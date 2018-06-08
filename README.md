@@ -1,4 +1,4 @@
-# Caster
+# fx_cast
 
 Very WIP! Not ready for release. Expect many bugs. Please don't sign builds on AMO with current ID.
 

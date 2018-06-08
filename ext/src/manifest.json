@@ -5,7 +5,7 @@
 
   , "applications": {
         "gecko": {
-            "id": "caster@matt.tf"
+            "id": "fx_cast@matt.tf"
           , "strict_min_version": "57.0"
         }
     }
