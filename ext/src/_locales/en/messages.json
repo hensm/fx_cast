@@ -1,0 +1,19 @@
+{
+    "extension_name": {
+        "message": "Caster"
+    }
+  , "extension_description": {
+        "message": ""
+    }
+
+  , "popup_cast_button_label": {
+        "message": "Cast"
+    }
+  , "popup_casting_button_label": {
+        "message": "Casting"
+    }
+
+  , "context_media_cast": {
+        "message": "Cast..."
+    }
+}

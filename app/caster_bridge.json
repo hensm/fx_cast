@@ -1,0 +1,7 @@
+{
+    "name": "caster_bridge"
+  , "description": ""
+  , "path": ""
+  , "type": "stdio"
+  , "allowed_extensions": [ "caster@matt.tf" ]
+}

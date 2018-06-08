@@ -1,0 +1,6 @@
+{
+	"dependencies": {
+		"castv2": "^0.1.9",
+		"mdns-js": "^1.0.1"
+	}
+}
