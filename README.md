@@ -39,3 +39,12 @@ Installer scripts aren't written yet, so registering the native messaging manife
 
 Extension can be loaded from `about:debugging` as a temporary extension.
 
+Most sites won't load the cast API unless the browser presents itself as Chrome. The plan is to spoof the user agent string for a whitelist of cast-enabled sites, but that isn't implemented yet. You can workaround this by setting it manually or using a [third-party extension](https://addons.mozilla.org/en-US/firefox/search/?q=user+agent).
+
+
+## Video Demos
+
+Netflix / HTML5:
+
+[<img width="200" src="https://img.youtube.com/vi/Ex9dWKYguEE/0.jpg" alt="fx_cast Netflix" />](https://www.youtube.com/watch?v=Ex9dWKYguEE)
+[<img width="200" src="https://img.youtube.com/vi/16r8lQKeEX8/0.jpg" alt="fx_cast HTML5" />](https://www.youtube.com/watch?v=16r8lQKeEX8)
