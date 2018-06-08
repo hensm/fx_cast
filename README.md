@@ -5,6 +5,7 @@ Very WIP! Not ready for release. Expect many bugs. Please don't sign builds on A
 Credit:
 * [electron-chromecast](https://github.com/GPMDP/electron-chromecast)
 * [node-castv2](https://github.com/thibauts/node-castv2)
+* [chrome-native-messaging](https://github.com/jdiamond/chrome-native-messaging)
 
 ## Supported platforms
 
