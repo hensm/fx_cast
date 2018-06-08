@@ -24,6 +24,8 @@ Only tested on Linux. mDNS library issue to be fixed. `mdns` only works on Windo
 * `node` binary in path
 * ~~Bonjour SDK (Windows)~~
 
+### Instructions
+
 ````
 git clone https://github.com/hensm/caster.git
 npm install ./ext --prefix ./ext
@@ -37,9 +39,15 @@ Installer scripts aren't written yet, so registering the native messaging manife
 `path` key within `app/caster_bridge.json` must be set to absolute path of `app/src/launcher.sh` or `app/src/launcher.bat`. Then, the manifest must be either moved to the correct location or the path added to the registry (Windows):  
 [MDN: Native Manifests # Manifest location](https://developer.mozilla.org/en-US/Add-ons/WebExtensions/Native_manifests#Manifest_location)
 
+## Usage
+
 Extension can be loaded from `about:debugging` as a temporary extension.
 
 Most sites won't load the cast API unless the browser presents itself as Chrome. The plan is to spoof the user agent string for a whitelist of cast-enabled sites, but that isn't implemented yet. You can workaround this by setting it manually or using a [third-party extension](https://addons.mozilla.org/en-US/firefox/search/?q=user+agent).
+
+HTML5 media elements have a "Cast..." context menu item that triggers a sender application. Only works on remote (non-local) media that isn't DRM-encumbered.
+
+Cast-enabled websites will load the sender API shim and display a cast button as in Chrome, provided there are no bugs/incompatibilities with the shim.
 
 
 ## Video Demos
