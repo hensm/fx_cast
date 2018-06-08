@@ -2,6 +2,10 @@
 
 Very WIP! Not ready for release. Expect many bugs. Please don't sign builds on AMO with current ID.
 
+Credit:
+* [electron-chromecast](https://github.com/GPMDP/electron-chromecast)
+* [node-castv2](https://github.com/thibauts/node-castv2)
+
 ## Supported platforms
 
 * Linux
