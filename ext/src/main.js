@@ -100,7 +100,7 @@ const bridgeMap = new Map();
  * forwarding.
  */
 function initBridge (tabId, frameId) {
-    const port = browser.runtime.connectNative("caster_bridge");
+    const port = browser.runtime.connectNative("fx_cast_bridge");
     bridgeMap.set(tabId, port);
 
     port.onMessage.addListener(message => {
