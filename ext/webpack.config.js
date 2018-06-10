@@ -16,7 +16,6 @@ module.exports = {
       , "content"        : `${include_path}/content.js`
       , "contentSetup"   : `${include_path}/contentSetup.js`
       , "mediaCast"      : `${include_path}/mediaCast.js`
-      , "compat/youtube" : `${include_path}/compat/youtube.js`
     }
   , output: {
         filename: "[name].js"
