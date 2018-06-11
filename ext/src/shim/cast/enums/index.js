@@ -4,6 +4,7 @@ export const AutoJoinPolicy = {
     TAB_AND_ORIGIN_SCOPED: "tab_and_origin_scoped"
   , ORIGIN_SCOPED: "origin_scoped"
   , PAGE_SCOPED: "page_scoped"
+  , CUSTOM_CONTROLLER_SCOPED: "custom_controller_scoped"
 };
 
 export const Capability = {

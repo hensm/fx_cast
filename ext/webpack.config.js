@@ -6,7 +6,7 @@ const webpack_copy = require("copy-webpack-plugin");
 
 
 const include_path = path.resolve(__dirname, "src");
-const output_path  = path.resolve(__dirname, "dist");
+const output_path  = path.resolve(__dirname, "../dist/unpacked");
 
 module.exports = {
     entry: {
@@ -22,9 +22,8 @@ module.exports = {
       , path: `${output_path}`
     }
   , plugins: [
-        new webpack.optimize.UglifyJsPlugin()
       //, new webpack.optimize.CommonsChunkPlugin("lib/init.bundle")
-      , new webpack.DefinePlugin({
+        new webpack.DefinePlugin({
             "process.env.NODE_ENV": `"production"`
         })
 

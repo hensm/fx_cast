@@ -28,9 +28,9 @@ Only tested on Linux. mDNS library issue to be fixed. `mdns` only works on Windo
 
 ````
 git clone https://github.com/hensm/caster.git
-npm install ./ext --prefix ./ext
-npm install ./app --prefix ./app
-npm run build --prefix ./ext
+npm install
+npm run build
+npm test
 ````
 
 Installer scripts aren't written yet, so registering the native messaging manifest with Firefox and specifiying the path must be done manually:  

@@ -1,3 +1,4 @@
+node_modules/
+dist/
 app/node_modules/
 ext/node_modules/
-ext/dist/

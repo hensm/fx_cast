@@ -1,0 +1,14 @@
+{
+    "scripts": {
+        "postinstall": "npm run postinstall:app && npm run postinstall:ext",
+        "postinstall:app": "npm install ./app --prefix ./app",
+        "postinstall:ext": "npm install ./ext --prefix ./ext",
+        "build": "npm run build --prefix ./ext",
+        "pretest": "npm run build",
+        "test": "jasmine --config=jasmine.json"
+    },
+    "devDependencies": {
+        "jasmine": "^3.1.0",
+        "selenium-webdriver": "^4.0.0-alpha.1"
+    }
+}
