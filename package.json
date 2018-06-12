@@ -4,7 +4,6 @@
         "postinstall:app": "npm install ./app --prefix ./app",
         "postinstall:ext": "npm install ./ext --prefix ./ext",
         "build": "npm run build --prefix ./ext",
-        "pretest": "npm run build",
         "test": "jasmine --config=jasmine.json"
     },
     "devDependencies": {

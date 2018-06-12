@@ -17,7 +17,7 @@ const firefoxOptions = new firefox.Options()
 const chromeOptions = new chrome.Options()
     .excludeSwitches("disable-default-apps")
     .addArguments(
-        "--load-media-router-component-extension");
+        `--user-data-dir=${path.resolve(__dirname, "ChromeProfile")}`);
 
 
 async function create () {

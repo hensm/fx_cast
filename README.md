@@ -26,11 +26,10 @@ Only tested on Linux. mDNS library issue to be fixed. `mdns` only works on Windo
 
 ### Instructions
 
-````
+````sh
 git clone https://github.com/hensm/caster.git
 npm install
 npm run build
-npm test
 ````
 
 Installer scripts aren't written yet, so registering the native messaging manifest with Firefox and specifiying the path must be done manually:  
@@ -38,6 +37,19 @@ Installer scripts aren't written yet, so registering the native messaging manife
 
 `path` key within `app/caster_bridge.json` must be set to absolute path of `app/src/launcher.sh` or `app/src/launcher.bat`. Then, the manifest must be either moved to the correct location or the path added to the registry (Windows):  
 [MDN: Native Manifests # Manifest location](https://developer.mozilla.org/en-US/Add-ons/WebExtensions/Native_manifests#Manifest_location)
+
+### Testing
+
+Testing requires geckodriver (or chromedriver for Chrome parity testing). See [selenium-webdriver](https://www.npmjs.com/package/selenium-webdriver#installation) installation instructions (ignore `npm install`).
+
+Chrome doesn't load the media router in a temporary selenium profile, so there's a bundled profile (`test/ChromeProfile.zip`). Extract the folder within as `test/ChromeProfile/`.
+
+````sh
+npm run build
+npm test
+SELENIUM_BROWSER=chrome npm test
+````
+
 
 ## Usage
 
