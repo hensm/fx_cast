@@ -13,6 +13,10 @@ describe("chrome", () => {
         });
     });
 
+    afterAll(() => {
+        driver.quit();
+    });
+
 
     it("should exist", () => {
         expect(chrome).toBeDefined();

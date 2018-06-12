@@ -1,10 +1,10 @@
 "use strict";
 
 export const IdleReason = {
-    CANCELLED: "cancelled"
-  , INTERRUPTED: "interrupted"
-  , FINISHED: "finished"
-  , ERROR: "error"
+    CANCELLED: "CANCELLED"
+  , INTERRUPTED: "INTERRUPTED"
+  , FINISHED: "FINISHED"
+  , ERROR: "ERROR"
 };
 
 export const MediaCommand = {
@@ -15,11 +15,11 @@ export const MediaCommand = {
 };
 
 export const MetadataType = {
-    GENERIC: "GENERIC"
-  , MOVIE: "MOVIE"
-  , TV_SHOW: "TV_SHOW"
-  , MUSIC_TRACK: "MUSIC_TRACK"
-  , PHOTO: "PHOTO"
+    GENERIC: 0
+  , MOVIE: 1
+  , TV_SHOW: 2
+  , MUSIC_TRACK: 3
+  , PHOTO: 4
 };
 
 export const PlayerState = {
@@ -30,10 +30,10 @@ export const PlayerState = {
 };
 
 export const RepeatMode = {
-    OFF: "OFF"
-  , ALL: "ALL"
-  , SINGLE: "SINGLE"
-  , ALL_AND_SHUFFLE: "ALL_AND_SHUFFLE"
+    OFF: "REPEAT_OFF"
+  , ALL: "REPEAT_ALL"
+  , SINGLE: "REPEAT_SINGLE"
+  , ALL_AND_SHUFFLE: "REPEAT_ALL_AND_SHUFFLE"
 };
 
 export const ResumeState = {
@@ -59,6 +59,7 @@ export const TextTrackFontGenericFamily = {
     SANS_SERIF: "SANS_SERIF"
   , MONOSPACED_SANS_SERIF: "MONOSPACED_SANS_SERIF"
   , SERIF: "SERIF"
+  , MONOSPACED_SERIF: "MONOSPACED_SERIF"
   , CASUAL: "CASUAL"
   , CURSIVE: "CURSIVE"
   , SMALL_CAPITALS: "SMALL_CAPITALS"
