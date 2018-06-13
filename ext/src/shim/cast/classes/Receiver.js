@@ -8,9 +8,7 @@ export default class Receiver {
     constructor (
             label
           , friendlyName
-          , opt_capabilities = [
-                Capability.VIDEO_OUT
-              , Capability.AUDIO_OUT ]
+          , opt_capabilities = []
           , opt_volume = null) {
 
         this.capabilities = opt_capabilities;

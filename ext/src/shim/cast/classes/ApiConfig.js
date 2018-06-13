@@ -16,5 +16,9 @@ export default class ApiConfig {
         this.receiverListener = receiverListener;
         this.sessionListener = sessionListener;
         this.sessionRequest = sessionRequest;
+
+        this.additionalSessionRequests = [];
+        this.customDialLaunchCallback = null;
+        this.invisibleSender = false;
     }
 };

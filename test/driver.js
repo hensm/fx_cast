@@ -37,8 +37,8 @@ async function create () {
     return driver;
 }
 
-async function destroy () {
-    await this.driver.quit();
+function destroy (driver = this.driver) {
+    driver.quit();
 }
 
 module.exports = {

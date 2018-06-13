@@ -1,18 +1,17 @@
 "use strict";
 
-const sharedDriver = require("../sharedDriver");
+const { create, destroy } = require("../../driver");
 
 describe("chrome", () => {
     let driver;
     let chrome;
 
     beforeAll(async () => {
-        driver = await sharedDriver();
+        driver = await create();
         chrome = await driver.executeScript(() => {
             return chrome;
         });
     });
-
     afterAll(() => {
         driver.quit();
     });
