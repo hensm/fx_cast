@@ -1,0 +1,9 @@
+body {
+    align-items: center;
+    display: flex;
+    justify-content: center;
+}
+#media {
+    max-height: 100vh;
+    max-width: 100vw;
+}

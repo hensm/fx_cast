@@ -9,7 +9,9 @@ export default class ApiConfig {
           , sessionListener
           , receiverListener
           , opt_autoJoinPolicy = AutoJoinPolicy.TAB_AND_ORIGIN_SCOPED
-          , opt_defaultActionPolicy = DefaultActionPolicy.CREATE_SESSION) {
+          , opt_defaultActionPolicy = DefaultActionPolicy.CREATE_SESSION
+            // TODO: Remove awful hack for mirror casting
+          , selectedMedia = "app") {
 
         this.autoJoinPolicy = opt_autoJoinPolicy;
         this.defaultActionPolicy = opt_defaultActionPolicy;
@@ -20,5 +22,7 @@ export default class ApiConfig {
         this.additionalSessionRequests = [];
         this.customDialLaunchCallback = null;
         this.invisibleSender = false;
+
+        this._selectedMedia = selectedMedia;
     }
 };

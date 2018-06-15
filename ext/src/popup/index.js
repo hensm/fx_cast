@@ -18,6 +18,7 @@ class App extends Component {
 
         this.state = {
             receivers: []
+          , selectedMedia: "app"
           , isLoading: false
         };
 
@@ -38,7 +39,8 @@ class App extends Component {
             switch (message.subject) {
                 case "popup:populate":
                     this.setState({
-                        receivers: message.data
+                        receivers: message.data.receivers
+                      , selectedMedia: message.data.selectedMedia
                     });
 
                     winHeight = document.body.clientHeight + frameHeight;
@@ -63,21 +65,45 @@ class App extends Component {
 
         browser.runtime.sendMessage({
             subject: "shim:selectReceiver"
-          , data: receiver
+          , data: {
+                receiver
+              , selectedMedia: this.state.selectedMedia
+            }
+        });
+    }
+
+    onSelectChange (ev) {
+        this.setState({
+            selectedMedia: ev.target.value
         });
     }
 
     render () {
+        const shareMedia =
+                this.state.selectedMedia === "tab"
+             || this.state.selectedMedia === "screen";
+
         return (
-            <ul className="receivers">
-                { this.state.receivers.map(receiver => {
-                    return (
-                       <Receiver receiver={receiver}
-                                 onCast={this.onCast.bind(this)}
-                                 isLoading={this.state.isLoading} />
-                    );
-                })}
-            </ul>
+            <div>
+                <div className="media-select">
+                    Cast
+                    <select value={this.state.selectedMedia} onChange={this.onSelectChange.bind(this)} className="media-select-dropdown">
+                        <option value="app" disabled={shareMedia}>this site's app</option>
+                        <option value="tab" disabled={!shareMedia}>Tab</option>
+                        <option value="screen" disabled={!shareMedia}>Screen</option>
+                    </select>
+                    to:
+                </div>
+                <ul className="receivers">
+                    { this.state.receivers.map(receiver => {
+                        return (
+                           <Receiver receiver={receiver}
+                                     onCast={this.onCast.bind(this)}
+                                     isLoading={this.state.isLoading} />
+                        );
+                    })}
+                </ul>
+            </div>
         );
     }
 }

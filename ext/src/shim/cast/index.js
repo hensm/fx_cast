@@ -204,7 +204,7 @@ onMessage(message => {
 
         case "shim:selectReceiver":
             console.info("Caster (Debug): Selected receiver");
-            const selectedReceiver = message.data;
+            const selectedReceiver = message.data.receiver;
 
             const sessionConstructorArgs = [
                 state.sessionList.length             // sessionId
@@ -218,7 +218,7 @@ onMessage(message => {
                     });
 
                     state.apiConfig.sessionListener(session);
-                    sessionSuccessCallback(session);
+                    sessionSuccessCallback(session, message.data.selectedMedia);
                 }
             ];
 
@@ -247,7 +247,10 @@ onMessage(message => {
         case "shim:popupReady":
             sendMessage({
                 subject: "popup:populate"
-              , data: state.receiverList
+              , data: {
+                    receivers: state.receiverList
+                  , selectedMedia: state.apiConfig._selectedMedia
+                }
             });
             break;
     }

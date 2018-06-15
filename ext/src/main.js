@@ -65,6 +65,12 @@ browser.contentScripts.register({
 });
 
 
+// Screen/Tab mirroring "Cast..." context menu item
+browser.menus.create({
+    contexts: [ "browser_action", "page" ]
+  , id: "contextCast"
+  , title: _("context_media_cast")
+});
 
 // <video>/<audio> "Cast..." context menu item
 browser.menus.create({
@@ -80,16 +86,46 @@ browser.menus.create({
 browser.menus.onClicked.addListener(async (info, tab) => {
     const { frameId } = info;
 
-    // Pass media URL to media sender app
+    // Load cast setup script
     await browser.tabs.executeScript(tab.id, {
-        code: `const srcUrl = "${info.srcUrl}";`
+        file: "content.js"
       , frameId
     });
 
-    // Load app and sender API shim
-    await browser.tabs.executeScript(tab.id, { file: "content.js"     , frameId })
-    await browser.tabs.executeScript(tab.id, { file: "mediaCast.js"   , frameId });
-    await browser.tabs.executeScript(tab.id, { file: "shim/bundle.js" , frameId });
+    switch (info.menuItemId) {
+        case "contextCast":
+            await browser.tabs.executeScript(tab.id, {
+                code: `const selectedMedia = "${info.pageUrl ? "tab" : "screen"}";`
+              , frameId
+            });
+
+            // Load mirroring sender app
+            await browser.tabs.executeScript(tab.id, {
+                file: "mirroringCast.js"
+              , frameId
+            });
+            break;
+
+        case "contextCastMedia":
+            // Pass media URL to media sender app
+            await browser.tabs.executeScript(tab.id, {
+                code: `const srcUrl = "${info.srcUrl}";`
+              , frameId
+            });
+
+            // Load media sender app
+            await browser.tabs.executeScript(tab.id, {
+                file: "mediaCast.js"
+              , frameId
+            });
+            break;
+    }
+
+    // Load cast API
+    await browser.tabs.executeScript(tab.id, {
+        file: "shim/bundle.js"
+      , frameId
+    });
 });
 
 

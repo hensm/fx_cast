@@ -10,12 +10,13 @@ const output_path  = path.resolve(__dirname, "../dist/unpacked");
 
 module.exports = {
     entry: {
-        "main"           : `${include_path}/main.js`
-      , "popup/bundle"   : `${include_path}/popup/index.js`
-      , "shim/bundle"    : `${include_path}/shim/index.js`
-      , "content"        : `${include_path}/content.js`
-      , "contentSetup"   : `${include_path}/contentSetup.js`
-      , "mediaCast"      : `${include_path}/mediaCast.js`
+        "main"          : `${include_path}/main.js`
+      , "popup/bundle"  : `${include_path}/popup/index.js`
+      , "shim/bundle"   : `${include_path}/shim/index.js`
+      , "content"       : `${include_path}/content.js`
+      , "contentSetup"  : `${include_path}/contentSetup.js`
+      , "mediaCast"     : `${include_path}/mediaCast.js`
+      , "mirroringCast" : `${include_path}/mirroringCast.js`
     }
   , output: {
         filename: "[name].js"
