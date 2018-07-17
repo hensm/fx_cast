@@ -17,6 +17,7 @@ module.exports = {
       , "contentSetup"  : `${include_path}/contentSetup.js`
       , "mediaCast"     : `${include_path}/mediaCast.js`
       , "mirroringCast" : `${include_path}/mirroringCast.js`
+      , "messageRouter" : `${include_path}/messageRouter.js`
     }
   , output: {
         filename: "[name].js"
