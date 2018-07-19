@@ -80,9 +80,18 @@ browser.menus.create({
   , targetUrlPatterns: [
         "http://*/*"
       , "https://*/*"
+      , "file://*/*"
     ]
   , title: _("context_media_cast")
 });
+
+
+let mediaCastTabId;
+let mediaCastFrameId;
+
+let mirrorCastTabId;
+let mirrorCastFrameId;
+
 
 browser.menus.onClicked.addListener(async (info, tab) => {
     const { frameId } = info;
@@ -95,6 +104,9 @@ browser.menus.onClicked.addListener(async (info, tab) => {
 
     switch (info.menuItemId) {
         case "contextCast":
+            mirrorCastTabId = tab.id;
+            mirrorCastFrameId = frameId;
+
             await browser.tabs.executeScript(tab.id, {
                 code: `const selectedMedia = "${info.pageUrl ? "tab" : "screen"}";`
               , frameId
@@ -108,6 +120,9 @@ browser.menus.onClicked.addListener(async (info, tab) => {
             break;
 
         case "contextCastMedia":
+            mediaCastTabId = tab.id;
+            mediaCastFrameId = frameId;
+
             // Pass media URL to media sender app
             await browser.tabs.executeScript(tab.id, {
                 code: `const srcUrl = "${info.srcUrl}";`
@@ -145,6 +160,8 @@ function initBridge (tabId, frameId) {
         // TODO: Integrate into messageRouter
         if (message.subject.startsWith("shim:")) {
             browser.tabs.sendMessage(tabId, message, { frameId });
+        } else {
+            messageRouter.handleMessage(message);
         }
     });
 }
@@ -220,6 +237,7 @@ messageRouter.register("main", async (message, sender) => {
 });
 
 messageRouter.register("bridge", (message, sender) => {
+    console.log(message);
     bridgeMap.get(sender.tab.id).postMessage(message);
 });
 
@@ -237,6 +255,16 @@ messageRouter.register("popup", (message, sender) => {
         // Popup is closed
     }
 });
+
+messageRouter.register("mirrorCast", message => {
+    browser.tabs.sendMessage(mirrorCastTabId, message
+          , { frameId: mirrorCastFrameId });
+});
+messageRouter.register("mediaCast", message => {
+    browser.tabs.sendMessage(mediaCastTabId, message
+          , { frameId: mediaCastFrameId });
+});
+
 
 browser.runtime.onMessage.addListener((message, sender) => {
     messageRouter.handleMessage(message, sender);

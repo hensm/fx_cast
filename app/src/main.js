@@ -1,15 +1,24 @@
 "use strict";
 
 const { Client } = require("castv2");
-const mdns = require("mdns-js");
+const mdns       = require("mdns-js");
+const http       = require("http");
+const fs         = require("fs");
 
 const transforms = require("./transforms");
 
 
 const browser = mdns.createBrowser(mdns.tcp("googlecast"));
 
+// Local media server
+let httpServer;
+
+process.on("SIGTERM", () => {
+    if (httpServer) httpServer.close();
+});
+
 // Increase listener limit
-require('events').EventEmitter.defaultMaxListeners = 50;
+require("events").EventEmitter.defaultMaxListeners = 50;
 
 // stdin -> stdout
 process.stdin
@@ -27,7 +36,7 @@ function sendMessage (message) {
     } catch (err) {}
 }
 
-/**
+/** 
  * Handle incoming messages from the extension and forward them to the
  * appropriate handlers.
  */
@@ -45,8 +54,59 @@ async function handleMessage (message) {
         case "bridge:discover":
             browser.discover();
             break;
+
+        case "bridge:startHttpServer": {
+            const { filePath, port } = message.data;
+
+            httpServer = http.createServer((req, res) => {
+                const { size: fileSize } = fs.statSync(filePath);
+                const { range } = req.headers;
+
+                // Partial content HTTP 206
+                if (range) {
+                    const bounds = range.substring(6).split("-");
+
+                    const start = parseInt(bounds[0]);
+                    const end = bounds[1]
+                        ? parseInt(bounds[1])
+                        : fileSize - 1;
+
+                    const chunkSize = (end - start) + 1;
+
+                    res.writeHead(206, {
+                        "Accept-Ranges": "bytes"
+                      , "Content-Range": `bytes ${start}-${end}/${fileSize}`
+                      , "Content-Length": chunkSize
+                      , "Content-Type": "video/mp4"
+                    });
+
+                    fs.createReadStream(filePath, { start, end }).pipe(res);
+
+                } else {
+                    res.writeHead(200, {
+                        "Content-Length": fileSize
+                      , "Content-Type": "video/mp4"
+                    });
+
+                    fs.createReadStream(filePath).pipe(res)
+                }
+            });
+
+            httpServer.listen(port, () => {
+                sendMessage({
+                    subject: "mediaCast:httpServerStarted"
+                });
+            });
+
+            break;
+        };
+
+        case "bridge:stopHttpServer":
+            if (httpServer) httpServer.close();
+            break;
     }
 }
+
 
 
 browser.on("update", service => {
@@ -420,7 +480,7 @@ class Media {
         this.channel = this.session.channelMap.get(namespace);
 
         this.channel.on("message", data => {
-            if (data && data.type === 'MEDIA_STATUS'
+            if (data && data.type === "MEDIA_STATUS"
                     && data.status && data.status.length > 0) {
 
                 const status = data.status[0];

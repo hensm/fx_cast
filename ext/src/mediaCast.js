@@ -7,7 +7,35 @@ let logMessage;
 let session;
 let currentMedia;
 
-let mediaElement = document.querySelector(`[src="${srcUrl}"]`);
+
+const isLocalFile = window.location.protocol === "file:";
+
+const mediaElement = isLocalFile
+    ? document.querySelector("video, audio")
+    : document.querySelector(`[src="${srcUrl}"]`);
+
+window.addEventListener("beforeunload", () => {
+    browser.runtime.sendMessage({
+        subject: "bridge:stopHttpServer"
+    });
+});
+
+function getLocalAddress () {
+    const pc = new RTCPeerConnection();
+    pc.createDataChannel(null);
+    pc.createOffer().then(pc.setLocalDescription.bind(pc));
+
+    return new Promise((resolve, reject) => {
+        pc.addEventListener("icecandidate", ev => {
+            if (ev.candidate) {
+                resolve(ev.candidate.candidate.split(" ")[4]);
+            }
+        });
+        pc.addEventListener("error", ev => {
+            reject();
+        });
+    });
+}
 
 // TODO: Fix this broken mess
 let ignoreMediaEvents = false;
@@ -88,12 +116,39 @@ mediaElement.addEventListener("volumechange", () => {
 });
 
 
-function onRequestSessionSuccess (session_) {
+async function onRequestSessionSuccess (session_) {
     logMessage("onRequestSessionSuccess");
 
     session = session_;
 
-    const mediaUrl = new URL(srcUrl);
+    let mediaUrl = new URL(srcUrl);
+
+    // TODO: Get from extension settings
+    const port = 9555;
+
+
+    if (isLocalFile) {
+        await new Promise((resolve, reject) => {
+            browser.runtime.sendMessage({
+                subject: "bridge:startHttpServer"
+              , data: {
+                    filePath: decodeURI(mediaUrl.pathname)
+                  , port
+                }
+            });
+
+            browser.runtime.onMessage.addListener(function onMessage (message) {
+                if (message.subject === "mediaCast:httpServerStarted") {
+                    browser.runtime.onMessage.removeListener(onMessage);
+                    resolve();
+                }
+            });
+        });
+
+        // Address of local HTTP server
+        mediaUrl = new URL(`http://${await getLocalAddress()}:${port}/`);
+    }
+
     const mediaInfo = new chrome.cast.media.MediaInfo(mediaUrl.href);
 
     // Media metadata (title/poster)
