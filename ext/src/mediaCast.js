@@ -8,7 +8,7 @@ let session;
 let currentMedia;
 
 
-const isLocalFile = window.location.protocol === "file:";
+const isLocalFile = srcUrl.startsWith("file:");
 
 const mediaElement = isLocalFile
     ? document.querySelector("video, audio")
