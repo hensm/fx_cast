@@ -5,6 +5,46 @@ import messageRouter from "./messageRouter";
 const _ = browser.i18n.getMessage;
 
 
+browser.runtime.onInstalled.addListener(async details => {
+    const initialOptions = {
+        option_localMediaEnabled: true
+      , option_localMediaServerPort: 9555
+    };
+
+    switch (details.reason) {
+
+        // Set initial options
+        case "install":
+            browser.storage.sync.set({
+                options: initialOptions
+            });
+            break;
+
+        // Set newly added options
+        case "update":
+            const { options } = await browser.storage.sync.get("options");
+            const newOptions = {};
+
+            // Find options not already in storage
+            for (const [ key, val ] of Object.entries(initialOptions)) {
+                if (!options.hasOwnProperty(key)) {
+                    newOptions[key] = val;
+                }
+            }
+
+            // Update storage with default values of new options
+            browser.storage.sync.set({
+                options: {
+                    ...options
+                  , ...newOptions
+                }
+            });
+
+            break;
+    }
+});
+
+
 // Google-hosted API loader script
 const SENDER_SCRIPT_URL =
         "https://www.gstatic.com/cv/js/sender/v1/cast_sender.js";

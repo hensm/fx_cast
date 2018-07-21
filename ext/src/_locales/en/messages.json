@@ -16,4 +16,20 @@
   , "context_media_cast": {
         "message": "Cast..."
     }
+
+  , "options_category_localMedia": {
+        "message": "Local media casting"
+    }
+  , "options_category_localMedia_description": {
+        "message": "HTTP server started by the bridge app to stream local media files to the cast receiver."
+    }
+  , "options_option_localMediaEnabled": {
+        "message": "Enabled"
+    }
+  , "options_option_localMediaServerPort": {
+        "message": "HTTP server port"
+    }
+  , "options_submit": {
+        "message": "Submit"
+    }
 }

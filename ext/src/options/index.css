@@ -1,0 +1,44 @@
+.category {
+    display: grid;
+    grid-template-columns: min-content min-content;
+    grid-column-gap: 20px;
+    grid-row-gap: 5px;
+}
+.category-name {}
+.category-description {
+    color: graytext;
+    grid-column: span 2;
+}
+
+.option {
+    display: contents;
+}
+
+.option-label {
+    text-align: right;
+    white-space: nowrap;
+    display: inline-block;
+}
+
+.option > input {
+    align-self: center;
+    justify-self: flex-start;
+}
+
+#form {
+    display: flex;
+    flex-direction: column;
+}
+
+#buttons {
+    align-self: flex-end;
+    margin-block-start: 5px;
+}
+
+#buttons > :not(:last-child) {
+    margin-inline-end: 5px;
+}
+
+*:invalid {
+    box-shadow: 0 0 1.5px 1px red;
+}

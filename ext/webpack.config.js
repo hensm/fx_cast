@@ -10,14 +10,15 @@ const output_path  = path.resolve(__dirname, "../dist/unpacked");
 
 module.exports = {
     entry: {
-        "main"          : `${include_path}/main.js`
-      , "popup/bundle"  : `${include_path}/popup/index.js`
-      , "shim/bundle"   : `${include_path}/shim/index.js`
-      , "content"       : `${include_path}/content.js`
-      , "contentSetup"  : `${include_path}/contentSetup.js`
-      , "mediaCast"     : `${include_path}/mediaCast.js`
-      , "mirroringCast" : `${include_path}/mirroringCast.js`
-      , "messageRouter" : `${include_path}/messageRouter.js`
+        "main"           : `${include_path}/main.js`
+      , "popup/bundle"   : `${include_path}/popup/index.js`
+      , "options/bundle" : `${include_path}/options/index.jsx`
+      , "shim/bundle"    : `${include_path}/shim/index.js`
+      , "content"        : `${include_path}/content.js`
+      , "contentSetup"   : `${include_path}/contentSetup.js`
+      , "mediaCast"      : `${include_path}/mediaCast.js`
+      , "mirroringCast"  : `${include_path}/mirroringCast.js`
+      , "messageRouter"  : `${include_path}/messageRouter.js`
     }
   , output: {
         filename: "[name].js"
@@ -40,7 +41,7 @@ module.exports = {
   , module: {
         loaders: [
             {
-                test: /\.js/
+                test: /\.jsx?$/
               , include: `${include_path}`
               , loader: "babel-loader"
               , options: {

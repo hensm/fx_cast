@@ -1,5 +1,7 @@
 "use strict";
 
+let options;
+
 let chrome;
 let logMessage;
 
@@ -122,10 +124,7 @@ async function onRequestSessionSuccess (session_) {
     session = session_;
 
     let mediaUrl = new URL(srcUrl);
-
-    // TODO: Get from extension settings
-    const port = 9555;
-
+    const port = options.option_localMediaServerPort;
 
     if (isLocalFile) {
         await new Promise((resolve, reject) => {
@@ -284,7 +283,7 @@ function onMediaSeekError (err) {
 }
 
 
-window.__onGCastApiAvailable = function (loaded, errorInfo) {
+window.__onGCastApiAvailable = async function (loaded, errorInfo) {
     if (!loaded) {
         logMessage("__onGCastApiAvailable error");
         return;
@@ -294,6 +293,15 @@ window.__onGCastApiAvailable = function (loaded, errorInfo) {
     logMessage = chrome.cast.logMessage;
 
     logMessage("__onGCastApiAvailable success");
+
+
+    options = (await browser.storage.sync.get("options")).options;
+
+    if (isLocalFile && !options.option_localMediaEnabled) {
+        logMessage("Local media casting not enabled");
+        return;
+    }
+
 
     const sessionRequest = new chrome.cast.SessionRequest(
             chrome.cast.media.DEFAULT_MEDIA_RECEIVER_APP_ID);
