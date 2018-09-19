@@ -1,6 +1,6 @@
 {
     "scripts": {
-        "build": "webpack && web-ext build --overwrite-dest --source-dir ../dist/unpacked --artifacts-dir ../dist && mv ../dist/*.zip ../dist/ext.xpi",
+        "build": "node build.js",
         "watch": "webpack -d --watch"
     },
     "devDependencies": {
@@ -12,6 +12,7 @@
         "babel-preset-env": "^1.6.1",
         "babel-preset-react": "^6.24.1",
         "copy-webpack-plugin": "^4.3.1",
+        "minimist": "^1.2.0",
         "react": "^16.2.0",
         "react-dom": "^16.2.0",
         "web-ext": "^2.7.0",

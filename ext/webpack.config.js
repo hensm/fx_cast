@@ -6,9 +6,9 @@ const webpack_copy = require("copy-webpack-plugin");
 
 
 const include_path = path.resolve(__dirname, "src");
-const output_path  = path.resolve(__dirname, "../dist/unpacked");
+const output_path  = path.resolve(__dirname, "../dist/ext/unpacked");
 
-module.exports = {
+module.exports = (env) => ({
     entry: {
         "main"           : `${include_path}/main.js`
       , "popup/bundle"   : `${include_path}/popup/index.js`
@@ -28,6 +28,7 @@ module.exports = {
       //, new webpack.optimize.CommonsChunkPlugin("lib/init.bundle")
         new webpack.DefinePlugin({
             "process.env.NODE_ENV": `"production"`
+          , "MIRROR_CAST_APP_ID": JSON.stringify(env.appId.toString() || "19A6F4AE")
         })
 
         // Ext copy assets
@@ -37,7 +38,7 @@ module.exports = {
           , ignore: [ "*.js" ]
         }])
     ]
-  , devtool: "source-map"
+  , devtool: "eval-source-map"
   , module: {
         loaders: [
             {
@@ -55,4 +56,4 @@ module.exports = {
             }
         ]
     }
-};
+});
