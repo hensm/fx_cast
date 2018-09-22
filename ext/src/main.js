@@ -70,7 +70,7 @@ browser.webRequest.onBeforeRequest.addListener(
                       , frameId: details.frameId
                       , runAt: "document_start"
                     });
-                    
+
                     return {
                         redirectUrl: browser.runtime.getURL("shim/bundle.js")
                     };
@@ -148,7 +148,7 @@ browser.menus.onClicked.addListener(async (info, tab) => {
             mirrorCastFrameId = frameId;
 
             await browser.tabs.executeScript(tab.id, {
-                code: `const selectedMedia = "${info.pageUrl ? "tab" : "screen"}";`
+                code: `let selectedMedia = "${info.pageUrl ? "tab" : "screen"}";`
               , frameId
             });
 
@@ -192,8 +192,30 @@ const bridgeMap = new Map();
  * forwarding.
  */
 function initBridge (tabId, frameId) {
+    const existingPort = bridgeMap.get(tabId);
+
+    if (existingPort) {
+        existingPort.disconnect();
+        bridgeMap.delete(tabId);
+    }
+
     const port = browser.runtime.connectNative("fx_cast_bridge");
-    bridgeMap.set(tabId, port);
+
+    if (port.error) {
+        console.error("Failed connect to fx_cast_bridge:", port.error.message);
+    } else {
+        bridgeMap.set(tabId, port);
+    }
+
+    port.onDisconnect.addListener(p => {
+        if (p.error) {
+            console.error("fx_cast_bridge disconnected:", p.error.message);
+        } else {
+            console.log("fx_cast_bridge disconnected");
+        }
+
+        bridgeMap.delete(tabId);
+    });
 
     port.onMessage.addListener(message => {
         // Forward shim: messages

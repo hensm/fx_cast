@@ -3,3 +3,6 @@ dist/
 app/node_modules/
 ext/node_modules/
 test/ChromeProfile/
+.idea/
+*.iml
+.DS_Store

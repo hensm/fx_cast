@@ -3,7 +3,9 @@
 let chrome;
 let logMessage;
 
-const FX_CAST_RECEIVER_APP_ID = "19A6F4AE";
+const FX_CAST_RECEIVER_APP_ID = typeof MIRROR_CAST_APP_ID !== "undefined"
+    ? MIRROR_CAST_APP_ID
+    : "19A6F4AE";
 const FX_CAST_NAMESPACE = "urn:x-cast:fx_cast";
 
 let session;
