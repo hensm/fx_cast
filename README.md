@@ -10,7 +10,7 @@ Credit:
 ## Supported platforms
 
 * Linux
-* macOS (TODO)
+* macOS
 * Windows (TODO)
 
 Only tested on Linux. mDNS library issue to be fixed. `mdns` only works on Windows, `mdns-js` only works on Linux.
