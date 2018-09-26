@@ -27,7 +27,7 @@ async function build() {
             ? 'bat'
             : 'sh';
     const launcherName = `launcher.${launcherExt}`;
-    const launcherPath = path.join(__dirname, '../../dist', launcherName);
+    const launcherPath = path.join(__dirname, '../../dist/app', launcherName);
 
     fs.copyFileSync(path.join(`src`, launcherName), launcherPath);
 
