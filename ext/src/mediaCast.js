@@ -12,9 +12,7 @@ let currentMedia;
 
 const isLocalFile = srcUrl.startsWith("file:");
 
-const mediaElement = isLocalFile
-    ? document.querySelector("video, audio")
-    : document.querySelector(`[src="${srcUrl}"]`);
+const mediaElement = browser.menus.getTargetElement(targetElementId);
 
 window.addEventListener("beforeunload", () => {
     browser.runtime.sendMessage({

@@ -165,7 +165,8 @@ browser.menus.onClicked.addListener(async (info, tab) => {
 
             // Pass media URL to media sender app
             await browser.tabs.executeScript(tab.id, {
-                code: `const srcUrl = "${info.srcUrl}";`
+                code: `const srcUrl = "${info.srcUrl}";
+                       const targetElementId = ${info.targetElementId};`
               , frameId
             });
 
