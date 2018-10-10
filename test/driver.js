@@ -11,7 +11,7 @@ const TEST_PAGE_URL = `file:///${__dirname}/test.html`;
 
 const firefoxOptions = new firefox.Options()
     .headless()
-    .addExtensions(path.resolve(__dirname, "../dist/ext.xpi"))
+    .addExtensions(path.resolve(__dirname, "../dist/ext/ext.xpi"))
     .setPreference("xpinstall.signatures.required", false);
 
 const chromeOptions = new chrome.Options()
