@@ -97,14 +97,6 @@ browser.contentScripts.register({
   , runAt: "document_start"
 });
 
-// YouTube compat shim
-browser.contentScripts.register({
-    allFrames: true
-  , js: [{ file: "compat/youtube.js" }]
-  , matches: [ "*://www.youtube.com/*" ]
-  , runAt: "document_start"
-});
-
 
 // Screen/Tab mirroring "Cast..." context menu item
 browser.menus.create({
