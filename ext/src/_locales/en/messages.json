@@ -34,13 +34,13 @@
         "message": "User agent whitelist"
     }
   , "options_category_uaWhitelist_description": {
-        "message": "Sites for which to replace the user agent with a Chrome version for compatibility."
+        "message": "Sites for which to replace the user agent with a Chrome version for compatibility. Must be valid match patterns."
     }
   , "options_option_uaWhitelistEnabled": {
         "message": "Enabled"
     }
   , "options_option_uaWhitelist": {
-        "message": "Site list (newline-separated)"
+        "message": "Match patterns (newline-separated)"
     }
 
   , "options_submit": {

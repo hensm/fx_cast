@@ -1,6 +1,6 @@
 .category {
     display: grid;
-    grid-template-columns: min-content min-content;
+    grid-template-columns: 150px 1fr;
     grid-column-gap: 20px;
     grid-row-gap: 5px;
 }
@@ -16,7 +16,6 @@
 
 .option-label {
     text-align: right;
-    white-space: nowrap;
     display: inline-block;
 }
 

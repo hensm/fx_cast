@@ -7,6 +7,8 @@ import ReactDOM             from "react-dom";
 const _ = browser.i18n.getMessage;
 
 
+const MATCH_PATTERN_REGEX = /^(?:(\*|https?|file|ftp):\/\/((?:\*\.|[^\/\*])+)(\/.*)|<all_urls>)$/;
+
 class OptionsApp extends Component {
     constructor (props) {
         super(props);
@@ -15,9 +17,10 @@ class OptionsApp extends Component {
             isFormValid: true
         };
 
-        this.handleFormSubmit  = this.handleFormSubmit.bind(this);
-        this.handleFormChange  = this.handleFormChange.bind(this);
-        this.handleInputChange = this.handleInputChange.bind(this);
+        this.handleFormSubmit        = this.handleFormSubmit.bind(this);
+        this.handleFormChange        = this.handleFormChange.bind(this);
+        this.handleInputChange       = this.handleInputChange.bind(this);
+        this.handleUAWhitelistChange = this.handleUAWhitelistChange.bind(this);
     }
 
     /**
@@ -26,10 +29,10 @@ class OptionsApp extends Component {
     setStorage () {
         return browser.storage.sync.set({
             options: {
-                option_localMediaEnabled: this.state.option_localMediaEnabled
-              , option_localMediaServerPort: this.state.option_localMediaServerPort
-              , option_uaWhitelistEnabled: this.state.option_uaWhitelistEnabled
-              , option_uaWhitelist: this.state.option_uaWhitelist
+                option_localMediaEnabled    : this.state.option_localMediaEnabled
+              , option_localMediaServerPort : this.state.option_localMediaServerPort
+              , option_uaWhitelistEnabled   : this.state.option_uaWhitelistEnabled
+              , option_uaWhitelist          : this.state.option_uaWhitelist
             }
         });
     }
@@ -61,7 +64,24 @@ class OptionsApp extends Component {
         this.form.reportValidity();
 
         try {
+            const { options: oldOptions } = await browser.storage.sync.get("options");
             await this.setStorage();
+            const { options } = await browser.storage.sync.get("options");
+
+            const alteredOptions = [];
+
+            for (const [ key, val ] of Object.entries(options)) {
+                const oldVal = oldOptions[key];
+                if (oldVal !== val) {
+                    alteredOptions.push(key);
+                }
+            }
+
+            // Send update message / event
+            browser.runtime.sendMessage({
+                subject: "optionsUpdated"
+              , data: { alteredOptions }
+            });
         } catch (err) {}
     }
 
@@ -85,6 +105,27 @@ class OptionsApp extends Component {
 
         this.setState({
             [ ev.target.name ]: val
+        });
+    }
+
+    handleUAWhitelistChange (ev) {
+        // Split patterns by newline
+        const matchPatterns = ev.target.value.split("\n");
+
+        // Validate each pattern against a regexp
+        for (const pattern of matchPatterns) {
+            if (!MATCH_PATTERN_REGEX.test(pattern)) {
+                // Set as invalid
+                ev.target.setCustomValidity(`Match pattern invalid: ${pattern}`);
+                break;
+            }
+
+            // Set as valid
+            ev.target.setCustomValidity("");
+        }
+
+        this.setState({
+            [ ev.target.name ]: matchPatterns
         });
     }
 
@@ -148,9 +189,11 @@ class OptionsApp extends Component {
                             { _("options_option_uaWhitelist") }
                         </div>
                         <textarea name="option_uaWhitelist"
-                               value={this.state.option_uaWhitelist}
+                               value={ this.state.option_uaWhitelist
+                                        && this.state.option_uaWhitelist.join("\n") }
                                required
-                               onChange={ this.handleInputChange }>
+                               rows="8"
+                               onChange={ this.handleUAWhitelistChange }>
                         </textarea>
                     </label>
                 </fieldset>

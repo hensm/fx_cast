@@ -10,7 +10,9 @@ browser.runtime.onInstalled.addListener(async details => {
         option_localMediaEnabled: true
       , option_localMediaServerPort: 9555
       , option_uaWhitelistEnabled: true
-      , option_uaWhitelist: [ "www.netflix.com" ].join("\n")
+      , option_uaWhitelist: [
+            "https://www.netflix.com/*"
+        ]
     };
 
     switch (details.reason) {
@@ -118,38 +120,71 @@ let currentUAString;
  * TODO: Inject script to change navigator.userAgent
  * property.
  */
-browser.webRequest.onBeforeSendHeaders.addListener(
-        async details => {
-            const { options } = await browser.storage.sync.get("options");
+async function onBeforeSendHeaders (details) {
+    const { options } = await browser.storage.sync.get("options");
 
-            // Cancel if feature is disabled
-            if (!options.option_uaWhitelistEnabled) return;
+    // Create Chrome UA from platform info on first run
+    if (!currentUAString) {
+        currentUAString = UA_STRINGS[
+                (await browser.runtime.getPlatformInfo()).os]
+    }
 
-            // Cancel if not on whitelist
-            // TODO: Do this with the built in filter
-            const { hostname } = new URL(details.url);
-            if (!options.option_uaWhitelist.split("\n").includes(hostname)) return;
-
-            // Create Chrome UA from platform info on first run
-            if (!currentUAString) {
-                currentUAString = UA_STRINGS[
-                        (await browser.runtime.getPlatformInfo()).os]
-            }
-
-            // Find and rewrite the User-Agent header
-            for (const header of details.requestHeaders) {
-                if (header.name.toLowerCase() === "user-agent") {
-                    header.value = currentUAString;
-                    break;
-                }
-            }
-
-            return {
-                requestHeaders: details.requestHeaders
-            };
+    // Find and rewrite the User-Agent header
+    for (const header of details.requestHeaders) {
+        if (header.name.toLowerCase() === "user-agent") {
+            header.value = currentUAString;
+            break;
         }
-      , { urls: [ "<all_urls>" ]}
-      , [  "blocking", "requestHeaders" ]);
+    }
+
+    return {
+        requestHeaders: details.requestHeaders
+    };
+}
+
+async function registerWebRequestListeners (alteredOptions) {
+    const { options } = await browser.storage.sync.get("options");
+
+    // If options aren't set yet, return
+    if (!options) return;
+
+    const registerFunctions = {
+        onBeforeSendHeaders () {
+            browser.webRequest.onBeforeSendHeaders.addListener(
+                    onBeforeSendHeaders
+                  , { urls: options.option_uaWhitelistEnabled
+                        ? options.option_uaWhitelist
+                        : [] }
+                  , [  "blocking", "requestHeaders" ]);
+        }
+    };
+
+
+    if (!alteredOptions) {
+        // If no altered properties specified, register all listeners
+        for (const func of Object.values(registerFunctions)) {
+            func();
+        }
+
+    } else {
+        if (       alteredOptions.includes("option_uaWhitelist")
+                || alteredOptions.includes("option_uaWhitelistEnabled")) {
+            browser.webRequest.onBeforeSendHeaders.removeListener(onBeforeSendHeaders);
+            registerFunctions.onBeforeSendHeaders();
+        }
+    }
+}
+
+registerWebRequestListeners();
+
+browser.runtime.onMessage.addListener(message => {
+    switch (message.subject) {
+        case "optionsUpdated":
+            const { alteredOptions } = message.data;
+            registerWebRequestListeners(alteredOptions);
+            break;
+    }
+});
 
 
 // Defines window.chrome for site compatibility
