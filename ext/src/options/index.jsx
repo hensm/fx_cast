@@ -28,6 +28,8 @@ class OptionsApp extends Component {
             options: {
                 option_localMediaEnabled: this.state.option_localMediaEnabled
               , option_localMediaServerPort: this.state.option_localMediaServerPort
+              , option_uaWhitelistEnabled: this.state.option_uaWhitelistEnabled
+              , option_uaWhitelist: this.state.option_uaWhitelist
             }
         });
     }
@@ -37,6 +39,7 @@ class OptionsApp extends Component {
      */
     async componentDidMount () {
         const { options } = await browser.storage.sync.get("options");
+
         if (options) {
             this.setState({
                 ...options
@@ -80,8 +83,6 @@ class OptionsApp extends Component {
             }
         };
 
-        console.log(ev.target.name);
-
         this.setState({
             [ ev.target.name ]: val
         });
@@ -121,6 +122,36 @@ class OptionsApp extends Component {
                                max="65535"
                                value={ this.state.option_localMediaServerPort }
                                onChange={ this.handleInputChange } />
+                    </label>
+                </fieldset>
+
+                <fieldset className="category">
+                    <legend className="category-name">
+                        { _("options_category_uaWhitelist") }
+                    </legend>
+                    <p className="category-description">
+                        { _("options_category_uaWhitelist_description") }
+                    </p>
+
+                    <label className="option">
+                        <div className="option-label">
+                            { _("options_option_uaWhitelistEnabled") }
+                        </div>
+                        <input name="option_uaWhitelistEnabled"
+                               type="checkbox"
+                               checked={ this.state.option_uaWhitelistEnabled }
+                               onChange={ this.handleInputChange } />
+                    </label>
+
+                    <label className="option">
+                        <div className="option-label">
+                            { _("options_option_uaWhitelist") }
+                        </div>
+                        <textarea name="option_uaWhitelist"
+                               value={this.state.option_uaWhitelist}
+                               required
+                               onChange={ this.handleInputChange }>
+                        </textarea>
                     </label>
                 </fieldset>
 

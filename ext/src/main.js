@@ -9,6 +9,8 @@ browser.runtime.onInstalled.addListener(async details => {
     const initialOptions = {
         option_localMediaEnabled: true
       , option_localMediaServerPort: 9555
+      , option_uaWhitelistEnabled: true
+      , option_uaWhitelist: [ "www.netflix.com" ].join("\n")
     };
 
     switch (details.reason) {
@@ -88,6 +90,67 @@ browser.webRequest.onBeforeRequest.addListener(
           , SENDER_SCRIPT_FRAMEWORK_URL
         ]}
       , [ "blocking" ]);
+
+
+/**
+ * Returns a Chrome user agent string with the provided platform.
+ */
+function getChromeUA (platform) {
+    return `Mozilla/5.0 (${platform}) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/70.0.3538.67 Safari/537.36`;
+}
+
+// Desktop platform Chrome UA strings
+const UA_STRINGS = {
+    "mac"   : getChromeUA("Macintosh; Intel Mac OS X 10_14_1")
+  , "win"   : getChromeUA("Windows NT 10.0; Win64; x64")
+  , "linux" : getChromeUA("Mozilla/5.0 (X11; Linux x86_64")
+};
+
+// Current user agent string for all whitelisted requests
+let currentUAString;
+
+/**
+ * Web apps usually only load the sender library and
+ * provide cast functionality if the browser is detected
+ * as Chrome, so we should rewrite the User-Agent header
+ * to reflect this on whitelisted sites.
+ *
+ * TODO: Inject script to change navigator.userAgent
+ * property.
+ */
+browser.webRequest.onBeforeSendHeaders.addListener(
+        async details => {
+            const { options } = await browser.storage.sync.get("options");
+
+            // Cancel if feature is disabled
+            if (!options.option_uaWhitelistEnabled) return;
+
+            // Cancel if not on whitelist
+            // TODO: Do this with the built in filter
+            const { hostname } = new URL(details.url);
+            if (!options.option_uaWhitelist.split("\n").includes(hostname)) return;
+
+            // Create Chrome UA from platform info on first run
+            if (!currentUAString) {
+                currentUAString = UA_STRINGS[
+                        (await browser.runtime.getPlatformInfo()).os]
+            }
+
+            // Find and rewrite the User-Agent header
+            for (const header of details.requestHeaders) {
+                if (header.name.toLowerCase() === "user-agent") {
+                    header.value = currentUAString;
+                    break;
+                }
+            }
+
+            return {
+                requestHeaders: details.requestHeaders
+            };
+        }
+      , { urls: [ "<all_urls>" ]}
+      , [  "blocking", "requestHeaders" ]);
+
 
 // Defines window.chrome for site compatibility
 browser.contentScripts.register({
