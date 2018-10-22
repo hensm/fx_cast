@@ -41,3 +41,25 @@
 *:invalid {
     box-shadow: 0 0 1.5px 1px red;
 }
+
+.editable-list {
+    justify-content: end;
+}
+.editable-list__item {
+    align-items: center;
+    display: flex;
+    height: 2em;
+}
+.editable-list__title {
+    flex: 1;
+}
+.editable-list__edit-field {
+    width: -moz-available;
+    margin-inline-end: 1em;
+}
+.editable-list__raw-view {
+    max-height: 300px;
+    resize: vertical;
+    width: 100%;
+}
+
