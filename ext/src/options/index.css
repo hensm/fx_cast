@@ -5,7 +5,8 @@
     grid-row-gap: 5px;
 }
 .category-name {}
-.category-description {
+.category-description,
+.category .category {
     color: graytext;
     grid-column: span 2;
 }
@@ -48,6 +49,7 @@
 .editable-list__items {
     display: flex;
     flex-direction: column;
+    padding: initial;
 }
 .editable-list__item {
     align-items: center;

@@ -1,26 +1,18 @@
 "use strict";
 
-import messageRouter from "./messageRouter";
+import defaultOptions from "./options/defaultOptions";
+import messageRouter  from "./messageRouter";
 
 const _ = browser.i18n.getMessage;
 
 
 browser.runtime.onInstalled.addListener(async details => {
-    const initialOptions = {
-        option_localMediaEnabled: true
-      , option_localMediaServerPort: 9555
-      , option_uaWhitelistEnabled: true
-      , option_uaWhitelist: [
-            "https://www.netflix.com/*"
-        ]
-    };
-
     switch (details.reason) {
 
-        // Set initial options
+        // Set default options
         case "install":
-            browser.storage.sync.set({
-                options: initialOptions
+            await browser.storage.sync.set({
+                options: defaultOptions
             });
             break;
 
@@ -30,14 +22,14 @@ browser.runtime.onInstalled.addListener(async details => {
             const newOptions = {};
 
             // Find options not already in storage
-            for (const [ key, val ] of Object.entries(initialOptions)) {
+            for (const [ key, val ] of Object.entries(defaultOptions)) {
                 if (!options.hasOwnProperty(key)) {
                     newOptions[key] = val;
                 }
             }
 
             // Update storage with default values of new options
-            browser.storage.sync.set({
+            await browser.storage.sync.set({
                 options: {
                     ...options
                   , ...newOptions
@@ -46,7 +38,53 @@ browser.runtime.onInstalled.addListener(async details => {
 
             break;
     }
+
+    // Call after default options have been set
+    createMenus();
 });
+
+
+// Menu IDs
+let mirrorCastMenuId;
+let mediaCastMenuId;
+
+const mediaCastTargetUrlPatterns = new Set([
+    "http://*/*"
+  , "https://*/*"
+]);
+
+const LOCAL_MEDIA_URL_PATTERN = "file://*/*";
+
+async function createMenus () {
+    const { options } = await browser.storage.sync.get("options");
+
+    /**
+     * If options aren't set or menus have already been
+     * created, return.
+     */
+    if (!options || mirrorCastMenuId || mediaCastMenuId) return;
+
+    if (options.option_localMediaEnabled) {
+        mediaCastTargetUrlPatterns.add(LOCAL_MEDIA_URL_PATTERN);
+    }
+
+    // <video>/<audio> "Cast..." context menu item
+    mediaCastMenuId = await browser.menus.create({
+        contexts: [ "audio", "video" ]
+      , id: "contextCastMedia"
+      , targetUrlPatterns: Array.from(mediaCastTargetUrlPatterns)
+      , title: _("context_media_cast")
+      , visible: options.option_mediaEnabled
+    });
+
+    // Screen/Tab mirroring "Cast..." context menu item
+    mirrorCastMenuId = await browser.menus.create({
+        contexts: [ "browser_action", "page" ]
+      , id: "contextCast"
+      , title: _("context_media_cast")
+      , visible: options.option_mirroringEnabled
+    });
+}
 
 
 // Google-hosted API loader script
@@ -142,7 +180,7 @@ async function onBeforeSendHeaders (details) {
     };
 }
 
-async function registerWebRequestListeners (alteredOptions) {
+async function onOptionsUpdated (alteredOptions) {
     const { options } = await browser.storage.sync.get("options");
 
     // If options aren't set yet, return
@@ -159,33 +197,51 @@ async function registerWebRequestListeners (alteredOptions) {
         }
     };
 
-
     if (!alteredOptions) {
         // If no altered properties specified, register all listeners
         for (const func of Object.values(registerFunctions)) {
             func();
         }
-
     } else {
-        if (       alteredOptions.includes("option_uaWhitelist")
+        if (alteredOptions.includes("option_uaWhitelist")
                 || alteredOptions.includes("option_uaWhitelistEnabled")) {
             browser.webRequest.onBeforeSendHeaders.removeListener(onBeforeSendHeaders);
             registerFunctions.onBeforeSendHeaders();
         }
+
+        if (alteredOptions.includes("option_mirroringEnabled")) {
+            browser.menus.update(mirrorCastMenuId, {
+                visible: options.option_mirroringEnabled
+            });
+        }
+
+        if (alteredOptions.includes("option_mediaEnabled")) {
+            browser.menus.update(mediaCastMenuId, {
+                visible: options.option_mediaEnabled
+            })
+        }
+
+        if (alteredOptions.includes("option_localMediaEnabled")) {
+            if (options.option_localMediaEnabled) {
+                mediaCastTargetUrlPatterns.add(LOCAL_MEDIA_URL_PATTERN);
+            } else {
+                mediaCastTargetUrlPatterns.delete(LOCAL_MEDIA_URL_PATTERN);
+            }
+
+            browser.menus.update(mediaCastMenuId, {
+                targetUrlPatterns: Array.from(mediaCastTargetUrlPatterns)
+            });
+        }
     }
 }
-
-registerWebRequestListeners();
 
 browser.runtime.onMessage.addListener(message => {
     switch (message.subject) {
         case "optionsUpdated":
-            const { alteredOptions } = message.data;
-            registerWebRequestListeners(alteredOptions);
+            onOptionsUpdated(message.data.alteredOptions);
             break;
     }
 });
-
 
 // Defines window.chrome for site compatibility
 browser.contentScripts.register({
@@ -193,26 +249,6 @@ browser.contentScripts.register({
   , js: [{ file: "contentSetup.js" }]
   , matches: [ "<all_urls>" ]
   , runAt: "document_start"
-});
-
-
-// Screen/Tab mirroring "Cast..." context menu item
-browser.menus.create({
-    contexts: [ "browser_action", "page" ]
-  , id: "contextCast"
-  , title: _("context_media_cast")
-});
-
-// <video>/<audio> "Cast..." context menu item
-browser.menus.create({
-    contexts: [ "audio", "video" ]
-  , id: "contextCastMedia"
-  , targetUrlPatterns: [
-        "http://*/*"
-      , "https://*/*"
-      , "file://*/*"
-    ]
-  , title: _("context_media_cast")
 });
 
 
@@ -225,6 +261,7 @@ let mirrorCastFrameId;
 
 browser.menus.onClicked.addListener(async (info, tab) => {
     const { frameId } = info;
+    const { options } = await browser.storage.sync.get("options");
 
     // Load cast setup script
     await browser.tabs.executeScript(tab.id, {
@@ -238,7 +275,8 @@ browser.menus.onClicked.addListener(async (info, tab) => {
             mirrorCastFrameId = frameId;
 
             await browser.tabs.executeScript(tab.id, {
-                code: `let selectedMedia = "${info.pageUrl ? "tab" : "screen"}";`
+                code: `let selectedMedia = "${info.pageUrl ? "tab" : "screen"}";
+                       let FX_CAST_RECEIVER_APP_ID = ${options.option_mirroringAppId};`
               , frameId
             });
 
@@ -422,3 +460,8 @@ messageRouter.register("mediaCast", message => {
 browser.runtime.onMessage.addListener((message, sender) => {
     messageRouter.handleMessage(message, sender);
 });
+
+
+// Misc init
+createMenus();
+onOptionsUpdated();

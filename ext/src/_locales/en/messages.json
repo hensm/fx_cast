@@ -17,6 +17,17 @@
         "message": "Cast..."
     }
 
+
+  , "options_category_media": {
+        "message": "Media casting"
+    }
+  , "options_category_media_description": {
+        "message": "HTML5 video/audio media casting."
+    }
+  , "options_option_mediaEnabled": {
+        "message": "Enabled"
+    }
+
   , "options_category_localMedia": {
         "message": "Local media casting"
     }
@@ -40,7 +51,7 @@
         "message": "Enabled"
     }
   , "options_option_uaWhitelist": {
-        "message": "Match matterns (newline-separated)"
+        "message": "Match patterns (newline-separated)"
     }
   , "options_option_uaWhitelistBasicView": {
         "message": "Basic View"
@@ -64,6 +75,22 @@
         "message": "Invalid match pattern $1"
     }
 
+  , "options_category_mirroring": {
+        "message": "Screen mirroring"
+    }
+  , "options_category_mirroring_description": {
+        "message": "Screen/Tab mirroring to a Chromecast receiver app."
+    }
+  , "options_option_mirroringEnabled": {
+        "message": "Enabled"
+    }
+  , "options_option_mirroringAppId": {
+        "message": "Receiver app ID"
+    }
+
+  , "options_reset": {
+        "message": "Reset to defaults"
+    }
   , "options_submit": {
         "message": "Submit"
     }

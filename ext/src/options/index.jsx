@@ -3,6 +3,8 @@
 import React, { Component } from "react";
 import ReactDOM             from "react-dom";
 
+import defaultOptions       from "./defaultOptions";
+
 
 const _ = browser.i18n.getMessage;
 
@@ -272,6 +274,7 @@ class OptionsApp extends Component {
           , isFormValid: true
         };
 
+        this.handleReset = this.handleReset.bind(this);
         this.handleFormSubmit = this.handleFormSubmit.bind(this);
         this.handleFormChange = this.handleFormChange.bind(this);
         this.handleInputChange = this.handleInputChange.bind(this);
@@ -285,12 +288,24 @@ class OptionsApp extends Component {
     setStorage () {
         return browser.storage.sync.set({
             options: {
-                option_localMediaEnabled: this.state.option_localMediaEnabled
+                option_mediaEnabled: this.state.option_mediaEnabled
+              , option_localMediaEnabled: this.state.option_localMediaEnabled
               , option_localMediaServerPort: this.state.option_localMediaServerPort
               , option_uaWhitelistEnabled: this.state.option_uaWhitelistEnabled
               , option_uaWhitelist: this.state.option_uaWhitelist
+              , option_mirroringEnabled: this.state.option_mirroringEnabled
+              , option_mirroringAppId: this.state.option_mirroringAppId
             }
         });
+    }
+
+    handleReset () {
+        this.setState({
+            ...defaultOptions
+        });
+
+        // TODO: Propagate state properly
+        this.form.submit();
     }
 
     async handleFormSubmit (ev) {
@@ -360,32 +375,81 @@ class OptionsApp extends Component {
                     onChange={ this.handleFormChange }>
                 <fieldset className="category">
                     <legend className="category-name">
-                        { _("options_category_localMedia") }
+                        { _("options_category_media") }
                     </legend>
                     <p className="category-description">
-                        { _("options_category_localMedia_description") }
+                        { _("options_category_media_description") }
                     </p>
 
                     <label className="option">
                         <div className="option-label">
-                            { _("options_option_localMediaEnabled") }
+                            { _("options_option_mediaEnabled") }
                         </div>
-                        <input name="option_localMediaEnabled"
+                        <input name="option_mediaEnabled"
                                type="checkbox"
-                               checked={ this.state.option_localMediaEnabled }
+                               checked={ this.state.option_mediaEnabled }
+                               onChange={ this.handleInputChange } />
+                    </label>
+
+                    <fieldset className="category">
+                        <legend className="category-name">
+                            { _("options_category_localMedia") }
+                        </legend>
+                        <p className="category-description">
+                            { _("options_category_localMedia_description") }
+                        </p>
+
+                        <label className="option">
+                            <div className="option-label">
+                                { _("options_option_localMediaEnabled") }
+                            </div>
+                            <input name="option_localMediaEnabled"
+                                   type="checkbox"
+                                   checked={ this.state.option_localMediaEnabled }
+                                   onChange={ this.handleInputChange } />
+                        </label>
+
+                        <label className="option">
+                            <div className="option-label">
+                                { _("options_option_localMediaServerPort") }
+                            </div>
+                            <input name="option_localMediaServerPort"
+                                   type="number"
+                                   required
+                                   min="1025"
+                                   max="65535"
+                                   value={ this.state.option_localMediaServerPort }
+                                   onChange={ this.handleInputChange } />
+                        </label>
+                    </fieldset>
+                </fieldset>
+
+                <fieldset className="category">
+                    <legend className="category-name">
+                        { _("options_category_mirroring") }
+                    </legend>
+                    <p className="category-description">
+                        { _("options_category_mirroring_description") }
+                    </p>
+
+                    <label className="option">
+                        <div className="option-label">
+                            { _("options_option_mirroringEnabled") }
+                        </div>
+                        <input name="option_mirroringEnabled"
+                               type="checkbox"
+                               checked={ this.state.option_mirroringEnabled }
                                onChange={ this.handleInputChange } />
                     </label>
 
                     <label className="option">
                         <div className="option-label">
-                            { _("options_option_localMediaServerPort") }
+                            { _("options_option_mirroringAppId") }
                         </div>
-                        <input name="option_localMediaServerPort"
-                               type="number"
+                        <input name="option_mirroringAppId"
+                               type="text"
                                required
-                               min="1025"
-                               max="65535"
-                               value={ this.state.option_localMediaServerPort }
+                               value={ this.state.option_mirroringAppId }
                                onChange={ this.handleInputChange } />
                     </label>
                 </fieldset>
@@ -420,6 +484,9 @@ class OptionsApp extends Component {
                 </fieldset>
 
                 <div id="buttons">
+                    <button onClick={ this.handleReset }>
+                        { _("options_reset") }
+                    </button>
                     <button type="submit"
                             disabled={ !this.state.isFormValid }>
                         { _("options_submit") }
