@@ -16,7 +16,7 @@ class EditableListItem extends React.Component {
             editing: this.props.editing || false
           , editValue: ""
         };
-        
+
         this.handleRemove = this.handleRemove.bind(this);
         this.handleEditBegin = this.handleEditBegin.bind(this);
         this.handleEditEnd = this.handleEditEnd.bind(this);
@@ -34,7 +34,7 @@ class EditableListItem extends React.Component {
           , editValue: this.props.text
         });
     }
-    
+
     handleEditEnd (ev) {
         if (this.props.editing
                 && !this.props.itemPattern.test(this.state.editValue)) {
@@ -51,7 +51,7 @@ class EditableListItem extends React.Component {
           , editValue: ""
         });
     }
-    
+
     handleInputChange (ev) {
         this.setState({
             editValue: ev.target.value
@@ -63,7 +63,7 @@ class EditableListItem extends React.Component {
             ev.target.setCustomValidity("");
         }
     }
-    
+
     handleInputKeyPress (ev) {
         if (ev.key === "Enter") {
             this.handleEditEnd({ target: ev.target });
@@ -105,7 +105,7 @@ class EditableList extends React.Component {
           , rawView: false
           , rawViewValue: ""
         };
-        
+
         this.handleItemRemove = this.handleItemRemove.bind(this);
         this.handleItemEdit = this.handleItemEdit.bind(this);
         this.handleSwitchView = this.handleSwitchView.bind(this);
@@ -115,7 +115,7 @@ class EditableList extends React.Component {
         this.handleNewItemRemove = this.handleNewItemRemove.bind(this);
         this.handleNewItemEdit = this.handleNewItemEdit.bind(this);
     }
-    
+
     handleItemRemove (item) {
         this.setState(currentState => {
             const newItems = new Set(currentState.items);
@@ -127,7 +127,7 @@ class EditableList extends React.Component {
             this.props.onListChange(Array.from(this.state.items));
         });
     }
-    
+
     handleItemEdit (item, newValue) {
         this.setState(currentState => ({
             items: new Set([...currentState.items]
@@ -136,7 +136,7 @@ class EditableList extends React.Component {
             this.props.onListChange(Array.from(this.state.items));
         });
     }
-    
+
     handleSwitchView () {
         this.setState(currentState => {
             if (currentState.rawView) {
@@ -178,7 +178,7 @@ class EditableList extends React.Component {
             this.props.onListChange(Array.from(this.state.items));
         });
     }
-    
+
     handleRawViewTextAreaChange (ev) {
         if (this.rawViewTextArea.scrollHeight > this.rawViewTextArea.clientHeight) {
             this.rawViewTextArea.style.height = `${this.rawViewTextArea.scrollHeight}px`;
@@ -209,7 +209,7 @@ class EditableList extends React.Component {
             this.props.onListChange(Array.from(this.state.items));
         });
     }
-    
+
     render () {
         const items = Array.from(this.state.items.values());
 
@@ -326,7 +326,7 @@ class OptionsApp extends Component {
         });
     }
 
-    
+
     handleInputChange (ev) {
         const val = do {
             if (ev.target.type === "checkbox") {
