@@ -13,7 +13,7 @@ Credit:
 * macOS
 * Windows (TODO)
 
-Only tested on Linux. mDNS library issue to be fixed. `mdns` only works on Windows, `mdns-js` only works on Linux.
+Only tested on Linux and macOS. mDNS library issue to be fixed. `mdns` only works on Windows, `mdns-js` only works on Linux.
 
 
 ## Building
@@ -50,7 +50,7 @@ SELENIUM_BROWSER=chrome npm test
 
 Extension can be loaded from `about:debugging` as a temporary extension.
 
-Most sites won't load the cast API unless the browser presents itself as Chrome. The plan is to spoof the user agent string for a whitelist of cast-enabled sites, but that isn't implemented yet. You can workaround this by setting it manually or using a [third-party extension](https://addons.mozilla.org/en-US/firefox/search/?q=user+agent).
+Most sites won't load the cast API unless the browser presents itself as Chrome. The extension includes a method of spoofing the user agent string, sites can be whitelisted via the options page. Whitelist entries are specified as [match patterns](https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/Match_patterns). To whitelist all sites, add `<all_urls>` to the whitelist, though this could cause breakage on random sites.
 
 HTML5 media elements have a "Cast..." context menu item that triggers a sender application. Only works on remote (non-local) media that isn't DRM-encumbered.
 
