@@ -38,7 +38,7 @@ class EditableListItem extends React.Component {
     handleEditEnd (ev) {
         if (this.props.editing
                 && !this.props.itemPattern.test(this.state.editValue)) {
-            ev.target.setCustomValidity(this.props.itemPatternError);
+            ev.target.setCustomValidity(this.props.itemPatternError());
         }
 
         if (!ev.target.validity.valid) {
@@ -58,7 +58,7 @@ class EditableListItem extends React.Component {
         });
         
         if (!this.props.itemPattern.test(ev.target.value)) {
-            ev.target.setCustomValidity(this.props.itemPatternError);        
+            ev.target.setCustomValidity(this.props.itemPatternError());        
         } else {
             ev.target.setCustomValidity("");
         }
@@ -74,22 +74,22 @@ class EditableListItem extends React.Component {
         return (
             <li className="editable-list__item">
                 <div className="editable-list__title"
-                     onDoubleClick={this.handleEditBegin}>
+                     onDoubleClick={ this.handleEditBegin }>
                     { this.state.editing
                         ? <input className="editable-list__edit-field"
                                  type="text"
                                  autoFocus
-                                 value={this.state.editValue}
-                                 onBlur={this.handleEditEnd}
-                                 onChange={this.handleInputChange}
-                                 onKeyPress={this.handleInputKeyPress}/>
+                                 value={ this.state.editValue }
+                                 onBlur={ this.handleEditEnd }
+                                 onChange={ this.handleInputChange }
+                                 onKeyPress={ this.handleInputKeyPress }/>
                         : this.props.text }
                 </div>
-                <button onClick={this.handleEditBegin}>
-                    Edit
+                <button onClick={ this.handleEditBegin }>
+                    { _("options_option_uaWhitelistItemEdit") }
                 </button>
-                <button onClick={this.handleRemove}>
-                    Remove
+                <button onClick={ this.handleRemove }>
+                    { _("options_option_uaWhitelistItemRemove") }
                 </button>
             </li>
         );
@@ -155,6 +155,7 @@ class EditableList extends React.Component {
 
     handleSaveRaw () {
         this.setState(currentState => {
+            console.log(currentState.rawViewValue);
             const newItems = currentState.rawViewValue.split("\n")
                 .filter(item => item !== "");
 
@@ -162,10 +163,12 @@ class EditableList extends React.Component {
                 for (const item of newItems) {
                     if (!this.props.itemPattern.test(item)) {
                         this.rawViewTextArea.setCustomValidity(
-                                `${this.props.itemPatternError}: ${item}`);
+                                this.props.itemPatternError(item));
                         return;
                     }
-                }                
+                }
+
+                this.rawViewTextArea.setCustomValidity("");           
             }
 
             return {
@@ -213,42 +216,46 @@ class EditableList extends React.Component {
         return (
             <div className="editable-list">
                 <button className="editable-list__view-button"
-                        onClick={this.handleSwitchView}>
-                    { this.state.rawView ? "Basic" : "Raw" } View
+                        onClick={ this.handleSwitchView }>
+                    { this.state.rawView
+                        ? _("options_option_uaWhitelistBasicView")
+                        : _("options_option_uaWhitelistRawView") }
                 </button>
                 { this.state.rawView &&
                     <button className="editable-list__save-raw-button"
-                            onClick={this.handleSaveRaw}>
-                        Save Raw
+                            onClick={ this.handleSaveRaw }>
+                        { _("options_option_uaWhitelistSaveRaw") }
                     </button> }
                 <hr />
                 {
                     this.state.rawView
                         ? ( <textarea className="editable-list__raw-view"
-                                      rows={items.length}
-                                      value={this.state.rawViewValue}
-                                      onChange={this.handleRawViewTextAreaChange}
-                                      ref={el => { this.rawViewTextArea = el }}>
+                                      rows={ items.length}
+                                      value={ this.state.rawViewValue}
+                                      onChange={ this.handleRawViewTextAreaChange }
+                                      ref={ el => { this.rawViewTextArea = el }}>
                             </textarea> )
                         : ( <ul className="editable-list__items">
                                 { items.map((item, i) => 
-                                    <EditableListItem text={item}
-                                                      itemPattern={this.props.itemPattern}
-                                                      itemPatternError={this.props.itemPatternError}
-                                                      onRemove={this.handleItemRemove}
-                                                      onEdit={this.handleItemEdit}
-                                                      key={i} /> )}
+                                    <EditableListItem text={ item }
+                                                      itemPattern={ this.props.itemPattern }
+                                                      itemPatternError={ this.props.itemPatternError }
+                                                      onRemove={ this.handleItemRemove }
+                                                      onEdit={ this.handleItemEdit }
+                                                      key={ i } /> )}
                                 { this.state.addingNewItem &&
-                                    <EditableListItem text={""}
-                                                      itemPattern={this.props.itemPattern}
-                                                      itemPatternError={this.props.itemPatternError}
-                                                      onRemove={this.handleNewItemRemove}
-                                                      onEdit={this.handleNewItemEdit}
-                                                      editing={true} /> }
-                                <button className="editable-list__add-button"
-                                        onClick={this.handleAddItem}>
-                                    Add Item
-                                </button>
+                                    <EditableListItem text=""
+                                                      itemPattern={ this.props.itemPattern }
+                                                      itemPatternError={ this.props.itemPatternError }
+                                                      onRemove={ this.handleNewItemRemove }
+                                                      onEdit={ this.handleNewItemEdit }
+                                                      editing={ true } /> }
+                                <div className="editable-list__item editable-list__item-actions">
+                                    <button className="editable-list__add-button"
+                                            onClick={ this.handleAddItem }>
+                                        { _("options_option_uaWhitelistAddItem") }
+                                    </button>
+                                </div>
                             </ul> )
                 }
             </div>
@@ -269,6 +276,7 @@ class OptionsApp extends Component {
         this.handleFormChange = this.handleFormChange.bind(this);
         this.handleInputChange = this.handleInputChange.bind(this);
         this.handleListChange = this.handleListChange.bind(this);
+        this.getItemPatternError = this.getItemPatternError.bind(this);
     }
 
     /**
@@ -277,10 +285,10 @@ class OptionsApp extends Component {
     setStorage () {
         return browser.storage.sync.set({
             options: {
-                option_localMediaEnabled : this.state.option_localMediaEnabled
-              , option_localMediaServerPort : this.state.option_localMediaServerPort
-              , option_uaWhitelistEnabled : this.state.option_uaWhitelistEnabled
-              , option_uaWhitelist : this.state.option_uaWhitelist
+                option_localMediaEnabled: this.state.option_localMediaEnabled
+              , option_localMediaServerPort: this.state.option_localMediaServerPort
+              , option_uaWhitelistEnabled: this.state.option_uaWhitelistEnabled
+              , option_uaWhitelist: this.state.option_uaWhitelist
             }
         });
     }
@@ -339,6 +347,10 @@ class OptionsApp extends Component {
         this.setState({
             option_uaWhitelist: data
         });
+    }
+
+    getItemPatternError (info) {
+        return _("options_option_uaWhitelistInvalidMatchPattern", info);
     }
 
     render () {
@@ -402,8 +414,8 @@ class OptionsApp extends Component {
                         </div>
                         <EditableList data={ this.state.option_uaWhitelist }
                                       onListChange={ this.handleListChange }
-                                      itemPattern={MATCH_PATTERN_REGEX}
-                                      itemPatternError="Invalid match pattern"/>
+                                      itemPattern={ MATCH_PATTERN_REGEX }
+                                      itemPatternError={ this.getItemPatternError }/>
                     </label>
                 </fieldset>
 

@@ -45,6 +45,10 @@
 .editable-list {
     justify-content: end;
 }
+.editable-list__items {
+    display: flex;
+    flex-direction: column;
+}
 .editable-list__item {
     align-items: center;
     display: flex;
@@ -62,4 +66,6 @@
     resize: vertical;
     width: 100%;
 }
-
+.editable-list__add-button {
+    align-self: end;
+}

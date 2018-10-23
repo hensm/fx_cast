@@ -40,7 +40,28 @@
         "message": "Enabled"
     }
   , "options_option_uaWhitelist": {
-        "message": "Match patterns (newline-separated)"
+        "message": "Match matterns (newline-separated)"
+    }
+  , "options_option_uaWhitelistBasicView": {
+        "message": "Basic View"
+    }
+  , "options_option_uaWhitelistRawView": {
+        "message": "Raw View"
+    }
+  , "options_option_uaWhitelistSaveRaw": {
+        "message": "Save Raw"
+    }
+  , "options_option_uaWhitelistAddItem": {
+        "message": "Add Item"
+    }
+  , "options_option_uaWhitelistItemEdit": {
+        "message": "Edit"
+    }
+  , "options_option_uaWhitelistItemRemove": {
+        "message": "Remove"
+    }
+  , "options_option_uaWhitelistInvalidMatchPattern": {
+        "message": "Invalid match pattern $1"
     }
 
   , "options_submit": {
