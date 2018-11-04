@@ -276,7 +276,7 @@ browser.menus.onClicked.addListener(async (info, tab) => {
 
             await browser.tabs.executeScript(tab.id, {
                 code: `let selectedMedia = "${info.pageUrl ? "tab" : "screen"}";
-                       let FX_CAST_RECEIVER_APP_ID = ${options.option_mirroringAppId};`
+                       let FX_CAST_RECEIVER_APP_ID = "${options.option_mirroringAppId}";`
               , frameId
             });
 
