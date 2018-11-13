@@ -7,5 +7,5 @@ export default {
         "https://www.netflix.com/*"
     ]
   , option_mirroringEnabled: false
-  , option_mirroringAppId: MIRROR_CAST_APP_ID || "19A6F4AE"
+  , option_mirroringAppId: MIRRORING_APP_ID
 }

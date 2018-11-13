@@ -1,11 +1,11 @@
 {
     "name": "__MSG_extension_name__"
   , "description": "__MSG_extension_description__"
-  , "version": "0.0.1"
+  , "version": "EXTENSION_VERSION"
 
   , "applications": {
         "gecko": {
-            "id": "fx_cast@matt.tf"
+            "id": "EXTENSION_ID"
           , "strict_min_version": "57.0"
         }
     }

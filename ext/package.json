@@ -1,24 +1,23 @@
 {
     "scripts": {
         "build": "node build.js",
-        "watch": "webpack -d --watch"
+        "watch": "node build.js --watch"
     },
     "devDependencies": {
-        "babel-core": "^6.26.0",
-        "babel-loader": "^7.1.2",
-        "babel-plugin-transform-class-properties": "^6.24.1",
-        "babel-plugin-transform-do-expressions": "^6.22.0",
-        "babel-plugin-transform-object-rest-spread": "^6.26.0",
-        "babel-preset-env": "^1.6.1",
-        "babel-preset-react": "^6.24.1",
+        "@babel/core": "^7.1.5",
+        "@babel/plugin-proposal-class-properties": "^7.1.0",
+        "@babel/plugin-proposal-do-expressions": "^7.0.0",
+        "@babel/plugin-proposal-object-rest-spread": "^7.0.0",
+        "@babel/preset-env": "^7.1.5",
+        "@babel/preset-react": "^7.0.0",
+        "babel-loader": "^8.0.4",
         "copy-webpack-plugin": "^4.3.1",
         "minimist": "^1.2.0",
-        "react": "^16.2.0",
-        "react-dom": "^16.2.0",
-        "web-ext": "^2.7.0",
-        "webpack": "^3.10.0"
-    },
-    "dependencies": {
-        "uuid": "^3.2.1"
+        "react": "^16.6.1",
+        "react-dom": "^16.6.1",
+        "uuid": "^3.2.1",
+        "web-ext": "^2.9.1",
+        "webpack": "^4.25.1",
+        "webpack-cli": "^3.1.2"
     }
 }

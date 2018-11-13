@@ -1,57 +1,74 @@
 "use strict";
 
-const path         = require("path");
-const webpack      = require("webpack");
-const webpack_copy = require("copy-webpack-plugin");
+const path              = require("path");
+const webpack           = require("webpack");
+const CopyWebpackPlugin = require("copy-webpack-plugin");
 
 
-const include_path = path.resolve(__dirname, "src");
-const output_path  = path.resolve(__dirname, "../dist/ext/unpacked");
+const includePath = path.resolve(__dirname, "src");
+const outputPath  = path.resolve(__dirname, "../dist/ext/");
 
 module.exports = (env) => ({
     entry: {
-        "main"           : `${include_path}/main.js`
-      , "popup/bundle"   : `${include_path}/popup/index.js`
-      , "options/bundle" : `${include_path}/options/index.jsx`
-      , "shim/bundle"    : `${include_path}/shim/index.js`
-      , "content"        : `${include_path}/content.js`
-      , "contentSetup"   : `${include_path}/contentSetup.js`
-      , "mediaCast"      : `${include_path}/mediaCast.js`
-      , "mirroringCast"  : `${include_path}/mirroringCast.js`
-      , "messageRouter"  : `${include_path}/messageRouter.js`
+        "main"           : `${includePath}/main.js`
+      , "popup/bundle"   : `${includePath}/popup/index.js`
+      , "options/bundle" : `${includePath}/options/index.jsx`
+      , "shim/bundle"    : `${includePath}/shim/index.js`
+      , "content"        : `${includePath}/content.js`
+      , "contentSetup"   : `${includePath}/contentSetup.js`
+      , "mediaCast"      : `${includePath}/mediaCast.js`
+      , "mirroringCast"  : `${includePath}/mirroringCast.js`
+      , "messageRouter"  : `${includePath}/messageRouter.js`
     }
   , output: {
         filename: "[name].js"
-      , path: `${output_path}`
+      , path: `${outputPath}`
     }
   , plugins: [
-      //, new webpack.optimize.CommonsChunkPlugin("lib/init.bundle")
         new webpack.DefinePlugin({
-            "process.env.NODE_ENV": `"production"`
-          , "MIRROR_CAST_APP_ID": JSON.stringify(env.appId.toString() || "19A6F4AE")
+            "EXTENSION_NAME"    : JSON.stringify(env.extensionName)
+          , "EXTENSION_ID"      : JSON.stringify(env.extensionId)
+          , "EXTENSION_VERSION" : JSON.stringify(env.extensionVersion)
+          , "MIRRORING_APP_ID"  : JSON.stringify(env.mirroringAppId)
         })
 
-        // Ext copy assets
-      , new webpack_copy([{
-            from: `${include_path}`
-          , to: `${output_path}`
-          , ignore: [ "*.js" ]
+        // Copy static assets
+      , new CopyWebpackPlugin([{
+            from: includePath
+          , to: outputPath
+          , ignore: [ "*.js", "*.jsx" ]
+          , transform (content, path) {
+                // Access to variables in static files
+                if (path.endsWith(".json")) {
+                    return Buffer.from(content.toString()
+                        .replace("EXTENSION_NAME", env.extensionName)
+                        .replace("EXTENSION_ID", env.extensionId)
+                        .replace("EXTENSION_VERSION", env.extensionVersion)
+                        .replace("MIRRORING_APP_ID", env.mirroringAppId));
+                }
+
+                return content;
+            }
         }])
     ]
-  , devtool: "eval-source-map"
+  , mode: "development"
   , module: {
-        loaders: [
+        rules: [
             {
                 test: /\.jsx?$/
-              , include: `${include_path}`
-              , loader: "babel-loader"
-              , options: {
-                    presets: [ "react" ]
-                  , plugins: [
-                        "transform-class-properties"
-                      , "transform-do-expressions"
-                      , "transform-object-rest-spread"
-                    ]
+              , include: `${includePath}`
+              , use: {
+                    loader: "babel-loader"
+                  , options: {
+                        presets: [
+                            "@babel/preset-react"
+                        ]
+                      , plugins: [
+                            "@babel/proposal-class-properties"
+                          , "@babel/proposal-do-expressions"
+                          , "@babel/proposal-object-rest-spread"
+                        ]
+                    }
                 }
             }
         ]
