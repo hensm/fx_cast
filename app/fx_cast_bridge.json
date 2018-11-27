@@ -1,7 +1,6 @@
 {
     "name": "fx_cast_bridge"
   , "description": ""
-  , "path": ""
   , "type": "stdio"
   , "allowed_extensions": [ "fx_cast@matt.tf" ]
 }

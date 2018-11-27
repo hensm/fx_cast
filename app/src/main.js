@@ -1,10 +1,11 @@
-import { Client } from 'castv2'
-import { createBrowser, tcp } from 'mdns-js'
+import { Client } from "castv2"
+import { createBrowser, tcp } from "mdns-js"
 
-import http from 'http'
-import fs from 'fs'
+import http from "http"
+import fs from "fs"
+import path from "path"
 
-import * as transforms from './transforms'
+import * as transforms from "./transforms"
 
 
 const browser = createBrowser(tcp("googlecast"));
