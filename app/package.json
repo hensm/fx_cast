@@ -23,7 +23,6 @@
                 "@babel/plugin-transform-runtime": "^7.0.0",
                 "@babel/preset-env": "^7.0.0",
                 "@babel/register": "^7.0.0",
-                "fs-extra": "^7.0.1",
                 "minimist": "^1.2.0",
                 "pkg": "^4.3.4"
         },

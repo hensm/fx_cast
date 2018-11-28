@@ -13,6 +13,7 @@
         "install-manifest": "npm run install-manifest --prefix ./app"
     },
     "devDependencies": {
+        "fs-extra": "^7.0.1",
         "jasmine": "^3.1.0",
         "selenium-webdriver": "^4.0.0-alpha.1"
     }
