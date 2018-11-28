@@ -6,7 +6,7 @@
                 "build": "node bin/build.js",
                 "package": "node bin/build.js --package",
                 "install-manifest": "node bin/install-manifest.js",
-                "start-debug": "node bin/start-debug.js"
+                "remove-manifest": "node bin/install-manifest.js --remove"
         },
         "dependencies": {
                 "@babel/runtime": "^7.0.0",

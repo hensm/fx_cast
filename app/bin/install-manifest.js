@@ -15,7 +15,7 @@ const CURRENT_MANIFEST_PATH = path.join(DIST_DIR_PATH, manifestName);
 const WIN_REGISTRY_KEY = "fx_cast_bridge";
 
 
-if (!fs.existsSync(CURRENT_MANIFEST_PATH)) {
+if (!fs.existsSync(CURRENT_MANIFEST_PATH) && !argv.remove) {
     console.error("No manifest in dist/app/ to install");
     process.exit(1);
 }
@@ -27,6 +27,11 @@ switch (platform) {
     case "linux": {
         const destination = path.join(os.homedir(), manifestPath[platform]);
 
+        if (argv.remove) {
+            fs.remove(path.join(destination, manifestName));
+            break;
+        }
+
         fs.ensureDirSync(destination);
         fs.copyFileSync(CURRENT_MANIFEST_PATH
               , path.join(destination, manifestName));
@@ -36,6 +41,11 @@ switch (platform) {
 
     case "win32": {
         const regedit = require("regedit");
+
+        if (argv.remove) {
+            // TODO: no corresponding method in regedit lib
+            break;
+        }
 
         regedit.putValue({
             "HKEY_CURRENT_USER\\SOFTWARE\\Mozilla\\NativeMessagingHosts": {
