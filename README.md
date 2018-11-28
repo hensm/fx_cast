@@ -27,11 +27,37 @@ Only tested on Linux and macOS. mDNS library issue to be fixed. `mdns` only work
 ### Instructions
 
 ````sh
-git clone https://github.com/hensm/caster.git
+git clone https://github.com/hensm/fx_cast.git
 npm install
 npm run build
 npm run install-manifest
 ````
+
+This will build the ext and app, outputting to dist/.
+
+`dist/app/` contains the bridge binary and manifest with the path pointing that binary. `install-manifest` copies the manifest to the proper location (or adds its current location to the registry).
+
+`dist/ext/` contains the built extension in the format `fx_cast-<version>.zip` in addition to the unpacked extension at `dist/ext/unpacked/`.
+
+
+Watching ext changes and auto reload:
+````sh
+npm run watch --prefix ./ext
+
+# In seperate terminal
+npm run start --prefix ./ext
+````
+
+
+### Packaging
+
+Packaging currently only possible on macOS:
+
+````sh
+npm run package
+````
+
+`dist/app/` contains the installer package: `fx_cast_bridge.pkg` (macOS). `dist/ext/` contains the built extension.
 
 ### Testing
 

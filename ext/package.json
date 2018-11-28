@@ -2,7 +2,8 @@
     "scripts": {
         "build": "node build.js",
         "package": "node build.js --package",
-        "watch": "node build.js --watch"
+        "watch": "node build.js --watch",
+        "start": "web-ext run -s ../dist/ext/unpacked/"
     },
     "devDependencies": {
         "@babel/core": "^7.1.5",
