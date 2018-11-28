@@ -1,6 +1,6 @@
 const path = require("path");
 
-exports.DIST_DIR_PATH = path.join(__dirname, "../../../dist/app");
+exports.DIST_PATH = path.join(__dirname, "../../../dist/app");
 
 exports.executableName = {
     win32: "bridge.exe"

@@ -1,15 +1,22 @@
 const fs = require("fs-extra");
 const os = require("os");
 const path = require("path");
+const minimist = require("minimist");
 
 const { manifestName
       , manifestPath
-      , DIST_DIR_PATH } = require("./lib/paths");
-
-const argv = require("minimist")(process.argv.slice(2));
+      , DIST_PATH } = require("./lib/paths");
 
 
-const CURRENT_MANIFEST_PATH = path.join(DIST_DIR_PATH, manifestName);
+const argv = minimist(process.argv.slice(2), {
+    boolean: [ "remove" ]
+  , default: {
+        remove: false
+    }
+});
+
+
+const CURRENT_MANIFEST_PATH = path.join(DIST_PATH, manifestName);
 const WIN_REGISTRY_KEY = "fx_cast_bridge";
 
 
