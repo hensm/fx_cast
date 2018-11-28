@@ -11,7 +11,7 @@ const outputPath  = path.resolve(__dirname, "../dist/ext/unpacked");
 module.exports = (env) => ({
     entry: {
         "main"           : `${includePath}/main.js`
-      , "popup/bundle"   : `${includePath}/popup/index.js`
+      , "popup/bundle"   : `${includePath}/popup/index.jsx`
       , "options/bundle" : `${includePath}/options/index.jsx`
       , "shim/bundle"    : `${includePath}/shim/index.js`
       , "content"        : `${includePath}/content.js`
