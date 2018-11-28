@@ -5,43 +5,21 @@ const path = require("path");
 const { spawnSync } = require("child_process");
 const { exec: pkgExec } = require("pkg");
 
+const { executableName
+      , executablePath
+      , manifestName
+      , manifestPath
+      , pkgPlatform
+      , DIST_DIR_PATH } = require("./lib/paths");
+
 const argv = require("minimist")(process.argv.slice(2));
 
 
-const MANIFEST_NAME = "fx_cast_bridge.json";
-
 const BUILD_DIR_PATH = path.join(__dirname, "../build");
-const DIST_DIR_PATH = path.join(__dirname, "../../dist/app");
 
-try {
-    // Make directories
-    fs.mkdirSync(BUILD_DIR_PATH);
-    fs.mkdirSync(DIST_DIR_PATH, { recursive: true });
-} catch (err) {}
-
-
-const executableName = {
-    win32: "bridge.exe"
-  , darwin: "bridge"
-  , linux: "bridge"
-};
-
-const executablePath = {
-    win32: "C:\\Program Files\\fx_cast\\"
-  , darwin: "/Library/Application Support/fx_cast/"
-  , linux: "/opt/fx_cast/"
-};
-
-const manifestPath = {
-    darwin: "/Library/Application Support/Mozilla/NativeMessagingHosts/"
-  , linux: "/usr/lib/mozilla/native-messaging-hosts/"
-};
-
-const pkgPlatform = {
-    win32: "win"
-  , darwin: "macos"
-  , linux: "linux"
-};
+// Make directories
+fs.ensureDirSync(BUILD_DIR_PATH);
+fs.ensureDirSync(DIST_DIR_PATH, { recursive: true });
 
 
 async function build () {
@@ -51,14 +29,14 @@ async function build () {
     spawnSync(`babel src -d ${BUILD_DIR_PATH} --copy-files `
       , { shell: true });
 
-    // Add build platform's executable path to the manifest
-    const manifest = {
-        ...(JSON.parse(fs.readFileSync(MANIFEST_NAME, "utf8")))
-      , path: path.join(executablePath[platform], executableName[platform])
-    };
+    // Add either installed path or dist path to app manifest
+    const manifest = JSON.parse(fs.readFileSync(manifestName, "utf8"));
+    manifest.path = argv.package
+        ? path.join(executablePath[platform], executableName[platform])
+        : path.join(DIST_DIR_PATH, executableName[platform]);
 
     // Write manifest
-    fs.writeFileSync(path.join(BUILD_DIR_PATH, MANIFEST_NAME)
+    fs.writeFileSync(path.join(BUILD_DIR_PATH, manifestName)
           , JSON.stringify(manifest, null, 4));
 
 
@@ -97,8 +75,8 @@ async function build () {
               , { overwrite: true });
     } else {
         // Move binary / app manifest
-        fs.moveSync(path.join(BUILD_DIR_PATH, MANIFEST_NAME)
-              , path.join(DIST_DIR_PATH, MANIFEST_NAME)
+        fs.moveSync(path.join(BUILD_DIR_PATH, manifestName)
+              , path.join(DIST_DIR_PATH, manifestName)
               , { overwrite: true });
         fs.moveSync(path.join(BUILD_DIR_PATH, executableName[platform])
               , path.join(DIST_DIR_PATH, executableName[platform])
@@ -113,6 +91,9 @@ async function buildInstaller (platform) {
     switch (platform) {
         case "darwin": {
             const installerName = "fx_cast_bridge.pkg";
+            const componentName = "fx_cast_bridge_default.pkg";
+            const installerPath = path.join(BUILD_DIR_PATH, installerName);
+            const componentPath = path.join(BUILD_DIR_PATH, componentName);
 
             // Create pkgbuild root
             const rootPath = path.join(BUILD_DIR_PATH, "root");
@@ -122,21 +103,31 @@ async function buildInstaller (platform) {
                   , manifestPath[platform]);
 
             // Create install locations
-            fs.mkdirSync(rootExecutablePath, { recursive: true });
-            fs.mkdirSync(rootManifestPath, { recursive: true });
+            fs.ensureDirSync(rootExecutablePath, { recursive: true });
+            fs.ensureDirSync(rootManifestPath, { recursive: true });
 
             // Move files to root
             fs.moveSync(path.join(BUILD_DIR_PATH, executableName[platform])
                   , path.join(rootExecutablePath, executableName[platform]));
-            fs.moveSync(path.join(BUILD_DIR_PATH, MANIFEST_NAME)
-                  , path.join(rootManifestPath, MANIFEST_NAME));
+            fs.moveSync(path.join(BUILD_DIR_PATH, manifestName)
+                  , path.join(rootManifestPath, manifestName));
 
-            // Build installer package
+            // Build component package
             spawnSync(
                 `pkgbuild --root ${rootPath} `
                        + `--identifier "tf.matt.fx_cast_bridge" `
                        + `--version "0.0.1" `
-                       + `${path.join(BUILD_DIR_PATH, installerName)}`
+                       + `${componentPath}`
+              , { shell: true });
+
+            // Distribution XML file
+            const distFilePath = path.join(__dirname, "../distribution.xml");
+
+            // Build installer package
+            spawnSync(
+                `productbuild --distribution ${distFilePath} `
+                           + `--package-path ${componentPath} `
+                           + `${installerPath}`
               , { shell: true });
 
             return installerName;

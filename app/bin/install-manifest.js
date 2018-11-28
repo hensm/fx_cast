@@ -1,69 +1,55 @@
-const fs = require('fs');
-const os = require('os');
-const path = require('path');
+const fs = require("fs-extra");
+const os = require("os");
+const path = require("path");
 
-const argv = require('minimist')(process.argv.slice(2));
-const mkdirpSync = require('mkdirp').sync;
+const { executableName
+      , executablePath
+      , manifestName
+      , manifestPath
+      , DIST_DIR_PATH } = require("./lib/paths");
 
-const MANIFEST_NAME = 'fx_cast_bridge.json';
-const MANIFEST_PATH = path.resolve(__dirname, '../../dist/app', MANIFEST_NAME);
+const argv = require("minimist")(process.argv.slice(2));
 
-const WIN_REGISTRY_KEY = 'fx_cast_bridge';
 
-let destination = argv.destination;
+const CURRENT_MANIFEST_PATH = path.join(DIST_DIR_PATH, manifestName);
+const WIN_REGISTRY_KEY = "fx_cast_bridge";
 
-switch (os.type()) {
-    case 'Darwin': {
-        if (!destination) {
-            const root = argv.root || process.env.HOME;
-            destination = path.resolve(
-                path.join(
-                    root
-                  , 'Library/Application Support/Mozilla/NativeMessagingHosts'
-                )
-            );
-        }
 
-        break;
-    }
+if (!fs.existsSync(CURRENT_MANIFEST_PATH)) {
+    console.error("No manifest in dist/app/ to install");
+    process.exit(1);
+}
 
-    case 'Linux': {
-        if (!destination) {
-            const root = argv.root || `${process.env.HOME}/.`;
-            destination = root.endsWith('/.')
-                ? `${root}mozilla/native-messaging-hosts/`
-                : path.join(root, 'mozilla/native-messaging-hosts/');
-        }
+const platform = os.platform();
+
+switch (platform) {
+    case "darwin":
+    case "linux": {
+        const destination = path.join(os.homedir(), manifestPath[platform]);
+
+        fs.ensureDirSync(destination);
+        fs.copyFileSync(CURRENT_MANIFEST_PATH
+              , path.join(destination, manifestName));
 
         break;
-    }
+    };
 
-    case 'Windows_NT': {
-        const regedit = require('regedit');
-        const destinationManifestPath = path.join(destination, MANIFEST_NAME)
-            || MANIFEST_PATH;
+    case "win32": {
+        const regedit = require("regedit");
 
         regedit.putValue({
-            'HKEY_CURRENT_USER\\SOFTWARE\\Mozilla\\NativeMessagingHosts': {
+            "HKEY_CURRENT_USER\\SOFTWARE\\Mozilla\\NativeMessagingHosts": {
                 [WIN_REGISTRY_KEY]: {
-                    value: destinationManifestPath
-                  , type: 'REG_DEFAULT'
+                    value: CURRENT_MANIFEST_PATH
+                  , type: "REG_DEFAULT"
                 }
             }
         });
 
         break;
-    }
+    };
 
     default:
-        console.error('Sorry, this installer does not yet support your OS');
+        console.error("Sorry, this installer does not yet support your OS");
         process.exit(1);
-}
-
-if (destination) {
-    mkdirpSync(destination);
-    fs.copyFileSync(
-        MANIFEST_PATH
-      , path.join(destination, MANIFEST_NAME)
-    );
 }

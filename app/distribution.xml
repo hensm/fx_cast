@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<installer-gui-script minSpecVersion="1">
+    <title>fx_cast Bridge</title>
+    <domains enable_anywhere="false" enable_currentUserHome="true" enable_localSystem="true" />
+    <pkg-ref id="tf.matt.fx_cast_bridge"/>
+    <options customize="never" require-scripts="false"/>
+    <choices-outline>
+        <line choice="default">
+            <line choice="tf.matt.fx_cast_bridge"/>
+        </line>
+    </choices-outline>
+    <choice id="default"/>
+    <choice id="tf.matt.fx_cast_bridge" visible="false">
+        <pkg-ref id="tf.matt.fx_cast_bridge"/>
+    </choice>
+    <pkg-ref id="tf.matt.fx_cast_bridge" version="0.0.1" onConclusion="none">fx_cast_bridge.pkg</pkg-ref>
+</installer-gui-script>
