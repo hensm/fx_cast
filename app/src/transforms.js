@@ -1,6 +1,6 @@
 "use strict";
 
-const { Transform } = require("stream");
+import { Transform } from "stream";
 
 
 /**

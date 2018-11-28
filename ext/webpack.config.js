@@ -6,7 +6,7 @@ const CopyWebpackPlugin = require("copy-webpack-plugin");
 
 
 const includePath = path.resolve(__dirname, "src");
-const outputPath  = path.resolve(__dirname, "../dist/ext/");
+const outputPath  = path.resolve(__dirname, "../dist/ext/unpacked");
 
 module.exports = (env) => ({
     entry: {
