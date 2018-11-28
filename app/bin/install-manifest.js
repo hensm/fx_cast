@@ -2,9 +2,7 @@ const fs = require("fs-extra");
 const os = require("os");
 const path = require("path");
 
-const { executableName
-      , executablePath
-      , manifestName
+const { manifestName
       , manifestPath
       , DIST_DIR_PATH } = require("./lib/paths");
 
@@ -16,15 +14,17 @@ const WIN_REGISTRY_KEY = "fx_cast_bridge";
 
 
 if (!fs.existsSync(CURRENT_MANIFEST_PATH) && !argv.remove) {
-    console.error("No manifest in dist/app/ to install");
+    console.error("No manifest in dist/app/ to install.");
     process.exit(1);
 }
+
 
 const platform = os.platform();
 
 switch (platform) {
     case "darwin":
     case "linux": {
+        // Manifest location within home directory
         const destination = path.join(os.homedir(), manifestPath[platform]);
 
         if (argv.remove) {
@@ -32,6 +32,7 @@ switch (platform) {
             break;
         }
 
+        // Install manifest
         fs.ensureDirSync(destination);
         fs.copyFileSync(CURRENT_MANIFEST_PATH
               , path.join(destination, manifestName));
@@ -59,7 +60,8 @@ switch (platform) {
         break;
     };
 
-    default:
+    default: {
         console.error("Sorry, this installer does not yet support your OS");
         process.exit(1);
+    }
 }
