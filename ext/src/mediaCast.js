@@ -122,7 +122,7 @@ async function onRequestSessionSuccess (session_) {
     session = session_;
 
     let mediaUrl = new URL(srcUrl);
-    const port = options.option_localMediaServerPort;
+    const port = options.localMediaServerPort;
 
     if (isLocalFile) {
         await new Promise((resolve, reject) => {
@@ -295,7 +295,7 @@ window.__onGCastApiAvailable = async function (loaded, errorInfo) {
 
     options = (await browser.storage.sync.get("options")).options;
 
-    if (isLocalFile && !options.option_localMediaEnabled) {
+    if (isLocalFile && !options.localMediaEnabled) {
         logMessage("Local media casting not enabled");
         return;
     }

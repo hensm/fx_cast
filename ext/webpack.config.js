@@ -56,6 +56,9 @@ module.exports = (env) => ({
         rules: [
             {
                 test: /\.jsx?$/
+              , resolve: {
+                    extensions: [ ".js", ".jsx" ]
+                }
               , include: `${includePath}`
               , use: {
                     loader: "babel-loader"

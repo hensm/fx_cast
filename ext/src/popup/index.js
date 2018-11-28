@@ -87,7 +87,9 @@ class App extends Component {
             <div>
                 <div className="media-select">
                     Cast
-                    <select value={this.state.selectedMedia} onChange={this.onSelectChange.bind(this)} className="media-select-dropdown">
+                    <select value={this.state.selectedMedia}
+                            onChange={this.onSelectChange.bind(this)}
+                            className="media-select-dropdown">
                         <option value="app" disabled={shareMedia}>this site's app</option>
                         <option value="tab" disabled={!shareMedia}>Tab</option>
                         <option value="screen" disabled={!shareMedia}>Screen</option>
@@ -152,12 +154,12 @@ class Receiver extends Component {
                         disabled={this.props.isLoading}>
                     { do {
                         if (this.state.isLoading) {
-                            _("popup_casting_button_label") +
+                            _("popupCastingButtonLabel") +
                                 (this.state.isLoading
                                     ? this.state.ellipsis
                                     : "" )
                         } else {
-                            _("popup_cast_button_label")
+                            _("popupCastButtonLabel")
                         }
                     }}
                 </button>

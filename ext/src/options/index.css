@@ -4,8 +4,8 @@
     grid-column-gap: 20px;
     grid-row-gap: 5px;
 }
-.category-name {}
-.category-description,
+.category__name {}
+.category__description,
 .category .category {
     color: graytext;
     grid-column: span 2;
@@ -15,7 +15,7 @@
     display: contents;
 }
 
-.option-label {
+.option__label {
     text-align: right;
     display: inline-block;
 }

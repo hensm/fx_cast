@@ -1,9 +1,10 @@
 "use strict";
 
 import React, { Component } from "react";
-import ReactDOM             from "react-dom";
+import ReactDOM from "react-dom";
 
-import defaultOptions       from "./defaultOptions";
+import defaultOptions from "./defaultOptions";
+import EditableList from "./EditableList";
 
 
 const _ = browser.i18n.getMessage;
@@ -11,266 +12,24 @@ const _ = browser.i18n.getMessage;
 
 const MATCH_PATTERN_REGEX = /^(?:(?:(\*|https?|ftp):\/\/((?:\*\.|[^\/\*])+)|(file):\/\/\/?(?:\*\.|[^\/\*])+)(\/.*)|<all_urls>)$/;
 
-class EditableListItem extends React.Component {
-    constructor (props) {
-        super(props);
-        this.state = {
-            editing: this.props.editing || false
-          , editValue: ""
-        };
+function getInputValue (input) {
+    switch (input.type) {
+        case "checkbox":
+            return input.checked;
+        case "number":
+            return parseFloat(input.value);
 
-        this.handleRemove = this.handleRemove.bind(this);
-        this.handleEditBegin = this.handleEditBegin.bind(this);
-        this.handleEditEnd = this.handleEditEnd.bind(this);
-        this.handleInputChange = this.handleInputChange.bind(this);
-        this.handleInputKeyPress = this.handleInputKeyPress.bind(this);
-    }
-
-    handleRemove () {
-        this.props.onRemove(this.props.text);
-    }
-
-    handleEditBegin () {
-        this.setState({
-            editing: true
-          , editValue: this.props.text
-        });
-    }
-
-    handleEditEnd (ev) {
-        if (this.props.editing
-                && !this.props.itemPattern.test(this.state.editValue)) {
-            ev.target.setCustomValidity(this.props.itemPatternError());
-        }
-
-        if (!ev.target.validity.valid) {
-            return;
-        }
-
-        this.props.onEdit(this.props.text, this.state.editValue);
-        this.setState({
-            editing: false
-          , editValue: ""
-        });
-    }
-
-    handleInputChange (ev) {
-        this.setState({
-            editValue: ev.target.value
-        });
-        
-        if (!this.props.itemPattern.test(ev.target.value)) {
-            ev.target.setCustomValidity(this.props.itemPatternError());        
-        } else {
-            ev.target.setCustomValidity("");
-        }
-    }
-
-    handleInputKeyPress (ev) {
-        if (ev.key === "Enter") {
-            this.handleEditEnd({ target: ev.target });
-        }
-    }
-
-    render () {
-        return (
-            <li className="editable-list__item">
-                <div className="editable-list__title"
-                     onDoubleClick={ this.handleEditBegin }>
-                    { this.state.editing
-                        ? <input className="editable-list__edit-field"
-                                 type="text"
-                                 autoFocus
-                                 value={ this.state.editValue }
-                                 onBlur={ this.handleEditEnd }
-                                 onChange={ this.handleInputChange }
-                                 onKeyPress={ this.handleInputKeyPress }/>
-                        : this.props.text }
-                </div>
-                <button onClick={ this.handleEditBegin }>
-                    { _("options_option_uaWhitelistItemEdit") }
-                </button>
-                <button onClick={ this.handleRemove }>
-                    { _("options_option_uaWhitelistItemRemove") }
-                </button>
-            </li>
-        );
+        default:
+            return input.value;
     }
 }
 
-class EditableList extends React.Component {
-    constructor (props) {
-        super(props);
-        this.state = {
-            items: new Set(this.props.data)
-          , addingNewItem: false
-          , rawView: false
-          , rawViewValue: ""
-        };
-
-        this.handleItemRemove = this.handleItemRemove.bind(this);
-        this.handleItemEdit = this.handleItemEdit.bind(this);
-        this.handleSwitchView = this.handleSwitchView.bind(this);
-        this.handleSaveRaw = this.handleSaveRaw.bind(this);
-        this.handleRawViewTextAreaChange = this.handleRawViewTextAreaChange.bind(this);
-        this.handleAddItem = this.handleAddItem.bind(this);
-        this.handleNewItemRemove = this.handleNewItemRemove.bind(this);
-        this.handleNewItemEdit = this.handleNewItemEdit.bind(this);
-    }
-
-    handleItemRemove (item) {
-        this.setState(currentState => {
-            const newItems = new Set(currentState.items);
-            newItems.delete(item);
-            return {
-                items: newItems
-            };
-        }, () => {
-            this.props.onListChange(Array.from(this.state.items));
-        });
-    }
-
-    handleItemEdit (item, newValue) {
-        this.setState(currentState => ({
-            items: new Set([...currentState.items]
-                    .map(item_ => item_ === item ? newValue : item_))
-        }), () => {
-            this.props.onListChange(Array.from(this.state.items));
-        });
-    }
-
-    handleSwitchView () {
-        this.setState(currentState => {
-            if (currentState.rawView) {
-                return {
-                    rawView: false
-                  , rawViewValue: ""
-                };
-            }
-            
-            return {
-                rawView: true
-              , rawViewValue: [...currentState.items.values()].join("\n")
-            };
-        });
-    }
-
-    handleSaveRaw () {
-        this.setState(currentState => {
-            console.log(currentState.rawViewValue);
-            const newItems = currentState.rawViewValue.split("\n")
-                .filter(item => item !== "");
-
-            if ("itemPattern" in this.props) {
-                for (const item of newItems) {
-                    if (!this.props.itemPattern.test(item)) {
-                        this.rawViewTextArea.setCustomValidity(
-                                this.props.itemPatternError(item));
-                        return;
-                    }
-                }
-
-                this.rawViewTextArea.setCustomValidity("");           
-            }
-
-            return {
-                items: new Set(newItems)
-            };
-        }, () => {
-            this.props.onListChange(Array.from(this.state.items));
-        });
-    }
-
-    handleRawViewTextAreaChange (ev) {
-        if (this.rawViewTextArea.scrollHeight > this.rawViewTextArea.clientHeight) {
-            this.rawViewTextArea.style.height = `${this.rawViewTextArea.scrollHeight}px`;
-        }
-
-        this.setState({
-            rawViewValue: ev.target.value
-        });
-    }
-
-    handleAddItem () {
-        this.setState({
-            addingNewItem: true
-        });
-    }
-
-    handleNewItemRemove () {
-        this.setState({
-            addingNewItem: false
-        });
-    }
-
-    handleNewItemEdit (item, newItem) {
-        this.setState(currentState => ({
-            items: [ ...currentState.items, newItem ]
-          , addingNewItem: false
-        }), () => {
-            this.props.onListChange(Array.from(this.state.items));
-        });
-    }
-
-    render () {
-        const items = Array.from(this.state.items.values());
-
-        return (
-            <div className="editable-list">
-                <button className="editable-list__view-button"
-                        onClick={ this.handleSwitchView }>
-                    { this.state.rawView
-                        ? _("options_option_uaWhitelistBasicView")
-                        : _("options_option_uaWhitelistRawView") }
-                </button>
-                { this.state.rawView &&
-                    <button className="editable-list__save-raw-button"
-                            onClick={ this.handleSaveRaw }>
-                        { _("options_option_uaWhitelistSaveRaw") }
-                    </button> }
-                <hr />
-                {
-                    this.state.rawView
-                        ? ( <textarea className="editable-list__raw-view"
-                                      rows={ items.length}
-                                      value={ this.state.rawViewValue}
-                                      onChange={ this.handleRawViewTextAreaChange }
-                                      ref={ el => { this.rawViewTextArea = el }}>
-                            </textarea> )
-                        : ( <ul className="editable-list__items">
-                                { items.map((item, i) => 
-                                    <EditableListItem text={ item }
-                                                      itemPattern={ this.props.itemPattern }
-                                                      itemPatternError={ this.props.itemPatternError }
-                                                      onRemove={ this.handleItemRemove }
-                                                      onEdit={ this.handleItemEdit }
-                                                      key={ i } /> )}
-                                { this.state.addingNewItem &&
-                                    <EditableListItem text=""
-                                                      itemPattern={ this.props.itemPattern }
-                                                      itemPatternError={ this.props.itemPatternError }
-                                                      onRemove={ this.handleNewItemRemove }
-                                                      onEdit={ this.handleNewItemEdit }
-                                                      editing={ true } /> }
-                                <div className="editable-list__item editable-list__item-actions">
-                                    <button className="editable-list__add-button"
-                                            onClick={ this.handleAddItem }>
-                                        { _("options_option_uaWhitelistAddItem") }
-                                    </button>
-                                </div>
-                            </ul> )
-                }
-            </div>
-        );
-    }
-}
-
-class OptionsApp extends Component {
+class App extends Component {
     constructor (props) {
         super(props);
 
         this.state = {
-            ...props.options
+            options: props.options
           , isFormValid: true
         };
 
@@ -278,8 +37,10 @@ class OptionsApp extends Component {
         this.handleFormSubmit = this.handleFormSubmit.bind(this);
         this.handleFormChange = this.handleFormChange.bind(this);
         this.handleInputChange = this.handleInputChange.bind(this);
-        this.handleListChange = this.handleListChange.bind(this);
-        this.getItemPatternError = this.getItemPatternError.bind(this);
+        this.handleWhitelistChange = this.handleWhitelistChange.bind(this);
+
+        this.getWhitelistItemPatternError
+                = this.getWhitelistItemPatternError.bind(this);
     }
 
     /**
@@ -287,21 +48,13 @@ class OptionsApp extends Component {
      */
     setStorage () {
         return browser.storage.sync.set({
-            options: {
-                option_mediaEnabled: this.state.option_mediaEnabled
-              , option_localMediaEnabled: this.state.option_localMediaEnabled
-              , option_localMediaServerPort: this.state.option_localMediaServerPort
-              , option_uaWhitelistEnabled: this.state.option_uaWhitelistEnabled
-              , option_uaWhitelist: this.state.option_uaWhitelist
-              , option_mirroringEnabled: this.state.option_mirroringEnabled
-              , option_mirroringAppId: this.state.option_mirroringAppId
-            }
+            options: this.state.options
         });
     }
 
     handleReset () {
         this.setState({
-            ...defaultOptions
+            options: defaultOptions
         });
 
         // TODO: Propagate state properly
@@ -314,7 +67,8 @@ class OptionsApp extends Component {
         this.form.reportValidity();
 
         try {
-            const { options: oldOptions } = await browser.storage.sync.get("options");
+            const { options: oldOptions }
+                    = await browser.storage.sync.get("options");
             await this.setStorage();
             const { options } = await browser.storage.sync.get("options");
 
@@ -341,31 +95,24 @@ class OptionsApp extends Component {
         });
     }
 
-
     handleInputChange (ev) {
-        const val = do {
-            if (ev.target.type === "checkbox") {
-                ev.target.checked;
-            } else if (ev.target.type === "number") {
-                parseInt(ev.target.value);
-            } else {
-                ev.target.value;
-            }
-        };
+        const { target } = ev;
 
-        this.setState({
-            [ ev.target.name ]: val
+        this.setState(({ options }) => {
+            options[target.name] = getInputValue(target);
+            return { options };
         });
     }
 
-    handleListChange (data) {
-        this.setState({
-            option_uaWhitelist: data
+    handleWhitelistChange (whitelist) {
+        this.setState(({ options }) => {
+            options.userAgentWhitelist = whitelist;
+            return { options };
         });
     }
 
-    getItemPatternError (info) {
-        return _("options_option_uaWhitelistInvalidMatchPattern", info);
+    getWhitelistItemPatternError (info) {
+        return _("optionsUserAgentWhitelistInvalidMatchPattern", info);
     }
 
     render () {
@@ -374,122 +121,122 @@ class OptionsApp extends Component {
                     onSubmit={ this.handleFormSubmit }
                     onChange={ this.handleFormChange }>
                 <fieldset className="category">
-                    <legend className="category-name">
-                        { _("options_category_media") }
+                    <legend className="category__name">
+                        { _("optionsMediaCategoryName") }
                     </legend>
-                    <p className="category-description">
-                        { _("options_category_media_description") }
+                    <p className="category__description">
+                        { _("optionsMediaCategoryDescription") }
                     </p>
 
                     <label className="option">
-                        <div className="option-label">
-                            { _("options_option_mediaEnabled") }
+                        <div className="option__label">
+                            { _("optionsMediaEnabled") }
                         </div>
-                        <input name="option_mediaEnabled"
+                        <input name="mediaEnabled"
                                type="checkbox"
-                               checked={ this.state.option_mediaEnabled }
+                               checked={ this.state.options.mediaEnabled }
                                onChange={ this.handleInputChange } />
                     </label>
 
                     <fieldset className="category">
-                        <legend className="category-name">
-                            { _("options_category_localMedia") }
+                        <legend className="category__name">
+                            { _("optionsLocalMediaCategoryName") }
                         </legend>
-                        <p className="category-description">
-                            { _("options_category_localMedia_description") }
+                        <p className="category__description">
+                            { _("optionsLocalMediaCategoryDescription") }
                         </p>
 
                         <label className="option">
-                            <div className="option-label">
-                                { _("options_option_localMediaEnabled") }
+                            <div className="option__label">
+                                { _("optionsLocalMediaEnabled") }
                             </div>
-                            <input name="option_localMediaEnabled"
+                            <input name="localMediaEnabled"
                                    type="checkbox"
-                                   checked={ this.state.option_localMediaEnabled }
+                                   checked={ this.state.options.localMediaEnabled }
                                    onChange={ this.handleInputChange } />
                         </label>
 
                         <label className="option">
-                            <div className="option-label">
-                                { _("options_option_localMediaServerPort") }
+                            <div className="option__label">
+                                { _("optionsLocalMediaServerPort") }
                             </div>
-                            <input name="option_localMediaServerPort"
+                            <input name="localMediaServerPort"
                                    type="number"
                                    required
                                    min="1025"
                                    max="65535"
-                                   value={ this.state.option_localMediaServerPort }
+                                   value={ this.state.options.localMediaServerPort }
                                    onChange={ this.handleInputChange } />
                         </label>
                     </fieldset>
                 </fieldset>
 
                 <fieldset className="category">
-                    <legend className="category-name">
-                        { _("options_category_mirroring") }
+                    <legend className="category__name">
+                        { _("optionsMirroringCategoryName") }
                     </legend>
-                    <p className="category-description">
-                        { _("options_category_mirroring_description") }
+                    <p className="category__description">
+                        { _("optionsMirroringCategoryDescription") }
                     </p>
 
                     <label className="option">
-                        <div className="option-label">
-                            { _("options_option_mirroringEnabled") }
+                        <div className="option__label">
+                            { _("optionsMirroringEnabled") }
                         </div>
-                        <input name="option_mirroringEnabled"
+                        <input name="mirroringEnabled"
                                type="checkbox"
-                               checked={ this.state.option_mirroringEnabled }
+                               checked={ this.state.options.mirroringEnabled }
                                onChange={ this.handleInputChange } />
                     </label>
 
                     <label className="option">
-                        <div className="option-label">
-                            { _("options_option_mirroringAppId") }
+                        <div className="option__label">
+                            { _("optionsMirroringAppId") }
                         </div>
-                        <input name="option_mirroringAppId"
+                        <input name="mirroringAppId"
                                type="text"
                                required
-                               value={ this.state.option_mirroringAppId }
+                               value={ this.state.options.mirroringAppId }
                                onChange={ this.handleInputChange } />
                     </label>
                 </fieldset>
 
                 <fieldset className="category">
-                    <legend className="category-name">
-                        { _("options_category_uaWhitelist") }
+                    <legend className="category__name">
+                        { _("optionsUserAgentWhitelistCategoryName") }
                     </legend>
-                    <p className="category-description">
-                        { _("options_category_uaWhitelist_description") }
+                    <p className="category__description">
+                        { _("optionsUserAgentWhitelistCategoryDescription") }
                     </p>
 
                     <label className="option">
-                        <div className="option-label">
-                            { _("options_option_uaWhitelistEnabled") }
+                        <div className="option__label">
+                            { _("optionsUserAgentWhitelistEnabled") }
                         </div>
-                        <input name="option_uaWhitelistEnabled"
+                        <input name="userAgentWhitelistEnabled"
                                type="checkbox"
-                               checked={ this.state.option_uaWhitelistEnabled }
+                               checked={ this.state.options.userAgentWhitelistEnabled }
                                onChange={ this.handleInputChange } />
                     </label>
 
-                    <label className="option">
-                        <div className="option-label">
-                            { _("options_option_uaWhitelist") }
+                    <div className="option">
+                        <div className="option__label">
+                            { _("optionsUserAgentWhitelistContent") }
                         </div>
-                        <EditableList data={ this.state.option_uaWhitelist }
-                                      onListChange={ this.handleListChange }
+                        <EditableList data={ this.state.options.userAgentWhitelist }
+                                      onChange={ this.handleWhitelistChange }
                                       itemPattern={ MATCH_PATTERN_REGEX }
-                                      itemPatternError={ this.getItemPatternError }/>
-                    </label>
+                                      itemPatternError={ this.getWhitelistItemPatternError }/>
+                    </div>
                 </fieldset>
 
                 <div id="buttons">
                     <button onClick={ this.handleReset }>
-                        { _("options_reset") }
+                        { _("optionsReset") }
                     </button>
                     <button type="submit"
                             disabled={ !this.state.isFormValid }>
-                        { _("options_submit") }
+                        { _("optionsSubmit") }
                     </button>
                 </div>
             </form>
@@ -500,6 +247,6 @@ class OptionsApp extends Component {
 
 browser.storage.sync.get("options").then(({options}) => {
     ReactDOM.render(
-        <OptionsApp options={options} />
+        <App options={options} />
       , document.querySelector("#root"));
 });

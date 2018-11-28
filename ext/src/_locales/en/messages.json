@@ -1,97 +1,97 @@
 {
-    "extension_name": {
+    "extensionName": {
         "message": "EXTENSION_NAME"
     }
-  , "extension_description": {
+  , "extensionDescription": {
         "message": ""
     }
 
-  , "popup_cast_button_label": {
+  , "popupCastButtonLabel": {
         "message": "Cast"
     }
-  , "popup_casting_button_label": {
+  , "popupCastingButtonLabel": {
         "message": "Casting"
     }
 
-  , "context_media_cast": {
+  , "contextCast": {
         "message": "Cast..."
     }
 
 
-  , "options_category_media": {
+  , "optionsMediaCategoryName": {
         "message": "Media casting"
     }
-  , "options_category_media_description": {
+  , "optionsMediaCategoryDescription": {
         "message": "HTML5 video/audio media casting."
     }
-  , "options_option_mediaEnabled": {
+  , "optionsMediaEnabled": {
         "message": "Enabled"
     }
 
-  , "options_category_localMedia": {
+  , "optionsLocalMediaCategoryName": {
         "message": "Local media casting"
     }
-  , "options_category_localMedia_description": {
+  , "optionsLocalMediaCategoryDescription": {
         "message": "HTTP server started by the bridge app to stream local media files to the cast receiver."
     }
-  , "options_option_localMediaEnabled": {
+  , "optionsLocalMediaEnabled": {
         "message": "Enabled"
     }
-  , "options_option_localMediaServerPort": {
+  , "optionsLocalMediaServerPort": {
         "message": "HTTP server port"
     }
 
-  , "options_category_uaWhitelist": {
+  , "optionsUserAgentWhitelistCategoryName": {
         "message": "User agent whitelist"
     }
-  , "options_category_uaWhitelist_description": {
+  , "optionsUserAgentWhitelistCategoryDescription": {
         "message": "Sites for which to replace the user agent with a Chrome version for compatibility. Must be valid match patterns."
     }
-  , "options_option_uaWhitelistEnabled": {
+  , "optionsUserAgentWhitelistEnabled": {
         "message": "Enabled"
     }
-  , "options_option_uaWhitelist": {
+  , "optionsUserAgentWhitelistContent": {
         "message": "Match patterns (newline-separated)"
     }
-  , "options_option_uaWhitelistBasicView": {
+  , "optionsUserAgentWhitelistBasicView": {
         "message": "Basic View"
     }
-  , "options_option_uaWhitelistRawView": {
+  , "optionsUserAgentWhitelistRawView": {
         "message": "Raw View"
     }
-  , "options_option_uaWhitelistSaveRaw": {
+  , "optionsUserAgentWhitelistSaveRaw": {
         "message": "Save Raw"
     }
-  , "options_option_uaWhitelistAddItem": {
+  , "optionsUserAgentWhitelistAddItem": {
         "message": "Add Item"
     }
-  , "options_option_uaWhitelistItemEdit": {
+  , "optionsUserAgentWhitelistEditItem": {
         "message": "Edit"
     }
-  , "options_option_uaWhitelistItemRemove": {
+  , "optionsUserAgentWhitelistRemoveItem": {
         "message": "Remove"
     }
-  , "options_option_uaWhitelistInvalidMatchPattern": {
+  , "optionsUserAgentWhitelistInvalidMatchPattern": {
         "message": "Invalid match pattern $1"
     }
 
-  , "options_category_mirroring": {
+  , "optionsMirroringCategoryName": {
         "message": "Screen mirroring"
     }
-  , "options_category_mirroring_description": {
+  , "optionsMirroringCategoryDescription": {
         "message": "Screen/Tab mirroring to a Chromecast receiver app."
     }
-  , "options_option_mirroringEnabled": {
+  , "optionsMirroringEnabled": {
         "message": "Enabled"
     }
-  , "options_option_mirroringAppId": {
+  , "optionsMirroringAppId": {
         "message": "Receiver app ID"
     }
 
-  , "options_reset": {
+  , "optionsReset": {
         "message": "Reset to defaults"
     }
-  , "options_submit": {
+  , "optionsSubmit": {
         "message": "Submit"
     }
 }

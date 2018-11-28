@@ -10,20 +10,23 @@ browser.runtime.onInstalled.addListener(async details => {
     switch (details.reason) {
 
         // Set default options
-        case "install":
+        case "install": {
             await browser.storage.sync.set({
                 options: defaultOptions
             });
             break;
+        };
 
         // Set newly added options
-        case "update":
-            const { options } = await browser.storage.sync.get("options");
+        case "update": {
+            const { options: existingOptions }
+                    = await browser.storage.sync.get("options");
+
             const newOptions = {};
 
             // Find options not already in storage
             for (const [ key, val ] of Object.entries(defaultOptions)) {
-                if (!options.hasOwnProperty(key)) {
+                if (!existingOptions.hasOwnProperty(key)) {
                     newOptions[key] = val;
                 }
             }
@@ -31,12 +34,13 @@ browser.runtime.onInstalled.addListener(async details => {
             // Update storage with default values of new options
             await browser.storage.sync.set({
                 options: {
-                    ...options
+                    ...existingOptions
                   , ...newOptions
                 }
             });
 
             break;
+        };
     }
 
     // Call after default options have been set
@@ -64,7 +68,7 @@ async function createMenus () {
      */
     if (!options || mirrorCastMenuId || mediaCastMenuId) return;
 
-    if (options.option_localMediaEnabled) {
+    if (options.localMediaEnabled) {
         mediaCastTargetUrlPatterns.add(LOCAL_MEDIA_URL_PATTERN);
     }
 
@@ -73,16 +77,16 @@ async function createMenus () {
         contexts: [ "audio", "video" ]
       , id: "contextCastMedia"
       , targetUrlPatterns: Array.from(mediaCastTargetUrlPatterns)
-      , title: _("context_media_cast")
-      , visible: options.option_mediaEnabled
+      , title: _("contextCast")
+      , visible: options.mediaEnabled
     });
 
     // Screen/Tab mirroring "Cast..." context menu item
     mirrorCastMenuId = await browser.menus.create({
         contexts: [ "browser_action", "page" ]
       , id: "contextCast"
-      , title: _("context_media_cast")
-      , visible: options.option_mirroringEnabled
+      , title: _("contextCast")
+      , visible: options.mirroringEnabled
     });
 }
 
@@ -190,8 +194,8 @@ async function onOptionsUpdated (alteredOptions) {
         onBeforeSendHeaders () {
             browser.webRequest.onBeforeSendHeaders.addListener(
                     onBeforeSendHeaders
-                  , { urls: options.option_uaWhitelistEnabled
-                        ? options.option_uaWhitelist
+                  , { urls: options.userAgentWhitelistEnabled
+                        ? options.userAgentWhitelist
                         : [] }
                   , [  "blocking", "requestHeaders" ]);
         }
@@ -203,26 +207,26 @@ async function onOptionsUpdated (alteredOptions) {
             func();
         }
     } else {
-        if (alteredOptions.includes("option_uaWhitelist")
-                || alteredOptions.includes("option_uaWhitelistEnabled")) {
+        if (alteredOptions.includes("userAgentWhitelist")
+                || alteredOptions.includes("userAgentWhitelistEnabled")) {
             browser.webRequest.onBeforeSendHeaders.removeListener(onBeforeSendHeaders);
             registerFunctions.onBeforeSendHeaders();
         }
 
-        if (alteredOptions.includes("option_mirroringEnabled")) {
+        if (alteredOptions.includes("mirroringEnabled")) {
             browser.menus.update(mirrorCastMenuId, {
-                visible: options.option_mirroringEnabled
+                visible: options.mirroringEnabled
             });
         }
 
-        if (alteredOptions.includes("option_mediaEnabled")) {
+        if (alteredOptions.includes("mediaEnabled")) {
             browser.menus.update(mediaCastMenuId, {
-                visible: options.option_mediaEnabled
+                visible: options.mediaEnabled
             })
         }
 
-        if (alteredOptions.includes("option_localMediaEnabled")) {
-            if (options.option_localMediaEnabled) {
+        if (alteredOptions.includes("localMediaEnabled")) {
+            if (options.localMediaEnabled) {
                 mediaCastTargetUrlPatterns.add(LOCAL_MEDIA_URL_PATTERN);
             } else {
                 mediaCastTargetUrlPatterns.delete(LOCAL_MEDIA_URL_PATTERN);
@@ -276,7 +280,7 @@ browser.menus.onClicked.addListener(async (info, tab) => {
 
             await browser.tabs.executeScript(tab.id, {
                 code: `let selectedMedia = "${info.pageUrl ? "tab" : "screen"}";
-                       let FX_CAST_RECEIVER_APP_ID = "${options.option_mirroringAppId}";`
+                       let FX_CAST_RECEIVER_APP_ID = "${options.mirroringEnabled}";`
               , frameId
             });
 

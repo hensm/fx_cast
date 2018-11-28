@@ -1,6 +1,6 @@
 {
-    "name": "__MSG_extension_name__"
-  , "description": "__MSG_extension_description__"
+    "name": "__MSG_extensionName__"
+  , "description": "__MSG_extensionDescription__"
   , "version": "EXTENSION_VERSION"
 
   , "applications": {
