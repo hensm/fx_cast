@@ -17,6 +17,9 @@ const argv = require("minimist")(process.argv.slice(2));
 
 const BUILD_DIR_PATH = path.join(__dirname, "../build");
 
+// Clean
+fs.removeSync(DIST_DIR_PATH);
+
 // Make directories
 fs.ensureDirSync(BUILD_DIR_PATH);
 fs.ensureDirSync(DIST_DIR_PATH, { recursive: true });
@@ -84,7 +87,7 @@ async function build () {
     }
 
     // Remove build directory
-    fs.removeSync(BUILD_DIR_PATH); 
+    fs.removeSync(BUILD_DIR_PATH);
 }
 
 async function buildInstaller (platform) {
@@ -126,7 +129,7 @@ async function buildInstaller (platform) {
             // Build installer package
             spawnSync(
                 `productbuild --distribution ${distFilePath} `
-                           + `--package-path ${componentPath} `
+                           + `--package-path ${BUILD_DIR_PATH} `
                            + `${installerPath}`
               , { shell: true });
 

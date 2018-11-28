@@ -13,5 +13,5 @@
     <choice id="tf.matt.fx_cast_bridge" visible="false">
         <pkg-ref id="tf.matt.fx_cast_bridge"/>
     </choice>
-    <pkg-ref id="tf.matt.fx_cast_bridge" version="0.0.1" onConclusion="none">fx_cast_bridge.pkg</pkg-ref>
+    <pkg-ref id="tf.matt.fx_cast_bridge" version="0.0.1" onConclusion="none">fx_cast_bridge_default.pkg</pkg-ref>
 </installer-gui-script>

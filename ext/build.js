@@ -18,6 +18,9 @@ if (argv.package) {
 const { mirroringAppId = "19A6F4AE"
       , mode = "development" } = argv;
 
+// Clean
+fs.removeSync(path.join(__dirname, "../dist/ext/"));
+
 const child = spawn(
     `webpack --env.extensionName=${extensionName} `
           + `--env.extensionId=${extensionId} `
