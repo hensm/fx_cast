@@ -1,0 +1,10 @@
+#!/bin/sh
+
+if [ "$2" != "/" ]
+then
+	manifestPath=$2"/Library/Application Support/Mozilla/NativeMessagingHosts/fx_cast_bridge.json"
+	sed -i.bak 's,"path": "/Library,"path": "'$2'/Library,g' "$manifestPath"
+	rm  "$manifestPath.bak"
+fi
+
+exit 0

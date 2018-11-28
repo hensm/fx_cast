@@ -98,6 +98,8 @@ async function buildInstaller (platform) {
             const installerPath = path.join(BUILD_DIR_PATH, installerName);
             const componentPath = path.join(BUILD_DIR_PATH, componentName);
 
+            const packagingDir = path.join(__dirname, "../packaging/macos/");
+
             // Create pkgbuild root
             const rootPath = path.join(BUILD_DIR_PATH, "root");
             const rootExecutablePath = path.join(rootPath
@@ -120,11 +122,12 @@ async function buildInstaller (platform) {
                 `pkgbuild --root ${rootPath} `
                        + `--identifier "tf.matt.fx_cast_bridge" `
                        + `--version "0.0.1" `
+                       + `--scripts ${path.join(packagingDir, "scripts")} `
                        + `${componentPath}`
               , { shell: true });
 
             // Distribution XML file
-            const distFilePath = path.join(__dirname, "../distribution.xml");
+            const distFilePath = path.join(packagingDir, "distribution.xml");
 
             // Build installer package
             spawnSync(
