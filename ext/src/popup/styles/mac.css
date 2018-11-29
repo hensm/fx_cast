@@ -1,0 +1,21 @@
+body {
+    background: rgb(236, 236, 236);
+    font: menu;
+}
+
+button,
+select {
+    font: inherit;
+}
+
+button:not([disabled]):hover:active {
+    color: -moz-mac-buttonactivetext;
+}
+
+.receiver-address {
+    font: message-box;
+}
+
+.receiver-connect {
+    height: 22px;
+}

@@ -5,6 +5,18 @@ import ReactDOM             from "react-dom";
 
 const _ = browser.i18n.getMessage;
 
+// macOS styles
+browser.runtime.getPlatformInfo()
+    .then(platformInfo => {
+        if (platformInfo.os === "mac") {
+            const link = document.createElement("link");
+            link.rel = "stylesheet";
+            link.href = "styles/mac.css";
+            document.head.appendChild(link);
+        }
+    });
+
+
 let winWidth = 350;
 let winHeight = 200;
 
@@ -97,11 +109,12 @@ class App extends Component {
                     to:
                 </div>
                 <ul className="receivers">
-                    { this.state.receivers.map(receiver => {
+                    { this.state.receivers.map((receiver, i) => {
                         return (
                            <Receiver receiver={receiver}
                                      onCast={this.onCast.bind(this)}
-                                     isLoading={this.state.isLoading} />
+                                     isLoading={this.state.isLoading}
+                                     key={i}/>
                         );
                     })}
                 </ul>
