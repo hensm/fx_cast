@@ -17,9 +17,9 @@ exports.executablePath = {
 exports.manifestName = "fx_cast_bridge.json";
 
 exports.manifestPath = {
-    darwin: "/Library/Application Support/Mozilla/NativeMessagingHosts/"
-  , linux: ".mozilla/native-messaging-hosts/"
-  , win32: "C:\\Program Files\\fx_cast\\"
+    win32: "C:\\Program Files\\fx_cast\\"
+  , darwin: "/Library/Application Support/Mozilla/NativeMessagingHosts/"
+  , linux: "/usr/lib/mozilla/native-messaging-hosts/"
 };
 
 exports.pkgPlatform = {

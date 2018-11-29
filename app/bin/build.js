@@ -16,10 +16,12 @@ const { executableName
 
 const argv = minimist(process.argv.slice(2), {
     boolean: [ "package" ]
-  , string: [ "platform" ]
+  , string: [ "platform", "packageType" ]
   , default: {
         platform: os.platform()
       , package: false
+        // Linux package type (deb/rpm)
+      , packageType: "deb"
     }
 });
 
@@ -27,6 +29,7 @@ const BUILD_PATH = path.join(__dirname, "../build");
 
 
 // Clean
+fs.removeSync(BUILD_PATH);
 fs.removeSync(DIST_PATH);
 
 // Make directories
@@ -77,7 +80,7 @@ async function build () {
     ]);
 
     if (argv.package) {
-        const installerName = await buildInstaller(argv.platform);
+        const installerName = await package(argv.platform);
 
         // Move installer to dist
         fs.moveSync(path.join(BUILD_PATH, installerName)
@@ -97,63 +100,111 @@ async function build () {
     fs.removeSync(BUILD_PATH);
 }
 
-async function buildInstaller (platform) {
+
+function package (platform) {
     switch (platform) {
-        case "darwin": {
-            const installerName = "fx_cast_bridge.pkg";
-            const componentName = "fx_cast_bridge_default.pkg";
-            const installerPath = path.join(BUILD_PATH, installerName);
-            const componentPath = path.join(BUILD_PATH, componentName);
+        case "darwin":
+            return packageDarwin();
 
-            const packagingDir = path.join(__dirname, "../packaging/macos/");
-
-            // Create pkgbuild root
-            const rootPath = path.join(BUILD_PATH, "root");
-            const rootExecutablePath = path.join(rootPath
-                  , executablePath[platform]);
-            const rootManifestPath = path.join(rootPath
-                  , manifestPath[platform]);
-
-            // Create install locations
-            fs.ensureDirSync(rootExecutablePath, { recursive: true });
-            fs.ensureDirSync(rootManifestPath, { recursive: true });
-
-            // Move files to root
-            fs.moveSync(path.join(BUILD_PATH, executableName[platform])
-                  , path.join(rootExecutablePath, executableName[platform]));
-            fs.moveSync(path.join(BUILD_PATH, manifestName)
-                  , path.join(rootManifestPath, manifestName));
-
-            // Build component package
-            spawnSync(
-                `pkgbuild --root ${rootPath} `
-                       + `--identifier "tf.matt.fx_cast_bridge" `
-                       + `--version "0.0.1" `
-                       + `--scripts ${path.join(packagingDir, "scripts")} `
-                       + `${componentPath}`
-              , { shell: true });
-
-            // Distribution XML file
-            const distFilePath = path.join(packagingDir, "distribution.xml");
-
-            // Build installer package
-            spawnSync(
-                `productbuild --distribution ${distFilePath} `
-                           + `--package-path ${BUILD_PATH} `
-                           + `${installerPath}`
-              , { shell: true });
-
-            return installerName;
-        };
+        case "linux":
+            switch (argv.packageType) {
+                case "deb":
+                    return packageLinuxDeb();
+                case "rpm":
+                    return packageLinuxRpm();
+            }
 
         case "win32":
-        case "linux":
-            // TODO: installers
+            return packageWin32();
 
         default:
             console.log("Cannot build installer package for this platform");
     }
 }
+
+function packageDarwin () {
+    const installerName = "fx_cast_bridge.pkg";
+    const componentName = "fx_cast_bridge_component.pkg";
+
+    const packagingDir = path.join(__dirname, "../packaging/mac/");
+
+    // Create pkgbuild root
+    const rootPath = path.join(BUILD_PATH, "root");
+    const rootExecutablePath = path.join(rootPath
+          , executablePath["darwin"]);
+    const rootManifestPath = path.join(rootPath
+          , manifestPath["darwin"]);
+
+    // Create install locations
+    fs.ensureDirSync(rootExecutablePath, { recursive: true });
+    fs.ensureDirSync(rootManifestPath, { recursive: true });
+
+    // Move files to root
+    fs.moveSync(path.join(BUILD_PATH, executableName["darwin"])
+          , path.join(rootExecutablePath, executableName["darwin"]));
+    fs.moveSync(path.join(BUILD_PATH, manifestName)
+          , path.join(rootManifestPath, manifestName));
+
+    // Build component package
+    spawnSync(
+        `pkgbuild --root ${rootPath} `
+               + `--identifier "tf.matt.fx_cast_bridge" `
+               + `--version "0.0.1" `
+               + `--scripts ${path.join(packagingDir, "scripts")} `
+               + `${path.join(BUILD_PATH, componentName)}`
+      , { shell: true });
+
+    // Distribution XML file
+    const distFilePath = path.join(packagingDir, "distribution.xml");
+
+    // Build installer package
+    spawnSync(
+        `productbuild --distribution ${distFilePath} `
+                   + `--package-path ${BUILD_PATH} `
+                   + `${path.join(BUILD_PATH, installerName)}`
+      , { shell: true });
+
+    return installerName;
+
+}
+
+function packageLinuxDeb () {
+    const installerName = "fx_cast_bridge.deb";
+
+    const packagingDir = path.join(__dirname, "../packaging/linux/deb");
+
+    // Create root
+    const rootPath = path.join(BUILD_PATH, "root");
+    const rootExecutablePath = path.join(rootPath
+          , executablePath["linux"]);
+    const rootManifestPath = path.join(rootPath
+          , manifestPath["linux"]);
+
+    fs.ensureDirSync(rootExecutablePath, { recursive: true });
+    fs.ensureDirSync(rootManifestPath, { recursive: true });
+
+    // Move files to root
+    fs.moveSync(path.join(BUILD_PATH, executableName["linux"])
+          , path.join(rootExecutablePath, executableName["linux"]));
+    fs.moveSync(path.join(BUILD_PATH, manifestName)
+          , path.join(rootManifestPath, manifestName));
+
+    // Copy package info to root
+    fs.copySync(path.join(packagingDir, "DEBIAN")
+          , path.join(rootPath, "DEBIAN"));
+
+    // Build .deb package
+    spawnSync(
+        `dpkg-deb --build ${rootPath} `
+                       + `${path.join(BUILD_PATH, installerName)}`
+      , {  shell: true});
+
+    return installerName;
+}
+
+function packageLinuxRpm () {} 
+function packageWin32 () {}
+
 
 build().catch(e => {
     console.log("Build failed", e);
