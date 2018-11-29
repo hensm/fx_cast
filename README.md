@@ -28,6 +28,7 @@ Only tested on Linux and macOS. mDNS library issue to be fixed. `mdns` only work
 
 ````sh
 git clone https://github.com/hensm/fx_cast.git
+cd fx_cast
 npm install
 npm run build
 npm run install-manifest
@@ -51,7 +52,7 @@ npm run start --prefix ./ext
 
 ### Packaging
 
-Packaging currently only possible on macOS:
+Packaging currently only possible on macOS/Linux:
 
 ````sh
 npm run package
