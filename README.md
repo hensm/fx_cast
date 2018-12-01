@@ -3,9 +3,11 @@
 Very WIP! Not ready for release. Expect many bugs. Please don't sign builds on AMO with current ID.
 
 Credit:
+
 * [electron-chromecast](https://github.com/GPMDP/electron-chromecast)
 * [node-castv2](https://github.com/thibauts/node-castv2)
 * [chrome-native-messaging](https://github.com/jdiamond/chrome-native-messaging)
+
 
 ## Supported platforms
 
@@ -21,44 +23,11 @@ Only tested on Linux and macOS. mDNS library issue to be fixed. `mdns` only work
 ### Requirements
 
 * NodeJS
-* `node` binary in path
-* ~~Bonjour SDK (Windows)~~
+* dpkg (for building deb packages)
+* rpm (for building rpm packages)
+* macOS (for building macOS installer packages)
 
-### Instructions
-
-````sh
-git clone https://github.com/hensm/fx_cast.git
-cd fx_cast
-npm install
-npm run build
-npm run install-manifest
-````
-
-This will build the ext and app, outputting to dist/.
-
-`dist/app/` contains the bridge binary and manifest with the path pointing that binary. `install-manifest` copies the manifest to the proper location (or adds its current location to the registry).
-
-`dist/ext/` contains the built extension in the format `fx_cast-<version>.zip` in addition to the unpacked extension at `dist/ext/unpacked/`.
-
-
-Watching ext changes and auto reload:
-````sh
-npm run watch --prefix ./ext
-
-# In seperate terminal
-npm run start --prefix ./ext
-````
-
-
-### Packaging
-
-Packaging currently only possible for macOS/Linux. macOS packages can only be created on macOS, Linux .deb/.rpm packages can be built on any platform with `dpkg-deb` and `rpmbuild` binaries.
-
-`dist/app/` contains the installer package: `fx_cast_bridge.pkg` (macOS).  
-`dist/ext/` contains the built extension.
-
-
-#### Dependencies
+#### Installing dependencies
 macOS:
 
 ````sh
@@ -71,7 +40,49 @@ Debian/Ubuntu:
 sudo apt install dpkg rpm
 ````
 
-#### Example commands
+Fedora:
+
+````sh
+sudo dnf install dpkg rpm-build
+````
+
+### Instructions
+
+````sh
+git clone https://github.com/hensm/fx_cast.git
+cd fx_cast
+npm install
+npm run build
+npm run install-manifest
+````
+
+This will build the ext and app, outputting to `dist/`:
+
+* #### `dist/app/`  
+   ... contains the bridge binary and manifest with the path pointing that binary. `install-manifest` copies this manifest to the proper location (or adds its current location to the registry).
+* #### `dist/ext/`  
+    ... contains the built extension in the format `fx_cast-<version>.zip` in addition to the unpacked extension at `dist/ext/unpacked/`.
+
+Watching ext changes:
+
+````sh
+npm run watch --prefix ./ext
+````
+
+Launch Firefox and auto-reload on rebuild (run in seperate terminal):
+
+````sh
+npm run start --prefix ./ext
+````
+
+### Packaging
+
+Packaging currently only possible for macOS/Linux. macOS packages can only be created on macOS, Linux .deb/.rpm packages can be built on any platform with `dpkg-deb` and `rpmbuild` binaries.
+
+* #### `dist/app/`  
+    ... contains the installer package: `fx_cast_bridge.pkg` (macOS).
+* #### `dist/ext/`  
+    ... contains the built extension.
 
 Build and package app and extension for current platform:
 
@@ -85,7 +96,8 @@ Build and package app for linux platforms:
 npm run package --prefix ./app -- --platform=linux --packageType=deb
 npm run package --prefix ./app -- --platform=linux --packageType=rpm
 ````
-##### Script arguments
+
+##### Package script arguments
 
 * `--platform` `"win"`,`"macos"`,`"linux"`  
     Select the platform to build for.
