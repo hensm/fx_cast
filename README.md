@@ -52,13 +52,45 @@ npm run start --prefix ./ext
 
 ### Packaging
 
-Packaging currently only possible on macOS/Linux:
+Packaging currently only possible for macOS/Linux. macOS packages can only be created on macOS, Linux .deb/.rpm packages can be built on any platform with `dpkg-deb` and `rpmbuild` binaries.
+
+`dist/app/` contains the installer package: `fx_cast_bridge.pkg` (macOS).  
+`dist/ext/` contains the built extension.
+
+
+#### Dependencies
+macOS:
+
+````sh
+brew install dpkg rpm
+````
+
+Debian/Ubuntu:
+
+````sh
+sudo apt install dpkg rpm
+````
+
+#### Example commands
+
+Build and package app and extension for current platform:
 
 ````sh
 npm run package
 ````
 
-`dist/app/` contains the installer package: `fx_cast_bridge.pkg` (macOS). `dist/ext/` contains the built extension.
+Build and package app for linux platforms:
+
+````sh
+npm run package --prefix ./app -- --platform=linux --packageType=deb
+npm run package --prefix ./app -- --platform=linux --packageType=rpm
+````
+##### Script arguments
+
+* `--platform` `"win"`,`"macos"`,`"linux"`  
+    Select the platform to build for.
+* `--packageType` `"deb"`,`"rpm"`  
+    Select the package type. Defaults to `deb`. Only relevant when building for Linux.
 
 ### Testing
 
