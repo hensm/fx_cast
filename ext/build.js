@@ -25,8 +25,15 @@ const extensionName = "fx_cast";
 const extensionId = "fx_cast@matt.tf";
 const extensionVersion = "0.0.1";
 
+const DIST_PATH = path.join(__dirname, "../dist/ext");
+const UNPACKED_PATH = path.join(DIST_PATH, "unpacked");
+
 // Clean
-fs.removeSync(path.join(__dirname, "../dist/ext/"));
+fs.removeSync(DIST_PATH);
+
+const buildCmd = `web-ext build --overwrite-dest `
+                             + `--source-dir ${UNPACKED_PATH} `
+                             + `--artifacts-dir ${DIST_PATH} `;
 
 const child = spawn(
     `webpack --env.extensionName=${extensionName} `
@@ -34,11 +41,8 @@ const child = spawn(
           + `--env.extensionVersion=${extensionVersion} `
           + `--env.mirroringAppId=${argv.mirroringAppId} `
           + `--mode=${argv.mode} `
-          + `${argv.watch ? "--watch" : ""} && `
-
-  + `web-ext build --overwrite-dest `
-                   + `--source-dir ../dist/ext/unpacked `
-                   + `--artifacts-dir ../dist/ext `
+          + `${argv.watch ? "--watch" : ""} `
+    + `${argv.package ? "&&" + buildCmd : ""} `
   , { shell: true }
 );
 
@@ -47,6 +51,15 @@ child.stderr.pipe(process.stderr);
 
 child.on("exit", () => {
     if (argv.package) {
-        fs.remove(path.join(__dirname, "../dist/ext/unpacked"));   
+        fs.remove(UNPACKED_PATH);   
+    } else {
+        for (const file of fs.readdirSync(UNPACKED_PATH)) {
+            fs.moveSync(path.join(UNPACKED_PATH, file)
+                  , path.join(DIST_PATH, file)
+                  , { overwrite: true });
+        }
+
+        // Remove empty unpacked directory
+        fs.remove(UNPACKED_PATH);
     }
 });

@@ -1,6 +1,7 @@
 node_modules/
 dist/
 app/node_modules/
+app/build
 ext/node_modules/
 test/ChromeProfile/
 .idea/

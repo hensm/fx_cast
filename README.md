@@ -61,7 +61,7 @@ This will build the ext and app, outputting to `dist/`:
 * #### `dist/app/`  
    ... contains the bridge binary and manifest with the path pointing that binary. `install-manifest` copies this manifest to the proper location (or adds its current location to the registry).
 * #### `dist/ext/`  
-    ... contains the built extension in the format `fx_cast-<version>.zip` in addition to the unpacked extension at `dist/ext/unpacked/`.
+    ... contains the unpacked extension.
 
 Watching ext changes:
 
@@ -80,9 +80,9 @@ npm run start --prefix ./ext
 Packaging currently only possible for macOS/Linux. macOS packages can only be created on macOS, Linux .deb/.rpm packages can be built on any platform with `dpkg-deb` and `rpmbuild` binaries.
 
 * #### `dist/app/`  
-    ... contains the installer package: `fx_cast_bridge.pkg` (macOS).
+    ... contains the installer package: `fx_cast_bridge.(pkg|deb|rpm|exe)`
 * #### `dist/ext/`  
-    ... contains the built extension.
+    ... contains the built extension in the format `fx_cast-<version>.zip`.
 
 Build and package app and extension for current platform:
 
@@ -99,7 +99,7 @@ npm run package --prefix ./app -- --platform=linux --packageType=rpm
 
 ##### Package script arguments
 
-* `--platform` `"win"`,`"macos"`,`"linux"`  
+* `--platform` `"win"`,`"mac"`,`"linux"`  
     Select the platform to build for.
 * `--packageType` `"deb"`,`"rpm"`  
     Select the package type. Defaults to `deb`. Only relevant when building for Linux.
