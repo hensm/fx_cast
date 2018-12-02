@@ -2,6 +2,7 @@ const fs = require("fs-extra");
 const os = require("os");
 const path = require("path");
 const minimist = require("minimist");
+const glob = require("glob");
 
 const { spawnSync } = require("child_process");
 const { exec: pkgExec } = require("pkg");
@@ -82,10 +83,12 @@ async function build () {
     if (argv.package) {
         const installerName = await package(argv.platform);
 
-        // Move installer to dist
-        fs.moveSync(path.join(BUILD_PATH, installerName)
-              , path.join(DIST_PATH, installerName)
-              , { overwrite: true });
+        if (installerName) {
+            // Move installer to dist
+            fs.moveSync(path.join(BUILD_PATH, installerName)
+                  , path.join(DIST_PATH, path.basename(installerName))
+                  , { overwrite: true });
+        }
     } else {
         // Move binary / app manifest
         fs.moveSync(path.join(BUILD_PATH, manifestName)
@@ -130,10 +133,8 @@ function packageDarwin () {
 
     // Create pkgbuild root
     const rootPath = path.join(BUILD_PATH, "root");
-    const rootExecutablePath = path.join(rootPath
-          , executablePath["darwin"]);
-    const rootManifestPath = path.join(rootPath
-          , manifestPath["darwin"]);
+    const rootExecutablePath = path.join(rootPath, executablePath["darwin"]);
+    const rootManifestPath = path.join(rootPath, manifestPath["darwin"]);
 
     // Create install locations
     fs.ensureDirSync(rootExecutablePath, { recursive: true });
@@ -171,14 +172,10 @@ function packageDarwin () {
 function packageLinuxDeb () {
     const installerName = "fx_cast_bridge.deb";
 
-    const packagingDir = path.join(__dirname, "../packaging/linux/deb");
-
     // Create root
     const rootPath = path.join(BUILD_PATH, "root");
-    const rootExecutablePath = path.join(rootPath
-          , executablePath["linux"]);
-    const rootManifestPath = path.join(rootPath
-          , manifestPath["linux"]);
+    const rootExecutablePath = path.join(rootPath, executablePath["linux"]);
+    const rootManifestPath = path.join(rootPath, manifestPath["linux"]);
 
     fs.ensureDirSync(rootExecutablePath, { recursive: true });
     fs.ensureDirSync(rootManifestPath, { recursive: true });
@@ -190,7 +187,7 @@ function packageLinuxDeb () {
           , path.join(rootManifestPath, manifestName));
 
     // Copy package info to root
-    fs.copySync(path.join(packagingDir, "DEBIAN")
+    fs.copySync(path.join(__dirname, "../packaging/linux/deb/DEBIAN/")
           , path.join(rootPath, "DEBIAN"));
 
     // Build .deb package
@@ -202,7 +199,19 @@ function packageLinuxDeb () {
     return installerName;
 }
 
-function packageLinuxRpm () {} 
+function packageLinuxRpm () {
+    const specPath = path.join(__dirname
+          , "../packaging/linux/rpm/fx_cast_bridge.spec");
+
+    spawnSync(
+        `rpmbuild -bb ${specPath} `
+               + `--define "_distdir ${BUILD_PATH}" `
+               + `--define "_rpmdir ${BUILD_PATH}" `
+      , { shell: true });
+
+    return glob.sync("**/*.rpm", { cwd: BUILD_PATH })[0];
+}
+
 function packageWin32 () {}
 
 
