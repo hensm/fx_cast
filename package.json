@@ -3,17 +3,13 @@
         "postinstall": "npm run postinstall:app && npm run postinstall:ext",
         "postinstall:app": "npm install ./app --prefix ./app",
         "postinstall:ext": "npm install ./ext --prefix ./ext",
-
         "build": "npm run build:app && npm run build:ext",
         "build:app": "npm run build --prefix ./app",
         "build:ext": "npm run build --prefix ./ext",
-
         "package": "npm run package:app && npm run package:ext",
         "package:app": "npm run package --prefix ./app",
         "package:ext": "npm run package --prefix ./ext",
-
         "test": "jasmine --config=jasmine.json",
-
         "install-manifest": "npm run install-manifest --prefix ./app",
         "remove-manifest": "npm run remove-manifest --prefix ./app"
     },

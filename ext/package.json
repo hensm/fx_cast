@@ -3,7 +3,7 @@
         "build": "node build.js",
         "package": "node build.js --package",
         "watch": "node build.js --watch",
-        "start": "web-ext run -s ../dist/ext/unpacked/"
+        "start": "web-ext run -s ../dist/ext/"
     },
     "devDependencies": {
         "@babel/core": "^7.1.5",
