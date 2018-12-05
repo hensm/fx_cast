@@ -1,28 +1,5 @@
-.category {
-    display: grid;
-    grid-template-columns: 150px 1fr;
-    grid-column-gap: 20px;
-    grid-row-gap: 5px;
-}
-.category__name {}
-.category__description,
-.category .category {
-    color: graytext;
-    grid-column: span 2;
-}
-
-.option {
-    display: contents;
-}
-
-.option__label {
-    text-align: right;
-    display: inline-block;
-}
-
-.option > input {
-    align-self: center;
-    justify-self: flex-start;
+*:invalid {
+    box-shadow: 0 0 1.5px 1px red;
 }
 
 #form {
@@ -39,35 +16,72 @@
     margin-inline-end: 5px;
 }
 
-*:invalid {
-    box-shadow: 0 0 1.5px 1px red;
+
+.category {
+    display: grid;
+    grid-template-columns: 150px 1fr;
+    grid-column-gap: 20px;
+    grid-row-gap: 5px;
 }
+
+.category__name {}
+
+.category__description {
+    color: graytext;
+}
+
+.category__description,
+.category .category {
+    grid-column: span 2;
+}
+
+
+.option {
+    display: contents;
+}
+
+.option__label {
+    text-align: right;
+    display: inline-block;
+}
+
+.option > input {
+    align-self: center;
+    justify-self: flex-start;
+}
+
 
 .editable-list {
     justify-content: end;
 }
+
 .editable-list__items {
     display: flex;
     flex-direction: column;
     padding: initial;
 }
+
 .editable-list__item {
     align-items: center;
     display: flex;
     height: 2em;
 }
+
 .editable-list__title {
     flex: 1;
 }
+
 .editable-list__edit-field {
     width: -moz-available;
     margin-inline-end: 1em;
 }
+
 .editable-list__raw-view {
     max-height: 300px;
     resize: vertical;
     width: 100%;
 }
+
 .editable-list__add-button {
     align-self: end;
 }
