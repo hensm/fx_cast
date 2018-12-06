@@ -33,7 +33,15 @@ if (argv.package) {
 
 // Import webpack config and specify env values
 const webpackConfig = require("./webpack.config.js")({
-    extensionName: "fx_cast"
+    /**
+     * If watching files, output directly to dist. Unpacked
+     * directory is used as a staging area for web-ext builds.
+     */
+    outputPath: argv.package
+        ? UNPACKED_PATH
+        : DIST_PATH
+
+  , extensionName: "fx_cast"
   , extensionId: "fx_cast@matt.tf"
   , extensionVersion: "0.0.1"
   , mirroringAppId: argv.mirroringAppId
@@ -41,14 +49,6 @@ const webpackConfig = require("./webpack.config.js")({
 
 // Add mode to config
 webpackConfig.mode = argv.mode;
-
-/**
- * If watching files, output directly to dist. Unpacked
- * directory is used as a staging area for web-ext builds.
- */
-webpackConfig.output.path = argv.package
-    ? UNPACKED_PATH
-    : DIST_PATH;
 
 
 // Clean

@@ -6,7 +6,6 @@ const CopyWebpackPlugin = require("copy-webpack-plugin");
 
 
 const includePath = path.resolve(__dirname, "src");
-const outputPath  = path.resolve(__dirname, "../dist/ext/unpacked");
 
 module.exports = (env) => ({
     entry: {
@@ -22,7 +21,7 @@ module.exports = (env) => ({
     }
   , output: {
         filename: "[name].js"
-      , path: `${outputPath}`
+      , path: `${env.outputPath}`
     }
   , plugins: [
         new webpack.DefinePlugin({
@@ -35,7 +34,7 @@ module.exports = (env) => ({
         // Copy static assets
       , new CopyWebpackPlugin([{
             from: includePath
-          , to: outputPath
+          , to: env.outputPath
           , ignore: [ "*.js", "*.jsx" ]
           , transform (content, path) {
                 // Access to variables in static files
