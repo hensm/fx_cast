@@ -37,49 +37,26 @@ function getLocalAddress () {
     });
 }
 
-// TODO: Fix this broken mess
-let ignoreMediaEvents = false;
-function silent (fn) {
-    ignoreMediaEvents = true;
-    fn();
-}
 
 mediaElement.addEventListener("play", () => {
-    if (ignoreMediaEvents) {
-        ignoreMediaEvents = false;
-        return;
-    }
-
     currentMedia.play(null
           , onMediaPlaySuccess
           , onMediaPlayError);
 });
 
 mediaElement.addEventListener("pause", () => {
-    if (ignoreMediaEvents) {
-        ignoreMediaEvents = false;
-        return;
-    }
-
     currentMedia.pause(null
           , onMediaPauseSuccess
           , onMediaPauseError);
 });
 
 mediaElement.addEventListener("suspend", () => {
-    if (ignoreMediaEvents) return;
-
     /*currentMedia.stop(null
           , onMediaStopSuccess
           , onMediaStopError);*/
 });
 
 mediaElement.addEventListener("seeking", () => {
-    if (ignoreMediaEvents) {
-        ignoreMediaEvents = false;
-        return;
-    }
-
     const seekRequest = new chrome.cast.media.SeekRequest();
     seekRequest.currentTime = mediaElement.currentTime;
 
@@ -89,11 +66,6 @@ mediaElement.addEventListener("seeking", () => {
 });
 
 mediaElement.addEventListener("ratechange", () => {
-    if (ignoreMediaEvents) {
-        ignoreMediaEvents = false;
-        return;
-    }
-
     currentMedia._sendMediaMessage({
         type: "SET_PLAYBACK_RATE"
       , playbackRate: mediaElement.playbackRate
@@ -101,11 +73,6 @@ mediaElement.addEventListener("ratechange", () => {
 });
 
 mediaElement.addEventListener("volumechange", () => {
-    if (ignoreMediaEvents) {
-        ignoreMediaEvents = false;
-        return;
-    }
-
     const newVolume = new chrome.cast.Volume(
             currentMedia.volume
           , currentMedia.muted);
@@ -205,21 +172,17 @@ function onLoadMediaSuccess (media) {
         if (localPlayerState !== currentMedia.playerState) {
             switch (currentMedia.playerState) {
                 case chrome.cast.media.PlayerState.PLAYING:
-                    silent(() => {
-                        mediaElement.play();
-                    });
+                    mediaElement.play();
                     break;
 
                 case chrome.cast.media.PlayerState.PAUSED:
-                    silent(() => {
-                        mediaElement.pause();
-                    });
+                    mediaElement.pause();
                     break;
             }
         }
 
         // RepeatMode
-        const localRepeatMode  = mediaElement.loop
+        const localRepeatMode = mediaElement.loop
             ? chrome.cast.media.RepeatMode.SINGLE
             : chrome.cast.media.RepeatMode.OFF;
 
@@ -238,9 +201,7 @@ function onLoadMediaSuccess (media) {
 
         // currentTime
         if (currentMedia.currentTime !== mediaElement.currentTime) {
-            silent(() => {
-                mediaElement.currentTime = currentMedia.currentTime;
-            });
+            mediaElement.currentTime = currentMedia.currentTime;
         }
     });
 }
