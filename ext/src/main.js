@@ -158,9 +158,6 @@ let currentUAString;
  * provide cast functionality if the browser is detected
  * as Chrome, so we should rewrite the User-Agent header
  * to reflect this on whitelisted sites.
- *
- * TODO: Inject script to change navigator.userAgent
- * property.
  */
 async function onBeforeSendHeaders (details) {
     const { options } = await browser.storage.sync.get("options");
