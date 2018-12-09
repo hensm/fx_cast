@@ -23,17 +23,6 @@ module.exports = (env) => ({
         filename: "[name].js"
       , path: `${env.outputPath}`
     }
-  , optimization: {
-        splitChunks: {
-            cacheGroups: {
-                vendor: {
-                    name: "vendor"
-                  , test: /[\\/]node_modules[\\/](react|react-dom)[\\/]/
-                  , chunks: "all"
-                }
-            }
-        }
-    }
   , plugins: [
         new webpack.DefinePlugin({
             "EXTENSION_NAME"    : JSON.stringify(env.extensionName)
@@ -85,5 +74,11 @@ module.exports = (env) => ({
                 }
             }
         ]
+    }
+  , resolve: {
+        alias: {
+            "react": "preact-compat"
+          , "react-dom": "preact-compat"
+        }
     }
 });
