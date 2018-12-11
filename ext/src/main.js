@@ -340,12 +340,6 @@ function initBridge (tabId, frameId) {
         bridgeMap.set(tabId, port);
     }
 
-    // Start version handoff
-    port.postMessage({
-        subject: "bridge:initialize"
-      , data: EXTENSION_VERSION
-    });
-
     port.onDisconnect.addListener(p => {
         if (p.error) {
             console.error(`${APPLICATION_NAME} disconnected:`, p.error.message);
@@ -428,27 +422,6 @@ messageRouter.register("main", async (message, sender) => {
     switch (message.subject) {
         case "main:initialize": {
             initBridge(tabId, sender.tab.frameId);
-            break;
-        };
-
-        case "main:bridgeInitialized": {
-            const applicationVersion = message.data;
-
-            /**
-             * Compare installed bridge version to the version the
-             * extension was built alongside and is known to be
-             * compatible with.
-             *
-             * TODO: Determine compatibility with semver and enforce/notify
-             * user.
-             */
-            if (applicationVersion !== APPLICATION_VERSION) {
-                console.error(`Expecting ${APPLICATION_NAME} v${APPLICATION_VERSION}, found v${applicationVersion}.`
-                      , semver.lt(applicationVersion, APPLICATION_VERSION)
-                            ? "Try updating the native app to the latest version."
-                            : "Try updating the extension to the latest version");
-            }
-
             break;
         };
 

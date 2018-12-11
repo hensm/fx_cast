@@ -6,6 +6,8 @@ import ReactDOM from "react-dom";
 import defaultOptions from "./defaultOptions";
 import EditableList from "./EditableList";
 
+import getBridgeInfo from "../lib/getBridgeInfo";
+
 
 const _ = browser.i18n.getMessage;
 
@@ -41,6 +43,8 @@ class App extends Component {
 
         this.state = {
             options: props.options
+          , bridgeInfo: null
+          , bridgeLoading: true
           , isFormValid: true
         };
 
@@ -52,6 +56,14 @@ class App extends Component {
 
         this.getWhitelistItemPatternError
                 = this.getWhitelistItemPatternError.bind(this);
+    }
+
+    async componentDidMount () {
+        const bridgeInfo = await getBridgeInfo();
+        this.setState({
+            bridgeInfo
+          , bridgeLoading: false
+        });
     }
 
     /**
@@ -126,140 +138,199 @@ class App extends Component {
         return _("optionsUserAgentWhitelistInvalidMatchPattern", info);
     }
 
+    async updateBridgeInfo () {
+        this.setState({
+            bridgeLoading: true
+        });
+
+        const bridgeInfo = await getBridgeInfo();
+
+        this.setState({
+            bridgeInfo
+          , bridgeLoading: false
+        });
+    }
+
     render () {
         return (
-            <form id="form" ref={ form => { this.form = form; }}
-                    onSubmit={ this.handleFormSubmit }
-                    onChange={ this.handleFormChange }>
-                <fieldset className="category">
-                    <legend className="category__name">
-                        { _("optionsMediaCategoryName") }
-                    </legend>
-                    <p className="category__description">
-                        { _("optionsMediaCategoryDescription") }
-                    </p>
+            <div>
+                <form id="form" ref={ form => { this.form = form; }}
+                        onSubmit={ this.handleFormSubmit }
+                        onChange={ this.handleFormChange }>
 
-                    <label className="option option--inline">
-                        <input name="mediaEnabled"
-                               type="checkbox"
-                               checked={ this.state.options.mediaEnabled }
-                               onChange={ this.handleInputChange } />
-                        <div className="option__label">
-                            { _("optionsMediaEnabled") }
-                        </div>
-                    </label>
-
-                    <fieldset className="category"
-                              disabled={ !this.state.options.mediaEnabled }>
+                    <fieldset className="category">
                         <legend className="category__name">
-                            { _("optionsLocalMediaCategoryName") }
+                            { _("optionsMediaCategoryName") }
                         </legend>
                         <p className="category__description">
-                            { _("optionsLocalMediaCategoryDescription") }
+                            { _("optionsMediaCategoryDescription") }
                         </p>
 
                         <label className="option option--inline">
-                            <input name="localMediaEnabled"
+                            <input name="mediaEnabled"
                                    type="checkbox"
-                                   checked={ this.state.options.localMediaEnabled }
+                                   checked={ this.state.options.mediaEnabled }
                                    onChange={ this.handleInputChange } />
                             <div className="option__label">
-                                { _("optionsLocalMediaEnabled") }
+                                { _("optionsMediaEnabled") }
+                            </div>
+                        </label>
+
+                        <fieldset className="category"
+                                  disabled={ !this.state.options.mediaEnabled }>
+                            <legend className="category__name">
+                                { _("optionsLocalMediaCategoryName") }
+                            </legend>
+                            <p className="category__description">
+                                { _("optionsLocalMediaCategoryDescription") }
+                            </p>
+
+                            <label className="option option--inline">
+                                <input name="localMediaEnabled"
+                                       type="checkbox"
+                                       checked={ this.state.options.localMediaEnabled }
+                                       onChange={ this.handleInputChange } />
+                                <div className="option__label">
+                                    { _("optionsLocalMediaEnabled") }
+                                </div>
+                            </label>
+
+                            <label className="option">
+                                <div className="option__label">
+                                    { _("optionsLocalMediaServerPort") }
+                                </div>
+                                <input name="localMediaServerPort"
+                                       type="number"
+                                       required
+                                       min="1025"
+                                       max="65535"
+                                       value={ this.state.options.localMediaServerPort }
+                                       onChange={ this.handleInputChange } />
+                            </label>
+                        </fieldset>
+                    </fieldset>
+
+                    <fieldset className="category">
+                        <legend className="category__name">
+                            { _("optionsMirroringCategoryName") }
+                        </legend>
+                        <p className="category__description">
+                            { _("optionsMirroringCategoryDescription") }
+                        </p>
+
+                        <label className="option option--inline">
+                            <input name="mirroringEnabled"
+                                   type="checkbox"
+                                   checked={ this.state.options.mirroringEnabled }
+                                   onChange={ this.handleInputChange } />
+                            <div className="option__label">
+                                { _("optionsMirroringEnabled") }
                             </div>
                         </label>
 
                         <label className="option">
                             <div className="option__label">
-                                { _("optionsLocalMediaServerPort") }
+                                { _("optionsMirroringAppId") }
                             </div>
-                            <input name="localMediaServerPort"
-                                   type="number"
+                            <input name="mirroringAppId"
+                                   type="text"
                                    required
-                                   min="1025"
-                                   max="65535"
-                                   value={ this.state.options.localMediaServerPort }
+                                   value={ this.state.options.mirroringAppId }
                                    onChange={ this.handleInputChange } />
                         </label>
                     </fieldset>
-                </fieldset>
 
-                <fieldset className="category">
-                    <legend className="category__name">
-                        { _("optionsMirroringCategoryName") }
-                    </legend>
-                    <p className="category__description">
-                        { _("optionsMirroringCategoryDescription") }
-                    </p>
+                    <fieldset className="category">
+                        <legend className="category__name">
+                            { _("optionsUserAgentWhitelistCategoryName") }
+                        </legend>
+                        <p className="category__description">
+                            { _("optionsUserAgentWhitelistCategoryDescription") }
+                        </p>
 
-                    <label className="option option--inline">
-                        <input name="mirroringEnabled"
-                               type="checkbox"
-                               checked={ this.state.options.mirroringEnabled }
-                               onChange={ this.handleInputChange } />
-                        <div className="option__label">
-                            { _("optionsMirroringEnabled") }
+                        <label className="option option--inline">
+                            <input name="userAgentWhitelistEnabled"
+                                   type="checkbox"
+                                   checked={ this.state.options.userAgentWhitelistEnabled }
+                                   onChange={ this.handleInputChange } />
+                            <div className="option__label">
+                                { _("optionsUserAgentWhitelistEnabled") }
+                            </div>
+                        </label>
+
+                        <div className="option">
+                            <div className="option__label">
+                                { _("optionsUserAgentWhitelistContent") }
+                            </div>
+                            <EditableList data={ this.state.options.userAgentWhitelist }
+                                          onChange={ this.handleWhitelistChange }
+                                          itemPattern={ MATCH_PATTERN_REGEX }
+                                          itemPatternError={ this.getWhitelistItemPatternError }/>
                         </div>
-                    </label>
+                    </fieldset>
 
-                    <label className="option">
-                        <div className="option__label">
-                            { _("optionsMirroringAppId") }
-                        </div>
-                        <input name="mirroringAppId"
-                               type="text"
-                               required
-                               value={ this.state.options.mirroringAppId }
-                               onChange={ this.handleInputChange } />
-                    </label>
-                </fieldset>
-
-                <fieldset className="category">
-                    <legend className="category__name">
-                        { _("optionsUserAgentWhitelistCategoryName") }
-                    </legend>
-                    <p className="category__description">
-                        { _("optionsUserAgentWhitelistCategoryDescription") }
-                    </p>
-
-                    <label className="option option--inline">
-                        <input name="userAgentWhitelistEnabled"
-                               type="checkbox"
-                               checked={ this.state.options.userAgentWhitelistEnabled }
-                               onChange={ this.handleInputChange } />
-                        <div className="option__label">
-                            { _("optionsUserAgentWhitelistEnabled") }
-                        </div>
-                    </label>
-
-                    <div className="option">
-                        <div className="option__label">
-                            { _("optionsUserAgentWhitelistContent") }
-                        </div>
-                        <EditableList data={ this.state.options.userAgentWhitelist }
-                                      onChange={ this.handleWhitelistChange }
-                                      itemPattern={ MATCH_PATTERN_REGEX }
-                                      itemPatternError={ this.getWhitelistItemPatternError }/>
+                    <div id="buttons">
+                        <button onClick={ this.handleReset }>
+                            { _("optionsReset") }
+                        </button>
+                        <button type="submit"
+                                default
+                                disabled={ !this.state.isFormValid }>
+                            { _("optionsSubmit") }
+                        </button>
                     </div>
-                </fieldset>
+                </form>
 
-                <div id="buttons">
-                    <button onClick={ this.handleReset }>
-                        { _("optionsReset") }
-                    </button>
-                    <button type="submit"
-                            default
-                            disabled={ !this.state.isFormValid }>
-                        { _("optionsSubmit") }
-                    </button>
+                <div className="bridge">
+                    { do {
+                        if (this.state.bridgeLoading) {
+                            <div className="bridge__loading">
+                                { _("optionsBridgeLoading") }
+                                <progress></progress>
+                            </div>
+                        } else if (this.state.bridgeInfo) {
+                            const bridgeInfo = this.state.bridgeInfo;
+                            let debugInfo =
+                                `${bridgeInfo.isVersionCompatible
+                                    ? _("optionsBridgeStatusCompatible")
+                                    : _("optionsBridgeStatusIncompatible")}\n\n`
+                              + `${APPLICATION_NAME} v${bridgeInfo.version}\n`
+                              + `Expected: ${APPLICATION_VERSION}\n`
+                              + `Found: ${bridgeInfo.version}\n`;
+
+                            if (bridgeInfo.isVersionOlder) {
+                                debugInfo += `\n${_("optionsBridgeOlder")}`
+                            }
+                            if (bridgeInfo.isVersionNewer) {
+                                debugInfo += `\n${_("optionsBridgeNewer")}`
+                            }
+
+                            <div>
+                                { _("optionsBridgeInfo") }
+                                <div className="bridge__found">
+                                    <textarea className="bridge__info">{ debugInfo }</textarea>
+                                </div>
+                            </div>
+                        } else {
+                            <div>
+                                { _("optionsBridgeInfo") }
+                                <div className="bridge__missing">
+                                    { _("optionsBridgeMissing") }
+                                </div>
+                            </div>
+                        }
+                    }}
                 </div>
-            </form>
+            </div>
         );
     }
 }
 
 
-browser.storage.sync.get("options").then(({options}) => {
+(async () => {
+    const { options } = await browser.storage.sync.get("options");
+
     ReactDOM.render(
         <App options={options} />
       , document.querySelector("#root"));
-});
+})()

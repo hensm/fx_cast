@@ -97,11 +97,11 @@ async function handleMessage (message) {
 
 
     switch (message.subject) {
-        case "bridge:initialize": {
+        case "bridge:getInfo": {
             const extensionVersion = message.data;
 
             return {
-                subject: "main:bridgeInitialized"
+                subject: "main:bridgeInfo"
               , data: __applicationVersion
             };
         };

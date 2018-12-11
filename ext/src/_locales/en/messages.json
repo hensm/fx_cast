@@ -18,6 +18,34 @@
     }
 
 
+  , "optionsBridgeCategoryName": {
+        "message": "Bridge"
+    }
+  , "optionsBridgeCategoryDescription": {
+        "message": "Native bridge application."
+    }
+  , "optionsBridgeLoading": {
+        "message": "Loading bridge info..."
+    }
+  , "optionsBridgeMissing": {
+        "message": "Bridge application not found. Try downloading and installing the latest version."
+    }
+  , "optionsBridgeInfo": {
+        "message": "Bridge info:"
+    }
+  , "optionsBridgeStatusCompatible": {
+        "message": "STATUS: COMPATIBLE"
+    }
+  , "optionsBridgeStatusIncompatible": {
+        "message": "STATUS: INCOMPATIBLE"
+    }
+  , "optionsBridgeOlder": {
+        "message": "Bridge version older than expected, try updating bridge to the latest bridge version."
+    }
+  , "optionsBridgeNewer": {
+        "message": "Bridge version newer than expected, try updating extension to the latest bridge version."
+    }
+
   , "optionsMediaCategoryName": {
         "message": "Media casting"
     }
