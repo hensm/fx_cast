@@ -9,6 +9,17 @@ import EditableList from "./EditableList";
 
 const _ = browser.i18n.getMessage;
 
+// macOS styles
+browser.runtime.getPlatformInfo()
+    .then(platformInfo => {
+        if (platformInfo.os === "mac") {
+            const link = document.createElement("link");
+            link.rel = "stylesheet";
+            link.href = "styles/mac.css";
+            document.head.appendChild(link);
+        }
+    });
+
 
 const MATCH_PATTERN_REGEX = /^(?:(?:(\*|https?|ftp):\/\/((?:\*\.|[^\/\*])+)|(file):\/\/\/?(?:\*\.|[^\/\*])+)(\/.*)|<all_urls>)$/;
 
@@ -128,17 +139,18 @@ class App extends Component {
                         { _("optionsMediaCategoryDescription") }
                     </p>
 
-                    <label className="option">
-                        <div className="option__label">
-                            { _("optionsMediaEnabled") }
-                        </div>
+                    <label className="option option--inline">
                         <input name="mediaEnabled"
                                type="checkbox"
                                checked={ this.state.options.mediaEnabled }
                                onChange={ this.handleInputChange } />
+                        <div className="option__label">
+                            { _("optionsMediaEnabled") }
+                        </div>
                     </label>
 
-                    <fieldset className="category">
+                    <fieldset className="category"
+                              disabled={ !this.state.options.mediaEnabled }>
                         <legend className="category__name">
                             { _("optionsLocalMediaCategoryName") }
                         </legend>
@@ -146,14 +158,14 @@ class App extends Component {
                             { _("optionsLocalMediaCategoryDescription") }
                         </p>
 
-                        <label className="option">
-                            <div className="option__label">
-                                { _("optionsLocalMediaEnabled") }
-                            </div>
+                        <label className="option option--inline">
                             <input name="localMediaEnabled"
                                    type="checkbox"
                                    checked={ this.state.options.localMediaEnabled }
                                    onChange={ this.handleInputChange } />
+                            <div className="option__label">
+                                { _("optionsLocalMediaEnabled") }
+                            </div>
                         </label>
 
                         <label className="option">
@@ -179,14 +191,14 @@ class App extends Component {
                         { _("optionsMirroringCategoryDescription") }
                     </p>
 
-                    <label className="option">
-                        <div className="option__label">
-                            { _("optionsMirroringEnabled") }
-                        </div>
+                    <label className="option option--inline">
                         <input name="mirroringEnabled"
                                type="checkbox"
                                checked={ this.state.options.mirroringEnabled }
                                onChange={ this.handleInputChange } />
+                        <div className="option__label">
+                            { _("optionsMirroringEnabled") }
+                        </div>
                     </label>
 
                     <label className="option">
@@ -209,14 +221,14 @@ class App extends Component {
                         { _("optionsUserAgentWhitelistCategoryDescription") }
                     </p>
 
-                    <label className="option">
-                        <div className="option__label">
-                            { _("optionsUserAgentWhitelistEnabled") }
-                        </div>
+                    <label className="option option--inline">
                         <input name="userAgentWhitelistEnabled"
                                type="checkbox"
                                checked={ this.state.options.userAgentWhitelistEnabled }
                                onChange={ this.handleInputChange } />
+                        <div className="option__label">
+                            { _("optionsUserAgentWhitelistEnabled") }
+                        </div>
                     </label>
 
                     <div className="option">
@@ -235,6 +247,7 @@ class App extends Component {
                         { _("optionsReset") }
                     </button>
                     <button type="submit"
+                            default
                             disabled={ !this.state.isFormValid }>
                         { _("optionsSubmit") }
                     </button>

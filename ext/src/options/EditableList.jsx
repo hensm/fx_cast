@@ -123,17 +123,19 @@ export default class EditableList extends Component {
 
         return (
             <div className="editable-list">
-                <button className="editable-list__view-button"
-                        onClick={ this.handleSwitchView }>
-                    { this.state.rawView
-                        ? _("optionsUserAgentWhitelistBasicView")
-                        : _("optionsUserAgentWhitelistRawView") }
-                </button>
-                { this.state.rawView &&
-                    <button className="editable-list__save-raw-button"
-                            onClick={ this.handleSaveRaw }>
-                        { _("optionsUserAgentWhitelistSaveRaw") }
-                    </button> }
+                <div className="editable-list__view-actions">
+                    { this.state.rawView &&
+                        <button className="editable-list__save-raw-button"
+                                onClick={ this.handleSaveRaw }>
+                            { _("optionsUserAgentWhitelistSaveRaw") }
+                        </button> }
+                    <button className="editable-list__view-button"
+                            onClick={ this.handleSwitchView }>
+                        { this.state.rawView
+                            ? _("optionsUserAgentWhitelistBasicView")
+                            : _("optionsUserAgentWhitelistRawView") }
+                    </button>
+                </div>
                 <hr />
                 { do {
                     if (this.state.rawView) {

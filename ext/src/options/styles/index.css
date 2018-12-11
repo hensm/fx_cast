@@ -1,0 +1,150 @@
+*:invalid {
+    box-shadow: 0 0 1.5px 1px red;
+}
+
+#form {
+    display: flex;
+    flex-direction: column;
+}
+
+#buttons {
+    align-self: flex-end;
+    margin-block-start: 5px;
+}
+
+#buttons > :not(:last-child) {
+    margin-inline-end: 5px;
+}
+
+
+.category {
+    border: initial;
+    display: grid;
+    grid-template-columns: 150px 1fr;
+    grid-column-gap: 20px;
+    grid-row-gap: 5px;
+    margin: initial;
+    padding: 15px 0;
+}
+
+.category:disabled {
+    color: graytext;
+}
+
+.category:not(:first-of-type) {
+    border-top: 1px solid rgb(225, 225, 225);
+}
+
+.category > .category {
+    background: rgba(235, 235, 235);
+    border-radius: 3px;
+    padding: 10px 0;
+    box-shadow: inset 6px 0 0 0 rgba(0, 0, 0, 0.1);
+}
+
+.category > .category:disabled {
+    background: rgba(245, 245, 245);
+}
+
+.category > .category > .category__name,
+.category > .category > .category__description {
+    margin-inline-start: 16px;
+}
+
+.category__name {
+    float: left;
+}
+
+.category__description {
+    color: graytext;
+    margin-top: initial;
+}
+
+.category__description,
+.category .category {
+    grid-column: span 2;
+}
+
+
+.option {
+    display: contents;
+}
+
+.option--inline {
+    display: block;
+    grid-column-start: 2;
+}
+
+.option__label {
+    text-align: right;
+    display: inline-block;
+}
+
+.option > input {
+    align-self: center;
+    justify-self: flex-start;
+    margin-inline-start: initial;
+}
+
+
+.editable-list {
+    border: 1px solid rgb(225, 225, 225);
+    justify-content: end;
+    padding: 5px;
+}
+
+.editable-list__view-actions {
+    display: flex;
+    justify-content: end;
+}
+
+.editable-list__view-button,
+.editable-list__save-raw-button {
+
+}
+
+.editable-list hr {
+    border: initial;
+    border-top: 1px solid rgb(225, 225, 225);
+    margin: 5px 0;
+}
+
+.editable-list__items {
+    display: flex;
+    flex-direction: column;
+    margin: initial;
+    margin-inline-start: -5px;
+    padding: initial;
+    width: calc(100% + 10px);
+}
+
+.editable-list__item {
+    align-items: center;
+    display: flex;
+    height: 2em;
+    padding: 0 5px;
+}
+
+.editable-list__item:nth-of-type(even) {
+    background-color: rgb(245, 245, 245);
+}
+
+.editable-list__title {
+    flex: 1;
+}
+
+.editable-list__edit-field {
+    width: -moz-available;
+    margin-inline-end: 1em;
+}
+
+.editable-list__raw-view {
+    max-height: 300px;
+    resize: vertical;
+    width: 100%;
+}
+
+.editable-list__add-button {
+    align-self: end;
+    margin-top: 5px;
+}

@@ -25,7 +25,7 @@
         "message": "HTML5 video/audio media casting."
     }
   , "optionsMediaEnabled": {
-        "message": "Enabled"
+        "message": "Media casting enabled"
     }
 
   , "optionsLocalMediaCategoryName": {
@@ -35,7 +35,7 @@
         "message": "HTTP server started by the bridge app to stream local media files to the cast receiver."
     }
   , "optionsLocalMediaEnabled": {
-        "message": "Enabled"
+        "message": "Local media casting enabled"
     }
   , "optionsLocalMediaServerPort": {
         "message": "HTTP server port"
@@ -48,7 +48,7 @@
         "message": "Sites for which to replace the user agent with a Chrome version for compatibility. Must be valid match patterns."
     }
   , "optionsUserAgentWhitelistEnabled": {
-        "message": "Enabled"
+        "message": "Site whitelist enabled"
     }
   , "optionsUserAgentWhitelistContent": {
         "message": "Match patterns (newline-separated)"
@@ -82,14 +82,14 @@
         "message": "Screen/Tab mirroring to a Chromecast receiver app."
     }
   , "optionsMirroringEnabled": {
-        "message": "Enabled"
+        "message": "Screen mirroring enabled"
     }
   , "optionsMirroringAppId": {
         "message": "Receiver app ID"
     }
 
   , "optionsReset": {
-        "message": "Reset to defaults"
+        "message": "Restore Defaults"
     }
   , "optionsSubmit": {
         "message": "Submit"
