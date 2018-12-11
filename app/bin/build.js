@@ -3,9 +3,13 @@ const os = require("os");
 const path = require("path");
 const minimist = require("minimist");
 const glob = require("glob");
+const mustache = require("mustache");
 
 const { spawnSync } = require("child_process");
 const { exec: pkgExec } = require("pkg");
+
+const { __applicationName: applicationName
+      , __applicationVersion: applicationVersion } = require("../package.json");
 
 const { executableName
       , executablePath
@@ -126,10 +130,11 @@ function package (platform) {
 }
 
 function packageDarwin () {
-    const installerName = "fx_cast_bridge.pkg";
-    const componentName = "fx_cast_bridge_component.pkg";
+    const installerName = `${applicationName}.pkg`;
+    const componentName = `${applicationName}_component.pkg`;
 
     const packagingDir = path.join(__dirname, "../packaging/mac/");
+    const packagingOutputDir = path.join(BUILD_PATH, "packaging");
 
     // Create pkgbuild root
     const rootPath = path.join(BUILD_PATH, "root");
@@ -146,17 +151,41 @@ function packageDarwin () {
     fs.moveSync(path.join(BUILD_PATH, manifestName)
           , path.join(rootManifestPath, manifestName));
 
+
+    // Copy static files to be processed
+    fs.copySync(packagingDir, packagingOutputDir);
+
+    const view = {
+        applicationName
+      , manifestName
+      , componentName
+      , packageId: `tf.matt.${applicationName}`
+    };
+
+    // Template paths
+    const templatePaths = [
+        path.join(packagingOutputDir, "scripts/postinstall")
+      , path.join(packagingOutputDir, "distribution.xml")
+    ];
+
+    // Do templating on static files
+    for (const templatePath of templatePaths) {
+        const templateContent = fs.readFileSync(templatePath).toString();
+        fs.writeFileSync(templatePath, mustache.render(templateContent, view));
+    }
+
+
     // Build component package
     spawnSync(
         `pkgbuild --root ${rootPath} `
-               + `--identifier "tf.matt.fx_cast_bridge" `
-               + `--version "0.0.1" `
-               + `--scripts ${path.join(packagingDir, "scripts")} `
+               + `--identifier "tf.matt.${applicationName}" `
+               + `--version "${applicationVersion}" `
+               + `--scripts ${path.join(packagingOutputDir, "scripts")} `
                + `${path.join(BUILD_PATH, componentName)}`
       , { shell: true });
 
     // Distribution XML file
-    const distFilePath = path.join(packagingDir, "distribution.xml");
+    const distFilePath = path.join(packagingOutputDir, "distribution.xml");
 
     // Build installer package
     spawnSync(
@@ -170,7 +199,7 @@ function packageDarwin () {
 }
 
 function packageLinuxDeb () {
-    const installerName = "fx_cast_bridge.deb";
+    const installerName = `${applicationName}.deb`;
 
     // Create root
     const rootPath = path.join(BUILD_PATH, "root");
@@ -186,9 +215,26 @@ function packageLinuxDeb () {
     fs.moveSync(path.join(BUILD_PATH, manifestName)
           , path.join(rootManifestPath, manifestName));
 
+
+    const controlDir = path.join(__dirname, "../packaging/linux/deb/DEBIAN/");
+    const controlOutputDir = path.join(rootPath, path.basename(controlDir));
+    const controlFilePath = path.join(controlOutputDir, "control");
+
     // Copy package info to root
-    fs.copySync(path.join(__dirname, "../packaging/linux/deb/DEBIAN/")
-          , path.join(rootPath, "DEBIAN"));
+    fs.copySync(controlDir, controlOutputDir);
+
+    const view = {
+        // Debian package names can't contain underscores
+        packageName: applicationName.replace(/_/g, "-")
+      , applicationName
+      , applicationVersion
+    };
+
+    // Do templating on control file
+    fs.writeFileSync(controlFilePath
+          , mustache.render(
+                fs.readFileSync(controlFilePath).toString()
+              , view));
 
     // Build .deb package
     spawnSync(
@@ -201,10 +247,27 @@ function packageLinuxDeb () {
 
 function packageLinuxRpm () {
     const specPath = path.join(__dirname
-          , "../packaging/linux/rpm/fx_cast_bridge.spec");
+          , "../packaging/linux/rpm/package.spec");
+
+    const specOutputPath = path.join(BUILD_PATH, path.basename(specPath));
+
+    const view = {
+        packageName: applicationName
+      , applicationName
+      , applicationVersion
+      , executablePath: executablePath["linux"]
+      , manifestPath: manifestPath["linux"]
+      , executableName: executableName["linux"]
+      , manifestName
+    };
+
+    fs.writeFileSync(specOutputPath
+          , mustache.render(
+                fs.readFileSync(specPath).toString()
+              , view));
 
     spawnSync(
-        `rpmbuild -bb ${specPath} `
+        `rpmbuild -bb ${specOutputPath} `
                + `--define "_distdir ${BUILD_PATH}" `
                + `--define "_rpmdir ${BUILD_PATH}" `
       , { shell: true });

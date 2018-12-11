@@ -25,10 +25,12 @@ module.exports = (env) => ({
     }
   , plugins: [
         new webpack.DefinePlugin({
-            "EXTENSION_NAME"    : JSON.stringify(env.extensionName)
-          , "EXTENSION_ID"      : JSON.stringify(env.extensionId)
-          , "EXTENSION_VERSION" : JSON.stringify(env.extensionVersion)
-          , "MIRRORING_APP_ID"  : JSON.stringify(env.mirroringAppId)
+            "EXTENSION_NAME"      : JSON.stringify(env.extensionName)
+          , "EXTENSION_ID"        : JSON.stringify(env.extensionId)
+          , "EXTENSION_VERSION"   : JSON.stringify(env.extensionVersion)
+          , "MIRRORING_APP_ID"    : JSON.stringify(env.mirroringAppId)
+          , "APPLICATION_NAME"    : JSON.stringify(env.applicationName)
+          , "APPLICATION_VERSION" : JSON.stringify(env.applicationVersion)
         })
 
         // Copy static assets
@@ -43,7 +45,9 @@ module.exports = (env) => ({
                         .replace("EXTENSION_NAME", env.extensionName)
                         .replace("EXTENSION_ID", env.extensionId)
                         .replace("EXTENSION_VERSION", env.extensionVersion)
-                        .replace("MIRRORING_APP_ID", env.mirroringAppId));
+                        .replace("MIRRORING_APP_ID", env.mirroringAppId)
+                        .replace("APPLICATION_NAME", env.applicationName)
+                        .replace("APPLICATION_VERSION", env.applicationVersion));
                 }
 
                 return content;

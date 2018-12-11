@@ -1,17 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
 <installer-gui-script minSpecVersion="1">
-    <title>fx_cast Bridge</title>
+    <title>{{applicationName}}</title>
     <domains enable_anywhere="false" enable_currentUserHome="true" enable_localSystem="true" />
-    <pkg-ref id="tf.matt.fx_cast_bridge"/>
+    <pkg-ref id="{{packageId}}"/>
     <options customize="never" require-scripts="false"/>
     <choices-outline>
         <line choice="default">
-            <line choice="tf.matt.fx_cast_bridge"/>
+            <line choice="{{packageId}}"/>
         </line>
     </choices-outline>
     <choice id="default"/>
-    <choice id="tf.matt.fx_cast_bridge" visible="false">
-        <pkg-ref id="tf.matt.fx_cast_bridge"/>
+    <choice id="{{packageId}}" visible="false">
+        <pkg-ref id="{{packageId}}"/>
     </choice>
-    <pkg-ref id="tf.matt.fx_cast_bridge" version="0.0.1" onConclusion="none">fx_cast_bridge_default.pkg</pkg-ref>
+    <pkg-ref id="{{packageId}}" onConclusion="none">{{componentName}}</pkg-ref>
 </installer-gui-script>

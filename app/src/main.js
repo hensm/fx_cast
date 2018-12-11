@@ -8,6 +8,9 @@ import * as transforms from "./transforms";
 import Media from "./Media";
 import Session from "./Session";
 
+import { __applicationName
+       , __applicationVersion } from "../package.json";
+
 
 const browser = createBrowser(tcp("googlecast"));
 
@@ -94,6 +97,15 @@ async function handleMessage (message) {
 
 
     switch (message.subject) {
+        case "bridge:initialize": {
+            const extensionVersion = message.data;
+
+            return {
+                subject: "main:bridgeInitialized"
+              , data: __applicationVersion
+            };
+        };
+
         case "bridge:discover":
             browser.discover();
             break;

@@ -3,6 +3,9 @@
 import defaultOptions from "./options/defaultOptions";
 import messageRouter  from "./messageRouter";
 
+import semver from "semver";
+
+
 const _ = browser.i18n.getMessage;
 
 
@@ -277,7 +280,7 @@ browser.menus.onClicked.addListener(async (info, tab) => {
 
             await browser.tabs.executeScript(tab.id, {
                 code: `let selectedMedia = "${info.pageUrl ? "tab" : "screen"}";
-                       let FX_CAST_RECEIVER_APP_ID = "${options.mirroringEnabled}";`
+                       let FX_CAST_RECEIVER_APP_ID = "${options.mirroringAppId}";`
               , frameId
             });
 
@@ -329,19 +332,25 @@ function initBridge (tabId, frameId) {
         bridgeMap.delete(tabId);
     }
 
-    const port = browser.runtime.connectNative("fx_cast_bridge");
+    const port = browser.runtime.connectNative(APPLICATION_NAME);
 
     if (port.error) {
-        console.error("Failed connect to fx_cast_bridge:", port.error.message);
+        console.error(`Failed connect to ${APPLICATION_NAME}:`, port.error.message);
     } else {
         bridgeMap.set(tabId, port);
     }
 
+    // Start version handoff
+    port.postMessage({
+        subject: "bridge:initialize"
+      , data: EXTENSION_VERSION
+    });
+
     port.onDisconnect.addListener(p => {
         if (p.error) {
-            console.error("fx_cast_bridge disconnected:", p.error.message);
+            console.error(`${APPLICATION_NAME} disconnected:`, p.error.message);
         } else {
-            console.log("fx_cast_bridge disconnected");
+            console.log(`${APPLICATION_NAME} disconnected`);
         }
 
         bridgeMap.delete(tabId);
@@ -414,17 +423,39 @@ async function openPopup (tabId) {
 
 
 messageRouter.register("main", async (message, sender) => {
-    const tabId = sender.tab.id;
+    const tabId = sender && sender.tab.id;
 
     switch (message.subject) {
-        case "main:initialize":
+        case "main:initialize": {
             initBridge(tabId, sender.tab.frameId);
             break;
+        };
+
+        case "main:bridgeInitialized": {
+            const applicationVersion = message.data;
+
+            /**
+             * Compare installed bridge version to the version the
+             * extension was built alongside and is known to be
+             * compatible with.
+             *
+             * TODO: Determine compatibility with semver and enforce/notify
+             * user.
+             */
+            if (applicationVersion !== APPLICATION_VERSION) {
+                console.error(`Expecting ${APPLICATION_NAME} v${APPLICATION_VERSION}, found v${applicationVersion}.`
+                      , semver.lt(applicationVersion, APPLICATION_VERSION)
+                            ? "Try updating the native app to the latest version."
+                            : "Try updating the extension to the latest version");
+            }
+
+            break;
+        };
 
         case "main:openPopup": {
             await openPopup(tabId);
             break;
-        }
+        };
     }
 });
 

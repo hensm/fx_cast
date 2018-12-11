@@ -1,5 +1,5 @@
-Package: fx-cast-bridge
-Version: 0.0.1
+Package: {{packageName}}
+Version: {{applicationVersion}}
 Priority: optional
 Architecture: amd64
-Description: fx_cast Bridge application
+Description: {{applicationName}}

@@ -5,7 +5,8 @@ const minimist = require("minimist");
 
 const { manifestName
       , manifestPath
-      , DIST_PATH } = require("./lib/paths");
+      , DIST_PATH
+      , WIN_REGISTRY_KEY } = require("./lib/paths");
 
 
 const argv = minimist(process.argv.slice(2), {
@@ -17,7 +18,6 @@ const argv = minimist(process.argv.slice(2), {
 
 
 const CURRENT_MANIFEST_PATH = path.join(DIST_PATH, manifestName);
-const WIN_REGISTRY_KEY = "fx_cast_bridge";
 
 
 if (!fs.existsSync(CURRENT_MANIFEST_PATH) && !argv.remove) {

@@ -1,4 +1,9 @@
 {
+    "__extensionName": "fx_cast",
+    "__extensionId": "fx_cast@matt.tf",
+    "__extensionVersion": "0.0.1",
+    "__mirroringAppId": "19A6F4AE",
+
     "scripts": {
         "build": "node build.js",
         "package": "node build.js --package",

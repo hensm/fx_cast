@@ -3,7 +3,7 @@
 # If the target location isn't root, we need to rewrite
 # the manifest path to point to the user directory.
 if [ "$2" != "/" ]; then
-	manifestPath=$2"/Library/Application Support/Mozilla/NativeMessagingHosts/fx_cast_bridge.json"
+	manifestPath=$2"/Library/Application Support/Mozilla/NativeMessagingHosts/{{{manifestName}}}"
 	sed -i.bak 's,"path": "/Library,"path": "'$2'/Library,g' "$manifestPath"
 	rm  "$manifestPath.bak"
 fi

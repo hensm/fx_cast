@@ -4,6 +4,9 @@ const minimist = require("minimist");
 const webpack = require("webpack");
 const webExt = require("web-ext").default;
 
+const package = require("./package.json");
+const appPackage = require("../app/package.json");
+
 
 const DIST_PATH = path.join(__dirname, "../dist/ext");
 const UNPACKED_PATH = path.join(DIST_PATH, "unpacked");
@@ -13,10 +16,10 @@ const argv = minimist(process.argv.slice(2), {
     boolean: [ "package", "watch" ]
   , string: [ "mirroringAppId", "mode" ]
   , default: {
-        package: false             // Should package with web-ext
-      , watch: false               // Should run webpack in watch mode
-      , mirroringAppId: "19A6F4AE" // Chromecast mirroring receiver app ID
-      , mode: "development"        // webpack mode
+        package: false                           // Should package with web-ext
+      , watch: false                             // Should run webpack in watch mode
+      , mirroringAppId: package.__mirroringAppId // Chromecast receiver app ID
+      , mode: "development"                      // webpack mode
     }
 });
 
@@ -41,9 +44,11 @@ const webpackConfig = require("./webpack.config.js")({
         ? UNPACKED_PATH
         : DIST_PATH
 
-  , extensionName: "fx_cast"
-  , extensionId: "fx_cast@matt.tf"
-  , extensionVersion: "0.0.1"
+  , extensionName: package.__extensionName
+  , extensionId: package.__extensionId
+  , extensionVersion: package.__extensionVersion
+  , applicationName: appPackage.__applicationName
+  , applicationVersion: appPackage.__applicationVersion
   , mirroringAppId: argv.mirroringAppId
 });
 

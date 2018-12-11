@@ -16,6 +16,7 @@
     "devDependencies": {
         "fs-extra": "^7.0.1",
         "jasmine": "^3.3.0",
-        "selenium-webdriver": "^4.0.0-alpha.1"
+        "selenium-webdriver": "^4.0.0-alpha.1",
+        "semver": "^5.6.0"
     }
 }

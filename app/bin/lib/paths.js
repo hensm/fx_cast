@@ -1,23 +1,30 @@
 const path = require("path");
 
+const { __applicationName
+      , __applicationDirectoryName
+      , __applicationExecutableName } = require("../../package.json");
+
+
 exports.DIST_PATH = path.join(__dirname, "../../../dist/app");
 
+exports.WIN_REGISTRY_KEY = __applicationName;
+
 exports.executableName = {
-    win32: "bridge.exe"
-  , darwin: "bridge"
-  , linux: "bridge"
+    win32: `${__applicationExecutableName}.exe`
+  , darwin: __applicationExecutableName
+  , linux: __applicationExecutableName
 };
 
 exports.executablePath = {
-    win32: "C:\\Program Files\\fx_cast\\"
-  , darwin: "/Library/Application Support/fx_cast/"
-  , linux: "/opt/fx_cast/"
+    win32: `C:\\Program Files\\${__applicationDirectoryName}\\`
+  , darwin: `/Library/Application Support/${__applicationDirectoryName}/`
+  , linux: `/opt/${__applicationDirectoryName}/`
 };
 
-exports.manifestName = "fx_cast_bridge.json";
+exports.manifestName = `${__applicationName}.json`;
 
 exports.manifestPath = {
-    win32: "C:\\Program Files\\fx_cast\\"
+    win32: `C:\\Program Files\\${__applicationDirectoryName}\\`
   , darwin: "/Library/Application Support/Mozilla/NativeMessagingHosts/"
   , linux: "/usr/lib/mozilla/native-messaging-hosts/"
 };
