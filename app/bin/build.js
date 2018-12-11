@@ -11,6 +11,8 @@ const { exec: pkgExec } = require("pkg");
 const { __applicationName: applicationName
       , __applicationVersion: applicationVersion } = require("../package.json");
 
+const { __extensionId: extensionId } = require("../../ext/package.json");
+
 const { executableName
       , executablePath
       , manifestName
@@ -47,11 +49,18 @@ async function build () {
     spawnSync(`babel src -d ${BUILD_PATH} --copy-files `
       , { shell: true });
 
-    // Add either installed path or dist path to app manifest
-    const manifest = JSON.parse(fs.readFileSync(manifestName, "utf8"));
-    manifest.path = argv.package
-        ? path.join(executablePath[argv.platform], executableName[argv.platform])
-        : path.join(DIST_PATH, executableName[argv.platform]);
+    // Create app manifest
+    const manifest = {
+        "name": applicationName
+      , "description": ""
+      , "type": "stdio"
+      , "allowed_extensions": [ extensionId ]
+      , "path": argv.package
+            // Add either installed path or dist path
+            ? path.join(executablePath[argv.platform]
+                      , executableName[argv.platform])
+            : path.join(DIST_PATH, executableName[argv.platform])
+    };
 
     // Write manifest
     fs.writeFileSync(path.join(BUILD_PATH, manifestName)
@@ -64,9 +73,8 @@ async function build () {
     }
 
 
-    const pkgInfo = {
-        name: "bridge"
-      , bin: "main.js"
+    const pkgManifest = {
+        bin: "main.js"
       , pkg: {
             // Workaround for pkg asset detection
             // https://github.com/thibauts/node-castv2/issues/46
@@ -75,7 +83,7 @@ async function build () {
     };
 
     fs.writeFileSync(path.join(BUILD_PATH, "package.json")
-          , JSON.stringify(pkgInfo))
+          , JSON.stringify(pkgManifest))
 
     // Package executable
     await pkgExec([
@@ -111,14 +119,14 @@ async function build () {
 function package (platform) {
     switch (platform) {
         case "darwin":
-            return packageDarwin();
+            return packageDarwin(platform);
 
         case "linux":
             switch (argv.packageType) {
                 case "deb":
-                    return packageLinuxDeb();
+                    return packageLinuxDeb(platform);
                 case "rpm":
-                    return packageLinuxRpm();
+                    return packageLinuxRpm(platform);
             }
 
         case "win32":
@@ -129,7 +137,7 @@ function package (platform) {
     }
 }
 
-function packageDarwin () {
+function packageDarwin (platform) {
     const installerName = `${applicationName}.pkg`;
     const componentName = `${applicationName}_component.pkg`;
 
@@ -138,16 +146,16 @@ function packageDarwin () {
 
     // Create pkgbuild root
     const rootPath = path.join(BUILD_PATH, "root");
-    const rootExecutablePath = path.join(rootPath, executablePath["darwin"]);
-    const rootManifestPath = path.join(rootPath, manifestPath["darwin"]);
+    const rootExecutablePath = path.join(rootPath, executablePath[platform]);
+    const rootManifestPath = path.join(rootPath, manifestPath[platform]);
 
     // Create install locations
     fs.ensureDirSync(rootExecutablePath, { recursive: true });
     fs.ensureDirSync(rootManifestPath, { recursive: true });
 
     // Move files to root
-    fs.moveSync(path.join(BUILD_PATH, executableName["darwin"])
-          , path.join(rootExecutablePath, executableName["darwin"]));
+    fs.moveSync(path.join(BUILD_PATH, executableName[platform])
+          , path.join(rootExecutablePath, executableName[platform]));
     fs.moveSync(path.join(BUILD_PATH, manifestName)
           , path.join(rootManifestPath, manifestName));
 
@@ -198,20 +206,20 @@ function packageDarwin () {
 
 }
 
-function packageLinuxDeb () {
+function packageLinuxDeb (platform) {
     const installerName = `${applicationName}.deb`;
 
     // Create root
     const rootPath = path.join(BUILD_PATH, "root");
-    const rootExecutablePath = path.join(rootPath, executablePath["linux"]);
-    const rootManifestPath = path.join(rootPath, manifestPath["linux"]);
+    const rootExecutablePath = path.join(rootPath, executablePath[platform]);
+    const rootManifestPath = path.join(rootPath, manifestPath[platform]);
 
     fs.ensureDirSync(rootExecutablePath, { recursive: true });
     fs.ensureDirSync(rootManifestPath, { recursive: true });
 
     // Move files to root
-    fs.moveSync(path.join(BUILD_PATH, executableName["linux"])
-          , path.join(rootExecutablePath, executableName["linux"]));
+    fs.moveSync(path.join(BUILD_PATH, executableName[platform])
+          , path.join(rootExecutablePath, executableName[platform]));
     fs.moveSync(path.join(BUILD_PATH, manifestName)
           , path.join(rootManifestPath, manifestName));
 
@@ -245,7 +253,7 @@ function packageLinuxDeb () {
     return installerName;
 }
 
-function packageLinuxRpm () {
+function packageLinuxRpm (platform) {
     const specPath = path.join(__dirname
           , "../packaging/linux/rpm/package.spec");
 
@@ -255,9 +263,9 @@ function packageLinuxRpm () {
         packageName: applicationName
       , applicationName
       , applicationVersion
-      , executablePath: executablePath["linux"]
-      , manifestPath: manifestPath["linux"]
-      , executableName: executableName["linux"]
+      , executablePath: executablePath[platform]
+      , manifestPath: manifestPath[platform]
+      , executableName: executableName[platform]
       , manifestName
     };
 
