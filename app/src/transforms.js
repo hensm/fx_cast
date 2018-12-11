@@ -37,7 +37,7 @@ const decode = new Transform({
         if (!this.hasOwnProperty("buf")
                 && !this.hasOwnProperty("message_length")) {
 
-            this.buf = new Buffer(0);
+            this.buf = Buffer.alloc(0);
             this.message_length = null;
         }
 
@@ -88,8 +88,8 @@ const encode = new Transform({
     writableObjectMode: true
 
   , transform (chunk, encoding, callback) {
-        const message_length = new Buffer(4);
-        const message = new Buffer(JSON.stringify(chunk));
+        const message_length = Buffer.alloc(4);
+        const message = Buffer.from(JSON.stringify(chunk));
 
         // Write message length
         message_length.writeUInt32LE(message.length, 0);
