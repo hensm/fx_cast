@@ -52,6 +52,7 @@
 
 .bridge__info {
     display: flex;
+    padding-inline-start: 25px;
 }
 
 .bridge__status {
@@ -59,8 +60,15 @@
     display: flex;
     flex-basis: min-content;
     flex-direction: column;
-    margin-inline-end: 50px;
-    margin-inline-start: 25px;
+    margin-inline-end: 25px;
+}
+
+.bridge__info--not-found {
+    padding-inline-end: 25px;
+}
+.bridge__info--found .bridge__status {
+    border-inline-end: 1px solid var(--border-color);
+    padding-inline-end: 25px;
 }
 
 .bridge__status-text {

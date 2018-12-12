@@ -51,8 +51,8 @@
   , "optionsBridgeCompatible": {
         "message": "COMPATIBLE"
     }
-  , "optionsBridgeMaybeCompatible": {
-        "message": "MAYBE COMPATIBLE"
+  , "optionsBridgeLikelyCompatible": {
+        "message": "LIKELY COMPATIBLE"
     }
   , "optionsBridgeIncompatible": {
         "message": "INCOMPATIBLE"

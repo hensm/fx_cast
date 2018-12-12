@@ -185,7 +185,7 @@ class App extends Component {
                                     [ "assets/icons8-cancel-120.png"
                                       , _("optionsBridgeNotFoundStatusText") ]
                                 } else {
-                                    if (bridgeInfo.isVersionExact) {
+                                    if (bridgeInfo.isVersionCompatible) {
                                         [ "assets/icons8-ok-120.png"
                                           , _("optionsBridgeFoundStatusText") ]
                                     } else {
@@ -228,7 +228,7 @@ class App extends Component {
                                                         if (bridgeInfo.isVersionExact) {
                                                             _("optionsBridgeCompatible")
                                                         } else {
-                                                            _("optionsBridgeMaybeCompatible")
+                                                            _("optionsBridgeLikelyCompatible")
                                                         }
                                                     } else {
                                                         _("optionsBridgeIncompatible")
