@@ -12,12 +12,18 @@
 }
 
 #buttons {
+    display: flex;
+    align-items: center;
     align-self: flex-end;
     margin-block-start: 5px;
 }
 
 #buttons > :not(:last-child) {
     margin-inline-end: 5px;
+}
+
+#status-line {
+    color: graytext;
 }
 
 

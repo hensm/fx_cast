@@ -119,7 +119,10 @@
   , "optionsReset": {
         "message": "Restore Defaults"
     }
-  , "optionsSubmit": {
-        "message": "Submit"
+  , "optionsSave": {
+        "message": "Save"
+    }
+  , "optionsSaved": {
+        "message": "Saved!"
     }
 }

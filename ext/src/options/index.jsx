@@ -46,6 +46,7 @@ class App extends Component {
           , bridgeInfo: null
           , bridgeLoading: true
           , isFormValid: true
+          , hasSaved: false
         };
 
         this.handleReset = this.handleReset.bind(this);
@@ -103,6 +104,16 @@ class App extends Component {
                     alteredOptions.push(key);
                 }
             }
+
+            this.setState({
+                hasSaved: true
+            }, () => {
+                window.setTimeout(() => {
+                    this.setState({
+                        hasSaved: false
+                    });
+                }, 1000)
+            });
 
             // Send update message / event
             browser.runtime.sendMessage({
@@ -270,13 +281,20 @@ class App extends Component {
                     </fieldset>
 
                     <div id="buttons">
+                        <div id="status-line">
+                            { do {
+                                if (this.state.hasSaved) {
+                                    _("optionsSaved")
+                                }
+                            }}
+                        </div>
                         <button onClick={ this.handleReset }>
                             { _("optionsReset") }
                         </button>
                         <button type="submit"
                                 default
                                 disabled={ !this.state.isFormValid }>
-                            { _("optionsSubmit") }
+                            { _("optionsSave") }
                         </button>
                     </div>
                 </form>
