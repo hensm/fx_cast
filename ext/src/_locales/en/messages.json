@@ -24,6 +24,9 @@
   , "optionsBridgeFoundStatusText": {
         "message": "Bridge found"
     }
+  , "optionsBridgeIssueStatusText": {
+        "message": "Bridge issue"
+    }
   , "optionsBridgeNotFoundStatusText": {
         "message": "Bridge not found. Try downloading and installing the latest version."
     }
@@ -44,6 +47,9 @@
     }
   , "optionsBridgeCompatible": {
         "message": "COMPATIBLE"
+    }
+  , "optionsBridgeMaybeCompatible": {
+        "message": "MAYBE COMPATIBLE"
     }
   , "optionsBridgeIncompatible": {
         "message": "INCOMPATIBLE"

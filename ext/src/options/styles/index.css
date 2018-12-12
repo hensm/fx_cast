@@ -50,14 +50,6 @@
     width: 100%;
 }
 
-.bridge__missing {
-    background-color: #d70022;
-    border-radius: 5px;
-    color: white;
-    padding: 5px;
-    margin-top: 5px;
-}
-
 .bridge__info {
     display: flex;
 }

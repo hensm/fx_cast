@@ -14,24 +14,36 @@ export default async function getBridgeInfo () {
     }
 
     /**
-     * Compare installed bridge version to the version the
-     * extension was built alongside and is known to be
-     * compatible with.
-     *
-     * TODO: Determine compatibility with semver and enforce/notify
-     * user.
+     * If the target version is above 0.x.x range, API is stable
+     * and versions with minor or patch level changes should be
+     * compatible.
      */
-    if (applicationVersion !== APPLICATION_VERSION) {
+    const isVersionCompatible =
+            semver.eq(applicationVersion, APPLICATION_VERSION)
+         || semver.diff(applicationVersion, APPLICATION_VERSION) !== "major"
+         && semver.major(APPLICATION_VERSION) !== 0;
+
+    const isVersionExact = semver.eq(applicationVersion, APPLICATION_VERSION);
+    const isVersionOlder = semver.lt(applicationVersion, APPLICATION_VERSION);
+    const isVersionNewer = semver.gt(applicationVersion, APPLICATION_VERSION);
+
+    // Print compatibility info to console
+    if (!isVersionCompatible) {
         console.error(`Expecting ${APPLICATION_NAME} v${APPLICATION_VERSION}, found v${applicationVersion}.`
-              , semver.lt(applicationVersion, APPLICATION_VERSION)
+              , isVersionOlder
                     ? "Try updating the native app to the latest version."
                     : "Try updating the extension to the latest version");
     }
 
     return {
-        version: applicationVersion
-      , isVersionCompatible: applicationVersion === APPLICATION_VERSION
-      , isVersionOlder: semver.lt(applicationVersion, APPLICATION_VERSION)
-      , isVersionNewer: semver.gt(applicationVersion, APPLICATION_VERSION)
+        name: APPLICATION_NAME
+      , version: applicationVersion
+      , expectedVersion: APPLICATION_VERSION
+
+        // Version info
+      , isVersionExact
+      , isVersionCompatible
+      , isVersionOlder
+      , isVersionNewer
     };
 }

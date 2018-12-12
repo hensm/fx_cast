@@ -180,18 +180,29 @@ class App extends Component {
                                 ? "bridge__info--found"
                                 : "bridge__info--not-found"}`;
 
+                            const [ statusIcon, statusText ] = do {
+                                if (!bridgeInfo) {
+                                    [ "assets/icons8-cancel-120.png"
+                                      , _("optionsBridgeNotFoundStatusText") ]
+                                } else {
+                                    if (bridgeInfo.isVersionExact) {
+                                        [ "assets/icons8-ok-120.png"
+                                          , _("optionsBridgeFoundStatusText") ]
+                                    } else {
+                                        [ "assets/icons8-warn-120.png"
+                                          , _("optionsBridgeIssueStatusText") ]
+                                    }
+                                }
+                            };
+
                             <div className={bridgeInfoClasses}>
                                 <div className="bridge__status">
                                     <img className="bridge__status-icon"
                                          width="60" height="60"
-                                         src={ bridgeInfo
-                                                ? "assets/icons8-ok-120.png"
-                                                : "assets/icons8-cancel-120.png" } />
+                                         src={ statusIcon } />
 
                                     <h2 className="bridge__status-text">
-                                        { bridgeInfo
-                                            ? _("optionsBridgeFoundStatusText")
-                                            : _("optionsBridgeNotFoundStatusText") }
+                                        { statusText }
                                     </h2>
                                 </div>
 
@@ -203,14 +214,22 @@ class App extends Component {
                                         </tr>
                                         <tr>
                                             <th>{ _("optionsBridgeStatsExpectedVersion") }</th>
-                                            <td>{ APPLICATION_VERSION }</td>
+                                            <td>{ bridgeInfo.expectedVersion }</td>
                                         </tr>
                                         <tr>
                                             <th>{ _("optionsBridgeStatsCompatibility") }</th>
                                             <td>
-                                                { bridgeInfo.isVersionCompatible
-                                                    ? _("optionsBridgeCompatible")
-                                                    : _("optionsBridgeIncompatible") }
+                                                { do {
+                                                    if (bridgeInfo.isVersionCompatible) {
+                                                        if (bridgeInfo.isVersionExact) {
+                                                            _("optionsBridgeCompatible")
+                                                        } else {
+                                                            _("optionsBridgeMaybeCompatible")
+                                                        }
+                                                    } else {
+                                                        _("optionsBridgeIncompatible")
+                                                    }
+                                                }}
                                             </td>
                                         </tr>
                                         <tr>
