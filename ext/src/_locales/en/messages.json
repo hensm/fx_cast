@@ -33,6 +33,9 @@
   , "optionsBridgeInfo": {
         "message": "Bridge info:"
     }
+  , "optionsBridgeStatsName": {
+        "message": "Name:"
+    }
   , "optionsBridgeStatsVersion": {
         "message": "Version:"
     }

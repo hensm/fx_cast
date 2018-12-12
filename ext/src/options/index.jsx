@@ -209,6 +209,10 @@ class App extends Component {
                                 { do { if (bridgeInfo) {
                                     <table className="bridge__stats">
                                         <tr>
+                                            <th>{ _("optionsBridgeStatsName") }</th>
+                                            <td>{ bridgeInfo.name }</td>
+                                        </tr>
+                                        <tr>
                                             <th>{ _("optionsBridgeStatsVersion") }</th>
                                             <td>{ bridgeInfo.version }</td>
                                         </tr>
