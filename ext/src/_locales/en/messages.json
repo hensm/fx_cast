@@ -18,32 +18,44 @@
     }
 
 
-  , "optionsBridgeCategoryName": {
-        "message": "Bridge"
-    }
-  , "optionsBridgeCategoryDescription": {
-        "message": "Native bridge application."
-    }
   , "optionsBridgeLoading": {
         "message": "Loading bridge info..."
     }
-  , "optionsBridgeMissing": {
-        "message": "Bridge application not found. Try downloading and installing the latest version."
+  , "optionsBridgeFoundStatusText": {
+        "message": "Bridge found"
+    }
+  , "optionsBridgeNotFoundStatusText": {
+        "message": "Bridge not found. Try downloading and installing the latest version."
     }
   , "optionsBridgeInfo": {
         "message": "Bridge info:"
     }
-  , "optionsBridgeStatusCompatible": {
-        "message": "STATUS: COMPATIBLE"
+  , "optionsBridgeStatsVersion": {
+        "message": "Version:"
     }
-  , "optionsBridgeStatusIncompatible": {
-        "message": "STATUS: INCOMPATIBLE"
+  , "optionsBridgeStatsExpectedVersion": {
+        "message": "Expected version:"
     }
-  , "optionsBridgeOlder": {
-        "message": "Bridge version older than expected, try updating bridge to the latest bridge version."
+  , "optionsBridgeStatsCompatibility": {
+        "message": "Compatibility:"
     }
-  , "optionsBridgeNewer": {
-        "message": "Bridge version newer than expected, try updating extension to the latest bridge version."
+  , "optionsBridgeStatsRecommendedAction": {
+        "message": "Recommended action:"
+    }
+  , "optionsBridgeCompatible": {
+        "message": "COMPATIBLE"
+    }
+  , "optionsBridgeIncompatible": {
+        "message": "INCOMPATIBLE"
+    }
+  , "optionsBridgeOlderAction": {
+        "message": "Bridge version older than expected, try updating bridge to the latest version."
+    }
+  , "optionsBridgeNewerAction": {
+        "message": "Bridge version newer than expected, try updating extension to the latest version."
+    }
+  , "optionsBridgeNoAction": {
+        "message": "No action needed."
     }
 
   , "optionsMediaCategoryName": {
@@ -66,7 +78,7 @@
         "message": "Local media casting enabled"
     }
   , "optionsLocalMediaServerPort": {
-        "message": "HTTP server port"
+        "message": "HTTP server port:"
     }
 
   , "optionsUserAgentWhitelistCategoryName": {
@@ -79,7 +91,7 @@
         "message": "Site whitelist enabled"
     }
   , "optionsUserAgentWhitelistContent": {
-        "message": "Match patterns (newline-separated)"
+        "message": "Match patterns (newline-separated):"
     }
   , "optionsUserAgentWhitelistBasicView": {
         "message": "Basic View"
@@ -113,7 +125,7 @@
         "message": "Screen mirroring enabled"
     }
   , "optionsMirroringAppId": {
-        "message": "Receiver app ID"
+        "message": "Receiver app ID:"
     }
 
   , "optionsReset": {

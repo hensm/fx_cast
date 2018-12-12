@@ -28,7 +28,7 @@
 
 
 .bridge {
-    margin-top: 20px;
+    margin-bottom: 20px;
 }
 
 .bridge,
@@ -58,14 +58,52 @@
     margin-top: 5px;
 }
 
-.bridge__found {
-    margin-top: 5px;
+.bridge__info {
+    display: flex;
 }
 
-.bridge__info {
-    height: 150px;
-    margin-inline-start: 5px;
-    width: 80%;
+.bridge__status {
+    align-items: center;
+    display: flex;
+    flex-basis: min-content;
+    flex-direction: column;
+    margin-inline-end: 50px;
+    margin-inline-start: 25px;
+}
+
+.bridge__status-text {
+    margin: initial;
+    font-weight: 500;
+    font-size: 1.5em;
+    white-space: nowrap;
+}
+
+.bridge__info--not-found .bridge__status {
+    flex-direction: row;
+}
+.bridge__info--found .bridge__status-icon {
+    margin-block-end: 5px;
+}
+.bridge__info--not-found .bridge__status-icon {
+    margin-inline-end: 10px;
+}
+.bridge__info--not-found .bridge__status-text {
+    font-weight: normal;
+    white-space: normal;
+}
+
+.bridge__stats {
+    border-collapse: collapse;
+    border-spacing: 0;
+    width: max-content;
+}
+
+.bridge__stats th {
+    font-weight: 500;
+    padding-inline-end: 10px;
+    text-align: end;
+    white-space: nowrap;
+    vertical-align: top;
 }
 
 
@@ -73,7 +111,7 @@
     border: initial;
     display: grid;
     grid-template-columns: 150px 1fr;
-    grid-column-gap: 20px;
+    grid-column-gap: 10px;
     grid-row-gap: 5px;
     margin: initial;
     padding: 10px 0;
@@ -83,13 +121,13 @@
     color: graytext;
 }
 
-.category:not(:first-of-type) {
+#form > .category {
     border-top: 1px solid var(--border-color);
 }
 
 .category > .category {
     padding: 5px 0;
-    box-shadow: inset 6px 0 0 0 var(--border-color);
+    box-shadow: inset 2px 0 0 0 var(--border-color);
 }
 
 .category > .category > .category__name,
@@ -101,11 +139,19 @@
     float: left;
 }
 
+.category__name > h2 {
+    font-size: 1.15em;
+    font-weight: 500;
+    margin: initial;
+}
+
 .category__description {
     color: graytext;
     margin-top: initial;
+    max-width: 60ch;
 }
 
+.category__name,
 .category__description,
 .category .category {
     grid-column: span 2;

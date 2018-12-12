@@ -165,13 +165,84 @@ class App extends Component {
     render () {
         return (
             <div>
+
+                <div className="bridge">
+                    { do {
+                        if (this.state.bridgeLoading) {
+                            <div className="bridge__loading">
+                                { _("optionsBridgeLoading") }
+                                <progress></progress>
+                            </div>
+                        } else {
+                            const { bridgeInfo } = this.state;
+
+                            const bridgeInfoClasses = `bridge__info ${bridgeInfo
+                                ? "bridge__info--found"
+                                : "bridge__info--not-found"}`;
+
+                            <div className={bridgeInfoClasses}>
+                                <div className="bridge__status">
+                                    <img className="bridge__status-icon"
+                                         width="60" height="60"
+                                         src={ bridgeInfo
+                                                ? "assets/icons8-ok-120.png"
+                                                : "assets/icons8-cancel-120.png" } />
+
+                                    <h2 className="bridge__status-text">
+                                        { bridgeInfo
+                                            ? _("optionsBridgeFoundStatusText")
+                                            : _("optionsBridgeNotFoundStatusText") }
+                                    </h2>
+                                </div>
+
+                                { do { if (bridgeInfo) {
+                                    <table className="bridge__stats">
+                                        <tr>
+                                            <th>{ _("optionsBridgeStatsVersion") }</th>
+                                            <td>{ bridgeInfo.version }</td>
+                                        </tr>
+                                        <tr>
+                                            <th>{ _("optionsBridgeStatsExpectedVersion") }</th>
+                                            <td>{ APPLICATION_VERSION }</td>
+                                        </tr>
+                                        <tr>
+                                            <th>{ _("optionsBridgeStatsCompatibility") }</th>
+                                            <td>
+                                                { bridgeInfo.isVersionCompatible
+                                                    ? _("optionsBridgeCompatible")
+                                                    : _("optionsBridgeIncompatible") }
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <th>{ _("optionsBridgeStatsRecommendedAction") }</th>
+                                            <td>
+                                                { do {
+                                                    if (bridgeInfo.isVersionOlder) {
+                                                        _("optionsBridgeOlderAction")
+                                                    } else if (bridgeInfo.isVersionNewer) {
+                                                        _("optionsBridgeNewerAction")
+                                                    } else {
+                                                        _("optionsBridgeNoAction")
+                                                    }
+                                                }}
+                                            </td>
+                                        </tr>
+                                    </table>
+                                } else {
+                                    // TODO: Download links
+                                }}}
+                            </div>
+                        }
+                    }}
+                </div>
+
                 <form id="form" ref={ form => { this.form = form; }}
                         onSubmit={ this.handleFormSubmit }
                         onChange={ this.handleFormChange }>
 
                     <fieldset className="category">
                         <legend className="category__name">
-                            { _("optionsMediaCategoryName") }
+                            <h2>{ _("optionsMediaCategoryName") }</h2>
                         </legend>
                         <p className="category__description">
                             { _("optionsMediaCategoryDescription") }
@@ -190,7 +261,7 @@ class App extends Component {
                         <fieldset className="category"
                                   disabled={ !this.state.options.mediaEnabled }>
                             <legend className="category__name">
-                                { _("optionsLocalMediaCategoryName") }
+                                <h2>{ _("optionsLocalMediaCategoryName") }</h2>
                             </legend>
                             <p className="category__description">
                                 { _("optionsLocalMediaCategoryDescription") }
@@ -223,7 +294,7 @@ class App extends Component {
 
                     <fieldset className="category">
                         <legend className="category__name">
-                            { _("optionsMirroringCategoryName") }
+                            <h2>{ _("optionsMirroringCategoryName") }</h2>
                         </legend>
                         <p className="category__description">
                             { _("optionsMirroringCategoryDescription") }
@@ -253,7 +324,7 @@ class App extends Component {
 
                     <fieldset className="category">
                         <legend className="category__name">
-                            { _("optionsUserAgentWhitelistCategoryName") }
+                            <h2>{ _("optionsUserAgentWhitelistCategoryName") }</h2>
                         </legend>
                         <p className="category__description">
                             { _("optionsUserAgentWhitelistCategoryDescription") }
@@ -276,7 +347,7 @@ class App extends Component {
                             <EditableList data={ this.state.options.userAgentWhitelist }
                                           onChange={ this.handleWhitelistChange }
                                           itemPattern={ MATCH_PATTERN_REGEX }
-                                          itemPatternError={ this.getWhitelistItemPatternError }/>
+                                          itemPatternError={ this.getWhitelistItemPatternError } />
                         </div>
                     </fieldset>
 
@@ -298,47 +369,6 @@ class App extends Component {
                         </button>
                     </div>
                 </form>
-
-                <div className="bridge">
-                    { do {
-                        if (this.state.bridgeLoading) {
-                            <div className="bridge__loading">
-                                { _("optionsBridgeLoading") }
-                                <progress></progress>
-                            </div>
-                        } else if (this.state.bridgeInfo) {
-                            const bridgeInfo = this.state.bridgeInfo;
-                            let debugInfo =
-                                `${bridgeInfo.isVersionCompatible
-                                    ? _("optionsBridgeStatusCompatible")
-                                    : _("optionsBridgeStatusIncompatible")}\n\n`
-                              + `${APPLICATION_NAME} v${bridgeInfo.version}\n`
-                              + `Expected: ${APPLICATION_VERSION}\n`
-                              + `Found: ${bridgeInfo.version}\n`;
-
-                            if (bridgeInfo.isVersionOlder) {
-                                debugInfo += `\n${_("optionsBridgeOlder")}`
-                            }
-                            if (bridgeInfo.isVersionNewer) {
-                                debugInfo += `\n${_("optionsBridgeNewer")}`
-                            }
-
-                            <div>
-                                { _("optionsBridgeInfo") }
-                                <div className="bridge__found">
-                                    <textarea className="bridge__info">{ debugInfo }</textarea>
-                                </div>
-                            </div>
-                        } else {
-                            <div>
-                                { _("optionsBridgeInfo") }
-                                <div className="bridge__missing">
-                                    { _("optionsBridgeMissing") }
-                                </div>
-                            </div>
-                        }
-                    }}
-                </div>
             </div>
         );
     }
