@@ -26,6 +26,8 @@ export default class EditableListItem extends Component {
         this.setState({
             editing: true
           , editValue: this.props.text
+        }, () => {
+            this.input.focus();
         });
     }
 
@@ -65,14 +67,17 @@ export default class EditableListItem extends Component {
     }
 
     render () {
+        const selected = this.state.editing
+            ? "editable-list__item--selected" : "";
+
         return (
-            <li className="editable-list__item">
+            <li className={`editable-list__item ${selected}`}>
                 <div className="editable-list__title"
                      onDoubleClick={ this.handleEditBegin }>
                     { this.state.editing
                         ? <input className="editable-list__edit-field"
                                  type="text"
-                                 autoFocus
+                                 ref={ input => this.input = input }
                                  value={ this.state.editValue }
                                  onBlur={ this.handleEditEnd }
                                  onChange={ this.handleInputChange }

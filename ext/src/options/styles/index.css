@@ -1,3 +1,7 @@
+:root {
+    --border-color: rgb(225, 225, 225);;
+}
+
 *:invalid {
     box-shadow: 0 0 1.5px 1px red;
 }
@@ -74,18 +78,12 @@
 }
 
 .category:not(:first-of-type) {
-    border-top: 1px solid rgb(225, 225, 225);
+    border-top: 1px solid var(--border-color);
 }
 
 .category > .category {
-    background: rgba(235, 235, 235);
-    border-radius: 3px;
-    padding: 10px 0;
-    box-shadow: inset 6px 0 0 0 rgba(0, 0, 0, 0.1);
-}
-
-.category > .category:disabled {
-    background: rgba(245, 245, 245);
+    padding: 5px 0;
+    box-shadow: inset 6px 0 0 0 var(--border-color);
 }
 
 .category > .category > .category__name,
@@ -130,7 +128,9 @@
 
 
 .editable-list {
-    border: 1px solid rgb(225, 225, 225);
+    background-color: -moz-field;
+    border: 1px solid var(--border-color);
+    color: -moz-fieldtext;
     justify-content: end;
     padding: 5px;
 }
@@ -147,7 +147,7 @@
 
 .editable-list hr {
     border: initial;
-    border-top: 1px solid rgb(225, 225, 225);
+    border-top: 1px solid var(--border-color);
     margin: 5px 0;
 }
 
@@ -167,8 +167,16 @@
     padding: 0 5px;
 }
 
-.editable-list__item:nth-of-type(even) {
-    background-color: rgb(245, 245, 245);
+.editable-list__item:nth-child(even):not(:last-child) {
+    background-color: -moz-eventreerow;
+}
+.editable-list__item:nth-child(odd):not(:last-child) {
+    background-color: -moz-oddtreerow;
+}
+
+.editable-list__item--selected {
+    background-color: -moz-cellhighlight !important;
+    color: -moz-cellhighlighttext !important;
 }
 
 .editable-list__title {
