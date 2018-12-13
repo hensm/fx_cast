@@ -126,11 +126,20 @@ cast.requestSession = (
         return;
     }
 
+    // Already requesting session
+    if (state.sessionRequestInProgress) {
+        errorCallback(new Error_(ErrorCode.INVALID_PARAMETER
+              , "Session request already in progress."));
+        return;
+    }
+
     // No available receivers
     if (!state.receiverList.length) {
         errorCallback(new Error_(ErrorCode.RECEIVER_UNAVAILABLE));
         return;
     }
+
+    state.sessionRequestInProgress = true;
 
     sessionSuccessCallback = successCallback;
     sessionErrorCallback = errorCallback;
@@ -218,6 +227,7 @@ onMessage(message => {
                     });
 
                     state.apiConfig.sessionListener(session);
+                    state.sessionRequestInProgress = false;
                     sessionSuccessCallback(session, message.data.selectedMedia);
                 }
             ];
@@ -256,6 +266,17 @@ onMessage(message => {
 
             break;
         };
+
+        /**
+         * Popup closed before session established.
+         */
+        case "shim:popupClosed": {
+            if (state.sessionRequestInProgress) {
+                state.sessionRequestInProgress = false;
+                sessionErrorCallback(new Error_(ErrorCode.CANCEL));
+            }
+            break;
+        }
     }
 });
 

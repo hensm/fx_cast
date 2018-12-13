@@ -364,14 +364,16 @@ function initBridge (tabId, frameId) {
 
 
 let popupTabId;
+let popupWinId;
 let popupOpenerTabId;
+let popupOpenerFrameId;
 
 /**
  * Creates popup window for cast destination selection.
  * Refocusing other browser windows causes the popup window
  * to close and returns an API error (TODO).
  */
-async function openPopup (tabId) {
+async function openPopup (tabId, frameId) {
     const width = 350;
     const height = 200;
 
@@ -396,7 +398,9 @@ async function openPopup (tabId) {
 
     // Store popup details for message forwarding
     popupTabId = popup.tabs[0].id;
+    popupWinId = popup.id;
     popupOpenerTabId = tabId;
+    popupOpenerFrameId = frameId;
 
     // Size/position not set correctly on creation (bug?)
     await browser.windows.update(popup.id, {
@@ -416,6 +420,20 @@ async function openPopup (tabId) {
     });
 }
 
+// Track popup close
+browser.windows.onRemoved.addListener(id => {
+    if (id === popupWinId) {
+        messageRouter.handleMessage({
+            subject: "shim:popupClosed"
+        });
+
+        popupTabId = null;
+        popupWinId = null;
+        popupOpenerTabId = null;
+
+    }
+});
+
 
 messageRouter.register("main", async (message, sender) => {
     const tabId = sender && sender.tab.id;
@@ -424,19 +442,36 @@ messageRouter.register("main", async (message, sender) => {
         case "main:initialize": {
             const bridgeInfo = await getBridgeInfo();
             if (bridgeInfo && bridgeInfo.isVersionCompatible) {
-                initBridge(tabId, sender.tab.frameId);            
+                initBridge(tabId, sender.frameId);            
             }
 
             browser.tabs.sendMessage(sender.tab.id, {
                 subject: "shim:initialized"
               , data: bridgeInfo
-            }, { frameId: sender.tab.frameId });
+            }, { frameId: sender.frameId });
 
             break;
         };
 
         case "main:openPopup": {
-            await openPopup(tabId);
+            // If popup already open, reassign opener tab to new shim
+            if (popupWinId) {
+
+                // Notify shim that existing popup is gone
+                messageRouter.handleMessage({
+                    subject: "shim:popupClosed"
+                });
+
+                popupOpenerTabId = tabId;
+                popupOpenerFrameId = sender.frameId;
+
+                // Notify shim to re-populate receiver list
+                messageRouter.handleMessage({
+                    subject: "shim:popupReady"
+                });
+            } else {
+                await openPopup(tabId, sender.frameId);
+            }
             break;
         };
     }
@@ -449,7 +484,7 @@ messageRouter.register("bridge", (message, sender) => {
 
 messageRouter.register("shim", (message, sender) => {
     browser.tabs.sendMessage(popupOpenerTabId, message
-          , { frameId: sender.tab.frameId });
+          , { frameId: popupOpenerFrameId })
 });
 
 messageRouter.register("popup", (message, sender) => {
