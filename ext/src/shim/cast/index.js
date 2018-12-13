@@ -166,7 +166,7 @@ onMessage(message => {
          * Cast destination found (serviceUp). Set the API availability
          * property and call the page event function (__onGCastApiAvailable).
          */
-        case "shim:serviceUp":
+        case "shim:serviceUp": {
             const receiver = new Receiver(
                     message.data.id
                   , message.data.friendlyName);
@@ -182,16 +182,15 @@ onMessage(message => {
 
             // Notify listeners of new cast destination
             state.apiConfig.receiverListener(ReceiverAvailability.AVAILABLE);
-            receiverListeners.forEach(
-                    listener => listener(ReceiverAvailability.AVAILABLE));
 
             break;
+        };
 
         /**
          * Cast destination lost (serviceDown). Remove from the receiver list
          * and update availability state.
          */
-        case "shim:serviceDown":
+        case "shim:serviceDown": {
             state.receiverList = state.receiverList.filter(
                     receiver => receiver.label !== message.data.id);
 
@@ -201,8 +200,9 @@ onMessage(message => {
             }
 
             break;
+        };
 
-        case "shim:selectReceiver":
+        case "shim:selectReceiver": {
             console.info("Caster (Debug): Selected receiver");
             const selectedReceiver = message.data.receiver;
 
@@ -239,12 +239,13 @@ onMessage(message => {
             state.sessionList.push(new Session(...sessionConstructorArgs));
 
             break;
+        };
 
         /**
          * Popup is ready to receive data to populate the cast destination
          * chooser.
          */
-        case "shim:popupReady":
+        case "shim:popupReady": {
             sendMessage({
                 subject: "popup:populate"
               , data: {
@@ -252,7 +253,9 @@ onMessage(message => {
                   , selectedMedia: state.apiConfig._selectedMedia
                 }
             });
+
             break;
+        };
     }
 });
 
