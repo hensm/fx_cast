@@ -256,9 +256,4 @@ onMessage(message => {
     }
 });
 
-// Trigger bridge mDNS discovery
-sendMessage({
-    subject: "main:initialize"
-});
-
 export default cast;

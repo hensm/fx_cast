@@ -244,7 +244,7 @@ function onMediaSeekError (err) {
 
 window.__onGCastApiAvailable = async function (loaded, errorInfo) {
     if (!loaded) {
-        logMessage("__onGCastApiAvailable error");
+        console.error("__onGCastApiAvailable error");
         return;
     }
 

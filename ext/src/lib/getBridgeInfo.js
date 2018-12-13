@@ -10,6 +10,7 @@ export default async function getBridgeInfo () {
 
         applicationVersion = response.data;
     } catch (err) {
+        console.error(err)
         return null;
     }
 

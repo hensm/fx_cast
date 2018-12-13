@@ -2,6 +2,7 @@
 
 import defaultOptions from "./options/defaultOptions";
 import messageRouter  from "./messageRouter";
+import getBridgeInfo  from "./lib/getBridgeInfo";
 
 import semver from "semver";
 
@@ -421,7 +422,16 @@ messageRouter.register("main", async (message, sender) => {
 
     switch (message.subject) {
         case "main:initialize": {
-            initBridge(tabId, sender.tab.frameId);
+            const bridgeInfo = await getBridgeInfo();
+            if (bridgeInfo && bridgeInfo.isVersionCompatible) {
+                initBridge(tabId, sender.tab.frameId);            
+            }
+
+            browser.tabs.sendMessage(sender.tab.id, {
+                subject: "shim:initialized"
+              , data: bridgeInfo
+            }, { frameId: sender.tab.frameId });
+
             break;
         };
 
