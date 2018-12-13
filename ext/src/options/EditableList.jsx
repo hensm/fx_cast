@@ -1,5 +1,5 @@
 import React, { Component } from "react";
-import EditableListItem     from "./EditableListItem";
+import EditableListItem from "./EditableListItem";
 
 const _ = browser.i18n.getMessage;
 

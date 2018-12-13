@@ -4,7 +4,9 @@ import React, { Component } from "react";
 import ReactDOM from "react-dom";
 
 import defaultOptions from "./defaultOptions";
+
 import EditableList from "./EditableList";
+import Bridge from "./Bridge";
 
 import getBridgeInfo from "../lib/getBridgeInfo";
 
@@ -165,99 +167,8 @@ class App extends Component {
     render () {
         return (
             <div>
-
-                <div className="bridge">
-                    { do {
-                        if (this.state.bridgeLoading) {
-                            <div className="bridge__loading">
-                                { _("optionsBridgeLoading") }
-                                <progress></progress>
-                            </div>
-                        } else {
-                            const { bridgeInfo } = this.state;
-
-                            const bridgeInfoClasses = `bridge__info ${bridgeInfo
-                                ? "bridge__info--found"
-                                : "bridge__info--not-found"}`;
-
-                            const [ statusIcon, statusText ] = do {
-                                if (!bridgeInfo) {
-                                    [ "assets/icons8-cancel-120.png"
-                                      , _("optionsBridgeNotFoundStatusText") ]
-                                } else {
-                                    if (bridgeInfo.isVersionCompatible) {
-                                        [ "assets/icons8-ok-120.png"
-                                          , _("optionsBridgeFoundStatusText") ]
-                                    } else {
-                                        [ "assets/icons8-warn-120.png"
-                                          , _("optionsBridgeIssueStatusText") ]
-                                    }
-                                }
-                            };
-
-                            <div className={bridgeInfoClasses}>
-                                <div className="bridge__status">
-                                    <img className="bridge__status-icon"
-                                         width="60" height="60"
-                                         src={ statusIcon } />
-
-                                    <h2 className="bridge__status-text">
-                                        { statusText }
-                                    </h2>
-                                </div>
-
-                                { do { if (bridgeInfo) {
-                                    <table className="bridge__stats">
-                                        <tr>
-                                            <th>{ _("optionsBridgeStatsName") }</th>
-                                            <td>{ bridgeInfo.name }</td>
-                                        </tr>
-                                        <tr>
-                                            <th>{ _("optionsBridgeStatsVersion") }</th>
-                                            <td>{ bridgeInfo.version }</td>
-                                        </tr>
-                                        <tr>
-                                            <th>{ _("optionsBridgeStatsExpectedVersion") }</th>
-                                            <td>{ bridgeInfo.expectedVersion }</td>
-                                        </tr>
-                                        <tr>
-                                            <th>{ _("optionsBridgeStatsCompatibility") }</th>
-                                            <td>
-                                                { do {
-                                                    if (bridgeInfo.isVersionCompatible) {
-                                                        if (bridgeInfo.isVersionExact) {
-                                                            _("optionsBridgeCompatible")
-                                                        } else {
-                                                            _("optionsBridgeLikelyCompatible")
-                                                        }
-                                                    } else {
-                                                        _("optionsBridgeIncompatible")
-                                                    }
-                                                }}
-                                            </td>
-                                        </tr>
-                                        <tr>
-                                            <th>{ _("optionsBridgeStatsRecommendedAction") }</th>
-                                            <td>
-                                                { do {
-                                                    if (bridgeInfo.isVersionOlder) {
-                                                        _("optionsBridgeOlderAction")
-                                                    } else if (bridgeInfo.isVersionNewer) {
-                                                        _("optionsBridgeNewerAction")
-                                                    } else {
-                                                        _("optionsBridgeNoAction")
-                                                    }
-                                                }}
-                                            </td>
-                                        </tr>
-                                    </table>
-                                } else {
-                                    // TODO: Download links
-                                }}}
-                            </div>
-                        }
-                    }}
-                </div>
+                <Bridge info={ this.state.bridgeInfo }
+                        loading={ this.state.bridgeLoading } />
 
                 <form id="form" ref={ form => { this.form = form; }}
                         onSubmit={ this.handleFormSubmit }
