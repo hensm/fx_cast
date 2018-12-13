@@ -168,6 +168,8 @@ function packageDarwin (platform) {
       , manifestName
       , componentName
       , packageId: `tf.matt.${applicationName}`
+      , executablePath: executablePath[platform]
+      , manifestPath: manifestPath[platform]
     };
 
     // Template paths
