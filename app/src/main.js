@@ -1,4 +1,4 @@
-import { createBrowser, tcp } from "mdns-js";
+import dnssd from "dnssd";
 
 import http from "http";
 import fs from "fs";
@@ -12,7 +12,7 @@ import { __applicationName
        , __applicationVersion } from "../package.json";
 
 
-const browser = createBrowser(tcp("googlecast"));
+const browser = dnssd.Browser(dnssd.tcp("googlecast"));
 
 // Local media server
 let httpServer;
@@ -107,7 +107,7 @@ async function handleMessage (message) {
         };
 
         case "bridge:discover":
-            browser.discover();
+            browser.start();
             break;
 
         case "bridge:startHttpServer": {
@@ -164,7 +164,7 @@ async function handleMessage (message) {
 
 
 
-browser.on("update", service => {
+/*browser.on("update", service => {
     if (!service.txt) return;
 
     const txt = service.txt
@@ -183,27 +183,28 @@ browser.on("update", service => {
           , friendlyName: txt.fn
         }
     })
-});
-/*
+});*/
+
 browser.on("serviceUp", service => {
     transforms.encode.write({
         subject: "shim:serviceUp"
       , data: {
             address: service.addresses[0]
           , port: service.port
-          , id: service.txtRecord.id
-          , friendlyName: service.txtRecord.fn
+          , id: service.txt.id
+          , friendlyName: service.txt.fn
         }
     });
 });
+
 browser.on("serviceDown", service => {
     transforms.encode.write({
         subject:"shim:serviceDown"
       , data: {
             address: service.addresses[0]
           , port: service.port
-          , id: service.txtRecord.id
-          , friendlyName: service.txtRecord.fn
+          , id: service.txt.id
+          , friendlyName: service.txt.fn
         }
     });
-})*/
+});
