@@ -126,8 +126,66 @@ async function onRequestSessionSuccess (session_) {
         ];
     }
 
+
+    const activeTrackIds = [];
+
+    if (mediaElement.textTracks.length) {
+        const trackElements = mediaElement.querySelectorAll("track");
+
+        let index = 0;
+        for (const textTrack of mediaElement.textTracks) {
+            const trackElement = trackElements[index];
+
+            // Create Track object
+            const track = new chrome.cast.media.Track(
+                    index                              // trackId
+                  , chrome.cast.media.TrackType.TEXT); // trackType
+
+            // Copy TextTrack properties to Track
+            track.name = textTrack.label;
+            track.language = textTrack.language;
+            track.trackContentId = trackElement.src;
+            track.trackContentType = "text/vtt";
+
+            const { TextTrackType } = chrome.cast.media;
+
+            switch (textTrack.kind) {
+                case "subtitles":
+                    track.subtype = TextTrackType.SUBTITLES;
+                    break;
+                case "captions":
+                    track.subtype = TextTrackType.CAPTIONS;
+                    break;
+                case "descriptions":
+                    track.subtype = TextTrackType.DESCRIPTIONS;
+                    break;
+                case "chapters":
+                    track.subtype = TextTrackType.CHAPTERS;
+                    break;
+                case "metadata":
+                    track.subtype = TextTrackType.METADATA;
+                    break;
+
+                // Default to subtitles
+                default:
+                    track.subtype = TextTrackType.SUBTITLES;
+            }
+
+            // Add track to mediaInfo
+            mediaInfo.tracks.push(track);
+
+            // If enabled, set as active track for load request
+            if (textTrack.mode === "showing" || trackElement.default) {
+                activeTrackIds.push(index);
+            }
+
+            index++;
+        }
+    }
+
     const loadRequest = new chrome.cast.media.LoadRequest(mediaInfo);
     loadRequest.autoplay = false;
+    loadRequest.activeTrackIds = activeTrackIds;
 
     session.loadMedia(loadRequest
           , onLoadMediaSuccess
