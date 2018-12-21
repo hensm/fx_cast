@@ -192,6 +192,26 @@ class App extends Component {
                             </div>
                         </label>
 
+                        <label className="option option--inline">
+                            <input name="mediaSyncElement"
+                                   type="checkbox"
+                                   checked={ this.state.options.mediaSyncElement }
+                                   onChange={ this.handleInputChange } />
+                            <div className="option__label">
+                                { _("optionsMediaSyncElement") }
+                            </div>
+                        </label>
+
+                        <label className="option option--inline">
+                            <input name="mediaStopOnUnload"
+                                   type="checkbox"
+                                   checked={ this.state.options.mediaStopOnUnload }
+                                   onChange={ this.handleInputChange } />
+                            <div className="option__label">
+                                { _("optionsMediaStopOnUnload") }
+                            </div>
+                        </label>
+
                         <fieldset className="category"
                                   disabled={ !this.state.options.mediaEnabled }>
                             <legend className="category__name">

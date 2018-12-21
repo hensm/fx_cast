@@ -1,5 +1,7 @@
 export default {
     mediaEnabled: true
+  , mediaSyncElement: false
+  , mediaStopOnUnload: false
   , localMediaEnabled: true
   , localMediaServerPort: 9555
   , mirroringEnabled: false

@@ -9,6 +9,8 @@ let logMessage;
 let session;
 let currentMedia;
 
+let ignoreMediaEvents = false;
+
 
 const isLocalFile = srcUrl.startsWith("file:");
 
@@ -18,6 +20,13 @@ window.addEventListener("beforeunload", () => {
     browser.runtime.sendMessage({
         subject: "bridge:stopHttpServer"
     });
+
+    if (options.mediaStopOnUnload) {
+        session.stop();
+        /*currentMedia.stop(null
+              , onMediaStopSuccess
+              , onMediaStopError);*/
+    }
 });
 
 function getLocalAddress () {
@@ -36,51 +45,6 @@ function getLocalAddress () {
         });
     });
 }
-
-
-mediaElement.addEventListener("play", () => {
-    currentMedia.play(null
-          , onMediaPlaySuccess
-          , onMediaPlayError);
-});
-
-mediaElement.addEventListener("pause", () => {
-    currentMedia.pause(null
-          , onMediaPauseSuccess
-          , onMediaPauseError);
-});
-
-mediaElement.addEventListener("suspend", () => {
-    /*currentMedia.stop(null
-          , onMediaStopSuccess
-          , onMediaStopError);*/
-});
-
-mediaElement.addEventListener("seeking", () => {
-    const seekRequest = new chrome.cast.media.SeekRequest();
-    seekRequest.currentTime = mediaElement.currentTime;
-
-    currentMedia.seek(seekRequest
-          , onMediaSeekSuccess
-          , onMediaSeekError);
-});
-
-mediaElement.addEventListener("ratechange", () => {
-    currentMedia._sendMediaMessage({
-        type: "SET_PLAYBACK_RATE"
-      , playbackRate: mediaElement.playbackRate
-    });
-});
-
-mediaElement.addEventListener("volumechange", () => {
-    const newVolume = new chrome.cast.Volume(
-            currentMedia.volume
-          , currentMedia.muted);
-    const volumeRequest = new chrome.cast.media.VolumeRequest(newVolume);
-
-    logMessage("Volume change");
-    currentMedia.setVolume(volumeRequest);
-});
 
 
 async function onRequestSessionSuccess (session_) {
@@ -219,49 +183,119 @@ function onLoadMediaSuccess (media) {
     logMessage("onLoadMediaSuccess");
 
     currentMedia = media;
-    currentMedia.addUpdateListener(() => {
-        console.log(currentMedia);
 
-        // PlayerState
-        const localPlayerState = mediaElement.paused
-            ? chrome.cast.media.PlayerState.PAUSED
-            : chrome.cast.media.PlayerState.PLAYING;
-
-        if (localPlayerState !== currentMedia.playerState) {
-            switch (currentMedia.playerState) {
-                case chrome.cast.media.PlayerState.PLAYING:
-                    mediaElement.play();
-                    break;
-
-                case chrome.cast.media.PlayerState.PAUSED:
-                    mediaElement.pause();
-                    break;
+    if (options.mediaSyncElement) {
+        mediaElement.addEventListener("play", () => {
+            if (ignoreMediaEvents) {
+                ignoreMediaEvents = false;
+                return;
             }
-        }
 
-        // RepeatMode
-        const localRepeatMode = mediaElement.loop
-            ? chrome.cast.media.RepeatMode.SINGLE
-            : chrome.cast.media.RepeatMode.OFF;
+            currentMedia.play(null
+                  , onMediaPlaySuccess
+                  , onMediaPlayError);
+        });
 
-        if (localRepeatMode !== currentMedia.repeatMode) {
-            switch (currentMedia.repeatMode) {
-                case chrome.cast.media.RepeatMode.SINGLE:
-                    mediaElement.loop = true;
-                    break;
-
-                case chrome.cast.media.RepeatMode.OFF:
-                    mediaElement.loop = false;
-                    break;
+        mediaElement.addEventListener("pause", () => {
+            if (ignoreMediaEvents) {
+                ignoreMediaEvents = false;
+                return;
             }
-        }
+
+            currentMedia.pause(null
+                  , onMediaPauseSuccess
+                  , onMediaPauseError);
+        });
+
+        mediaElement.addEventListener("suspend", () => {
+            /*currentMedia.stop(null
+                  , onMediaStopSuccess
+                  , onMediaStopError);*/
+        });
+
+        mediaElement.addEventListener("seeking", () => {
+            if (ignoreMediaEvents) {
+                ignoreMediaEvents = false;
+                return;
+            }
+
+            const seekRequest = new chrome.cast.media.SeekRequest();
+            seekRequest.currentTime = mediaElement.currentTime;
+
+            currentMedia.seek(seekRequest
+                  , onMediaSeekSuccess
+                  , onMediaSeekError);
+        });
+
+        mediaElement.addEventListener("ratechange", () => {
+            currentMedia._sendMediaMessage({
+                type: "SET_PLAYBACK_RATE"
+              , playbackRate: mediaElement.playbackRate
+            });
+        });
+
+        mediaElement.addEventListener("volumechange", () => {
+            const newVolume = new chrome.cast.Volume(
+                    currentMedia.volume
+                  , currentMedia.muted);
+
+            const volumeRequest =
+                    new chrome.cast.media.VolumeRequest(newVolume);
+
+            logMessage("Volume change");
+            currentMedia.setVolume(volumeRequest);
+        });
 
 
-        // currentTime
-        if (currentMedia.currentTime !== mediaElement.currentTime) {
-            mediaElement.currentTime = currentMedia.currentTime;
-        }
-    });
+        currentMedia.addUpdateListener(isAlive => {
+            if (!isAlive) {
+                return;
+            }
+
+            // PlayerState
+            const localPlayerState = mediaElement.paused
+                ? chrome.cast.media.PlayerState.PAUSED
+                : chrome.cast.media.PlayerState.PLAYING;
+
+            if (localPlayerState !== currentMedia.playerState) {
+                ignoreMediaEvents = true;
+                switch (currentMedia.playerState) {
+                    case chrome.cast.media.PlayerState.PLAYING:
+                        mediaElement.play();
+                        break;
+
+                    case chrome.cast.media.PlayerState.PAUSED:
+                        mediaElement.pause();
+                        break;
+                }
+            }
+
+            // RepeatMode
+            const localRepeatMode = mediaElement.loop
+                ? chrome.cast.media.RepeatMode.SINGLE
+                : chrome.cast.media.RepeatMode.OFF;
+
+            if (localRepeatMode !== currentMedia.repeatMode) {
+                ignoreMediaEvents = true;
+                switch (currentMedia.repeatMode) {
+                    case chrome.cast.media.RepeatMode.SINGLE:
+                        mediaElement.loop = true;
+                        break;
+
+                    case chrome.cast.media.RepeatMode.OFF:
+                        mediaElement.loop = false;
+                        break;
+                }
+            }
+
+
+            // currentTime
+            if (currentMedia.currentTime !== mediaElement.currentTime) {
+                ignoreMediaEvents = true;
+                mediaElement.currentTime = currentMedia.currentTime;
+            }
+        });
+    }
 }
 function onLoadMediaError () {
     logMessage("onLoadMediaError");

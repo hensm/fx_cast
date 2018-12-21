@@ -76,6 +76,12 @@
   , "optionsMediaEnabled": {
         "message": "Media casting enabled"
     }
+  , "optionsMediaSyncElement": {
+        "message": "Sync receiver state with media element"
+    }
+  , "optionsMediaStopOnUnload": {
+        "message": "Stop receiver playback on page unload"
+    }
 
   , "optionsLocalMediaCategoryName": {
         "message": "Local media casting"
