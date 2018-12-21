@@ -83,7 +83,12 @@ if (argv.watch) {
                 // Prevent auto-exit
                 shouldExitProgram: false
 
-            }).then(() => {
+            }).then(result => {
+                const archiveName = path.basename(result.extensionPath);
+
+                fs.moveSync(path.join(DIST_PATH, archiveName)
+                      , path.join(DIST_PATH, archiveName.replace("zip", "xpi")));
+
                 // Only need the built extension archive
                 fs.remove(UNPACKED_PATH);
             })

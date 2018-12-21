@@ -1,17 +1,32 @@
 "use strict";
 
-const path      = require("path");
+const path = require("path");
+const glob = require("glob");
+const fs = require("fs");
 
 const webdriver = require("selenium-webdriver");
-const firefox   = require("selenium-webdriver/firefox");
-const chrome    = require("selenium-webdriver/chrome");
+const firefox = require("selenium-webdriver/firefox");
+const chrome = require("selenium-webdriver/chrome");
+
+const { __extensionName
+      , __extensionVersion } = require("../ext/package.json");
+
+
+const extensionArchivePath = path.join(
+        path.join(__dirname, "../dist/ext/")
+      , `${__extensionName}-${__extensionVersion}.xpi`);
+
+if (!fs.existsSync(extensionArchivePath)) {
+    console.error("Extension archive not found.");
+    process.exit(1);
+}
 
 
 const TEST_PAGE_URL = `file:///${__dirname}/test.html`;
 
 const firefoxOptions = new firefox.Options()
     .headless()
-    .addExtensions(path.resolve(__dirname, "../dist/ext/ext.xpi"))
+    .addExtensions(extensionArchivePath)
     .setPreference("xpinstall.signatures.required", false);
 
 const chromeOptions = new chrome.Options()
