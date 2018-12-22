@@ -13,9 +13,7 @@ Credit:
 
 * Linux
 * macOS
-* Windows (TODO)
-
-Only tested on Linux and macOS. mDNS library issue to be fixed. `mdns` only works on Windows, `mdns-js` only works on Linux.
+* Windows
 
 
 ## Building
