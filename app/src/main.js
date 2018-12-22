@@ -163,28 +163,6 @@ async function handleMessage (message) {
 }
 
 
-
-/*browser.on("update", service => {
-    if (!service.txt) return;
-
-    const txt = service.txt
-        .reduce((prev, current) => {
-            const [ key, value ] = current.split("=");
-            prev[key] = value;
-            return prev;
-        }, {});
-
-    sendMessage({
-        subject: "shim:serviceUp"
-      , data: {
-            address: service.addresses[0]
-          , port: service.port
-          , id: txt.id
-          , friendlyName: txt.fn
-        }
-    })
-});*/
-
 browser.on("serviceUp", service => {
     transforms.encode.write({
         subject: "shim:serviceUp"
