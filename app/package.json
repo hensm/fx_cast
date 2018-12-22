@@ -31,6 +31,6 @@
         "pkg": "^4.3.5"
     },
     "optionalDependencies": {
-        "regedit": "^3.0.0"
+        "rage-edit": "^1.2.0"
     }
 }

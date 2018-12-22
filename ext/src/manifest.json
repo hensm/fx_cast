@@ -6,7 +6,7 @@
   , "applications": {
         "gecko": {
             "id": "EXTENSION_ID"
-          , "strict_min_version": "57.0"
+          , "strict_min_version": "64.0"
         }
     }
 

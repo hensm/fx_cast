@@ -48,21 +48,19 @@ switch (platform) {
     };
 
     case "win32": {
-        const regedit = require("regedit");
+        const { Registry } = require("rage-edit");
+        const REGISTRY_PATH = `HKCU\\SOFTWARE\\Mozilla\\NativeMessagingHosts\\${WIN_REGISTRY_KEY}`;
 
         if (argv.remove) {
-            // TODO: no corresponding method in regedit lib
+            Registry.delete(REGISTRY_PATH);
             break;
         }
 
-        regedit.putValue({
-            "HKEY_CURRENT_USER\\SOFTWARE\\Mozilla\\NativeMessagingHosts": {
-                [WIN_REGISTRY_KEY]: {
-                    value: CURRENT_MANIFEST_PATH
-                  , type: "REG_DEFAULT"
-                }
-            }
-        });
+        Registry.set(
+                REGISTRY_PATH
+              , ""
+              , CURRENT_MANIFEST_PATH
+              , "REG_SZ");
 
         break;
     };
