@@ -109,7 +109,9 @@ Testing requires geckodriver (or chromedriver for Chrome parity testing). See [s
 Chrome doesn't load the media router in a temporary selenium profile, so there's a bundled profile (`test/ChromeProfile.zip`). Extract the folder within as `test/ChromeProfile/`.
 
 ````sh
-npm run build
+npm run build --prefix ./app
+npm run install-manifest
+npm run package --prefix ./ext
 npm test
 SELENIUM_BROWSER=chrome npm test
 ````

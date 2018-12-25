@@ -25,6 +25,7 @@ if (!fs.existsSync(extensionArchivePath)) {
 const TEST_PAGE_URL = `file:///${__dirname}/test.html`;
 
 const firefoxOptions = new firefox.Options()
+    .setBinary(firefox.Channel.NIGHTLY)
     .headless()
     .addExtensions(extensionArchivePath)
     .setPreference("xpinstall.signatures.required", false);
@@ -37,7 +38,7 @@ const chromeOptions = new chrome.Options()
 
 async function create () {
     const driver = new webdriver.Builder()
-        .forBrowser('firefox')
+        .forBrowser("firefox")
         .setFirefoxOptions(firefoxOptions)
         .setChromeOptions(chromeOptions)
         .build();
