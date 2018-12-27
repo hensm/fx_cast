@@ -31,6 +31,7 @@ const firefoxOptions = new firefox.Options()
     .setPreference("xpinstall.signatures.required", false);
 
 const chromeOptions = new chrome.Options()
+    .headless()
     .excludeSwitches("disable-default-apps")
     .addArguments(
         `--user-data-dir=${path.resolve(__dirname, "ChromeProfile")}`);
