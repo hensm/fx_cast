@@ -107,7 +107,7 @@ npm run package --prefix ./app -- --platform=linux --packageType=rpm
 
 Testing requires geckodriver (or chromedriver for Chrome parity testing). See [selenium-webdriver](https://www.npmjs.com/package/selenium-webdriver#installation) installation instructions (ignore `npm install`).
 
-Chrome doesn't load the media router in a temporary selenium profile, so there's a bundled profile (`test/ChromeProfile.zip`). Extract the folder within as `test/ChromeProfile/`.
+Tests fail in Chrome currently due to issue with loading the media router scripts.
 
 ````sh
 npm run build --prefix ./app
