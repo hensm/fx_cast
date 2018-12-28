@@ -32,9 +32,8 @@ const firefoxOptions = new firefox.Options()
 
 const chromeOptions = new chrome.Options()
     .headless()
-    .excludeSwitches("disable-default-apps")
-    .addArguments(
-        `--user-data-dir=${path.resolve(__dirname, "ChromeProfile")}`);
+    .excludeSwitches([ "disable-background-networking"
+                     , "disable-default-apps"]);
 
 
 async function create () {
