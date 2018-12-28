@@ -7,6 +7,7 @@ Credit:
 * [electron-chromecast](https://github.com/GPMDP/electron-chromecast)
 * [node-castv2](https://github.com/thibauts/node-castv2)
 * [chrome-native-messaging](https://github.com/jdiamond/chrome-native-messaging)
+* [icons8](https://icons8.com/)
 
 
 ## Supported platforms
