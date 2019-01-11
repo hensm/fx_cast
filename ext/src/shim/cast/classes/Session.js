@@ -32,6 +32,7 @@ export default class Session {
         this._stopCallbacks = new Map();
 
         this.sessionId = sessionId;
+        this.transportId = sessionId;
         this.appId = appId;
         this.appImages = appImages;
         this.displayName = displayName;
