@@ -1,28 +1,11 @@
 "use strict";
 
-const { create, destroy } = require("../../driver");
-
 describe("chrome", () => {
-    let driver;
-    let chrome;
-
-    beforeAll(async () => {
-        driver = await create();
-        chrome = await driver.executeScript(() => {
-            return chrome;
-        });
-    });
-    afterAll(() => {
-        driver.quit();
-    });
-
-
     it("should exist", () => {
         expect(chrome).toBeDefined();
         expect(chrome.cast).toBeDefined();
         expect(chrome.cast.media).toBeDefined();
     });
-
 
     describe("chrome.cast", () => {
         it("should have all api methods", () => {

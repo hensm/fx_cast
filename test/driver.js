@@ -26,38 +26,79 @@ const TEST_PAGE_URL = `file:///${__dirname}/test.html`;
 
 const firefoxOptions = new firefox.Options()
     .setBinary(firefox.Channel.NIGHTLY)
-    .headless()
     .addExtensions(extensionArchivePath)
     .setPreference("xpinstall.signatures.required", false);
 
 const chromeOptions = new chrome.Options()
-    .headless()
     .excludeSwitches([ "disable-background-networking"
                      , "disable-default-apps"]);
 
 
-async function create () {
+/**
+ * Chrome doesn't load the media router extension immediately
+ * and there doesn't seem to be a consistent way of
+ * determining when it has loaded.
+
+ * Workaround is to poll every 100ms, refresh the page, and
+ * check whether the chrome.cast API objects are defined.
+ */
+function waitUntilDefined (
+        driver
+      , pollingTimeout = 10000
+      , pollingFrequency = 100) {
+
+   return new Promise(async (resolve, reject) => {
+        let time = pollingFrequency;
+
+        const interval = setInterval(async () => {
+            await driver.navigate().refresh();
+
+            const isDefined = await driver.executeScript(() => {
+                return window.chrome.cast !== undefined;
+            });
+
+            time += pollingFrequency;
+
+            if (isDefined) {
+                clearInterval(interval);
+                resolve();
+            } else if (time >= pollingTimeout) {
+                reject("Timed out");
+            }
+        }, pollingFrequency);
+    });
+}
+
+(async () => {
     const driver = new webdriver.Builder()
         .forBrowser("firefox")
         .setFirefoxOptions(firefoxOptions)
         .setChromeOptions(chromeOptions)
         .build();
 
+    // Navigate to test page
     await driver.get(TEST_PAGE_URL);
 
-    try {
-        // Allow access from other specs
-        this.driver = driver;
-    } catch (err) {}
+    const capabilties = await driver.getCapabilities();
+    switch (capabilties.get("browserName")) {
+        // Need to wait for cast extension on Chrome
+        case "chrome":
+            console.log("Waiting for cast extension...");
+            await waitUntilDefined(driver);
+            console.log("Cast extension loaded!");
 
-    return driver;
-}
+            break;
 
-function destroy (driver = this.driver) {
-    driver.quit();
-}
+        case "firefox":
+            break;
+    }
 
-module.exports = {
-    create
-  , destroy
-}
+    // Load Jasmine
+    await driver.executeScript(() => {
+        const iframe = document.querySelector("iframe");
+        iframe.setAttribute("src", "SpecRunner.html");
+    });
+})();
+
+// Keep process alive
+process.stdin.resume();

@@ -107,7 +107,7 @@ npm run package --prefix ./app -- --platform=linux --packageType=rpm
 
 Testing requires geckodriver (or chromedriver for Chrome parity testing). See [selenium-webdriver](https://www.npmjs.com/package/selenium-webdriver#installation) installation instructions (ignore `npm install`).
 
-Tests fail in Chrome currently due to issue with loading the media router scripts.
+Test results will be displayed within the opened browser tab.
 
 ````sh
 npm run build --prefix ./app
