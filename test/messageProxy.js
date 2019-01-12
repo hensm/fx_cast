@@ -1,8 +1,10 @@
-function sendMessage (message) {
-    const msgElement = document.createElement("div");
-    msgElement.setAttribute("id", "__msg");
-    msgElement.textContent = JSON.stringify(message);
-    document.body.appendChild(msgElement);
+"use strict";
+
+// Create socket connection
+const socket = new WebSocket("ws://localhost:8080");
+
+window.sendMessage = (message) => {
+    socket.send(JSON.stringify(message));
 }
 
 const reporterMethods = [
@@ -26,4 +28,6 @@ for (const method of reporterMethods) {
     }
 }
 
-jasmine.getEnv().addReporter(customReporter);
+socket.addEventListener("open", ev => {
+    jasmine.getEnv().addReporter(customReporter);
+});

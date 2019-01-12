@@ -1,10 +1,11 @@
 "use strict";
 
 const path = require("path");
-const glob = require("glob");
 const fs = require("fs");
 const EventEmitter = require("events");
 
+const glob = require("glob");
+const WebSocket = require("ws");
 const JasmineConsoleReporter = require("jasmine-console-reporter");
 
 const webdriver = require("selenium-webdriver");
@@ -86,41 +87,72 @@ function waitUntilDefined (
  * from Jasmine in the browser context to node context to use
  * reporters here.
  *
- * reporter.js is loaded on the test page and adds reporter
- * messages to the DOM which we listen for here.
+ * Creates a WebSocket server. messageProxy.js creates a client
+ * socket to this server and facilitates a communication
+ * channel.
  */
-class ReporterProxy extends EventEmitter {
-    constructor (driver) {
+class MessageProxy extends EventEmitter {
+    constructor () {
         super();
-        this._driver = driver;
-        this._wait();
-    }
 
-    async _wait () {
-        const elementFilter = By.id("__msg");
-
-        // Wait for message element
-        await this._driver.wait(until.elementLocated(elementFilter))
-        
-        // Get message content
-        const messageElement = this._driver.findElement(elementFilter);
-        const messageContent = JSON.parse(await messageElement.getText());
-
-        // Remove message element
-        await this._driver.executeScript(() => {
-            document.getElementById("__msg").remove();
+        const wss = new WebSocket.Server({
+            port: 8080
         });
 
-        // Send event
-        this.emit(messageContent.subject, messageContent.data);
-
-        // Wait for next event
-        if (messageContent.subject !== "jasmineDone") {
-            this._wait();
-        }
+        wss.on("connection", socket => {
+            socket.on("message", message => {
+                const messageContent = JSON.parse(message);
+                this.emit(messageContent.subject, messageContent.data);
+            });
+        })
     }
 }
 
+/**
+ * Ensures cast API is loaded before finding and injecting spec
+ * file scripts into the test page.
+ */
+async function injectSpecs (driver) {
+    const [ loaded, errorInfo ] = await driver.executeAsyncScript(() => {
+        const callback = arguments[arguments.length - 1];
+
+        // If already loaded, return immediately
+        if (chrome.cast !== undefined) {
+            callback([ true ]);
+        }
+
+        // Set Cast API callback
+        window.__onGCastApiAvailable = function (...args) {
+            callback(args);
+        };
+    });
+
+    // Return error if API unavailable
+    if (!loaded) {
+        console.error("Failed to load cast API", errorInfo);
+        return;
+    }
+
+
+    // Get spec files
+    const specFiles = glob.sync("spec/**/*.spec.js", {
+        cwd: __dirname
+    });
+
+    // Inject spec files
+    for (const specFile of specFiles) {
+        await driver.executeScript(`
+            const scriptElement = document.createElement("script");
+            scriptElement.src = "${specFile}";
+            document.head.appendChild(scriptElement);
+        `);
+    }
+
+    // Trigger Jasmine spec execution
+    await driver.executeScript(() => {
+        jasmine.getEnv().execute();
+    });
+}
 
 (async () => {
     const driver = new webdriver.Builder()
@@ -140,24 +172,28 @@ class ReporterProxy extends EventEmitter {
     }
 
 
-    // Create console reporter and reporter proxy.
+    // Create console reporter and message proxy.
     const reporter = new JasmineConsoleReporter();
-    const reporterProxy = new ReporterProxy(driver);
+    const messageProxy = new MessageProxy();
+
+    // Inject specs when ready
+    messageProxy.on("injectSpecs", () => {
+        injectSpecs(driver);
+    });
 
     /**
-     * Forward events from Jasmine standlone via reporter proxy to
+     * Forward events from Jasmine standlone via message proxy to
      * console reporter.
      */
-    reporterProxy.on("jasmineDone"    , result => reporter.jasmineDone(result));
-    reporterProxy.on("jasmineStarted" , result => reporter.jasmineStarted(result));
-    reporterProxy.on("specDone"       , result => reporter.specDone(result));
-    reporterProxy.on("specStarted"    , result => reporter.specStarted(result));
-    reporterProxy.on("suiteDone"      , result => reporter.suiteDone(result));
-    reporterProxy.on("suiteStarted"   , result => reporter.suiteStarted(result));
-
+    messageProxy.on("jasmineDone"    , result => reporter.jasmineDone(result));
+    messageProxy.on("jasmineStarted" , result => reporter.jasmineStarted(result));
+    messageProxy.on("specDone"       , result => reporter.specDone(result));
+    messageProxy.on("specStarted"    , result => reporter.specStarted(result));
+    messageProxy.on("suiteDone"      , result => reporter.suiteDone(result));
+    messageProxy.on("suiteStarted"   , result => reporter.suiteStarted(result));
 
     // Load Jasmine test page
-    await driver.get(TEST_PAGE_URL);
+    driver.get(TEST_PAGE_URL);
 })();
 
 // Keep process alive
