@@ -10,11 +10,12 @@ export default class SessionRequest {
           , opt_capabilities = [
                 Capability.VIDEO_OUT
               , Capability.AUDIO_OUT ]
-          , opt_timeout = null) {
+          , opt_timeout = requestSessionTimeout) {
 
         this.appId = appId;
         this.capabilities = opt_capabilities;
+        this.dialRequest = null;
         this.language = null;
-        this.requestSessionTimeout = requestSessionTimeout;
+        this.requestSessionTimeout = opt_timeout;
     }
 };

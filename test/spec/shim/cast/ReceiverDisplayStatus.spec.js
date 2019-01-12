@@ -1,6 +1,6 @@
 "use strict";
 
-describe("chrome.cast.Receiver", () => {
+describe("chrome.cast.ReceiverDisplayStatus", () => {
     it("should have all properties", async () => {
         const receiverDisplayStatus =
                 new chrome.cast.ReceiverDisplayStatus();

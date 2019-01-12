@@ -32,7 +32,7 @@ export default class Session {
         this._stopCallbacks = new Map();
 
         this.sessionId = sessionId;
-        this.transportId = sessionId;
+        this.transportId = sessionId || "";
         this.appId = appId;
         this.appImages = appImages;
         this.displayName = displayName;
@@ -41,16 +41,17 @@ export default class Session {
         this.media = [];
         this.namespaces = [];
         this.senderApps = [];
-        this.status = SessionStatus.DISCONNECTED;
+        this.status = SessionStatus.CONNECTED;
         this.statusText = null;
 
-        this._sendMessage("bridge:bridgesession/initialize", {
-            address: receiver._address
-          , port: receiver._port
-          , appId
-          , sessionId
-        });
-
+        if (receiver) {        
+            this._sendMessage("bridge:bridgesession/initialize", {
+                address: receiver._address
+              , port: receiver._port
+              , appId
+              , sessionId
+            });
+        }
 
         onMessage(message => {
             // Filter other session messages
