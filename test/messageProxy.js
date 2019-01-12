@@ -3,8 +3,10 @@
 // Create socket connection
 const socket = new WebSocket("ws://localhost:8080");
 
-window.sendMessage = (message) => {
-    socket.send(JSON.stringify(message));
+window.messageProxy = {
+    sendMessage (message) {
+        socket.send(JSON.stringify(message));
+    }
 }
 
 const reporterMethods = [
@@ -21,7 +23,7 @@ const customReporter = {};
 // Populate reporter methods
 for (const method of reporterMethods) {
     customReporter[method] = function (result) {
-        sendMessage({
+        messageProxy.sendMessage({
             subject: method
           , data: result
         });

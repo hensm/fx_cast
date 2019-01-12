@@ -67,7 +67,7 @@ window.addEventListener("load", () => {
     htmlReporter.initialize();
 
     // Use messageProxy socket to request spec injection
-    window.sendMessage({
+    messageProxy.sendMessage({
         subject: "injectSpecs"
     });
 });
