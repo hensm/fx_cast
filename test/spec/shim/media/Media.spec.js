@@ -6,6 +6,7 @@ describe("chrome.cast.media.Media", () => {
 
         expect(media.activeTrackIds).toBe(null);
         expect(media.currentItemId).toBe(null);
+        expect(media.currentTime).toBe(0);
         expect(media.customData).toBe(null);
         expect(media.idleReason).toBe(null);
         expect(media.items).toBe(null);

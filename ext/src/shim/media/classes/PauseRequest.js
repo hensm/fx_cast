@@ -2,6 +2,6 @@
 
 export default class PauseRequest {
     constructor () {
-        this.customData = {};
+        this.customData = null;
     }
 }

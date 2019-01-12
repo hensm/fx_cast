@@ -3,7 +3,7 @@
 export default class TextTrackStyle {
     constructor () {
         this.backgroundColor = null;
-        this.customData = {};
+        this.customData = null;
         this.edgeColor = null;
         this.edgeType = null;
         this.fontFamily = null;

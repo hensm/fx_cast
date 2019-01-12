@@ -2,10 +2,10 @@
 
 export default class QueueSetPropertiesRequest {
     constructor () {
-        this.type = "QUEUE_UPDATE";
-        this.customData = {};
+        this.customData = null;
         this.repeatMode = null;
-        this.sessionId = null;
         this.requestId = null;
+        this.sessionId = null;
+        this.type = "QUEUE_UPDATE";
     }
 }

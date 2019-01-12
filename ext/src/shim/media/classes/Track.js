@@ -2,7 +2,7 @@
 
 export default class Track {
     constructor (trackId, trackType) {
-        this.customData = {};
+        this.customData = null;
         this.language = null;
         this.name = null;
         this.subtype = null;

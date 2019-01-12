@@ -6,11 +6,11 @@ export default class MediaInfo {
 	constructor (contentId, contentType) {
 		this.contentId = contentId;
 		this.contentType = contentType;
-		this.customData = {};
+		this.customData = null;
 		this.duration = null;
 		this.metadata = null;
 		this.streamType = StreamType.BUFFERED;
 		this.textTrackStyle = null;
-		this.tracks = [];
+		this.tracks = null;
 	}
 }

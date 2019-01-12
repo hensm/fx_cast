@@ -3,7 +3,7 @@
 export default class SeekRequest {
     constructor () {
         this.currentTime = null;
-        this.customData = {};
+        this.customData = null;
         this.resumeState = null;
     }
 }

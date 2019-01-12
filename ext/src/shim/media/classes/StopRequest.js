@@ -2,6 +2,6 @@
 
 export default class StopRequest {
     constructor () {
-        this.customData = {};
+        this.customData = null;
     }
 }

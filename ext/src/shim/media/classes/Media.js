@@ -19,26 +19,21 @@ export default class Media {
     constructor (sessionId, mediaSessionId, _internalSessionId) {
         this._id = uuid();
 
-        this.activeTrackIds = [];
-        this.currentItemId = 1;
-        this.customData = {};
+        this.activeTrackIds = null;
+        this.currentItemId = null;
+        this.customData = null;
         this.currentTime = 0;
         this.idleReason = null;
-        this.items = [];
+        this.items = null;
         this.loadingItemId = null;
         this.media = null;
         this.mediaSessionId = mediaSessionId;
         this.playbackRate = 1;
-        this.playerState = PlayerState.PAUSED;
+        this.playerState = PlayerState.IDLE;
         this.preloadedItemId = null;
-        this.RepeatMode = RepeatMode.OFF;
+        this.repeatMode = RepeatMode.OFF;
         this.sessionId = sessionId;
-        this.supportedMediaCommands = [
-            MediaCommand.PAUSE
-          , MediaCommand.SEEK
-          , MediaCommand.STREAM_VOLUME
-          , MediaCommand.STREAM_MUTE
-        ];
+        this.supportedMediaCommands = [];
         this.volume = new Volume();
 
         this._sendMessage("bridge:bridgemedia/initialize", {

@@ -2,6 +2,6 @@
 
 export default class PlayRequest {
     constructor () {
-        this.customData = {};
+        this.customData = null;
     }
 }
