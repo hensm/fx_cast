@@ -71,6 +71,7 @@ select.btn:-moz-focusring {
 .btn[disabled] {
     background-color: var(--btn-bg) !important;
     box-shadow: initial;
+    cursor: default;
     opacity: 0.4;
 }
 

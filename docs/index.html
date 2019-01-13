@@ -7,6 +7,8 @@
         <link rel="stylesheet" href="photon-colors.css">
         <link rel="stylesheet" href="photon.css">
         <link rel="stylesheet" href="index.css">
+
+        <script src="index.js" defer></script>
     </head>
     <body>
         <div class="container">
@@ -18,30 +20,36 @@
                 <main class="main-content">
                     <section class="description">
                         <p>
-                            Enables Chromecast support for casting web apps (like Netflix, YouTube or BBC iPlayer), HTML5 video and screen/tab sharing.
+                            Enables Chromecast support for casting web apps (like Netflix, <s>YouTube</s> or BBC iPlayer), HTML5 video and screen/tab sharing.
                         </p>
                         <p class="discription__disclaimer">
                             Requires a native bridge app to connect with receiver devices. Currently supported on Windows, macOS and Linux.
-                            <br><br>
-                            <strong>No public full release yet!</strong>
+                        </p>
+                        <p class="discription__prerelease">
+                            No full public release yet! Pre-release beta version is incomplete and likely buggy.
                         </p>
                     </section>
                     <section class="download">
-                        <a class="download__ext btn btn--puffy btn--primary" href="#" disabled>
+                        <a class="download__ext btn btn--puffy btn--primary" disabled title="No available download found">
                             <img class="btn__icon" src="icons/extension_light.svg" alt="">
                             Firefox Extension
                         </a>
                         <div class="download__app">
                             <div class="app-list">
                                 <div class="app-list__label">Bridge:</div>
-                                <a class="app-list__app btn btn--puffy" href="#" disabled>
+                                <a class="app-list__app app-list__win btn btn--puffy" disabled title="No available download found">
+                                    Windows
+                                </a>
+                                <a class="app-list__app app-list__mac btn btn--puffy" disabled title="No available download found">
                                     macOS
                                 </a>
-                                <a class="app-list__app btn btn--puffy" href="#" disabled>
+                                <a class="app-list__app app-list__deb btn btn--puffy" disabled title="No available download found">
                                     Linux
+                                    <span class="app-list__app-label">deb</span>
                                 </a>
-                                <a class="app-list__app btn btn--puffy" href="#" disabled>
-                                    Windows
+                                <a class="app-list__app app-list__rpm btn btn--puffy" disabled title="No available download found">
+                                    Linux
+                                    <span class="app-list__app-label">rpm</span>
                                 </a>
                             </div>
                         </div>

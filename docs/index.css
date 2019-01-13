@@ -103,6 +103,11 @@ body {
     color: var(--text-color-secondary);
     font-size: 0.8em;
 }
+.discription__prerelease {
+    color: var(--red-50);
+    font-size: 0.8em;
+    font-weight: bolder;
+}
 
 .description p {
     margin: 1rem 0;
@@ -138,6 +143,14 @@ body {
     color: var(--text-color-secondary);
     font-size: 1.75rem;
     margin-right: 1rem;
+}
+
+.app-list__app-label {
+    color: var(--blue-40);
+    font-size: 0.8em;
+    font-variant: small-caps;
+    margin-left: 5px;
+    vertical-align: super;
 }
 
 
