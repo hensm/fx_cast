@@ -90,12 +90,12 @@ body {
     color: var(--page-color);
     font-size: 2.75rem;
     padding: 0.25rem 1rem;
-    margin-inline-end: -1rem;
+    margin-right: -1rem;
 }
 
 .description {
     font-size: 1.75rem;
-    padding-inline-end: 40px;
+    padding-right: 40px;
     text-align: right;
     width: 45ch;
     z-index: 1;
@@ -131,13 +131,13 @@ body {
     cursor: pointer;
 }
 .app-list__app:not(:last-child) {
-    margin-inline-end: 0.5rem;
+    margin-right: 0.5rem;
 }
 
 .app-list__label {
     color: var(--text-color-secondary);
     font-size: 1.75rem;
-    margin-inline-end: 1rem;
+    margin-right: 1rem;
 }
 
 
@@ -146,6 +146,7 @@ body {
 }
 
 .preview--bg {
+    -webkit-mask-image: linear-gradient(to right, black, transparent);
     mask-image: linear-gradient(to right, black, transparent);
     max-height: 712px;
     max-width: 912px;
@@ -156,7 +157,7 @@ body {
 }
 
 .preview--fg {
-    margin-inline-start: -60px;
+    margin-left: -60px;
     max-height: 281px;
     max-width: 462px;
     position: relative;

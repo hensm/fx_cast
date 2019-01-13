@@ -17,7 +17,7 @@ select.btn {
     -moz-appearance: none;
     background-repeat: no-repeat;
     background-position: right 12px center;
-    padding-inline-end: 40px;
+    padding-right: 40px;
 }
 
 select.btn {
@@ -100,7 +100,7 @@ select.btn:-moz-focusring {
 
 .btn__icon {
     height: 20px;
-    margin-inline-end: 8px;
+    margin-right: 8px;
     width: 20px;
 }
 
