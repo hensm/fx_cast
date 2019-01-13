@@ -5,7 +5,7 @@
     --text-color-secondary: var(--grey-50);
 }
 :root.theme-dark {
-    --page-color: var(--grey-70);
+    --page-color: var(--grey-80);
     --text-color-primary: var(--white-100);
     --text-color-secondary: var(--grey-40);
 }
@@ -143,17 +143,18 @@ body {
 
 .preview--bg {
     height: auto;
-    width: auto;
-    max-width: 912px;
     max-height: 712px;
+    max-width: 912px;
+    opacity: 0.65;
+    width: auto;
 }
 
 .preview--fg {
+    margin-inline-start: -40px;
     max-height: 281px;
     max-width: 462px;
     position: relative;
     top: 115px;
-    margin-inline-start: -40px;
 }
 
 .footer {
