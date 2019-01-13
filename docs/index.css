@@ -97,7 +97,6 @@ body {
     padding-right: 40px;
     text-align: right;
     width: 45ch;
-    z-index: 1;
 }
 .discription__disclaimer {
     color: var(--text-color-secondary);
@@ -156,26 +155,29 @@ body {
 
 .preview {
     grid-area: preview;
+    -moz-user-select: none;
+    -webkit-user-select: none;
+    user-select: none;
+    z-index: -1;
 }
 
 .preview--bg {
     -webkit-mask-image: linear-gradient(to right, black, transparent);
     mask-image: linear-gradient(to right, black, transparent);
-    max-height: 712px;
-    max-width: 912px;
-    object-fit: none;
+    height: 668px;
+    object-fit: cover;
     object-position: left;
     opacity: 0.65;
     width: 500px;
 }
 
 .preview--fg {
-    margin-left: -60px;
-    max-height: 281px;
-    max-width: 462px;
-    position: relative;
-    grid-row-start: 2;
     align-self: flex-start;
+    grid-row-start: 2;
+    margin-left: -60px;
+    height: 280px;
+    width: 462px;
+    position: relative;
 }
 
 .footer {
