@@ -1,0 +1,170 @@
+
+:root.theme-light {
+    --page-color: white;
+    --text-color-primary: var(--grey-90);
+    --text-color-secondary: var(--grey-50);
+}
+:root.theme-dark {
+    --page-color: var(--grey-70);
+    --text-color-primary: var(--white-100);
+    --text-color-secondary: var(--grey-40);
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+p {
+    margin: initial;
+    font-weight: unset;
+}
+
+* {
+    box-sizing: border-box;
+}
+
+html,
+body {
+    height: 100%;
+    width: 100%;
+}
+
+:root {
+    background-color: var(--page-color);
+    color: var(--text-color-primary);
+    font-family: "SF Mono";
+    font-size: 10px;
+    font-weight: lighter;
+}
+
+body {
+    display: flex;
+    margin: initial;
+}
+
+.container {
+    min-width: 480px;
+    margin: auto;
+    display: grid;
+    font-size: 13px;
+    grid-gap: 3rem;
+    grid-column-gap: 6rem;
+    grid-template-columns: min-content min-content;
+    grid-template-rows: min-content min-content;
+    grid-template-areas:
+        "main preview"
+        "footer preview";
+    overflow-x: hidden;
+    padding: 2rem 6rem;
+}
+
+.main {
+    min-width: inherit;
+    align-items: flex-end;
+    flex-direction: column;
+    display: flex;
+    justify-content: center;
+    grid-area: main;
+}
+
+.main-header,
+.main-content {
+    display: contents;
+}
+
+.main-content > * {
+    margin: 2rem 0;
+}
+
+.main-title {
+    font-size: 5rem;
+    font-weight: 400;
+    margin-bottom: 0.5rem;
+}
+.main-subtitle {
+    background-color: var(--text-color-secondary);
+    color: var(--page-color);
+    font-size: 2.75rem;
+    padding: 0.25rem 1rem;
+    margin-inline-end: -1rem;
+}
+
+.description {
+    width: 45ch;
+    font-size: 1.75rem;
+    text-align: right;
+}
+.discription__disclaimer {
+    font-size: 0.8em;
+    color: var(--text-color-secondary);
+}
+
+.description p {
+    margin: 1rem 0;
+}
+
+.download {
+    align-items: flex-end;
+    display: flex;
+    flex-direction: column;
+    font-size: 2rem;
+    position: relative;
+}
+
+.download__ext,
+.download__app .app-list__app {
+    font-size: 0.85em;
+}
+
+.app-list {
+    align-items: center;
+    display: flex;
+    margin-top: 1rem;
+}
+.app-list__app {
+    cursor: pointer;
+}
+.app-list__app:not(:last-child) {
+    margin-inline-end: 0.5rem;
+}
+
+.app-list__label {
+    color: var(--text-color-secondary);
+    font-size: 1.75rem;
+    margin-inline-end: 1rem;
+}
+
+
+.preview {
+    grid-area: preview;
+}
+
+.preview--bg {
+    height: auto;
+    width: auto;
+    max-width: 912px;
+    max-height: 712px;
+}
+
+.preview--fg {
+    max-height: 281px;
+    max-width: 462px;
+    position: relative;
+    top: 115px;
+    margin-inline-start: -40px;
+}
+
+.footer {
+    align-items: center;
+    display: flex;
+    flex-direction: column;
+    font-size: 1.5rem;
+    grid-area: footer;
+    justify-content: center;
+}
+
+:root.theme-dark .links__github {
+    filter: invert(1);
+}
