@@ -129,12 +129,12 @@ body {
 
 .app-list {
     align-items: center;
-    column-gap: 10px;
+    column-gap: 1rem;
     display: grid;
     grid-template-columns: min-content min-content min-content min-content;
     grid-template-rows: min-content min-content;
     margin-top: 1rem;
-    row-gap: 5px;
+    row-gap: 0.5rem;
 }
 
 .app-list__app {
@@ -151,7 +151,7 @@ body {
     color: var(--blue-40);
     font-size: 0.8em;
     font-variant: small-caps;
-    margin-left: 5px;
+    margin-left: 0.5rem;
     vertical-align: super;
 }
 
