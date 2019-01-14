@@ -112,6 +112,7 @@ body {
     margin: 1rem 0;
 }
 
+
 .download {
     align-items: flex-end;
     display: flex;
@@ -128,20 +129,22 @@ body {
 
 .app-list {
     align-items: center;
-    display: flex;
+    column-gap: 10px;
+    display: grid;
+    grid-template-columns: min-content min-content min-content min-content;
+    grid-template-rows: min-content min-content;
     margin-top: 1rem;
+    row-gap: 5px;
 }
+
 .app-list__app {
     cursor: pointer;
-}
-.app-list__app:not(:last-child) {
-    margin-right: 0.5rem;
+    
 }
 
 .app-list__label {
     color: var(--text-color-secondary);
     font-size: 1.75rem;
-    margin-right: 1rem;
 }
 
 .app-list__app-label {
@@ -150,6 +153,10 @@ body {
     font-variant: small-caps;
     margin-left: 5px;
     vertical-align: super;
+}
+
+.app-list__rpm {
+    grid-column-start: 4;
 }
 
 
