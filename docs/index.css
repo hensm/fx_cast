@@ -175,7 +175,6 @@ body {
     align-self: flex-start;
     grid-row-start: 2;
     margin-left: -60px;
-    height: 280px;
     width: 462px;
     position: relative;
 }
