@@ -13,7 +13,8 @@
     "dependencies": {
         "@babel/runtime": "^7.2.0",
         "castv2": "^0.1.9",
-        "dnssd": "^0.4.1"
+        "dnssd": "^0.4.1",
+        "node-fetch": "^2.3.0"
     },
     "devDependencies": {
         "@babel/cli": "^7.2.0",
