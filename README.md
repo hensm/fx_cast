@@ -45,9 +45,14 @@ Fedora:
 sudo dnf install dpkg rpm-build
 ````
 
-Archlinux (AUR):
+Archlinux:
+
+At the moment, `pkg` has a [bug](https://github.com/zeit/pkg/issues/584), until fixed nodejs has to be downgraded to `10.12.0`:
+
 ```sh
-yay -S fx_cast
+sudo pacman -S nvm
+echo 'source /usr/share/nvm/init-nvm.sh' >> ~/.bashrc
+nvm install 10.12.0
 ```
 
 ### Instructions
