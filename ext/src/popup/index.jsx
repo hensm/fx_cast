@@ -160,7 +160,14 @@ class Receiver extends Component {
                     { this.props.receiver.friendlyName }
                 </div>
                 <div className="receiver-address">
-                    { `${this.props.receiver._address}:${this.props.receiver._port}` }
+                    { `${this.props.receiver.address}:${this.props.receiver.port}` }
+                </div>
+                <div className="receiver-status">
+                    { do {
+                        if (this.props.receiver.currentApp) {
+                            `- ${this.props.receiver.currentApp}`
+                        }
+                    }}
                 </div>
                 <button className="receiver-connect"
                         onClick={this.onClick.bind(this)}

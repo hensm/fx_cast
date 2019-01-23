@@ -12,7 +12,8 @@ button:not([disabled]):hover:active {
     color: -moz-mac-buttonactivetext;
 }
 
-.receiver-address {
+.receiver-address,
+.receiver-status {
     font: message-box;
 }
 

@@ -176,14 +176,11 @@ onMessage(message => {
          * property and call the page event function (__onGCastApiAvailable).
          */
         case "shim:serviceUp": {
-            const receiver = new Receiver(
-                    message.data.id
-                  , message.data.friendlyName);
+            const receiver = message.data;
 
-            receiver._address = message.data.address;
-            receiver._port = message.data.port;
+            console.log(receiver);
 
-            if (state.receiverList.find(r => r.label === receiver.label)) {
+            if (state.receiverList.find(r => r.id === receiver.id)) {
                 break;
             }
 
@@ -201,7 +198,7 @@ onMessage(message => {
          */
         case "shim:serviceDown": {
             state.receiverList = state.receiverList.filter(
-                    receiver => receiver.label !== message.data.id);
+                    receiver => receiver.id !== message.data.id);
 
             if (state.receiverList.length === 0) {
                 state.apiConfig.receiverListener(
@@ -213,7 +210,13 @@ onMessage(message => {
 
         case "shim:selectReceiver": {
             console.info("Caster (Debug): Selected receiver");
-            const selectedReceiver = message.data.receiver;
+
+            const selectedReceiver = new Receiver(
+                    message.data.receiver.id
+                  , message.data.receiver.friendlyName);
+
+            selectedReceiver._address = message.data.receiver.address;
+            selectedReceiver._port = message.data.receiver.port;
 
             const sessionConstructorArgs = [
                 state.sessionList.length             // sessionId

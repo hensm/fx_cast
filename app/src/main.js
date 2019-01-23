@@ -171,6 +171,7 @@ browser.on("serviceUp", service => {
           , port: service.port
           , id: service.txt.id
           , friendlyName: service.txt.fn
+          , currentApp: service.txt.rs
         }
     });
 });
@@ -179,10 +180,7 @@ browser.on("serviceDown", service => {
     transforms.encode.write({
         subject:"shim:serviceDown"
       , data: {
-            address: service.addresses[0]
-          , port: service.port
-          , id: service.txt.id
-          , friendlyName: service.txt.fn
+            id: service.txt.id
         }
     });
 });
