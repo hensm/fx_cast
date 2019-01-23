@@ -45,6 +45,11 @@ Fedora:
 sudo dnf install dpkg rpm-build
 ````
 
+Archlinux (AUR):
+```sh
+yay -S fx_cast
+```
+
 ### Instructions
 
 ````sh
