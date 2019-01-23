@@ -18,31 +18,23 @@ Credit:
 
 ## Installing
 
-macOS:
+Install the Firefox extension and companion bridge application. Downloads can be found on the website or in the [GitHub releases](https://github.com/hensm/fx_cast/releases) section.
 
-1. Download the .pkg file
-2. Install it
-3. Install the [firefox extension](https://github.com/hensm/fx_cast/releases/download/v0.0.1/fx_cast-0.0.1-fx.xpi)
+macOS/Windows versions have installers, Linux packages can be installed via the command line:
 
+````sh
+# Debian/Ubuntu
+sudo dpkg -i fx_cast_bridge.deb
 
-Debian/Ubuntu:
+# Fedora
+sudo dnf install fx_cast_bridge-<version>.<arch>.rpm
+````
 
-1. Download the .deb file
-2. `$ sudo dpkg -i fx_cast.deb`
-3. Install the [firefox extension](https://github.com/hensm/fx_cast/releases/download/v0.0.1/fx_cast-0.0.1-fx.xpi)
-
-Fedora:
-
-1. Download the .rpm file
-2. `$ sudo dnf install fx_cast.rpm`
-3. Install the [firefox extension](https://github.com/hensm/fx_cast/releases/download/v0.0.1/fx_cast-0.0.1-fx.xpi)
-
-
-ArchLinux (AUR):
-
-1. `$ yay -S fx_cast`
-2. Install the [firefox extension](https://github.com/hensm/fx_cast/releases/download/v0.0.1/fx_cast-0.0.1-fx.xpi)
-
+### Package managers
+* #### Arch Linux (AUR) - https://aur.archlinux.org/packages/fx_cast/
+  ````sh
+  yay -S fx_cast
+  ````
 
 ## Building
 
@@ -77,7 +69,8 @@ Archlinux:
 At the moment, `pkg` has a [bug](https://github.com/zeit/pkg/issues/584), until fixed nodejs has to be downgraded to `10.12.0`:
 
 ```sh
-sudo pacman -S nvm
+sudo pacman -S nvm dpkg
+yay -S rpm-org
 echo 'source /usr/share/nvm/init-nvm.sh' >> ~/.bashrc
 nvm install 10.12.0
 ```
