@@ -16,6 +16,25 @@ Credit:
 * macOS
 * Windows
 
+## Installing
+
+Install the Firefox extension and companion bridge application. Downloads can be found on the website or in the [GitHub releases](https://github.com/hensm/fx_cast/releases) section.
+
+macOS/Windows versions have installers, Linux packages can be installed via the command line:
+
+````sh
+# Debian/Ubuntu
+sudo dpkg -i fx_cast_bridge.deb
+
+# Fedora
+sudo dnf install fx_cast_bridge-<version>.<arch>.rpm
+````
+
+### Package managers
+* #### Arch Linux (AUR) - https://aur.archlinux.org/packages/fx_cast/
+  ````sh
+  yay -S fx_cast
+  ````
 
 ## Building
 
@@ -44,6 +63,17 @@ Fedora:
 ````sh
 sudo dnf install dpkg rpm-build
 ````
+
+Archlinux:
+
+At the moment, `pkg` has a [bug](https://github.com/zeit/pkg/issues/584), until fixed nodejs has to be downgraded to `10.12.0`:
+
+```sh
+sudo pacman -S nvm dpkg
+yay -S rpm-org
+echo 'source /usr/share/nvm/init-nvm.sh' >> ~/.bashrc
+nvm install 10.12.0
+```
 
 ### Instructions
 
