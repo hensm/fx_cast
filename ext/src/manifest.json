@@ -17,6 +17,13 @@
   , "background": {
         "scripts": [ "main.js" ]
     }
+  , "content_scripts": [
+        {
+            "matches": [ "https://www.youtube.com/*" ]
+          , "js": [ "compat/youtube.js" ]
+          , "run_at": "document_start"
+        }
+    ]
 
   , "content_security_policy": "script-src 'self' 'unsafe-eval'; object-src 'self'"
   , "default_locale": "en"
@@ -38,6 +45,6 @@
 
   , "web_accessible_resources": [
         "shim/bundle.js"
-      , "dm.js"
+      , "vendor/webcomponents-lite.min.js"
     ]
 }

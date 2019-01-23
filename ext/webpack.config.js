@@ -18,6 +18,7 @@ module.exports = (env) => ({
       , "mediaCast"      : `${includePath}/mediaCast.js`
       , "mirroringCast"  : `${includePath}/mirroringCast.js`
       , "messageRouter"  : `${includePath}/messageRouter.js`
+      , "compat/youtube" : `${includePath}/compat/youtube.js`
     }
   , output: {
         filename: "[name].js"
@@ -34,25 +35,32 @@ module.exports = (env) => ({
         })
 
         // Copy static assets
-      , new CopyWebpackPlugin([{
-            from: includePath
-          , to: env.outputPath
-          , ignore: [ "*.js", "*.jsx" ]
-          , transform (content, path) {
-                // Access to variables in static files
-                if (path.endsWith(".json")) {
-                    return Buffer.from(content.toString()
-                        .replace("EXTENSION_NAME", env.extensionName)
-                        .replace("EXTENSION_ID", env.extensionId)
-                        .replace("EXTENSION_VERSION", env.extensionVersion)
-                        .replace("MIRRORING_APP_ID", env.mirroringAppId)
-                        .replace("APPLICATION_NAME", env.applicationName)
-                        .replace("APPLICATION_VERSION", env.applicationVersion));
-                }
+      , new CopyWebpackPlugin([
+          {
+                from: includePath
+              , to: env.outputPath
+              , ignore: [ "*.js", "*.jsx" ]
+              , transform (content, path) {
+                    // Access to variables in static files
+                    if (path.endsWith(".json")) {
+                        return Buffer.from(content.toString()
+                            .replace("EXTENSION_NAME", env.extensionName)
+                            .replace("EXTENSION_ID", env.extensionId)
+                            .replace("EXTENSION_VERSION", env.extensionVersion)
+                            .replace("MIRRORING_APP_ID", env.mirroringAppId)
+                            .replace("APPLICATION_NAME", env.applicationName)
+                            .replace("APPLICATION_VERSION", env.applicationVersion));
+                    }
 
-                return content;
+                    return content;
+                }
             }
-        }])
+          , {
+                // Copy vendor dir
+                from: path.join(includePath, "vendor")
+              , to: path.join(env.outputPath, "vendor")
+            }
+        ])
     ]
   , mode: "development"
   , module: {
