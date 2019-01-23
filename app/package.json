@@ -12,9 +12,13 @@
     },
     "dependencies": {
         "@babel/runtime": "^7.2.0",
+        "bplist-creator": "0.0.7",
+        "bplist-parser": "^0.1.1",
         "castv2": "^0.1.9",
         "dnssd": "^0.4.1",
-        "node-fetch": "^2.3.0"
+        "fast-srp-hap": "^1.0.1",
+        "node-fetch": "^2.3.0",
+        "tweetnacl": "^1.0.0"
     },
     "devDependencies": {
         "@babel/cli": "^7.2.0",
