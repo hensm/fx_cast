@@ -68,7 +68,7 @@ Watching ext changes:
 npm run watch --prefix ./ext
 ````
 
-Launch Firefox and auto-reload on rebuild (run in seperate terminal):
+Launch Firefox and auto-reload on rebuild (run in separate terminal):
 
 ````sh
 npm run start --prefix ./ext

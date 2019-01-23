@@ -161,8 +161,8 @@ async function injectSpecs (driver) {
         .setChromeOptions(chromeOptions)
         .build();
 
-    const capabilties = await driver.getCapabilities();
-    const browserName = capabilties.get("browserName");
+    const capabilities = await driver.getCapabilities();
+    const browserName = capabilities.get("browserName");
 
     // Need to wait for cast extension on Chrome
     if (browserName === "chrome") {
