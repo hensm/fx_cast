@@ -16,6 +16,33 @@ Credit:
 * macOS
 * Windows
 
+## Installing
+
+macOS:
+
+1. Download the .pkg file
+2. Install it
+3. Install the [firefox extension](https://github.com/hensm/fx_cast/releases/download/v0.0.1/fx_cast-0.0.1-fx.xpi)
+
+
+Debian/Ubuntu:
+
+1. Download the .deb file
+2. `$ sudo dpkg -i fx_cast.deb`
+3. Install the [firefox extension](https://github.com/hensm/fx_cast/releases/download/v0.0.1/fx_cast-0.0.1-fx.xpi)
+
+Fedora:
+
+1. Download the .rpm file
+2. `$ sudo dnf install fx_cast.rpm`
+3. Install the [firefox extension](https://github.com/hensm/fx_cast/releases/download/v0.0.1/fx_cast-0.0.1-fx.xpi)
+
+
+ArchLinux (AUR):
+
+1. `$ yay -S fx_cast`
+2. Install the [firefox extension](https://github.com/hensm/fx_cast/releases/download/v0.0.1/fx_cast-0.0.1-fx.xpi)
+
 
 ## Building
 
