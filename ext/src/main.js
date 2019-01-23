@@ -280,8 +280,8 @@ browser.menus.onClicked.addListener(async (info, tab) => {
             mirrorCastFrameId = frameId;
 
             await browser.tabs.executeScript(tab.id, {
-                code: `let selectedMedia = "${info.pageUrl ? "tab" : "screen"}";
-                       let FX_CAST_RECEIVER_APP_ID = "${options.mirroringAppId}";`
+                code: `var selectedMedia = "${info.pageUrl ? "tab" : "screen"}";
+                       var FX_CAST_RECEIVER_APP_ID = "${options.mirroringAppId}";`
               , frameId
             });
 
@@ -298,8 +298,8 @@ browser.menus.onClicked.addListener(async (info, tab) => {
 
             // Pass media URL to media sender app
             await browser.tabs.executeScript(tab.id, {
-                code: `const srcUrl = "${info.srcUrl}";
-                       const targetElementId = ${info.targetElementId};`
+                code: `var srcUrl = "${info.srcUrl}";
+                       var targetElementId = ${info.targetElementId};`
               , frameId
             });
 
