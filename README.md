@@ -2,14 +2,6 @@
 
 No full public release yet! Pre-release beta version is incomplete and likely buggy.
 
-Credit:
-
-* [electron-chromecast](https://github.com/GPMDP/electron-chromecast)
-* [node-castv2](https://github.com/thibauts/node-castv2)
-* [chrome-native-messaging](https://github.com/jdiamond/chrome-native-messaging)
-* [icons8](https://icons8.com/)
-
-
 ## Supported platforms
 
 * Linux
@@ -165,3 +157,13 @@ Netflix / HTML5:
 
 [<img width="200" src="https://img.youtube.com/vi/Ex9dWKYguEE/0.jpg" alt="fx_cast Netflix" />](https://www.youtube.com/watch?v=Ex9dWKYguEE)
 [<img width="200" src="https://img.youtube.com/vi/16r8lQKeEX8/0.jpg" alt="fx_cast HTML5" />](https://www.youtube.com/watch?v=16r8lQKeEX8)
+
+
+## Credit
+
+Note: Since it seems to be causing confusion, this project does not use electron. The electron-chromecast library was only used as a reference for the intitial implementation of the API shim.
+
+* [electron-chromecast](https://github.com/GPMDP/electron-chromecast)
+* [node-castv2](https://github.com/thibauts/node-castv2)
+* [chrome-native-messaging](https://github.com/jdiamond/chrome-native-messaging)
+* [icons8](https://icons8.com/)
