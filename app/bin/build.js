@@ -281,6 +281,7 @@ function packageLinuxRpm (platform, packageType) {
         `rpmbuild -bb ${specOutputPath} `
                + `--define "_distdir ${BUILD_PATH}" `
                + `--define "_rpmdir ${BUILD_PATH}" `
+               + `--target=x86_64-linux`
       , { shell: true });
 
     return glob.sync("**/*.rpm", { cwd: BUILD_PATH })[0];
