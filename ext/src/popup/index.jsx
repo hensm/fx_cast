@@ -43,29 +43,37 @@ class App extends Component {
     }
 
     componentDidMount () {
-        browser.runtime.sendMessage({
+        this.port = browser.runtime.connect({
+            name: "popup"
+        });
+
+        this.port.postMessage({
             subject: "shim:popupReady"
         });
 
-        browser.runtime.onMessage.addListener(message => {
+        this.port.onMessage.addListener(message => {
             switch (message.subject) {
-                case "popup:populate":
+                case "popup:populate": {
                     this.setState({
                         receivers: message.data.receivers
                       , selectedMedia: message.data.selectedMedia
-                    });
+                    }, () => {
+                        // Get height of content without window decoration
+                        winHeight = document.body.clientHeight + frameHeight;
 
-                    winHeight = document.body.clientHeight + frameHeight;
-
-                    browser.windows.update(this.win.id, {
-                        height: winHeight
+                        // Adjust height to fit content
+                        browser.windows.update(this.win.id, {
+                            height: winHeight
+                        });
                     });
 
                     break;
+                }
 
-                case "popup:close":
+                case "popup:close": {
                     window.close();
                     break;
+                }
             }
         });
     }
@@ -75,7 +83,7 @@ class App extends Component {
             isLoading: true
         });
 
-        browser.runtime.sendMessage({
+        this.port.postMessage({
             subject: "shim:selectReceiver"
           , data: {
                 receiver

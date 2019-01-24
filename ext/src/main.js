@@ -363,7 +363,6 @@ function initBridge (tabId, frameId) {
 }
 
 
-let popupTabId;
 let popupWinId;
 let popupOpenerTabId;
 let popupOpenerFrameId;
@@ -397,7 +396,6 @@ async function openPopup (tabId, frameId) {
     });
 
     // Store popup details for message forwarding
-    popupTabId = popup.tabs[0].id;
     popupWinId = popup.id;
     popupOpenerTabId = tabId;
     popupOpenerFrameId = frameId;
@@ -427,13 +425,25 @@ browser.windows.onRemoved.addListener(id => {
             subject: "shim:popupClosed"
         });
 
-        popupTabId = null;
         popupWinId = null;
         popupOpenerTabId = null;
 
     }
 });
 
+
+/**
+ * Extension scripts make a connection to the background script
+ * with a destination name to be registered as message route.
+ */
+browser.runtime.onConnect.addListener(port => {
+    messageRouter.register(port.name, message => {
+        port.postMessage(message);
+    });
+    port.onMessage.addListener(message => {
+        messageRouter.handleMessage(message);
+    })
+});
 
 messageRouter.register("main", async (message, sender) => {
     const tabId = sender && sender.tab.id;
@@ -485,16 +495,6 @@ messageRouter.register("bridge", (message, sender) => {
 messageRouter.register("shim", (message, sender) => {
     browser.tabs.sendMessage(popupOpenerTabId, message
           , { frameId: popupOpenerFrameId })
-});
-
-messageRouter.register("popup", (message, sender) => {
-    if (!popupTabId) return;
-
-    try {
-        browser.tabs.sendMessage(popupTabId, message);
-    } catch (err) {
-        // Popup is closed
-    }
 });
 
 messageRouter.register("mirrorCast", message => {
