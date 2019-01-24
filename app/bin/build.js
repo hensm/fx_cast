@@ -124,9 +124,9 @@ function package (platform) {
         case "linux":
             switch (argv.packageType) {
                 case "deb":
-                    return packageLinuxDeb(platform);
+                    return packageLinuxDeb(platform, argv.packageType);
                 case "rpm":
-                    return packageLinuxRpm(platform);
+                    return packageLinuxRpm(platform, argv.packageType);
             }
 
         case "win32":
@@ -208,13 +208,14 @@ function packageDarwin (platform) {
 
 }
 
-function packageLinuxDeb (platform) {
+function packageLinuxDeb (platform, packageType) {
     const installerName = `${applicationName}.deb`;
 
     // Create root
     const rootPath = path.join(BUILD_PATH, "root");
     const rootExecutablePath = path.join(rootPath, executablePath[platform]);
-    const rootManifestPath = path.join(rootPath, manifestPath[platform]);
+    const rootManifestPath = path.join(rootPath
+          , manifestPath[platform][packageType]);
 
     fs.ensureDirSync(rootExecutablePath, { recursive: true });
     fs.ensureDirSync(rootManifestPath, { recursive: true });
@@ -255,7 +256,7 @@ function packageLinuxDeb (platform) {
     return installerName;
 }
 
-function packageLinuxRpm (platform) {
+function packageLinuxRpm (platform, packageType) {
     const specPath = path.join(__dirname
           , "../packaging/linux/rpm/package.spec");
 
@@ -266,7 +267,7 @@ function packageLinuxRpm (platform) {
       , applicationName
       , applicationVersion
       , executablePath: executablePath[platform]
-      , manifestPath: manifestPath[platform]
+      , manifestPath: manifestPath[platform][packageType]
       , executableName: executableName[platform]
       , manifestName
     };

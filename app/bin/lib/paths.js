@@ -26,7 +26,10 @@ exports.manifestName = `${__applicationName}.json`;
 exports.manifestPath = {
     win32: `C:\\Program Files\\${__applicationDirectoryName}\\`
   , darwin: "/Library/Application Support/Mozilla/NativeMessagingHosts/"
-  , linux: "/usr/lib/mozilla/native-messaging-hosts/"
+  , linux: {
+        deb: "/usr/lib/mozilla/native-messaging-hosts/"
+      , rpm: "/usr/lib64/mozilla/native-messaging-hosts/"
+    }
 };
 
 exports.pkgPlatform = {
