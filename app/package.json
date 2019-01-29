@@ -17,6 +17,7 @@
         "castv2": "^0.1.9",
         "dnssd": "^0.4.1",
         "fast-srp-hap": "^1.0.1",
+        "mime-types": "^2.1.21",
         "node-fetch": "^2.3.0",
         "tweetnacl": "^1.0.0"
     },

@@ -3,6 +3,7 @@ import dnssd from "dnssd";
 import http from "http";
 import fs from "fs";
 import path from "path";
+import mime from "mime-types";
 
 import * as transforms from "./transforms";
 import Media from "./Media";
@@ -117,6 +118,8 @@ async function handleMessage (message) {
                 const { size: fileSize } = fs.statSync(filePath);
                 const { range } = req.headers;
 
+                const contentType = mime.lookup(filePath) || "video/mp4";
+
                 // Partial content HTTP 206
                 if (range) {
                     const bounds = range.substring(6).split("-");
@@ -132,7 +135,7 @@ async function handleMessage (message) {
                         "Accept-Ranges": "bytes"
                       , "Content-Range": `bytes ${start}-${end}/${fileSize}`
                       , "Content-Length": chunkSize
-                      , "Content-Type": "video/mp4"
+                      , "Content-Type": contentType
                     });
 
                     fs.createReadStream(filePath, { start, end }).pipe(res);
@@ -140,7 +143,7 @@ async function handleMessage (message) {
                 } else {
                     res.writeHead(200, {
                         "Content-Length": fileSize
-                      , "Content-Type": "video/mp4"
+                      , "Content-Type": contentType
                     });
 
                     fs.createReadStream(filePath).pipe(res)
