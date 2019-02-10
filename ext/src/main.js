@@ -91,6 +91,12 @@ async function createMenus () {
       , id: "contextCast"
       , title: _("contextCast")
       , visible: options.mirroringEnabled
+
+        // Mirroring doesn't work from local files
+      , documentUrlPatterns: [
+            "http://*/*"
+          , "https://*/*"
+        ]
     });
 }
 
