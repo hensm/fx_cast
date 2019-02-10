@@ -42,18 +42,23 @@ class App extends Component {
         });
     }
 
-    componentDidMount () {
-        this.port = browser.runtime.connect({
+    async componentDidMount () {
+        const { tabId, frameId } = await browser.runtime.sendMessage({
+            subject: "getPopupShimInfo"
+        });
+
+        this.port = browser.tabs.connect(tabId, {
             name: "popup"
+          , frameId
         });
 
         this.port.postMessage({
-            subject: "shim:popupReady"
+            subject: "popupReady"
         });
 
         this.port.onMessage.addListener(message => {
             switch (message.subject) {
-                case "popup:populate": {
+                case "populateReceiverList": {
                     this.setState({
                         receivers: message.data.receivers
                       , selectedMedia: message.data.selectedMedia
@@ -70,8 +75,9 @@ class App extends Component {
                     break;
                 }
 
-                case "popup:close": {
+                case "close": {
                     window.close();
+
                     break;
                 }
             }
@@ -84,7 +90,7 @@ class App extends Component {
         });
 
         this.port.postMessage({
-            subject: "shim:selectReceiver"
+            subject: "selectReceiver"
           , data: {
                 receiver
               , selectedMedia: this.state.selectedMedia

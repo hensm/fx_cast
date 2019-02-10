@@ -319,60 +319,15 @@ browser.menus.onClicked.addListener(async (info, tab) => {
 });
 
 
-const bridgeMap = new Map();
-
-/**
- * Initializes native application and handles message
- * forwarding.
- */
-function initBridge (tabId, frameId) {
-    const existingPort = bridgeMap.get(tabId);
-
-    if (existingPort) {
-        existingPort.disconnect();
-        bridgeMap.delete(tabId);
-    }
-
-    const port = browser.runtime.connectNative(APPLICATION_NAME);
-
-    if (port.error) {
-        console.error(`Failed connect to ${APPLICATION_NAME}:`, port.error.message);
-    } else {
-        bridgeMap.set(tabId, port);
-    }
-
-    port.onDisconnect.addListener(p => {
-        if (p.error) {
-            console.error(`${APPLICATION_NAME} disconnected:`, p.error.message);
-        } else {
-            console.log(`${APPLICATION_NAME} disconnected`);
-        }
-
-        bridgeMap.delete(tabId);
-    });
-
-    port.onMessage.addListener(message => {
-        // Forward shim: messages
-        // TODO: Integrate into messageRouter
-        if (message.subject.startsWith("shim:")) {
-            browser.tabs.sendMessage(tabId, message, { frameId });
-        } else {
-            messageRouter.handleMessage(message);
-        }
-    });
-}
-
-
 let popupWinId;
-let popupOpenerTabId;
-let popupOpenerFrameId;
+let popupShimId;
 
 /**
  * Creates popup window for cast destination selection.
  * Refocusing other browser windows causes the popup window
  * to close and returns an API error (TODO).
  */
-async function openPopup (tabId, frameId) {
+async function openPopup (shimId) {
     const width = 350;
     const height = 200;
 
@@ -397,8 +352,7 @@ async function openPopup (tabId, frameId) {
 
     // Store popup details for message forwarding
     popupWinId = popup.id;
-    popupOpenerTabId = tabId;
-    popupOpenerFrameId = frameId;
+    popupShimId = shimId;
 
     // Size/position not set correctly on creation (bug?)
     await browser.windows.update(popup.id, {
@@ -422,80 +376,138 @@ async function openPopup (tabId, frameId) {
 browser.windows.onRemoved.addListener(id => {
     if (id === popupWinId) {
         messageRouter.handleMessage({
-            subject: "shim:popupClosed"
+            subject: "popupClosed"
         });
 
         popupWinId = null;
-        popupOpenerTabId = null;
-
+        popupShimId = null;
     }
 });
 
 
-/**
- * Extension scripts make a connection to the background script
- * with a destination name to be registered as message route.
- */
-browser.runtime.onConnect.addListener(port => {
-    messageRouter.register(port.name, message => {
+const shimMap = new Map();
+
+browser.runtime.onMessage.addListener(message => {
+    if (message.subject === "getPopupShimInfo") {
+        return new Promise(resolve => {
+            const { tabId, frameId } = shimMap.get(popupShimId);
+
+            resolve({
+                tabId
+              , frameId
+            });
+        });
+    }
+});
+
+async function onConnectShim (port) {
+    const bridgeInfo = await getBridgeInfo();
+    if (bridgeInfo && !bridgeInfo.isVersionCompatible) {
+        return;
+    }
+
+
+    const tabId = port.sender.tab.id;
+    const frameId = port.sender.frameId;
+    const shimId = `${tabId}:${frameId}`;
+
+    // Disconnect existing shim
+    if (shimMap.has(shimId)) {
+        shimMap.get(shimId).port.disconnect();
+        shimMap.delete(shimId);
+    }
+
+    // Spawn bridge app instance
+    const bridgePort = browser.runtime.connectNative(APPLICATION_NAME);
+
+    if (bridgePort.error) {
+        console.error(`Failed connect to ${APPLICATION_NAME}:`
+              , bridgePort.error.message);
+    }
+
+    shimMap.set(shimId, {
+        port
+      , bridgePort
+      , tabId
+      , frameId
+    });
+
+    bridgePort.onDisconnect.addListener(() => {
+        if (bridgePort.error) {
+            console.error(`${APPLICATION_NAME} disconnected:`
+                  , bridgePort.error.message);
+        } else {
+            console.log(`${APPLICATION_NAME} disconnected`);
+        }
+    });
+
+    // Handle disconnect
+    port.onDisconnect.addListener(() => {
+        bridgePort.disconnect();
+        shimMap.delete(shimId);
+    });
+
+
+    bridgePort.onMessage.addListener(message => {
         port.postMessage(message);
     });
-    port.onMessage.addListener(message => {
-        messageRouter.handleMessage(message);
-    })
-});
 
-messageRouter.register("main", async (message, sender) => {
-    const tabId = sender && sender.tab.id;
+    port.onMessage.addListener(async message => {
+        if (message.subject.startsWith("bridge")) {
+            bridgePort.postMessage(message);
+        }
 
-    switch (message.subject) {
-        case "main:initialize": {
-            const bridgeInfo = await getBridgeInfo();
-            if (bridgeInfo && bridgeInfo.isVersionCompatible) {
-                initBridge(tabId, sender.frameId);            
-            }
+        switch (message.subject) {
+            case "openPopup": {
+                /**
+                 * If popup already open, reassign to new shim,
+                 * otherwise create a new popup.
+                 */
+                if (popupWinId) {
+                    /**
+                     * Notify shim that existing popup has closed and
+                     * to re-populate receiver list for new popup.
+                     */
+                    port.postMessage({ subject: "popupClosed" });
+                    port.postMessage({ subject: "popupReady" });
+                } else {
+                    await openPopup(shimId);
+                }
 
-            browser.tabs.sendMessage(sender.tab.id, {
-                subject: "shim:initialized"
-              , data: bridgeInfo
-            }, { frameId: sender.frameId });
+                break;
+            };
 
-            break;
-        };
-
-        case "main:openPopup": {
-            // If popup already open, reassign opener tab to new shim
-            if (popupWinId) {
-
-                // Notify shim that existing popup is gone
-                messageRouter.handleMessage({
-                    subject: "shim:popupClosed"
+            case "discover": {
+                bridgePort.postMessage({
+                    subject: "bridge:discover"
                 });
 
-                popupOpenerTabId = tabId;
-                popupOpenerFrameId = sender.frameId;
+                break;
+            };
 
-                // Notify shim to re-populate receiver list
-                messageRouter.handleMessage({
-                    subject: "shim:popupReady"
-                });
-            } else {
-                await openPopup(tabId, sender.frameId);
+            default: {
+                // TODO: Remove need for this
+                messageRouter.handleMessage(message);
+                break;
             }
+        }
+    });
+
+    port.postMessage({
+        subject: "shimInitialized"
+      , data: bridgeInfo
+    });
+}
+
+browser.runtime.onConnect.addListener(port => {
+    switch (port.name) {
+        case "shim": {
+            onConnectShim(port);
             break;
         };
     }
 });
 
-messageRouter.register("bridge", (message, sender) => {
-    console.log(message);
-    bridgeMap.get(sender.tab.id).postMessage(message);
-});
-
-messageRouter.register("shim", (message, sender) => {
-    browser.tabs.sendMessage(popupOpenerTabId, message
-          , { frameId: popupOpenerFrameId })
-});
 
 messageRouter.register("mirrorCast", message => {
     browser.tabs.sendMessage(mirrorCastTabId, message
@@ -507,8 +519,12 @@ messageRouter.register("mediaCast", message => {
 });
 
 
+// Forward messages into messageRouter
 browser.runtime.onMessage.addListener((message, sender) => {
-    messageRouter.handleMessage(message, sender);
+    messageRouter.handleMessage(message, {
+        tabId: sender.tab.id
+      , frameId: sender.frameId
+    });
 });
 
 

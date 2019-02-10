@@ -16,7 +16,7 @@ window.chrome.cast.media = media;
 
 onMessage(message => {
     switch (message.subject) {
-        case "shim:initialized": {
+        case "shimInitialized": {
             const bridgeInfo = message.data;
 
             // Call page's API loaded function if defined
@@ -27,9 +27,4 @@ onMessage(message => {
             break;
         };
     }
-});
-
-// Trigger bridge mDNS discovery
-sendMessage({
-    subject: "main:initialize"
 });

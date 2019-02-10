@@ -168,7 +168,7 @@ async function handleMessage (message) {
 
 browser.on("serviceUp", service => {
     transforms.encode.write({
-        subject: "shim:serviceUp"
+        subject: "serviceUp"
       , data: {
             address: service.addresses[0]
           , port: service.port
@@ -181,7 +181,7 @@ browser.on("serviceUp", service => {
 
 browser.on("serviceDown", service => {
     transforms.encode.write({
-        subject:"shim:serviceDown"
+        subject:"serviceDown"
       , data: {
             id: service.txt.id
         }

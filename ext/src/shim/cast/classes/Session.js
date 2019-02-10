@@ -44,7 +44,7 @@ export default class Session {
         this.status = SessionStatus.CONNECTED;
         this.statusText = null;
 
-        if (receiver) {        
+        if (receiver) {
             this._sendMessage("bridge:bridgesession/initialize", {
                 address: receiver._address
               , port: receiver._port

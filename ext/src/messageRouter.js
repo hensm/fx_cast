@@ -11,10 +11,10 @@ function deregister (routeName) {
     routeMap.delete(routeName);
 }
 
-function handleMessage (message, sender) {
+function handleMessage (message, details) {
     const destination = message.subject.split(":")[0];
     if (routeMap.has(destination)) {
-        routeMap.get(destination)(message, sender);
+        routeMap.get(destination)(message, details);
     }
 }
 

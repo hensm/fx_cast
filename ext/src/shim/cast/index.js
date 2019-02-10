@@ -91,7 +91,7 @@ cast.initialize = (
     state.apiConfig = apiConfig;
 
     sendMessage({
-        subject: "bridge:discover"
+        subject: "discover"
     });
 
     apiConfig.receiverListener(state.receiverList.length
@@ -146,7 +146,7 @@ cast.requestSession = (
 
     // Open destination chooser
     sendMessage({
-        subject: "main:openPopup"
+        subject: "openPopup"
     });
 };
 
@@ -175,10 +175,8 @@ onMessage(message => {
          * Cast destination found (serviceUp). Set the API availability
          * property and call the page event function (__onGCastApiAvailable).
          */
-        case "shim:serviceUp": {
+        case "serviceUp": {
             const receiver = message.data;
-
-            console.log(receiver);
 
             if (state.receiverList.find(r => r.id === receiver.id)) {
                 break;
@@ -196,7 +194,7 @@ onMessage(message => {
          * Cast destination lost (serviceDown). Remove from the receiver list
          * and update availability state.
          */
-        case "shim:serviceDown": {
+        case "serviceDown": {
             state.receiverList = state.receiverList.filter(
                     receiver => receiver.id !== message.data.id);
 
@@ -208,7 +206,7 @@ onMessage(message => {
             break;
         };
 
-        case "shim:selectReceiver": {
+        case "selectReceiver": {
             console.info("Caster (Debug): Selected receiver");
 
             const selectedReceiver = new Receiver(
@@ -226,7 +224,8 @@ onMessage(message => {
               , selectedReceiver                     // receiver
               , (session) => {
                     sendMessage({
-                        subject: "popup:close"
+                        subject: "close"
+                      , destination: "popup"
                     });
 
                     state.apiConfig.sessionListener(session);
@@ -258,9 +257,10 @@ onMessage(message => {
          * Popup is ready to receive data to populate the cast destination
          * chooser.
          */
-        case "shim:popupReady": {
+        case "popupReady": {
             sendMessage({
-                subject: "popup:populate"
+                subject: "populateReceiverList"
+              , destination: "popup"
               , data: {
                     receivers: state.receiverList
                   , selectedMedia: state.apiConfig._selectedMedia
@@ -273,7 +273,7 @@ onMessage(message => {
         /**
          * Popup closed before session established.
          */
-        case "shim:popupClosed": {
+        case "popupClosed": {
             if (state.sessionRequestInProgress) {
                 state.sessionRequestInProgress = false;
                 sessionErrorCallback(new Error_(ErrorCode.CANCEL));
