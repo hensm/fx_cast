@@ -4,21 +4,18 @@ const path              = require("path");
 const webpack           = require("webpack");
 const CopyWebpackPlugin = require("copy-webpack-plugin");
 
-
-const includePath = path.resolve(__dirname, "src");
-
 module.exports = (env) => ({
     entry: {
-        "main"           : `${includePath}/main.js`
-      , "popup/bundle"   : `${includePath}/popup/index.jsx`
-      , "options/bundle" : `${includePath}/options/index.jsx`
-      , "shim/bundle"    : `${includePath}/shim/index.js`
-      , "content"        : `${includePath}/content.js`
-      , "contentSetup"   : `${includePath}/contentSetup.js`
-      , "mediaCast"      : `${includePath}/mediaCast.js`
-      , "mirroringCast"  : `${includePath}/mirroringCast.js`
-      , "messageRouter"  : `${includePath}/messageRouter.js`
-      , "compat/youtube" : `${includePath}/compat/youtube.js`
+        "main"           : `${env.includePath}/main.js`
+      , "popup/bundle"   : `${env.includePath}/popup/index.jsx`
+      , "options/bundle" : `${env.includePath}/options/index.jsx`
+      , "shim/bundle"    : `${env.includePath}/shim/index.js`
+      , "content"        : `${env.includePath}/content.js`
+      , "contentSetup"   : `${env.includePath}/contentSetup.js`
+      , "mediaCast"      : `${env.includePath}/mediaCast.js`
+      , "mirroringCast"  : `${env.includePath}/mirroringCast.js`
+      , "messageRouter"  : `${env.includePath}/messageRouter.js`
+      , "compat/youtube" : `${env.includePath}/compat/youtube.js`
     }
   , output: {
         filename: "[name].js"
@@ -36,8 +33,8 @@ module.exports = (env) => ({
 
         // Copy static assets
       , new CopyWebpackPlugin([
-          {
-                from: includePath
+            {
+                from: env.includePath
               , to: env.outputPath
               , ignore: [ "*.js", "*.jsx" ]
               , transform (content, path) {
@@ -49,7 +46,8 @@ module.exports = (env) => ({
                             .replace("EXTENSION_VERSION", env.extensionVersion)
                             .replace("MIRRORING_APP_ID", env.mirroringAppId)
                             .replace("APPLICATION_NAME", env.applicationName)
-                            .replace("APPLICATION_VERSION", env.applicationVersion));
+                            .replace("APPLICATION_VERSION", env.applicationVersion)
+                            .replace("CONTENT_SECURITY_POLICY", env.contentSecurityPolicy));
                     }
 
                     return content;
@@ -57,12 +55,11 @@ module.exports = (env) => ({
             }
           , {
                 // Copy vendor dir
-                from: path.join(includePath, "vendor")
+                from: path.join(env.includePath, "vendor")
               , to: path.join(env.outputPath, "vendor")
             }
         ])
     ]
-  , mode: "development"
   , module: {
         rules: [
             {
@@ -70,7 +67,7 @@ module.exports = (env) => ({
               , resolve: {
                     extensions: [ ".js", ".jsx" ]
                 }
-              , include: `${includePath}`
+              , include: `${env.includePath}`
               , use: {
                     loader: "babel-loader"
                   , options: {

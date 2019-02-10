@@ -8,6 +8,8 @@ const package = require("./package.json");
 const appPackage = require("../app/package.json");
 
 
+const INCLUDE_PATH = path.resolve(__dirname, "src");
+
 const DIST_PATH = path.join(__dirname, "../dist/ext");
 const UNPACKED_PATH = path.join(DIST_PATH, "unpacked");
 
@@ -36,11 +38,12 @@ if (argv.package) {
 
 // Import webpack config and specify env values
 const webpackConfig = require("./webpack.config.js")({
+    includePath: INCLUDE_PATH
     /**
      * If watching files, output directly to dist. Unpacked
      * directory is used as a staging area for web-ext builds.
      */
-    outputPath: argv.package
+  , outputPath: argv.package
         ? UNPACKED_PATH
         : DIST_PATH
 
@@ -50,10 +53,18 @@ const webpackConfig = require("./webpack.config.js")({
   , applicationName: appPackage.__applicationName
   , applicationVersion: appPackage.__applicationVersion
   , mirroringAppId: argv.mirroringAppId
+
+    // eval source map needs special CSP
+  , contentSecurityPolicy: argv.mode === "production"
+        ? "default-src 'self'"
+        : "script-src 'self' 'unsafe-eval'; object-src 'self'"
 });
 
 // Add mode to config
 webpackConfig.mode = argv.mode;
+webpackConfig.devtool = argv.mode === "production"
+    ? "source-map"
+    : "eval";
 
 
 // Clean

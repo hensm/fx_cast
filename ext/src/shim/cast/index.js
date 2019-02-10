@@ -278,6 +278,7 @@ onMessage(message => {
                 state.sessionRequestInProgress = false;
                 sessionErrorCallback(new Error_(ErrorCode.CANCEL));
             }
+
             break;
         }
     }

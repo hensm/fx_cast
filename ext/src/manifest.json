@@ -3,13 +3,12 @@
   , "description": "__MSG_extensionDescription__"
   , "version": "EXTENSION_VERSION"
 
-  , "applications": {
+  , "browser_specific_settings": {
         "gecko": {
             "id": "EXTENSION_ID"
           , "strict_min_version": "64.0"
         }
     }
-
   , "browser_action": {
         "default_popup": "popup/index.html"
     }
@@ -24,15 +23,13 @@
           , "run_at": "document_start"
         }
     ]
-
-  , "content_security_policy": "script-src 'self' 'unsafe-eval'; object-src 'self'"
+  , "content_security_policy": "CONTENT_SECURITY_POLICY"
   , "default_locale": "en"
   , "manifest_version": 2
 
   , "options_ui": {
         "page": "options/index.html"
     }
-
   , "permissions": [
         "menus"
       , "nativeMessaging"
@@ -42,7 +39,6 @@
       , "webRequestBlocking"
       , "<all_urls>"
     ]
-
   , "web_accessible_resources": [
         "shim/bundle.js"
       , "vendor/webcomponents-lite.min.js"
