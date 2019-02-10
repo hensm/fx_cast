@@ -327,6 +327,7 @@ browser.menus.onClicked.addListener(async (info, tab) => {
 
 let popupWinId;
 let popupShimId;
+let popupPort;
 
 /**
  * Creates popup window for cast destination selection.
@@ -381,30 +382,18 @@ async function openPopup (shimId) {
 // Track popup close
 browser.windows.onRemoved.addListener(id => {
     if (id === popupWinId) {
-        messageRouter.handleMessage({
+        shimMap.get(popupShimId).port.postMessage({
             subject: "popupClosed"
         });
 
         popupWinId = null;
         popupShimId = null;
+        popupPort = null;
     }
 });
 
 
 const shimMap = new Map();
-
-browser.runtime.onMessage.addListener(message => {
-    if (message.subject === "getPopupShimInfo") {
-        return new Promise(resolve => {
-            const { tabId, frameId } = shimMap.get(popupShimId);
-
-            resolve({
-                tabId
-              , frameId
-            });
-        });
-    }
-});
 
 async function onConnectShim (port) {
     const bridgeInfo = await getBridgeInfo();
@@ -470,6 +459,16 @@ async function onConnectShim (port) {
                  * otherwise create a new popup.
                  */
                 if (popupWinId) {
+
+                    // Reassign popup to new shim
+                    popupPort.postMessage({
+                        subject: "assignPopup"
+                      , data: {
+                            tabId
+                          , frameId
+                        }
+                    });
+
                     /**
                      * Notify shim that existing popup has closed and
                      * to re-populate receiver list for new popup.
@@ -505,12 +504,27 @@ async function onConnectShim (port) {
     });
 }
 
+function onConnectPopup (port) {
+    if (popupPort) {
+        popupPort.disconnect();
+    }
+
+    popupPort = port;
+
+    const { tabId, frameId } = shimMap.get(popupShimId);
+    port.postMessage({
+        subject: "assignPopup"
+      , data: {
+            tabId
+          , frameId
+        }
+    });
+}
+
 browser.runtime.onConnect.addListener(port => {
     switch (port.name) {
-        case "shim": {
-            onConnectShim(port);
-            break;
-        };
+        case "shim":  onConnectShim(port);  break;
+        case "popup": onConnectPopup(port); break;
     }
 });
 

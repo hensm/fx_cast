@@ -42,14 +42,14 @@ class App extends Component {
         });
     }
 
-    async componentDidMount () {
-        const { tabId, frameId } = await browser.runtime.sendMessage({
-            subject: "getPopupShimInfo"
-        });
+    async setPort (shimTabId, shimFrameId) {
+        if (this.port) {
+            this.port.disconnect();
+        }
 
-        this.port = browser.tabs.connect(tabId, {
+        this.port = browser.tabs.connect(shimTabId, {
             name: "popup"
-          , frameId
+          , frameId: shimFrameId
         });
 
         this.port.postMessage({
@@ -80,6 +80,19 @@ class App extends Component {
 
                     break;
                 }
+            }
+        });
+    }
+
+    componentDidMount () {
+        const backgroundPort = browser.runtime.connect({
+            name: "popup"
+        });
+
+        backgroundPort.onMessage.addListener(message => {
+            if (message.subject === "assignPopup") {
+                this.setPort(message.data.tabId
+                           , message.data.frameId);
             }
         });
     }
