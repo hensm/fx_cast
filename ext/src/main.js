@@ -1,8 +1,8 @@
 "use strict";
 
 import defaultOptions from "./options/defaultOptions";
-import messageRouter  from "./messageRouter";
-import getBridgeInfo  from "./lib/getBridgeInfo";
+import getBridgeInfo from "./lib/getBridgeInfo";
+import messageRouter from "./lib/messageRouter";
 
 import semver from "semver";
 
@@ -383,7 +383,7 @@ async function openPopup (shimId) {
 browser.windows.onRemoved.addListener(id => {
     if (id === popupWinId) {
         shimMap.get(popupShimId).port.postMessage({
-            subject: "popupClosed"
+            subject: "shim:/popupClosed"
         });
 
         popupWinId = null;
@@ -448,12 +448,16 @@ async function onConnectShim (port) {
     });
 
     port.onMessage.addListener(async message => {
-        if (message.subject.startsWith("bridge")) {
-            bridgePort.postMessage(message);
+        const [ destination ] = message.subject.split(":/");
+        switch (destination) {
+            case "bridge": {
+                bridgePort.postMessage(message);
+                break;
+            };
         }
 
         switch (message.subject) {
-            case "openPopup": {
+            case "main:/openPopup": {
                 /**
                  * If popup already open, reassign to new shim,
                  * otherwise create a new popup.
@@ -462,7 +466,7 @@ async function onConnectShim (port) {
 
                     // Reassign popup to new shim
                     popupPort.postMessage({
-                        subject: "assignPopup"
+                        subject: "popup:/assignShim"
                       , data: {
                             tabId
                           , frameId
@@ -473,19 +477,11 @@ async function onConnectShim (port) {
                      * Notify shim that existing popup has closed and
                      * to re-populate receiver list for new popup.
                      */
-                    port.postMessage({ subject: "popupClosed" });
-                    port.postMessage({ subject: "popupReady" });
+                    port.postMessage({ subject: "shim:/popupClosed" });
+                    port.postMessage({ subject: "shim:/popupReady" });
                 } else {
                     await openPopup(shimId);
                 }
-
-                break;
-            };
-
-            case "discover": {
-                bridgePort.postMessage({
-                    subject: "bridge:discover"
-                });
 
                 break;
             };
@@ -499,7 +495,7 @@ async function onConnectShim (port) {
     });
 
     port.postMessage({
-        subject: "shimInitialized"
+        subject: "shim:/initialized"
       , data: bridgeInfo
     });
 }
@@ -513,7 +509,7 @@ function onConnectPopup (port) {
 
     const { tabId, frameId } = shimMap.get(popupShimId);
     port.postMessage({
-        subject: "assignPopup"
+        subject: "popup:/assignShim"
       , data: {
             tabId
           , frameId

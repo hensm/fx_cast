@@ -5,7 +5,7 @@ export default async function getBridgeInfo () {
     try {
         const response = await browser.runtime.sendNativeMessage(
                 APPLICATION_NAME
-              , { subject: "bridge:getInfo"
+              , { subject: "bridge:/getInfo"
                 , data: EXTENSION_VERSION });
 
         applicationVersion = response.data;

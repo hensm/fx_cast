@@ -16,7 +16,7 @@ window.chrome.cast.media = media;
 
 onMessage(message => {
     switch (message.subject) {
-        case "shimInitialized": {
+        case "shim:/initialized": {
             const bridgeInfo = message.data;
 
             // Call page's API loaded function if defined

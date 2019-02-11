@@ -54,7 +54,7 @@ const existingMedia = new Map();
  * for managing existing ones.
  */
 async function handleMessage (message) {
-    if (message.subject.startsWith("bridge:bridgemedia/")) {
+    if (message.subject.startsWith("bridge:/media/")) {
         if (existingMedia.has(message._id)) {
             // Forward message to instance message handler
             existingMedia.get(message._id).messageHandler(message);
@@ -77,7 +77,7 @@ async function handleMessage (message) {
         return;
     }
 
-    if (message.subject.startsWith("bridge:bridgesession/")) {
+    if (message.subject.startsWith("bridge:/session/")) {
         if (existingSessions.has(message._id)) {
             // Forward message to instance message handler
             existingSessions.get(message._id).messageHandler(message);
@@ -96,22 +96,21 @@ async function handleMessage (message) {
         return;
     }
 
-
     switch (message.subject) {
-        case "bridge:getInfo": {
+        case "bridge:/getInfo": {
             const extensionVersion = message.data;
 
             return {
-                subject: "main:bridgeInfo"
+                subject: "main:/bridgeInfo"
               , data: __applicationVersion
             };
         };
 
-        case "bridge:discover":
+        case "bridge:/discover":
             browser.start();
             break;
 
-        case "bridge:startHttpServer": {
+        case "bridge:/startHttpServer": {
             const { filePath, port } = message.data;
 
             httpServer = http.createServer((req, res) => {
@@ -152,14 +151,14 @@ async function handleMessage (message) {
 
             httpServer.listen(port, () => {
                 sendMessage({
-                    subject: "mediaCast:httpServerStarted"
+                    subject: "mediaCast:/httpServerStarted"
                 });
             });
 
             break;
         };
 
-        case "bridge:stopHttpServer":
+        case "bridge:/stopHttpServer":
             if (httpServer) httpServer.close();
             break;
     }
@@ -168,7 +167,7 @@ async function handleMessage (message) {
 
 browser.on("serviceUp", service => {
     transforms.encode.write({
-        subject: "serviceUp"
+        subject: "shim:/serviceUp"
       , data: {
             address: service.addresses[0]
           , port: service.port
@@ -181,7 +180,7 @@ browser.on("serviceUp", service => {
 
 browser.on("serviceDown", service => {
     transforms.encode.write({
-        subject:"serviceDown"
+        subject:"shim:/serviceDown"
       , data: {
             id: service.txt.id
         }

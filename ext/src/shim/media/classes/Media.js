@@ -36,7 +36,7 @@ export default class Media {
         this.supportedMediaCommands = [];
         this.volume = new Volume();
 
-        this._sendMessage("bridge:bridgemedia/initialize", {
+        this._sendMessage("bridge:/media/initialize", {
             sessionId
           , mediaSessionId
           , _internalSessionId
@@ -48,7 +48,7 @@ export default class Media {
             }
 
             switch (message.subject) {
-                case "shim:media/update":
+                case "shim:/media/update":
                     const status = message.data;
                     this.currentTime = status.currentTime;
                     this._lastCurrentTime = status._lastCurrentTime;
@@ -72,7 +72,7 @@ export default class Media {
 
                     break;
 
-                case "shim:media/sendMediaMessageResponse":
+                case "shim:/media/sendMediaMessageResponse":
                     const { messageId, error } = message.data;
                     const [ successCallback, errorCallback ]
                             = this._sendMediaMessageCallbacks.get(messageId);
@@ -113,7 +113,7 @@ export default class Media {
           , errorCallback
         ]);
 
-        this._sendMessage("bridge:bridgemedia/sendMediaMessage", {
+        this._sendMessage("bridge:/media/sendMediaMessage", {
             message
           , messageId
         });

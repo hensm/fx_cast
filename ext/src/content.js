@@ -26,7 +26,8 @@ browser.runtime.onConnect.addListener(port => {
 });
 
 document.addEventListener("__castMessageResponse", ev => {
-    if (ev.detail.destination === "popup") {
+    const [ destination ] = ev.detail.subject.split(":/");
+    if (destination === "popup") {
         if (popupPort) {
             popupPort.postMessage(ev.detail);
         }

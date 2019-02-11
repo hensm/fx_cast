@@ -45,7 +45,7 @@ export default class Session {
         this.statusText = null;
 
         if (receiver) {
-            this._sendMessage("bridge:bridgesession/initialize", {
+            this._sendMessage("bridge:/session/initialize", {
                 address: receiver._address
               , port: receiver._port
               , appId
@@ -60,12 +60,14 @@ export default class Session {
             }
 
             switch (message.subject) {
-                case "shim:session/stopped":
+                case "shim:/session/stopped": {
                     this.status = SessionStatus.STOPPED;
                     this._updateListeners.forEach(listener => listener());
-                    break;
 
-                case "shim:session/connected":
+                    break;
+                };
+
+                case "shim:/session/connected": {
                     this.status = SessionStatus.CONNECTED;
                     this.sessionId = message.data.sessionId;
                     this.namespaces = message.data.namespaces;
@@ -77,8 +79,9 @@ export default class Session {
                     }
 
                     break;
+                };
 
-                case "shim:session/updateStatus":
+                case "shim:/session/updateStatus": {
                     if (message.data.volume) {
                         if (!this.receiver.volume) {
                             const receiverVolume = new Volume(
@@ -94,17 +97,19 @@ export default class Session {
                             this.receiver.volume.muted = message.data.volume.muted;
                         }
                     }
+
                     break;
+                };
 
 
-                case "shim:session/impl_addMessageListener": {
+                case "shim:/session/impl_addMessageListener": {
                     const { namespace, data } = message.data;
                     this._messageListeners.get(namespace).forEach(
                             listener => listener(namespace, data));
                     break;
-                }
+                };
 
-                case "shim:session/impl_sendMessage": {
+                case "shim:/session/impl_sendMessage": {
                     const { messageId, error } = message.data;
                     const [ successCallback, errorCallback ]
                             = this._sendMessageCallbacks.get(messageId)
@@ -114,11 +119,13 @@ export default class Session {
                     } else if (successCallback) {
                         successCallback();
                     }
-                    this._sendMessageCallbacks.delete(messageId);
-                    break;
-                }
 
-                case "shim:session/impl_setReceiverMuted": {
+                    this._sendMessageCallbacks.delete(messageId);
+
+                    break;
+                };
+
+                case "shim:/session/impl_setReceiverMuted": {
                     const { volumeId, error } = message.data;
                     const [ successCallback, errorCallback ]
                             = this._setReceiverMutedCallbacks.get(volumeId);
@@ -128,11 +135,13 @@ export default class Session {
                     } else if (successCallback) {
                         successCallback();
                     }
-                    break;
-                    this._setReceiverMutedCallbacks.delete(volumeId);
-                }
 
-                case "shim:session/impl_setReceiverVolumeLevel": {
+                    this._setReceiverMutedCallbacks.delete(volumeId);
+
+                    break;
+                };
+
+                case "shim:/session/impl_setReceiverVolumeLevel": {
                     const { volumeId, error } = message.data;
                     const [ successCallback, errorCallback ]
                             = this._setReceiverVolumeLevelCallbacks.get(volumeId);
@@ -142,11 +151,13 @@ export default class Session {
                     } else if (successCallback) {
                         successCallback();
                     }
-                    this._setReceiverVolumeLevelCallbacks.delete(volumeId);
-                    break;
-                }
 
-                case "shim:session/impl_stop": {
+                    this._setReceiverVolumeLevelCallbacks.delete(volumeId);
+
+                    break;
+                };
+
+                case "shim:/session/impl_stop": {
                     const { stopId, error } = message.data;
                     const [ successCallback, errorCallback ]
                             = this._stopCallbacks.get(stopId);
@@ -161,10 +172,11 @@ export default class Session {
                             successCallback();
                         }
                     }
-                    this._stopCallbacks.delete(stopId);
-                    break;
-                }
 
+                    this._stopCallbacks.delete(stopId);
+
+                    break;
+                };
             }
         });
     }
@@ -187,7 +199,7 @@ export default class Session {
             this._messageListeners.set(namespace, new Set());
         }
         this._messageListeners.get(namespace).add(listener);
-        this._sendMessage("bridge:bridgesession/impl_addMessageListener", {
+        this._sendMessage("bridge:/session/impl_addMessageListener", {
             namespace
         });
     }
@@ -199,7 +211,7 @@ export default class Session {
     leave (successCallback, errorCallback) {
         const id = uuid();
 
-        this._sendMessage("bridge:bridgesession/impl_leave", { id });
+        this._sendMessage("bridge:/session/impl_leave", { id });
 
         this._leaveCallbacks.set(id, [
             successCallback
@@ -270,7 +282,7 @@ export default class Session {
     sendMessage (namespace, message, successCallback, errorCallback) {
         const messageId = uuid();
 
-        this._sendMessage("bridge:bridgesession/impl_sendMessage", {
+        this._sendMessage("bridge:/session/impl_sendMessage", {
             namespace
           , message
           , messageId
@@ -285,7 +297,7 @@ export default class Session {
     setReceiverMuted (muted, successCallback, errorCallback) {
         const volumeId = uuid();
 
-        this._sendMessage("bridge:bridgesession/impl_setReceiverMuted", {
+        this._sendMessage("bridge:/session/impl_setReceiverMuted", {
             muted
           , volumeId
         });
@@ -298,7 +310,7 @@ export default class Session {
 
     setReceiverVolumeLevel (newLevel, successCallback, errorCallback) {
         const volumeId = uuid();
-        this._sendMessage("bridge:bridgesession/impl_setReceiverVolumeLevel", {
+        this._sendMessage("bridge:/session/impl_setReceiverVolumeLevel", {
             newLevel
           , volumeId
         });
@@ -311,7 +323,7 @@ export default class Session {
 
     stop (successCallback, errorCallback) {
         const stopId = uuid();
-        this._sendMessage("bridge:bridgesession/impl_stop", { stopId });
+        this._sendMessage("bridge:/session/impl_stop", { stopId });
 
         this._stopCallbacks.set(stopId, [
             successCallback

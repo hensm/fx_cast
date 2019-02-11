@@ -18,7 +18,7 @@ const mediaElement = browser.menus.getTargetElement(targetElementId);
 
 window.addEventListener("beforeunload", () => {
     browser.runtime.sendMessage({
-        subject: "bridge:stopHttpServer"
+        subject: "bridge:/stopHttpServer"
     });
 
     if (options.mediaStopOnUnload) {
@@ -58,7 +58,7 @@ async function onRequestSessionSuccess (session_) {
     if (isLocalFile) {
         await new Promise((resolve, reject) => {
             browser.runtime.sendMessage({
-                subject: "bridge:startHttpServer"
+                subject: "bridge:/startHttpServer"
               , data: {
                     filePath: decodeURI(mediaUrl.pathname)
                   , port
@@ -66,7 +66,7 @@ async function onRequestSessionSuccess (session_) {
             });
 
             browser.runtime.onMessage.addListener(function onMessage (message) {
-                if (message.subject === "mediaCast:httpServerStarted") {
+                if (message.subject === "mediaCast:/httpServerStarted") {
                     browser.runtime.onMessage.removeListener(onMessage);
                     resolve();
                 }

@@ -1,7 +1,7 @@
 export default class Media {
     messageHandler (message) {
         switch (message.subject) {
-            case "bridge:bridgemedia/sendMediaMessage": {
+            case "bridge:/media/sendMediaMessage": {
                 let error = false;
                 try {
                     this.channel.send(message.data.message);
@@ -9,7 +9,7 @@ export default class Media {
                     error = true;
                 }
 
-                this.sendMessage("shim:media/sendMediaMessageResponse", {
+                this.sendMessage("shim:/media/sendMediaMessageResponse", {
                     messageId: message.data.messageId
                   , error
                 });
@@ -62,7 +62,7 @@ export default class Media {
                     messageData.mediaSessionId = status.mediaSessionId;
                 }
 
-                this.sendMessage("shim:media/update", messageData);
+                this.sendMessage("shim:/media/update", messageData);
 
                 // Update ID
                 if (status.mediaSessionId) {

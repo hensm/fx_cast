@@ -53,12 +53,12 @@ class App extends Component {
         });
 
         this.port.postMessage({
-            subject: "popupReady"
+            subject: "shim:/popupReady"
         });
 
         this.port.onMessage.addListener(message => {
             switch (message.subject) {
-                case "populateReceiverList": {
+                case "popup:/populateReceiverList": {
                     this.setState({
                         receivers: message.data.receivers
                       , selectedMedia: message.data.selectedMedia
@@ -75,7 +75,7 @@ class App extends Component {
                     break;
                 }
 
-                case "close": {
+                case "popup:/close": {
                     window.close();
 
                     break;
@@ -90,7 +90,7 @@ class App extends Component {
         });
 
         backgroundPort.onMessage.addListener(message => {
-            if (message.subject === "assignPopup") {
+            if (message.subject === "popup:/assignShim") {
                 this.setPort(message.data.tabId
                            , message.data.frameId);
             }
@@ -103,7 +103,7 @@ class App extends Component {
         });
 
         this.port.postMessage({
-            subject: "selectReceiver"
+            subject: "shim:/selectReceiver"
           , data: {
                 receiver
               , selectedMedia: this.state.selectedMedia

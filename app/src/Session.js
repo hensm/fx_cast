@@ -3,34 +3,34 @@ import { Client } from "castv2";
 export default class Session {
     messageHandler (message) {
         switch (message.subject) {
-            case "bridge:bridgesession/close":
+            case "bridge:/session/close":
                 this.close();
                 break;
 
-            case "bridge:bridgesession/impl_addMessageListener":
+            case "bridge:/session/impl_addMessageListener":
                 this._impl_addMessageListener(message.data.namespace);
                 break;
 
-            case "bridge:bridgesession/impl_sendMessage":
+            case "bridge:/session/impl_sendMessage":
                 this._impl_sendMessage(
                         message.data.namespace
                       , message.data.message
                       , message.data.messageId)
                 break;
 
-            case "bridge:bridgesession/impl_setReceiverMuted":
+            case "bridge:/session/impl_setReceiverMuted":
                 this._impl_setReceiverMuted(
                         message.data.muted
                       , message.data.volumeId);
                 break;
 
-            case "bridge:bridgesession/impl_setReceiverVolumeLevel":
+            case "bridge:/session/impl_setReceiverVolumeLevel":
                 this._impl_setReceiverVolumeLevel(
                         message.data.newLevel
                       , message.data.volumeId);
                 break;
 
-            case "bridge:bridgesession/impl_stop":
+            case "bridge:/session/impl_stop":
                 this._impl_stop(message.data.stopId);
                 break;
         }
@@ -89,7 +89,7 @@ export default class Session {
                 switch (data.type) {
                     case "RECEIVER_STATUS":
 
-                        this.sendMessage("shim:session/updateStatus", data.status);
+                        this.sendMessage("shim:/session/updateStatus", data.status);
 
                         if (!data.status.applications) return;
 
@@ -100,7 +100,7 @@ export default class Session {
 
                         if (receiverAppId !== appId) {
                             // Close session
-                            this.sendMessage("shim:session/stopped");
+                            this.sendMessage("shim:/session/stopped");
                             this.client.close();
                             clearInterval(this.clientHeartbeatInterval);
                             return;
@@ -129,7 +129,7 @@ export default class Session {
 
                             this.sessionId = this.app.sessionId;
 
-                            this.sendMessage("shim:session/connected", {
+                            this.sendMessage("shim:/session/connected", {
                                 sessionId: this.app.sessionId
                               , namespaces: this.app.namespaces
                               , displayName: this.app.displayName
@@ -170,7 +170,7 @@ export default class Session {
     _impl_addMessageListener (namespace) {
         this.createChannel(namespace);
         this.channelMap.get(namespace).on("message", data => {
-            this.sendMessage("shim:session/impl_addMessageListener", {
+            this.sendMessage("shim:/session/impl_addMessageListener", {
                 namespace: namespace
               , data: JSON.stringify(data)
             });
@@ -187,7 +187,7 @@ export default class Session {
             error = true;
         }
 
-        this.sendMessage("shim:session/impl_sendMessage", {
+        this.sendMessage("shim:/session/impl_sendMessage", {
             messageId
           , error
         });
@@ -206,7 +206,7 @@ export default class Session {
             error = true;
         }
 
-        this.sendMessage("shim:session/impl_setReceiverMuted", {
+        this.sendMessage("shim:/session/impl_setReceiverMuted", {
             volumeId
           , error
         });
@@ -225,7 +225,7 @@ export default class Session {
             error = true;
         }
 
-        this.sendMessage("shim:session/impl_setReceiverVolumeLevel", {
+        this.sendMessage("shim:/session/impl_setReceiverVolumeLevel", {
             volumeId
           , error
         });
@@ -247,7 +247,7 @@ export default class Session {
         this.client.close();
         clearInterval(this.clientHeartbeatInterval);
 
-        this.sendMessage("shim:session/impl_stop", {
+        this.sendMessage("shim:/session/impl_stop", {
             stopId
           , error
         });

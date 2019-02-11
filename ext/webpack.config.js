@@ -14,7 +14,6 @@ module.exports = (env) => ({
       , "contentSetup"   : `${env.includePath}/contentSetup.js`
       , "mediaCast"      : `${env.includePath}/mediaCast.js`
       , "mirroringCast"  : `${env.includePath}/mirroringCast.js`
-      , "messageRouter"  : `${env.includePath}/messageRouter.js`
       , "compat/youtube" : `${env.includePath}/compat/youtube.js`
     }
   , output: {
