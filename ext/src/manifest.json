@@ -31,7 +31,9 @@
         "page": "options/index.html"
     }
   , "permissions": [
-        "menus"
+        "downloads"
+      , "downloads.open"
+      , "menus"
       , "nativeMessaging"
       , "storage"
       , "webNavigation"

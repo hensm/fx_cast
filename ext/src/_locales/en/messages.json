@@ -21,14 +21,17 @@
   , "optionsBridgeLoading": {
         "message": "Loading bridge info..."
     }
-  , "optionsBridgeFoundStatusText": {
+  , "optionsBridgeFoundStatusTitle": {
         "message": "Bridge found"
     }
-  , "optionsBridgeIssueStatusText": {
+  , "optionsBridgeIssueStatusTitle": {
         "message": "Bridge issue"
     }
+  , "optionsBridgeNotFoundStatusTitle": {
+        "message": "Bridge not found"
+    }
   , "optionsBridgeNotFoundStatusText": {
-        "message": "Bridge not found. Try downloading and installing the latest version."
+        "message": "Try downloading and installing the latest version."
     }
   , "optionsBridgeInfo": {
         "message": "Bridge info:"
@@ -65,6 +68,18 @@
     }
   , "optionsBridgeNoAction": {
         "message": "No action needed."
+    }
+  , "optionsBridgeDownloadsGet": {
+        "message": "Fetch downloads"
+    }
+  , "optionsBridgeDownloadsLoading": {
+        "message": "Fetching downloads$1"
+    }
+  , "optionsBridgeDownloadsGetFailed": {
+        "message": "Failed to fetch downloads"
+    }
+  , "optionsBridgeDownloadsTitle": {
+        "message": "Bridge downloads"
     }
 
   , "optionsMediaCategoryName": {

@@ -3,6 +3,8 @@
 import React, { Component } from "react";
 import ReactDOM             from "react-dom";
 
+import { getNextEllipsis } from "../lib/utils";
+
 const _ = browser.i18n.getMessage;
 
 // macOS styles
@@ -168,14 +170,9 @@ class Receiver extends Component {
         });
 
         setInterval(() => {
-            this.setState({
-                ellipsis: do {
-                         if (this.state.ellipsis === "")    ".";
-                    else if (this.state.ellipsis === ".")   "..";
-                    else if (this.state.ellipsis === "..")  "...";
-                    else if (this.state.ellipsis === "...") "";
-                }
-            });
+            this.setState(state => ({
+                ellipsis: getNextEllipsis(state.ellipsis)
+            }));
 
         }, 500);
     }

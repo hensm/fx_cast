@@ -1,5 +1,6 @@
 :root {
-    --border-color: rgb(225, 225, 225);;
+    --border-color: rgb(225, 225, 225);
+    --secondary-color: rgb(125, 125, 125);
 }
 
 *:invalid {
@@ -23,7 +24,7 @@
 }
 
 #status-line {
-    color: graytext;
+    color: var(--secondary-color);
 }
 
 
@@ -73,11 +74,19 @@
     padding-inline-end: 25px;
 }
 
-.bridge__status-text {
+.bridge__status-title {
     margin: initial;
     font-weight: 500;
     font-size: 1.5em;
     white-space: nowrap;
+}
+
+.bridge__status-text {
+    margin: initial;
+    margin-top: 5px;
+    font-size: 1.15em;
+    font-weight: 300;
+    text-align: center;
 }
 
 .bridge__info--not-found .bridge__status {
@@ -89,7 +98,7 @@
 .bridge__info--not-found .bridge__status-icon {
     margin-inline-end: 10px;
 }
-.bridge__info--not-found .bridge__status-text {
+.bridge__info--not-found .bridge__status-title {
     font-weight: normal;
     white-space: normal;
 }
@@ -108,6 +117,37 @@
     vertical-align: top;
 }
 
+.bridge__download-info {
+    margin-top: 30px;
+    display: flex;
+    flex-direction: column;
+    width: -moz-available;
+}
+
+.bridge__download-info-get {
+    align-self: flex-start;
+    justify-content: center;
+}
+
+.bridge__download-info-title {
+    font-weight: 500;
+    font-size: 1.25em;
+}
+
+.bridge-downloads {
+    display: flex;
+}
+
+.bridge-downloads__download {
+
+}
+
+.bridge-downloads__linux {
+    display: flex;
+    flex-direction: column;
+}
+
+
 
 .category {
     border: initial;
@@ -120,7 +160,7 @@
 }
 
 .category:disabled {
-    color: graytext;
+    color: var(--secondary-color);
 }
 
 #form > .category:not(:first-child) {
@@ -148,7 +188,7 @@
 }
 
 .category__description {
-    color: graytext;
+    color: var(--secondary-color);
     margin-top: initial;
     max-width: 60ch;
 }
