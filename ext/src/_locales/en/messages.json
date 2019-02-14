@@ -69,17 +69,32 @@
   , "optionsBridgeNoAction": {
         "message": "No action needed."
     }
-  , "optionsBridgeDownloadsGet": {
-        "message": "Fetch downloads"
+  , "optionsBridgeUpdateCheck": {
+        "message": "Check for Updates"
     }
-  , "optionsBridgeDownloadsLoading": {
-        "message": "Fetching downloads$1"
+  , "optionsBridgeUpdateChecking": {
+        "message": "Checking for Updates$1"
     }
-  , "optionsBridgeDownloadsGetFailed": {
-        "message": "Failed to fetch downloads"
+  , "optionsBridgeUpdateStatusNoUpdates": {
+        "message": "No updates available"
+   }
+  , "optionsBridgeUpdateStatusError": {
+        "message": "Error checking for updates"
+   }
+  , "optionsBridgeUpdateAvailable": {
+        "message": "An update is available:"
+   }
+  , "optionsBridgeUpdatePackageTypeSelect": {
+        "message": "Select package type"
     }
-  , "optionsBridgeDownloadsTitle": {
-        "message": "Bridge downloads"
+  , "optionsBridgeUpdatePackageTypeDeb": {
+        "message": ".deb (Debian/Ubuntu)"
+    }
+  , "optionsBridgeUpdatePackageTypeRpm": {
+        "message": ".rpm (Fedora)"
+    }
+  , "optionsBridgeUpdate": {
+        "message": "Update Now..."
     }
 
   , "optionsMediaCategoryName": {
@@ -166,5 +181,25 @@
     }
   , "optionsSaved": {
         "message": "Saved!"
+    }
+
+
+  , "updaterCancel": {
+        "message": "Cancel"
+    }
+  , "updaterDescriptionDownloading": {
+        "message": "Downloading..."
+    }
+  , "updaterAdditionalDescriptionDownloading": {
+        "message": "Fetching update package"
+    }
+  , "updaterDescriptionInstallReady": {
+        "message": "Ready to install"
+    }
+  , "updaterAdditionalDescriptionInstallReady": {
+        "message": "The install package has been downloaded to your default downloads location."
+    }
+  , "updaterInstall": {
+        "message": "Install..."
     }
 }

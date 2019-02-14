@@ -90,17 +90,28 @@
 }
 
 .bridge__info--not-found .bridge__status {
-    flex-direction: row;
+    display: grid;
+    grid-template-columns: min-content 1fr;
+    grid-template-rows: min-content min-content;
+    grid-template-areas:
+        "status-icon status-title"
+        "status-icon status-text";
 }
 .bridge__info--found .bridge__status-icon {
     margin-block-end: 5px;
 }
 .bridge__info--not-found .bridge__status-icon {
+    grid-area: status-icon;
     margin-inline-end: 10px;
 }
 .bridge__info--not-found .bridge__status-title {
+    grid-area: status-title;
     font-weight: normal;
     white-space: normal;
+}
+.bridge__info--not-found .bridge__status-text {
+    grid-area: status-text;
+    margin-top: initial;
 }
 
 .bridge__stats {
@@ -113,40 +124,35 @@
     font-weight: 500;
     padding-inline-end: 10px;
     text-align: end;
-    white-space: nowrap;
     vertical-align: top;
+    white-space: nowrap;
 }
 
-.bridge__download-info {
+.bridge__update-info {
+    align-items: center;
+    display: flex;
     margin-top: 30px;
-    display: flex;
+}
+
+.bridge__update-label {
+    display: inline-block;
+    margin: initial;
+}
+
+.bridge__update-options {
+    display: inline-flex;
     flex-direction: column;
-    width: -moz-available;
+    margin-left: 10px;
 }
 
-.bridge__download-info-get {
-    align-self: flex-start;
-    justify-content: center;
+.bridge__update-start {
+    align-self: flex-end;
+    margin-top: 5px;
 }
 
-.bridge__download-info-title {
-    font-weight: 500;
-    font-size: 1.25em;
+.bridge--update-status {
+    margin-left: 10px;
 }
-
-.bridge-downloads {
-    display: flex;
-}
-
-.bridge-downloads__download {
-
-}
-
-.bridge-downloads__linux {
-    display: flex;
-    flex-direction: column;
-}
-
 
 
 .category {

@@ -18,6 +18,7 @@ button[default]:not(:hover):active {
   color: ButtonText;
 }
 
-button {
+button,
+select {
     height: 22px;
 }

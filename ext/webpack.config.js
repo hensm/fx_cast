@@ -10,6 +10,7 @@ module.exports = (env) => ({
       , "popup/bundle"   : `${env.includePath}/popup/index.jsx`
       , "options/bundle" : `${env.includePath}/options/index.jsx`
       , "shim/bundle"    : `${env.includePath}/shim/index.js`
+      , "updater/bundle" : `${env.includePath}/updater/index.jsx`
       , "content"        : `${env.includePath}/content.js`
       , "contentSetup"   : `${env.includePath}/contentSetup.js`
       , "mediaCast"      : `${env.includePath}/mediaCast.js`

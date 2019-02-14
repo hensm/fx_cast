@@ -1,4 +1,6 @@
 import React, { Component } from "react";
+import semver from "semver";
+
 import { getNextEllipsis } from "../lib/utils";
 
 const _ = browser.i18n.getMessage;
@@ -91,28 +93,35 @@ export default class Bridge extends Component {
     constructor (props) {
         super(props);
 
-        this.onGetDownloads = this.onGetDownloads.bind(this);
-        this.onGetDownloadsResponse = this.onGetDownloadsResponse.bind(this);
-        this.onGetDownloadsError = this.onGetDownloadsError.bind(this);
+        this.onCheckUpdates = this.onCheckUpdates.bind(this);
+        this.onCheckUpdatesResponse = this.onCheckUpdatesResponse.bind(this);
+        this.onCheckUpdatesError = this.onCheckUpdatesError.bind(this);
+        this.onUpdate = this.onUpdate.bind(this);
+        this.onPackageTypeChange = this.onPackageTypeChange.bind(this);
+
+        this.updateData = null;
+        this.updateStatusTimeout = null;
 
         this.state = {
-            downloads: null
-          , isLoadingDownloads: false
-          , wasErrorLoadingDownloads: false
-          , downloadsLoadingEllipsis: "..."
+            isCheckingUpdates: false
+          , isUpdateAvailable: false
+          , wasErrorCheckingUpdates: false
+          , checkUpdatesEllipsis: "..."
+          , updateStatus: null
+          , packageType: null
         };
     }
 
 
-    onGetDownloads () {
+    onCheckUpdates () {
         this.setState({
-            isLoadingDownloads: true
+            isCheckingUpdates: true
         });
 
         const timeout = setInterval(() => {
             this.setState(state => ({
-                downloadsLoadingEllipsis: getNextEllipsis(
-                        state.downloadsLoadingEllipsis)
+                checkUpdatesEllipsis: getNextEllipsis(
+                        state.checkUpdatesEllipsis)
             }));
         }, 500);
 
@@ -121,46 +130,113 @@ export default class Bridge extends Component {
                 window.clearTimeout(timeout);
                 return res.json()
             })
-            .then(this.onGetDownloadsResponse)
-            .catch(this.onGetDownloadsError);
+            .then(this.onCheckUpdatesResponse)
+            .catch(this.onCheckUpdatesError);
     }
 
-    async onGetDownloadsResponse (res) {
-        const platformInfo = await browser.runtime.getPlatformInfo();
-        const downloads = res.assets
-            .reduce((acc, asset) => {
-                const download = {
-                    name: asset.name
-                  , url: asset.browser_download_url
-                };
+    showUpdateStatus () {
+        if (this.updateStatusTimeout) {
+            window.clearTimeout(this.updateStatusTimeout);
+        }
+        this.updateStatusTimeout = window.setTimeout(() => {
+            this.setState({
+                updateStatus: null
+            });
+        }, 1500);
+    }
 
-                const platformExtensions = {
-                    "exe": "win"
-                  , "pkg": "mac"
-                  , "deb": "deb"
-                  , "rpm": "rpm"
-                };
+    async onUpdate () {
+        const width = 400;
+        const height = 150;
 
-                const fileExtension = asset.name.match(/.*\.(.*)$/).pop();
+        // Current window to base centered position on
+        const win = await browser.windows.getCurrent();
 
-                if (fileExtension in platformExtensions) {
-                    const platform = platformExtensions[fileExtension];
-                    acc[platform] = download;
-                }
+        // Top(mid)-center position
+        const centerX = win.left + (win.width / 2);
+        const centerY = win.top + (win.height / 3);
 
-                return acc;
-            }, { platform: platformInfo.os });
+        const left = Math.floor(centerX - (width / 2));
+        const top = Math.floor(centerY - (height / 2));
 
-        this.setState({
-            isLoadingDownloads: false
-          , downloads
+        const updaterPopup = await browser.windows.create({
+            url: "../updater/index.html"
+          , type: "popup"
+          , width
+          , height
+          , left
+          , top
+        });
+
+        // Size/position not set correctly on creation (bug?)
+        await browser.windows.update(updaterPopup.id, {
+            width
+          , height
+          , left
+          , top
+        });
+
+        browser.runtime.onConnect.addListener(port => {
+            if (port.name === "updater") {
+                const asset = this.updateData.assets.find(asset => {
+                    const fileExtension = asset.name.match(/.*\.(.*)$/).pop();
+                    const currentPlatform = (this.props.platform === "linux")
+                        ? this.state.packageType
+                        : this.props.platform;
+
+                    switch (fileExtension) {
+                        case "exe": return "win" === currentPlatform;
+                        case "pkg": return "mac" === currentPlatform;
+                        case "deb": return "deb" === currentPlatform;
+                        case "rpm": return "rpm" === currentPlatform;
+                    }
+                });
+
+                port.postMessage({
+                    subject: "updater:/updateData"
+                  , data: asset
+                });
+
+                port.onDisconnect.addListener(() => {
+                    browser.windows.remove(updaterPopup.id);
+                });
+            }
         });
     }
 
-    onGetDownloadsError (err) {
+
+    async onCheckUpdatesResponse (res) {
+        const isUpdateAvailable = !this.props.info || semver.lt(
+                this.props.info.version, res.tag_name);
+
+        if (isUpdateAvailable) {
+            this.updateData = res;
+        }
+
         this.setState({
-            isLoadingDownloads: false
-          , wasErrorLoadingDownloads: true
+            isCheckingUpdates: false
+          , isUpdateAvailable
+          , updateStatus: !isUpdateAvailable
+                ? _("optionsBridgeUpdateStatusNoUpdates")
+                : null
+        });
+
+        this.showUpdateStatus();
+    }
+
+    onCheckUpdatesError (err) {
+        this.setState({
+            isCheckingUpdates: false
+          , wasErrorCheckingUpdates: true
+          , updateStatus: _("optionsBridgeUpdateStatusError")
+        });
+
+        this.showUpdateStatus();
+    }
+
+    onPackageTypeChange (ev) {
+        this.setState({
+            packageType: ev.target.value
         });
     }
 
@@ -224,35 +300,65 @@ export default class Bridge extends Component {
                 }}
 
                 { do {
-                    if (!this.props.loading
-                            && (!this.props.info
-                             || !this.props.info.isVersionCompatible)) {
-                        <div className="bridge__download-info">
-                            <h2 className="bridge__download-info-title">
-                                { _("optionsBridgeDownloadsTitle") }
-                            </h2>
+                    if (!this.props.loading) {
+                        <div className="bridge__update-info">
                             { do {
-                                if (this.state.downloads) {
-                                    <BridgeDownloads info={ this.state.downloads }/>
-                                } else if (this.state.wasErrorLoadingDownloads) {
-                                    <div className="bridge__download-info-get-error">
-                                        { _("optionsBridgeDownloadsGetFailed") }
+                                if (this.state.isUpdateAvailable) {
+                                    <div className="bridge__update">
+                                        <p className="bridge__update-label">
+                                            { _("optionsBridgeUpdateAvailable") }
+                                        </p>
+                                        <div className="bridge__update-options">
+                                            { do {
+                                                if (this.props.platform === "linux") {
+                                                    <select className="bridge__update-package-type"
+                                                            onChange={ this.onPackageTypeChange }
+                                                            value={ this.state.packageType }>
+                                                        <option value="" disabled selected>
+                                                            { _("optionsBridgeUpdatePackageTypeSelect") }
+                                                        </option>
+                                                        <option value="deb">
+                                                            { _("optionsBridgeUpdatePackageTypeDeb") }
+                                                        </option>
+                                                        <option value="rpm">
+                                                            { _("optionsBridgeUpdatePackageTypeRpm") }
+                                                        </option>
+                                                    </select>
+                                                }
+                                            }}
+                                            <button className="bridge__update-start"
+                                                    onClick={ this.onUpdate }
+                                                    disabled={ this.props.platform === "linux"
+                                                            && !this.state.packageType }>
+                                                { _("optionsBridgeUpdate") }
+                                            </button>
+                                        </div>
                                     </div>
                                 } else {
-                                    <button className="bridge__download-info-get"
-                                            onClick={ this.onGetDownloads }
-                                            disabled={ this.state.isLoadingDownloads }>
+                                    <button className="bridge__update-check"
+                                            disabled={ this.state.isCheckingUpdates }
+                                            onClick={ this.onCheckUpdates }>
+
                                         { do {
-                                            if (this.state.isLoadingDownloads) {
-                                                _("optionsBridgeDownloadsLoading"
-                                                      , getNextEllipsis(this.state.downloadsLoadingEllipsis));
+                                            if (this.state.isCheckingUpdates) {
+                                                _("optionsBridgeUpdateChecking"
+                                                      , getNextEllipsis(this.state.checkUpdatesEllipsis));
                                             } else {
-                                                _("optionsBridgeDownloadsGet");
+                                                _("optionsBridgeUpdateCheck");
                                             }
                                         }}
                                     </button>
                                 }
                             }}
+
+                            <div className="bridge--update-status">
+                                { do {
+                                    if (this.state.updateStatus
+                                            && !this.state.isUpdateAvailable) {
+                                        this.state.updateStatus;
+                                    }
+                                }}
+                            </div>
                         </div>
                     }
                 }}

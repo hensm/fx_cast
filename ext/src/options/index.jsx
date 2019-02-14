@@ -46,6 +46,7 @@ class App extends Component {
         this.state = {
             options: props.options
           , bridgeInfo: null
+          , platform: null
           , bridgeLoading: true
           , isFormValid: true
           , hasSaved: false
@@ -63,8 +64,10 @@ class App extends Component {
 
     async componentDidMount () {
         const bridgeInfo = await getBridgeInfo();
+        const platform = await browser.runtime.getPlatformInfo();
         this.setState({
             bridgeInfo
+          , platform: platform.os
           , bridgeLoading: false
         });
     }
@@ -168,6 +171,7 @@ class App extends Component {
         return (
             <div>
                 <Bridge info={ this.state.bridgeInfo }
+                        platform={ this.state.platform }
                         loading={ this.state.bridgeLoading } />
 
                 <form id="form" ref={ form => { this.form = form; }}

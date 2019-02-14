@@ -1,0 +1,38 @@
+body {
+    background: -moz-dialog;
+    color: -moz-dialogtext;
+    margin: initial;
+    font: message-box;
+}
+
+.updater {
+    align-items: center;
+    display: grid;
+    gap: 0.75em;
+    grid-template-rows: min-content min-content 1fr min-content;
+    grid-template-columns: 1fr min-content min-content;
+    grid-template-areas:
+        "description description description"
+        "additional-description additional-description additional-description"
+        "progress progress progress"
+        ". cancel install";
+    padding: 0.75em;
+}
+
+.updater__description {
+    grid-area: description;
+}
+.updater__additional-description {
+    font-size: 0.9em;
+    grid-area: additional-description;
+    margin-top: -0.75em;
+}
+.updater__progress {
+    grid-area: progress;
+}
+.updater__install {
+    grid-area: install;
+}
+.updater__cancel {
+    grid-area: cancel;
+}
