@@ -4,6 +4,8 @@ import defaultOptions from "./options/defaultOptions";
 import getBridgeInfo from "./lib/getBridgeInfo";
 import messageRouter from "./lib/messageRouter";
 
+import { getWindowCenteredProps } from "./lib/utils";
+
 import semver from "semver";
 
 
@@ -335,26 +337,14 @@ let popupPort;
  * to close and returns an API error.
  */
 async function openPopup (shimId) {
-    const width = 350;
-    const height = 200;
-
     // Current window to base centered position on
     const win = await browser.windows.getCurrent();
-
-    // Top(mid)-center position
-    const centerX = win.left + (win.width / 2);
-    const centerY = win.top + (win.height / 3);
-
-    const left = Math.floor(centerX - (width / 2));
-    const top = Math.floor(centerY - (height / 2));
+    const centeredProps = getWindowCenteredProps(win, 350, 200);
 
     const popup = await browser.windows.create({
         url: "popup/index.html"
       , type: "popup"
-      , width
-      , height
-      , left
-      , top
+      , ...centeredProps
     });
 
     // Store popup details for message forwarding
@@ -363,10 +353,7 @@ async function openPopup (shimId) {
 
     // Size/position not set correctly on creation (bug?)
     await browser.windows.update(popup.id, {
-        width
-      , height
-      , left
-      , top
+        ...centeredProps
     });
 
     // Close popup on other browser window focus

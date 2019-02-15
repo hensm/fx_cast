@@ -1,7 +1,8 @@
 import React, { Component } from "react";
 import semver from "semver";
 
-import { getNextEllipsis } from "../lib/utils";
+import { getNextEllipsis
+       , getWindowCenteredProps } from "../lib/utils";
 
 const _ = browser.i18n.getMessage;
 
@@ -146,34 +147,19 @@ export default class Bridge extends Component {
     }
 
     async onUpdate () {
-        const width = 400;
-        const height = 150;
-
         // Current window to base centered position on
         const win = await browser.windows.getCurrent();
-
-        // Top(mid)-center position
-        const centerX = win.left + (win.width / 2);
-        const centerY = win.top + (win.height / 3);
-
-        const left = Math.floor(centerX - (width / 2));
-        const top = Math.floor(centerY - (height / 2));
+        const centeredProps = getWindowCenteredProps(win, 400, 150);
 
         const updaterPopup = await browser.windows.create({
             url: "../updater/index.html"
           , type: "popup"
-          , width
-          , height
-          , left
-          , top
+          , ...centeredProps
         });
 
         // Size/position not set correctly on creation (bug?)
         await browser.windows.update(updaterPopup.id, {
-            width
-          , height
-          , left
-          , top
+            ...centeredProps
         });
 
         browser.runtime.onConnect.addListener(port => {
