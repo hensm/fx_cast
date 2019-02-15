@@ -197,17 +197,19 @@ class App extends Component {
     }
 
     render () {
-        return do {
-            if (this.state.hasLoaded) {
-               <Updater description={ this.state.description }
-                        additionalDescription={ this.state.additionalDescription }
-                        downloadTotal={ this.state.downloadTotal }
-                        downloadCurrent={ this.state.downloadCurrent }
-                        isDownloading={ this.state.isDownloading }
-                        onCancel={ this.onCancel }
-                        onInstall={ this.onInstall } /> 
-            }
+        if (!this.state.hasLoaded) {
+            return;
         }
+
+        return (
+            <Updater description={ this.state.description }
+                     additionalDescription={ this.state.additionalDescription }
+                     downloadTotal={ this.state.downloadTotal }
+                     downloadCurrent={ this.state.downloadCurrent }
+                     isDownloading={ this.state.isDownloading }
+                     onCancel={ this.onCancel }
+                     onInstall={ this.onInstall } /> 
+        );
     }
 }
 

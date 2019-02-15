@@ -44,7 +44,8 @@ class App extends Component {
         super(props);
 
         this.state = {
-            options: props.options
+            hasLoaded: false
+          , options: null
           , bridgeInfo: null
           , platform: null
           , bridgeLoading: true
@@ -63,13 +64,21 @@ class App extends Component {
     }
 
     async componentDidMount () {
+        const { options } = await browser.storage.sync.get("options");
+
+        this.setState({
+            hasLoaded: true
+          , options
+        });
+
         const bridgeInfo = await getBridgeInfo();
         const platform = await browser.runtime.getPlatformInfo();
+
         this.setState({
             bridgeInfo
           , platform: platform.os
           , bridgeLoading: false
-        });
+        })
     }
 
     /**
@@ -83,11 +92,8 @@ class App extends Component {
 
     handleReset () {
         this.setState({
-            options: defaultOptions
+            options: { ...defaultOptions }
         });
-
-        // TODO: Propagate state properly
-        this.form.submit();
     }
 
     async handleFormSubmit (ev) {
@@ -128,7 +134,9 @@ class App extends Component {
         } catch (err) {}
     }
 
-    handleFormChange () {
+    handleFormChange (ev) {
+        ev.preventDefault();
+
         this.setState({
             isFormValid: this.form.checkValidity()
         });
@@ -168,6 +176,10 @@ class App extends Component {
     }
 
     render () {
+        if (!this.state.hasLoaded) {
+            return;
+        }
+
         return (
             <div>
                 <Bridge info={ this.state.bridgeInfo }
@@ -333,10 +345,6 @@ class App extends Component {
 }
 
 
-(async () => {
-    const { options } = await browser.storage.sync.get("options");
-
-    ReactDOM.render(
-        <App options={options} />
-      , document.querySelector("#root"));
-})()
+ReactDOM.render(
+    <App />
+  , document.querySelector("#root"));
