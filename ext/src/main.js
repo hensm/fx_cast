@@ -332,7 +332,7 @@ let popupPort;
 /**
  * Creates popup window for cast destination selection.
  * Refocusing other browser windows causes the popup window
- * to close and returns an API error (TODO).
+ * to close and returns an API error.
  */
 async function openPopup (shimId) {
     const width = 350;
