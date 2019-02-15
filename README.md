@@ -5,7 +5,11 @@
 
 # fx_cast
 
-No full public release yet! Pre-release beta version is incomplete and likely buggy.
+Firefox extension that implements the [Chrome sender API](https://developers.google.com/cast/docs/reference/chrome/) and exposes it to web apps to enable cast support.
+
+Communication with receiver devices is handled by a native application (bridge). Check the [implementation notes](IMPLEMENTATION.md) for more info.
+
+**No full public release yet! Pre-release beta version is incomplete and likely buggy.**
 
 ## Installing
 
