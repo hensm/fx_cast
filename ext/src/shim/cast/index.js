@@ -71,7 +71,7 @@ let sessionErrorCallback;
 
 
 cast.addReceiverActionListener = (listener) => {
-    console.info("Caster (Debug): cast.addReceiverActionListener");
+    console.info("fx_cast (Debug): cast.addReceiverActionListener");
     receiverListeners.add(listener);
 };
 
@@ -80,7 +80,7 @@ cast.initialize = (
       , successCallback
       , errorCallback) => {
 
-    console.info("Caster (Debug): cast.initialize");
+    console.info("fx_cast (Debug): cast.initialize");
 
     // Already initialized
     if (state.apiConfig) {
@@ -118,7 +118,7 @@ cast.requestSession = (
       , errorCallback
       , opt_sessionRequest = state.apiConfig.sessionRequest) => {
 
-    console.info("Caster (Debug): cast.requestSession");
+    console.info("fx_cast (Debug): cast.requestSession");
 
     // Called before initialization
     if (!state.apiConfig) {
@@ -207,7 +207,7 @@ onMessage(message => {
         };
 
         case "shim:/selectReceiver": {
-            console.info("Caster (Debug): Selected receiver");
+            console.info("fx_cast (Debug): Selected receiver");
 
             const selectedReceiver = new Receiver(
                     message.data.receiver.id
