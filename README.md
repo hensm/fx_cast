@@ -1,14 +1,19 @@
+<img src="docs/images/preview-fg@2x.png"
+     alt="Preview of cast device selection popup"
+     align="right"
+     width="462">
+
 # fx_cast
 
 No full public release yet! Pre-release beta version is incomplete and likely buggy.
 
-## Supported platforms
+## Installing
+
+### Supported platforms
 
 * Linux
 * macOS
 * Windows
-
-## Installing
 
 Install the Firefox extension and companion bridge application. Downloads can be found on the website or in the [GitHub releases](https://github.com/hensm/fx_cast/releases) section.
 
