@@ -3,7 +3,7 @@
 import cast  from "./cast";
 import media from "./media";
 
-import { onMessage, sendMessage } from "./messageBridge";
+import { onMessage } from "./messageBridge";
 
 
 if (!window.chrome) {

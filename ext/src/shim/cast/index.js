@@ -28,7 +28,7 @@ import { requestSession as requestSessionTimeout } from "../timeout";
 
 import state from "../state";
 
-import { onMessage, sendMessage } from "../messageBridge";
+import { onMessage, sendMessageResponse } from "../messageBridge";
 
 
 const cast = {
@@ -90,7 +90,7 @@ cast.initialize = (
 
     state.apiConfig = apiConfig;
 
-    sendMessage({
+    sendMessageResponse({
         subject: "bridge:/discover"
     });
 
@@ -145,7 +145,7 @@ cast.requestSession = (
     sessionErrorCallback = errorCallback;
 
     // Open destination chooser
-    sendMessage({
+    sendMessageResponse({
         subject: "main:/openPopup"
     });
 };
@@ -223,7 +223,7 @@ onMessage(message => {
               , []                                   // appImages
               , selectedReceiver                     // receiver
               , (session) => {
-                    sendMessage({
+                    sendMessageResponse({
                         subject: "popup:/close"
                     });
 
@@ -257,7 +257,7 @@ onMessage(message => {
          * chooser.
          */
         case "shim:/popupReady": {
-            sendMessage({
+            sendMessageResponse({
                 subject: "popup:/populateReceiverList"
               , data: {
                     receivers: state.receiverList

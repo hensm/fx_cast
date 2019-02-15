@@ -8,7 +8,7 @@ import { SessionStatus
        , ErrorCode
        , VolumeControlType } from "../enums";
 
-import { onMessage, sendMessage } from "../../messageBridge";
+import { onMessage, sendMessageResponse } from "../../messageBridge";
 
 import uuid from "uuid/v1";
 
@@ -182,7 +182,7 @@ export default class Session {
     }
 
     _sendMessage (subject, data = {}) {
-        sendMessage({
+        sendMessageResponse({
             subject
           , data
           , _id: this._id

@@ -10,7 +10,7 @@ import { PlayerState
 import _Error from "../../cast/classes/Error";
 import { ErrorCode } from "../../cast/enums";
 
-import { onMessage, sendMessage } from "../../messageBridge";
+import { onMessage, sendMessageResponse } from "../../messageBridge";
 
 import uuid from "uuid/v1";
 
@@ -93,7 +93,7 @@ export default class Media {
     }
 
     _sendMessage (subject, data) {
-        sendMessage({
+        sendMessageResponse({
             subject
           , data
           , _id: this._id

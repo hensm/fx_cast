@@ -9,13 +9,15 @@ module.exports = (env) => ({
         "main"           : `${env.includePath}/main.js`
       , "popup/bundle"   : `${env.includePath}/popup/index.jsx`
       , "options/bundle" : `${env.includePath}/options/index.jsx`
-      , "shim/bundle"    : `${env.includePath}/shim/index.js`
       , "updater/bundle" : `${env.includePath}/updater/index.jsx`
-      , "content"        : `${env.includePath}/content.js`
-      , "contentSetup"   : `${env.includePath}/contentSetup.js`
       , "mediaCast"      : `${env.includePath}/mediaCast.js`
       , "mirroringCast"  : `${env.includePath}/mirroringCast.js`
       , "compat/youtube" : `${env.includePath}/compat/youtube.js`
+
+        // Shim entries
+      , "shim/bundle"       : `${env.includePath}/shim/index.js`
+      , "shim/content"      : `${env.includePath}/shim/content.js`
+      , "shim/contentSetup" : `${env.includePath}/shim/contentSetup.js`
     }
   , output: {
         filename: "[name].js"

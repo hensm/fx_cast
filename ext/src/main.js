@@ -122,7 +122,7 @@ browser.webRequest.onBeforeRequest.addListener(
                 case SENDER_SCRIPT_URL:
                     // Content/Page script bridge
                     await browser.tabs.executeScript(details.tabId, {
-                        file: "content.js"
+                        file: "shim/content.js"
                       , frameId: details.frameId
                       , runAt: "document_start"
                     });
@@ -257,7 +257,7 @@ browser.runtime.onMessage.addListener(message => {
 // Defines window.chrome for site compatibility
 browser.contentScripts.register({
     allFrames: true
-  , js: [{ file: "contentSetup.js" }]
+  , js: [{ file: "shim/contentSetup.js" }]
   , matches: [ "<all_urls>" ]
   , runAt: "document_start"
 });
@@ -276,7 +276,7 @@ browser.menus.onClicked.addListener(async (info, tab) => {
 
     // Load cast setup script
     await browser.tabs.executeScript(tab.id, {
-        file: "content.js"
+        file: "shim/content.js"
       , frameId
     });
 
