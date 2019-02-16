@@ -41,7 +41,7 @@ Cast SDK API calls are translated into Chromecast protocol messages and sent via
 
 # Messages (WIP)
 
-<img src="diagram.svg" width="550">
+<img src="diagram.svg" width="770">
 
 | No. | Subject | Origin | Destination | Description |
 | --- | --- | --- | --- | --- |
