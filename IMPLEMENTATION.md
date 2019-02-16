@@ -41,15 +41,18 @@ Cast SDK API calls are translated into Chromecast protocol messages and sent via
 
 # Messages (WIP)
 
-| Subject | Origin | Destination | Description |
-| --- | --- | --- | --- |
-| `shim:/initialized` | background | shim | Sent after bridge has been created. |
-| `bridge:/discover` | shim | bridge | Starts network discovery. |
-| `shim:/serviceUp` | bridge | shim | Sent when a receiver device has been found. |
-| `shim:/serviceDown` | bridge | shim | Sent when a receiver device has been lost. |
-| `main:/openPopup` | shim | background | Opens the receiver selection popup. |
-| `popup:/assignShim` | background | popup | Provides popup with tab/frame ID for the opener shim so that it can make a direct connection. |
-| `shim:/popupReady` | popup | shim | Sent after popup is ready to be populated. |
-| `popup:/populateReceiverList` | shim | popup | Supplies popup with current `state.receiverList`. |
-| `shim:/selectReceiver` | popup | shim | Sent once a receiver has been selected. |
+<img src="diagram.svg" width="550">
+
+| No. | Subject | Origin | Destination | Description |
+| --- | --- | --- | --- | --- |
+| 1 | `shim:/initialized` | background | shim | Sent after bridge has been created. |
+| 2 | `bridge:/discover` | shim | bridge | Starts network discovery. |
+| 3 | `shim:/serviceUp` | bridge | shim | Sent when a receiver device has been found. |
+| 4 | `shim:/serviceDown` | bridge | shim | Sent when a receiver device has been lost. |
+| 5 | `main:/openPopup` | shim | background | Opens the receiver selection popup. |
+| 6 | `popup:/assignShim` | background | popup | Provides popup with tab/frame ID for the opener shim so that it can make a direct connection. |
+| 7 | `shim:/popupReady` | popup | shim | Sent after popup is ready to receive data. |
+| 8 | `popup:/populateReceiverList` | shim | popup | Supplies popup with current `state.receiverList`. |
+| 9 | `shim:/selectReceiver` | popup | shim | Sent once a receiver has been selected. |
+| 9 | `popup:/close` | popup | shim | Sent once a receiver has been selected. |
 
