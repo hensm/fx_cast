@@ -2,7 +2,7 @@
 
 Contributions welcome.
 
-Implementation notes are at [IMPLEMENTATION.md](implementation.md). 
+Implementation notes are at [IMPLEMENTATION.md](IMPLEMENTATION.md). 
 If you're unsure about anything, feel free to ask.
 
 Just submit a PR for small changes (bugfixes, typos, etc...). Comment first on existing 
