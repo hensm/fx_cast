@@ -91,7 +91,7 @@ cast.initialize = (
     state.apiConfig = apiConfig;
 
     sendMessageResponse({
-        subject: "bridge:/discover"
+        subject: "bridge:/startDiscovery"
     });
 
     apiConfig.receiverListener(state.receiverList.length

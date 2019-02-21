@@ -106,7 +106,7 @@ async function handleMessage (message) {
             };
         };
 
-        case "bridge:/discover":
+        case "bridge:/startDiscovery":
             browser.start();
             break;
 
