@@ -8,7 +8,7 @@ When a request is intercepted, the `shim/content.js` script is executed in the c
 
 Messages passed to the shim are custom events of type `__castMessage`. Messages passed back from the shim are custom events of type `__castMessageResponse`. Event listening and creation is handled by the `shim/messageBridge.js` script.
 
-The request is then redirected to the shim bundle (`shim/index.js`) which creates the `window.chrome.cast` API interface.
+The request is then redirected to the shim bundle (`shim/index.js`) which creates the `window.chrome.cast` API object.
 
 The `shim/content.js` script creates a message port connection (named `shim`) to the background script through which messages from the shim (except `popup:/` messages) are forwarded to the background script. The connection triggers the background script to spawn a bridge application instance. The tab/frame ID is stored and used to associate shim instances with popup windows.
 
