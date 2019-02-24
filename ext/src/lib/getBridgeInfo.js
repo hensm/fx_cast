@@ -3,12 +3,10 @@ import semver from "semver";
 export default async function getBridgeInfo () {
     let applicationVersion;
     try {
-        const response = await browser.runtime.sendNativeMessage(
+        applicationVersion = await browser.runtime.sendNativeMessage(
                 APPLICATION_NAME
               , { subject: "bridge:/getInfo"
                 , data: EXTENSION_VERSION });
-
-        applicationVersion = response.data;
     } catch (err) {
         return null;
     }

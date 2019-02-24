@@ -100,10 +100,7 @@ async function handleMessage (message) {
         case "bridge:/getInfo": {
             const extensionVersion = message.data;
 
-            return {
-                subject: "main:/bridgeInfo"
-              , data: __applicationVersion
-            };
+            return __applicationVersion;
         };
 
         case "bridge:/startDiscovery":
