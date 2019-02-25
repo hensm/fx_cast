@@ -1,0 +1,14 @@
+{
+    "compilerOptions": {
+        "allowJs": true
+      , "target": "es5"
+      , "noImplicitAny": true
+      , "esModuleInterop": true
+      , "resolveJsonModule": true
+      , "removeComments": true
+    }
+  , "include": [
+        "./src/**/*"
+      , "./@types/**/*"
+    ]
+}

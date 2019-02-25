@@ -9,14 +9,16 @@ import * as transforms from "./transforms";
 import Media from "./Media";
 import Session from "./Session";
 
+import { Message } from "./types";
+
 import { __applicationName
        , __applicationVersion } from "../package.json";
 
 
-const browser = dnssd.Browser(dnssd.tcp("googlecast"));
+const browser = new dnssd.Browser(dnssd.tcp("googlecast"));
 
 // Local media server
-let httpServer;
+let httpServer: http.Server;
 
 process.on("SIGTERM", () => {
     if (httpServer) httpServer.close();
@@ -35,7 +37,7 @@ process.stdin
 /**
  * Encode and send a message to the extension.
  */
-function sendMessage (message) {
+function sendMessage (message: object) {
     try {
         transforms.encode.write(message);
     } catch (err) {}
@@ -43,8 +45,8 @@ function sendMessage (message) {
 
 
 // Existing counterpart Media/Session objects
-const existingSessions = new Map();
-const existingMedia = new Map();
+const existingSessions: Map<string, Session> = new Map();
+const existingMedia: Map<string, Media> = new Map();
 
 /**
  * Handle incoming messages from the extension and forward
@@ -53,7 +55,7 @@ const existingMedia = new Map();
  * Initializes the counterpart objects and is responsible
  * for managing existing ones.
  */
-async function handleMessage (message) {
+async function handleMessage (message: Message) {
     if (message.subject.startsWith("bridge:/media/")) {
         if (existingMedia.has(message._id)) {
             // Forward message to instance message handler
@@ -99,13 +101,13 @@ async function handleMessage (message) {
     switch (message.subject) {
         case "bridge:/getInfo": {
             const extensionVersion = message.data;
-
             return __applicationVersion;
         };
 
-        case "bridge:/startDiscovery":
+        case "bridge:/startDiscovery": {
             browser.start();
             break;
+        };
 
         case "bridge:/startHttpServer": {
             const { filePath, port } = message.data;
@@ -155,14 +157,15 @@ async function handleMessage (message) {
             break;
         };
 
-        case "bridge:/stopHttpServer":
+        case "bridge:/stopHttpServer": {
             if (httpServer) httpServer.close();
             break;
+        };
     }
 }
 
 
-browser.on("serviceUp", service => {
+browser.on("serviceUp", (service: dnssd.Service) => {
     transforms.encode.write({
         subject: "shim:/serviceUp"
       , data: {
@@ -175,7 +178,7 @@ browser.on("serviceUp", service => {
     });
 });
 
-browser.on("serviceDown", service => {
+browser.on("serviceDown", (service: dnssd.Service) => {
     transforms.encode.write({
         subject:"shim:/serviceDown"
       , data: {

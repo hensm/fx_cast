@@ -32,7 +32,9 @@ const argv = minimist(process.argv.slice(2), {
     }
 });
 
-const BUILD_PATH = path.join(__dirname, "../build");
+const ROOT_PATH = path.join(__dirname, "..");
+const SRC_PATH = path.join(ROOT_PATH, "src");
+const BUILD_PATH = path.join(ROOT_PATH, "build");
 
 
 // Clean
@@ -45,9 +47,25 @@ fs.ensureDirSync(DIST_PATH, { recursive: true });
 
 
 async function build () {
-    // Run Babel
-    spawnSync(`babel src -d ${BUILD_PATH} --copy-files `
-      , { shell: true });
+    // Run tsc
+    spawnSync(`tsc --project ${ROOT_PATH} \
+                   --outDir ${BUILD_PATH}`
+      , {
+          shell: true
+        , stdio: [ process.stdin, process.stdout, process.stderr ]
+      });
+
+    // Move tsc output to build dir
+    fs.moveSync(path.join(BUILD_PATH, "src"), BUILD_PATH);
+
+    // Copy other files
+    fs.copySync(SRC_PATH, BUILD_PATH, {
+        overwrite: true
+      , filter (src, dest) {
+            return !/.(js|ts)$/.test(src);
+        }
+    });
+
 
     // Create app manifest
     const manifest = {
