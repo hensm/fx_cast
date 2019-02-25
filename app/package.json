@@ -25,8 +25,7 @@
         "@types/mime-types": "^2.1.0",
         "@types/node": "^11.9.5",
         "mustache": "^3.0.1",
-        "pkg": "^4.3.5",
-        "typescript": "^3.3.3333"
+        "pkg": "^4.3.5"
     },
     "optionalDependencies": {
         "rage-edit": "^1.2.0"

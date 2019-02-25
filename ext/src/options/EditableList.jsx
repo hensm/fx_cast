@@ -56,14 +56,13 @@ export default class EditableList extends Component {
             
             return {
                 rawView: true
-              , rawViewValue: [...currentState.items.values()].join("\n")
+              , rawViewValue: Array.from(currentState.items.values()).join("\n")
             };
         });
     }
 
     handleSaveRaw () {
         this.setState(currentState => {
-            console.log(currentState.rawViewValue);
             const newItems = currentState.rawViewValue.split("\n")
                 .filter(item => item !== "");
 
@@ -137,15 +136,15 @@ export default class EditableList extends Component {
                     </button>
                 </div>
                 <hr />
-                { do {
-                    if (this.state.rawView) {
+                { this.state.rawView
+                    ? (
                         <textarea className="editable-list__raw-view"
                                   rows={ items.length}
                                   value={ this.state.rawViewValue}
                                   onChange={ this.handleRawViewTextAreaChange }
                                   ref={ el => { this.rawViewTextArea = el }}>
                         </textarea>
-                    } else {
+                    ) : (
                         <ul className="editable-list__items">
                             { items.map((item, i) => 
                                 <EditableListItem text={ item }
@@ -169,8 +168,7 @@ export default class EditableList extends Component {
                                 </button>
                             </div>
                         </ul>
-                    }
-                }}
+                    )}
             </div>
         );
     }

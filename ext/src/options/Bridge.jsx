@@ -60,31 +60,25 @@ const BridgeStats = (props) => (
         <tr>
             <th>{ _("optionsBridgeStatsCompatibility") }</th>
             <td>
-                { do {
-                    if (props.info.isVersionCompatible) {
-                        if (props.info.isVersionExact) {
-                            _("optionsBridgeCompatible")
-                        } else {
-                            _("optionsBridgeLikelyCompatible")
-                        }
-                    } else {
-                        _("optionsBridgeIncompatible")
-                    }
-                }}
+                { props.info.isVersionCompatible
+                    ? props.info.isVersionExact
+                        ? _("optionsBridgeCompatible")
+                        : _("optionsBridgeLikelyCompatible")
+                    : _("optionsBridgeIncompatible") }
             </td>
         </tr>
         <tr>
             <th>{ _("optionsBridgeStatsRecommendedAction") }</th>
             <td>
-                { do {
-                    if (props.info.isVersionOlder) {
-                        _("optionsBridgeOlderAction")
-                    } else if (props.info.isVersionNewer) {
-                        _("optionsBridgeNewerAction")
-                    } else {
-                        _("optionsBridgeNoAction")
-                    }
-                }}
+                {    // If older
+                    props.info.isVersionOlder
+                        ? _("optionsBridgeOlderAction")
+                    // else if newer
+                  : props.info.isVersionNewer
+                        ? _("optionsBridgeNewerAction")
+                    // else
+                        : _("optionsBridgeNoAction")
+                }
             </td>
         </tr>
     </table>
@@ -227,127 +221,110 @@ export default class Bridge extends Component {
     }
 
 
+    renderStatus () {
+        const infoClasses = `bridge__info ${this.props.info
+            ? "bridge__info--found"
+            : "bridge__info--not-found"}`;
+
+        let statusIcon;
+        let statusTitle;
+        let statusText;
+
+        if (!this.props.info) {
+            statusIcon = "assets/icons8-cancel-120.png";
+            statusTitle = _("optionsBridgeNotFoundStatusTitle");
+            statusText = _("optionsBridgeNotFoundStatusText");
+        } else {
+            if (this.props.info.isVersionCompatible) {
+                statusIcon = "assets/icons8-ok-120.png";
+                statusTitle = _("optionsBridgeFoundStatusTitle";
+            } else {
+                statusIcon = "assets/icons8-warn-120.png";
+                statusTitle = _("optionsBridgeIssueStatusTitle");
+            }
+        }
+
+        return (
+            <div className={infoClasses}>
+                <div className="bridge__status">
+                    <img className="bridge__status-icon"
+                         width="60" height="60"
+                         src={ statusIcon } />
+
+                    <h2 className="bridge__status-title">
+                        { statusTitle }
+                    </h2>
+
+                    { statusText &&
+                        <p className="bridge__status-text">
+                            { statusText }
+                        </p> }
+                </div>
+
+                { this.props.info &&
+                    <BridgeStats info={ this.props.info }/> }
+            </div>
+        );
+    }
+
     render () {
         return (
             <div className="bridge">
-                { do {
-                    if (this.props.loading) {
-                        <div className="bridge__loading">
+                { this.props.loading
+                    ? ( <div className="bridge__loading">
                             { _("optionsBridgeLoading") }
                             <progress></progress>
                         </div>
-                    } else {
-                        const infoClasses = `bridge__info ${this.props.info
-                            ? "bridge__info--found"
-                            : "bridge__info--not-found"}`;
+                    : this.renderStatus() }
 
-                        const [ statusIcon, statusTitle, statusText ] = do {
-                            if (!this.props.info) {
-                                [ "assets/icons8-cancel-120.png"
-                                  , _("optionsBridgeNotFoundStatusTitle")
-                                  , _("optionsBridgeNotFoundStatusText") ]
-                            } else {
-                                if (this.props.info.isVersionCompatible) {
-                                    [ "assets/icons8-ok-120.png"
-                                      , _("optionsBridgeFoundStatusTitle") ]
-                                } else {
-                                    [ "assets/icons8-warn-120.png"
-                                      , _("optionsBridgeIssueStatusTitle") ]
-                                }
-                            }
-                        };
-
-                        <div className={infoClasses}>
-                            <div className="bridge__status">
-                                <img className="bridge__status-icon"
-                                     width="60" height="60"
-                                     src={ statusIcon } />
-
-                                <h2 className="bridge__status-title">
-                                    { statusTitle }
-                                </h2>
-
-                                { do {
-                                    if (statusText) {
-                                        <p className="bridge__status-text">
-                                            { statusText }
-                                        </p>
-                                    }
-                                }}
-                            </div>
-
-                            { do {
-                                if (this.props.info) {
-                                    <BridgeStats info={ this.props.info }/>
-                                }
-                            }}
-                        </div>
-                    }
-                }}
-
-                { do {
-                    if (!this.props.loading) {
-                        <div className="bridge__update-info">
-                            { do {
-                                if (this.state.isUpdateAvailable) {
-                                    <div className="bridge__update">
-                                        <p className="bridge__update-label">
-                                            { _("optionsBridgeUpdateAvailable") }
-                                        </p>
-                                        <div className="bridge__update-options">
-                                            { do {
-                                                if (this.props.platform === "linux") {
-                                                    <select className="bridge__update-package-type"
-                                                            onChange={ this.onPackageTypeChange }
-                                                            value={ this.state.packageType }>
-                                                        <option value="" disabled selected>
-                                                            { _("optionsBridgeUpdatePackageTypeSelect") }
-                                                        </option>
-                                                        <option value="deb">
-                                                            { _("optionsBridgeUpdatePackageTypeDeb") }
-                                                        </option>
-                                                        <option value="rpm">
-                                                            { _("optionsBridgeUpdatePackageTypeRpm") }
-                                                        </option>
-                                                    </select>
-                                                }
-                                            }}
-                                            <button className="bridge__update-start"
-                                                    onClick={ this.onUpdate }
-                                                    disabled={ this.props.platform === "linux"
-                                                            && !this.state.packageType }>
-                                                { _("optionsBridgeUpdate") }
-                                            </button>
-                                        </div>
+                { !this.props.loading &&
+                    <div className="bridge__update-info">
+                        { this.state.isUpdateAvailable 
+                            ? (
+                                <div className="bridge__update">
+                                    <p className="bridge__update-label">
+                                        { _("optionsBridgeUpdateAvailable") }
+                                    </p>
+                                    <div className="bridge__update-options">
+                                        { this.props.platform === "linux" &&
+                                            <select className="bridge__update-package-type"
+                                                    onChange={ this.onPackageTypeChange }
+                                                    value={ this.state.packageType }>
+                                                <option value="" disabled selected>
+                                                    { _("optionsBridgeUpdatePackageTypeSelect") }
+                                                </option>
+                                                <option value="deb">
+                                                    { _("optionsBridgeUpdatePackageTypeDeb") }
+                                                </option>
+                                                <option value="rpm">
+                                                    { _("optionsBridgeUpdatePackageTypeRpm") }
+                                                </option>
+                                            </select> }
+                                        <button className="bridge__update-start"
+                                                onClick={ this.onUpdate }
+                                                disabled={ this.props.platform === "linux"
+                                                        && !this.state.packageType }>
+                                            { _("optionsBridgeUpdate") }
+                                        </button>
                                     </div>
-                                } else {
-                                    <button className="bridge__update-check"
-                                            disabled={ this.state.isCheckingUpdates }
-                                            onClick={ this.onCheckUpdates }>
+                                </div>
+                            ) : (
+                                <button className="bridge__update-check"
+                                        disabled={ this.state.isCheckingUpdates }
+                                        onClick={ this.onCheckUpdates }>
 
-                                        { do {
-                                            if (this.state.isCheckingUpdates) {
-                                                _("optionsBridgeUpdateChecking"
-                                                      , getNextEllipsis(this.state.checkUpdatesEllipsis));
-                                            } else {
-                                                _("optionsBridgeUpdateCheck");
-                                            }
-                                        }}
-                                    </button>
-                                }
-                            }}
+                                    { this.state.isCheckingUpdates
+                                        ? _("optionsBridgeUpdateChecking"
+                                              , getNextEllipsis(this.state.checkUpdatesEllipsis))
+                                        : _("optionsBridgeUpdateCheck") }
+                                </button>
+                            )}
 
-                            <div className="bridge--update-status">
-                                { do {
-                                    if (this.state.updateStatus
-                                            && !this.state.isUpdateAvailable) {
-                                        this.state.updateStatus;
-                                    }
-                                }}
-                            </div>
+                        <div className="bridge--update-status">
+                            { this.state.updateStatus && !this.state.isUpdateAvailable
+                                    && this.state.updateStatus }
                         </div>
-                    }
-                }}
+                    </div> }
             </div>
         );
     }

@@ -21,7 +21,7 @@ module.exports = (env) => ({
     }
   , output: {
         filename: "[name].js"
-      , path: `${env.outputPath}`
+      , path: env.outputPath
     }
   , plugins: [
         new webpack.DefinePlugin({
@@ -65,23 +65,14 @@ module.exports = (env) => ({
   , module: {
         rules: [
             {
-                test: /\.jsx?$/
+                test: /\.(js|ts)x?$/
               , resolve: {
-                    extensions: [ ".js", ".jsx" ]
+                    extensions: [ ".js", ".jsx"
+                                , ".ts", ".tsx" ]
                 }
-              , include: `${env.includePath}`
+              , include: env.includePath
               , use: {
-                    loader: "babel-loader"
-                  , options: {
-                        presets: [
-                            "@babel/preset-react"
-                        ]
-                      , plugins: [
-                            "@babel/proposal-class-properties"
-                          , "@babel/proposal-do-expressions"
-                          , "@babel/proposal-object-rest-spread"
-                        ]
-                    }
+                    loader: "ts-loader"
                 }
             }
         ]

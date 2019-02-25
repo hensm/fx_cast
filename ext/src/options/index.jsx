@@ -323,11 +323,7 @@ class App extends Component {
 
                     <div id="buttons">
                         <div id="status-line">
-                            { do {
-                                if (this.state.hasSaved) {
-                                    _("optionsSaved")
-                                }
-                            }}
+                            { this.state.hasSaved && _("optionsSaved") }
                         </div>
                         <button onClick={ this.handleReset }>
                             { _("optionsReset") }

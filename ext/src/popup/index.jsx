@@ -187,25 +187,18 @@ class Receiver extends Component {
                     { `${this.props.receiver.address}:${this.props.receiver.port}` }
                 </div>
                 <div className="receiver-status">
-                    { do {
-                        if (this.props.receiver.currentApp) {
-                            `- ${this.props.receiver.currentApp}`
-                        }
-                    }}
+                    { this.props.receiver.currentApp &&
+                        `- ${this.props.receiver.currentApp}` }
                 </div>
                 <button className="receiver-connect"
                         onClick={this.onClick.bind(this)}
                         disabled={this.props.isLoading}>
-                    { do {
-                        if (this.state.isLoading) {
-                            _("popupCastingButtonLabel") +
-                                (this.state.isLoading
-                                    ? this.state.ellipsis
-                                    : "" )
-                        } else {
-                            _("popupCastButtonLabel")
-                        }
-                    }}
+                    { this.state.isLoading
+                        ? _("popupCastingButtonLabel") +
+                            (this.state.isLoading
+                                ? this.state.ellipsis
+                                : "")
+                        : _("popupCastButtonLabel") }
                 </button>
             </li>
         );
