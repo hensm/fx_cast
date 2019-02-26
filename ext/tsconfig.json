@@ -1,14 +1,14 @@
 {
     "compilerOptions": {
         "allowJs": true
-      , "sourceMap": true
-      , "target": "es6"
-      , "noImplicitAny": true
       , "esModuleInterop": true
-      , "moduleResolution": "node"
-      , "resolveJsonModule": true
-      , "removeComments": true
       , "jsx": "react"
       , "lib": [ "esnext", "dom" ]
+      , "moduleResolution": "node"
+      , "noImplicitAny": true
+      , "removeComments": true
+      , "resolveJsonModule": true
+      , "sourceMap": true
+      , "target": "es6"
     }
 }

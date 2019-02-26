@@ -8,7 +8,8 @@
         "build": "node bin/build.js",
         "package": "node bin/build.js --package",
         "install-manifest": "node bin/install-manifest.js",
-        "remove-manifest": "node bin/install-manifest.js --remove"
+        "remove-manifest": "node bin/install-manifest.js --remove",
+        "lint": "tslint -c tslint.json -p ."
     },
     "dependencies": {
         "bplist-creator": "0.0.7",
@@ -24,8 +25,10 @@
         "@types/dnssd": "^0.4.1",
         "@types/mime-types": "^2.1.0",
         "@types/node": "^11.9.5",
+        "@types/node-fetch": "^2.1.6",
         "mustache": "^3.0.1",
-        "pkg": "^4.3.5"
+        "pkg": "^4.3.5",
+        "tslint": "^5.13.0"
     },
     "optionalDependencies": {
         "rage-edit": "^1.2.0"

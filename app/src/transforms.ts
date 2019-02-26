@@ -4,9 +4,7 @@ import { Transform } from "stream";
 import { Message } from "./types";
 
 
-interface ResponseHandlerFunction {
-    (message: Message): Promise<any>
-}
+type ResponseHandlerFunction = (message: Message) => Promise<any>;
 
 /**
  * Takes a handler function that implements the transform
@@ -18,9 +16,9 @@ export const response = (handler: ResponseHandlerFunction) => new Transform({
 
   , transform (chunk: Message, encoding, callback) {
         Promise.resolve(handler(chunk))
-            .then(response => {
-                if (response) {
-                    callback(null, response);
+            .then(res => {
+                if (res) {
+                    callback(null, res);
                 } else {
                     callback(null);
                 }
@@ -94,13 +92,13 @@ export const encode = new Transform({
     writableObjectMode: true
 
   , transform (chunk, encoding, callback) {
-        const message_length = Buffer.alloc(4);
+        const messageLength = Buffer.alloc(4);
         const message = Buffer.from(JSON.stringify(chunk));
 
         // Write message length
-        message_length.writeUInt32LE(message.length, 0);
+        messageLength.writeUInt32LE(message.length, 0);
 
         // Output joined message length and content
-        callback(null, Buffer.concat([message_length, message]));
+        callback(null, Buffer.concat([messageLength, message]));
     }
 });

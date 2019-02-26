@@ -25,25 +25,24 @@ export interface UpdateMessageData {
 export default class Media {
     private sessionId: number;
     private mediaSessionId: number;
-    private _id: string;
+    private referenceId: string;
     private session: Session;
     private channel: any;
-    private _sendMessage: SendMessageCallback;
+    private sendMessageCallback: SendMessageCallback;
 
-    constructor (sessionId: number
-               , mediaSessionId: number
-               , _id: string
-               , parentSession: Session,
-                _sendMessage: SendMessageCallback) {
-
-        this._id = _id;
-
-        this._sendMessage = _sendMessage;
+    constructor (
+            sessionId: number
+          , mediaSessionId: number
+          , referenceId: string
+          , session: Session
+          , sendMessageCallback: SendMessageCallback) {
 
         this.sessionId = sessionId;
         this.mediaSessionId = mediaSessionId;
+        this.referenceId = referenceId;
+        this.session = session;
+        this.sendMessageCallback = sendMessageCallback;
 
-        this.session = parentSession;
         this.session.createChannel(MEDIA_NAMESPACE);
         this.channel = this.session.channelMap.get(MEDIA_NAMESPACE);
 
@@ -54,11 +53,12 @@ export default class Media {
                 const status = data.status[0];
 
                 const messageData = {
-                    currentTime: status.currentTime
-                  , _lastCurrentTime: Date.now() / 1000
-                  , customData: status.customData
+                    _lastCurrentTime: Date.now() / 1000
                   , _volumeLevel: status.volume.level
                   , _volumeMuted: status.volume.muted
+
+                  , currentTime: status.currentTime
+                  , customData: status.customData
                   , playbackRate: status.playbackRate
                   , playerState: status.playerState
                   , repeatMode: status.repeatMode
@@ -81,7 +81,7 @@ export default class Media {
         });
     }
 
-    messageHandler (message: Message) {
+    public messageHandler (message: Message) {
         switch (message.subject) {
             case "bridge:/media/sendMediaMessage": {
                 let error = false;
@@ -97,15 +97,15 @@ export default class Media {
                 });
 
                 break;
-            };
+            }
         }
     }
 
-    sendMessage (subject: string, data: any = {}) {
-        this._sendMessage({
+    private sendMessage (subject: string, data: any = {}) {
+        this.sendMessageCallback({
             subject
           , data
-          , _id: this._id
+          , _id: this.referenceId
         });
     }
 }

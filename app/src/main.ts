@@ -1,18 +1,23 @@
 import dnssd from "dnssd";
 
-import http from "http";
+import events from "events";
 import fs from "fs";
-import path from "path";
+import http from "http";
 import mime from "mime-types";
+import path from "path";
 
-import * as transforms from "./transforms";
 import Media from "./Media";
 import Session from "./Session";
+import * as transforms from "./transforms";
 
 import { Message } from "./types";
 
 import { __applicationName
        , __applicationVersion } from "../package.json";
+
+
+// Increase listener limit
+events.EventEmitter.defaultMaxListeners = 50;
 
 
 const browser = new dnssd.Browser(dnssd.tcp("googlecast"));
@@ -21,11 +26,10 @@ const browser = new dnssd.Browser(dnssd.tcp("googlecast"));
 let httpServer: http.Server;
 
 process.on("SIGTERM", () => {
-    if (httpServer) httpServer.close();
+    if (httpServer) {
+        httpServer.close();
+    }
 });
-
-// Increase listener limit
-require("events").EventEmitter.defaultMaxListeners = 50;
 
 // stdin -> stdout
 process.stdin
@@ -40,7 +44,9 @@ process.stdin
 function sendMessage (message: object) {
     try {
         transforms.encode.write(message);
-    } catch (err) {}
+    } catch (err) {
+        console.error("Failed to encode message");
+    }
 }
 
 
@@ -102,12 +108,12 @@ async function handleMessage (message: Message) {
         case "bridge:/getInfo": {
             const extensionVersion = message.data;
             return __applicationVersion;
-        };
+        }
 
         case "bridge:/startDiscovery": {
             browser.start();
             break;
-        };
+        }
 
         case "bridge:/startHttpServer": {
             const { filePath, port } = message.data;
@@ -144,7 +150,7 @@ async function handleMessage (message: Message) {
                       , "Content-Type": contentType
                     });
 
-                    fs.createReadStream(filePath).pipe(res)
+                    fs.createReadStream(filePath).pipe(res);
                 }
             });
 
@@ -155,12 +161,14 @@ async function handleMessage (message: Message) {
             });
 
             break;
-        };
+        }
 
         case "bridge:/stopHttpServer": {
-            if (httpServer) httpServer.close();
+            if (httpServer) {
+                httpServer.close();
+            }
             break;
-        };
+        }
     }
 }
 
@@ -180,7 +188,7 @@ browser.on("serviceUp", (service: dnssd.Service) => {
 
 browser.on("serviceDown", (service: dnssd.Service) => {
     transforms.encode.write({
-        subject:"shim:/serviceDown"
+        subject: "shim:/serviceDown"
       , data: {
             id: service.txt.id
         }

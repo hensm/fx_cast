@@ -11,9 +11,12 @@
         "package:ext": "npm run package --prefix ./ext",
         "test": "node test/driver.js",
         "install-manifest": "npm run install-manifest --prefix ./app",
-        "remove-manifest": "npm run remove-manifest --prefix ./app"
+        "remove-manifest": "npm run remove-manifest --prefix ./app",
+        "lint": "npm run lint:app",
+        "lint:app": "npm run lint --prefix ./app"
     },
     "devDependencies": {
+        "@types/uuid": "^3.4.4",
         "fs-extra": "^7.0.1",
         "glob": "^7.1.3",
         "jasmine-console-reporter": "^3.1.0",
@@ -21,6 +24,7 @@
         "selenium-webdriver": "^4.0.0-alpha.1",
         "semver": "^5.6.0",
         "typescript": "^3.3.3333",
+        "uuid": "^3.3.2",
         "ws": "^6.1.2"
     }
 }

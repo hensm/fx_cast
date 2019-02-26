@@ -6,6 +6,7 @@
       , "esModuleInterop": true
       , "resolveJsonModule": true
       , "removeComments": true
+      , "downlevelIteration": true
     }
   , "include": [
         "./src/**/*"

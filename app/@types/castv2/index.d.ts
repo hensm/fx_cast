@@ -1,16 +1,17 @@
+/// <reference types="node" />
+
 declare module "castv2" {
     import { EventEmitter } from "events";
 
     interface ClientConnectOptions {
-        host: string
-      , port?: number
+        host: string;
+        port?: number;
     }
 
-    interface ClientConnectCallback {
-        (): void;
-    }
+    type CallbackFunction = () => void;
 
-    export interface ClientChannel extends EventEmitter {
+
+    export interface Channel extends EventEmitter {
         bus: Client;
         sourceId: string;
         destinationId: string;
@@ -21,41 +22,47 @@ declare module "castv2" {
         close (): void;
     }
 
-    interface ServerListenCallback {
-        (): void;
+    export interface DeviceAuthMessage {
+        parse (data: any): any;
+        serialize (data: any): any;
     }
 
 
     export class Client extends EventEmitter {
-        connect (host: string, callback?: ClientConnectCallback): void;
-        connect (options: ClientConnectOptions, callback: ClientConnectCallback): void;
+        public connect (
+                options: ClientConnectOptions | string
+              , callback?: CallbackFunction): void;
 
-        close (): void;
+        public close (): void;
 
-        send (sourceId: string
-            , destinationId: string
-            , namespace: string
-            , data: Buffer | string): void;
+        public send (
+                sourceId: string
+              , destinationId: string
+              , namespace: string
+              , data: Buffer | string): void;
 
-        createChannel (sourceId: string
-                     , destinationId: string
-                     , namespace: string
-                     , encoding: string): ClientChannel;
+        public createChannel (
+                sourceId: string
+              , destinationId: string
+              , namespace: string
+              , encoding: string): Channel;
     }
 
-    export class Server {
+    export class Server extends EventEmitter {
         constructor (options: object);
 
-        listen (port: number
+        public listen (
+                port: number
               , host: string
-              , callback: ServerListenCallback): void;
+              , callback?: CallbackFunction): void;
 
-        send (clientId: string
-           , sourceId: string
-           , destinationId: string
-           , namespace: string
-           , data: Buffer | string): void;
+        public send (
+                clientId: string
+              , sourceId: string
+              , destinationId: string
+              , namespace: string
+              , data: Buffer | string): void;
 
-        close (): void;
+        public close (): void;
     }
 }

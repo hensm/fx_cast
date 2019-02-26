@@ -6,6 +6,4 @@ export interface Message {
     _id?: string;
 }
 
-export interface SendMessageCallback {
-    (message: Message): void
-}
+export type SendMessageCallback = (message: Message) => void;
