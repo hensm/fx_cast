@@ -11,9 +11,10 @@
       , "max-classes-per-file": false
       , "max-line-length": [ true, {
             "limit": 80
-          , "ignore-pattern": "//"
+          , "ignore-pattern": "//|.*\";$"
         }]
       , "no-console": [ true, "log" ]
+      , "no-namespace": [ true, "allow-declarations" ]
       , "object-literal-sort-keys": false
       , "radix": false
       , "semicolon": [ true, "always" ]

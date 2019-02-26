@@ -6,7 +6,7 @@ const CopyWebpackPlugin = require("copy-webpack-plugin");
 
 module.exports = (env) => ({
     entry: {
-        "main"           : `${env.includePath}/main.js`
+        "main"           : `${env.includePath}/main.ts`
       , "popup/bundle"   : `${env.includePath}/popup/index.jsx`
       , "options/bundle" : `${env.includePath}/options/index.jsx`
       , "updater/bundle" : `${env.includePath}/updater/index.jsx`

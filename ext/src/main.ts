@@ -1,9 +1,10 @@
 "use strict";
 
-import defaultOptions from "./options/defaultOptions";
 import getBridgeInfo from "./lib/getBridgeInfo";
 import messageRouter from "./lib/messageRouter";
+import defaultOptions from "./options/defaultOptions";
 
+import { getChromeUserAgent } from "./lib/userAgents";
 import { getWindowCenteredProps } from "./lib/utils";
 
 import semver from "semver";
@@ -14,21 +15,20 @@ const _ = browser.i18n.getMessage;
 
 browser.runtime.onInstalled.addListener(async details => {
     switch (details.reason) {
-
         // Set default options
         case "install": {
             await browser.storage.sync.set({
                 options: defaultOptions
             });
             break;
-        };
+        }
 
         // Set newly added options
         case "update": {
             const { options: existingOptions }
                     = await browser.storage.sync.get("options");
 
-            const newOptions = {};
+            const newOptions: { [key: string]: any } = {};
 
             // Find options not already in storage
             for (const [ key, val ] of Object.entries(defaultOptions)) {
@@ -46,7 +46,7 @@ browser.runtime.onInstalled.addListener(async details => {
             });
 
             break;
-        };
+        }
     }
 
     // Call after default options have been set
@@ -55,8 +55,8 @@ browser.runtime.onInstalled.addListener(async details => {
 
 
 // Menu IDs
-let mirrorCastMenuId;
-let mediaCastMenuId;
+let mirrorCastMenuId: string | number;
+let mediaCastMenuId: string | number;
 
 const mediaCastTargetUrlPatterns = new Set([
     "http://*/*"
@@ -72,7 +72,9 @@ async function createMenus () {
      * If options aren't set or menus have already been
      * created, return.
      */
-    if (!options || mirrorCastMenuId || mediaCastMenuId) return;
+    if (!options || mirrorCastMenuId || mediaCastMenuId) {
+        return;
+    }
 
     if (options.localMediaEnabled) {
         mediaCastTargetUrlPatterns.add(LOCAL_MEDIA_URL_PATTERN);
@@ -121,7 +123,7 @@ const SENDER_SCRIPT_FRAMEWORK_URL =
 browser.webRequest.onBeforeRequest.addListener(
         async details => {
             switch (details.url) {
-                case SENDER_SCRIPT_URL:
+                case SENDER_SCRIPT_URL: {
                     // Content/Page script bridge
                     await browser.tabs.executeScript(details.tabId, {
                         file: "shim/content.js"
@@ -132,13 +134,14 @@ browser.webRequest.onBeforeRequest.addListener(
                     return {
                         redirectUrl: browser.runtime.getURL("shim/bundle.js")
                     };
+                }
 
-                case SENDER_SCRIPT_FRAMEWORK_URL:
+                case SENDER_SCRIPT_FRAMEWORK_URL: {
                     // TODO: implement cast.framework
-
                     return {
                         cancel: true
                     };
+                }
             }
         }
       , { urls: [
@@ -148,22 +151,8 @@ browser.webRequest.onBeforeRequest.addListener(
       , [ "blocking" ]);
 
 
-/**
- * Returns a Chrome user agent string with the provided platform.
- */
-function getChromeUA (platform) {
-    return `Mozilla/5.0 (${platform}) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/70.0.3538.67 Safari/537.36`;
-}
-
-// Desktop platform Chrome UA strings
-const UA_STRINGS = {
-    "mac"   : getChromeUA("Macintosh; Intel Mac OS X 10_14_1")
-  , "win"   : getChromeUA("Windows NT 10.0; Win64; x64")
-  , "linux" : getChromeUA("Mozilla/5.0 (X11; Linux x86_64")
-};
-
 // Current user agent string for all whitelisted requests
-let currentUAString;
+let currentUAString: string;
 
 /**
  * Web apps usually only load the sender library and
@@ -171,13 +160,13 @@ let currentUAString;
  * as Chrome, so we should rewrite the User-Agent header
  * to reflect this on whitelisted sites.
  */
-async function onBeforeSendHeaders (details) {
+async function onBeforeSendHeaders (details: any) {
     const { options } = await browser.storage.sync.get("options");
+    const { os } = await browser.runtime.getPlatformInfo();
 
     // Create Chrome UA from platform info on first run
     if (!currentUAString) {
-        currentUAString = UA_STRINGS[
-                (await browser.runtime.getPlatformInfo()).os]
+        currentUAString = getChromeUserAgent(os);
     }
 
     // Find and rewrite the User-Agent header
@@ -193,11 +182,13 @@ async function onBeforeSendHeaders (details) {
     };
 }
 
-async function onOptionsUpdated (alteredOptions) {
+async function onOptionsUpdated (alteredOptions?: any[]) {
     const { options } = await browser.storage.sync.get("options");
 
     // If options aren't set yet, return
-    if (!options) return;
+    if (!options) {
+        return;
+    }
 
     const registerFunctions = {
         onBeforeSendHeaders () {
@@ -217,8 +208,10 @@ async function onOptionsUpdated (alteredOptions) {
         }
     } else {
         if (alteredOptions.includes("userAgentWhitelist")
-                || alteredOptions.includes("userAgentWhitelistEnabled")) {
-            browser.webRequest.onBeforeSendHeaders.removeListener(onBeforeSendHeaders);
+             || alteredOptions.includes("userAgentWhitelistEnabled")) {
+
+            browser.webRequest.onBeforeSendHeaders.removeListener(
+                    onBeforeSendHeaders);
             registerFunctions.onBeforeSendHeaders();
         }
 
@@ -231,7 +224,7 @@ async function onOptionsUpdated (alteredOptions) {
         if (alteredOptions.includes("mediaEnabled")) {
             browser.menus.update(mediaCastMenuId, {
                 visible: options.mediaEnabled
-            })
+            });
         }
 
         if (alteredOptions.includes("localMediaEnabled")) {
@@ -250,9 +243,10 @@ async function onOptionsUpdated (alteredOptions) {
 
 browser.runtime.onMessage.addListener(message => {
     switch (message.subject) {
-        case "optionsUpdated":
+        case "optionsUpdated": {
             onOptionsUpdated(message.data.alteredOptions);
             break;
+        }
     }
 });
 
@@ -265,11 +259,11 @@ browser.contentScripts.register({
 });
 
 
-let mediaCastTabId;
-let mediaCastFrameId;
+let mediaCastTabId: number;
+let mediaCastFrameId: number;
 
-let mirrorCastTabId;
-let mirrorCastFrameId;
+let mirrorCastTabId: number;
+let mirrorCastFrameId: number;
 
 
 browser.menus.onClicked.addListener(async (info, tab) => {
@@ -283,13 +277,15 @@ browser.menus.onClicked.addListener(async (info, tab) => {
     });
 
     switch (info.menuItemId) {
-        case "contextCast":
+        case "contextCast": {
             mirrorCastTabId = tab.id;
             mirrorCastFrameId = frameId;
 
             await browser.tabs.executeScript(tab.id, {
-                code: `var selectedMedia = "${info.pageUrl ? "tab" : "screen"}";
-                       var FX_CAST_RECEIVER_APP_ID = "${options.mirroringAppId}";`
+                code: `
+                    var selectedMedia = "${info.pageUrl ? "tab" : "screen"}";
+                    var FX_CAST_RECEIVER_APP_ID = "${options.mirroringAppId}";
+                `
               , frameId
             });
 
@@ -298,9 +294,11 @@ browser.menus.onClicked.addListener(async (info, tab) => {
                 file: "mirroringCast.js"
               , frameId
             });
-            break;
 
-        case "contextCastMedia":
+            break;
+        }
+
+        case "contextCastMedia": {
             mediaCastTabId = tab.id;
             mediaCastFrameId = frameId;
 
@@ -316,7 +314,9 @@ browser.menus.onClicked.addListener(async (info, tab) => {
                 file: "mediaCast.js"
               , frameId
             });
+
             break;
+        }
     }
 
     // Load cast API
@@ -327,16 +327,16 @@ browser.menus.onClicked.addListener(async (info, tab) => {
 });
 
 
-let popupWinId;
-let popupShimId;
-let popupPort;
+let popupWinId: number;
+let popupShimId: string;
+let popupPort: browser.runtime.Port;
 
 /**
  * Creates popup window for cast destination selection.
  * Refocusing other browser windows causes the popup window
  * to close and returns an API error.
  */
-async function openPopup (shimId) {
+async function openPopup (shimId: string) {
     // Current window to base centered position on
     const win = await browser.windows.getCurrent();
     const centeredProps = getWindowCenteredProps(win, 350, 200);
@@ -382,7 +382,7 @@ browser.windows.onRemoved.addListener(id => {
 
 const shimMap = new Map();
 
-async function onConnectShim (port) {
+async function onConnectShim (port: browser.runtime.Port) {
     const bridgeInfo = await getBridgeInfo();
     if (bridgeInfo && !bridgeInfo.isVersionCompatible) {
         return;
@@ -419,7 +419,7 @@ async function onConnectShim (port) {
             console.error(`${APPLICATION_NAME} disconnected:`
                   , bridgePort.error.message);
         } else {
-            console.log(`${APPLICATION_NAME} disconnected`);
+            console.info(`${APPLICATION_NAME} disconnected`);
         }
     });
 
@@ -430,17 +430,17 @@ async function onConnectShim (port) {
     });
 
 
-    bridgePort.onMessage.addListener(message => {
+    bridgePort.onMessage.addListener((message: any) => {
         port.postMessage(message);
     });
 
-    port.onMessage.addListener(async message => {
+    port.onMessage.addListener(async (message: any) => {
         const [ destination ] = message.subject.split(":/");
         switch (destination) {
             case "bridge": {
                 bridgePort.postMessage(message);
                 break;
-            };
+            }
         }
 
         switch (message.subject) {
@@ -471,7 +471,7 @@ async function onConnectShim (port) {
                 }
 
                 break;
-            };
+            }
 
             default: {
                 // TODO: Remove need for this
@@ -487,7 +487,7 @@ async function onConnectShim (port) {
     });
 }
 
-function onConnectPopup (port) {
+function onConnectPopup (port: browser.runtime.Port) {
     if (popupPort) {
         popupPort.disconnect();
     }
@@ -506,17 +506,17 @@ function onConnectPopup (port) {
 
 browser.runtime.onConnect.addListener(port => {
     switch (port.name) {
-        case "shim":  onConnectShim(port);  break;
+        case "shim": onConnectShim(port); break;
         case "popup": onConnectPopup(port); break;
     }
 });
 
 
-messageRouter.register("mirrorCast", message => {
+messageRouter.register("mirrorCast", (message: object) => {
     browser.tabs.sendMessage(mirrorCastTabId, message
           , { frameId: mirrorCastFrameId });
 });
-messageRouter.register("mediaCast", message => {
+messageRouter.register("mediaCast", (message: object) => {
     browser.tabs.sendMessage(mediaCastTabId, message
           , { frameId: mediaCastFrameId });
 });
