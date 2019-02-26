@@ -51,9 +51,9 @@ async function build () {
     spawnSync(`tsc --project ${ROOT_PATH} \
                    --outDir ${BUILD_PATH}`
       , {
-          shell: true
-        , stdio: [ process.stdin, process.stdout, process.stderr ]
-      });
+            shell: true
+          , stdio: [ process.stdin, process.stdout, process.stderr ]
+        });
 
     // Move tsc output to build dir
     fs.moveSync(path.join(BUILD_PATH, "src"), BUILD_PATH);

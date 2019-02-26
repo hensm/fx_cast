@@ -12,8 +12,9 @@
         "test": "node test/driver.js",
         "install-manifest": "npm run install-manifest --prefix ./app",
         "remove-manifest": "npm run remove-manifest --prefix ./app",
-        "lint": "npm run lint:app",
-        "lint:app": "npm run lint --prefix ./app"
+        "lint": "npm run lint:app && npm run lint:ext",
+        "lint:app": "npm run lint --prefix ./app",
+        "lint:ext": "npm run lint --prefix ./ext"
     },
     "devDependencies": {
         "@types/uuid": "^3.4.4",

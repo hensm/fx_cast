@@ -1,17 +1,18 @@
+"use strict";
+
 const fs = require("fs-extra");
 const path = require("path");
 const minimist = require("minimist");
 const webpack = require("webpack");
 const webExt = require("web-ext").default;
 
-const package = require("./package.json");
-const appPackage = require("../app/package.json");
+const { ROOT
+      , INCLUDE_PATH
+      , DIST_PATH
+      , UNPACKED_PATH } = require("./lib/paths");
 
-
-const INCLUDE_PATH = path.resolve(__dirname, "src");
-
-const DIST_PATH = path.join(__dirname, "../dist/ext");
-const UNPACKED_PATH = path.join(DIST_PATH, "unpacked");
+const packageMeta = require(`${ROOT}/package.json`);
+const appPackageMeta = require(`${ROOT}/../app/package.json`);
 
 
 const argv = minimist(process.argv.slice(2), {
@@ -20,7 +21,7 @@ const argv = minimist(process.argv.slice(2), {
   , default: {
         package: false                           // Should package with web-ext
       , watch: false                             // Should run webpack in watch mode
-      , mirroringAppId: package.__mirroringAppId // Chromecast receiver app ID
+      , mirroringAppId: packageMeta.__mirroringAppId // Chromecast receiver app ID
       , mode: "development"                      // webpack mode
     }
 });
@@ -37,7 +38,7 @@ if (argv.package) {
 
 
 // Import webpack config and specify env values
-const webpackConfig = require("./webpack.config.js")({
+const webpackConfig = require(`${ROOT}/webpack.config.js`)({
     includePath: INCLUDE_PATH
     /**
      * If watching files, output directly to dist. Unpacked
@@ -47,11 +48,11 @@ const webpackConfig = require("./webpack.config.js")({
         ? UNPACKED_PATH
         : DIST_PATH
 
-  , extensionName: package.__extensionName
-  , extensionId: package.__extensionId
-  , extensionVersion: package.__extensionVersion
-  , applicationName: appPackage.__applicationName
-  , applicationVersion: appPackage.__applicationVersion
+  , extensionName: packageMeta.__extensionName
+  , extensionId: packageMeta.__extensionId
+  , extensionVersion: packageMeta.__extensionVersion
+  , applicationName: appPackageMeta.__applicationName
+  , applicationVersion: appPackageMeta.__applicationVersion
   , mirroringAppId: argv.mirroringAppId
 
     // eval source map needs special CSP

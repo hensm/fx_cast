@@ -5,10 +5,11 @@
     "__mirroringAppId": "19A6F4AE",
 
     "scripts": {
-        "build": "node build.js",
-        "package": "node build.js --package",
-        "watch": "node build.js --watch",
-        "start": "web-ext run -s ../dist/ext/"
+        "build": "node bin/build.js",
+        "package": "node bin/build.js --package",
+        "watch": "node bin/build.js --watch",
+        "start": "web-ext run -s ../dist/ext/",
+        "lint": "node bin/lint.js"
     },
     "devDependencies": {
         "@types/react": "^16.8.4",
