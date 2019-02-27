@@ -1,12 +1,13 @@
+/* tslint:disable:max-line-length */
 "use strict";
 
 import React, { Component } from "react";
 import ReactDOM from "react-dom";
 
-import defaultOptions from "./defaultOptions";
+import defaultOptions, { Options } from "./defaultOptions";
 
-import EditableList from "./EditableList";
 import Bridge from "./Bridge";
+import EditableList from "./EditableList";
 
 import getBridgeInfo from "../lib/getBridgeInfo";
 
@@ -27,7 +28,7 @@ browser.runtime.getPlatformInfo()
 
 const MATCH_PATTERN_REGEX = /^(?:(?:(\*|https?|ftp):\/\/((?:\*\.|[^\/\*])+)|(file):\/\/\/?(?:\*\.|[^\/\*])+)(\/.*)|<all_urls>)$/;
 
-function getInputValue (input) {
+function getInputValue (input: HTMLInputElement) {
     switch (input.type) {
         case "checkbox":
             return input.checked;
@@ -39,8 +40,21 @@ function getInputValue (input) {
     }
 }
 
-class App extends Component {
-    constructor (props) {
+
+interface OptionsAppState {
+    hasLoaded: boolean;
+    options: Options;
+    bridgeInfo: any;
+    platform: string;
+    bridgeLoading: boolean;
+    isFormValid: boolean;
+    hasSaved: boolean;
+}
+
+class App extends Component<{}, OptionsAppState> {
+    private form: HTMLFormElement;
+
+    constructor (props: {}) {
         super(props);
 
         this.state = {
@@ -72,105 +86,11 @@ class App extends Component {
         });
 
         const bridgeInfo = await getBridgeInfo();
-        const platform = await browser.runtime.getPlatformInfo();
+        const { os } = await browser.runtime.getPlatformInfo();
 
         this.setState({
             bridgeInfo
-          , platform: platform.os
-          , bridgeLoading: false
-        })
-    }
-
-    /**
-     * Set stored option values to current state
-     */
-    setStorage () {
-        return browser.storage.sync.set({
-            options: this.state.options
-        });
-    }
-
-    handleReset () {
-        this.setState({
-            options: { ...defaultOptions }
-        });
-    }
-
-    async handleFormSubmit (ev) {
-        ev.preventDefault();
-
-        this.form.reportValidity();
-
-        try {
-            const { options: oldOptions }
-                    = await browser.storage.sync.get("options");
-            await this.setStorage();
-            const { options } = await browser.storage.sync.get("options");
-
-            const alteredOptions = [];
-
-            for (const [ key, val ] of Object.entries(options)) {
-                const oldVal = oldOptions[key];
-                if (oldVal !== val) {
-                    alteredOptions.push(key);
-                }
-            }
-
-            this.setState({
-                hasSaved: true
-            }, () => {
-                window.setTimeout(() => {
-                    this.setState({
-                        hasSaved: false
-                    });
-                }, 1000)
-            });
-
-            // Send update message / event
-            browser.runtime.sendMessage({
-                subject: "optionsUpdated"
-              , data: { alteredOptions }
-            });
-        } catch (err) {}
-    }
-
-    handleFormChange (ev) {
-        ev.preventDefault();
-
-        this.setState({
-            isFormValid: this.form.checkValidity()
-        });
-    }
-
-    handleInputChange (ev) {
-        const { target } = ev;
-
-        this.setState(({ options }) => {
-            options[target.name] = getInputValue(target);
-            return { options };
-        });
-    }
-
-    handleWhitelistChange (whitelist) {
-        this.setState(({ options }) => {
-            options.userAgentWhitelist = whitelist;
-            return { options };
-        });
-    }
-
-    getWhitelistItemPatternError (info) {
-        return _("optionsUserAgentWhitelistInvalidMatchPattern", info);
-    }
-
-    async updateBridgeInfo () {
-        this.setState({
-            bridgeLoading: true
-        });
-
-        const bridgeInfo = await getBridgeInfo();
-
-        this.setState({
-            bridgeInfo
+          , platform: os
           , bridgeLoading: false
         });
     }
@@ -337,6 +257,102 @@ class App extends Component {
                 </form>
             </div>
         );
+    }
+
+    /**
+     * Set stored option values to current state
+     */
+    private setStorage () {
+        return browser.storage.sync.set({
+            options: this.state.options
+        });
+    }
+
+    private handleReset () {
+        this.setState({
+            options: { ...defaultOptions }
+        });
+    }
+
+    private async handleFormSubmit (ev: React.FormEvent<HTMLFormElement>) {
+        ev.preventDefault();
+
+        this.form.reportValidity();
+
+        try {
+            const { options: oldOptions }
+                    = await browser.storage.sync.get("options");
+            await this.setStorage();
+            const { options } = await browser.storage.sync.get("options");
+
+            const alteredOptions = [];
+
+            for (const [ key, val ] of Object.entries(options)) {
+                const oldVal = oldOptions[key];
+                if (oldVal !== val) {
+                    alteredOptions.push(key);
+                }
+            }
+
+            this.setState({
+                hasSaved: true
+            }, () => {
+                window.setTimeout(() => {
+                    this.setState({
+                        hasSaved: false
+                    });
+                }, 1000);
+            });
+
+            // Send update message / event
+            browser.runtime.sendMessage({
+                subject: "optionsUpdated"
+              , data: { alteredOptions }
+            });
+        } catch (err) {
+            console.error("Failed to save options");
+        }
+    }
+
+    private handleFormChange (ev: React.FormEvent<HTMLFormElement>) {
+        ev.preventDefault();
+
+        this.setState({
+            isFormValid: this.form.checkValidity()
+        });
+    }
+
+    private handleInputChange (ev: React.ChangeEvent<HTMLInputElement>) {
+        const { target } = ev;
+
+        this.setState(({ options }) => {
+            options[target.name] = getInputValue(target);
+            return { options };
+        });
+    }
+
+    private handleWhitelistChange (whitelist: string[]) {
+        this.setState(({ options }) => {
+            options.userAgentWhitelist = whitelist;
+            return { options };
+        });
+    }
+
+    private getWhitelistItemPatternError (info: string): string {
+        return _("optionsUserAgentWhitelistInvalidMatchPattern", info);
+    }
+
+    private async updateBridgeInfo () {
+        this.setState({
+            bridgeLoading: true
+        });
+
+        const bridgeInfo = await getBridgeInfo();
+
+        this.setState({
+            bridgeInfo
+          , bridgeLoading: false
+        });
     }
 }
 

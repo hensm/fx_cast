@@ -16,3 +16,16 @@ declare namespace browser.runtime {
         error: { message: string };
     }
 }
+
+// Allow default attribute on <button>
+declare namespace React {
+    interface ButtonHTMLAttributes<T> {
+        default?: boolean;
+    }
+}
+declare namespace JSX {
+    interface IntrinsicElements {
+        button: React.DetailedHTMLProps<
+            React.ButtonHTMLAttributes<HTMLButtonElement>, HTMLButtonElement>;
+    }
+}
