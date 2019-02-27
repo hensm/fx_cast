@@ -1,7 +1,6 @@
 "use strict";
 
 export interface Options {
-    [ key: string ]: any;
     mediaEnabled: boolean;
     mediaSyncElement: boolean;
     mediaStopOnUnload: boolean;
@@ -13,7 +12,7 @@ export interface Options {
     userAgentWhitelist: string[];
 }
 
-export default {
+const options: Options = {
     mediaEnabled: true
   , mediaSyncElement: false
   , mediaStopOnUnload: false
@@ -25,4 +24,6 @@ export default {
   , userAgentWhitelist: [
         "https://www.netflix.com/*"
     ]
-} as Options;
+};
+
+export default options;

@@ -326,7 +326,7 @@ class App extends Component<{}, OptionsAppState> {
         const { target } = ev;
 
         this.setState(({ options }) => {
-            options[target.name] = getInputValue(target);
+            options[target.name as keyof Options] = getInputValue(target);
             return { options };
         });
     }
