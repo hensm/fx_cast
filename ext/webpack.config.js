@@ -9,7 +9,7 @@ module.exports = (env) => ({
         "main"           : `${env.includePath}/main.ts`
       , "popup/bundle"   : `${env.includePath}/popup/index.tsx`
       , "options/bundle" : `${env.includePath}/options/index.tsx`
-      , "updater/bundle" : `${env.includePath}/updater/index.jsx`
+      , "updater/bundle" : `${env.includePath}/updater/index.tsx`
       , "mediaCast"      : `${env.includePath}/mediaCast.js`
       , "mirroringCast"  : `${env.includePath}/mirroringCast.js`
       , "compat/youtube" : `${env.includePath}/compat/youtube.js`

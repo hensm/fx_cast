@@ -1,9 +1,10 @@
 "use strict";
 
 import React, { Component } from "react";
-import ReactDOM             from "react-dom";
+import ReactDOM from "react-dom";
 
 import { getNextEllipsis } from "../lib/utils";
+import { DownloadDelta, Message } from "../types";
 
 const _ = browser.i18n.getMessage;
 
@@ -19,7 +20,17 @@ browser.runtime.getPlatformInfo()
     });
 
 
-const Updater = (props) => (
+interface UpdaterProps {
+    description: string;
+    additionalDescription: string;
+    downloadTotal: number;
+    downloadCurrent: number;
+    isDownloading: boolean;
+    onCancel (): void;
+    onInstall (): void;
+}
+
+const Updater = (props: UpdaterProps) => (
     <div className="updater">
         <div className="updater__description">
             { props.description }
@@ -44,8 +55,25 @@ const Updater = (props) => (
     </div>
 );
 
-class App extends Component {
-    constructor (props) {
+
+interface UpdaterAppState {
+    hasLoaded: boolean;
+    isDownloading: boolean;
+    description: string;
+    additionalDescription: string;
+    downloadTotal: number;
+    downloadCurrent: number;
+}
+
+class UpdaterApp extends Component<{}, UpdaterAppState> {
+    private downloadId: number;
+    private downloadProgressInterval: number;
+    private port: browser.runtime.Port;
+    private frameWidth: number;
+    private frameHeight: number;
+    private win: browser.windows.Window;
+
+    constructor (props: {}) {
         super(props);
 
         this.downloadId = null;
@@ -84,14 +112,23 @@ class App extends Component {
         });
     }
 
-    closeWindow () {
-        window.clearInterval(this.downloadProgressInterval);
-        browser.downloads.onChanged.removeListener(this.onDownloadChanged);
-        this.port.onMessage.removeListener(this.onMessage);
-        this.port.disconnect();
+    render () {
+        if (!this.state.hasLoaded) {
+            return;
+        }
+
+        return (
+            <Updater description={ this.state.description }
+                     additionalDescription={ this.state.additionalDescription }
+                     downloadTotal={ this.state.downloadTotal }
+                     downloadCurrent={ this.state.downloadCurrent }
+                     isDownloading={ this.state.isDownloading }
+                     onCancel={ this.onCancel }
+                     onInstall={ this.onInstall } />
+        );
     }
 
-    async onMessage (message) {
+    private async onMessage (message: Message) {
         switch (message.subject) {
             case "updater:/updateData": {
                 // Only run once
@@ -127,11 +164,18 @@ class App extends Component {
                 });
 
                 break;
-            };
+            }
         }
     }
 
-    onDownloadChanged (downloadItem) {
+    private closeWindow () {
+        window.clearInterval(this.downloadProgressInterval);
+        browser.downloads.onChanged.removeListener(this.onDownloadChanged);
+        this.port.onMessage.removeListener(this.onMessage);
+        this.port.disconnect();
+    }
+
+    private onDownloadChanged (downloadItem: DownloadDelta) {
         if (downloadItem.id !== this.downloadId) {
             return;
         }
@@ -162,12 +206,13 @@ class App extends Component {
               , downloadTotal: 1
               , downloadCurrent: 1
               , description: _("updaterDescriptionInstallReady")
-              , additionalDescription: _("updaterAdditionalDescriptionInstallReady")
+              , additionalDescription:
+                      _("updaterAdditionalDescriptionInstallReady")
             });
         }
     }
 
-    async updateDownloadProgress () {
+    private async updateDownloadProgress () {
         const [ download ] = await browser.downloads.search({
             id: this.downloadId
         });
@@ -178,7 +223,7 @@ class App extends Component {
         });
     }
 
-    async onCancel () {
+    private async onCancel () {
         try {
             await browser.downloads.cancel(this.downloadId);
             this.closeWindow();
@@ -187,7 +232,7 @@ class App extends Component {
         }
     }
 
-    async onInstall () {
+    private async onInstall () {
         try {
             await browser.downloads.open(this.downloadId);
             this.closeWindow();
@@ -195,24 +240,8 @@ class App extends Component {
             // Cancelled or not finished
         }
     }
-
-    render () {
-        if (!this.state.hasLoaded) {
-            return;
-        }
-
-        return (
-            <Updater description={ this.state.description }
-                     additionalDescription={ this.state.additionalDescription }
-                     downloadTotal={ this.state.downloadTotal }
-                     downloadCurrent={ this.state.downloadCurrent }
-                     isDownloading={ this.state.isDownloading }
-                     onCancel={ this.onCancel }
-                     onInstall={ this.onInstall } /> 
-        );
-    }
 }
 
 ReactDOM.render(
-    <App />
+    <UpdaterApp />
   , document.querySelector("#root"));
