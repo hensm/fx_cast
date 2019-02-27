@@ -7,6 +7,8 @@ import semver from "semver";
 import { getNextEllipsis
        , getWindowCenteredProps } from "../lib/utils";
 
+import { BridgeInfo } from "../lib/getBridgeInfo";
+
 const _ = browser.i18n.getMessage;
 
 const ENDPOINT_URL = "https://api.github.com/repos/hensm/fx_cast/releases/14720978";
@@ -53,7 +55,7 @@ const BridgeDownloads = (props: BridgeDownloadsProps) => (
 
 
 interface BridgeStatsProps {
-    info: any;
+    info: BridgeInfo;
 }
 
 const BridgeStats = (props: BridgeStatsProps) => (
@@ -99,7 +101,7 @@ const BridgeStats = (props: BridgeStatsProps) => (
 
 
 interface BridgeProps {
-    info: any;
+    info: BridgeInfo;
     platform: string;
     loading: boolean;
 }

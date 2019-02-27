@@ -1,7 +1,19 @@
+"use strict";
+
 import semver from "semver";
 
-export default async function getBridgeInfo () {
-    let applicationVersion;
+export interface BridgeInfo {
+    name: string;
+    version: string;
+    expectedVersion: string;
+    isVersionExact: boolean;
+    isVersionCompatible: boolean;
+    isVersionOlder: boolean;
+    isVersionNewer: boolean;
+}
+
+export default async function getBridgeInfo (): Promise<BridgeInfo> {
+    let applicationVersion: string;
     try {
         applicationVersion = await browser.runtime.sendNativeMessage(
                 APPLICATION_NAME
