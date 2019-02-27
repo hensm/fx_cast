@@ -15,6 +15,11 @@ declare namespace browser.runtime {
     interface Port {
         error: { message: string };
     }
+
+    function connect (connectInfo: {
+            name?: string
+          , includeTlsChannelId?: boolean
+      }): browser.runtime.Port;
 }
 
 // Allow default attribute on <button>

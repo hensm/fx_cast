@@ -51,7 +51,7 @@ interface OptionsAppState {
     hasSaved: boolean;
 }
 
-class App extends Component<{}, OptionsAppState> {
+class OptionsApp extends Component<{}, OptionsAppState> {
     private form: HTMLFormElement;
 
     constructor (props: {}) {
@@ -358,5 +358,5 @@ class App extends Component<{}, OptionsAppState> {
 
 
 ReactDOM.render(
-    <App />
+    <OptionsApp />
   , document.querySelector("#root"));

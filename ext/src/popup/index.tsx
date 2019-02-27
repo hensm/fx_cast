@@ -1,9 +1,11 @@
+/* tslint:disable:max-line-length */
 "use strict";
 
 import React, { Component } from "react";
-import ReactDOM             from "react-dom";
+import ReactDOM from "react-dom";
 
 import { getNextEllipsis } from "../lib/utils";
+import * as types from "../types";
 
 const _ = browser.i18n.getMessage;
 
@@ -19,16 +21,25 @@ browser.runtime.getPlatformInfo()
     });
 
 
-let winWidth = 350;
+const winWidth = 350;
 let winHeight = 200;
 
-let frameHeight;
-let frameWidth;
+let frameHeight: number;
+let frameWidth: number;
 
 
-class App extends Component {
-    constructor () {
-        super();
+interface PopupAppState {
+    receivers: types.Receiver[];
+    selectedMedia: string;
+    isLoading: boolean;
+}
+
+class PopupApp extends Component<{}, PopupAppState> {
+    private port: browser.runtime.Port;
+    private win: browser.windows.Window;
+
+    constructor (props: {}) {
+        super(props);
 
         this.state = {
             receivers: []
@@ -42,9 +53,57 @@ class App extends Component {
             frameHeight = win.height - window.innerHeight;
             frameWidth = win.width - window.innerWidth;
         });
+
+        this.onSelectChange = this.onSelectChange.bind(this);
+        this.onCast = this.onCast.bind(this);
     }
 
-    async setPort (shimTabId, shimFrameId) {
+    componentDidMount () {
+        const backgroundPort = browser.runtime.connect({
+            name: "popup"
+        });
+
+        backgroundPort.onMessage.addListener((message: types.Message) => {
+            if (message.subject === "popup:/assignShim") {
+                this.setPort(message.data.tabId
+                           , message.data.frameId);
+            }
+        });
+    }
+
+    render () {
+        const shareMedia =
+                this.state.selectedMedia === "tab"
+             || this.state.selectedMedia === "screen";
+
+        return (
+            <div>
+                <div className="media-select">
+                    Cast
+                    <select value={ this.state.selectedMedia }
+                            onChange={ this.onSelectChange }
+                            className="media-select-dropdown">
+                        <option value="app" disabled={ shareMedia }>this site's app</option>
+                        <option value="tab" disabled={ !shareMedia }>Tab</option>
+                        <option value="screen" disabled={ !shareMedia }>Screen</option>
+                    </select>
+                    to:
+                </div>
+                <ul className="receivers">
+                    { this.state.receivers.map((receiver, i) => {
+                        return (
+                           <Receiver receiver={ receiver }
+                                     onCast={ this.onCast }
+                                     isLoading={ this.state.isLoading }
+                                     key={ i }/>
+                        );
+                    })}
+                </ul>
+            </div>
+        );
+    }
+
+    private async setPort (shimTabId: number, shimFrameId: number) {
         if (this.port) {
             this.port.disconnect();
         }
@@ -58,7 +117,7 @@ class App extends Component {
             subject: "shim:/popupReady"
         });
 
-        this.port.onMessage.addListener(message => {
+        this.port.onMessage.addListener((message: types.Message) => {
             switch (message.subject) {
                 case "popup:/populateReceiverList": {
                     this.setState({
@@ -86,20 +145,7 @@ class App extends Component {
         });
     }
 
-    componentDidMount () {
-        const backgroundPort = browser.runtime.connect({
-            name: "popup"
-        });
-
-        backgroundPort.onMessage.addListener(message => {
-            if (message.subject === "popup:/assignShim") {
-                this.setPort(message.data.tabId
-                           , message.data.frameId);
-            }
-        });
-    }
-
-    onCast (receiver) {
+    private onCast (receiver: types.Receiver) {
         this.setState({
             isLoading: true
         });
@@ -109,57 +155,40 @@ class App extends Component {
           , data: {
                 receiver
               , selectedMedia: this.state.selectedMedia
+              , a: 5
             }
         });
     }
 
-    onSelectChange (ev) {
+    private onSelectChange (ev: React.ChangeEvent<HTMLSelectElement>) {
         this.setState({
             selectedMedia: ev.target.value
         });
     }
-
-    render () {
-        const shareMedia =
-                this.state.selectedMedia === "tab"
-             || this.state.selectedMedia === "screen";
-
-        return (
-            <div>
-                <div className="media-select">
-                    Cast
-                    <select value={this.state.selectedMedia}
-                            onChange={this.onSelectChange.bind(this)}
-                            className="media-select-dropdown">
-                        <option value="app" disabled={shareMedia}>this site's app</option>
-                        <option value="tab" disabled={!shareMedia}>Tab</option>
-                        <option value="screen" disabled={!shareMedia}>Screen</option>
-                    </select>
-                    to:
-                </div>
-                <ul className="receivers">
-                    { this.state.receivers.map((receiver, i) => {
-                        return (
-                           <Receiver receiver={receiver}
-                                     onCast={this.onCast.bind(this)}
-                                     isLoading={this.state.isLoading}
-                                     key={i}/>
-                        );
-                    })}
-                </ul>
-            </div>
-        );
-    }
 }
 
-class Receiver extends Component {
-    constructor () {
-        super();
+
+interface ReceiverProps {
+    receiver: types.Receiver;
+    isLoading: boolean;
+    onCast (receiver: types.Receiver): void;
+}
+
+interface ReceiverState {
+    ellipsis: string;
+    isLoading: boolean;
+}
+
+class Receiver extends Component<ReceiverProps, ReceiverState> {
+    constructor (props: ReceiverProps) {
+        super(props);
 
         this.state = {
             isLoading: false
           , ellipsis: ""
         };
+
+        this.onClick = this.onClick.bind(this);
     }
 
     onClick () {
@@ -191,7 +220,7 @@ class Receiver extends Component {
                         `- ${this.props.receiver.currentApp}` }
                 </div>
                 <button className="receiver-connect"
-                        onClick={this.onClick.bind(this)}
+                        onClick={ this.onClick }
                         disabled={this.props.isLoading}>
                     { this.state.isLoading
                         ? _("popupCastingButtonLabel") +
@@ -207,5 +236,5 @@ class Receiver extends Component {
 
 
 ReactDOM.render(
-    <App />
+    <PopupApp />
   , document.querySelector("#root"));

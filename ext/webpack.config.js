@@ -7,7 +7,7 @@ const CopyWebpackPlugin = require("copy-webpack-plugin");
 module.exports = (env) => ({
     entry: {
         "main"           : `${env.includePath}/main.ts`
-      , "popup/bundle"   : `${env.includePath}/popup/index.jsx`
+      , "popup/bundle"   : `${env.includePath}/popup/index.tsx`
       , "options/bundle" : `${env.includePath}/options/index.tsx`
       , "updater/bundle" : `${env.includePath}/updater/index.jsx`
       , "mediaCast"      : `${env.includePath}/mediaCast.js`
