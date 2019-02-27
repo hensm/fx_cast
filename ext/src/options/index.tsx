@@ -9,7 +9,7 @@ import defaultOptions, { Options } from "./defaultOptions";
 import Bridge from "./Bridge";
 import EditableList from "./EditableList";
 
-import getBridgeInfo from "../lib/getBridgeInfo";
+import getBridgeInfo, { BridgeInfo } from "../lib/getBridgeInfo";
 
 
 const _ = browser.i18n.getMessage;
@@ -44,7 +44,7 @@ function getInputValue (input: HTMLInputElement) {
 interface OptionsAppState {
     hasLoaded: boolean;
     options: Options;
-    bridgeInfo: any;
+    bridgeInfo: BridgeInfo;
     platform: string;
     bridgeLoading: boolean;
     isFormValid: boolean;
