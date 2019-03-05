@@ -26,6 +26,7 @@
         "@types/mime-types": "^2.1.0",
         "@types/node": "^11.9.5",
         "@types/node-fetch": "^2.1.6",
+        "makensis": "^0.17.0",
         "mustache": "^3.0.1",
         "pkg": "^4.3.5",
         "tslint": "^5.13.0"

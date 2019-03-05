@@ -1,9 +1,12 @@
+"use strict";
+
 const fs = require("fs-extra");
 const os = require("os");
 const path = require("path");
 const minimist = require("minimist");
 const glob = require("glob");
 const mustache = require("mustache");
+const makensis = require("makensis");
 
 const { spawnSync } = require("child_process");
 const { exec: pkgExec } = require("pkg");
@@ -18,14 +21,16 @@ const { executableName
       , manifestName
       , manifestPath
       , pkgPlatform
-      , DIST_PATH } = require("./lib/paths");
+      , DIST_PATH
+      , WIN_REGISTRY_KEY } = require("./lib/paths");
 
 
 const argv = minimist(process.argv.slice(2), {
     boolean: [ "package" ]
-  , string: [ "platform", "packageType" ]
+  , string: [ "platform", "arch", "packageType" ]
   , default: {
         platform: os.platform()
+      , arch: os.arch()
       , package: false
         // Linux package type (deb/rpm)
       , packageType: "deb"
@@ -75,8 +80,9 @@ async function build () {
       , "allowed_extensions": [ extensionId ]
       , "path": argv.package
             // Add either installed path or dist path
-            ? path.join(executablePath[argv.platform]
-                      , executableName[argv.platform])
+            ? (argv.platform === "win32" ? path.win32 : path)
+                .join(executablePath[argv.platform]
+                    , executableName[argv.platform])
             : path.join(DIST_PATH, executableName[argv.platform])
     };
 
@@ -106,12 +112,12 @@ async function build () {
     // Package executable
     await pkgExec([
         BUILD_PATH
-      , "--target", pkgPlatform[argv.platform]
+      , "--target", `${pkgPlatform[argv.platform]}-${argv.arch}`
       , "--output", path.join(BUILD_PATH, executableName[argv.platform])
     ]);
 
     if (argv.package) {
-        const installerName = await package(argv.platform);
+        const installerName = await packageApp(argv.platform);
 
         if (installerName) {
             // Move installer to dist
@@ -134,7 +140,7 @@ async function build () {
 }
 
 
-function package (platform) {
+function packageApp (platform) {
     switch (platform) {
         case "darwin":
             return packageDarwin(platform);
@@ -148,7 +154,7 @@ function package (platform) {
             }
 
         case "win32":
-            return packageWin32();
+            return packageWin32(platform);
 
         default:
             console.log("Cannot build installer package for this platform");
@@ -295,6 +301,7 @@ function packageLinuxRpm (platform, packageType) {
                 fs.readFileSync(specPath).toString()
               , view));
 
+    // TODO: Use argv.arch
     spawnSync(
         `rpmbuild -bb ${specOutputPath} `
                + `--define "_distdir ${BUILD_PATH}" `
@@ -305,7 +312,37 @@ function packageLinuxRpm (platform, packageType) {
     return glob.sync("**/*.rpm", { cwd: BUILD_PATH })[0];
 }
 
-function packageWin32 () {}
+function packageWin32 (platform) {
+    const scriptPath = path.join(__dirname, "../packaging/win/installer.nsi");
+    const scriptOutputPath = path.join(BUILD_PATH, path.basename(scriptPath));
+
+    const outFile = "installer.exe";
+
+    const view = {
+        applicationName
+      , applicationVersion
+      , executableName: executableName[platform]
+      , executablePath: executablePath[platform]
+      , manifestName
+      , winRegistryKey: WIN_REGISTRY_KEY
+      , outFile
+    };
+
+    fs.writeFileSync(scriptOutputPath
+          , mustache.render(
+                fs.readFileSync(scriptPath).toString()
+              , view));
+
+    const output = makensis.compileSync(scriptOutputPath);
+
+    if (output.status === 0) {
+        console.log(output.stdout);
+    } else {
+        console.error(output.stderr);
+    }
+
+    return outFile;
+}
 
 
 build().catch(e => {

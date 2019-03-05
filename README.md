@@ -50,19 +50,19 @@ sudo dnf install fx_cast_bridge-<version>.<arch>.rpm
 macOS:
 
 ````sh
-brew install dpkg rpm
+brew install dpkg rpm makensis
 ````
 
 Debian/Ubuntu:
 
 ````sh
-sudo apt install dpkg rpm
+sudo apt install dpkg rpm makensis
 ````
 
 Fedora:
 
 ````sh
-sudo dnf install dpkg rpm-build
+sudo dnf install dpkg rpm-build mingw-nsis
 ````
 
 Archlinux:
@@ -71,7 +71,7 @@ At the moment, `pkg` has a [bug](https://github.com/zeit/pkg/issues/584), until 
 
 ```sh
 sudo pacman -S nvm dpkg
-yay -S rpm-org
+yay -S rpm-org nsis
 echo 'source /usr/share/nvm/init-nvm.sh' >> ~/.bashrc
 nvm install 10.12.0
 ```
