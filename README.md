@@ -120,17 +120,26 @@ Build and package app and extension for current platform:
 npm run package
 ````
 
-Build and package app for linux platforms:
+Packaging examples:
 
 ````sh
+# Linux platforms
 npm run package --prefix ./app -- --platform=linux --packageType=deb
 npm run package --prefix ./app -- --platform=linux --packageType=rpm
+
+# Windows
+npm run package --prefix ./app -- --platform=win32
+
+# macOS
+npm run package --prefix ./app -- --platform=darwin
 ````
 
 ##### Package script arguments
 
-* `--platform` `"win"`,`"mac"`,`"linux"`  
-    Select the platform to build for.
+* `--platform` `"win32"`,`"darwin"`,`"linux"`  
+    Select the platform to build for. Defaults to current platform.
+* `--arch` `"x64"`,`"x86"`  
+    Select platform arch to build for. Defaults to current platform arch.
 * `--packageType` `"deb"`,`"rpm"`  
     Select the package type. Defaults to `deb`. Only relevant when building for Linux.
 
