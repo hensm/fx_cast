@@ -7,9 +7,9 @@ const minimist = require("minimist");
 const glob = require("glob");
 const mustache = require("mustache");
 const makensis = require("makensis");
+const pkg = require("pkg");
 
 const { spawnSync } = require("child_process");
-const { exec: pkgExec } = require("pkg");
 
 const { __applicationName: applicationName
       , __applicationVersion: applicationVersion } = require("../package.json");
@@ -25,6 +25,7 @@ const { executableName
       , WIN_REGISTRY_KEY } = require("./lib/paths");
 
 
+// Command line args
 const argv = minimist(process.argv.slice(2), {
     boolean: [ "package" ]
   , string: [ "platform", "arch", "packageType" ]
@@ -42,11 +43,12 @@ const SRC_PATH = path.join(ROOT_PATH, "src");
 const BUILD_PATH = path.join(ROOT_PATH, "build");
 
 
-// Clean
+/**
+ * Shouldn't exist, but cleanup and re-create any existing
+ * build directories, just in case.
+ */
 fs.removeSync(BUILD_PATH);
 fs.removeSync(DIST_PATH);
-
-// Make directories
 fs.ensureDirSync(BUILD_PATH);
 fs.ensureDirSync(DIST_PATH, { recursive: true });
 
@@ -72,66 +74,91 @@ async function build () {
     });
 
 
-    // Create app manifest
+    /**
+     * Native app manifest
+     * https://mdn.io/Native_manifests#Native_messaging_manifests
+     */
     const manifest = {
         "name": applicationName
       , "description": ""
       , "type": "stdio"
       , "allowed_extensions": [ extensionId ]
-      , "path": argv.package
-            // Add either installed path or dist path
-            ? (argv.platform === "win32" ? path.win32 : path)
-                .join(executablePath[argv.platform]
-                    , executableName[argv.platform])
-            : path.join(DIST_PATH, executableName[argv.platform])
     };
 
-    // Write manifest
+    /**
+     * If packaging, add the installed executable path, otherwise
+     * add the path to the built executable in the dist folder.
+     */
+    if (argv.package) {
+        // If packaging for windows, use win32 path helpers.
+        manifest.path = (argv.platform === "win32" ? path.win32 : path)
+            .join(executablePath[argv.platform]
+                , executableName[argv.platform]);
+    } else {
+        manifest.path = path.join(DIST_PATH, executableName[argv.platform]);
+    }
+
+
+    // Write app manifest
     fs.writeFileSync(path.join(BUILD_PATH, manifestName)
           , JSON.stringify(manifest, null, 4));
 
 
-    // File permissions
+    // Ensure file permissions are correct
     for (const file of fs.readdirSync(BUILD_PATH)) {
         fs.chmodSync(path.resolve(BUILD_PATH, file), 0o755);
     }
 
 
+    // Need a minimal package.json for pkg.
     const pkgManifest = {
         bin: "main.js"
       , pkg: {
-            // Workaround for pkg asset detection
-            // https://github.com/thibauts/node-castv2/issues/46
+            /**
+             * Workaround for pkg asset detection
+             * https://github.com/thibauts/node-castv2/issues/46
+             */
             "assets": "../node_modules/castv2/lib/cast_channel.proto"
         }
     };
 
+    // Write pkg manifest
     fs.writeFileSync(path.join(BUILD_PATH, "package.json")
           , JSON.stringify(pkgManifest))
 
-    // Package executable
-    await pkgExec([
+    // Run pkg to create a single executable
+    await pkg.exec([
         BUILD_PATH
       , "--target", `${pkgPlatform[argv.platform]}-${argv.arch}`
       , "--output", path.join(BUILD_PATH, executableName[argv.platform])
     ]);
 
+
+    /**
+     * If packaging, create an installer package and move it to
+     * dist, otherwise move the built executable and app manifest
+     * to dist.
+     */
     if (argv.package) {
         const installerName = await packageApp(argv.platform);
-
         if (installerName) {
             // Move installer to dist
-            fs.moveSync(path.join(BUILD_PATH, installerName)
+            fs.moveSync(
+                    path.join(BUILD_PATH, installerName)
                   , path.join(DIST_PATH, path.basename(installerName))
                   , { overwrite: true });
         }
     } else {
-        // Move binary / app manifest
-        fs.moveSync(path.join(BUILD_PATH, manifestName)
+        const builtExecutableName = executableName[argv.platform];
+
+        // Move executable and app manifest to dist
+        fs.moveSync(
+                path.join(BUILD_PATH, manifestName)
               , path.join(DIST_PATH, manifestName)
               , { overwrite: true });
-        fs.moveSync(path.join(BUILD_PATH, executableName[argv.platform])
-              , path.join(DIST_PATH, executableName[argv.platform])
+        fs.moveSync(
+                path.join(BUILD_PATH, builtExecutableName)
+              , path.join(DIST_PATH, builtExecutableName)
               , { overwrite: true });
     }
 
@@ -139,29 +166,60 @@ async function build () {
     fs.removeSync(BUILD_PATH);
 }
 
-
+/**
+ * Takes a platform and returns the path of the created
+ * install package.
+ */
 function packageApp (platform) {
+    const packageFunctionArgs = [
+        executableName[platform] // platformExecutableName
+      , executablePath[platform] // platformExecutablePath
+      , manifestPath[platform]   // platformManifestPath
+    ];
+
     switch (platform) {
-        case "darwin":
-            return packageDarwin(platform);
+        case "win32": return packageWin32(...packageFunctionArgs);
+        case "darwin": return packageDarwin(...packageFunctionArgs);
 
         case "linux":
+            /**
+             * Get manifest path from package type sub key for Linux
+             * platforms.
+             */
+            packageFunctionArgs.push(
+                    packageFunctionArgs.pop()[argv.packageType]);
+
             switch (argv.packageType) {
-                case "deb":
-                    return packageLinuxDeb(platform, argv.packageType);
-                case "rpm":
-                    return packageLinuxRpm(platform, argv.packageType);
+                case "deb": return packageLinuxDeb(...packageFunctionArgs);
+                case "rpm": return packageLinuxRpm(...packageFunctionArgs);
             }
 
-        case "win32":
-            return packageWin32(platform);
+            break;
+
 
         default:
             console.log("Cannot build installer package for this platform");
     }
 }
 
-function packageDarwin (platform) {
+/**
+ * Builds a macOS Installer package.
+ *
+ * Creates a root directory with the installed file system
+ * structure for package files, bundles the postinstall
+ * script (packaging/mac/scripts/postinstall), then creates
+ * a component package.
+ * Distribution package is built from the component package
+ * and distribution file (packaging/mac/distribution.xml).
+ *
+ * Requires the pkgbuild and productbuild command line
+ * utilities. Only possible on macOS.
+ */
+function packageDarwin (
+        platformExecutableName
+      , platformExecutablePath
+      , platformManifestPath) {
+
     const installerName = `${applicationName}.pkg`;
     const componentName = `${applicationName}_component.pkg`;
 
@@ -170,16 +228,16 @@ function packageDarwin (platform) {
 
     // Create pkgbuild root
     const rootPath = path.join(BUILD_PATH, "root");
-    const rootExecutablePath = path.join(rootPath, executablePath[platform]);
-    const rootManifestPath = path.join(rootPath, manifestPath[platform]);
+    const rootExecutablePath = path.join(rootPath, platformExecutablePath);
+    const rootManifestPath = path.join(rootPath, platformManifestPath);
 
     // Create install locations
     fs.ensureDirSync(rootExecutablePath, { recursive: true });
     fs.ensureDirSync(rootManifestPath, { recursive: true });
 
     // Move files to root
-    fs.moveSync(path.join(BUILD_PATH, executableName[platform])
-          , path.join(rootExecutablePath, executableName[platform]));
+    fs.moveSync(path.join(BUILD_PATH, platformExecutableName)
+          , path.join(rootExecutablePath, platformExecutableName));
     fs.moveSync(path.join(BUILD_PATH, manifestName)
           , path.join(rootManifestPath, manifestName));
 
@@ -192,8 +250,8 @@ function packageDarwin (platform) {
       , manifestName
       , componentName
       , packageId: `tf.matt.${applicationName}`
-      , executablePath: executablePath[platform]
-      , manifestPath: manifestPath[platform]
+      , executablePath: platformExecutablePath
+      , manifestPath: platformManifestPath
     };
 
     // Template paths
@@ -229,24 +287,36 @@ function packageDarwin (platform) {
       , { shell: true });
 
     return installerName;
-
 }
 
-function packageLinuxDeb (platform, packageType) {
+/**
+ * Builds a DEB package for Debian, Ubuntu, Mint, etc...
+ *
+ * Creates a root directory with the installed file system
+ * structure for package files, copies control file
+ * (packaging/linux/deb/DEBIAN/control) to root, then builds
+ * package from root.
+ * Requires the dpkg-deb command line utility. 
+ */
+function packageLinuxDeb (
+        platformExecutableName
+      , platformExecutablePath
+      , platformManifestPath) {
+
     const installerName = `${applicationName}.deb`;
 
     // Create root
     const rootPath = path.join(BUILD_PATH, "root");
-    const rootExecutablePath = path.join(rootPath, executablePath[platform]);
+    const rootExecutablePath = path.join(rootPath, platformExecutablePath);
     const rootManifestPath = path.join(rootPath
-          , manifestPath[platform][packageType]);
+          , platformManifestPath);
 
     fs.ensureDirSync(rootExecutablePath, { recursive: true });
     fs.ensureDirSync(rootManifestPath, { recursive: true });
 
     // Move files to root
-    fs.moveSync(path.join(BUILD_PATH, executableName[platform])
-          , path.join(rootExecutablePath, executableName[platform]));
+    fs.moveSync(path.join(BUILD_PATH, platformExecutableName)
+          , path.join(rootExecutablePath, platformExecutableName));
     fs.moveSync(path.join(BUILD_PATH, manifestName)
           , path.join(rootManifestPath, manifestName));
 
@@ -280,7 +350,18 @@ function packageLinuxDeb (platform, packageType) {
     return installerName;
 }
 
-function packageLinuxRpm (platform, packageType) {
+/**
+ * Builds an RPM package for Fedora, openSUSE, etc...
+ *
+ * Templates and uses the spec file
+ * (packaging/linux/rpm/package.spec) to build the package.
+ * Requires the rpmbuild command line utility.
+ */
+function packageLinuxRpm (
+        platformExecutableName
+      , platformExecutablePath
+      , platformManifestPath) {
+
     const specPath = path.join(__dirname
           , "../packaging/linux/rpm/package.spec");
 
@@ -290,9 +371,9 @@ function packageLinuxRpm (platform, packageType) {
         packageName: applicationName
       , applicationName
       , applicationVersion
-      , executablePath: executablePath[platform]
-      , manifestPath: manifestPath[platform][packageType]
-      , executableName: executableName[platform]
+      , executablePath: platformExecutablePath
+      , manifestPath: platformManifestPath
+      , executableName: platformExecutableName
       , manifestName
     };
 
@@ -312,7 +393,17 @@ function packageLinuxRpm (platform, packageType) {
     return glob.sync("**/*.rpm", { cwd: BUILD_PATH })[0];
 }
 
-function packageWin32 (platform) {
+/**
+ * Builds a Windows installer.
+ *
+ * Uses NSIS to create a GUI installer with an installer
+ * script (packaging/win/installer.nsi). Requires the
+ * makensis command line utility.
+ */
+function packageWin32 (
+        platformExecutableName
+      , platformExecutablePath) {
+
     const scriptPath = path.join(__dirname, "../packaging/win/installer.nsi");
     const scriptOutputPath = path.join(BUILD_PATH, path.basename(scriptPath));
 
@@ -321,17 +412,19 @@ function packageWin32 (platform) {
     const view = {
         applicationName
       , applicationVersion
-      , executableName: executableName[platform]
-      , executablePath: executablePath[platform]
+      , executableName: platformExecutableName
+      , executablePath: platformExecutablePath
       , manifestName
       , winRegistryKey: WIN_REGISTRY_KEY
       , outFile
     };
 
+    // Write templated script to build dir
     fs.writeFileSync(scriptOutputPath
           , mustache.render(
                 fs.readFileSync(scriptPath).toString()
               , view));
+
 
     const output = makensis.compileSync(scriptOutputPath);
 
