@@ -1,6 +1,6 @@
 "use strict";
 
-const ENDPOINT_URL = "https://api.github.com/repos/hensm/fx_cast/releases/14720978";
+const ENDPOINT_URL = "https://api.github.com/repos/hensm/fx_cast/releases/latest";
 
 fetch(ENDPOINT_URL)
     .then(res => res.json())

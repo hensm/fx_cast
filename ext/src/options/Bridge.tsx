@@ -11,7 +11,7 @@ import { BridgeInfo } from "../lib/getBridgeInfo";
 
 const _ = browser.i18n.getMessage;
 
-const ENDPOINT_URL = "https://api.github.com/repos/hensm/fx_cast/releases/14720978";
+const ENDPOINT_URL = "https://api.github.com/repos/hensm/fx_cast/releases/latest";
 
 
 async function downloadApp (info: any, platform: string) {
