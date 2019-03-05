@@ -15,6 +15,7 @@ function onResponse (res) {
         const downloadExtBtn = document.querySelector(".download__ext");
 
         // App download buttons
+        const appListWinBtn = document.querySelector(".app-list__win");
         const appListMacBtn = document.querySelector(".app-list__mac");
         const appListDebBtn = document.querySelector(".app-list__deb");
         const appListRpmBtn = document.querySelector(".app-list__rpm");
