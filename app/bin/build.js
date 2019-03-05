@@ -38,6 +38,33 @@ const argv = minimist(process.argv.slice(2), {
     }
 });
 
+
+const supportedTargets = [
+    "win-x64"
+  , "macos-x64"
+  , "linux-x64"
+];
+
+const supportedPlatforms = [];
+const supportedArchs = [];
+
+for (const target of supportedTargets) {
+    const [ platform, arch ] = target.split("-");
+
+    supportedPlatforms.push(platform);
+    supportedArchs.push(arch);
+}
+
+if (!supportedPlatforms.includes(pkgPlatform[argv.platform])) {
+    console.error("Unsupported target platform");
+    process.exit(1);
+}
+if (!supportedArchs.includes(argv.arch)) {
+    console.error("Unsupported target arch");
+    process.exit(1);
+}
+
+
 const ROOT_PATH = path.join(__dirname, "..");
 const SRC_PATH = path.join(ROOT_PATH, "src");
 const BUILD_PATH = path.join(ROOT_PATH, "build");
@@ -140,7 +167,7 @@ async function build () {
      * to dist.
      */
     if (argv.package) {
-        const installerName = await packageApp(argv.platform);
+        const installerName = await packageApp(argv.platform, argv.arch);
         if (installerName) {
             // Move installer to dist
             fs.moveSync(
@@ -168,11 +195,12 @@ async function build () {
 
 /**
  * Takes a platform and returns the path of the created
- * install package.
+ * installer package.
  */
-function packageApp (platform) {
+function packageApp (platform, arch) {
     const packageFunctionArgs = [
-        executableName[platform] // platformExecutableName
+        arch
+      , executableName[platform] // platformExecutableName
       , executablePath[platform] // platformExecutablePath
       , manifestPath[platform]   // platformManifestPath
     ];
@@ -198,7 +226,8 @@ function packageApp (platform) {
 
 
         default:
-            console.log("Cannot build installer package for this platform");
+            console.error("Unsupported target platform");
+            process.exit(1);
     }
 }
 
@@ -216,11 +245,12 @@ function packageApp (platform) {
  * utilities. Only possible on macOS.
  */
 function packageDarwin (
-        platformExecutableName
+        arch
+      , platformExecutableName
       , platformExecutablePath
       , platformManifestPath) {
 
-    const installerName = `${applicationName}.pkg`;
+    const outputName = `${applicationName}-${applicationVersion}-${arch}.pkg`;
     const componentName = `${applicationName}_component.pkg`;
 
     const packagingDir = path.join(__dirname, "../packaging/mac/");
@@ -283,10 +313,10 @@ function packageDarwin (
     spawnSync(
         `productbuild --distribution ${distFilePath} `
                    + `--package-path ${BUILD_PATH} `
-                   + `${path.join(BUILD_PATH, installerName)}`
+                   + `${path.join(BUILD_PATH, outputName)}`
       , { shell: true });
 
-    return installerName;
+    return outputName;
 }
 
 /**
@@ -299,25 +329,27 @@ function packageDarwin (
  * Requires the dpkg-deb command line utility. 
  */
 function packageLinuxDeb (
-        platformExecutableName
+        arch
+      , platformExecutableName
       , platformExecutablePath
       , platformManifestPath) {
 
-    const installerName = `${applicationName}.deb`;
+    const outputName = `${applicationName}-${applicationVersion}-${arch}.deb`;
 
     // Create root
     const rootPath = path.join(BUILD_PATH, "root");
     const rootExecutablePath = path.join(rootPath, platformExecutablePath);
-    const rootManifestPath = path.join(rootPath
-          , platformManifestPath);
+    const rootManifestPath = path.join(rootPath, platformManifestPath);
 
     fs.ensureDirSync(rootExecutablePath, { recursive: true });
     fs.ensureDirSync(rootManifestPath, { recursive: true });
 
     // Move files to root
-    fs.moveSync(path.join(BUILD_PATH, platformExecutableName)
+    fs.moveSync(
+            path.join(BUILD_PATH, platformExecutableName)
           , path.join(rootExecutablePath, platformExecutableName));
-    fs.moveSync(path.join(BUILD_PATH, manifestName)
+    fs.moveSync(
+            path.join(BUILD_PATH, manifestName)
           , path.join(rootManifestPath, manifestName));
 
 
@@ -344,10 +376,10 @@ function packageLinuxDeb (
     // Build .deb package
     spawnSync(
         `dpkg-deb --build ${rootPath} `
-                       + `${path.join(BUILD_PATH, installerName)}`
+                       + `${path.join(BUILD_PATH, outputName)}`
       , {  shell: true});
 
-    return installerName;
+    return outputName;
 }
 
 /**
@@ -358,9 +390,12 @@ function packageLinuxDeb (
  * Requires the rpmbuild command line utility.
  */
 function packageLinuxRpm (
-        platformExecutableName
+        arch
+      , platformExecutableName
       , platformExecutablePath
       , platformManifestPath) {
+
+    const outputName = `${applicationName}-${applicationVersion}-${arch}.rpm`;
 
     const specPath = path.join(__dirname
           , "../packaging/linux/rpm/package.spec");
@@ -382,15 +417,21 @@ function packageLinuxRpm (
                 fs.readFileSync(specPath).toString()
               , view));
 
+    const archMap = {
+        "x86": "i386"
+      , "x64": "x86_64"
+    };
+
     // TODO: Use argv.arch
     spawnSync(
         `rpmbuild -bb ${specOutputPath} `
                + `--define "_distdir ${BUILD_PATH}" `
                + `--define "_rpmdir ${BUILD_PATH}" `
-               + `--target=x86_64-linux`
+               + `--define "_rpmfilename ${outputName}" `
+               + `--target=${archMap[arch]}-linux`
       , { shell: true });
 
-    return glob.sync("**/*.rpm", { cwd: BUILD_PATH })[0];
+    return outputName;
 }
 
 /**
@@ -401,13 +442,15 @@ function packageLinuxRpm (
  * makensis command line utility.
  */
 function packageWin32 (
-        platformExecutableName
-      , platformExecutablePath) {
+        arch
+      , platformExecutableName
+      , platformExecutablePath
+      , platformManifestPath) {
+
+    const outputName = `${applicationName}-${applicationVersion}-${arch}.exe`;
 
     const scriptPath = path.join(__dirname, "../packaging/win/installer.nsi");
     const scriptOutputPath = path.join(BUILD_PATH, path.basename(scriptPath));
-
-    const outFile = "installer.exe";
 
     const view = {
         applicationName
@@ -416,7 +459,7 @@ function packageWin32 (
       , executablePath: platformExecutablePath
       , manifestName
       , winRegistryKey: WIN_REGISTRY_KEY
-      , outFile
+      , outputName
     };
 
     // Write templated script to build dir
@@ -434,7 +477,7 @@ function packageWin32 (
         console.error(output.stderr);
     }
 
-    return outFile;
+    return outputName;
 }
 
 

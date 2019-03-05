@@ -4,7 +4,7 @@
 !define UNINSTALL_KEY "Software\Microsoft\Windows\CurrentVersion\Uninstall\{{winRegistryKey}}"
 
 Name "{{applicationName}} v{{applicationVersion}}"
-OutFile "{{outFile}}"
+OutFile "{{outputName}}"
 InstallDir "{{executablePath}}"
 RequestExecutionLevel user
 
