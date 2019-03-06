@@ -1,6 +1,6 @@
 !include LogicLib.nsh
 
-!define MANIFEST_KEY "Software\Mozilla\NativeMessagingHosts\{{manifestName}}"
+!define MANIFEST_KEY "Software\Mozilla\NativeMessagingHosts\{{applicationName}}"
 !define UNINSTALL_KEY "Software\Microsoft\Windows\CurrentVersion\Uninstall\{{winRegistryKey}}"
 
 Name "{{applicationName}} v{{applicationVersion}}"
