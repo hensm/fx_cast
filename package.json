@@ -1,4 +1,8 @@
 {
+    "author": "Matt Hensman <m@matt.tf>",
+    "homepage": "https://hensm.github.io/fx_cast",
+    "bugs": "https://github.com/hensm/fx_cast",
+
     "scripts": {
         "postinstall": "npm run postinstall:app && npm run postinstall:ext",
         "postinstall:app": "npm install ./app --prefix ./app",

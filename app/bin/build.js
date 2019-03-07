@@ -14,6 +14,9 @@ const { spawnSync } = require("child_process");
 const { __applicationName: applicationName
       , __applicationVersion: applicationVersion } = require("../package.json");
 
+const { author
+      , homepage } = require("../../package.json");
+
 const { __extensionId: extensionId } = require("../../ext/package.json");
 
 const { executableName
@@ -22,6 +25,7 @@ const { executableName
       , manifestPath
       , pkgPlatform
       , DIST_PATH
+      , LICENSE_PATH
       , WIN_REGISTRY_KEY } = require("./lib/paths");
 
 
@@ -460,6 +464,11 @@ function packageWin32 (
       , manifestName
       , winRegistryKey: WIN_REGISTRY_KEY
       , outputName
+      , licensePath: LICENSE_PATH
+
+        // Uninstaller keys
+      , registryPublisher: author
+      , registryUrlInfoAbout: homepage
     };
 
     // Write templated script to build dir

@@ -5,8 +5,10 @@ const { __applicationName
       , __applicationExecutableName } = require("../../package.json");
 
 
-exports.DIST_PATH = path.join(__dirname, "../../../dist/app");
+const rootPath = path.join(__dirname, "../../../");
 
+exports.DIST_PATH = path.join(rootPath, "dist/app");
+exports.LICENSE_PATH = path.join(rootPath, "LICENSE");
 exports.WIN_REGISTRY_KEY = __applicationName;
 
 exports.executableName = {

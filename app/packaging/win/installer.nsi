@@ -1,12 +1,35 @@
-!include LogicLib.nsh
+!include MUI2.nsh
 
-!define MANIFEST_KEY "Software\Mozilla\NativeMessagingHosts\{{applicationName}}"
-!define UNINSTALL_KEY "Software\Microsoft\Windows\CurrentVersion\Uninstall\{{winRegistryKey}}"
+# MUI general
+!define MUI_ABORTWARNING
+
+# Installer pages
+!insertmacro MUI_PAGE_WELCOME
+!insertmacro MUI_PAGE_LICENSE "{{{licensePath}}}"
+!insertmacro MUI_PAGE_INSTFILES
+!insertmacro MUI_PAGE_FINISH
+
+# Uninstaller pages
+!insertmacro MUI_UNPAGE_CONFIRM
+!insertmacro MUI_UNPAGE_INSTFILES
+!insertmacro MUI_UNPAGE_FINISH
+
+!insertmacro MUI_LANGUAGE "English"
+
+
+!define KEY_MANIFEST "Software\Mozilla\NativeMessagingHosts\{{applicationName}}"
+!define KEY_UNINSTALL "Software\Microsoft\Windows\CurrentVersion\Uninstall\{{winRegistryKey}}"
+
 
 Name "{{applicationName}} v{{applicationVersion}}"
+
+VIProductVersion "{{applicationVersion}}.0"
+VIAddVersionKey /LANG=${LANG_ENGLISH} "ProductName" "{{applicationName}}"
+VIAddVersionKey /LANG=${LANG_ENGLISH} "FileVersion" "{{applicationVersion}}"
+
 OutFile "{{outputName}}"
 InstallDir "{{executablePath}}"
-RequestExecutionLevel user
+RequestExecutionLevel admin
 
 Section
     SetRegView 64
@@ -18,13 +41,19 @@ Section
     File "{{manifestName}}"
 
     # Native manifest key
-    WriteRegStr HKLM "${MANIFEST_KEY}" "" "$INSTDIR\{{manifestName}}"
+    WriteRegStr HKLM "${KEY_MANIFEST}" "" "$INSTDIR\{{manifestName}}"
 
     # Create and register uninstaller
     WriteUninstaller "$INSTDIR\uninstall.exe"
-    WriteRegStr HKLM "${UNINSTALL_KEY}" "DisplayName" "{{applicationName}}"
-    WriteRegStr HKLM "${UNINSTALL_KEY}" "UninstallString" "$\"$INSTDIR\uninstall.exe$\""
-    WriteRegStr HKLM "${UNINSTALL_KEY}" "QuietUninstallString" "$\"$INSTDIR\uninstall.exe$\" /S"
+    WriteRegStr HKLM ${KEY_UNINSTALL} DisplayName "{{applicationName}}"
+    WriteRegStr HKLM ${KEY_UNINSTALL} DisplayVersion "{{applicationVersion}}"
+    WriteRegStr HKLM ${KEY_UNINSTALL} Publisher "{{{registryPublisher}}}"
+    WriteRegStr HKLM ${KEY_UNINSTALL} URLInfoAbout "{{{registryUrlInfoAbout}}}"
+    WriteRegStr HKLM ${KEY_UNINSTALL} InstallLocation "$\"$INSTDIR$\""
+    WriteRegStr HKLM ${KEY_UNINSTALL} UninstallString "$\"$INSTDIR\uninstall.exe$\""
+    WriteRegStr HKLM ${KEY_UNINSTALL} QuietUninstallString "$\"$INSTDIR\uninstall.exe$\" /S"
+    WriteRegDWORD HKLM ${KEY_UNINSTALL} NoModify 1
+    WriteRegDWORD HKLM ${KEY_UNINSTALL} NoRepair 1
 SectionEnd
 
 Section "uninstall"
@@ -32,10 +61,10 @@ Section "uninstall"
 
     # Remove uninstaller
     Delete "$INSTDIR\uninstall.exe"
-    DeleteRegKey HKLM "${UNINSTALL_KEY}"
+    DeleteRegKey HKLM ${KEY_UNINSTALL}
 
     # Remove manifest and executable dir
-    DeleteRegKey HKLM "${MANIFEST_KEY}"
+    DeleteRegKey HKLM ${KEY_MANIFEST}
     Delete "$INSTDIR\{{executableName}}"
     Delete "$INSTDIR\{{manifestName}}"
     RMDir $INSTDIR
