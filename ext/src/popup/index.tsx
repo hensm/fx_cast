@@ -58,7 +58,7 @@ class PopupApp extends Component<{}, PopupAppState> {
         this.onCast = this.onCast.bind(this);
     }
 
-    componentDidMount () {
+    public componentDidMount () {
         const backgroundPort = browser.runtime.connect({
             name: "popup"
         });
@@ -71,7 +71,7 @@ class PopupApp extends Component<{}, PopupAppState> {
         });
     }
 
-    render () {
+    public render () {
         const shareMedia =
                 this.state.selectedMedia === "tab"
              || this.state.selectedMedia === "screen";
@@ -188,25 +188,10 @@ class Receiver extends Component<ReceiverProps, ReceiverState> {
           , ellipsis: ""
         };
 
-        this.onClick = this.onClick.bind(this);
+        this.handleCast = this.handleCast.bind(this);
     }
 
-    onClick () {
-        this.props.onCast(this.props.receiver);
-
-        this.setState({
-            isLoading: true
-        });
-
-        setInterval(() => {
-            this.setState(state => ({
-                ellipsis: getNextEllipsis(state.ellipsis)
-            }));
-
-        }, 500);
-    }
-
-    render () {
+    public render () {
         return (
             <li className="receiver">
                 <div className="receiver-name">
@@ -220,7 +205,7 @@ class Receiver extends Component<ReceiverProps, ReceiverState> {
                         `- ${this.props.receiver.currentApp}` }
                 </div>
                 <button className="receiver-connect"
-                        onClick={ this.onClick }
+                        onClick={ this.handleCast }
                         disabled={this.props.isLoading}>
                     { this.state.isLoading
                         ? _("popupCastingButtonLabel") +
@@ -231,6 +216,21 @@ class Receiver extends Component<ReceiverProps, ReceiverState> {
                 </button>
             </li>
         );
+    }
+
+    private handleCast () {
+        this.props.onCast(this.props.receiver);
+
+        this.setState({
+            isLoading: true
+        });
+
+        setInterval(() => {
+            this.setState(state => ({
+                ellipsis: getNextEllipsis(state.ellipsis)
+            }));
+
+        }, 500);
     }
 }
 

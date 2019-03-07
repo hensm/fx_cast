@@ -77,7 +77,7 @@ class OptionsApp extends Component<{}, OptionsAppState> {
                 = this.getWhitelistItemPatternError.bind(this);
     }
 
-    async componentDidMount () {
+    public async componentDidMount () {
         const { options } = await browser.storage.sync.get("options");
 
         this.setState({
@@ -95,7 +95,7 @@ class OptionsApp extends Component<{}, OptionsAppState> {
         });
     }
 
-    render () {
+    public render () {
         if (!this.state.hasLoaded) {
             return;
         }

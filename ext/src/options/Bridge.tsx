@@ -138,7 +138,7 @@ export default class Bridge extends Component<BridgeProps, BridgeState> {
         this.onPackageTypeChange = this.onPackageTypeChange.bind(this);
     }
 
-    render () {
+    public render () {
         return (
             <div className="bridge">
                 { this.props.loading

@@ -46,7 +46,7 @@ export default class EditableList extends Component<
         this.handleNewItemEdit = this.handleNewItemEdit.bind(this);
     }
 
-    render () {
+    public render () {
         const items = Array.from(this.state.items.values());
 
         return (

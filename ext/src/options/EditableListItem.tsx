@@ -40,7 +40,7 @@ export default class EditableListItem extends Component<
         this.handleInputKeyPress = this.handleInputKeyPress.bind(this);
     }
 
-    render () {
+    public render () {
         const selected = this.state.editing
             ? "editable-list__item--selected" : "";
 

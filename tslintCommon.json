@@ -13,7 +13,7 @@
             "limit": 80
           , "ignore-pattern": "//|.*(\"|`);?$"
         }]
-      , "member-access": [ true, "no-public" ]
+      , "member-access": [ true ]
       , "no-console": [ true, "log" ]
       , "no-namespace": [ true, "allow-declarations" ]
       , "object-literal-sort-keys": false

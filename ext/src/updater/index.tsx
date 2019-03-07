@@ -95,7 +95,7 @@ class UpdaterApp extends Component<{}, UpdaterAppState> {
         };
     }
 
-    async componentDidMount () {
+    public async componentDidMount () {
         this.port = browser.runtime.connect({
             name: "updater"
         });
@@ -104,7 +104,7 @@ class UpdaterApp extends Component<{}, UpdaterAppState> {
         browser.downloads.onChanged.addListener(this.onDownloadChanged);
     }
 
-    componentDidUpdate () {
+    public componentDidUpdate () {
         // Size window to content
         browser.windows.update(this.win.id, {
             width: document.body.clientWidth + this.frameWidth
@@ -112,7 +112,7 @@ class UpdaterApp extends Component<{}, UpdaterAppState> {
         });
     }
 
-    render () {
+    public render () {
         if (!this.state.hasLoaded) {
             return;
         }
