@@ -1,17 +1,19 @@
 "use strict";
 
-import cast  from "./cast";
+import cast from "./cast";
 import media from "./media";
 
 import { onMessage } from "./messageBridge";
 
 
-if (!window.chrome) {
-	window.chrome = {};
+const global = (window as any);
+
+if (!global.chrome) {
+    global.chrome = {};
 }
 
-window.chrome.cast = cast;
-window.chrome.cast.media = media;
+global.chrome.cast = cast;
+global.chrome.cast.media = media;
 
 
 onMessage(message => {
@@ -20,11 +22,12 @@ onMessage(message => {
             const bridgeInfo = message.data;
 
             // Call page's API loaded function if defined
-            const readyFunction = window.__onGCastApiAvailable;
+            const readyFunction = global.__onGCastApiAvailable;
             if (readyFunction && typeof readyFunction === "function") {
                 readyFunction(bridgeInfo && bridgeInfo.isVersionCompatible);
             }
+
             break;
-        };
+        }
     }
 });

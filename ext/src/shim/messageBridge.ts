@@ -1,7 +1,12 @@
 "use strict";
 
-export function onMessage (listener) {
-    document.addEventListener("__castMessage", ev => {
+import { Message } from "../types";
+
+type ListenerFunc = (message: Message) => void;
+
+
+export function onMessage (listener: ListenerFunc) {
+    document.addEventListener("__castMessage", (ev: CustomEvent) => {
         listener(JSON.parse(ev.detail));
 
         /**
@@ -16,7 +21,7 @@ export function onMessage (listener) {
     }, true);
 }
 
-export function sendMessageResponse (message) {
+export function sendMessageResponse (message: Message) {
     const event = new CustomEvent("__castMessageResponse", {
         detail: JSON.stringify(message)
     });
@@ -25,13 +30,13 @@ export function sendMessageResponse (message) {
 }
 
 
-export function onMessageResponse (listener) {
-    document.addEventListener("__castMessageResponse", ev => {
+export function onMessageResponse (listener: ListenerFunc) {
+    document.addEventListener("__castMessageResponse", (ev: CustomEvent) => {
         listener(JSON.parse(ev.detail));
     }, true);
 }
 
-export function sendMessage (message) {
+export function sendMessage (message: Message) {
     const event = new CustomEvent("__castMessage", {
         detail: JSON.stringify(message)
     });

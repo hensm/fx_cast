@@ -1,7 +1,7 @@
 "use strict";
 
 import { Capability } from "../enums";
-import { requestSession as requestSessionTimeout } from "../../timeout.js";
+import { requestSession as requestSessionTimeout } from "../../timeout";
 
 // https://developers.google.com/cast/docs/reference/chrome/chrome.cast.SessionRequest
 export default class SessionRequest {
