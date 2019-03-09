@@ -3,7 +3,7 @@
   , "description": "__MSG_extensionDescription__"
   , "version": "EXTENSION_VERSION"
 
-  , "browser_specific_settings": {
+  , "applications": {
         "gecko": {
             "id": "EXTENSION_ID"
           , "strict_min_version": "64.0"
