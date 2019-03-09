@@ -38,7 +38,8 @@ module.exports = (env) => ({
             {
                 from: env.includePath
               , to: env.outputPath
-              , ignore: [ "*.js", "*.jsx" ]
+              , ignore: [ "*.js", "*.jsx"
+                        , "*.ts", "*.tsx" ]
               , transform (content, path) {
                     // Access to variables in static files
                     if (path.endsWith(".json")) {
