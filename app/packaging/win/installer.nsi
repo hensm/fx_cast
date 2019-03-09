@@ -2,6 +2,7 @@
 
 # MUI general
 !define MUI_ABORTWARNING
+!insertmacro MUI_LANGUAGE "English"
 
 # Installer pages
 !insertmacro MUI_PAGE_WELCOME
@@ -14,26 +15,28 @@
 !insertmacro MUI_UNPAGE_INSTFILES
 !insertmacro MUI_UNPAGE_FINISH
 
-!insertmacro MUI_LANGUAGE "English"
 
-
+# Registry keys
 !define KEY_MANIFEST "Software\Mozilla\NativeMessagingHosts\{{applicationName}}"
 !define KEY_UNINSTALL "Software\Microsoft\Windows\CurrentVersion\Uninstall\{{winRegistryKey}}"
 
 
+# Application name
 Name "{{applicationName}} v{{applicationVersion}}"
 
+OutFile "{{outputName}}"        # Installer filename
+InstallDir "{{executablePath}}" # Installation directory
+
+# Version info
 VIProductVersion "{{applicationVersion}}.0"
 VIAddVersionKey /LANG=${LANG_ENGLISH} "ProductName" "{{applicationName}}"
 VIAddVersionKey /LANG=${LANG_ENGLISH} "FileVersion" "{{applicationVersion}}"
 
-OutFile "{{outputName}}"
-InstallDir "{{executablePath}}"
+# Need admin privileges for global install
 RequestExecutionLevel admin
 
 Section
     SetRegView 64
-
     SetOutPath $INSTDIR
 
     # Main executable
