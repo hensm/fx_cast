@@ -2,7 +2,8 @@
 
 export interface Message {
     subject: string;
-    data: any;
+    data?: any;
+    _id?: string;
 }
 
 export interface Receiver {

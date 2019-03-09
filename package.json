@@ -17,6 +17,7 @@
         "lint:ext": "npm run lint --prefix ./ext"
     },
     "devDependencies": {
+        "@types/semver": "^5.5.0",
         "@types/uuid": "^3.4.4",
         "fs-extra": "^7.0.1",
         "glob": "^7.1.3",

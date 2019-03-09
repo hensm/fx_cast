@@ -20,8 +20,8 @@ const { __extensionName
       , __extensionVersion } = require("../ext/package.json");
 
 const extensionArchivePath = path.join(
-        path.join(__dirname, "../dist/ext/")
-      , `${__extensionName}-${__extensionVersion}.xpi`);
+        __dirname, "../dist/ext"
+      , `${__extensionName}-${__extensionVersion}.xpi`)
 
 if (!fs.existsSync(extensionArchivePath)) {
     console.error("Extension archive not found.");
