@@ -1,0 +1,205 @@
+{
+    "extensionName": {
+        "message": "EXTENSION_NAME"
+    }
+  , "extensionDescription": {
+        "message": ""
+    }
+
+  , "popupCastButtonLabel": {
+        "message": "Casten"
+    }
+  , "popupCastingButtonLabel": {
+        "message": "Aan het casten"
+    }
+
+  , "contextCast": {
+        "message": "Bezig met casten..."
+    }
+
+
+  , "optionsBridgeLoading": {
+        "message": "Bezig met laden van bridge-informatie..."
+    }
+  , "optionsBridgeFoundStatusTitle": {
+        "message": "Bridge aangetroffen"
+    }
+  , "optionsBridgeIssueStatusTitle": {
+        "message": "Bridge-probleem"
+    }
+  , "optionsBridgeNotFoundStatusTitle": {
+        "message": "Geen bridge aangetroffen"
+    }
+  , "optionsBridgeNotFoundStatusText": {
+        "message": "Probeer de nieuwste versie te installeren."
+    }
+  , "optionsBridgeInfo": {
+        "message": "Bridge-informatie:"
+    }
+  , "optionsBridgeStatsName": {
+        "message": "Naam:"
+    }
+  , "optionsBridgeStatsVersion": {
+        "message": "Versie:"
+    }
+  , "optionsBridgeStatsExpectedVersion": {
+        "message": "Verwachte versie:"
+    }
+  , "optionsBridgeStatsCompatibility": {
+        "message": "compatibiliteit:"
+    }
+  , "optionsBridgeStatsRecommendedAction": {
+        "message": "Aanbevolen actie:"
+    }
+  , "optionsBridgeCompatible": {
+        "message": "COMPATIBEL"
+    }
+  , "optionsBridgeLikelyCompatible": {
+        "message": "WAARSCHIJNLIJK COMPATIBEL"
+    }
+  , "optionsBridgeIncompatible": {
+        "message": "INCOMPATIBEL"
+    }
+  , "optionsBridgeOlderAction": {
+        "message": "De bridge-versie is ouder dan verwacht. Installeer de nieuwste bridge-versie."
+    }
+  , "optionsBridgeNewerAction": {
+        "message": "De bridge-versie is nieuwer dan verwacht. Installeer de nieuwste versie van de extensie."
+    }
+  , "optionsBridgeNoAction": {
+        "message": "Geen actie benodigd."
+    }
+  , "optionsBridgeUpdateCheck": {
+        "message": "Controleren op updates"
+    }
+  , "optionsBridgeUpdateChecking": {
+        "message": "Bezig met controleren$1"
+    }
+  , "optionsBridgeUpdateStatusNoUpdates": {
+        "message": "Geen updates beschikbaar"
+   }
+  , "optionsBridgeUpdateStatusError": {
+        "message": "Kan niet controleren op updates"
+   }
+  , "optionsBridgeUpdateAvailable": {
+        "message": "Er is een update beschikbaar:"
+   }
+  , "optionsBridgeUpdatePackageTypeSelect": {
+        "message": "Kies het soort pakket"
+    }
+  , "optionsBridgeUpdatePackageTypeDeb": {
+        "message": ".deb (Debian/Ubuntu)"
+    }
+  , "optionsBridgeUpdatePackageTypeRpm": {
+        "message": ".rpm (Fedora)"
+    }
+  , "optionsBridgeUpdate": {
+        "message": "Nu bijwerken..."
+    }
+
+  , "optionsMediaCategoryName": {
+        "message": "Mediacasten"
+    }
+  , "optionsMediaCategoryDescription": {
+        "message": "HTML5-video/audio casten."
+    }
+  , "optionsMediaEnabled": {
+        "message": "Mediacasten ingeschakeld"
+    }
+  , "optionsMediaSyncElement": {
+        "message": "Ontvangerstatus synchroniseren met media-element"
+    }
+  , "optionsMediaStopOnUnload": {
+        "message": "Afspelen stoppen na sluiten van pagina"
+    }
+
+  , "optionsLocalMediaCategoryName": {
+        "message": "Lokale media casten"
+    }
+  , "optionsLocalMediaCategoryDescription": {
+        "message": "HTTP-server gestart door de bridge-app om lokale mediabestanden te streamen naar de ontvanger."
+    }
+  , "optionsLocalMediaEnabled": {
+        "message": "Lokaal mediacasten ingeschakeld"
+    }
+  , "optionsLocalMediaServerPort": {
+        "message": "HTTP-serverpoort:"
+    }
+
+  , "optionsUserAgentWhitelistCategoryName": {
+        "message": "Gebruikersagent - Witte lijst"
+    }
+  , "optionsUserAgentWhitelistCategoryDescription": {
+        "message": "Websites waarvan de gebruikersagent omwille van compatibiliteit moet worden ingesteld op Chrome. De patronen moeten geldig zijn."
+    }
+  , "optionsUserAgentWhitelistEnabled": {
+        "message": "Witte lijst ingeschakeld"
+    }
+  , "optionsUserAgentWhitelistContent": {
+        "message": "Patronen (gescheiden door een nieuwe regel):"
+    }
+  , "optionsUserAgentWhitelistBasicView": {
+        "message": "Basisweergave"
+    }
+  , "optionsUserAgentWhitelistRawView": {
+        "message": "Onbewerkte weergave"
+    }
+  , "optionsUserAgentWhitelistSaveRaw": {
+        "message": "Onbewerkte weergave opslaan"
+    }
+  , "optionsUserAgentWhitelistAddItem": {
+        "message": "Item toevoegen"
+    }
+  , "optionsUserAgentWhitelistEditItem": {
+        "message": "Bewerken"
+    }
+  , "optionsUserAgentWhitelistRemoveItem": {
+        "message": "Verwijderen"
+    }
+  , "optionsUserAgentWhitelistInvalidMatchPattern": {
+        "message": "Ongeldig patroon $1"
+    }
+
+  , "optionsMirroringCategoryName": {
+        "message": "Beeldschermspiegeling"
+    }
+  , "optionsMirroringCategoryDescription": {
+        "message": "Beeldscherm-/tabbladspiegeling naar een Chromecast-ontvanger."
+    }
+  , "optionsMirroringEnabled": {
+        "message": "Beeldschermspiegeling ingeschakeld"
+    }
+  , "optionsMirroringAppId": {
+        "message": "ID van ontvanger:"
+    }
+
+  , "optionsReset": {
+        "message": "Standaardwaarden herstellen"
+    }
+  , "optionsSave": {
+        "message": "Opslaan"
+    }
+  , "optionsSaved": {
+        "message": "Opgeslagen!"
+    }
+
+
+  , "updaterCancel": {
+        "message": "Annuleren"
+    }
+  , "updaterDescriptionDownloading": {
+        "message": "Bezig met downloaden..."
+    }
+  , "updaterAdditionalDescriptionDownloading": {
+        "message": "Bezig met ophalen van updatepakket"
+    }
+  , "updaterDescriptionInstallReady": {
+        "message": "Klaar voor installatie"
+    }
+  , "updaterAdditionalDescriptionInstallReady": {
+        "message": "Het installatiepakket is opgeslagen in je standaard downloadmap."
+    }
+  , "updaterInstall": {
+        "message": "Installeren..."
+    }
+}
