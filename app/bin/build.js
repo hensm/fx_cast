@@ -369,6 +369,7 @@ function packageLinuxDeb (
         packageName: applicationName.replace(/_/g, "-")
       , applicationName
       , applicationVersion
+      , author
     };
 
     // Do templating on control file

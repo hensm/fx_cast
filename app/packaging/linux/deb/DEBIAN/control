@@ -1,6 +1,6 @@
 Package: {{packageName}}
 Version: {{applicationVersion}}
 Priority: optional
-Maintainer: Matt Hensman <m+github@matt.tf>
+Maintainer: {{{author}}}
 Architecture: amd64
 Description: {{applicationName}}
