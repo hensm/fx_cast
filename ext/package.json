@@ -3,7 +3,6 @@
     "__extensionId": "fx_cast@matt.tf",
     "__extensionVersion": "0.0.2",
     "__mirroringAppId": "19A6F4AE",
-
     "scripts": {
         "build": "node bin/build.js",
         "package": "node bin/build.js --package",
