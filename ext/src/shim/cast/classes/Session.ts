@@ -1,5 +1,7 @@
 "use strict";
 
+import uuid from "uuid/v1";
+
 import _Error from "./Error";
 import Image from "./Image";
 import Receiver from "./Receiver";
@@ -16,19 +18,14 @@ import { SessionStatus
 
 import { onMessage, sendMessageResponse } from "../../messageBridge";
 
-import uuid from "uuid/v1";
-
-
-type SuccessCallback = () => void;
-type ErrorCallback = (err: _Error) => void;
-
-type MediaListener = (media: Media) => void;
-type MessageListener = (namespace: string, message: string) => void;
-type UpdateListener = (isAlive: boolean) => void;
-type LoadSuccessCallback = (media: Media) => void;
-
-type Callbacks = [ SuccessCallback, ErrorCallback ];
-type CallbacksMap = Map<string, Callbacks>;
+import { SuccessCallback
+       , ErrorCallback
+       , MediaListener
+       , MessageListener
+       , UpdateListener
+       , LoadSuccessCallback
+       , Callbacks
+       , CallbacksMap } from "../../types";
 
 
 export default class Session {
