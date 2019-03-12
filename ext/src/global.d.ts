@@ -19,7 +19,7 @@ interface CloneIntoOptions {
 
 declare function cloneInto<T> (
         obj: T
-      , targetScope: any
+      , targetScope: Window
       , options?: CloneIntoOptions): T;
 
 
