@@ -7,7 +7,7 @@ import Image_ from "./classes/Image";
 import Receiver from "./classes/Receiver";
 import ReceiverDisplayStatus from "./classes/ReceiverDisplayStatus";
 import SenderApplication from "./classes/SenderApplication";
-import Session, { SessionWrapper } from "./classes/Session";
+import Session from "./classes/Session";
 import SessionRequest from "./classes/SessionRequest";
 import Timeout from "./classes/Timeout";
 import Volume from "./classes/Volume";
@@ -27,6 +27,8 @@ import { AutoJoinPolicy
 
 import { requestSession as requestSessionTimeout } from "../timeout";
 
+import { onMessage, sendMessageResponse } from "../messageBridge";
+
 
 
 type ReceiverActionListener = (
@@ -39,250 +41,248 @@ type SuccessCallback = () => void;
 type ErrorCallback = (err: Error_) => void;
 
 
-export default class extends EventTarget {
-    private apiConfig: ApiConfig;
-    private receiverList: any[] = [];
-    private sessionList: Session[] = [];
-    private sessionRequestInProgress: boolean = false;
+let apiConfig: ApiConfig;
+let receiverList: any[] = [];
+let sessionList: Session[] = [];
+let sessionRequestInProgress = false;
 
-    private receiverListeners = new Set<ReceiverActionListener>();
+let receiverListeners = new Set<ReceiverActionListener>();
 
-    private sessionSuccessCallback: RequestSessionSuccessCallback;
-    private sessionErrorCallback: ErrorCallback;
+let sessionSuccessCallback: RequestSessionSuccessCallback;
+let sessionErrorCallback: ErrorCallback;
 
-    private sessionWrapper: SessionWrapper;
+export default {
+    // Enums
+    AutoJoinPolicy, Capability, DefaultActionPolicy, DialAppState
+  , ErrorCode, ReceiverAction, ReceiverAvailability, ReceiverType
+  , SenderPlatform, SessionStatus, VolumeControlType
 
+    // Classes
+  , ApiConfig, DialRequest, Error: Error_, Image: Image_
+  , Receiver, ReceiverDisplayStatus, SenderApplication, Session
+  , SessionRequest, Timeout, Volume
 
-    private interface = {
-        // Enums
-        AutoJoinPolicy, Capability, DefaultActionPolicy, DialAppState
-      , ErrorCode, ReceiverAction, ReceiverAvailability, ReceiverType
-      , SenderPlatform, SessionStatus, VolumeControlType
-
-        // Classes
-      , ApiConfig, DialRequest, Error: Error_, Image: Image_
-      , Receiver, ReceiverDisplayStatus, SenderApplication, Session
-      , SessionRequest, Timeout, Volume
-
-      , VERSION: [1, 2]
-      , isAvailable: false
-      , timeout: new Timeout()
+  , VERSION: [1, 2]
+  , isAvailable: false
+  , timeout: new Timeout()
 
 
-      , addReceiverActionListener: (
-                listener: ReceiverActionListener): void => {
+  , addReceiverActionListener: (
+            listener: ReceiverActionListener): void => {
 
-            console.info("fx_cast (Debug): cast.addReceiverActionListener");
-            this.receiverListeners.add(listener);
-        }
-
-      , initialize: (
-                apiConfig: ApiConfig
-              , successCallback: SuccessCallback
-              , errorCallback: ErrorCallback): void => {
-
-            console.info("fx_cast (Debug): cast.initialize");
-
-            // Already initialized
-            if (this.apiConfig) {
-                errorCallback(new Error_(ErrorCode.RECEIVER_UNAVAILABLE));
-                return;
-            }
-
-            this.apiConfig = apiConfig;
-
-            this.onInitialize();
-
-            apiConfig.receiverListener(this.receiverList.length
-                ? ReceiverAvailability.AVAILABLE
-                : ReceiverAvailability.UNAVAILABLE);
-
-            successCallback();
-        }
-
-      , logMessage: (message: string): void => {
-            console.log("CAST MSG:", message);
-        }
-
-      , precache: (data: string): void => {
-            console.info("STUB :: cast.precache");
-        }
-
-      , removeReceiverActionListener: (
-                listener: ReceiverActionListener): void => {
-
-            this.receiverListeners.delete(listener);
-        }
-
-      , requestSession: (
-                successCallback: RequestSessionSuccessCallback
-              , errorCallback: ErrorCallback
-              , sessionRequest: SessionRequest = this.apiConfig.sessionRequest): void => {
-
-            console.info("fx_cast (Debug): cast.requestSession");
-
-            // Called before initialization
-            if (!this.apiConfig) {
-                errorCallback(new Error_(ErrorCode.API_NOT_INITIALIZED));
-                return;
-            }
-
-            // Already requesting session
-            if (this.sessionRequestInProgress) {
-                errorCallback(new Error_(ErrorCode.INVALID_PARAMETER
-                      , "Session request already in progress."));
-                return;
-            }
-
-            // No available receivers
-            if (!this.receiverList.length) {
-                errorCallback(new Error_(ErrorCode.RECEIVER_UNAVAILABLE));
-                return;
-            }
-
-            this.sessionRequestInProgress = true;
-
-            this.sessionSuccessCallback = successCallback;
-            this.sessionErrorCallback = errorCallback;
-
-            // Open destination chooser
-            this.onRequestSession();
-        }
-
-      , requestSessionById: (sessionId: string): void => {
-            console.info("STUB :: cast.requestSessionById");
-        }
-
-      , setCustomReceivers: (
-                receivers: Receiver[]
-              , successCallback: SuccessCallback
-              , errorCallback: ErrorCallback): void => {
-
-            console.info("STUB :: cast.setCustomReceivers");
-        }
-
-      , setPageContext: (win: Window): void => {
-            console.info("STUB :: cast.setPageContext");
-        }
-
-      , setReceiverDisplayStatus: (sessionId: string): void => {
-            console.info("STUB :: cast.setReceiverDisplayStatus");
-        }
-
-      , unescape: (escaped: string): string => {
-            return unescape(escaped);
-        }
+        console.info("fx_cast (Debug): cast.addReceiverActionListener");
+        receiverListeners.add(listener);
     }
 
+  , initialize: (
+            newApiConfig: ApiConfig
+          , successCallback: SuccessCallback
+          , errorCallback: ErrorCallback): void => {
 
-    private onInitialize () {
-        const ev = new CustomEvent("initialized");
-        this.dispatchEvent(ev);
-    }
-    private onRequestSession () {
-        const ev = new CustomEvent("sessionRequested");
-        this.dispatchEvent(ev);
-    }
-    private onCreateSessionWrapper () {
-        const ev = new CustomEvent("sessionWrapperCreated");
-        this.dispatchEvent(ev);
-    }
-    private onCreateSession () {
-        const ev = new CustomEvent("sessionCreated");
-        this.dispatchEvent(ev);
-    }
+        console.info("fx_cast (Debug): cast.initialize");
 
-    private onSessionEvent (ev: CustomEvent) {
-        const newEvent = new CustomEvent(`session_${ev.type}`, {
-            detail: ev.detail
+        // Already initialized
+        if (apiConfig) {
+            errorCallback(new Error_(ErrorCode.RECEIVER_UNAVAILABLE));
+            return;
+        }
+
+        apiConfig = newApiConfig;
+
+        sendMessageResponse({
+            subject: "bridge:/startDiscovery"
         });
 
-        this.dispatchEvent(newEvent);
+        console.log(receiverList.length)
+
+        apiConfig.receiverListener(receiverList.length
+            ? ReceiverAvailability.AVAILABLE
+            : ReceiverAvailability.UNAVAILABLE);
+
+        successCallback();
     }
 
-
-    public getReceiverList () {
-        return this.receiverList;
+  , logMessage: (message: string): void => {
+        console.log("CAST MSG:", message);
     }
 
-    public getSelectedMedia () {
-        return this.apiConfig._selectedMedia;
+  , precache: (data: string): void => {
+        console.info("STUB :: cast.precache");
     }
 
-    public getInterface () {
-        return this.interface;
+  , removeReceiverActionListener: (
+            listener: ReceiverActionListener): void => {
+
+        receiverListeners.delete(listener);
     }
 
-    public getSessionWrapper () {
-        return this.sessionWrapper;
-    }
+  , requestSession: (
+            successCallback: RequestSessionSuccessCallback
+          , errorCallback: ErrorCallback
+          , sessionRequest: SessionRequest = apiConfig.sessionRequest): void => {
 
+        console.info("fx_cast (Debug): cast.requestSession");
 
-    public addReciever (receiver: any) {
-        this.receiverList.push(receiver);
-
-        // Notify listeners of new cast destination
-        this.apiConfig.receiverListener(ReceiverAvailability.AVAILABLE);
-    }
-
-    public removeReceiver (receiverId: any) {
-        this.receiverList = this.receiverList.filter(
-                receiver => receiver.id !== receiverId);
-
-        if (this.receiverList.length === 0) {
-            this.apiConfig.receiverListener(
-                    ReceiverAvailability.UNAVAILABLE);
+        // Called before initialization
+        if (!apiConfig) {
+            errorCallback(new Error_(ErrorCode.API_NOT_INITIALIZED));
+            return;
         }
-    }
 
-    public createSession (receiver: any, selectedMedia: string) {
-        console.log(receiver, selectedMedia);
+        // Already requesting session
+        if (sessionRequestInProgress) {
+            errorCallback(new Error_(ErrorCode.INVALID_PARAMETER
+                  , "Session request already in progress."));
+            return;
+        }
 
-        const selectedReceiver = new Receiver(
-                receiver.id
-              , receiver.friendlyName);
+        // No available receivers
+        if (!receiverList.length) {
+            errorCallback(new Error_(ErrorCode.RECEIVER_UNAVAILABLE));
+            return;
+        }
 
-        (selectedReceiver as any)._address = receiver.address;
-        (selectedReceiver as any)._port = receiver.port;
+        sessionRequestInProgress = true;
 
+        sessionSuccessCallback = successCallback;
+        sessionErrorCallback = errorCallback;
 
-        const sessionWrapper = new SessionWrapper(
-                this.sessionList.length
-              , this.apiConfig.sessionRequest.appId
-              , selectedReceiver.friendlyName
-              , []
-              , selectedReceiver);
-
-        this.onCreateSessionWrapper();
-
-        sessionWrapper.addEventListener("connected", ev => {
-            this.onCreateSession();
-
-            const session = sessionWrapper.getInterface();
-
-            this.apiConfig.sessionListener(session);
-            this.sessionRequestInProgress = false;
-            this.sessionSuccessCallback(session, selectedMedia);
+        // Open destination chooser
+        sendMessageResponse({
+            subject: "main:/openPopup"
         });
-
-        // If existing session active, stop it and start new one
-        if (this.sessionList.length > 0) {
-            const lastSession = this.sessionList[this.sessionList.length - 1];
-
-            if (lastSession.status !== SessionStatus.STOPPED) {
-                lastSession.stop(() => {
-                    this.sessionList.push(sessionWrapper.getInterface());
-                }, null);
-            }
-        } else {
-            this.sessionList.push(sessionWrapper.getInterface());
-        }
     }
 
-    public cancelSessionRequest (): void {
-        if (this.sessionRequestInProgress) {
-            this.sessionRequestInProgress = false;
-            this.sessionErrorCallback(new Error_(ErrorCode.CANCEL));
-        }
+  , requestSessionById: (sessionId: string): void => {
+        console.info("STUB :: cast.requestSessionById");
+    }
+
+  , setCustomReceivers: (
+            receivers: Receiver[]
+          , successCallback: SuccessCallback
+          , errorCallback: ErrorCallback): void => {
+
+        console.info("STUB :: cast.setCustomReceivers");
+    }
+
+  , setPageContext: (win: Window): void => {
+        console.info("STUB :: cast.setPageContext");
+    }
+
+  , setReceiverDisplayStatus: (sessionId: string): void => {
+        console.info("STUB :: cast.setReceiverDisplayStatus");
+    }
+
+  , unescape: (escaped: string): string => {
+        return unescape(escaped);
     }
 }
+
+onMessage(message => {
+    switch (message.subject) {
+        /**
+         * Cast destination found (serviceUp). Set the API availability
+         * property and call the page event function (__onGCastApiAvailable).
+         */
+        case "shim:/serviceUp": {
+            const receiver = message.data;
+
+            if (receiverList.find(r => r.id === receiver.id)) {
+                break;
+            }
+
+            receiverList.push(receiver);
+
+            // Notify listeners of new cast destination
+            apiConfig.receiverListener(ReceiverAvailability.AVAILABLE);
+
+            break;
+        };
+
+        /**
+         * Cast destination lost (serviceDown). Remove from the receiver list
+         * and update availability state.
+         */
+        case "shim:/serviceDown": {
+            receiverList = receiverList.filter(
+                    receiver => receiver.id !== message.data.id);
+
+            if (receiverList.length === 0) {
+                apiConfig.receiverListener(
+                        ReceiverAvailability.UNAVAILABLE);
+            }
+
+            break;
+        };
+
+        case "shim:/selectReceiver": {
+            console.info("fx_cast (Debug): Selected receiver");
+
+            const selectedReceiver = new Receiver(
+                    message.data.receiver.id
+                  , message.data.receiver.friendlyName);
+
+            (selectedReceiver as any)._address = message.data.receiver.address;
+            (selectedReceiver as any)._port = message.data.receiver.port;
+
+            function createSession () {
+                sessionList.push(new Session(
+                        sessionList.length.toString()  // sessionId
+                      , apiConfig.sessionRequest.appId // appId
+                      , selectedReceiver.friendlyName  // displayName
+                      , []                             // appImages
+                      , selectedReceiver               // receiver
+                      , (session: Session) => {
+                            sendMessageResponse({
+                                subject: "popup:/close"
+                            });
+
+                            apiConfig.sessionListener(session);
+                            sessionRequestInProgress = false;
+                            sessionSuccessCallback(session, message.data.selectedMedia);
+                        }));
+            }
+
+            // If an existing session is active, stop it and start new one
+            if (sessionList.length) {
+                const lastSession = sessionList[sessionList.length - 1];
+
+                if (lastSession.status !== SessionStatus.STOPPED) {
+                    lastSession.stop(createSession, null);
+                }
+            } else {
+                createSession();
+            }
+
+            break;
+        };
+
+        /**
+         * Popup is ready to receive data to populate the cast destination
+         * chooser.
+         */
+        case "shim:/popupReady": {
+            sendMessageResponse({
+                subject: "popup:/populateReceiverList"
+              , data: {
+                    receivers: receiverList
+                  , selectedMedia: apiConfig._selectedMedia
+                }
+            });
+
+            break;
+        };
+
+        /**
+         * Popup closed before session established.
+         */
+        case "shim:/popupClosed": {
+            if (sessionRequestInProgress) {
+                sessionRequestInProgress = false;
+                sessionErrorCallback(new Error_(ErrorCode.CANCEL));
+            }
+
+            break;
+        }
+    }
+});
