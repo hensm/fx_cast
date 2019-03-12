@@ -11,7 +11,8 @@ const { ROOT
       , DIST_PATH
       , UNPACKED_PATH } = require("./lib/paths");
 
-const packageMeta = require(`${ROOT}/package.json`);
+const packageMeta = require(`${ROOT}/../package.json`);
+const extPackageMeta = require(`${ROOT}/package.json`);
 const appPackageMeta = require(`${ROOT}/../app/package.json`);
 
 
@@ -21,7 +22,7 @@ const argv = minimist(process.argv.slice(2), {
   , default: {
         package: false                           // Should package with web-ext
       , watch: false                             // Should run webpack in watch mode
-      , mirroringAppId: packageMeta.__mirroringAppId // Chromecast receiver app ID
+      , mirroringAppId: extPackageMeta.__mirroringAppId // Chromecast receiver app ID
       , mode: "development"                      // webpack mode
     }
 });
@@ -48,9 +49,9 @@ const webpackConfig = require(`${ROOT}/webpack.config.js`)({
         ? UNPACKED_PATH
         : DIST_PATH
 
-  , extensionName: packageMeta.__extensionName
-  , extensionId: packageMeta.__extensionId
-  , extensionVersion: packageMeta.__extensionVersion
+  , extensionName: extPackageMeta.__extensionName
+  , extensionId: extPackageMeta.__extensionId
+  , extensionVersion: extPackageMeta.__extensionVersion
   , applicationName: appPackageMeta.__applicationName
   , applicationVersion: appPackageMeta.__applicationVersion
   , mirroringAppId: argv.mirroringAppId
@@ -59,6 +60,10 @@ const webpackConfig = require(`${ROOT}/webpack.config.js`)({
   , contentSecurityPolicy: argv.mode === "production"
         ? "default-src 'self'"
         : "script-src 'self' 'unsafe-eval'; object-src 'self'"
+
+    // Developer info
+  , author: packageMeta.author
+  , authorHomepage: packageMeta.homepage
 });
 
 // Add mode to config

@@ -50,7 +50,9 @@ module.exports = (env) => ({
                             .replace("MIRRORING_APP_ID", env.mirroringAppId)
                             .replace("APPLICATION_NAME", env.applicationName)
                             .replace("APPLICATION_VERSION", env.applicationVersion)
-                            .replace("CONTENT_SECURITY_POLICY", env.contentSecurityPolicy));
+                            .replace("CONTENT_SECURITY_POLICY", env.contentSecurityPolicy)
+                            .replace("AUTHOR", env.author)
+                            .replace("AUTHOR_HOMEPAGE", env.authorHomepage));
                     }
 
                     return content;
