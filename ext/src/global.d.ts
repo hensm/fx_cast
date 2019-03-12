@@ -7,6 +7,37 @@ declare const APPLICATION_NAME: string;
 declare const APPLICATION_VERSION: string;
 
 
+declare interface Window {
+    wrappedJSObject: typeof Window;
+}
+
+
+interface CloneIntoOptions {
+    cloneFunctions?: boolean;
+    wrapReflectors?: boolean;
+}
+
+declare function cloneInto<T> (
+        obj: T
+      , targetScope: any
+      , options?: CloneIntoOptions): T;
+
+
+interface ExportFunctionOptions {
+    defineAs: string;
+    allowCallbacks?: boolean;
+    allowCrossOriginArguments?: boolean;
+}
+
+type ExportFunctionFunc = (...args: any[]) => any;
+
+declare function exportFunction (
+        func: ExportFunctionFunc
+      , targetScope: any
+      , options?: ExportFunctionOptions): ExportFunctionFunc;
+
+
+
 // Fix issues with @types/firefox-webext-browser
 declare namespace browser.events {
     /**

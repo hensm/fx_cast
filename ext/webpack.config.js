@@ -15,9 +15,9 @@ module.exports = (env) => ({
       , "compat/youtube" : `${env.includePath}/compat/youtube.js`
 
         // Shim entries
-      , "shim/bundle"       : `${env.includePath}/shim/index.js`
-      , "shim/content"      : `${env.includePath}/shim/content.js`
-      , "shim/contentSetup" : `${env.includePath}/shim/contentSetup.js`
+      , "shim/bundle"       : `${env.includePath}/shim/index.ts`
+      , "shim/content"      : `${env.includePath}/shim/content.ts`
+      , "shim/contentSetup" : `${env.includePath}/shim/contentSetup.ts`
     }
   , output: {
         filename: "[name].js"
@@ -38,7 +38,8 @@ module.exports = (env) => ({
             {
                 from: env.includePath
               , to: env.outputPath
-              , ignore: [ "*.js", "*.jsx" ]
+              , ignore: [ "*.js", "*.jsx"
+                        , "*.ts", "*.tsx" ]
               , transform (content, path) {
                     // Access to variables in static files
                     if (path.endsWith(".json")) {
