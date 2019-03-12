@@ -2,10 +2,12 @@
 
 import getBridgeInfo from "./lib/getBridgeInfo";
 import messageRouter from "./lib/messageRouter";
-import defaultOptions from "./options/defaultOptions";
+import defaultOptions, { Options } from "./options/defaultOptions";
 
 import { getChromeUserAgent } from "./lib/userAgents";
 import { getWindowCenteredProps } from "./lib/utils";
+
+import { Message } from "./types";
 
 import semver from "semver";
 
@@ -28,12 +30,12 @@ browser.runtime.onInstalled.addListener(async details => {
             const { options: existingOptions }
                     = await browser.storage.sync.get("options");
 
-            const newOptions: { [key: string]: any } = {};
+            const newOptions: Partial<Options> = {};
 
             // Find options not already in storage
             for (const [ key, val ] of Object.entries(defaultOptions)) {
                 if (!existingOptions.hasOwnProperty(key)) {
-                    newOptions[key] = val;
+                    (newOptions as any)[key] = val;
                 }
             }
 
@@ -160,7 +162,9 @@ let currentUAString: string;
  * as Chrome, so we should rewrite the User-Agent header
  * to reflect this on whitelisted sites.
  */
-async function onBeforeSendHeaders (details: any) {
+async function onBeforeSendHeaders (
+        details: { requestHeaders?: browser.webRequest.HttpHeaders }) {
+
     const { options } = await browser.storage.sync.get("options");
     const { os } = await browser.runtime.getPlatformInfo();
 
@@ -182,7 +186,7 @@ async function onBeforeSendHeaders (details: any) {
     };
 }
 
-async function onOptionsUpdated (alteredOptions?: any[]) {
+async function onOptionsUpdated (alteredOptions?: (keyof Options)[]) {
     const { options } = await browser.storage.sync.get("options");
 
     // If options aren't set yet, return
@@ -430,11 +434,11 @@ async function onConnectShim (port: browser.runtime.Port) {
     });
 
 
-    bridgePort.onMessage.addListener((message: any) => {
+    bridgePort.onMessage.addListener((message: Message) => {
         port.postMessage(message);
     });
 
-    port.onMessage.addListener(async (message: any) => {
+    port.onMessage.addListener(async (message: Message) => {
         const [ destination ] = message.subject.split(":/");
         switch (destination) {
             case "bridge": {
