@@ -6,4 +6,4 @@ export default class DialRequest {
             public appName: string
           , public launchParameter: string = null) {
     }
-};
+}

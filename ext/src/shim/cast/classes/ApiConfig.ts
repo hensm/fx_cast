@@ -16,10 +16,13 @@ export default class ApiConfig {
             public sessionRequest: SessionRequest
           , public sessionListener: (session: Session) => void
           , public receiverListener: (availability: string) => void
-          , public autoJoinPolicy: string = AutoJoinPolicy.TAB_AND_ORIGIN_SCOPED
-          , public defaultActionPolicy: string = DefaultActionPolicy.CREATE_SESSION
+
+          , public autoJoinPolicy: string
+                    = AutoJoinPolicy.TAB_AND_ORIGIN_SCOPED
+          , public defaultActionPolicy: string
+                    = DefaultActionPolicy.CREATE_SESSION
 
             // TODO: Remove awful hack for mirror casting
           , public _selectedMedia: string = "app") {
     }
-};
+}

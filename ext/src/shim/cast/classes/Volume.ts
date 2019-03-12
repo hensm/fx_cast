@@ -12,4 +12,4 @@ export default class Volume {
             public level: number = null
           , public muted: boolean = null) {
     }
-};
+}

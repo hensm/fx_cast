@@ -18,4 +18,4 @@ export default class Receiver {
           , public capabilities: string[] = []
           , public volume: Volume = null) {
     }
-};
+}

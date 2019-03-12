@@ -4,44 +4,35 @@ import uuid from "uuid/v1";
 
 import EditTracksInfoRequest from "./EditTracksInfoRequest";
 import GetStatusRequest from "./GetStatusRequest";
+import MediaInfo from "./MediaInfo";
 import PauseRequest from "./PauseRequest";
 import PlayRequest from "./PlayRequest";
 import QueueInsertItemsRequest from "./QueueInsertItemsRequest";
+import QueueItem from "./QueueItem";
 import QueueReorderItemsRequest from "./QueueReorderItemsRequest";
 import QueueUpdateItemsRequest from "./QueueUpdateItemsRequest";
 import SeekRequest from "./SeekRequest";
-import VolumeRequest from "./VolumeRequest";
 import StopRequest from "./StopRequest";
-import MediaInfo from "./MediaInfo";
-import QueueItem from "./QueueItem";
+import VolumeRequest from "./VolumeRequest";
 
 import Volume from "../../cast/classes/Volume";
 
 import { PlayerState
-       , RepeatMode
-       , MediaCommand } from "../enums";
+       , RepeatMode } from "../enums";
 
 import _Error from "../../cast/classes/Error";
 import { ErrorCode } from "../../cast/enums";
 
 import { onMessage, sendMessageResponse } from "../../messageBridge";
 
-import { SuccessCallback
+import { Callbacks
+       , CallbacksMap
        , ErrorCallback
-       , UpdateListener
-       , Callbacks
-       , CallbacksMap } from "../../types";
+       , SuccessCallback
+       , UpdateListener } from "../../types";
 
 
 export default class Media {
-    private _id: string = uuid();
-
-    private _updateListeners = new Set<UpdateListener>();
-    private _sendMediaMessageCallbacks: CallbacksMap = new Map();
-
-    private _lastCurrentTime: number;
-
-
     public activeTrackIds: number[] = null;
     public currentItemId: number = null;
     public customData: any = null;
@@ -56,6 +47,14 @@ export default class Media {
     public repeatMode: string = RepeatMode.OFF;
     public supportedMediaCommands: string[] = [];
     public volume: Volume = new Volume();
+
+
+    private _id: string = uuid();
+
+    private _updateListeners = new Set<UpdateListener>();
+    private _sendMediaMessageCallbacks: CallbacksMap = new Map();
+
+    private _lastCurrentTime: number;
 
     constructor (
             public sessionId: string
@@ -129,7 +128,7 @@ export default class Media {
           , successCallback?: SuccessCallback
           , errorCallback?: ErrorCallback): void {
 
-        console.log("STUB :: Media#editTracksInfo");
+        console.info("STUB :: Media#editTracksInfo");
     }
 
     public getEstimatedTime (): number {
@@ -172,21 +171,21 @@ export default class Media {
             item: QueueItem
           , successCallback?: SuccessCallback
           , errorCallback?: ErrorCallback) {
-        console.log("STUB :: Media#queueAppendItem");
+        console.info("STUB :: Media#queueAppendItem");
     }
 
     public queueInsertItems (
             queueInsertItemsRequest: QueueInsertItemsRequest
           , successCallback?: SuccessCallback
           , errorCallback?: ErrorCallback) {
-        console.log("STUB :: Media#queueInsertItems");
+        console.info("STUB :: Media#queueInsertItems");
     }
 
     public queueJumpToItem (
             itemId: number
           , successCallback?: SuccessCallback
           , errorCallback?: ErrorCallback) {
-        console.log("STUB :: Media#queueJumpToItem");
+        console.info("STUB :: Media#queueJumpToItem");
     }
 
     public queueMoveItemToNewIndex (
@@ -194,47 +193,47 @@ export default class Media {
           , newIndex: number
           , successCallback?: SuccessCallback
           , errorCallback?: ErrorCallback) {
-        console.log("STUB :: Media#queueMoveItemToNewIndex");
+        console.info("STUB :: Media#queueMoveItemToNewIndex");
     }
 
     public queueNext (
             successCallback?: SuccessCallback
           , errorCallback?: ErrorCallback) {
-        console.log("STUB :: Media#queueNext");
+        console.info("STUB :: Media#queueNext");
     }
 
     public queuePrev (
             successCallback?: SuccessCallback
           , errorCallback?: ErrorCallback) {
-        console.log("STUB :: Media#queuePrev");
+        console.info("STUB :: Media#queuePrev");
     }
 
-    public queueRemoveItem(
+    public queueRemoveItem (
             itemId: number
           , successCallback?: SuccessCallback
           , errorCallback?: ErrorCallback) {
-        console.log("STUB :: Media#queueRemoveItem");
+        console.info("STUB :: Media#queueRemoveItem");
     }
 
     public queueReorderItems (
             queueReorderItemsRequest: QueueReorderItemsRequest
           , successCallback?: SuccessCallback
           , errorCallback?: ErrorCallback) {
-        console.log("STUB :: Media#queueReorderItems");
+        console.info("STUB :: Media#queueReorderItems");
     }
 
     public queueSetRepeatMode (
             repeatMode: string
           , successCallback?: SuccessCallback
           , errorCallback?: ErrorCallback) {
-        console.log("STUB :: Media#queueSetRepeatMode");
+        console.info("STUB :: Media#queueSetRepeatMode");
     }
 
     public queueUpdateItems (
             queueUpdateItemsRequest: QueueUpdateItemsRequest
           , successCallback?: SuccessCallback
           , errorCallback?: ErrorCallback) {
-        console.log("STUB :: Media#queueUpdateItems");
+        console.info("STUB :: Media#queueUpdateItems");
     }
 
     public removeUpdateListener (listener: UpdateListener) {
@@ -274,7 +273,7 @@ export default class Media {
     }
 
     public supportsCommand (command: string) {
-        console.log("STUB :: Media#supportsCommand");
+        console.info("STUB :: Media#supportsCommand");
     }
 
 

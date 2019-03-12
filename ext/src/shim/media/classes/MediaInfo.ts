@@ -27,7 +27,7 @@ export default class MediaInfo {
     public textTrackStyle: TextTrackStyle = null;
     public tracks: Track[] = null;
 
-	constructor (
+    constructor (
             public contentId: string
           , public contentType: string) {}
 }

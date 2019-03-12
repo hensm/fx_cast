@@ -35,7 +35,9 @@ type ReceiverActionListener = (
         receiver: Receiver
       , receiverAction: typeof ReceiverAction) => void;
 
-type RequestSessionSuccessCallback = (session: Session, selectedMedia: string) => void;
+type RequestSessionSuccessCallback = (
+        session: Session
+      , selectedMedia: string) => void;
 
 type SuccessCallback = () => void;
 type ErrorCallback = (err: Error_) => void;
@@ -43,10 +45,10 @@ type ErrorCallback = (err: Error_) => void;
 
 let apiConfig: ApiConfig;
 let receiverList: any[] = [];
-let sessionList: Session[] = [];
+const sessionList: Session[] = [];
 let sessionRequestInProgress = false;
 
-let receiverListeners = new Set<ReceiverActionListener>();
+const receiverListeners = new Set<ReceiverActionListener>();
 
 let sessionSuccessCallback: RequestSessionSuccessCallback;
 let sessionErrorCallback: ErrorCallback;
@@ -93,8 +95,6 @@ export default {
             subject: "bridge:/startDiscovery"
         });
 
-        console.log(receiverList.length)
-
         apiConfig.receiverListener(receiverList.length
             ? ReceiverAvailability.AVAILABLE
             : ReceiverAvailability.UNAVAILABLE);
@@ -103,6 +103,7 @@ export default {
     }
 
   , logMessage: (message: string): void => {
+        /* tslint:disable-next-line:no-console */
         console.log("CAST MSG:", message);
     }
 
@@ -119,7 +120,8 @@ export default {
   , requestSession: (
             successCallback: RequestSessionSuccessCallback
           , errorCallback: ErrorCallback
-          , sessionRequest: SessionRequest = apiConfig.sessionRequest): void => {
+          , sessionRequest: SessionRequest
+                    = apiConfig.sessionRequest): void => {
 
         console.info("fx_cast (Debug): cast.requestSession");
 
@@ -176,7 +178,7 @@ export default {
   , unescape: (escaped: string): string => {
         return unescape(escaped);
     }
-}
+};
 
 onMessage(message => {
     switch (message.subject) {
@@ -197,7 +199,7 @@ onMessage(message => {
             apiConfig.receiverListener(ReceiverAvailability.AVAILABLE);
 
             break;
-        };
+        }
 
         /**
          * Cast destination lost (serviceDown). Remove from the receiver list
@@ -213,7 +215,7 @@ onMessage(message => {
             }
 
             break;
-        };
+        }
 
         case "shim:/selectReceiver": {
             console.info("fx_cast (Debug): Selected receiver");
@@ -239,7 +241,9 @@ onMessage(message => {
 
                             apiConfig.sessionListener(session);
                             sessionRequestInProgress = false;
-                            sessionSuccessCallback(session, message.data.selectedMedia);
+                            sessionSuccessCallback(
+                                    session
+                                  , message.data.selectedMedia);
                         }));
             }
 
@@ -255,7 +259,7 @@ onMessage(message => {
             }
 
             break;
-        };
+        }
 
         /**
          * Popup is ready to receive data to populate the cast destination
@@ -271,7 +275,7 @@ onMessage(message => {
             });
 
             break;
-        };
+        }
 
         /**
          * Popup closed before session established.

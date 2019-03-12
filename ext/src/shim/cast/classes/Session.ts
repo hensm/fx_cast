@@ -12,23 +12,31 @@ import LoadRequest from "../../media/classes/LoadRequest";
 import Media from "../../media/classes/Media";
 import QueueLoadRequest from "../../media/classes/QueueLoadRequest";
 
-import { SessionStatus
-       , ErrorCode
+import { ErrorCode
+       , SessionStatus
        , VolumeControlType } from "../enums";
 
 import { onMessage, sendMessageResponse } from "../../messageBridge";
 
-import { SuccessCallback
+import { Callbacks
+       , CallbacksMap
        , ErrorCallback
+       , LoadSuccessCallback
        , MediaListener
        , MessageListener
-       , UpdateListener
-       , LoadSuccessCallback
-       , Callbacks
-       , CallbacksMap } from "../../types";
+       , SuccessCallback
+       , UpdateListener } from "../../types";
 
 
 export default class Session {
+    public media: Media[];
+    public namespaces: Array<{ name: "string" }>;
+    public senderApps: SenderApplication[];
+    public status: string;
+    public statusText: string;
+    public transportId: string;
+
+
     private _id: string = uuid();
     private _messageListeners = new Map<string, Set<MessageListener>>();
     private _updateListeners = new Set<UpdateListener>();
@@ -39,20 +47,13 @@ export default class Session {
     private _setReceiverVolumeLevelCallbacks: CallbacksMap = new Map();
     private _stopCallbacks: CallbacksMap = new Map();
 
-    public media: Media[];
-    public namespaces: { name: "string" }[];
-    public senderApps: SenderApplication[];
-    public status: string;
-    public statusText: string;
-    public transportId: string;
-
     constructor (
             public sessionId: string
           , public appId: string
           , public displayName: string
           , public appImages: Image[]
           , public receiver: Receiver
-          , successCallback: (session: Session) => void) {
+          , _successCallback: (session: Session) => void) {
 
         this.media = [];
         this.namespaces = [];
@@ -85,7 +86,7 @@ export default class Session {
                     }
 
                     break;
-                };
+                }
 
                 case "shim:/session/connected": {
                     this.status = SessionStatus.CONNECTED;
@@ -94,12 +95,12 @@ export default class Session {
                     this.displayName = message.data.displayName;
                     this.statusText = message.data.statusText;
 
-                    if (successCallback) {
-                        successCallback(this);
+                    if (_successCallback) {
+                        _successCallback(this);
                     }
 
                     break;
-                };
+                }
 
                 case "shim:/session/updateStatus": {
                     const volume: Volume = message.data.volume;
@@ -121,22 +122,23 @@ export default class Session {
                     }
 
                     break;
-                };
+                }
 
 
                 case "shim:/session/impl_addMessageListener": {
                     const { namespace, data } = message.data;
-                    for (const listener of this._messageListeners.get(namespace)) {
+                    for (const listener of
+                            this._messageListeners.get(namespace)) {
                         listener(namespace, data);
                     }
 
                     break;
-                };
+                }
 
                 case "shim:/session/impl_sendMessage": {
                     const { messageId, error } = message.data;
                     const [ successCallback, errorCallback ]
-                            = this._sendMessageCallbacks.get(messageId)
+                            = this._sendMessageCallbacks.get(messageId);
 
                     if (error && errorCallback) {
                         errorCallback(new _Error(ErrorCode.SESSION_ERROR));
@@ -147,7 +149,7 @@ export default class Session {
                     this._sendMessageCallbacks.delete(messageId);
 
                     break;
-                };
+                }
 
                 case "shim:/session/impl_setReceiverMuted": {
                     const { volumeId, error } = message.data;
@@ -163,12 +165,13 @@ export default class Session {
                     this._setReceiverMutedCallbacks.delete(volumeId);
 
                     break;
-                };
+                }
 
                 case "shim:/session/impl_setReceiverVolumeLevel": {
                     const { volumeId, error } = message.data;
                     const [ successCallback, errorCallback ]
-                            = this._setReceiverVolumeLevelCallbacks.get(volumeId);
+                            = this._setReceiverVolumeLevelCallbacks
+                                .get(volumeId);
 
                     if (error && errorCallback) {
                         errorCallback(new _Error(ErrorCode.SESSION_ERROR));
@@ -179,7 +182,7 @@ export default class Session {
                     this._setReceiverVolumeLevelCallbacks.delete(volumeId);
 
                     break;
-                };
+                }
 
                 case "shim:/session/impl_stop": {
                     const { stopId, error } = message.data;
@@ -203,17 +206,20 @@ export default class Session {
                     this._stopCallbacks.delete(stopId);
 
                     break;
-                };
+                }
             }
         });
     }
 
 
     public addMediaListener (listener: MediaListener) {
-        console.info("STUB :: Session#addMediaListener")
+        console.info("STUB :: Session#addMediaListener");
     }
 
-    public addMessageListener (namespace: string, listener: MessageListener) {
+    public addMessageListener (
+            namespace: string
+          , listener: MessageListener) {
+
         if (!this._messageListeners.has(namespace)) {
             this._messageListeners.set(namespace, new Set());
         }
@@ -263,7 +269,9 @@ export default class Session {
                 "urn:x-cast:com.google.cast.media"
               , (namespace, data) => {
 
-            if (hasResponded) return;
+            if (hasResponded) {
+                return;
+            }
 
             const mediaObject = JSON.parse(data);
 
@@ -283,7 +291,7 @@ export default class Session {
             } else {
                 errorCallback(new _Error(ErrorCode.SESSION_ERROR));
             }
-        })
+        });
     }
 
     public queueLoad (

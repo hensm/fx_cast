@@ -6,4 +6,4 @@ export default class Image {
     public height: number = null;
 
     constructor (public url: string) {}
-};
+}

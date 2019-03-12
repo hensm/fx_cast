@@ -7,4 +7,4 @@ export default class Error {
           , public description: string = null
           , public details: any = null) {
     }
-};
+}

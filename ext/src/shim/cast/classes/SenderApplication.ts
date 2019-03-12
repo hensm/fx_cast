@@ -6,4 +6,4 @@ export default class SenderApplication {
     public url: string = null;
 
     constructor (public platform: string) {}
-};
+}

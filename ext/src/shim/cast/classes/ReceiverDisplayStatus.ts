@@ -10,4 +10,4 @@ export default class ReceiverDisplayStatus {
     constructor (
             public statusText: string
           , public appImages: Image[]) {}
-};
+}

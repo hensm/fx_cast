@@ -186,7 +186,7 @@ async function onBeforeSendHeaders (
     };
 }
 
-async function onOptionsUpdated (alteredOptions?: (keyof Options)[]) {
+async function onOptionsUpdated (alteredOptions?: Array<(keyof Options)>) {
     const { options } = await browser.storage.sync.get("options");
 
     // If options aren't set yet, return

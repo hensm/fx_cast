@@ -7,4 +7,4 @@ export default class Timeout {
     constructor () {
         Object.assign(this, timeouts);
     }
-};
+}
