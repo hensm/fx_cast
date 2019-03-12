@@ -25,10 +25,10 @@ macOS version has an installer, Linux packages can be installed via the command 
 
 ````sh
 # Debian/Ubuntu
-sudo dpkg -i fx_cast_bridge.deb
+sudo dpkg -i fx_cast_bridge-<version>-<arch>.deb
 
 # Fedora
-sudo dnf install fx_cast_bridge-<version>.<arch>.rpm
+sudo dnf install fx_cast_bridge-<version>-<arch>.rpm
 ````
 
 ### Package managers
@@ -110,7 +110,7 @@ npm run start --prefix ./ext
 Packaging currently only possible for macOS/Linux. macOS packages can only be created on macOS, Linux .deb/.rpm packages can be built on any platform with `dpkg-deb` and `rpmbuild` binaries.
 
 * #### `dist/app/`  
-    ... contains the installer package: `fx_cast_bridge.(pkg|deb|rpm|exe)`
+    ... contains the installer package: `fx_cast_bridge-<version>-<arch>.(pkg|deb|rpm|exe)`
 * #### `dist/ext/`  
     ... contains the built extension in the format `fx_cast-<version>.zip`.
 
