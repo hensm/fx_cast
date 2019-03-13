@@ -7,18 +7,28 @@ const PLATFORM_LINUX = "Mozilla/5.0 (X11; Linux x86_64";
 const UA_PREFIX = "Mozilla/5.0";
 
 const UA_CHROME = "AppleWebKit/537.36 (KHTML, like Gecko) Chrome/70.0.3538.67 Safari/537.36";
+const UA_CHROME_LEGACY = "AppleWebKit/537.36 (KHTML, like Gecko) Chrome/53.0.2883.87 Safari/537.36";
 const UA_SAFARI = "AppleWebKit/605.1.15 (KHTML, like Gecko) Version/12.0 Safari/605.1.15";
 
 
-export function getChromeUserAgent (platform: string): string {
-    let platformComponent: string;
+function getPlatformComponent (platform: string) {
     switch (platform) {
-        case "mac": platformComponent = PLATFORM_MAC; break;
-        case "win": platformComponent = PLATFORM_WIN; break;
-        case "linux": platformComponent = PLATFORM_LINUX; break;
+        case "mac": return PLATFORM_MAC; break;
+        case "win": return PLATFORM_WIN; break;
+        case "linux": return PLATFORM_LINUX; break;
     }
+}
 
-    return `${UA_PREFIX} (${platformComponent}) ${UA_CHROME}`;
+export function getChromeUserAgent (
+        platform: string
+      , legacy: boolean = false): string {
+
+    const platformComponent = getPlatformComponent(platform);
+    const browserComponent = legacy
+        ? UA_CHROME_LEGACY
+        : UA_CHROME;
+
+    return `${UA_PREFIX} (${platformComponent}) ${browserComponent}`;
 }
 
 export function getSafariUserAgent (platform: string): string {

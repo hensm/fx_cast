@@ -1,3 +1,6 @@
 "use strict";
 
-(window.wrappedJSObject as any).chrome = cloneInto({}, window);
+const _window = (window.wrappedJSObject as any);
+
+_window.chrome = cloneInto({}, window);
+_window.navigator.presentation = cloneInto({}, window);

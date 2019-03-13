@@ -173,10 +173,19 @@ async function onBeforeSendHeaders (
         currentUAString = getChromeUserAgent(os);
     }
 
+    const host = details.requestHeaders.find(
+            (header: any) => header.name === "Host");
+
     // Find and rewrite the User-Agent header
     for (const header of details.requestHeaders) {
         if (header.name.toLowerCase() === "user-agent") {
-            header.value = currentUAString;
+            // TODO: Move this somewhere else
+            if (host.value === "www.youtube.com") {
+                header.value = getChromeUserAgent(os, true);
+            } else {
+                header.value = currentUAString;
+            }
+
             break;
         }
     }
