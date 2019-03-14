@@ -179,12 +179,14 @@ async function onBeforeSendHeaders (
     // Find and rewrite the User-Agent header
     for (const header of details.requestHeaders) {
         if (header.name.toLowerCase() === "user-agent") {
-            // TODO: Move this somewhere else
+
+            // TODO: Remove need for this
             if (host.value === "www.youtube.com") {
                 header.value = getChromeUserAgent(os, true);
-            } else {
-                header.value = currentUAString;
+                break;
             }
+            
+            header.value = currentUAString;
 
             break;
         }
@@ -195,6 +197,9 @@ async function onBeforeSendHeaders (
     };
 }
 
+/**
+ * Updates any extension state based on options changes.
+ */
 async function onOptionsUpdated (alteredOptions?: Array<(keyof Options)>) {
     const { options } = await browser.storage.sync.get("options");
 
@@ -203,29 +208,35 @@ async function onOptionsUpdated (alteredOptions?: Array<(keyof Options)>) {
         return;
     }
 
-    const registerFunctions = {
-        onBeforeSendHeaders () {
-            browser.webRequest.onBeforeSendHeaders.addListener(
-                    onBeforeSendHeaders
-                  , { urls: options.userAgentWhitelistEnabled
-                        ? options.userAgentWhitelist
-                        : [] }
-                  , [  "blocking", "requestHeaders" ]);
-        }
-    };
+    /**
+     * Adds a webRequest listener that intercepts and modifies user agent based on 
+     */
+    function register_userAgentWhitelist () {
+        browser.webRequest.onBeforeSendHeaders.addListener(
+                onBeforeSendHeaders
+              , { urls: options.userAgentWhitelistEnabled
+                    ? options.userAgentWhitelist
+                    : [] }
+              , [  "blocking", "requestHeaders" ]);
+    }
+
+    function unregister_userAgentWhitelist () {
+        browser.webRequest.onBeforeSendHeaders.removeListener(
+              onBeforeSendHeaders);
+    }
+
+
 
     if (!alteredOptions) {
         // If no altered properties specified, register all listeners
-        for (const func of Object.values(registerFunctions)) {
-            func();
-        }
+        register_userAgentWhitelist();
     } else {
+
         if (alteredOptions.includes("userAgentWhitelist")
              || alteredOptions.includes("userAgentWhitelistEnabled")) {
 
-            browser.webRequest.onBeforeSendHeaders.removeListener(
-                    onBeforeSendHeaders);
-            registerFunctions.onBeforeSendHeaders();
+            unregister_userAgentWhitelist();
+            register_userAgentWhitelist();
         }
 
         if (alteredOptions.includes("mirroringEnabled")) {

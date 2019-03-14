@@ -1,23 +1,22 @@
 "use strict";
 
-const path              = require("path");
-const webpack           = require("webpack");
+const path = require("path");
+const webpack = require("webpack");
 const CopyWebpackPlugin = require("copy-webpack-plugin");
 
 module.exports = (env) => ({
     entry: {
-        "main"           : `${env.includePath}/main.ts`
-      , "popup/bundle"   : `${env.includePath}/popup/index.tsx`
-      , "options/bundle" : `${env.includePath}/options/index.tsx`
-      , "updater/bundle" : `${env.includePath}/updater/index.tsx`
-      , "mediaCast"      : `${env.includePath}/mediaCast.js`
-      , "mirroringCast"  : `${env.includePath}/mirroringCast.js`
-      , "compat/youtube" : `${env.includePath}/compat/youtube.js`
+        "main": `${env.includePath}/main.ts`
+      , "popup/bundle": `${env.includePath}/popup/index.tsx`
+      , "options/bundle": `${env.includePath}/options/index.tsx`
+      , "updater/bundle": `${env.includePath}/updater/index.tsx`
+      , "mediaCast": `${env.includePath}/mediaCast.js`
+      , "mirroringCast": `${env.includePath}/mirroringCast.js`
 
         // Shim entries
-      , "shim/bundle"       : `${env.includePath}/shim/index.ts`
-      , "shim/content"      : `${env.includePath}/shim/content.ts`
-      , "shim/contentSetup" : `${env.includePath}/shim/contentSetup.ts`
+      , "shim/bundle": `${env.includePath}/shim/index.ts`
+      , "shim/content": `${env.includePath}/shim/content.ts`
+      , "shim/contentSetup": `${env.includePath}/shim/contentSetup.ts`
     }
   , output: {
         filename: "[name].js"
@@ -25,12 +24,12 @@ module.exports = (env) => ({
     }
   , plugins: [
         new webpack.DefinePlugin({
-            "EXTENSION_NAME"      : JSON.stringify(env.extensionName)
-          , "EXTENSION_ID"        : JSON.stringify(env.extensionId)
-          , "EXTENSION_VERSION"   : JSON.stringify(env.extensionVersion)
-          , "MIRRORING_APP_ID"    : JSON.stringify(env.mirroringAppId)
-          , "APPLICATION_NAME"    : JSON.stringify(env.applicationName)
-          , "APPLICATION_VERSION" : JSON.stringify(env.applicationVersion)
+            "EXTENSION_NAME": JSON.stringify(env.extensionName)
+          , "EXTENSION_ID": JSON.stringify(env.extensionId)
+          , "EXTENSION_VERSION": JSON.stringify(env.extensionVersion)
+          , "MIRRORING_APP_ID": JSON.stringify(env.mirroringAppId)
+          , "APPLICATION_NAME": JSON.stringify(env.applicationName)
+          , "APPLICATION_VERSION": JSON.stringify(env.applicationVersion)
         })
 
         // Copy static assets

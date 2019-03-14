@@ -10,6 +10,7 @@ import Bridge from "./Bridge";
 import EditableList from "./EditableList";
 
 import getBridgeInfo, { BridgeInfo } from "../lib/getBridgeInfo";
+import { REMOTE_MATCH_PATTERN_REGEX } from "../lib/utils";
 
 
 const _ = browser.i18n.getMessage;
@@ -25,8 +26,6 @@ browser.runtime.getPlatformInfo()
         }
     });
 
-
-const MATCH_PATTERN_REGEX = /^(?:(?:(\*|https?|ftp):\/\/((?:\*\.|[^\/\*])+)|(file):\/\/\/?(?:\*\.|[^\/\*])+)(\/.*)|<all_urls>)$/;
 
 function getInputValue (input: HTMLInputElement) {
     switch (input.type) {
@@ -236,7 +235,7 @@ class OptionsApp extends Component<{}, OptionsAppState> {
                             </div>
                             <EditableList data={ this.state.options.userAgentWhitelist }
                                           onChange={ this.handleWhitelistChange }
-                                          itemPattern={ MATCH_PATTERN_REGEX }
+                                          itemPattern={ REMOTE_MATCH_PATTERN_REGEX }
                                           itemPatternError={ this.getWhitelistItemPatternError } />
                         </div>
                     </fieldset>

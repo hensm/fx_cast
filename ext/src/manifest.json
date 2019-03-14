@@ -27,13 +27,7 @@
   , "background": {
         "scripts": [ "main.js" ]
     }
-  , "content_scripts": [
-        {
-            "matches": [ "https://www.youtube.com/*" ]
-          , "js": [ "compat/youtube.js" ]
-          , "run_at": "document_start"
-        }
-    ]
+
   , "content_security_policy": "CONTENT_SECURITY_POLICY"
   , "default_locale": "en"
   , "manifest_version": 2

@@ -7,8 +7,8 @@ declare const APPLICATION_NAME: string;
 declare const APPLICATION_VERSION: string;
 
 
-declare interface Window {
-    wrappedJSObject: typeof Window;
+declare interface Object {
+    wrappedJSObject: Object;
 }
 
 

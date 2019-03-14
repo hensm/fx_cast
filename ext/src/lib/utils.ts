@@ -31,3 +31,6 @@ export function getWindowCenteredProps (
       , top: Math.floor(centerY - height / 2)
     };
 }
+
+
+export const REMOTE_MATCH_PATTERN_REGEX = /^(?:(?:(\*|https?|ftp):\/\/(\*|(?:\*\.(?:[^\/\*:]\.?)+(?:[^\.])|[^\/\*:]*))?)(\/.*)|<all_urls>)$/;
