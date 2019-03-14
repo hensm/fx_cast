@@ -44,12 +44,15 @@ select.btn:-moz-focusring {
     background-color: var(--btn-bg);
     border-radius: 2px;
     color: var(--btn-color);
-    display: inline-flex;
     font-size: 13px;
     font-weight: 400;
     height: var(--btn-height);
     justify-content: center;
     padding: 0 var(--btn-padding);
+}
+
+.btn:not([hidden]) {
+    display: inline-flex;
 }
 
 .btn--primary {
