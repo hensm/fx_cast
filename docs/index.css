@@ -41,7 +41,7 @@ body {
 
 body {
     display: flex;
-    margin: initial;`
+    margin: initial;
 }
 
 .container {
@@ -136,39 +136,76 @@ body {
     margin-bottom: 0.5rem;
 }
 
+
 .app-list {
-    align-items: flex-start;
-    display: flex;
-}
-
-.app-list > *:not(:first-child) {
-    margin-left: 1rem;
-}
-
-.app-list__platform {
     display: flex;
     flex-direction: column;
 }
 
+.app-list__platform {
+    display: contents;
+}
 
-.app-list__app {
+
+.app-list__app:not(.btn) {
+    color: var(--blue-50);
+    position: relative;
+    padding-right: 50px;
+    text-decoration: initial;
+}
+
+.app-list__app:not(.btn):hover {
+    text-decoration: underline;
+}
+
+.app-list__app:not(.btn):active {
+    color: var(--blue-60);
+}
+
+.app-list__app:not(.btn)[data-app-size]::after {
+    content: "(" attr(data-app-size) ")";
+    display: block;
+    position: absolute;
+    right: 0;
+    top: 0;
+    cursor: initial;
+    color: var(--text-color-secondary);
+}
+
+
+.app-list--buttons {
+    align-items: flex-start;
+    display: flex;
+    flex-direction: row;
+}
+
+.app-list--buttons > *:not(:first-child) {
+    margin-left: 1rem;
+}
+
+.app-list--buttons .app-list__platform {
+    display: flex;
+    flex-direction: column;
+}
+
+.app-list--buttons .app-list__app {
     cursor: pointer;
 }
 
-.app-list__platform > .app-list__app + .app-list__app {
+.app-list--buttons > .app-list__platform > .app-list__app + .app-list__app {
     margin-top: 0.5rem;
 }
 
-.app-list__app-label {
+.app-list--buttons .app-list__app-link {
+    display: inline-flex;
+}
+
+.app-list--buttons .app-list__app-label {
     color: var(--blue-40);
     font-size: 0.8em;
     font-variant: small-caps;
-    margin-left: 0.5rem;
+    margin-left: 0.5em;
     vertical-align: super;
-}
-
-.app-list__rpm {
-    grid-column-start: 3;
 }
 
 
