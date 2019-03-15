@@ -61,10 +61,14 @@ export default class Media {
           , public mediaSessionId: number
           , _internalSessionId: string) {
 
-        this._sendMessage("bridge:/media/initialize", {
-            sessionId
-          , mediaSessionId
-          , _internalSessionId
+        sendMessageResponse({
+            subject: "bridge:/media/initialize"
+          , data: {
+                sessionId
+              , mediaSessionId
+              , _internalSessionId
+            }
+          , _id: this._id
         });
 
         onMessage(message => {
@@ -143,7 +147,7 @@ export default class Media {
     public getStatus (
             getStatusRequest?: GetStatusRequest
           , successCallback?: SuccessCallback
-          , errorCallback?: ErrorCallback) {
+          , errorCallback?: ErrorCallback): void {
 
         this._sendMediaMessage({ type: "MEDIA_GET_STATUS" }
               , successCallback, errorCallback);
@@ -152,7 +156,7 @@ export default class Media {
     public pause (
             pauseRequest: PauseRequest
           , successCallback?: SuccessCallback
-          , errorCallback?: ErrorCallback) {
+          , errorCallback?: ErrorCallback): void {
 
         this._sendMediaMessage({ type: "PAUSE" }
               , successCallback, errorCallback);
@@ -161,7 +165,7 @@ export default class Media {
     public play (
             playRequest?: PlayRequest
           , successCallback?: SuccessCallback
-          , errorCallback?: ErrorCallback) {
+          , errorCallback?: ErrorCallback): void {
 
         this._sendMediaMessage({ type: "PLAY" }
               , successCallback, errorCallback);
@@ -170,21 +174,21 @@ export default class Media {
     public queueAppendItem (
             item: QueueItem
           , successCallback?: SuccessCallback
-          , errorCallback?: ErrorCallback) {
+          , errorCallback?: ErrorCallback): void {
         console.info("STUB :: Media#queueAppendItem");
     }
 
     public queueInsertItems (
             queueInsertItemsRequest: QueueInsertItemsRequest
           , successCallback?: SuccessCallback
-          , errorCallback?: ErrorCallback) {
+          , errorCallback?: ErrorCallback): void {
         console.info("STUB :: Media#queueInsertItems");
     }
 
     public queueJumpToItem (
             itemId: number
           , successCallback?: SuccessCallback
-          , errorCallback?: ErrorCallback) {
+          , errorCallback?: ErrorCallback): void {
         console.info("STUB :: Media#queueJumpToItem");
     }
 
@@ -192,47 +196,47 @@ export default class Media {
             itemId: number
           , newIndex: number
           , successCallback?: SuccessCallback
-          , errorCallback?: ErrorCallback) {
+          , errorCallback?: ErrorCallback): void {
         console.info("STUB :: Media#queueMoveItemToNewIndex");
     }
 
     public queueNext (
             successCallback?: SuccessCallback
-          , errorCallback?: ErrorCallback) {
+          , errorCallback?: ErrorCallback): void {
         console.info("STUB :: Media#queueNext");
     }
 
     public queuePrev (
             successCallback?: SuccessCallback
-          , errorCallback?: ErrorCallback) {
+          , errorCallback?: ErrorCallback): void {
         console.info("STUB :: Media#queuePrev");
     }
 
     public queueRemoveItem (
             itemId: number
           , successCallback?: SuccessCallback
-          , errorCallback?: ErrorCallback) {
+          , errorCallback?: ErrorCallback): void {
         console.info("STUB :: Media#queueRemoveItem");
     }
 
     public queueReorderItems (
             queueReorderItemsRequest: QueueReorderItemsRequest
           , successCallback?: SuccessCallback
-          , errorCallback?: ErrorCallback) {
+          , errorCallback?: ErrorCallback): void {
         console.info("STUB :: Media#queueReorderItems");
     }
 
     public queueSetRepeatMode (
             repeatMode: string
           , successCallback?: SuccessCallback
-          , errorCallback?: ErrorCallback) {
+          , errorCallback?: ErrorCallback): void {
         console.info("STUB :: Media#queueSetRepeatMode");
     }
 
     public queueUpdateItems (
             queueUpdateItemsRequest: QueueUpdateItemsRequest
           , successCallback?: SuccessCallback
-          , errorCallback?: ErrorCallback) {
+          , errorCallback?: ErrorCallback): void {
         console.info("STUB :: Media#queueUpdateItems");
     }
 
@@ -243,7 +247,7 @@ export default class Media {
     public seek (
             seekRequest: SeekRequest
           , successCallback?: SuccessCallback
-          , errorCallback?: ErrorCallback) {
+          , errorCallback?: ErrorCallback): void {
 
         this._sendMediaMessage({
             type: "SEEK"
@@ -254,7 +258,7 @@ export default class Media {
     public setVolume (
             volumeRequest: VolumeRequest
           , successCallback?: SuccessCallback
-          , errorCallback?: ErrorCallback) {
+          , errorCallback?: ErrorCallback): void {
 
         this._sendMediaMessage({
             type: "SET_VOLUME"
@@ -265,25 +269,18 @@ export default class Media {
     public stop (
             stopRequest: StopRequest
           , successCallback?: SuccessCallback
-          , errorCallback?: ErrorCallback) {
+          , errorCallback?: ErrorCallback): void {
 
         this._sendMediaMessage({
             type: "STOP"
         }, successCallback, errorCallback);
     }
 
-    public supportsCommand (command: string) {
+    public supportsCommand (command: string): boolean {
         console.info("STUB :: Media#supportsCommand");
+        return true;
     }
 
-
-    private _sendMessage (subject: string, data: {}) {
-        sendMessageResponse({
-            subject
-          , data
-          , _id: this._id
-        });
-    }
 
     private _sendMediaMessage (
             message: any
@@ -302,9 +299,13 @@ export default class Media {
           , errorCallback
         ]);
 
-        this._sendMessage("bridge:/media/sendMediaMessage", {
-            message
-          , messageId
+        sendMessageResponse({
+            subject: "bridge:/media/sendMediaMessage"
+          , data: {
+                message
+              , messageId
+            }
+          , _id: this._id
         });
     }
 }
