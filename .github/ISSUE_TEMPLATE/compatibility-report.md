@@ -8,9 +8,7 @@ assignees: ''
 ---
 
 **App name:**
-
 **App URL:**
-
 **App ID (if possible):**
 
 
