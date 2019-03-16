@@ -47,6 +47,7 @@ export default class Session {
     private _setReceiverVolumeLevelCallbacks: CallbacksMap = new Map();
     private _stopCallbacks: CallbacksMap = new Map();
 
+
     constructor (
             public sessionId: string
           , public appId: string
@@ -95,6 +96,7 @@ export default class Session {
                 case "shim:/session/connected": {
                     this.status = SessionStatus.CONNECTED;
                     this.sessionId = message.data.sessionId;
+                    this.transportId = message.data.sessionId;
                     this.namespaces = message.data.namespaces;
                     this.displayName = message.data.displayName;
                     this.statusText = message.data.statusText;

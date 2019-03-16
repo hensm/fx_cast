@@ -85,7 +85,7 @@ export default {
 
         // Already initialized
         if (apiConfig) {
-            errorCallback(new Error_(ErrorCode.RECEIVER_UNAVAILABLE));
+            errorCallback(new Error_(ErrorCode.INVALID_PARAMETER));
             return;
         }
 
@@ -239,8 +239,8 @@ onMessage(message => {
                                 subject: "popup:/close"
                             });
 
-                            apiConfig.sessionListener(session);
                             sessionRequestInProgress = false;
+
                             sessionSuccessCallback(
                                     session
                                   , message.data.selectedMedia);
