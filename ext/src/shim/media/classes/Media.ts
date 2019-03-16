@@ -32,6 +32,14 @@ import { Callbacks
        , UpdateListener } from "../../types";
 
 
+const _id = new WeakMap<Media, string>();
+
+const _updateListeners = new WeakMap<Media, Set<UpdateListener>>();
+const _sendMediaMessageCallbacks = new WeakMap<Media, CallbacksMap>();
+
+const _lastCurrentTime = new WeakMap<Media, number>();
+
+
 export default class Media {
     public activeTrackIds: number[] = null;
     public currentItemId: number = null;
@@ -49,17 +57,18 @@ export default class Media {
     public volume: Volume = new Volume();
 
 
-    private _id: string = uuid();
-
-    private _updateListeners = new Set<UpdateListener>();
-    private _sendMediaMessageCallbacks: CallbacksMap = new Map();
-
-    private _lastCurrentTime: number;
-
     constructor (
             public sessionId: string
           , public mediaSessionId: number
           , _internalSessionId: string) {
+
+        _id.set(this, uuid());
+
+        _updateListeners.set(this, new Set());
+        _sendMediaMessageCallbacks.set(this, new Map());
+
+        _lastCurrentTime.set(this, undefined);
+
 
         sendMessageResponse({
             subject: "bridge:/media/initialize"
@@ -68,11 +77,11 @@ export default class Media {
               , mediaSessionId
               , _internalSessionId
             }
-          , _id: this._id
+          , _id: _id.get(this)
         });
 
         onMessage(message => {
-            if (!message._id || message._id !== this._id) {
+            if (!message._id || message._id !== _id.get(this)) {
                 return;
             }
 
@@ -81,7 +90,7 @@ export default class Media {
                     const status = message.data;
 
                     this.currentTime = status.currentTime;
-                    this._lastCurrentTime = status._lastCurrentTime;
+                    _lastCurrentTime.set(this, status._lastCurrentTime);
                     this.customData = status.customData;
                     this.volume = new Volume(
                             status._volumeLevel
@@ -98,7 +107,7 @@ export default class Media {
                     }
 
                     // Call update listeners
-                    for (const listener of this._updateListeners) {
+                    for (const listener of _updateListeners.get(this)) {
                         listener(true);
                     }
 
@@ -108,7 +117,7 @@ export default class Media {
                 case "shim:/media/sendMediaMessageResponse": {
                     const { messageId, error } = message.data;
                     const [ successCallback, errorCallback ]
-                            = this._sendMediaMessageCallbacks.get(messageId);
+                            = _sendMediaMessageCallbacks.get(this).get(messageId);
 
                     if (error && errorCallback) {
                         errorCallback(new _Error(ErrorCode.SESSION_ERROR));
@@ -124,7 +133,7 @@ export default class Media {
     }
 
     public addUpdateListener (listener: UpdateListener): void {
-        this._updateListeners.add(listener);
+        _updateListeners.get(this).add(listener);
     }
 
     public editTracksInfo (
@@ -141,7 +150,7 @@ export default class Media {
         }
 
         return this.currentTime
-                + ((Date.now() / 1000) - this._lastCurrentTime);
+                + ((Date.now() / 1000) - _lastCurrentTime.get(this));
     }
 
     public getStatus (
@@ -241,7 +250,7 @@ export default class Media {
     }
 
     public removeUpdateListener (listener: UpdateListener) {
-        this._updateListeners.delete(listener);
+        _updateListeners.get(this).delete(listener);
     }
 
     public seek (
@@ -294,7 +303,7 @@ export default class Media {
 
         const messageId = uuid();
 
-        this._sendMediaMessageCallbacks.set(messageId, [
+        _sendMediaMessageCallbacks.get(this).set(messageId, [
             successCallback
           , errorCallback
         ]);
@@ -305,7 +314,7 @@ export default class Media {
                 message
               , messageId
             }
-          , _id: this._id
+          , _id: _id.get(this)
         });
     }
 }
