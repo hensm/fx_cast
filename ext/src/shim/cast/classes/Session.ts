@@ -139,6 +139,10 @@ export default class Session {
                         }
                     }
 
+                    for (const listener of _updateListeners.get(this)) {
+                        listener(true);
+                    }
+
                     break;
                 }
 
