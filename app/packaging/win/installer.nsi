@@ -2,7 +2,6 @@
 
 # MUI general
 !define MUI_ABORTWARNING
-!insertmacro MUI_LANGUAGE "English"
 
 # Installer pages
 !insertmacro MUI_PAGE_WELCOME
@@ -14,6 +13,8 @@
 !insertmacro MUI_UNPAGE_CONFIRM
 !insertmacro MUI_UNPAGE_INSTFILES
 !insertmacro MUI_UNPAGE_FINISH
+
+!insertmacro MUI_LANGUAGE "English"
 
 
 # Registry keys
@@ -30,6 +31,8 @@ InstallDir "{{executablePath}}" # Installation directory
 # Version info
 VIProductVersion "{{applicationVersion}}.0"
 VIAddVersionKey /LANG=${LANG_ENGLISH} "ProductName" "{{applicationName}}"
+VIAddVersionKey /LANG=${LANG_ENGLISH} "LegalCopyright" "© {{{registryPublisher}}}"
+VIAddVersionKey /LANG=${LANG_ENGLISH} "FileDescription" "{{applicationName}}"
 VIAddVersionKey /LANG=${LANG_ENGLISH} "FileVersion" "{{applicationVersion}}"
 
 # Need admin privileges for global install
