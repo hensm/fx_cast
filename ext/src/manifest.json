@@ -14,8 +14,7 @@
         }
     }
   , "browser_action": {
-        "default_popup": "popup/index.html"
-      , "theme_icons": [
+        "theme_icons": [
             {
                 "light": "icons/cast-default-light.svg"
               , "dark": "icons/cast-default-dark.svg"
