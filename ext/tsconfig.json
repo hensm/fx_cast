@@ -4,6 +4,7 @@
       , "esModuleInterop": true
       , "jsx": "react"
       , "lib": [ "esnext", "dom" ]
+      , "module": "commonjs"
       , "moduleResolution": "node"
       , "noImplicitAny": true
       , "removeComments": true

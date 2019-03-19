@@ -124,27 +124,20 @@ const SENDER_SCRIPT_FRAMEWORK_URL =
  */
 browser.webRequest.onBeforeRequest.addListener(
         async details => {
-            switch (details.url) {
-                case SENDER_SCRIPT_URL: {
-                    // Content/Page script bridge
-                    await browser.tabs.executeScript(details.tabId, {
-                        file: "shim/content.js"
-                      , frameId: details.frameId
-                      , runAt: "document_start"
-                    });
 
-                    return {
-                        redirectUrl: browser.runtime.getURL("shim/bundle.js")
-                    };
-                }
+            await browser.tabs.executeScript(details.tabId, {
+                file: "shim/content.js"
+              , frameId: details.frameId
+              , runAt: "document_start"
+            });
 
-                case SENDER_SCRIPT_FRAMEWORK_URL: {
-                    // TODO: implement cast.framework
-                    return {
-                        cancel: true
-                    };
-                }
-            }
+            const redirectUrl = details.url === SENDER_SCRIPT_URL
+                ? browser.runtime.getURL("shim/bundle.js")
+                : browser.runtime.getURL("shim/bundle.js?loadCastFramework=1");
+
+            return {
+                redirectUrl
+            };
         }
       , { urls: [
             SENDER_SCRIPT_URL
@@ -185,7 +178,7 @@ async function onBeforeSendHeaders (
                 header.value = getChromeUserAgent(os, true);
                 break;
             }
-            
+
             header.value = currentUAString;
 
             break;
@@ -209,7 +202,8 @@ async function onOptionsUpdated (alteredOptions?: Array<(keyof Options)>) {
     }
 
     /**
-     * Adds a webRequest listener that intercepts and modifies user agent based on 
+     * Adds a webRequest listener that intercepts and modifies user
+     * agent.
      */
     function register_userAgentWhitelist () {
         browser.webRequest.onBeforeSendHeaders.addListener(

@@ -14,6 +14,21 @@ if (!global.chrome) {
 global.chrome.cast = cast;
 
 
+if (document.currentScript) {
+    const currentScript = (document.currentScript as HTMLScriptElement);
+    const currentScriptUrl = new URL(currentScript.src);
+    const currentScriptParams = new URLSearchParams(currentScriptUrl.search);
+
+    // Load Framework API if requested
+    if (currentScriptParams.get("loadCastFramework") === "1") {
+        import("./framework").then(framework => {
+            global.cast = {};
+            global.cast.framework = framework.default;
+        });
+    }
+}
+
+
 onMessage(message => {
     switch (message.subject) {
         case "shim:/initialized": {
