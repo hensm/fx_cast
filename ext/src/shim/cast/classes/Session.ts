@@ -30,7 +30,9 @@ import { Callbacks
 
 const _id = new WeakMap<Session, string>();
 
-const _messageListeners = new WeakMap<Session, Map<string, Set<MessageListener>>>();
+const _messageListeners = new WeakMap<
+        Session, Map<string, Set<MessageListener>>>();
+
 const _updateListeners = new WeakMap<Session, Set<UpdateListener>>();
 
 const _leaveCallbacks = new WeakMap<Session, CallbacksMap>();
@@ -176,7 +178,9 @@ export default class Session {
                 case "shim:/session/impl_setReceiverMuted": {
                     const { volumeId, error } = message.data;
                     const [ successCallback, errorCallback ]
-                            = _setReceiverMutedCallbacks.get(this).get(volumeId);
+                            = _setReceiverMutedCallbacks
+                                .get(this)
+                                .get(volumeId);
 
                     if (error && errorCallback) {
                         errorCallback(new _Error(ErrorCode.SESSION_ERROR));

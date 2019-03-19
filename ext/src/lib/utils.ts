@@ -33,4 +33,5 @@ export function getWindowCenteredProps (
 }
 
 
+// tslint:disable-next-line:max-line-length
 export const REMOTE_MATCH_PATTERN_REGEX = /^(?:(?:(\*|https?|ftp):\/\/(\*|(?:\*\.(?:[^\/\*:]\.?)+(?:[^\.])|[^\/\*:]*))?)(\/.*)|<all_urls>)$/;

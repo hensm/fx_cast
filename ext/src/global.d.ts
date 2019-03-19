@@ -8,6 +8,7 @@ declare const APPLICATION_VERSION: string;
 
 
 declare interface Object {
+    // tslint:disable-next-line:ban-types
     wrappedJSObject: Object;
 }
 
