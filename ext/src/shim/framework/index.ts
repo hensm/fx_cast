@@ -1,6 +1,6 @@
 "use strict";
 
-import cast from "../cast";
+import * as cast from "../cast";
 
 import ActiveInputStateEventData from "./classes/ActiveInputStateEventData";
 import ApplicationMetadata from "./classes/ApplicationMetadata";

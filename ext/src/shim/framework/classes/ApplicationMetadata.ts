@@ -1,16 +1,15 @@
 "use strict";
 
-import Image from "../../cast/classes/Image";
-import Session from "../../cast/classes/Session";
+import * as cast from "../../cast";
 
 
 export default class ApplicationMetadata {
     public applicationId: string;
-    public images: Image[];
+    public images: cast.Image[];
     public name: string;
     public namespaces: string[];
 
-    constructor (sessionObj: Session) {
+    constructor (sessionObj: cast.Session) {
         this.applicationId = sessionObj.appId;
         this.images = sessionObj.appImages;
         this.name = sessionObj.displayName;

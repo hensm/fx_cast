@@ -1,6 +1,6 @@
 "use strict";
 
-import cast from "./cast";
+import * as cast from "./cast";
 
 import { onMessage } from "./messageBridge";
 
@@ -34,8 +34,6 @@ onMessage(message => {
     switch (message.subject) {
         case "shim:/initialized": {
             const bridgeInfo = message.data;
-
-            cast.isAvailable = true;
 
             // Call page's API loaded function if defined
             const readyFunction = global.__onGCastApiAvailable;

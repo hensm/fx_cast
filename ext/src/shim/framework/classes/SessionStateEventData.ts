@@ -1,7 +1,5 @@
 "use strict";
 
-import { ErrorCode } from "../../cast/enums";
-
 import CastSession from "./CastSession";
 import EventData from "./EventData";
 

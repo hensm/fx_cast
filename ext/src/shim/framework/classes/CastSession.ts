@@ -1,11 +1,6 @@
 "use strict";
 
-import Image from "../../cast/classes/Image";
-import Receiver from "../../cast/classes/Receiver";
-import Session from "../../cast/classes/Session";
-
-import LoadRequest from "../../cast/media/classes/LoadRequest";
-import Media from "../../cast/media/classes/Media";
+import * as cast from "../../cast";
 
 import ActiveInputStateEventData from "./ActiveInputStateEventData";
 import ApplicationMetadata from "./ApplicationMetadata";
@@ -26,7 +21,7 @@ type MessageListener = (namespace: string, message: string) => void;
 
 
 export default class CastSession {
-    constructor (sessionObj: Session, state: string) {
+    constructor (sessionObj: cast.Session, state: string) {
         console.info("STUB :: CastSession#constructor");
     }
 
@@ -64,12 +59,12 @@ export default class CastSession {
     }
 
     // @ts-ignore
-    public getCastDevice (): Receiver {
+    public getCastDevice (): cast.Receiver {
         console.info("STUB :: CastSession#getCastDevice");
     }
 
     // @ts-ignore
-    public getMediaSession (): Media {
+    public getMediaSession (): cast.media.Media {
         console.info("STUB :: CastSession#getMediaSession");
     }
 
@@ -79,7 +74,7 @@ export default class CastSession {
     }
 
     // @ts-ignore
-    public getSessionObj (): Session {
+    public getSessionObj (): cast.Session {
         console.info("STUB :: CastSession#getSessionObj");
     }
 
@@ -99,7 +94,7 @@ export default class CastSession {
     }
 
     // @ts-ignore
-    public loadMedia (loadRequest: LoadRequest): Promise<string> {
+    public loadMedia (loadRequest: cast.media.LoadRequest): Promise<string> {
         console.info("STUB :: CastSession#loadMedia");
     }
 

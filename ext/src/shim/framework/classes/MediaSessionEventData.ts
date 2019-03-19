@@ -1,6 +1,6 @@
 "use strict";
 
-import Media from "../../cast/media/classes/Media";
+import * as cast from "../../cast";
 
 import EventData from "./EventData";
 
@@ -9,7 +9,7 @@ import { SessionEventType } from "../enums";
 
 export default class ApplicationStatusEventData extends EventData {
     constructor (
-            public mediaSession: Media) {
+            public mediaSession: cast.media.Media) {
 
         super(SessionEventType.MEDIA_SESSION);
     }

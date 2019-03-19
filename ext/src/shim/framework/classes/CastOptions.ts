@@ -1,9 +1,10 @@
 "use strict";
 
-import { AutoJoinPolicy } from "../../cast/enums";
+import * as cast from "../../cast";
+
 
 export default class CastOptions {
-    public autoJoinPolicy: string = AutoJoinPolicy.TAB_AND_ORIGIN_SCOPED;
+    public autoJoinPolicy: string = cast.AutoJoinPolicy.TAB_AND_ORIGIN_SCOPED;
     public language: string = null;
     public receiverApplicationId: string = null;
     public resumeSavedSession: boolean = true;

@@ -1,6 +1,6 @@
 "use strict";
 
-import MediaInfo from "../../cast/media/classes/MediaInfo";
+import * as cast from "../../cast";
 
 import RemotePlayerController from "./RemotePlayerController";
 
@@ -25,7 +25,7 @@ export default class RemotePlayer {
     public isMediaLoaded = false;
     public isMuted = false;
     public isPaused = false;
-    public mediaInfo: MediaInfo = null;
+    public mediaInfo: cast.media.MediaInfo = null;
     public playerState: string = null;
     public savedPlayerState: SavedPlayerState = null;
     public statusText = "";

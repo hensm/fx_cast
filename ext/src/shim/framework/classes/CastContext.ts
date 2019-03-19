@@ -1,8 +1,5 @@
 "use strict";
 
-import Image from "../../cast/classes/Image";
-import Session from "../../cast/classes/Session";
-
 import CastOptions from "./CastOptions";
 import CastSession from "./CastSession";
 import CastStateEventData from "./CastStateEventData";
