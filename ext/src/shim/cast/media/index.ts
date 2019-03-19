@@ -42,45 +42,19 @@ import { IdleReason
 
 export default {
     // Enums
-    IdleReason
-  , MediaCommand
-  , MetadataType
-  , PlayerState
-  , RepeatMode
-  , ResumeState
-  , StreamType
-  , TextTrackEdgeType
-  , TextTrackFontGenericFamily
-  , TextTrackFontStyle
-  , TextTrackType
-  , TextTrackWindowType
-  , TrackType
+    IdleReason, MediaCommand, MetadataType, PlayerState
+  , RepeatMode, ResumeState, StreamType, TextTrackEdgeType
+  , TextTrackFontGenericFamily, TextTrackFontStyle, TextTrackType
+  , TextTrackWindowType, TrackType
 
     // Classes
-  , EditTracksInfoRequest
-  , GenericMediaMetadata
-  , GetStatusRequest
-  , LoadRequest
-  , Media
-  , MediaInfo
-  , MovieMediaMetadata
-  , MusicTrackMediaMetadata
-  , PauseRequest
-  , PhotoMediaMetadata
-  , PlayRequest
-  , QueueInsertItemsRequest
-  , QueueItem
-  , QueueLoadRequest
-  , QueueRemoveItemsRequest
-  , QueueReorderItemsRequest
-  , QueueSetPropertiesRequest
-  , QueueUpdateItemsRequest
-  , SeekRequest
-  , StopRequest
-  , TextTrackStyle
-  , Track
-  , TvShowMediaMetadata
-  , VolumeRequest
+  , EditTracksInfoRequest, GenericMediaMetadata, GetStatusRequest, LoadRequest
+  , Media, MediaInfo, MovieMediaMetadata, MusicTrackMediaMetadata
+  , PauseRequest, PhotoMediaMetadata, PlayRequest, QueueInsertItemsRequest
+  , QueueItem, QueueLoadRequest, QueueRemoveItemsRequest
+  , QueueReorderItemsRequest, QueueSetPropertiesRequest, QueueUpdateItemsRequest
+  , SeekRequest, StopRequest, TextTrackStyle, Track
+  , TvShowMediaMetadata, VolumeRequest
 
   , timeout: {
         editTracksInfo: 0
