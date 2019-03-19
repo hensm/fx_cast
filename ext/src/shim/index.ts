@@ -7,13 +7,14 @@ import { onMessage } from "./messageBridge";
 
 const global = (window as any);
 
-if (!global.chrome) {
-    global.chrome = {};
-}
-
+global.chrome = {};
 global.chrome.cast = cast;
 
-
+/**
+ * If loaded within a page via a <script> element,
+ * document.currentScript should exist and we can check its
+ * [src] query string for the loadCastFramework param.
+ */
 if (document.currentScript) {
     const currentScript = (document.currentScript as HTMLScriptElement);
     const currentScriptUrl = new URL(currentScript.src);

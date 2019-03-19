@@ -25,7 +25,7 @@ type EventHandler = (eventData:
 type MessageListener = (namespace: string, message: string) => void;
 
 
-export default class RemotePlayer {
+export default class CastSession {
     constructor (sessionObj: Session, state: string) {
         console.info("STUB :: CastSession#constructor");
     }

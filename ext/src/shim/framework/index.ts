@@ -44,16 +44,22 @@ export default {
   , RemotePlayer, RemotePlayerChangedEvent, RemotePlayerController
   , SessionStateEventData, VolumeEventData
 
-  , CastContext: Object.assign(CastContext, {
-        getInstance () {
+    /**
+     * CastContext class with an extra getInstance method used to
+     * instantiate and fetch a singleton instance.
+     */
+  , CastContext: {
+        ...CastContext
+
+      , getInstance () {
             if (castContext) {
-                return castContext;
+                return castContext
             }
 
             castContext = new CastContext();
             return castContext;
         }
-    })
+    }
 
   , VERSION: "1.0.07"
 
