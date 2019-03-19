@@ -1,7 +1,6 @@
 "use strict";
 
 import cast from "./cast";
-import media from "./media";
 
 import { onMessage } from "./messageBridge";
 
@@ -13,7 +12,6 @@ if (!global.chrome) {
 }
 
 global.chrome.cast = cast;
-global.chrome.cast.media = media;
 
 
 onMessage(message => {

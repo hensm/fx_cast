@@ -1,7 +1,7 @@
 "use strict";
 
 import _Error from "./cast/classes/Error";
-import Media from "./media/classes/Media";
+import Media from "./cast/media/classes/Media";
 
 export type SuccessCallback = () => void;
 export type ErrorCallback = (err: _Error) => void;

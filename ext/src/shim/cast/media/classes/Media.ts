@@ -15,21 +15,21 @@ import SeekRequest from "./SeekRequest";
 import StopRequest from "./StopRequest";
 import VolumeRequest from "./VolumeRequest";
 
-import Volume from "../../cast/classes/Volume";
+import Volume from "../../classes/Volume";
 
 import { PlayerState
        , RepeatMode } from "../enums";
 
-import _Error from "../../cast/classes/Error";
-import { ErrorCode } from "../../cast/enums";
+import _Error from "../../classes/Error";
+import { ErrorCode } from "../../enums";
 
-import { onMessage, sendMessageResponse } from "../../messageBridge";
+import { onMessage, sendMessageResponse } from "../../../messageBridge";
 
 import { Callbacks
        , CallbacksMap
        , ErrorCallback
        , SuccessCallback
-       , UpdateListener } from "../../types";
+       , UpdateListener } from "../../../types";
 
 
 const _id = new WeakMap<Media, string>();

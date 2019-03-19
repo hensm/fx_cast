@@ -1,6 +1,6 @@
 "use strict";
 
-import Image from "../../cast/classes/Image";
+import Image from "../../classes/Image";
 
 import { MetadataType } from "../enums";
 

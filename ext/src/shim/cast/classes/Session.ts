@@ -8,9 +8,9 @@ import Receiver from "./Receiver";
 import SenderApplication from "./SenderApplication";
 import Volume from "./Volume";
 
-import LoadRequest from "../../media/classes/LoadRequest";
-import Media from "../../media/classes/Media";
-import QueueLoadRequest from "../../media/classes/QueueLoadRequest";
+import LoadRequest from "../media/classes/LoadRequest";
+import Media from "../media/classes/Media";
+import QueueLoadRequest from "../media/classes/QueueLoadRequest";
 
 import { ErrorCode
        , SessionStatus

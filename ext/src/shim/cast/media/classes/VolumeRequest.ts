@@ -1,6 +1,6 @@
 "use strict";
 
-import Volume from "../../cast/classes/Volume";
+import Volume from "../../classes/Volume";
 
 
 export default class VolumeRequest {

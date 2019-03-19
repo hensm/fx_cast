@@ -24,11 +24,10 @@ import { AutoJoinPolicy
        , SessionStatus
        , VolumeControlType } from "./enums";
 
+import media from "./media";
 
 import { requestSession as requestSessionTimeout } from "../timeout";
-
 import { onMessage, sendMessageResponse } from "../messageBridge";
-
 
 
 type ReceiverActionListener = (
@@ -67,6 +66,9 @@ export default {
   , VERSION: [1, 2]
   , isAvailable: false
   , timeout: new Timeout()
+
+    // chrome.cast.media namespace
+  , media
 
 
   , addReceiverActionListener: (
