@@ -117,7 +117,6 @@
 .bridge__stats {
     border-collapse: collapse;
     border-spacing: 0;
-    width: max-content;
 }
 
 .bridge__stats th {
