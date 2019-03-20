@@ -7,7 +7,10 @@ import { onMessage } from "./messageBridge";
 
 const global = (window as any);
 
-global.chrome = {};
+if (!global.chrome) {
+    global.chrome = {};
+}
+
 global.chrome.cast = cast;
 
 /**
@@ -22,8 +25,11 @@ if (document.currentScript) {
 
     // Load Framework API if requested
     if (currentScriptParams.get("loadCastFramework") === "1") {
-        import("./framework").then(framework => {
+        if (!global.cast) {
             global.cast = {};
+        }
+
+        import("./framework").then(framework => {
             global.cast.framework = framework.default;
         });
     }
