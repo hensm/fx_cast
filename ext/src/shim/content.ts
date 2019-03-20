@@ -3,6 +3,15 @@
 import { Message } from "../types";
 import { onMessageResponse, sendMessage } from "./messageBridge";
 
+
+if ((window as any)._isFramework) {
+    const polyfillScriptElement = document.createElement("script");
+    polyfillScriptElement.src = browser.runtime.getURL(
+            "vendor/webcomponents-lite.js")
+    document.head.append(polyfillScriptElement);
+}
+
+
 // Message ports
 const backgroundPort = browser.runtime.connect({ name: "shim" });
 let popupPort: browser.runtime.Port;

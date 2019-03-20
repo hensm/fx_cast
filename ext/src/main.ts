@@ -125,18 +125,23 @@ const SENDER_SCRIPT_FRAMEWORK_URL =
 browser.webRequest.onBeforeRequest.addListener(
         async details => {
 
+            const isFramework = details.url === SENDER_SCRIPT_FRAMEWORK_URL;
+
+            await browser.tabs.executeScript(details.tabId, {
+                code: `window._isFramework = ${isFramework}`
+              , frameId: details.frameId
+              , runAt: "document_start"
+            });
+
             await browser.tabs.executeScript(details.tabId, {
                 file: "shim/content.js"
               , frameId: details.frameId
               , runAt: "document_start"
             });
 
-            const redirectUrl = details.url === SENDER_SCRIPT_URL
-                ? browser.runtime.getURL("shim/bundle.js")
-                : browser.runtime.getURL("shim/bundle.js?loadCastFramework=1");
 
             return {
-                redirectUrl
+                redirectUrl: browser.runtime.getURL("shim/bundle.js")
             };
         }
       , { urls: [
