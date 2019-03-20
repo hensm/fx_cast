@@ -5,7 +5,7 @@ import EventData from "./EventData";
 import { CastContextEventType } from "../enums";
 
 
-export default class ApplicationStatusEventData extends EventData {
+export default class CastStateEventData extends EventData {
     constructor (
             public castState: string) {
 

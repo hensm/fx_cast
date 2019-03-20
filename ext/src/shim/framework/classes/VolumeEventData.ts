@@ -3,7 +3,7 @@
 import { SessionEventType } from "../enums";
 
 
-export default class ApplicationStatusEventData {
+export default class VolumeEventData {
     public type = SessionEventType.VOLUME_CHANGED;
 
     constructor (

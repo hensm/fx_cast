@@ -10,7 +10,7 @@ type EventHandler = (eventData:
         CastStateEventData
       | SessionStateEventData) => void;
 
-export default class ApplicationMetadata {
+export default class CastContext {
     public addEventListener (type: string, handler: EventHandler): void {
         console.info("STUB :: CastContext#addEventListener");
     }
