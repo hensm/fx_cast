@@ -6,7 +6,7 @@ import ActiveInputStateEventData from "./classes/ActiveInputStateEventData";
 import ApplicationMetadata from "./classes/ApplicationMetadata";
 import ApplicationMetadataEventData from "./classes/ApplicationMetadataEventData";
 import ApplicationStatusEventData from "./classes/ApplicationStatusEventData";
-import CastContext from "./classes/CastContext";
+import CastContext, { instance } from "./classes/CastContext";
 import CastOptions from "./classes/CastOptions";
 import CastSession from "./classes/CastSession";
 import CastStateEventData from "./classes/CastStateEventData";
@@ -26,11 +26,10 @@ import { ActiveInputState
        , SessionEventType
        , SessionState } from "./enums";
 
+import GoogleCastLauncher from "./GoogleCastLauncher";
 
 import { onMessage } from "../messageBridge";
 
-
-let castContext: CastContext = null;
 
 export default {
     // Enums
@@ -52,12 +51,7 @@ export default {
         ...CastContext
 
       , getInstance () {
-            if (castContext) {
-                return castContext;
-            }
-
-            castContext = new CastContext();
-            return castContext;
+            return instance;
         }
     }
 
@@ -67,3 +61,19 @@ export default {
         console.info("STUB :: cast.framework.setLoggerLevel");
     }
 };
+
+
+/**
+ * The Framework API defines a <google-cast-launcher> element
+ * and a <button is="google-cast-button"> element extension,
+ * both of which produce the same result.
+ *
+ * Chrome allowed custom elements to extend <button> elements
+ * via Element#createShadowRoot, but the standard
+ * Element#attachShadow method supported in Firefox specifies a
+ * limited whitelist of elements that are extendable.
+ *
+ * It's not officially advertised in the cast docs, so it
+ * shouldn't be much of a compatibility issue to ignore it.
+ */
+customElements.define("google-cast-launcher", GoogleCastLauncher);

@@ -1,20 +1,14 @@
 "use strict";
 
+import * as cast from "../../cast";
+
 import CastOptions from "./CastOptions";
 import CastSession from "./CastSession";
 import CastStateEventData from "./CastStateEventData";
 import SessionStateEventData from "./SessionStateEventData";
 
 
-type EventHandler = (eventData:
-        CastStateEventData
-      | SessionStateEventData) => void;
-
-export default class CastContext {
-    public addEventListener (type: string, handler: EventHandler): void {
-        console.info("STUB :: CastContext#addEventListener");
-    }
-
+export default class CastContext extends EventTarget {
     public endCurrentSession (stopCasting: boolean): void {
         console.info("STUB :: CastContext#endCurrentSession");
     }
@@ -34,10 +28,6 @@ export default class CastContext {
         console.info("STUB :: CastContext#getSessionState");
     }
 
-    public removeEventListener (type: string, handler: EventHandler): void {
-        console.info("STUB :: CastContext#removeEventListener");
-    }
-
     // @ts-ignore
     public requestSession (): Promise<string> {
         console.info("STUB :: CastContext#requestSession");
@@ -47,3 +37,5 @@ export default class CastContext {
         console.info("STUB :: CastContext#setOptions");
     }
 }
+
+export const instance = new CastContext();

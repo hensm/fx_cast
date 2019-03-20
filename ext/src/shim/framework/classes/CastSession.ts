@@ -10,26 +10,13 @@ import MediaSessionEventData from "./MediaSessionEventData";
 import VolumeEventData from "./VolumeEventData";
 
 
-type EventHandler = (eventData:
-        ApplicationStatusEventData
-      | ApplicationMetadataEventData
-      | ActiveInputStateEventData
-      | MediaSessionEventData
-      | VolumeEventData) => void;
-
 type MessageListener = (namespace: string, message: string) => void;
 
 
-export default class CastSession {
+export default class CastSession extends EventTarget {
     constructor (sessionObj: cast.Session, state: string) {
+        super();
         console.info("STUB :: CastSession#constructor");
-    }
-
-    public addEventListener (
-            type: string
-          , handler: EventHandler): void {
-
-        console.info("STUB :: CastSession#addEventListener");
     }
 
     public addMessageListener (
@@ -96,13 +83,6 @@ export default class CastSession {
     // @ts-ignore
     public loadMedia (loadRequest: cast.media.LoadRequest): Promise<string> {
         console.info("STUB :: CastSession#loadMedia");
-    }
-
-    public removeEventListener (
-            type: string
-          , handler: EventHandler): void {
-
-        console.info("STUB :: CastSession#removeEventListener");
     }
 
     public removeMessageListener (

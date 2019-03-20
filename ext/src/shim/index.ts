@@ -5,13 +5,13 @@ import * as cast from "./cast";
 import { onMessage } from "./messageBridge";
 
 
-const global = (window as any);
+const _window = (window as any);
 
-if (!global.chrome) {
-    global.chrome = {};
+if (!_window.chrome) {
+    _window.chrome = {};
 }
 
-global.chrome.cast = cast;
+_window.chrome.cast = cast;
 
 /**
  * If loaded within a page via a <script> element,
@@ -25,12 +25,12 @@ if (document.currentScript) {
 
     // Load Framework API if requested
     if (currentScriptParams.get("loadCastFramework") === "1") {
-        if (!global.cast) {
-            global.cast = {};
+        if (!_window.cast) {
+            _window.cast = {};
         }
 
         import("./framework").then(framework => {
-            global.cast.framework = framework.default;
+            _window.cast.framework = framework.default;
         });
     }
 }
@@ -42,7 +42,7 @@ onMessage(message => {
             const bridgeInfo = message.data;
 
             // Call page's API loaded function if defined
-            const readyFunction = global.__onGCastApiAvailable;
+            const readyFunction = _window.__onGCastApiAvailable;
             if (readyFunction && typeof readyFunction === "function") {
                 readyFunction(bridgeInfo && bridgeInfo.isVersionCompatible);
             }

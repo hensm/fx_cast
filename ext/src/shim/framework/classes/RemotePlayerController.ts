@@ -4,15 +4,10 @@ import RemotePlayer from "./RemotePlayer";
 import RemotePlayerChangedEvent from "./RemotePlayerChangedEvent";
 
 
-type EventHandler = (event: RemotePlayerChangedEvent) => void;
-
-export default class RemotePlayerController {
+export default class RemotePlayerController extends EventTarget {
     constructor (player: RemotePlayer) {
+        super();
         console.info("STUB :: RemotePlayerController#constructor");
-    }
-
-    public addEventListener (type: string, handler: EventHandler): void {
-        console.info("STUB :: RemotePlayerContoller#addEventListener");
     }
 
     public getFormattedTime (timeInSec: number): string {
@@ -39,10 +34,6 @@ export default class RemotePlayerController {
 
     public playOrPause (): void {
         console.info("STUB :: RemotePlayerController#playOrPause");
-    }
-
-    public removeEventListener (type: string, handler: EventHandler): void {
-        console.info("STUB :: RemotePlayerController#removeEventListener");
     }
 
     public seek (): void {

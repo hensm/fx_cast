@@ -33,7 +33,7 @@ import { onMessage, sendMessageResponse } from "../messageBridge";
 
 type ReceiverActionListener = (
         receiver: Receiver
-      , receiverAction: typeof ReceiverAction) => void;
+      , receiverAction: string) => void;
 
 type RequestSessionSuccessCallback = (
         session: Session
