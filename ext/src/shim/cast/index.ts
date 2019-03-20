@@ -80,7 +80,7 @@ export function addReceiverActionListener (
 
     console.info("fx_cast (Debug): cast.addReceiverActionListener");
     receiverListeners.add(listener);
-};
+}
 
 export function initialize (
         newApiConfig: ApiConfig
@@ -106,22 +106,22 @@ export function initialize (
         : ReceiverAvailability.UNAVAILABLE);
 
     successCallback();
-};
+}
 
 export function logMessage (message: string): void {
     /* tslint:disable-next-line:no-console */
     console.log("CAST MSG:", message);
-};
+}
 
 export function precache (data: string): void {
     console.info("STUB :: cast.precache");
-};
+}
 
 export function removeReceiverActionListener (
         listener: ReceiverActionListener): void {
 
     receiverListeners.delete(listener);
-};
+}
 
 export function requestSession (
         successCallback: RequestSessionSuccessCallback
@@ -159,11 +159,11 @@ export function requestSession (
     sendMessageResponse({
         subject: "main:/openPopup"
     });
-};
+}
 
 export function requestSessionById (sessionId: string): void {
     console.info("STUB :: cast.requestSessionById");
-};
+}
 
 export function setCustomReceivers (
         receivers: Receiver[]
@@ -171,19 +171,19 @@ export function setCustomReceivers (
       , errorCallback: ErrorCallback): void {
 
     console.info("STUB :: cast.setCustomReceivers");
-};
+}
 
 export function setPageContext (win: Window): void {
     console.info("STUB :: cast.setPageContext");
-};
+}
 
 export function setReceiverDisplayStatus (sessionId: string): void {
     console.info("STUB :: cast.setReceiverDisplayStatus");
-};
+}
 
 export function unescape (escaped: string): string {
     return unescape(escaped);
-};
+}
 
 
 onMessage(message => {

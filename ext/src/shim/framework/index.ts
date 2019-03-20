@@ -53,7 +53,7 @@ export default {
 
       , getInstance () {
             if (castContext) {
-                return castContext
+                return castContext;
             }
 
             castContext = new CastContext();
