@@ -3,12 +3,11 @@
 import { Message } from "../types";
 import { onMessageResponse, sendMessage } from "./messageBridge";
 
+import { loadScript } from "../lib/utils";
+
 
 if ((window as any)._isFramework) {
-    const polyfillScriptElement = document.createElement("script");
-    polyfillScriptElement.src = browser.runtime.getURL(
-            "vendor/webcomponents-lite.js")
-    document.head.append(polyfillScriptElement);
+    loadScript(browser.runtime.getURL("vendor/webcomponents-lite.js"));
 }
 
 

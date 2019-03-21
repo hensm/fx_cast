@@ -4,6 +4,8 @@ import * as cast from "./cast";
 
 import { onMessage } from "./messageBridge";
 
+import { loadScript } from "../lib/utils";
+
 
 const _window = (window as any);
 
@@ -18,7 +20,7 @@ const CAST_FRAMEWORK_SCRIPT_URL =
         "https://www.gstatic.com/cast/sdk/libs/sender/1.0/cast_framework.js";
 
 let bridgeInfo: any;
-let scriptLoaded = false;
+let isFramework = false;
 
 // Call page's API loaded function if defined
 function callPageReadyFunction () {
@@ -45,16 +47,11 @@ if (document.currentScript) {
             _window.cast = {};
         }
 
-        const scriptElement = document.createElement("script");
-        scriptElement.src = CAST_FRAMEWORK_SCRIPT_URL;
-        (document.head || document.documentElement).append(scriptElement);
+        isFramework = true;
 
-        scriptElement.addEventListener("load", ev => {
-            if (bridgeInfo) {
-                callPageReadyFunction();
-            }
-
-            scriptLoaded = true;
+        const script = loadScript(CAST_FRAMEWORK_SCRIPT_URL);
+        script.addEventListener("load", ev => {
+            callPageReadyFunction();
         });
 
         /*
@@ -72,7 +69,7 @@ onMessage(message => {
         case "shim:/initialized": {
             bridgeInfo = message.data;
 
-            if (!scriptLoaded) {
+            if (!isFramework) {
                 callPageReadyFunction();
             }
 

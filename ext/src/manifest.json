@@ -47,6 +47,6 @@
     ]
   , "web_accessible_resources": [
         "shim/bundle.js"
-      , "vendor/webcomponents-lite.min.js"
+      , "vendor/webcomponents-lite.js"
     ]
 }

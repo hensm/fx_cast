@@ -35,3 +35,15 @@ export function getWindowCenteredProps (
 
 // tslint:disable-next-line:max-line-length
 export const REMOTE_MATCH_PATTERN_REGEX = /^(?:(?:(\*|https?|ftp):\/\/(\*|(?:\*\.(?:[^\/\*:]\.?)+(?:[^\.])|[^\/\*:]*))?)(\/.*)|<all_urls>)$/;
+
+
+export function loadScript (
+        scriptUrl: string
+      , doc: Document = document): HTMLScriptElement {
+
+    const scriptElement = doc.createElement("script");
+    scriptElement.src = scriptUrl;
+    (doc.head || doc.documentElement).append(scriptElement);
+
+    return scriptElement;
+}
