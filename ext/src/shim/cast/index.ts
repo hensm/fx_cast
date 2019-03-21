@@ -182,7 +182,7 @@ export function setReceiverDisplayStatus (sessionId: string): void {
 }
 
 export function unescape (escaped: string): string {
-    return unescape(escaped);
+    return decodeURI(escaped);
 }
 
 
