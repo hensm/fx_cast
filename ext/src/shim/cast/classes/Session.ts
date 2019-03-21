@@ -16,7 +16,9 @@ import { ErrorCode
        , SessionStatus
        , VolumeControlType } from "../enums";
 
-import { onMessage, sendMessageResponse } from "../../messageBridge";
+import { ListenerObject
+       , onMessage
+       , sendMessageResponse } from "../../messageBridge";
 
 import { Callbacks
        , CallbacksMap
@@ -29,6 +31,7 @@ import { Callbacks
 
 
 const _id = new WeakMap<Session, string>();
+const _listener = new WeakMap<Session, ListenerObject>();
 
 const _messageListeners = new WeakMap<
         Session, Map<string, Set<MessageListener>>>();
@@ -90,7 +93,7 @@ export default class Session {
             });
         }
 
-        onMessage(message => {
+        const listenerObject = onMessage(message => {
             // Filter other session messages
             if (message._id && message._id !== _id.get(this)) {
                 return;
@@ -98,6 +101,9 @@ export default class Session {
 
             switch (message.subject) {
                 case "shim:/session/stopped": {
+                    // Disconnect from extension messages
+                    _listener.get(this).disconnect();
+
                     this.status = SessionStatus.STOPPED;
 
                     for (const listener of _updateListeners.get(this)) {
@@ -215,6 +221,9 @@ export default class Session {
                     const [ successCallback, errorCallback ]
                             = _stopCallbacks.get(this).get(stopId);
 
+                    // Disconnect from extension messages
+                    _listener.get(this).disconnect();
+
                     if (error && errorCallback) {
                         errorCallback(new _Error(ErrorCode.SESSION_ERROR));
                     } else {
@@ -235,6 +244,8 @@ export default class Session {
                 }
             }
         });
+
+        _listener.set(this, listenerObject);
     }
 
 

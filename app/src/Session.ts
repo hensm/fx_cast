@@ -37,10 +37,12 @@ export default class Session {
           , port: number
           , appId: string
           , sessionId: number
+          , referenceId: string
           , sendMessageCallback: SendMessageCallback) {
 
-        this.sendMessageCallback = sendMessageCallback;
         this.sessionId = sessionId;
+        this.referenceId = referenceId;
+        this.sendMessageCallback = sendMessageCallback;
 
         this.client = new Client();
 

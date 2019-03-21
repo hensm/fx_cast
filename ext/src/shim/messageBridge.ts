@@ -2,11 +2,16 @@
 
 import { Message } from "../types";
 
+
 type ListenerFunc = (message: Message) => void;
 
+export interface ListenerObject {
+    disconnect (): void;
+}
 
-export function onMessage (listener: ListenerFunc) {
-    document.addEventListener("__castMessage", (ev: CustomEvent) => {
+
+export function onMessage (listener: ListenerFunc): ListenerObject {
+    function on__castMessage (ev: CustomEvent) {
         listener(JSON.parse(ev.detail));
 
         /**
@@ -18,7 +23,19 @@ export function onMessage (listener: ListenerFunc) {
          * intercept the event, and cancel it.
          */
         ev.stopPropagation();
-    }, true);
+    }
+
+    document.addEventListener(
+            "__castMessage"
+          , on__castMessage, true);
+
+    return {
+        disconnect () {
+            document.removeEventListener(
+                    "__castMessage"
+                  , on__castMessage, true);
+        }
+    };
 }
 
 export function sendMessageResponse (message: Message) {
@@ -30,10 +47,22 @@ export function sendMessageResponse (message: Message) {
 }
 
 
-export function onMessageResponse (listener: ListenerFunc) {
-    document.addEventListener("__castMessageResponse", (ev: CustomEvent) => {
+export function onMessageResponse (listener: ListenerFunc): ListenerObject {
+    function on__castMessageResponse (ev: CustomEvent) {
         listener(JSON.parse(ev.detail));
-    }, true);
+    }
+
+    document.addEventListener(
+            "__castMessageResponse"
+          , on__castMessageResponse, true);
+
+    return {
+        disconnect () {
+            document.removeEventListener(
+                    "__castMessageResponse"
+                  , on__castMessageResponse, true);
+        }
+    };
 }
 
 export function sendMessage (message: Message) {

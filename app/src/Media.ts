@@ -1,5 +1,7 @@
 "use strict";
 
+import { Channel } from "castv2";
+
 import Session from "./Session";
 
 import { Message
@@ -27,7 +29,7 @@ export default class Media {
     private mediaSessionId: number;
     private referenceId: string;
     private session: Session;
-    private channel: any;
+    private channel: Channel;
     private sendMessageCallback: SendMessageCallback;
 
     constructor (
