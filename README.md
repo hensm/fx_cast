@@ -56,7 +56,7 @@ brew install dpkg rpm makensis
 Debian/Ubuntu:
 
 ````sh
-sudo apt install dpkg rpm makensis
+sudo apt install dpkg rpm nsis
 ````
 
 Fedora:
