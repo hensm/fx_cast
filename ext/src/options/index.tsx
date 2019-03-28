@@ -244,7 +244,8 @@ class OptionsApp extends Component<{}, OptionsAppState> {
                         <div id="status-line">
                             { this.state.hasSaved && _("optionsSaved") }
                         </div>
-                        <button onClick={ this.handleReset }>
+                        <button onClick={ this.handleReset }
+                                type="button">
                             { _("optionsReset") }
                         </button>
                         <button type="submit"

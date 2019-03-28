@@ -58,10 +58,12 @@ export default class EditableListItem extends Component<
                                  onKeyPress={ this.handleInputKeyPress }/>
                         : this.props.text }
                 </div>
-                <button onClick={ this.handleEditBegin }>
+                <button onClick={ this.handleEditBegin }
+                        type="button">
                     { _("optionsUserAgentWhitelistEditItem") }
                 </button>
-                <button onClick={ this.handleRemove }>
+                <button onClick={ this.handleRemove }
+                        type="button">
                     { _("optionsUserAgentWhitelistRemoveItem") }
                 </button>
             </li>

@@ -15,7 +15,6 @@ interface EditableListProps {
 }
 
 interface EditableListState {
-    items: Set<string>;
     addingNewItem: boolean;
     rawView: boolean;
     rawViewValue: string;
@@ -30,8 +29,7 @@ export default class EditableList extends Component<
         super(props);
 
         this.state = {
-            items: new Set(this.props.data)
-          , addingNewItem: false
+            addingNewItem: false
           , rawView: false
           , rawViewValue: ""
         };
@@ -47,18 +45,18 @@ export default class EditableList extends Component<
     }
 
     public render () {
-        const items = Array.from(this.state.items.values());
-
         return (
             <div className="editable-list">
                 <div className="editable-list__view-actions">
                     { this.state.rawView &&
                         <button className="editable-list__save-raw-button"
-                                onClick={ this.handleSaveRaw }>
+                                onClick={ this.handleSaveRaw }
+                                type="button">
                             { _("optionsUserAgentWhitelistSaveRaw") }
                         </button> }
                     <button className="editable-list__view-button"
-                            onClick={ this.handleSwitchView }>
+                            onClick={ this.handleSwitchView }
+                            type="button">
                         { this.state.rawView
                             ? _("optionsUserAgentWhitelistBasicView")
                             : _("optionsUserAgentWhitelistRawView") }
@@ -68,14 +66,14 @@ export default class EditableList extends Component<
                 { this.state.rawView
                     ? (
                         <textarea className="editable-list__raw-view"
-                                  rows={ items.length}
+                                  rows={ this.props.data.length}
                                   value={ this.state.rawViewValue}
                                   onChange={ this.handleRawViewTextAreaChange }
                                   ref={ el => { this.rawViewTextArea = el; }}>
                         </textarea>
                     ) : (
                         <ul className="editable-list__items">
-                            { items.map((item, i) =>
+                            { this.props.data.map((item, i) =>
                                 <EditableListItem text={ item }
                                                   itemPattern={ this.props.itemPattern }
                                                   itemPatternError={ this.props.itemPatternError }
@@ -92,7 +90,8 @@ export default class EditableList extends Component<
 
                             <div className="editable-list__item editable-list__item-actions">
                                 <button className="editable-list__add-button"
-                                        onClick={ this.handleAddItem }>
+                                        onClick={ this.handleAddItem }
+                                        type="button">
                                     { _("optionsUserAgentWhitelistAddItem") }
                                 </button>
                             </div>
@@ -103,26 +102,17 @@ export default class EditableList extends Component<
     }
 
     private handleItemRemove (item: string) {
-        this.setState(currentState => {
-            const newItems = new Set(currentState.items);
-            newItems.delete(item);
-            return {
-                items: newItems
-            };
-        }, () => {
-            this.props.onChange(Array.from(this.state.items));
-        });
+        const newItems = new Set(this.props.data);
+        newItems.delete(item);
+
+        this.props.onChange([...newItems]);
     }
 
     private handleItemEdit (item: string, newValue: string) {
-        this.setState(currentState => ({
-            items: new Set([...currentState.items]
-                    .map(currentItem => currentItem === item
+        this.props.onChange(this.props.data.map(
+                currentItem => currentItem === item
                         ? newValue
-                        : currentItem))
-        }), () => {
-            this.props.onChange(Array.from(this.state.items));
-        });
+                        : currentItem));
     }
 
     private handleSwitchView () {
@@ -136,7 +126,7 @@ export default class EditableList extends Component<
 
             return {
                 rawView: true
-              , rawViewValue: Array.from(currentState.items.values()).join("\n")
+              , rawViewValue: this.props.data.join("\n")
             };
         });
     }
@@ -158,11 +148,7 @@ export default class EditableList extends Component<
                 this.rawViewTextArea.setCustomValidity("");
             }
 
-            return {
-                items: new Set(newItems)
-            };
-        }, () => {
-            this.props.onChange(Array.from(this.state.items));
+            this.props.onChange(newItems);
         });
     }
 
@@ -189,11 +175,10 @@ export default class EditableList extends Component<
     }
 
     private handleNewItemEdit (item: string, newItem: string) {
-        this.setState(currentState => ({
-            items: new Set([ ...currentState.items, newItem ])
-          , addingNewItem: false
-        }), () => {
-            this.props.onChange(Array.from(this.state.items));
+        this.setState({
+            addingNewItem: false
+        }, () => {
+            this.props.onChange([ ...this.props.data, newItem ]);
         });
     }
 }
