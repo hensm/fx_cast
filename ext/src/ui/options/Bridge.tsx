@@ -5,9 +5,9 @@ import React, { Component } from "react";
 import semver from "semver";
 
 import { getNextEllipsis
-       , getWindowCenteredProps } from "../lib/utils";
+       , getWindowCenteredProps } from "../../lib/utils";
 
-import { BridgeInfo } from "../lib/getBridgeInfo";
+import { BridgeInfo } from "../../lib/getBridgeInfo";
 
 const _ = browser.i18n.getMessage;
 

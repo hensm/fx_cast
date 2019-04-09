@@ -3,8 +3,8 @@
 import React, { Component } from "react";
 import ReactDOM from "react-dom";
 
-import { getNextEllipsis } from "../lib/utils";
-import { DownloadDelta, Message } from "../types";
+import { getNextEllipsis } from "../../lib/utils";
+import { DownloadDelta, Message } from "../../types";
 
 const _ = browser.i18n.getMessage;
 

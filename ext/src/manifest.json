@@ -32,7 +32,7 @@
   , "manifest_version": 2
 
   , "options_ui": {
-        "page": "options/index.html"
+        "page": "ui/options/index.html"
     }
   , "permissions": [
         "downloads"

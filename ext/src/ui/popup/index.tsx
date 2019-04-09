@@ -4,8 +4,8 @@
 import React, { Component } from "react";
 import ReactDOM from "react-dom";
 
-import { getNextEllipsis } from "../lib/utils";
-import * as types from "../types";
+import { getNextEllipsis } from "../../lib/utils";
+import * as types from "../../types";
 
 const _ = browser.i18n.getMessage;
 

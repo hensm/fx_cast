@@ -2,7 +2,7 @@
 
 import getBridgeInfo from "./lib/getBridgeInfo";
 import messageRouter from "./lib/messageRouter";
-import defaultOptions, { Options } from "./options/defaultOptions";
+import defaultOptions, { Options } from "./defaultOptions";
 
 import { getChromeUserAgent } from "./lib/userAgents";
 import { getWindowCenteredProps } from "./lib/utils";
@@ -365,7 +365,7 @@ async function openPopup (shimId: string) {
     const centeredProps = getWindowCenteredProps(win, 350, 200);
 
     const popup = await browser.windows.create({
-        url: "popup/index.html"
+        url: "ui/popup/index.html"
       , type: "popup"
       , ...centeredProps
     });

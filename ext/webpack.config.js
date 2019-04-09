@@ -7,9 +7,13 @@ const CopyWebpackPlugin = require("copy-webpack-plugin");
 module.exports = (env) => ({
     entry: {
         "main": `${env.includePath}/main.ts`
-      , "popup/bundle": `${env.includePath}/popup/index.tsx`
-      , "options/bundle": `${env.includePath}/options/index.tsx`
-      , "updater/bundle": `${env.includePath}/updater/index.tsx`
+
+        // UI
+      , "ui/popup/bundle": `${env.includePath}/ui/popup/index.tsx`
+      , "ui/options/bundle": `${env.includePath}/ui/options/index.tsx`
+      , "ui/updater/bundle": `${env.includePath}/ui/updater/index.tsx`
+
+        // Sender apps
       , "mediaCast": `${env.includePath}/mediaCast.js`
       , "mirroringCast": `${env.includePath}/mirroringCast.js`
 
