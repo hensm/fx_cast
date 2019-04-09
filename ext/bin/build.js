@@ -20,10 +20,10 @@ const argv = minimist(process.argv.slice(2), {
     boolean: [ "package", "watch" ]
   , string: [ "mirroringAppId", "mode" ]
   , default: {
-        package: false                           // Should package with web-ext
-      , watch: false                             // Should run webpack in watch mode
+        package: false                                  // Should package with web-ext
+      , watch: false                                    // Should run webpack in watch mode
       , mirroringAppId: extPackageMeta.__mirroringAppId // Chromecast receiver app ID
-      , mode: "development"                      // webpack mode
+      , mode: "development"                             // webpack mode
     }
 });
 
@@ -101,14 +101,15 @@ if (argv.watch) {
                 shouldExitProgram: false
 
             }).then(result => {
-                const archiveName = path.basename(result.extensionPath);
+                const outputName = path.basename(result.extensionPath);
 
-                fs.moveSync(path.join(DIST_PATH, archiveName)
-                      , path.join(DIST_PATH, archiveName.replace("zip", "xpi")));
+                // Rename output extension to XPI
+                fs.moveSync(path.join(DIST_PATH, outputName)
+                      , path.join(DIST_PATH, outputName.replace("zip", "xpi")));
 
                 // Only need the built extension archive
                 fs.remove(UNPACKED_PATH);
-            })
+            });
         }
     });
 }
@@ -131,8 +132,12 @@ function handleCompilerOutput (err, stats) {
     const info = stats.toJson();
 
     // Log errors/warnings
-    if (stats.hasErrors()) console.error(info.errors);
-    if (stats.hasWarnings()) console.warn(info.warnings);
+    if (stats.hasErrors()) {
+        console.error(info.errors);
+    }
+    if (stats.hasWarnings()) {
+        console.warn(info.warnings);
+    }
 
     // Log formatted output
     console.log(stats.toString());
