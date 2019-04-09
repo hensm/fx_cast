@@ -58,7 +58,7 @@ const webpackConfig = require(`${ROOT}/webpack.config.js`)({
 
     // eval source map needs special CSP
   , contentSecurityPolicy: argv.mode === "production"
-        ? "default-src 'self'"
+        ? "script-src 'self'; object-src 'self'"
         : "script-src 'self' 'unsafe-eval'; object-src 'self'"
 
     // Developer info
