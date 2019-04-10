@@ -529,17 +529,21 @@ function onConnectPopup (port: browser.runtime.Port) {
 
 browser.runtime.onConnect.addListener(port => {
     switch (port.name) {
-        case "shim": onConnectShim(port); break;
-        case "popup": onConnectPopup(port); break;
+        case "shim":
+            onConnectShim(port);
+            break;
+        case "popup":
+            onConnectPopup(port);
+            break;
     }
 });
 
 
-messageRouter.register("mirrorCast", (message: object) => {
+messageRouter.register("mirrorCast", message => {
     browser.tabs.sendMessage(mirrorCastTabId, message
           , { frameId: mirrorCastFrameId });
 });
-messageRouter.register("mediaCast", (message: object) => {
+messageRouter.register("mediaCast", message => {
     browser.tabs.sendMessage(mediaCastTabId, message
           , { frameId: mediaCastFrameId });
 });
