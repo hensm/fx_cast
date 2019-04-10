@@ -1,8 +1,8 @@
 "use strict";
 
+import defaultOptions, { Options } from "./defaultOptions";
 import getBridgeInfo from "./lib/getBridgeInfo";
 import messageRouter from "./lib/messageRouter";
-import defaultOptions, { Options } from "./defaultOptions";
 
 import { getChromeUserAgent } from "./lib/userAgents";
 import { getWindowCenteredProps } from "./lib/utils";

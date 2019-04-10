@@ -4,8 +4,8 @@ import { Message } from "../types";
 
 
 interface Details {
-    tabId: number
-  , frameId: number
+    tabId: number;
+    frameId: number;
 }
 
 type SenderCallback = (message: Message, details: Details) => void;
