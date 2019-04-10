@@ -46,7 +46,7 @@ Cast SDK API calls are translated into Chromecast protocol messages and sent via
 | No. | Subject                                       | Origin     | Destination | Description |
 | --: | --------------------------------------------- | ---------- | ----------- | ----------- |
 |  1  | `shim:/initialized`                           | background | shim        | Sent once bridge has been created. |
-|  2  | `bridge:/startDiscovery`                      | shim       | bridge      | Starts network discovery. |
+|  2  | `bridge:/initialize`                          | shim       | bridge      | Starts network discovery. |
 |  3  | `shim:/serviceUp`                             | bridge     | shim        | Sent once a receiver device has been found. |
 |  4  | `shim:/serviceDown`                           | bridge     | shim        | Sent once a receiver device has been lost. |
 |  5  | `main:/openPopup`                             | shim       | background  | Opens the receiver selection popup. |

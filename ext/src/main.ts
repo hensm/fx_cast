@@ -539,6 +539,28 @@ browser.runtime.onConnect.addListener(port => {
 });
 
 
+const statusBridge = browser.runtime.connectNative(APPLICATION_NAME);
+const receiverStatusMap = new Map<string, any>();
+
+statusBridge.onMessage.addListener((message: Message)  => {
+    switch (message.subject) {
+        case "main:/receiverStatusUpdate": {
+            const { id, status } = message.data;
+            receiverStatusMap.set(id, status);
+
+            break;
+        }
+    }
+});
+
+statusBridge.postMessage({
+    subject: "bridge:/initialize"
+  , data: {
+        shouldWatchStatus: true
+    }
+});
+
+
 messageRouter.register("mirrorCast", message => {
     browser.tabs.sendMessage(mirrorCastTabId, message
           , { frameId: mirrorCastFrameId });
