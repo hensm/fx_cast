@@ -7,10 +7,11 @@ export interface Message {
 }
 
 export interface Receiver {
-    friendlyName: string;
     address: string;
-    port: number;
     currentApp: string;
+    friendlyName: string;
+    id: string;
+    port: number;
 }
 
 export interface DownloadDelta {
