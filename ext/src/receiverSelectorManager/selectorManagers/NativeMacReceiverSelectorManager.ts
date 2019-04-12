@@ -1,7 +1,7 @@
 "use strict";
 
 import ReceiverSelectorManager, {
-        ReceiverSelectorCastType } from "../ReceiverSelectorManager";
+        ReceiverSelectorMediaType } from "../ReceiverSelectorManager";
 
 import { Message, Receiver } from "../../types";
 
@@ -12,7 +12,7 @@ class NativeMacReceiverSelectorManager
 
     public async open (
             receivers: Receiver[]
-          , defaultCastType: ReceiverSelectorCastType): Promise<void> {
+          , defaultMediaType: ReceiverSelectorMediaType): Promise<void> {
         console.info("STUB :: NativeMacReceiverSelectorManager.open");
     }
 
