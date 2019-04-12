@@ -4,6 +4,12 @@ const path = require("path");
 const webpack = require("webpack");
 const CopyWebpackPlugin = require("copy-webpack-plugin");
 
+
+const sourceFileExtensions = [
+    ".js", ".jsx"
+  , ".ts", ".tsx"
+];
+
 module.exports = (env) => ({
     entry: {
         "main": `${env.includePath}/main.ts`
@@ -41,8 +47,7 @@ module.exports = (env) => ({
             {
                 from: env.includePath
               , to: env.outputPath
-              , ignore: [ "*.js", "*.jsx"
-                        , "*.ts", "*.tsx" ]
+              , ignore: sourceFileExtensions.map(ext => `*${ext}`)
               , transform (content, path) {
                     // Access to variables in static files
                     if (path.endsWith(".json")) {
@@ -73,8 +78,7 @@ module.exports = (env) => ({
             {
                 test: /\.(js|ts)x?$/
               , resolve: {
-                    extensions: [ ".js", ".jsx"
-                                , ".ts", ".tsx" ]
+                    extensions: sourceFileExtensions
                 }
               , include: env.includePath
               , use: {
