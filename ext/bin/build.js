@@ -69,7 +69,7 @@ const webpackConfig = require(`${ROOT}/webpack.config.js`)({
 // Add mode to config
 webpackConfig.mode = argv.mode;
 webpackConfig.devtool = argv.mode === "production"
-    ? "source-map"
+    ? "none"
     : "eval";
 
 
