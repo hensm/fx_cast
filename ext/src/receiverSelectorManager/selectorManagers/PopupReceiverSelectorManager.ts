@@ -1,7 +1,7 @@
 "use strict";
 
 import ReceiverSelectorManager, {
-        ReceiverSelectorCastType } from "../ReceiverSelectorManager";
+        ReceiverSelectorMediaType } from "../ReceiverSelectorManager";
 
 import { getWindowCenteredProps } from "../../lib/utils";
 import { Message, Receiver } from "../../types";
@@ -16,7 +16,7 @@ class PopupReceiverSelectorManager
     private messagePort: browser.runtime.Port;
 
     private receivers: Receiver[];
-    private defaultCastType: ReceiverSelectorCastType;
+    private defaultMediaType: ReceiverSelectorMediaType;
 
     private wasReceiverSelected: boolean = false;
 
@@ -55,7 +55,7 @@ class PopupReceiverSelectorManager
 
     public async open (
             receivers: Receiver[]
-          , defaultCastType: ReceiverSelectorCastType): Promise<void> {
+          , defaultMediaType: ReceiverSelectorMediaType): Promise<void> {
 
         // If popup already exists, close it
         if (this.windowId) {
@@ -63,7 +63,7 @@ class PopupReceiverSelectorManager
         }
 
         this.receivers = receivers;
-        this.defaultCastType = defaultCastType;
+        this.defaultMediaType = defaultMediaType;
 
         // Current window to base centered position on
         const openerWindow = await browser.windows.getCurrent();
@@ -126,7 +126,7 @@ class PopupReceiverSelectorManager
         this.openerWindowId = null;
         this.messagePort = null;
         this.receivers = null;
-        this.defaultCastType = null;
+        this.defaultMediaType = null;
         this.wasReceiverSelected = false;
     }
 
