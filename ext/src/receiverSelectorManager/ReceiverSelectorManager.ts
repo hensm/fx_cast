@@ -1,6 +1,6 @@
 "use strict";
 
-import { Receiver } from "../types"
+import { Receiver } from "../types";
 
 
 export type ReceiverSelectorSelectedEvent = CustomEvent<Receiver>;

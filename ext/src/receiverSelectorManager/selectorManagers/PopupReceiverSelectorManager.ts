@@ -3,8 +3,8 @@
 import ReceiverSelectorManager, {
         ReceiverSelectorCastType } from "../ReceiverSelectorManager";
 
-import { Receiver, Message } from "../../types";
 import { getWindowCenteredProps } from "../../lib/utils";
+import { Message, Receiver } from "../../types";
 
 
 class PopupReceiverSelectorManager

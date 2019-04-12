@@ -1,0 +1,11 @@
+{
+    "compilerOptions": {
+        "allowJs": true
+      , "esModuleInterop": true
+      , "module": "commonjs"
+      , "noImplicitAny": true
+      , "removeComments": true
+      , "resolveJsonModule": true
+      , "target": "es6"
+    }
+}

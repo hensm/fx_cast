@@ -3,7 +3,7 @@
 import ReceiverSelectorManager, {
         ReceiverSelectorCastType } from "../ReceiverSelectorManager";
 
-import { Receiver, Message } from "../../types";
+import { Message, Receiver } from "../../types";
 
 
 class NativeMacReceiverSelectorManager
