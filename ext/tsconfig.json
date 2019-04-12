@@ -1,15 +1,9 @@
 {
-    "compilerOptions": {
-        "allowJs": true
-      , "esModuleInterop": true
-      , "jsx": "react"
+    "extends": "../common/tsconfig"
+  , "compilerOptions": {
+        "jsx": "react"
       , "lib": [ "esnext", "dom" ]
-      , "module": "commonjs"
       , "moduleResolution": "node"
-      , "noImplicitAny": true
-      , "removeComments": true
-      , "resolveJsonModule": true
       , "sourceMap": true
-      , "target": "es6"
     }
 }

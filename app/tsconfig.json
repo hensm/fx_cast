@@ -1,13 +1,5 @@
 {
-    "compilerOptions": {
-        "allowJs": true
-      , "target": "es5"
-      , "noImplicitAny": true
-      , "esModuleInterop": true
-      , "resolveJsonModule": true
-      , "removeComments": true
-      , "downlevelIteration": true
-    }
+    "extends": "../common/tsconfig"
   , "include": [
         "./src/**/*"
       , "./@types/**/*"
