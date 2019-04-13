@@ -235,7 +235,7 @@ onMessage(message => {
                     message.data.receiver.id
                   , message.data.receiver.friendlyName);
 
-            (selectedReceiver as any)._address = message.data.receiver.address;
+            (selectedReceiver as any)._address = message.data.receiver.host;
             (selectedReceiver as any)._port = message.data.receiver.port;
 
             function createSession () {

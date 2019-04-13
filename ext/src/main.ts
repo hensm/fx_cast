@@ -7,7 +7,11 @@ import messageRouter from "./lib/messageRouter";
 import { getChromeUserAgent } from "./lib/userAgents";
 import { getWindowCenteredProps } from "./lib/utils";
 
-import { Message } from "./types";
+import { Message, Receiver } from "./types";
+
+import { ReceiverStatusMessage
+       , ServiceDownMessage
+       , ServiceUpMessage } from "./messageTypes";
 
 import semver from "semver";
 
@@ -540,13 +544,45 @@ browser.runtime.onConnect.addListener(port => {
 
 
 const statusBridge = browser.runtime.connectNative(APPLICATION_NAME);
-const receiverStatusMap = new Map<string, any>();
+const statusBridgeReceivers = new Map<string, Receiver>();
 
 statusBridge.onMessage.addListener((message: Message)  => {
     switch (message.subject) {
-        case "main:/receiverStatusUpdate": {
-            const { id, status } = message.data;
-            receiverStatusMap.set(id, status);
+
+        case "shim:/serviceUp": {
+            const serviceUpMessage = message as ServiceUpMessage;
+            const receiver = serviceUpMessage.data;
+
+            statusBridgeReceivers.set(receiver.id, receiver);
+
+            break;
+        }
+
+        case "shim:/serviceDown": {
+            const serviceDownMessage = (message as ServiceDownMessage);
+            const { id } = serviceDownMessage.data;
+
+            if (statusBridgeReceivers.has(id)) {
+                statusBridgeReceivers.delete(id);
+            }
+
+            break;
+        }
+
+        case "receiverStatus": {
+            const receiverStatusMessage = message as ReceiverStatusMessage;
+            const { id, status } = receiverStatusMessage.data;
+
+            const receiver = statusBridgeReceivers.get(id);
+
+            // Merge new status with old status
+            statusBridgeReceivers.set(id, {
+                ...receiver
+              , status: {
+                    ...receiver.status
+                  , ...status
+                }
+            });
 
             break;
         }
