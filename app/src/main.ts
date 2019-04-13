@@ -11,6 +11,8 @@ import Session from "./Session";
 import StatusListener from "./StatusListener";
 import * as transforms from "./transforms";
 
+import { ReceiverStatus, MediaStatus } from "./castTypes";
+
 import { Message } from "./types";
 
 import { __applicationName
@@ -185,29 +187,48 @@ function initialize (options: InitializeOptions) {
     const statusListeners = new Map<string, StatusListener>();
 
     browser.on("serviceUp", (service: dnssd.Service) => {
-        const address = service.addresses[0];
+        const host = service.addresses[0];
         const port = service.port;
         const id = service.txt.id;
 
         if (options.shouldWatchStatus) {
-            const listener = new StatusListener(address, port);
+            const listener = new StatusListener(host, port);
 
-            listener.on("statusUpdate", (status: any) => {
-                sendMessage({
-                    subject: "main:/receiverStatusUpdate"
-                  , data: { id, status }
-                });
+            listener.on("receiverStatus", (status: ReceiverStatus) => {
+                const receiverStatusMessage: any = {
+                    subject: "receiverStatus"
+                  , data: {
+                        id
+                      , status: {
+                            volume: {
+                                level: status.volume.level
+                              , muted: status.volume.muted
+                            }
+                        }
+                    }
+                };
+                
+                if ("applications" in status) {
+                    const application = status.applications[0];
+
+                    receiverStatusMessage.data.status.application = {
+                        displayName: application.displayName
+                      , isIdleScreen: application.isIdleScreen
+                      , statusText: application.statusText
+                    };
+                }
+
+                sendMessage(receiverStatusMessage);
             });
 
             statusListeners.set(id, listener);
         }
 
-        transforms.encode.write({
+        sendMessage({
             subject: "shim:/serviceUp"
           , data: {
-                address, port, id
+                host, port, id
               , friendlyName: service.txt.fn
-              , currentApp: service.txt.rs
             }
         });
     });
@@ -215,11 +236,12 @@ function initialize (options: InitializeOptions) {
     browser.on("serviceDown", (service: dnssd.Service) => {
         const id = service.txt.id;
 
+        // De-register status listener
         if (options.shouldWatchStatus && statusListeners.has(id)) {
             statusListeners.get(id).deregister();
         }
 
-        transforms.encode.write({
+        sendMessage({
             subject: "shim:/serviceDown"
           , data: { id }
         });

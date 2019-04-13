@@ -7,11 +7,24 @@ export interface Message {
 }
 
 export interface Receiver {
-    address: string;
-    currentApp: string;
+    host: string;
     friendlyName: string;
     id: string;
     port: number;
+    status?: ReceiverStatus;
+}
+
+export interface ReceiverStatus {
+    application: {
+        displayName: string;
+        isIdleScreen: string;
+        statusText: string;
+    };
+    id: string;
+    volume: {
+        level: number;
+        muted: boolean
+    };
 }
 
 export interface DownloadDelta {

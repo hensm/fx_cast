@@ -5,7 +5,7 @@ import React, { Component } from "react";
 import ReactDOM from "react-dom";
 
 import { getNextEllipsis } from "../../lib/utils";
-import * as types from "../../types";
+import { Message, Receiver } from "../../types";
 
 const _ = browser.i18n.getMessage;
 
@@ -29,7 +29,7 @@ let frameWidth: number;
 
 
 interface PopupAppState {
-    receivers: types.Receiver[];
+    receivers: Receiver[];
     selectedMedia: string;
     isLoading: boolean;
 }
@@ -63,7 +63,7 @@ class PopupApp extends Component<{}, PopupAppState> {
             name: "popup"
         });
 
-        backgroundPort.onMessage.addListener((message: types.Message) => {
+        backgroundPort.onMessage.addListener((message: Message) => {
             if (message.subject === "popup:/assignShim") {
                 this.setPort(message.data.tabId
                            , message.data.frameId);
@@ -92,10 +92,10 @@ class PopupApp extends Component<{}, PopupAppState> {
                 <ul className="receivers">
                     { this.state.receivers.map((receiver, i) => {
                         return (
-                           <Receiver receiver={ receiver }
-                                     onCast={ this.onCast }
-                                     isLoading={ this.state.isLoading }
-                                     key={ i }/>
+                           <ReceiverEntry receiver={ receiver }
+                                          onCast={ this.onCast }
+                                          isLoading={ this.state.isLoading }
+                                          key={ i }/>
                         );
                     })}
                 </ul>
@@ -117,7 +117,7 @@ class PopupApp extends Component<{}, PopupAppState> {
             subject: "shim:/popupReady"
         });
 
-        this.port.onMessage.addListener((message: types.Message) => {
+        this.port.onMessage.addListener((message: Message) => {
             switch (message.subject) {
                 case "popup:/populateReceiverList": {
                     this.setState({
@@ -145,7 +145,7 @@ class PopupApp extends Component<{}, PopupAppState> {
         });
     }
 
-    private onCast (receiver: types.Receiver) {
+    private onCast (receiver: Receiver) {
         this.setState({
             isLoading: true
         });
@@ -168,19 +168,19 @@ class PopupApp extends Component<{}, PopupAppState> {
 }
 
 
-interface ReceiverProps {
-    receiver: types.Receiver;
+interface ReceiverEntryProps {
+    receiver: Receiver;
     isLoading: boolean;
-    onCast (receiver: types.Receiver): void;
+    onCast (receiver: Receiver): void;
 }
 
-interface ReceiverState {
+interface ReceiverEntryState {
     ellipsis: string;
     isLoading: boolean;
 }
 
-class Receiver extends Component<ReceiverProps, ReceiverState> {
-    constructor (props: ReceiverProps) {
+class ReceiverEntry extends Component<ReceiverEntryProps, ReceiverEntryState> {
+    constructor (props: ReceiverEntryProps) {
         super(props);
 
         this.state = {
@@ -198,12 +198,9 @@ class Receiver extends Component<ReceiverProps, ReceiverState> {
                     { this.props.receiver.friendlyName }
                 </div>
                 <div className="receiver-address">
-                    { `${this.props.receiver.address}:${this.props.receiver.port}` }
+                    { `${this.props.receiver.host}:${this.props.receiver.port}` }
                 </div>
-                <div className="receiver-status">
-                    { this.props.receiver.currentApp &&
-                        `- ${this.props.receiver.currentApp}` }
-                </div>
+                <div className="receiver-status"></div>
                 <button className="receiver-connect"
                         onClick={ this.handleCast }
                         disabled={this.props.isLoading}>

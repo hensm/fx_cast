@@ -59,9 +59,11 @@ export default class StatusListener extends EventEmitter {
                 }
 
                 case "RECEIVER_STATUS": {
-                    // Send update message
-                    this.emit("statusUpdate", data.status);
-
+                    this.emit("receiverStatus", data.status);
+                    break;
+                }
+                case "MEDIA_STATUS": {
+                    this.emit("mediaStatus", data.status);
                     break;
                 }
             }
