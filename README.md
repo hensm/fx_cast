@@ -41,7 +41,7 @@ sudo dnf install fx_cast_bridge-<version>-<arch>.rpm
 
 ### Requirements
 
-* Node.js 10.x (pkg doesn't support node11 targets yet)
+* Node.js 10.x (https://git.io/fjmgL)
 * dpkg (for building deb packages)
 * rpm (for building rpm packages)
 * macOS (for building macOS installer packages)
@@ -67,11 +67,12 @@ sudo dnf install dpkg rpm-build mingw-nsis
 
 Archlinux:
 
-At the moment, `pkg` has a [bug](https://github.com/zeit/pkg/issues/584), until fixed nodejs has to be downgraded to `10.12.0`:
 
 ```sh
 sudo pacman -S nvm dpkg
 yay -S rpm-org nsis
+
+# Downgrade to node10
 echo 'source /usr/share/nvm/init-nvm.sh' >> ~/.bashrc
 nvm install 10.12.0
 ```
