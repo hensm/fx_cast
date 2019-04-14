@@ -27,9 +27,9 @@
         "jasmine-console-reporter": "^3.1.0",
         "minimist": "^1.2.0",
         "selenium-webdriver": "^4.0.0-alpha.1",
-        "semver": "^5.6.0",
-        "typescript": "^3.3.3333",
+        "semver": "^5.7.0",
+        "typescript": "^3.4.3",
         "uuid": "^3.3.2",
-        "ws": "^6.1.2"
+        "ws": "^6.2.1"
     }
 }

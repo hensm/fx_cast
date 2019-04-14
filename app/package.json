@@ -16,19 +16,19 @@
         "castv2": "^0.1.9",
         "dnssd": "^0.4.1",
         "fast-srp-hap": "^1.0.1",
-        "mime-types": "^2.1.21",
+        "mime-types": "^2.1.22",
         "node-fetch": "^2.3.0",
-        "tweetnacl": "^1.0.0"
+        "tweetnacl": "^1.0.1"
     },
     "devDependencies": {
         "@types/dnssd": "^0.4.1",
         "@types/mime-types": "^2.1.0",
-        "@types/node": "^11.9.5",
-        "@types/node-fetch": "^2.1.6",
+        "@types/node": "^11.13.4",
+        "@types/node-fetch": "^2.3.2",
         "makensis": "^0.17.0",
         "mustache": "^3.0.1",
-        "pkg": "^4.3.5",
-        "tslint": "^5.13.0"
+        "pkg": "^4.3.7",
+        "tslint": "^5.15.0"
     },
     "optionalDependencies": {
         "rage-edit": "^1.2.0"
