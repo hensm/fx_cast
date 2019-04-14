@@ -41,7 +41,7 @@ sudo dnf install fx_cast_bridge-<version>-<arch>.rpm
 
 ### Requirements
 
-* NodeJS
+* Node.js 10.x (pkg doesn't support node11 targets yet)
 * dpkg (for building deb packages)
 * rpm (for building rpm packages)
 * macOS (for building macOS installer packages)
