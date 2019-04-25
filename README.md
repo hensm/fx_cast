@@ -21,7 +21,7 @@ Communication with receiver devices is handled by a native application (bridge).
 
 Install the Firefox extension and companion bridge application. Downloads can be found on the website or in the [GitHub releases](https://github.com/hensm/fx_cast/releases) section.
 
-macOS version has an installer, Linux packages can be installed via the command line:
+macOS/Windows version has an installer, Linux packages can be installed via the command line:
 
 ````sh
 # Debian/Ubuntu
@@ -108,7 +108,7 @@ npm run start --prefix ./ext
 
 ### Packaging
 
-Packaging currently only possible for macOS/Linux. macOS packages can only be created on macOS, Linux .deb/.rpm packages can be built on any platform with `dpkg-deb` and `rpmbuild` binaries.
+macOS packages can only be created on macOS, Linux .deb/.rpm packages can be built on any platform with `dpkg-deb` and `rpmbuild` binaries, and Windows installers can be created on any platform with the `makensis` binary.
 
 * #### `dist/app/`  
     ... contains the installer package: `fx_cast_bridge-<version>-<arch>.(pkg|deb|rpm|exe)`
