@@ -180,9 +180,19 @@ Netflix / HTML5:
 
 ## Credit
 
-Note: Since it seems to be causing confusion, this project does not use electron. The electron-chromecast library was only used as a reference for the intitial implementation of the API shim.
+_**Note**: Since it seems to be causing confusion, this project does not use electron. The electron-chromecast library was only used as a reference for the intitial implementation of the API shim._
 
 * [electron-chromecast](https://github.com/GPMDP/electron-chromecast)
 * [node-castv2](https://github.com/thibauts/node-castv2)
 * [chrome-native-messaging](https://github.com/jdiamond/chrome-native-messaging)
 * [icons8](https://icons8.com/)
+
+## Donation
+
+### PayPal
+
+To donate via PayPal:
+
+[<img src="https://www.paypal.com/en_US/i/btn/btn_donateCC_LG.gif" alt="Donate with PayPal button">](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=3Z2FTMSG976WN&source=url)
+
+<img alt="Donate with PayPal" src="https://i.imgur.com/oisL6Eo.png">
