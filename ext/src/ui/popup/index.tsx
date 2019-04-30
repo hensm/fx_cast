@@ -7,6 +7,10 @@ import ReactDOM from "react-dom";
 import { getNextEllipsis } from "../../lib/utils";
 import { Message, Receiver } from "../../types";
 
+import { ReceiverSelectorMediaType }
+    from "../../receiverSelectorManager/ReceiverSelectorManager";
+
+
 const _ = browser.i18n.getMessage;
 
 // macOS styles
@@ -30,7 +34,7 @@ let frameWidth: number;
 
 interface PopupAppState {
     receivers: Receiver[];
-    selectedMedia: string;
+    defaultMediaType: ReceiverSelectorMediaType;
     isLoading: boolean;
 }
 
@@ -43,7 +47,7 @@ class PopupApp extends Component<{}, PopupAppState> {
 
         this.state = {
             receivers: []
-          , selectedMedia: "app"
+          , defaultMediaType: ReceiverSelectorMediaType.App
           , isLoading: false
         };
 
@@ -59,28 +63,46 @@ class PopupApp extends Component<{}, PopupAppState> {
     }
 
     public componentDidMount () {
-        const backgroundPort = browser.runtime.connect({
+        this.port = browser.runtime.connect({
             name: "popup"
         });
 
-        backgroundPort.onMessage.addListener((message: Message) => {
-            if (message.subject === "popup:/assignShim") {
-                this.setPort(message.data.tabId
-                           , message.data.frameId);
+        this.port.onMessage.addListener((message: Message) => {
+            switch (message.subject) {
+                case "popup:/populateReceiverList": {
+                    this.setState({
+                        receivers: message.data.receivers
+                      , defaultMediaType: message.data.defaultMediaType
+                    }, () => {
+                        // Get height of content without window decoration
+                        winHeight = document.body.clientHeight + frameHeight;
+
+                        browser.windows.update(this.win.id, {
+                            height: winHeight
+                        });
+                    });
+
+                    break;
+                }
+
+                case "popup:/close": {
+                    window.close();
+                    break;
+                }
             }
         });
     }
 
     public render () {
         const shareMedia =
-                this.state.selectedMedia === "tab"
-             || this.state.selectedMedia === "screen";
+                this.state.defaultMediaType === ReceiverSelectorMediaType.Tab
+             || this.state.defaultMediaType === ReceiverSelectorMediaType.Screen;
 
         return (
             <div>
                 <div className="media-select">
                     Cast
-                    <select value={ this.state.selectedMedia }
+                    <select value={ this.state.defaultMediaType }
                             onChange={ this.onSelectChange }
                             className="media-select-dropdown">
                         <option value="app" disabled={ shareMedia }>this site's app</option>
@@ -103,66 +125,29 @@ class PopupApp extends Component<{}, PopupAppState> {
         );
     }
 
-    private async setPort (shimTabId: number, shimFrameId: number) {
-        if (this.port) {
-            this.port.disconnect();
-        }
-
-        this.port = browser.tabs.connect(shimTabId, {
-            name: "popup"
-          , frameId: shimFrameId
-        });
-
-        this.port.postMessage({
-            subject: "shim:/popupReady"
-        });
-
-        this.port.onMessage.addListener((message: Message) => {
-            switch (message.subject) {
-                case "popup:/populateReceiverList": {
-                    this.setState({
-                        receivers: message.data.receivers
-                      , selectedMedia: message.data.selectedMedia
-                    }, () => {
-                        // Get height of content without window decoration
-                        winHeight = document.body.clientHeight + frameHeight;
-
-                        // Adjust height to fit content
-                        browser.windows.update(this.win.id, {
-                            height: winHeight
-                        });
-                    });
-
-                    break;
-                }
-
-                case "popup:/close": {
-                    window.close();
-
-                    break;
-                }
-            }
-        });
-    }
-
     private onCast (receiver: Receiver) {
         this.setState({
             isLoading: true
         });
 
         this.port.postMessage({
-            subject: "shim:/selectReceiver"
+            subject: "receiverSelectorManager:/selected"
           , data: {
                 receiver
-              , selectedMedia: this.state.selectedMedia
-              , a: 5
+              , defaultMediaType: this.state.defaultMediaType
             }
         });
     }
 
     private onSelectChange (ev: React.ChangeEvent<HTMLSelectElement>) {
+        const mediaTypeMap: { [key: string]: ReceiverSelectorMediaType } = {
+            "app": ReceiverSelectorMediaType.App
+          , "tab": ReceiverSelectorMediaType.Tab
+          , "screen": ReceiverSelectorMediaType.Screen
+        };
+
         this.setState({
-            selectedMedia: ev.target.value
+            defaultMediaType: mediaTypeMap[ev.target.value]
         });
     }
 }

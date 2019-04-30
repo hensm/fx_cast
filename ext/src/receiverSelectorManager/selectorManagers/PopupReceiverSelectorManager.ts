@@ -48,7 +48,13 @@ class PopupReceiverSelectorManager
             this.messagePort = port;
             this.messagePort.onMessage.addListener(this.onPopupMessage);
 
-            // TODO: Send initial data
+            this.messagePort.postMessage({
+                subject: "popup:/populateReceiverList"
+              , data: {
+                    receivers: this.receivers
+                  , defaultMediaType: this.defaultMediaType
+                }
+            })
         });
     }
 
@@ -97,8 +103,15 @@ class PopupReceiverSelectorManager
      * Handles popup messages.
      */
     private onPopupMessage (message: Message) {
+        console.log("popupmsg", message);
+
         switch (message.subject) {
-            case "selected": {
+            case "receiverSelectorManager:/selected": {
+                this.wasReceiverSelected = true;
+                this.dispatchEvent(new CustomEvent("selected", {
+                    detail: message.data
+                }));
+
                 break;
             }
         }
