@@ -1,5 +1,11 @@
 "use strict";
 
+export { ReceiverSelection
+       , ReceiverSelectorCancelledEvent
+       , ReceiverSelectorErrorEvent
+       , ReceiverSelectorMediaType
+       , ReceiverSelectorSelectedEvent } from "./ReceiverSelectorManager";
+
 export { default as NativeMacReceiverSelectorManager }
     from "./selectorManagers/NativeMacReceiverSelectorManager";
 

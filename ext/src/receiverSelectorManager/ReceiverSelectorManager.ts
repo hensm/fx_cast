@@ -11,7 +11,7 @@ export enum ReceiverSelectorMediaType {
 
 export interface ReceiverSelection {
     receiver: Receiver;
-    castMethod: ReceiverSelectorMediaType;
+    mediaType: ReceiverSelectorMediaType;
 }
 
 export type ReceiverSelectorSelectedEvent = CustomEvent<ReceiverSelection>;

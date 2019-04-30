@@ -98,7 +98,7 @@ export function initialize (
     apiConfig = newApiConfig;
 
     sendMessageResponse({
-        subject: "bridge:/startDiscovery"
+        subject: "main:/shimInitialized"
     });
 
     apiConfig.receiverListener(receiverList.length
@@ -157,7 +157,10 @@ export function requestSession (
 
     // Open destination chooser
     sendMessageResponse({
-        subject: "main:/openPopup"
+        subject: "main:/selectReceiverBegin"
+      , data: {
+            defaultMediaType: apiConfig._selectedMedia
+        }
     });
 }
 
@@ -186,10 +189,12 @@ export function unescape (escaped: string): string {
 }
 
 
-onMessage(message => {
+onMessage(async message => {
+    console.log(message)
     switch (message.subject) {
         case "shim:/initialized": {
             isAvailable = true;
+
             break;
         }
 
@@ -228,7 +233,7 @@ onMessage(message => {
             break;
         }
 
-        case "shim:/selectReceiver": {
+        case "shim:/selectReceiverEnd": {
             console.info("fx_cast (Debug): Selected receiver");
 
             const selectedReceiver = new Receiver(
@@ -247,7 +252,7 @@ onMessage(message => {
                       , selectedReceiver               // receiver
                       , (session: Session) => {
                             sendMessageResponse({
-                                subject: "popup:/close"
+                                subject: "main:/sessionCreated"
                             });
 
                             sessionRequestInProgress = false;
@@ -273,25 +278,9 @@ onMessage(message => {
         }
 
         /**
-         * Popup is ready to receive data to populate the cast destination
-         * chooser.
-         */
-        case "shim:/popupReady": {
-            sendMessageResponse({
-                subject: "popup:/populateReceiverList"
-              , data: {
-                    receivers: receiverList
-                  , selectedMedia: apiConfig._selectedMedia
-                }
-            });
-
-            break;
-        }
-
-        /**
          * Popup closed before session established.
          */
-        case "shim:/popupClosed": {
+        case "shim:/selectReceiverCancelled": {
             if (sessionRequestInProgress) {
                 sessionRequestInProgress = false;
                 sessionErrorCallback(new Error_(ErrorCode.CANCEL));

@@ -7,6 +7,10 @@ import messageRouter from "./lib/messageRouter";
 import { getChromeUserAgent } from "./lib/userAgents";
 import { getWindowCenteredProps } from "./lib/utils";
 
+import { ReceiverSelectorMediaType
+       , ReceiverSelectorSelectedEvent
+       , PopupReceiverSelectorManager } from "./receiverSelectorManager";
+
 import { Message, Receiver } from "./types";
 
 import { ReceiverStatusMessage
@@ -354,60 +358,83 @@ browser.menus.onClicked.addListener(async (info, tab) => {
 });
 
 
-let popupWinId: number;
-let popupShimId: string;
-let popupPort: browser.runtime.Port;
 
-/**
- * Creates popup window for cast destination selection.
- * Refocusing other browser windows causes the popup window
- * to close and returns an API error.
- */
-async function openPopup (shimId: string) {
-    // Current window to base centered position on
-    const win = await browser.windows.getCurrent();
-    const centeredProps = getWindowCenteredProps(win, 350, 200);
-
-    const popup = await browser.windows.create({
-        url: "ui/popup/index.html"
-      , type: "popup"
-      , ...centeredProps
-    });
-
-    // Store popup details for message forwarding
-    popupWinId = popup.id;
-    popupShimId = shimId;
-
-    // Size/position not set correctly on creation (bug?)
-    await browser.windows.update(popup.id, {
-        ...centeredProps
-    });
-
-    // Close popup on other browser window focus
-    browser.windows.onFocusChanged.addListener(function listener (id) {
-        if (id !== browser.windows.WINDOW_ID_NONE
-                && id === win.id) {
-            browser.windows.onFocusChanged.removeListener(listener);
-            browser.windows.remove(popup.id);
-        }
-    });
+interface Shim {
+    port: browser.runtime.Port;
+    bridgePort: browser.runtime.Port;
+    tabId: number;
+    frameId: number;
 }
 
-// Track popup close
-browser.windows.onRemoved.addListener(id => {
-    if (id === popupWinId) {
-        shimMap.get(popupShimId).port.postMessage({
-            subject: "shim:/popupClosed"
-        });
+const shimMap = new Map<string, Shim>();
 
-        popupWinId = null;
-        popupShimId = null;
-        popupPort = null;
+const statusBridge = browser.runtime.connectNative(APPLICATION_NAME);
+const statusBridgeReceivers = new Map<string, Receiver>();
+
+statusBridge.onMessage.addListener(async (message: Message)  => {
+    console.log(message);
+
+    switch (message.subject) {
+        case "shim:/serviceUp": {
+            const receiver = (message as ServiceUpMessage).data;
+            statusBridgeReceivers.set(receiver.id, receiver);
+
+            // Forward update to shims
+            for (const shim of shimMap.values()) {
+                shim.port.postMessage({
+                    subject: "shim:/serviceUp"
+                  , data: { id: receiver.id }
+                });
+            }
+
+            break;
+        }
+
+        case "shim:/serviceDown": {
+            const { id } = (message as ServiceDownMessage).data;
+
+            if (statusBridgeReceivers.has(id)) {
+                statusBridgeReceivers.delete(id);
+            }
+
+            // Forward update to shims
+            for (const shim of shimMap.values()) {
+                shim.port.postMessage({
+                    subject: "shim:/serviceDown"
+                  , data: { id }
+                });
+            }
+
+            break;
+        }
+
+        case "receiverStatus": {
+            const { id, status } = (message as ReceiverStatusMessage).data;
+
+            const receiver = statusBridgeReceivers.get(id);
+
+            // Merge new status with old status
+            statusBridgeReceivers.set(id, {
+                ...receiver
+              , status: {
+                    ...receiver.status
+                  , ...status
+                }
+            });
+
+            break;
+        }
+    }
+});
+
+statusBridge.postMessage({
+    subject: "bridge:/initialize"
+  , data: {
+        shouldWatchStatus: true
     }
 });
 
 
-const shimMap = new Map();
 
 async function onConnectShim (port: browser.runtime.Port) {
     const bridgeInfo = await getBridgeInfo();
@@ -471,31 +498,52 @@ async function onConnectShim (port: browser.runtime.Port) {
         }
 
         switch (message.subject) {
-            case "main:/openPopup": {
-                /**
-                 * If popup already open, reassign to new shim,
-                 * otherwise create a new popup.
-                 */
-                if (popupWinId) {
+            case "main:/shimInitialized": {
 
-                    // Reassign popup to new shim
-                    popupPort.postMessage({
-                        subject: "popup:/assignShim"
+                // Send existing receivers as serviceUp messages
+                for (const receiver of statusBridgeReceivers.values()) {
+                    port.postMessage({
+                        subject: "shim:/serviceUp"
+                      , data: { id: receiver.id }
+                    });
+                }
+
+                break;
+            }
+
+            case "main:/sessionCreated": {
+                PopupReceiverSelectorManager.close();
+                break;
+            }
+
+            case "main:/selectReceiverBegin": {
+                PopupReceiverSelectorManager.open(
+                        Array.from(statusBridgeReceivers.values())
+                      , message.data.defaultMediaType);
+
+                PopupReceiverSelectorManager.addEventListener("selected"
+                      , (ev: ReceiverSelectorSelectedEvent) => {
+
+                    port.postMessage({
+                        subject: "shim:/selectReceiverEnd"
                       , data: {
-                            tabId
-                          , frameId
+                            receiver: ev.detail.receiver
                         }
                     });
+                });
 
-                    /**
-                     * Notify shim that existing popup has closed and
-                     * to re-populate receiver list for new popup.
-                     */
-                    port.postMessage({ subject: "shim:/popupClosed" });
-                    port.postMessage({ subject: "shim:/popupReady" });
-                } else {
-                    await openPopup(shimId);
-                }
+                PopupReceiverSelectorManager.addEventListener("cancelled", () => {
+                    port.postMessage({
+                        subject: "shim:/selectReceiverCancelled"
+                    });
+                });
+
+                PopupReceiverSelectorManager.addEventListener("error", () => {
+                    // TODO: Report errors properly
+                    port.postMessage({
+                        subject: "shim:/selectReceiverCancelled"
+                    });
+                });
 
                 break;
             }
@@ -514,85 +562,11 @@ async function onConnectShim (port: browser.runtime.Port) {
     });
 }
 
-function onConnectPopup (port: browser.runtime.Port) {
-    if (popupPort) {
-        popupPort.disconnect();
-    }
-
-    popupPort = port;
-
-    const { tabId, frameId } = shimMap.get(popupShimId);
-    port.postMessage({
-        subject: "popup:/assignShim"
-      , data: {
-            tabId
-          , frameId
-        }
-    });
-}
-
 browser.runtime.onConnect.addListener(port => {
     switch (port.name) {
         case "shim":
             onConnectShim(port);
             break;
-        case "popup":
-            onConnectPopup(port);
-            break;
-    }
-});
-
-
-const statusBridge = browser.runtime.connectNative(APPLICATION_NAME);
-const statusBridgeReceivers = new Map<string, Receiver>();
-
-statusBridge.onMessage.addListener((message: Message)  => {
-    switch (message.subject) {
-
-        case "shim:/serviceUp": {
-            const serviceUpMessage = message as ServiceUpMessage;
-            const receiver = serviceUpMessage.data;
-
-            statusBridgeReceivers.set(receiver.id, receiver);
-
-            break;
-        }
-
-        case "shim:/serviceDown": {
-            const serviceDownMessage = (message as ServiceDownMessage);
-            const { id } = serviceDownMessage.data;
-
-            if (statusBridgeReceivers.has(id)) {
-                statusBridgeReceivers.delete(id);
-            }
-
-            break;
-        }
-
-        case "receiverStatus": {
-            const receiverStatusMessage = message as ReceiverStatusMessage;
-            const { id, status } = receiverStatusMessage.data;
-
-            const receiver = statusBridgeReceivers.get(id);
-
-            // Merge new status with old status
-            statusBridgeReceivers.set(id, {
-                ...receiver
-              , status: {
-                    ...receiver.status
-                  , ...status
-                }
-            });
-
-            break;
-        }
-    }
-});
-
-statusBridge.postMessage({
-    subject: "bridge:/initialize"
-  , data: {
-        shouldWatchStatus: true
     }
 });
 
