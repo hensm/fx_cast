@@ -6,6 +6,15 @@
         "message": ""
     }
 
+  , "popupMediaTypeApp": {
+        "message": "this site's app"
+    }
+  , "popupMediaTypeTab": {
+        "message": "Tab"
+    }
+  , "popupMediaTypeScreen": {
+        "message": "Screen"
+    }
   , "popupCastButtonLabel": {
         "message": "Cast"
     }

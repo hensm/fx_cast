@@ -25,16 +25,9 @@ browser.runtime.getPlatformInfo()
     });
 
 
-const winWidth = 350;
-let winHeight = 200;
-
-let frameHeight: number;
-let frameWidth: number;
-
-
 interface PopupAppState {
     receivers: Receiver[];
-    defaultMediaType: ReceiverSelectorMediaType;
+    mediaType: ReceiverSelectorMediaType;
     isLoading: boolean;
 }
 
@@ -47,15 +40,13 @@ class PopupApp extends Component<{}, PopupAppState> {
 
         this.state = {
             receivers: []
-          , defaultMediaType: ReceiverSelectorMediaType.App
+          , mediaType: ReceiverSelectorMediaType.App
           , isLoading: false
         };
 
         // Store window ref
         browser.windows.getCurrent().then(win => {
             this.win = win;
-            frameHeight = win.height - window.innerHeight;
-            frameWidth = win.width - window.innerWidth;
         });
 
         this.onSelectChange = this.onSelectChange.bind(this);
@@ -72,14 +63,7 @@ class PopupApp extends Component<{}, PopupAppState> {
                 case "popup:/populateReceiverList": {
                     this.setState({
                         receivers: message.data.receivers
-                      , defaultMediaType: message.data.defaultMediaType
-                    }, () => {
-                        // Get height of content without window decoration
-                        winHeight = document.body.clientHeight + frameHeight;
-
-                        browser.windows.update(this.win.id, {
-                            height: winHeight
-                        });
+                      , mediaType: message.data.defaultMediaType
                     });
 
                     break;
@@ -93,21 +77,43 @@ class PopupApp extends Component<{}, PopupAppState> {
         });
     }
 
+    public componentDidUpdate () {
+        setTimeout(() => {
+            // Fit window to content height
+            const frameHeight = window.outerHeight - window.innerHeight;
+            const windowHeight = document.body.clientHeight + frameHeight;
+
+            browser.windows.update(this.win.id, {
+                height: windowHeight
+            });
+        }, 1)
+    }
+
     public render () {
         const shareMedia =
-                this.state.defaultMediaType === ReceiverSelectorMediaType.Tab
-             || this.state.defaultMediaType === ReceiverSelectorMediaType.Screen;
+                this.state.mediaType === ReceiverSelectorMediaType.Tab
+             || this.state.mediaType === ReceiverSelectorMediaType.Screen
 
         return (
             <div>
                 <div className="media-select">
                     Cast
-                    <select value={ this.state.defaultMediaType }
+                    <select value={ this.state.mediaType }
                             onChange={ this.onSelectChange }
                             className="media-select-dropdown">
-                        <option value="app" disabled={ shareMedia }>this site's app</option>
-                        <option value="tab" disabled={ !shareMedia }>Tab</option>
-                        <option value="screen" disabled={ !shareMedia }>Screen</option>
+                        <option value={ ReceiverSelectorMediaType.App }
+                                disabled={ shareMedia }>
+                            
+                            { _("popupMediaTypeApp") }
+                        </option>
+                        <option value={ ReceiverSelectorMediaType.Tab }
+                                disabled={ !shareMedia }>
+                            { _("popupMediaTypeTab") }
+                        </option>
+                        <option value={ ReceiverSelectorMediaType.Screen }
+                                disabled={ !shareMedia }>
+                            { _("popupMediaTypeScreen") }
+                        </option>
                     </select>
                     to:
                 </div>
@@ -134,20 +140,14 @@ class PopupApp extends Component<{}, PopupAppState> {
             subject: "receiverSelectorManager:/selected"
           , data: {
                 receiver
-              , defaultMediaType: this.state.defaultMediaType
+              , mediaType: this.state.mediaType
             }
         });
     }
 
     private onSelectChange (ev: React.ChangeEvent<HTMLSelectElement>) {
-        const mediaTypeMap: { [key: string]: ReceiverSelectorMediaType } = {
-            "app": ReceiverSelectorMediaType.App
-          , "tab": ReceiverSelectorMediaType.Tab
-          , "screen": ReceiverSelectorMediaType.Screen
-        };
-
         this.setState({
-            defaultMediaType: mediaTypeMap[ev.target.value]
+            mediaType: parseInt(ev.target.value)
         });
     }
 }
@@ -217,6 +217,9 @@ class ReceiverEntry extends Component<ReceiverEntryProps, ReceiverEntryState> {
 }
 
 
-ReactDOM.render(
-    <PopupApp />
-  , document.querySelector("#root"));
+// Render after CSS has loaded
+window.addEventListener("load", () => {
+    ReactDOM.render(
+        <PopupApp />
+      , document.querySelector("#root"));
+});
