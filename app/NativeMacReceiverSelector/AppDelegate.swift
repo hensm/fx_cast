@@ -39,6 +39,10 @@ extension AppDelegate: NSApplicationDelegate {
         NSApp.activate(ignoringOtherApps: true)
     }
 
+    func applicationDidResignActive(_ aNotification: Notification) {
+        self.mainWindow?.performClose(aNotification)
+    }
+
     func applicationWillTerminate(_ aNotification: Notification) {}
 
     func applicationShouldTerminateAfterLastWindowClosed(_ app: NSApplication) -> Bool {

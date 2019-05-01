@@ -8,6 +8,7 @@ import mime from "mime-types";
 import path from "path";
 
 import Media from "./Media";
+import MediaServer from "./MediaServer";
 import Session from "./Session";
 import StatusListener from "./StatusListener";
 import * as transforms from "./transforms";
@@ -27,11 +28,11 @@ events.EventEmitter.defaultMaxListeners = 50;
 const browser = new dnssd.Browser(dnssd.tcp("googlecast"));
 
 // Local media server
-let httpServer: http.Server;
+let mediaServer: MediaServer;
 
 process.on("SIGTERM", () => {
-    if (httpServer) {
-        httpServer.close();
+    if (mediaServer) {
+        mediaServer.stop();
     }
 });
 
@@ -182,58 +183,32 @@ async function handleMessage (message: Message) {
         }
 
 
-        case "bridge:/startHttpServer": {
+        case "bridge:/mediaServer/start": {
             const { filePath, port } = message.data;
 
-            httpServer = http.createServer((req, res) => {
-                const { size: fileSize } = fs.statSync(filePath);
-                const { range } = req.headers;
+            mediaServer = new MediaServer(filePath, port);
+            mediaServer.start();
 
-                const contentType = mime.lookup(filePath) || "video/mp4";
-
-                // Partial content HTTP 206
-                if (range) {
-                    const bounds = range.substring(6).split("-");
-
-                    const start = parseInt(bounds[0]);
-                    const end = bounds[1]
-                        ? parseInt(bounds[1])
-                        : fileSize - 1;
-
-                    const chunkSize = (end - start) + 1;
-
-                    res.writeHead(206, {
-                        "Accept-Ranges": "bytes"
-                      , "Content-Range": `bytes ${start}-${end}/${fileSize}`
-                      , "Content-Length": chunkSize
-                      , "Content-Type": contentType
-                    });
-
-                    fs.createReadStream(filePath, { start, end }).pipe(res);
-
-                } else {
-                    res.writeHead(200, {
-                        "Content-Length": fileSize
-                      , "Content-Type": contentType
-                    });
-
-                    fs.createReadStream(filePath).pipe(res);
-                }
-            });
-
-            httpServer.listen(port, () => {
+            mediaServer.on("started", () => {
                 sendMessage({
-                    subject: "mediaCast:/httpServerStarted"
+                    subject: "mediaCast:/mediaServer/started"
                 });
             });
+
+            mediaServer.on("stopped", () => {
+                sendMessage({
+                    subject: "mediaCast:/mediaServer/stopped"
+                });
+            })
 
             break;
         }
 
-        case "bridge:/stopHttpServer": {
-            if (httpServer) {
-                httpServer.close();
+        case "bridge:/mediaServer/stop": {
+            if (mediaServer) {
+                mediaServer.stop();
             }
+
             break;
         }
     }
