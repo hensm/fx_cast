@@ -28,6 +28,8 @@ struct InitData: Codable {
     let i18n_mediaTypeApp: String
     let i18n_mediaTypeTab: String
     let i18n_mediaTypeScreen: String
+    let i18n_mediaSelectCastLabel: String
+    let i18n_mediaSelectToLabel: String
 }
 
 struct ReceiverSelection: Codable {
@@ -101,9 +103,9 @@ class ViewController: NSViewController {
         self.mediaTypePopUpButton.selectItem(at: initData.defaultMediaType.rawValue)
 
         let mediaTypeStackView = NSStackView(views: [
-            makeLabel("Cast"),
+            makeLabel(initData.i18n_mediaSelectCastLabel),
             self.mediaTypePopUpButton,
-            makeLabel("to:")
+            makeLabel(initData.i18n_mediaSelectToLabel)
         ])
 
 

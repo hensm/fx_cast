@@ -97,7 +97,7 @@ class PopupApp extends Component<{}, PopupAppState> {
         return (
             <div>
                 <div className="media-select">
-                    Cast
+                    { _("popupMediaSelectCastLabel") }
                     <select value={ this.state.mediaType }
                             onChange={ this.onSelectChange }
                             className="media-select-dropdown">
@@ -115,7 +115,7 @@ class PopupApp extends Component<{}, PopupAppState> {
                             { _("popupMediaTypeScreen") }
                         </option>
                     </select>
-                    to:
+                    { _("popupMediaSelectToLabel") }
                 </div>
                 <ul className="receivers">
                     { this.state.receivers.map((receiver, i) => {

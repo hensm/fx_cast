@@ -15,6 +15,12 @@
   , "popupMediaTypeScreen": {
         "message": "Screen"
     }
+  , "popupMediaSelectCastLabel": {
+        "message": "Cast"
+    }
+  , "popupMediaSelectToLabel": {
+        "message": "to:"
+    }
   , "popupCastButtonLabel": {
         "message": "Cast"
     }
