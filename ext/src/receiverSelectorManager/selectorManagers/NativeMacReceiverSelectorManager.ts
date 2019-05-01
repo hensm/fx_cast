@@ -61,6 +61,8 @@ class NativeMacReceiverSelectorManager
               , i18n_mediaTypeApp: _("popupMediaTypeApp")
               , i18n_mediaTypeTab: _("popupMediaTypeTab")
               , i18n_mediaTypeScreen: _("popupMediaTypeScreen")
+              , i18n_mediaSelectCastLabel: _("popupMediaSelectCastLabel")
+              , i18n_mediaSelectToLabel: _("popupMediaSelectToLabel")
             })
         });
     }
