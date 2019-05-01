@@ -1,5 +1,6 @@
 import dnssd from "dnssd";
 
+import child_process from "child_process";
 import events from "events";
 import fs from "fs";
 import http from "http";
@@ -60,6 +61,8 @@ interface InitializeOptions {
 // Existing counterpart Media/Session objects
 const existingSessions: Map<string, Session> = new Map();
 const existingMedia: Map<string, Media> = new Map();
+
+let receiverSelectorApp: child_process.ChildProcess;
 
 /**
  * Handle incoming messages from the extension and forward
@@ -126,6 +129,59 @@ async function handleMessage (message: Message) {
         }
 
 
+        case "bridge:/receiverSelector/open": {
+            const receiverSelectorData = message.data;
+
+            if (process.platform !== "darwin") {
+                console.error("Invalid platform for native selector.");
+                process.exit(1);
+            }
+
+            if (!receiverSelectorData) {
+                console.error("Missing native selector data.");
+                process.exit(1);
+            } else {
+                try {
+                    JSON.parse(receiverSelectorData);
+                } catch (err) {
+                    console.error("Invalid native selector data.")
+                }
+            }
+
+            receiverSelectorApp = child_process.spawn(
+                    path.join(process.cwd(), "selector")
+                  , [ receiverSelectorData ]);
+
+            receiverSelectorApp.stdout.setEncoding("utf8")
+            receiverSelectorApp.stdout.on("data", data => {
+                sendMessage({
+                    subject: "main:/receiverSelector/selected"
+                  , data: JSON.parse(data)
+                })
+            });
+
+            receiverSelectorApp.addListener("error", err => {
+                sendMessage({
+                    subject: "main:/receiverSelector/error"
+                  , data: err.message
+                })
+            });
+
+            receiverSelectorApp.on("close", () => {
+                sendMessage({
+                    subject: "main:/receiverSelector/close"
+                });
+            });
+
+            break;
+        }
+
+        case "bridge:/receiverSelector/close": {
+            receiverSelectorApp.kill();
+            break;
+        }
+
+
         case "bridge:/startHttpServer": {
             const { filePath, port } = message.data;
 
@@ -183,69 +239,86 @@ async function handleMessage (message: Message) {
     }
 }
 
+
 function initialize (options: InitializeOptions) {
-    const statusListeners = new Map<string, StatusListener>();
+    if (options.shouldWatchStatus) {
+        browser.on("serviceUp", onStatusBrowserServiceUp);
+        browser.on("serviceDown", onStatusBrowserServiceDown);
+    }
 
-    browser.on("serviceUp", (service: dnssd.Service) => {
-        const host = service.addresses[0];
-        const port = service.port;
-        const id = service.txt.id;
+    browser.on("serviceUp", onBrowserServiceUp);
+    browser.on("servicedown", onBrowserServiceDown);
+    browser.start();
 
-        if (options.shouldWatchStatus) {
-            const listener = new StatusListener(host, port);
 
-            listener.on("receiverStatus", (status: ReceiverStatus) => {
-                const receiverStatusMessage: any = {
-                    subject: "receiverStatus"
-                  , data: {
-                        id
-                      , status: {
-                            volume: {
-                                level: status.volume.level
-                              , muted: status.volume.muted
-                            }
-                        }
-                    }
-                };
-                
-                if ("applications" in status) {
-                    const application = status.applications[0];
-
-                    receiverStatusMessage.data.status.application = {
-                        displayName: application.displayName
-                      , isIdleScreen: application.isIdleScreen
-                      , statusText: application.statusText
-                    };
-                }
-
-                sendMessage(receiverStatusMessage);
-            });
-
-            statusListeners.set(id, listener);
-        }
-
+    function onBrowserServiceUp (service: dnssd.Service) {
         sendMessage({
             subject: "shim:/serviceUp"
           , data: {
-                host, port, id
+                host: service.addresses[0]
+              , port: service.port
+              , id: service.txt.id
               , friendlyName: service.txt.fn
             }
         });
-    });
+    }
 
-    browser.on("serviceDown", (service: dnssd.Service) => {
-        const id = service.txt.id;
-
-        // De-register status listener
-        if (options.shouldWatchStatus && statusListeners.has(id)) {
-            statusListeners.get(id).deregister();
-        }
-
+    function onBrowserServiceDown (service: dnssd.Service) {
         sendMessage({
             subject: "shim:/serviceDown"
-          , data: { id }
+          , data: {
+                id: service.txt.id
+            }
         });
-    });
+    }
 
-    browser.start();
+
+    // Receiver status listeners for status mode
+    const statusListeners = new Map<string, StatusListener>();
+
+    function onStatusBrowserServiceUp (service: dnssd.Service) {
+        const { id } = service.txt;
+
+        const listener = new StatusListener(
+                service.addresses[0]
+              , service.port);
+
+        listener.on("receiverStatus", (status: ReceiverStatus) => {
+            const receiverStatusMessage: any = {
+                subject: "receiverStatus"
+              , data: {
+                    id
+                  , status: {
+                        volume: {
+                            level: status.volume.level
+                          , muted: status.volume.muted
+                        }
+                    }
+                }
+            };
+
+            if ("applications" in status) {
+                const application = status.applications[0];
+
+                receiverStatusMessage.data.status.application = {
+                    displayName: application.displayName
+                  , isIdleScreen: application.isIdleScreen
+                  , statusText: application.statusText
+                };
+            }
+
+            sendMessage(receiverStatusMessage);
+        });
+
+        statusListeners.set(id, listener);
+    }
+
+    function onStatusBrowserServiceDown (service: dnssd.Service) {
+        const { id } = service.txt;
+
+        if (statusListeners.has(id)) {
+            statusListeners.get(id).deregister();
+            statusListeners.delete(id);
+        }
+    }
 }

@@ -23,3 +23,18 @@ export interface ServiceUpMessage extends Message {
     data: Receiver;
 }
 
+
+export interface NativeReceiverSelectorSelectedMessage extends Message {
+    subject: "main:/receiverSelector/selected"
+  , data: Receiver
+}
+
+export interface NativeReceiverSelectorCloseMessage extends Message {
+    subject: "main:/receiverSelector/error"
+  , data: string
+}
+
+export interface NativeReceiverSelectorErrorMessage extends Message {
+    subject: "main:/receiverSelector/error"
+  , data: string
+}

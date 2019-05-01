@@ -23,6 +23,7 @@ const { executableName
       , executablePath
       , manifestName
       , manifestPath
+      , selectorExecutableName
       , pkgPlatform
       , DIST_PATH
       , LICENSE_PATH
@@ -73,6 +74,10 @@ const ROOT_PATH = path.join(__dirname, "..");
 const SRC_PATH = path.join(ROOT_PATH, "src");
 const BUILD_PATH = path.join(ROOT_PATH, "build");
 
+const spawnOptions = {
+    shell: true
+  , stdio: [ process.stdin, process.stdout, process.stderr ]
+};
 
 /**
  * Shouldn't exist, but cleanup and re-create any existing
@@ -88,10 +93,7 @@ async function build () {
     // Run tsc
     spawnSync(`tsc --project ${ROOT_PATH} \
                    --outDir ${BUILD_PATH}`
-      , {
-            shell: true
-          , stdio: [ process.stdin, process.stdout, process.stderr ]
-        });
+          , spawnOptions);
 
     // Move tsc output to build dir
     fs.moveSync(path.join(BUILD_PATH, "src"), BUILD_PATH);
@@ -164,6 +166,22 @@ async function build () {
       , "--output", path.join(BUILD_PATH, executableName[argv.platform])
     ]);
 
+    // Build NativeMacReceiverSelector
+    if (argv.platform === "darwin") {
+        const sourceFiles = glob.sync("*.swift", {
+            cwd: path.join(__dirname, "../NativeMacReceiverSelector")
+          , absolute: true
+        });
+
+        const formattedSourceFiles = sourceFiles
+            .map(fileName => `"${fileName}"`)
+            .join(" ");
+
+        spawnSync(`swiftc -o "${path.join(BUILD_PATH, selectorExecutableName)}" \
+                          ${formattedSourceFiles}`
+              , spawnOptions);
+    }
+
 
     /**
      * If packaging, create an installer package and move it to
@@ -191,6 +209,13 @@ async function build () {
                 path.join(BUILD_PATH, builtExecutableName)
               , path.join(DIST_PATH, builtExecutableName)
               , { overwrite: true });
+
+        if (argv.platform === "darwin") {
+            fs.moveSync(
+                    path.join(BUILD_PATH, selectorExecutableName)
+                  , path.join(DIST_PATH, selectorExecutableName)
+                  , { overwrite: true });
+        }
     }
 
     // Remove build directory
@@ -274,6 +299,10 @@ function packageDarwin (
           , path.join(rootExecutablePath, platformExecutableName));
     fs.moveSync(path.join(BUILD_PATH, manifestName)
           , path.join(rootManifestPath, manifestName));
+
+    // Move selector executable alongside main executable
+    fs.moveSync(path.join(BUILD_PATH, selectorExecutableName)
+          , path.join(rootExecutablePath, selectorExecutableName));
 
 
     // Copy static files to be processed

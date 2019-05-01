@@ -9,7 +9,8 @@ import { getWindowCenteredProps } from "./lib/utils";
 
 import { ReceiverSelectorMediaType
        , ReceiverSelectorSelectedEvent
-       , PopupReceiverSelectorManager } from "./receiverSelectorManager";
+       , PopupReceiverSelectorManager
+       , NativeMacReceiverSelectorManager } from "./receiverSelectorManager";
 
 import { Message, Receiver } from "./types";
 
@@ -430,10 +431,9 @@ statusBridge.onMessage.addListener(async (message: Message)  => {
 statusBridge.postMessage({
     subject: "bridge:/initialize"
   , data: {
-        shouldWatchStatus: true
+        mode: "status"
     }
 });
-
 
 
 async function onConnectShim (port: browser.runtime.Port) {
@@ -512,16 +512,16 @@ async function onConnectShim (port: browser.runtime.Port) {
             }
 
             case "main:/sessionCreated": {
-                PopupReceiverSelectorManager.close();
+                NativeMacReceiverSelectorManager.close();
                 break;
             }
 
             case "main:/selectReceiverBegin": {
-                PopupReceiverSelectorManager.open(
+                NativeMacReceiverSelectorManager.open(
                         Array.from(statusBridgeReceivers.values())
                       , message.data.defaultMediaType);
 
-                PopupReceiverSelectorManager.addEventListener("selected"
+                NativeMacReceiverSelectorManager.addEventListener("selected"
                       , (ev: ReceiverSelectorSelectedEvent) => {
 
                     port.postMessage({
@@ -532,13 +532,13 @@ async function onConnectShim (port: browser.runtime.Port) {
                     });
                 });
 
-                PopupReceiverSelectorManager.addEventListener("cancelled", () => {
+                NativeMacReceiverSelectorManager.addEventListener("cancelled", () => {
                     port.postMessage({
                         subject: "shim:/selectReceiverCancelled"
                     });
                 });
 
-                PopupReceiverSelectorManager.addEventListener("error", () => {
+                NativeMacReceiverSelectorManager.addEventListener("error", () => {
                     // TODO: Report errors properly
                     port.postMessage({
                         subject: "shim:/selectReceiverCancelled"
