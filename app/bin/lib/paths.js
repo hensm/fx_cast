@@ -34,6 +34,8 @@ exports.manifestPath = {
     }
 };
 
+exports.selectorExecutableName = "selector";
+
 exports.pkgPlatform = {
     win32: "win"
   , darwin: "macos"
