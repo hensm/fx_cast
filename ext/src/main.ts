@@ -373,8 +373,6 @@ const statusBridge = browser.runtime.connectNative(APPLICATION_NAME);
 const statusBridgeReceivers = new Map<string, Receiver>();
 
 statusBridge.onMessage.addListener(async (message: Message)  => {
-    console.log(message);
-
     switch (message.subject) {
         case "shim:/serviceUp": {
             const receiver = (message as ServiceUpMessage).data;
