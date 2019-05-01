@@ -510,16 +510,16 @@ async function onConnectShim (port: browser.runtime.Port) {
             }
 
             case "main:/sessionCreated": {
-                NativeMacReceiverSelectorManager.close();
+                PopupReceiverSelectorManager.close();
                 break;
             }
 
             case "main:/selectReceiverBegin": {
-                NativeMacReceiverSelectorManager.open(
+                PopupReceiverSelectorManager.open(
                         Array.from(statusBridgeReceivers.values())
                       , message.data.defaultMediaType);
 
-                NativeMacReceiverSelectorManager.addEventListener("selected"
+                PopupReceiverSelectorManager.addEventListener("selected"
                       , (ev: ReceiverSelectorSelectedEvent) => {
 
                     port.postMessage({
@@ -530,13 +530,13 @@ async function onConnectShim (port: browser.runtime.Port) {
                     });
                 });
 
-                NativeMacReceiverSelectorManager.addEventListener("cancelled", () => {
+                PopupReceiverSelectorManager.addEventListener("cancelled", () => {
                     port.postMessage({
                         subject: "shim:/selectReceiverCancelled"
                     });
                 });
 
-                NativeMacReceiverSelectorManager.addEventListener("error", () => {
+                PopupReceiverSelectorManager.addEventListener("error", () => {
                     // TODO: Report errors properly
                     port.postMessage({
                         subject: "shim:/selectReceiverCancelled"

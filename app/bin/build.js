@@ -79,6 +79,9 @@ const spawnOptions = {
   , stdio: [ process.stdin, process.stdout, process.stderr ]
 };
 
+const isBuildingForMac = argv.platform === "darwin";
+const isBuildingForMacOnMac = isBuildingForMac && process.platform === "darwin";
+
 /**
  * Shouldn't exist, but cleanup and re-create any existing
  * build directories, just in case.
@@ -90,6 +93,18 @@ fs.ensureDirSync(DIST_PATH, { recursive: true });
 
 
 async function build () {
+    /**
+     * Because the native receiver selector can only be built on
+     * systems with the capacity to link to the native AppKit
+     * libraries, and the pkg installer can only be built on
+     * platforms with the requisite pkgbuild/productbuild binaries,
+     * there's no point in trying to build from other platforms.
+     */
+    if (isBuildingForMac && !isBuildingForMacOnMac) {
+        console.error("macOS version must be built on macOS");
+        process.exit(1);
+    }
+
     // Run tsc
     spawnSync(`tsc --project ${ROOT_PATH} \
                    --outDir ${BUILD_PATH}`
@@ -167,7 +182,7 @@ async function build () {
     ]);
 
     // Build NativeMacReceiverSelector
-    if (argv.platform === "darwin") {
+    if (isBuildingForMacOnMac) {
         const sourceFiles = glob.sync("*.swift", {
             cwd: path.join(__dirname, "../NativeMacReceiverSelector")
           , absolute: true
@@ -177,9 +192,16 @@ async function build () {
             .map(fileName => `"${fileName}"`)
             .join(" ");
 
-        spawnSync(`swiftc -o "${path.join(BUILD_PATH, selectorExecutableName)}" \
-                          ${formattedSourceFiles}`
-              , spawnOptions);
+        const buildCommand = `
+            swiftc -o "${path.join(BUILD_PATH, selectorExecutableName)}" \
+                   ${formattedSourceFiles}`;
+
+        // Build with optimizations if packaging
+        if (argv.package) {
+            buildCommand += " -0size";
+        }
+
+        spawnSync(buildCommand, spawnOptions);
     }
 
 
@@ -210,7 +232,7 @@ async function build () {
               , path.join(DIST_PATH, builtExecutableName)
               , { overwrite: true });
 
-        if (argv.platform === "darwin") {
+        if (isBuildingForMacOnMac) {
             fs.moveSync(
                     path.join(BUILD_PATH, selectorExecutableName)
                   , path.join(DIST_PATH, selectorExecutableName)
@@ -235,10 +257,10 @@ function packageApp (platform, arch) {
     ];
 
     switch (platform) {
-        case "win32": return packageWin32(...packageFunctionArgs);
+        case "win32":  return packageWin32(...packageFunctionArgs);
         case "darwin": return packageDarwin(...packageFunctionArgs);
 
-        case "linux":
+        case "linux": {
             /**
              * Get manifest path from package type sub key for Linux
              * platforms.
@@ -252,11 +274,13 @@ function packageApp (platform, arch) {
             }
 
             break;
+        }
 
 
-        default:
+        default: {
             console.error("Unsupported target platform");
             process.exit(1);
+        }
     }
 }
 
