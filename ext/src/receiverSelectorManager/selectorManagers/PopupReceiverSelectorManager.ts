@@ -7,7 +7,7 @@ import { getWindowCenteredProps } from "../../lib/utils";
 import { Message, Receiver } from "../../types";
 
 
-class PopupReceiverSelectorManager
+export default class PopupReceiverSelectorManager
         extends EventTarget
         implements ReceiverSelectorManager {
 
@@ -158,6 +158,3 @@ class PopupReceiverSelectorManager
         }
     }
 }
-
-// Singleton instance
-export default new PopupReceiverSelectorManager();

@@ -13,7 +13,7 @@ import { NativeReceiverSelectorCloseMessage
 const _ = browser.i18n.getMessage;
 
 
-class NativeMacReceiverSelectorManager
+export default class NativeMacReceiverSelectorManager
         extends EventTarget
         implements ReceiverSelectorManager {
 
@@ -105,6 +105,3 @@ class NativeMacReceiverSelectorManager
         this.wasReceiverSelected = false;
     }
 }
-
-// Singleton instance
-export default new NativeMacReceiverSelectorManager();
