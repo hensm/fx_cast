@@ -23,10 +23,10 @@ export function getReceiverSelectorManager (
 
     switch (type) {
         case ReceiverSelectorManagerType.Popup: {
-            return PopupReceiverSelectorManager;
+            return new PopupReceiverSelectorManager();
         }
         case ReceiverSelectorManagerType.NativeMac: {
-            return NativeMacReceiverSelectorManager;
+            return new NativeMacReceiverSelectorManager();
         }
     }
 }

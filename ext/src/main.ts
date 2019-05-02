@@ -590,6 +590,46 @@ async function onConnectShim (port: browser.runtime.Port) {
         ? ReceiverSelectorManagerType.NativeMac
         : ReceiverSelectorManagerType.Popup);
 
+    function onReceiverSelectorManagerSelected (
+            ev: ReceiverSelectorSelectedEvent) {
+
+        port.postMessage({
+            subject: "shim:/selectReceiverEnd"
+          , data: {
+                receiver: ev.detail.receiver
+            }
+        });
+    }
+
+    function onReceiverSelectorManagerCancelled () {
+        port.postMessage({
+            subject: "shim:/selectReceiverCancelled"
+        });
+    }
+
+    function onReceiverSelectorManagerError () {
+        // TODO: Report errors properly
+        port.postMessage({
+            subject: "shim:/selectReceiverCancelled"
+        });
+    }
+
+    receiverSelectorManager.addEventListener("selected"
+          , onReceiverSelectorManagerSelected);
+    receiverSelectorManager.addEventListener("cancelled"
+          , onReceiverSelectorManagerCancelled);
+    receiverSelectorManager.addEventListener("error"
+          , onReceiverSelectorManagerError);
+
+    port.onDisconnect.addListener(() => {
+        receiverSelectorManager.removeEventListener("selected"
+              , onReceiverSelectorManagerSelected);
+        receiverSelectorManager.removeEventListener("cancelled"
+              , onReceiverSelectorManagerCancelled);
+        receiverSelectorManager.removeEventListener("error"
+              , onReceiverSelectorManagerError);
+    });
+
 
     const tabId = port.sender.tab.id;
     const frameId = port.sender.frameId;
@@ -668,31 +708,6 @@ async function onConnectShim (port: browser.runtime.Port) {
                 receiverSelectorManager.open(
                         Array.from(statusBridgeReceivers.values())
                       , message.data.defaultMediaType);
-
-                receiverSelectorManager.addEventListener("selected"
-                      , (ev: ReceiverSelectorSelectedEvent) => {
-
-                    port.postMessage({
-                        subject: "shim:/selectReceiverEnd"
-                      , data: {
-                            receiver: ev.detail.receiver
-                        }
-                    });
-                });
-
-                receiverSelectorManager.addEventListener("cancelled", () => {
-                    port.postMessage({
-                        subject: "shim:/selectReceiverCancelled"
-                    });
-                });
-
-                receiverSelectorManager.addEventListener("error", () => {
-                    // TODO: Report errors properly
-                    port.postMessage({
-                        subject: "shim:/selectReceiverCancelled"
-                    });
-                });
-
                 break;
             }
 
