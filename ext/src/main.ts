@@ -65,9 +65,18 @@ browser.runtime.onInstalled.addListener(async details => {
 });
 
 
+type MenuId = string | number;
+
 // Menu IDs
-let mirrorCastMenuId: string | number;
-let mediaCastMenuId: string | number;
+let mirrorCastMenuId: MenuId;
+let mediaCastMenuId: MenuId;
+
+
+let whitelistMenuId: MenuId;
+let whitelistRecommendedMenuId: MenuId;
+
+const whitelistMenuMap = new Map<MenuId, string>();
+
 
 const mediaCastTargetUrlPatterns = new Set([
     "http://*/*"
@@ -102,7 +111,7 @@ async function createMenus () {
 
     // Screen/Tab mirroring "Cast..." context menu item
     mirrorCastMenuId = await browser.menus.create({
-        contexts: [ "browser_action", "page" ]
+        contexts: [ "browser_action", "page", "tools_menu" ]
       , id: "contextCast"
       , title: _("contextCast")
       , visible: options.mirroringEnabled
@@ -113,6 +122,119 @@ async function createMenus () {
           , "https://*/*"
         ]
     });
+
+    whitelistMenuId = await browser.menus.create({
+        contexts: [ "browser_action", "tools_menu" ]
+      , title: _("contextAddToWhitelist")
+      , visible: false
+    });
+
+    whitelistRecommendedMenuId = await browser.menus.create({
+        title: _("contextAddToWhitelistRecommended")
+      , parentId: whitelistMenuId
+    });
+
+    await browser.menus.create({
+        type: "separator"
+      , parentId: whitelistMenuId
+    });
+}
+
+
+browser.webNavigation.onCommitted.addListener(
+        details => {
+            // Only track navigation in top level contexts
+            if (details.frameId === 0) {
+                rebuildWhitelistMenus(details.url);
+            }
+        }
+      , { url: [
+            { schemes: [ "http", "https" ]}]
+        });
+
+browser.tabs.onActivated.addListener(async () => {
+    const { url } = (await browser.tabs.query({
+        active: true
+      , currentWindow: true
+    }))[0];
+
+    rebuildWhitelistMenus(url);
+});
+
+async function rebuildWhitelistMenus (urlString: string) {
+    const url = new URL(urlString);
+
+    await browser.menus.update(whitelistMenuId, {
+        visible: url.origin !== "null"
+    })
+
+    function addWhitelistMenuItem (pattern: string) {
+        const menuId = browser.menus.create({
+            title: _("contextAddToWhitelistAdvancedAdd", pattern)
+          , parentId: whitelistMenuId
+        });
+
+        whitelistMenuMap.set(menuId, pattern);
+    }
+
+    for (const [ menuId ] of whitelistMenuMap) {
+        // Remove all temporary menus
+        if (menuId !== whitelistRecommendedMenuId) {
+            browser.menus.remove(menuId);
+        }
+
+        // Clear map
+        whitelistMenuMap.delete(menuId);
+    }
+
+
+    const recommendedPattern = `${url.origin}/*`;
+
+    browser.menus.update(whitelistRecommendedMenuId, {
+        title: _("contextAddToWhitelistRecommended", recommendedPattern)
+    });
+
+    whitelistMenuMap.set(whitelistRecommendedMenuId, recommendedPattern);
+
+
+    if (url.search) {
+        addWhitelistMenuItem(`${url.origin}${url.pathname}${url.search}`);
+    }
+
+
+    const pathTrimmed = url.pathname.endsWith("/")
+        ? url.pathname.substring(0, url.pathname.length - 1)
+        : url.pathname;
+
+    const pathSegments = pathTrimmed.split("/")
+            .filter(segment => segment)
+            .reverse();
+
+    if (pathSegments.length) {
+        let index = 0;
+
+        for (const pathSegment of pathSegments) {
+            const partialPath = pathSegments
+                    .slice(index)
+                    .reverse()
+                    .join("/");
+
+            addWhitelistMenuItem(`${url.origin}/${partialPath}/*`);
+            index++;
+        }
+    }
+
+
+    const baseHost = (url.host.match(/\./g) || []).length > 1
+        ? url.host.substring(url.host.indexOf(".") + 1)
+        : url.host;
+
+    // Wildcard protocol
+    addWhitelistMenuItem(`*://${url.host}/*`);
+    // Wildcard subdomain
+    addWhitelistMenuItem(`${url.protocol}//*.${baseHost}/*`);
+    // Wildcard protocol and subdomain
+    addWhitelistMenuItem(`*://*.${baseHost}/*`);
 }
 
 
@@ -299,63 +421,84 @@ let mirrorCastFrameId: number;
 
 
 browser.menus.onClicked.addListener(async (info, tab) => {
-    const { frameId } = info;
-    const { options } = await browser.storage.sync.get("options");
+    if (info.menuItemId === mirrorCastMenuId
+     || info.menuItemId === mediaCastMenuId) {
 
-    // Load cast setup script
-    await browser.tabs.executeScript(tab.id, {
-        file: "shim/content.js"
-      , frameId
-    });
+        const { frameId } = info;
+        const { options } = await browser.storage.sync.get("options");
 
-    switch (info.menuItemId) {
-        case "contextCast": {
-            mirrorCastTabId = tab.id;
-            mirrorCastFrameId = frameId;
+        // Load cast setup script
+        await browser.tabs.executeScript(tab.id, {
+            file: "shim/content.js"
+          , frameId
+        });
 
-            await browser.tabs.executeScript(tab.id, {
-                code: `
-                    var selectedMedia = "${info.pageUrl ? "tab" : "screen"}";
-                    var FX_CAST_RECEIVER_APP_ID = "${options.mirroringAppId}";
-                `
-              , frameId
-            });
+        switch (info.menuItemId) {
+            case mirrorCastMenuId: {
+                mirrorCastTabId = tab.id;
+                mirrorCastFrameId = frameId;
 
-            // Load mirroring sender app
-            await browser.tabs.executeScript(tab.id, {
-                file: "mirroringCast.js"
-              , frameId
-            });
+                await browser.tabs.executeScript(tab.id, {
+                    code: `
+                        var selectedMedia = "${info.pageUrl ? "tab" : "screen"}";
+                        var FX_CAST_RECEIVER_APP_ID = "${options.mirroringAppId}";
+                    `
+                  , frameId
+                });
 
-            break;
+                // Load mirroring sender app
+                await browser.tabs.executeScript(tab.id, {
+                    file: "mirroringCast.js"
+                  , frameId
+                });
+
+                break;
+            }
+
+            case mediaCastMenuId: {
+                mediaCastTabId = tab.id;
+                mediaCastFrameId = frameId;
+
+                // Pass media URL to media sender app
+                await browser.tabs.executeScript(tab.id, {
+                    code: `var srcUrl = "${info.srcUrl}";
+                           var targetElementId = ${info.targetElementId};`
+                  , frameId
+                });
+
+                // Load media sender app
+                await browser.tabs.executeScript(tab.id, {
+                    file: "mediaCast.js"
+                  , frameId
+                });
+
+                break;
+            }
         }
 
-        case "contextCastMedia": {
-            mediaCastTabId = tab.id;
-            mediaCastFrameId = frameId;
+        // Load cast API
+        await browser.tabs.executeScript(tab.id, {
+            file: "shim/bundle.js"
+          , frameId
+        });
 
-            // Pass media URL to media sender app
-            await browser.tabs.executeScript(tab.id, {
-                code: `var srcUrl = "${info.srcUrl}";
-                       var targetElementId = ${info.targetElementId};`
-              , frameId
-            });
-
-            // Load media sender app
-            await browser.tabs.executeScript(tab.id, {
-                file: "mediaCast.js"
-              , frameId
-            });
-
-            break;
-        }
+        return;
     }
 
-    // Load cast API
-    await browser.tabs.executeScript(tab.id, {
-        file: "shim/bundle.js"
-      , frameId
-    });
+
+    if (info.parentMenuItemId === whitelistMenuId) {
+        const matchPattern = whitelistMenuMap.get(info.menuItemId);
+        const options: Options =
+                (await browser.storage.sync.get("options")).options;
+
+        // Add to whitelist
+        options.userAgentWhitelist.push(matchPattern);
+
+        // Update options
+        await browser.storage.sync.set({
+            options: options
+        });
+    }
 });
 
 

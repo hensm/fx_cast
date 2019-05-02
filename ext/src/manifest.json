@@ -40,6 +40,7 @@
       , "menus"
       , "nativeMessaging"
       , "storage"
+      , "tabs"
       , "webNavigation"
       , "webRequest"
       , "webRequestBlocking"

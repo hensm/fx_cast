@@ -31,6 +31,15 @@
   , "contextCast": {
         "message": "Cast..."
     }
+  , "contextAddToWhitelist": {
+        "message": "Add to Whitelist"
+    }
+  , "contextAddToWhitelistRecommended": {
+        "message": "Add $1 (Recommended)"
+    }
+  , "contextAddToWhitelistAdvancedAdd": {
+        "message": "Add $1"
+    }
 
 
   , "optionsBridgeLoading": {
