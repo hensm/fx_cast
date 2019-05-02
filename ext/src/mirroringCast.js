@@ -1,5 +1,8 @@
 "use strict";
 
+import { ReceiverSelectorMediaType }
+        from "./receiverSelectorManager/ReceiverSelectorManager":
+
 let chrome;
 let logMessage;
 
@@ -70,7 +73,7 @@ async function onRequestSessionSuccess (session_, selectedMedia) {
     });
 
     switch (selectedMedia) {
-        case "tab":
+        case ReceiverSelectorMediaType.Tab:
             interval = setInterval(() => {
                 ctx.clearRect(0, 0, canvas.width, canvas.height);
                 ctx.drawWindow(
@@ -85,7 +88,7 @@ async function onRequestSessionSuccess (session_, selectedMedia) {
             pc.addStream(canvas.captureStream());
             break;
 
-        case "screen":
+        case ReceiverSelectorMediaType.Screen:
             const stream = await navigator.mediaDevices.getUserMedia({
                 video: { mediaSource: "window" }
             });

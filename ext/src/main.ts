@@ -440,7 +440,9 @@ browser.menus.onClicked.addListener(async (info, tab) => {
 
                 await browser.tabs.executeScript(tab.id, {
                     code: `
-                        var selectedMedia = "${info.pageUrl ? "tab" : "screen"}";
+                        var selectedMedia = ${info.pageUrl
+                            ? ReceiverSelectorMediaType.Tab
+                            : ReceiverSelectorMediaType.Screen};
                         var FX_CAST_RECEIVER_APP_ID = "${options.mirroringAppId}";
                     `
                   , frameId
@@ -595,9 +597,7 @@ async function onConnectShim (port: browser.runtime.Port) {
 
         port.postMessage({
             subject: "shim:/selectReceiverEnd"
-          , data: {
-                receiver: ev.detail.receiver
-            }
+          , data: ev.detail
         });
     }
 
