@@ -7,15 +7,15 @@ export interface ReceiverStatus {
         controlType: string;
         level: number;
     };
-    applications?: {
+    applications?: Array<{
         displayName: string;
         statusText: string;
         transportId: string;
         isIdleScreen: boolean;
         sessionId: string;
-        namespaces: { name: string }[];
+        namespaces: Array<{ name: string }>;
         appId: string;
-    }[];
+    }>;
     userEq?: {};
 }
 
@@ -33,7 +33,7 @@ export interface MediaStatus {
     volume: {
         muted: boolean;
         level: number;
-    }
+    };
     currentItemId: number;
     idleReason: string;
     playerState: string;
@@ -44,11 +44,11 @@ export interface MediaStatus {
             streamType: string;
             contentType: string;
             metadata: {
-                images: { url: string }[];
+                images: Array<{ url: string }>;
                 metadataType: number;
                 artist: string;
                 title: string;
             };
         }
-    }
+    };
 }

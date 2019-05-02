@@ -5,9 +5,9 @@ import ReceiverSelectorManager, {
 
 import { Message, Receiver } from "../../types";
 
-import { NativeReceiverSelectorSelectedMessage
+import { NativeReceiverSelectorCloseMessage
        , NativeReceiverSelectorErrorMessage
-       , NativeReceiverSelectorCloseMessage } from "../../messageTypes";
+       , NativeReceiverSelectorSelectedMessage } from "../../messageTypes";
 
 
 const _ = browser.i18n.getMessage;
@@ -26,7 +26,7 @@ class NativeMacReceiverSelectorManager
     public async open (
             receivers: Receiver[]
           , defaultMediaType: ReceiverSelectorMediaType): Promise<void> {
-        
+
         this.bridgePort = browser.runtime.connectNative(APPLICATION_NAME);
 
         this.bridgePort.onMessage.addListener((message: Message) => {
@@ -91,7 +91,7 @@ class NativeMacReceiverSelectorManager
 
     private onBridgePortMessageClose (
             message: NativeReceiverSelectorCloseMessage) {
-        
+
         if (!this.wasReceiverSelected) {
             this.dispatchEvent(new CustomEvent("cancelled"));
         }

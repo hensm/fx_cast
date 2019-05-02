@@ -54,7 +54,7 @@ class PopupReceiverSelectorManager
                     receivers: this.receivers
                   , defaultMediaType: this.defaultMediaType
                 }
-            })
+            });
         });
     }
 
@@ -103,8 +103,6 @@ class PopupReceiverSelectorManager
      * Handles popup messages.
      */
     private onPopupMessage (message: Message) {
-        console.log("popupmsg", message);
-
         switch (message.subject) {
             case "receiverSelectorManager:/selected": {
                 this.wasReceiverSelected = true;

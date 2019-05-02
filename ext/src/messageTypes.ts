@@ -8,7 +8,7 @@ export interface ReceiverStatusMessage extends Message {
     data: {
         id: string;
         status: ReceiverStatus;
-    }
+    };
 }
 
 export interface ServiceDownMessage extends Message {
@@ -25,16 +25,16 @@ export interface ServiceUpMessage extends Message {
 
 
 export interface NativeReceiverSelectorSelectedMessage extends Message {
-    subject: "main:/receiverSelector/selected"
-  , data: Receiver
+    subject: "main:/receiverSelector/selected";
+    data: Receiver;
 }
 
 export interface NativeReceiverSelectorCloseMessage extends Message {
-    subject: "main:/receiverSelector/error"
-  , data: string
+    subject: "main:/receiverSelector/error";
+    data: string;
 }
 
 export interface NativeReceiverSelectorErrorMessage extends Message {
-    subject: "main:/receiverSelector/error"
-  , data: string
+    subject: "main:/receiverSelector/error";
+    data: string;
 }

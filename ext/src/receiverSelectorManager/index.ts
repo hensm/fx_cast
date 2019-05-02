@@ -18,7 +18,7 @@ export enum ReceiverSelectorManagerType {
   , NativeMac
 }
 
-export function getReceiverSelectorManager(
+export function getReceiverSelectorManager (
         type: ReceiverSelectorManagerType) {
 
     switch (type) {

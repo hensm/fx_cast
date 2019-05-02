@@ -1,9 +1,9 @@
 "use strict";
 
+import EventEmitter from "events";
 import fs from "fs";
 import http from "http";
 import mime from "mime-types";
-import EventEmitter from "events";
 
 import { Message
        , SendMessageCallback } from "./types";
