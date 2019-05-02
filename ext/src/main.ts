@@ -7,10 +7,10 @@ import messageRouter from "./lib/messageRouter";
 import { getChromeUserAgent } from "./lib/userAgents";
 import { getWindowCenteredProps } from "./lib/utils";
 
-import { ReceiverSelectorMediaType
-       , ReceiverSelectorSelectedEvent
-       , PopupReceiverSelectorManager
-       , NativeMacReceiverSelectorManager } from "./receiverSelectorManager";
+import { getReceiverSelectorManager
+       , ReceiverSelectorManagerType
+       , ReceiverSelectorMediaType
+       , ReceiverSelectorSelectedEvent } from "./receiverSelectorManager";
 
 import { Message, Receiver } from "./types";
 
@@ -441,6 +441,13 @@ async function onConnectShim (port: browser.runtime.Port) {
     }
 
 
+    const { os } = await browser.runtime.getPlatformInfo();
+
+    const receiverSelectorManager = getReceiverSelectorManager(os === "mac"
+        ? ReceiverSelectorManagerType.NativeMac
+        : ReceiverSelectorManagerType.Popup);
+
+
     const tabId = port.sender.tab.id;
     const frameId = port.sender.frameId;
     const shimId = `${tabId}:${frameId}`;
@@ -510,16 +517,16 @@ async function onConnectShim (port: browser.runtime.Port) {
             }
 
             case "main:/sessionCreated": {
-                PopupReceiverSelectorManager.close();
+                receiverSelectorManager.close();
                 break;
             }
 
             case "main:/selectReceiverBegin": {
-                PopupReceiverSelectorManager.open(
+                receiverSelectorManager.open(
                         Array.from(statusBridgeReceivers.values())
                       , message.data.defaultMediaType);
 
-                PopupReceiverSelectorManager.addEventListener("selected"
+                receiverSelectorManager.addEventListener("selected"
                       , (ev: ReceiverSelectorSelectedEvent) => {
 
                     port.postMessage({
@@ -530,13 +537,13 @@ async function onConnectShim (port: browser.runtime.Port) {
                     });
                 });
 
-                PopupReceiverSelectorManager.addEventListener("cancelled", () => {
+                receiverSelectorManager.addEventListener("cancelled", () => {
                     port.postMessage({
                         subject: "shim:/selectReceiverCancelled"
                     });
                 });
 
-                PopupReceiverSelectorManager.addEventListener("error", () => {
+                receiverSelectorManager.addEventListener("error", () => {
                     // TODO: Report errors properly
                     port.postMessage({
                         subject: "shim:/selectReceiverCancelled"
