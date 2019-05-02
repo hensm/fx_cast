@@ -59,7 +59,7 @@ declare namespace browser.runtime {
          * https://git.io/fjmzb
          * addListener cb `() => void` is wrong
          */
-        onMessage: browser.events.Event
+        onMessage: browser.events.Event;
     }
 
     function connect (connectInfo: {

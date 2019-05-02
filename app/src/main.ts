@@ -13,7 +13,7 @@ import Session from "./Session";
 import StatusListener from "./StatusListener";
 import * as transforms from "./transforms";
 
-import { ReceiverStatus, MediaStatus } from "./castTypes";
+import { MediaStatus, ReceiverStatus } from "./castTypes";
 
 import { Message } from "./types";
 
@@ -145,7 +145,7 @@ async function handleMessage (message: Message) {
                 try {
                     JSON.parse(receiverSelectorData);
                 } catch (err) {
-                    console.error("Invalid native selector data.")
+                    console.error("Invalid native selector data.");
                 }
             }
 
@@ -153,19 +153,19 @@ async function handleMessage (message: Message) {
                     path.join(process.cwd(), "selector")
                   , [ receiverSelectorData ]);
 
-            receiverSelectorApp.stdout.setEncoding("utf8")
+            receiverSelectorApp.stdout.setEncoding("utf8");
             receiverSelectorApp.stdout.on("data", data => {
                 sendMessage({
                     subject: "main:/receiverSelector/selected"
                   , data: JSON.parse(data)
-                })
+                });
             });
 
             receiverSelectorApp.addListener("error", err => {
                 sendMessage({
                     subject: "main:/receiverSelector/error"
                   , data: err.message
-                })
+                });
             });
 
             receiverSelectorApp.on("close", () => {
@@ -199,7 +199,7 @@ async function handleMessage (message: Message) {
                 sendMessage({
                     subject: "mediaCast:/mediaServer/stopped"
                 });
-            })
+            });
 
             break;
         }

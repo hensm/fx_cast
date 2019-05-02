@@ -190,11 +190,9 @@ export function unescape (escaped: string): string {
 
 
 onMessage(async message => {
-    console.log(message)
     switch (message.subject) {
         case "shim:/initialized": {
             isAvailable = true;
-
             break;
         }
 

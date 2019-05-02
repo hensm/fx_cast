@@ -86,13 +86,13 @@ class PopupApp extends Component<{}, PopupAppState> {
             browser.windows.update(this.win.id, {
                 height: windowHeight
             });
-        }, 1)
+        }, 1);
     }
 
     public render () {
         const shareMedia =
                 this.state.mediaType === ReceiverSelectorMediaType.Tab
-             || this.state.mediaType === ReceiverSelectorMediaType.Screen
+             || this.state.mediaType === ReceiverSelectorMediaType.Screen;
 
         return (
             <div>
@@ -103,7 +103,6 @@ class PopupApp extends Component<{}, PopupAppState> {
                             className="media-select-dropdown">
                         <option value={ ReceiverSelectorMediaType.App }
                                 disabled={ shareMedia }>
-                            
                             { _("popupMediaTypeApp") }
                         </option>
                         <option value={ ReceiverSelectorMediaType.Tab }

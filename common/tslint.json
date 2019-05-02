@@ -5,8 +5,8 @@
     ]
   , "jsRules": false
   , "rules": {
-        "no-consecutive-blank-lines": false
-      , "arrow-parens": false
+        "arrow-parens": false
+      , "import-spacing": false
       , "interface-name": false
       , "max-classes-per-file": false
       , "max-line-length": [ true, {
@@ -14,6 +14,7 @@
           , "ignore-pattern": "//|.*(\"|`);?$"
         }]
       , "member-access": [ true ]
+      , "no-consecutive-blank-lines": false
       , "no-console": [ true, "log" ]
       , "no-namespace": [ true, "allow-declarations" ]
       , "object-literal-sort-keys": false
