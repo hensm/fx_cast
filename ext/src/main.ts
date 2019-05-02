@@ -166,7 +166,7 @@ async function rebuildWhitelistMenus (urlString: string) {
 
     await browser.menus.update(whitelistMenuId, {
         visible: url.origin !== "null"
-    })
+    });
 
     function addWhitelistMenuItem (pattern: string) {
         const menuId = browser.menus.create({
@@ -496,7 +496,7 @@ browser.menus.onClicked.addListener(async (info, tab) => {
 
         // Update options
         await browser.storage.sync.set({
-            options: options
+            options
         });
     }
 });
