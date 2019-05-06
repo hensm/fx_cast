@@ -10,6 +10,8 @@ class ReceiverView: NSStackView {
     var receiver: Receiver!
     var constraintsSet = false
 
+    var button: NSButton!
+    var spinner: NSProgressIndicator!
 
     override init (frame: CGRect) {
         super.init(frame: frame)
@@ -35,16 +37,22 @@ class ReceiverView: NSStackView {
         metaStackView.spacing = 4
 
 
-        let castButton = WideButton(
+        self.button = WideButton(
                 title: "Cast"
               , target: self
               , action: #selector(ReceiverView.onCast))
 
-        castButton.bezelStyle = .rounded
+        self.button.bezelStyle = .rounded
 
+        self.spinner = NSProgressIndicator()
+        self.spinner.style = .spinning
+        self.spinner.controlSize = .small
+        self.spinner.isHidden = true
 
         self.addArrangedSubview(metaStackView)
-        self.addArrangedSubview(castButton)
+        self.addArrangedSubview(self.spinner)
+        self.addArrangedSubview(self.button)
+
         self.distribution = .fill
     }
 
@@ -60,9 +68,16 @@ class ReceiverView: NSStackView {
         }
     }
 
+    func disable () {
+        self.button.isEnabled = false
+    }
+
     @objc
     func onCast () {
         self.receiverViewDelegate?.didCast(self.receiver)
+
+        self.spinner.isHidden = false
+        self.spinner.startAnimation(nil)
     }
 }
 

@@ -53,6 +53,7 @@ struct Receiver: Codable {
 
 class ViewController: NSViewController {
     var mediaTypePopUpButton: NSPopUpButton!
+    var receiverViews = [ReceiverView]()
 
     override func loadView () {
         let visualEffectView = NSVisualEffectView()
@@ -119,6 +120,8 @@ class ViewController: NSViewController {
             let receiverView = ReceiverView(receiver: receiver)
             receiverView.receiverViewDelegate = self
 
+            self.receiverViews.append(receiverView)
+
             stackView.addArrangedSubview(receiverSeparator)
             stackView.addArrangedSubview(receiverView)
         }
@@ -133,6 +136,10 @@ class ViewController: NSViewController {
 
 extension ViewController: ReceiverViewDelegate {
     func didCast (_ receiver: Receiver) {
+        for receiverView in self.receiverViews {
+            receiverView.disable()
+        }
+
         do {
             let mediaType = MediaType(
                     rawValue: self.mediaTypePopUpButton.indexOfSelectedItem)!
