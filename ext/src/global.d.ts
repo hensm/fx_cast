@@ -65,7 +65,7 @@ declare namespace browser.runtime {
     function connect (connectInfo: {
             name?: string
           , includeTlsChannelId?: boolean
-      }): browser.runtime.Port;
+        }): browser.runtime.Port;
 }
 
 

@@ -124,9 +124,9 @@ async function createMenus () {
     });
 
     whitelistMenuId = await browser.menus.create({
-        contexts: [ "browser_action", "tools_menu" ]
+        contexts: [ "browser_action" ]
       , title: _("contextAddToWhitelist")
-      , visible: false
+      , enabled: false
     });
 
     whitelistRecommendedMenuId = await browser.menus.create({
@@ -141,32 +141,41 @@ async function createMenus () {
 }
 
 
-browser.webNavigation.onCommitted.addListener(
-        details => {
-            // Only track navigation in top level contexts
-            if (details.frameId === 0) {
-                rebuildWhitelistMenus(details.url);
-            }
-        }
-      , { url: [
-            { schemes: [ "http", "https" ]}]
+browser.menus.onShown.addListener(info => {
+    // Only rebuild menus if whitelist menu present
+    // Workaround type issues
+    const menuIds = info.menuIds as unknown as number[];
+    if (!menuIds.includes(whitelistMenuId as number)) {
+        return;
+    }
+
+    if (!info.pageUrl) {
+        browser.menus.update(whitelistMenuId, {
+            enabled: false
         });
 
-browser.tabs.onActivated.addListener(async () => {
-    const { url } = (await browser.tabs.query({
-        active: true
-      , currentWindow: true
-    }))[0];
+        browser.menus.refresh();
+        return;
+    }
 
-    rebuildWhitelistMenus(url);
-});
+    const url = new URL(info.pageUrl);
+    const hasOrigin = url.origin !== "null";
 
-async function rebuildWhitelistMenus (urlString: string) {
-    const url = new URL(urlString);
 
-    await browser.menus.update(whitelistMenuId, {
-        visible: url.origin !== "null"
+    /**
+     * If .origin is "null", hide top-level menu and don't
+     * bother re-building submenus, since we're probably not on
+     * a remote page.
+     */
+    browser.menus.update(whitelistMenuId, {
+        enabled: hasOrigin
     });
+
+    if (!hasOrigin) {
+        browser.menus.refresh();
+        return;
+    }
+
 
     function addWhitelistMenuItem (pattern: string) {
         const menuId = browser.menus.create({
@@ -176,6 +185,7 @@ async function rebuildWhitelistMenus (urlString: string) {
 
         whitelistMenuMap.set(menuId, pattern);
     }
+
 
     for (const [ menuId ] of whitelistMenuMap) {
         // Remove all temporary menus
@@ -188,54 +198,66 @@ async function rebuildWhitelistMenus (urlString: string) {
     }
 
 
-    const recommendedPattern = `${url.origin}/*`;
-
-    browser.menus.update(whitelistRecommendedMenuId, {
-        title: _("contextAddToWhitelistRecommended", recommendedPattern)
-    });
-
-    whitelistMenuMap.set(whitelistRecommendedMenuId, recommendedPattern);
-
-
-    if (url.search) {
-        addWhitelistMenuItem(`${url.origin}${url.pathname}${url.search}`);
-    }
-
-
-    const pathTrimmed = url.pathname.endsWith("/")
-        ? url.pathname.substring(0, url.pathname.length - 1)
-        : url.pathname;
-
-    const pathSegments = pathTrimmed.split("/")
-            .filter(segment => segment)
-            .reverse();
-
-    if (pathSegments.length) {
-        let index = 0;
-
-        for (const pathSegment of pathSegments) {
-            const partialPath = pathSegments
-                    .slice(index)
-                    .reverse()
-                    .join("/");
-
-            addWhitelistMenuItem(`${url.origin}/${partialPath}/*`);
-            index++;
-        }
-    }
-
-
     const baseHost = (url.host.match(/\./g) || []).length > 1
         ? url.host.substring(url.host.indexOf(".") + 1)
         : url.host;
 
-    // Wildcard protocol
-    addWhitelistMenuItem(`*://${url.host}/*`);
-    // Wildcard subdomain
-    addWhitelistMenuItem(`${url.protocol}//*.${baseHost}/*`);
-    // Wildcard protocol and subdomain
-    addWhitelistMenuItem(`*://*.${baseHost}/*`);
-}
+
+    const patternRecommended = `${url.origin}/*`;
+    const patternSearch = `${url.origin}${url.pathname}${url.search}`;
+    const patternWildcardProtocol = `*://${url.host}/*`;
+    const patternWildcardSubdomain = `${url.protocol}//*.${baseHost}/*`;
+    const patternWildcardProtocolAndSubdomain = `*://*.${baseHost}/*`;
+
+
+    // Update recommended menu item
+    browser.menus.update(whitelistRecommendedMenuId, {
+        title: _("contextAddToWhitelistRecommended", patternRecommended)
+    });
+    whitelistMenuMap.set(whitelistRecommendedMenuId, patternRecommended);
+
+
+    if (url.search) {
+        addWhitelistMenuItem(patternSearch);
+    }
+
+
+    /**
+     * Split url path into segments and add menu items for each
+     * partial path as the segments are removed.
+     */
+     {
+        const pathTrimmed = url.pathname.endsWith("/")
+            ? url.pathname.substring(0, url.pathname.length - 1)
+            : url.pathname;
+
+        const pathSegments = pathTrimmed.split("/")
+                .filter(segment => segment)
+                .reverse();
+
+        if (pathSegments.length) {
+            let index = 0;
+
+            for (const pathSegment of pathSegments) {
+                const partialPath = pathSegments
+                        .slice(index)
+                        .reverse()
+                        .join("/");
+
+                addWhitelistMenuItem(`${url.origin}/${partialPath}/*`);
+                index++;
+            }
+        }
+    }
+
+
+    // Add remaining menu items
+    addWhitelistMenuItem(patternWildcardProtocol);
+    addWhitelistMenuItem(patternWildcardSubdomain);
+    addWhitelistMenuItem(patternWildcardProtocolAndSubdomain);
+
+    browser.menus.refresh();
+});
 
 
 // Google-hosted API loader script
