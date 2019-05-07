@@ -111,7 +111,13 @@ async function build () {
           , spawnOptions);
 
     // Move tsc output to build dir
-    fs.moveSync(path.join(BUILD_PATH, "src"), BUILD_PATH);
+    if (process.platform === "linux") {
+        // Quick workaround for issue on linux
+        spawnSync("mv", [ path.join(BUILD_PATH, "src/*"), BUILD_PATH ]
+              , spawnOptions);
+    } else {
+        fs.moveSync(path.join(BUILD_PATH, "src"), BUILD_PATH);
+    }
 
     // Copy other files
     fs.copySync(SRC_PATH, BUILD_PATH, {

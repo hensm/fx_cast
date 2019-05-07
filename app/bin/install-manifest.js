@@ -32,7 +32,9 @@ switch (platform) {
     case "darwin":
     case "linux": {
         // Manifest location within home directory
-        const destination = path.join(os.homedir(), manifestPath[platform]);
+        const destination = path.join(os.homedir(), platform === "linux"
+            ? ".mozilla/native-messaging-hosts/"
+            : manifestPath[platform]);
 
         if (argv.remove) {
             fs.remove(path.join(destination, manifestName));
