@@ -226,7 +226,7 @@ browser.menus.onShown.addListener(info => {
      * Split url path into segments and add menu items for each
      * partial path as the segments are removed.
      */
-     {
+    {
         const pathTrimmed = url.pathname.endsWith("/")
             ? url.pathname.substring(0, url.pathname.length - 1)
             : url.pathname;

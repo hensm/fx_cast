@@ -122,7 +122,7 @@ class PopupApp extends Component<{}, PopupAppState> {
                         <ReceiverEntry receiver={ receiver }
                                        onCast={ this.onCast }
                                        isLoading={ this.state.isLoading }
-                                       key={ i }/> )}
+                                       key={ i }/> ))}
                 </ul>
             </div>
         );
