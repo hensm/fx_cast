@@ -117,14 +117,12 @@ class PopupApp extends Component<{}, PopupAppState> {
                     { _("popupMediaSelectToLabel") }
                 </div>
                 <ul className="receivers">
-                    { this.state.receivers.map((receiver, i) => {
-                        return (
-                           <ReceiverEntry receiver={ receiver }
-                                          onCast={ this.onCast }
-                                          isLoading={ this.state.isLoading }
-                                          key={ i }/>
-                        );
-                    })}
+                    { this.state.receivers && this.state.receivers.map(
+                            (receiver, i) => (
+                        <ReceiverEntry receiver={ receiver }
+                                       onCast={ this.onCast }
+                                       isLoading={ this.state.isLoading }
+                                       key={ i }/> )}
                 </ul>
             </div>
         );
