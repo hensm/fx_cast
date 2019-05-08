@@ -18,7 +18,7 @@ wss.on("connection", socket => {
      * Daemon and bridge are the same binary, so spawn a new
      * version of self in bridge mode.
      */
-    const bridge = spawn(process.execPath);
+    const bridge = spawn(process.execPath, [ process.argv[1] ]);
 
     // Stream for incoming WebSocket messages
     const messageStream = new Readable({
