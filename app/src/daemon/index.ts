@@ -10,7 +10,7 @@ import { DecodeTransform
        , EncodeTransform } from "../transforms";
 
 
-const wss = new WebSocket.Server({ port: 9999 });
+const wss = new WebSocket.Server({ port: 9556 });
 
 wss.on("connection", socket => {
 
