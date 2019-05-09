@@ -49,7 +49,10 @@ wss.on("connection", socket => {
     bridge.stdout
         .pipe(new DecodeTransform())
         .on("data", data => {
-            socket.send(JSON.stringify(data));
+            // Socket can be CLOSING here
+            if (socket.readyState === WebSocket.OPEN) {
+                socket.send(JSON.stringify(data));
+            }
         });
 
     // Handle termination
