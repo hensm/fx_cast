@@ -1,8 +1,11 @@
 "use strict";
 
+import semver from "semver";
+
 import defaultOptions, { Options } from "./defaultOptions";
 import getBridgeInfo from "./lib/getBridgeInfo";
 import messageRouter from "./lib/messageRouter";
+import nativeMessaging from "./lib/nativeMessaging";
 
 import { getChromeUserAgent } from "./lib/userAgents";
 import { getWindowCenteredProps } from "./lib/utils";
@@ -17,8 +20,6 @@ import { Message, Receiver } from "./types";
 import { ReceiverStatusMessage
        , ServiceDownMessage
        , ServiceUpMessage } from "./messageTypes";
-
-import semver from "semver";
 
 
 const _ = browser.i18n.getMessage;
@@ -536,11 +537,68 @@ interface Shim {
 
 const shimMap = new Map<string, Shim>();
 
-const statusBridge = browser.runtime.connectNative(APPLICATION_NAME);
+let statusBridge: browser.runtime.Port;
 const statusBridgeReceivers = new Map<string, Receiver>();
 
-statusBridge.onMessage.addListener(async (message: Message)  => {
+
+/**
+ * Create status bridge, set event handlers and initialize.
+ */
+function initStatusBridge () {
+    statusBridge = nativeMessaging.connectNative(APPLICATION_NAME);
+    statusBridge.onDisconnect.addListener(onStatusBridgeDisconnect);
+    statusBridge.onMessage.addListener(onStatusBridgeMessage);
+
+    statusBridge.postMessage({
+        subject: "bridge:/initialize"
+      , data: {
+            mode: "status"
+        }
+    });
+}
+
+initStatusBridge();
+
+/**
+ * Runs once the status bridge has disconnected. Sends
+ * serviceDown messages for all receivers to all shims to
+ * update receiver availability, then clears the receiver
+ * list.
+ *
+ * Attempts to reinitialize the status bridge after 10
+ * seconds. If it fails immediately, this handler will be
+ * triggered again and the timer is reset for another 10
+ * seconds.
+ */
+function onStatusBridgeDisconnect () {
+    // Notify shims for receiver availability
+    for (const [ , receiver ] of statusBridgeReceivers) {
+        for (const [, shim ] of shimMap) {
+            shim.port.postMessage({
+                subject: "shim:/serviceDown"
+              , data: { id: receiver.id }
+            });
+        }
+    }
+
+    // Cleanup
+    statusBridgeReceivers.clear();
+    statusBridge.onDisconnect.removeListener(onStatusBridgeDisconnect);
+    statusBridge.onMessage.removeListener(onStatusBridgeMessage);
+    statusBridge = null;
+
+    // After 10 seconds, attempt to reinitialize
+    window.setTimeout(() => {
+        initStatusBridge();
+    }, 10000);
+}
+
+/**
+ * Handles incoming status bridge messages.
+ */
+async function onStatusBridgeMessage (message: Message) {
     switch (message.subject) {
+
         case "shim:/serviceUp": {
             const receiver = (message as ServiceUpMessage).data;
             statusBridgeReceivers.set(receiver.id, receiver);
@@ -591,14 +649,7 @@ statusBridge.onMessage.addListener(async (message: Message)  => {
             break;
         }
     }
-});
-
-statusBridge.postMessage({
-    subject: "bridge:/initialize"
-  , data: {
-        mode: "status"
-    }
-});
+}
 
 
 async function onConnectShim (port: browser.runtime.Port) {
@@ -664,7 +715,7 @@ async function onConnectShim (port: browser.runtime.Port) {
     }
 
     // Spawn bridge app instance
-    const bridgePort = browser.runtime.connectNative(APPLICATION_NAME);
+    const bridgePort = nativeMessaging.connectNative(APPLICATION_NAME);
 
     if (bridgePort.error) {
         console.error(`Failed connect to ${APPLICATION_NAME}:`
