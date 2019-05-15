@@ -195,7 +195,7 @@ async function build () {
 
     // Build NativeMacReceiverSelector
     if (isBuildingForMacOnMac) {
-        const sourceFiles = glob.sync("*.swift", {
+        const sourceFiles = glob.sync("**/*.swift", {
             cwd: path.join(__dirname, "../NativeMacReceiverSelector")
           , absolute: true
         });
