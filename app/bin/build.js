@@ -180,11 +180,17 @@ async function build () {
     fs.writeFileSync(path.join(BUILD_PATH, "package.json")
           , JSON.stringify(pkgManifest))
 
+    /**
+     * With the BUILD_PATH/bridge dir, cannot build to
+     * BUILD_PATH/bridge file.
+     */
+    const tempExecutableName = `${executableName[argv.platform]}.temp`;
+
     // Run pkg to create a single executable
     await pkg.exec([
         BUILD_PATH
       , "--target", `${pkgPlatform[argv.platform]}-${argv.arch}`
-      , "--output", path.join(BUILD_PATH, executableName[argv.platform])
+      , "--output", path.join(BUILD_PATH, tempExecutableName)
     ]);
 
     // Build NativeMacReceiverSelector
@@ -226,16 +232,14 @@ async function build () {
                   , { overwrite: true });
         }
     } else {
-        const builtExecutableName = executableName[argv.platform];
-
         // Move executable and app manifest to dist
         fs.moveSync(
                 path.join(BUILD_PATH, manifestName)
               , path.join(DIST_PATH, manifestName)
               , { overwrite: true });
         fs.moveSync(
-                path.join(BUILD_PATH, builtExecutableName)
-              , path.join(DIST_PATH, builtExecutableName)
+                path.join(BUILD_PATH, tempExecutableName)
+              , path.join(DIST_PATH, executableName[argv.platform])
               , { overwrite: true });
 
         if (isBuildingForMacOnMac) {

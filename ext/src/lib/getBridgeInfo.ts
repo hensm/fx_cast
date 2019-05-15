@@ -1,6 +1,7 @@
 "use strict";
 
 import semver from "semver";
+import nativeMessaging from "./nativeMessaging";
 
 export interface BridgeInfo {
     name: string;
@@ -15,7 +16,7 @@ export interface BridgeInfo {
 export default async function getBridgeInfo (): Promise<BridgeInfo> {
     let applicationVersion: string;
     try {
-        applicationVersion = await browser.runtime.sendNativeMessage(
+        applicationVersion = await nativeMessaging.sendNativeMessage(
                 APPLICATION_NAME
               , { subject: "bridge:/getInfo"
                 , data: EXTENSION_VERSION });

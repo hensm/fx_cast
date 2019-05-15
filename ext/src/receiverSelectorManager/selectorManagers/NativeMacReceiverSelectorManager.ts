@@ -1,5 +1,7 @@
 "use strict";
 
+import nativeMessaging from "../../lib/nativeMessaging";
+
 import ReceiverSelectorManager, {
         ReceiverSelectorMediaType } from "../ReceiverSelectorManager";
 
@@ -27,7 +29,7 @@ export default class NativeMacReceiverSelectorManager
             receivers: Receiver[]
           , defaultMediaType: ReceiverSelectorMediaType): Promise<void> {
 
-        this.bridgePort = browser.runtime.connectNative(APPLICATION_NAME);
+        this.bridgePort = nativeMessaging.connectNative(APPLICATION_NAME);
 
         this.bridgePort.onMessage.addListener((message: Message) => {
             switch (message.subject) {
