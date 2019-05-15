@@ -1,59 +1,12 @@
 import Cocoa
-import Foundation
 
 
-func makeLabel(_ text: String,
-               size: CGFloat = 0,
-               color: NSColor = NSColor.textColor) -> NSTextField {
+class ViewController : NSViewController {
+    var initData: InitData!
 
-    let textField = NSTextField()
-    textField.stringValue = text
-    textField.backgroundColor = .clear
-    textField.isEditable = false
-    textField.isBezeled = false
-    textField.sizeToFit()
-
-    // Text
-    textField.font = NSFont.systemFont(ofSize: size)
-    textField.textColor = color
-
-    return textField
-}
-
-
-struct InitData: Codable {
-    let receivers: [Receiver]
-    let defaultMediaType: MediaType
-
-    let i18n_mediaTypeApp: String
-    let i18n_mediaTypeTab: String
-    let i18n_mediaTypeScreen: String
-    let i18n_mediaSelectCastLabel: String
-    let i18n_mediaSelectToLabel: String
-}
-
-struct ReceiverSelection: Codable {
-    let receiver: Receiver
-    let mediaType: MediaType
-}
-
-enum MediaType: Int, Codable {
-    case app
-    case tab
-    case screen
-}
-
-struct Receiver: Codable {
-    let friendlyName: String
-    let host: String
-    let id: String
-    let port: Int
-}
-
-
-class ViewController: NSViewController {
     var mediaTypePopUpButton: NSPopUpButton!
     var receiverViews = [ReceiverView]()
+
 
     override func loadView () {
         let visualEffectView = NSVisualEffectView()
@@ -76,15 +29,33 @@ class ViewController: NSViewController {
             exit(1)
         }
 
-
-        let initData: InitData!
-
         do {
-            initData = try JSONDecoder().decode(InitData.self, from: data)
+            // Decode and store initialization JSON data
+            self.initData = try JSONDecoder().decode(InitData.self, from: data)
         } catch {
             fputs("Error: Failed to parse input data\n", stderr)
             exit(1)
         }
+
+
+        /**
+         * View Hierarchy
+         * --------------
+         *
+         * stackView                  \ (NSStackView)
+         *  ├ mediaTypeStackView      \  (NSStackView)
+         *  │  ├ mediaSelectCastLabel \    (NSTextField)
+         *  │  ├ mediaTypePopUpButton \    (NSPopUpButton)
+         *  │  └ mediaSelectToLabel   \    (NSTextField)
+         *  │
+         *  ├ receiverSeparator       \  (NSBox)                    ┐
+         *  └ receiverView            \  (ReceiverView:NSStackView) │
+         *     ├ metaStackView        \    (NSStackView)            │
+         *     │  ├ receiver name     \      (NSTextField)          ├ Repeats
+         *     │  └ receiver host     \      (NSTextField)          │
+         *     ├ spinner              \    (NSProgressIndicator)    │
+         *     └ button               \    (NSButton)               ┘
+         */
 
 
         let stackView = NSStackView()
@@ -101,7 +72,9 @@ class ViewController: NSViewController {
           , initData.i18n_mediaTypeScreen
         ])
 
-        self.mediaTypePopUpButton.selectItem(at: initData.defaultMediaType.rawValue)
+        self.mediaTypePopUpButton.selectItem(
+                at: initData.defaultMediaType.rawValue)
+
 
         let mediaTypeStackView = NSStackView(views: [
             makeLabel(initData.i18n_mediaSelectCastLabel),
@@ -109,16 +82,28 @@ class ViewController: NSViewController {
             makeLabel(initData.i18n_mediaSelectToLabel)
         ])
 
-
         stackView.addArrangedSubview(mediaTypeStackView)
 
 
+        /**
+         * For each receiver in the initData list, create a new
+         * ReceiverView, set self as a ReceiverViewDelegate and
+         * appends to main stack view.
+         *
+         * Keeps a reference to the receiver view to call disable()
+         * later.
+         */
         for receiver in initData.receivers {
+            // Create separator between last receiver / media type
             let receiverSeparator = NSBox()
             receiverSeparator.boxType = .separator
 
-            let receiverView = ReceiverView(receiver: receiver)
+            let receiverView = ReceiverView(
+                    receiver: receiver
+                  , initData: self.initData)
+
             receiverView.receiverViewDelegate = self
+
 
             self.receiverViews.append(receiverView)
 
@@ -127,17 +112,30 @@ class ViewController: NSViewController {
         }
 
 
+        // Add to main view and set width to resize window
         self.view.addSubview(stackView)
         self.view.autoresizesSubviews = true
         self.view.frame.size.width = 350
     }
+
+    override func viewDidAppear () {
+        // Set window title and update visibility
+        let window = self.view.window!
+        window.title = initData.i18n_extensionName
+        window.titleVisibility = .visible
+    }
 }
 
 
-extension ViewController: ReceiverViewDelegate {
+extension ViewController : ReceiverViewDelegate {
     func didCast (_ receiver: Receiver) {
+
+        // Disable media type UI
+        self.mediaTypePopUpButton.isEnabled = false
+
+        // Disable cast buttons
         for receiverView in self.receiverViews {
-            receiverView.disable()
+            receiverView.isEnabled = false
         }
 
         do {

@@ -6,10 +6,10 @@
         "message": ""
     }
 
-  , "popupCastButtonLabel": {
+  , "popupCastButtonTitle": {
         "message": "Casten"
     }
-  , "popupCastingButtonLabel": {
+  , "popupCastingButtonTitle": {
         "message": "Aan het casten"
     }
 

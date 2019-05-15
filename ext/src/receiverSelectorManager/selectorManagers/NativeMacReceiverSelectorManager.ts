@@ -60,6 +60,9 @@ export default class NativeMacReceiverSelectorManager
           , data: JSON.stringify({
                 receivers
               , defaultMediaType
+
+              , i18n_extensionName: _("extensionName")
+              , i18n_castButtonTitle: _("popupCastButtonTitle")
               , i18n_mediaTypeApp: _("popupMediaTypeApp")
               , i18n_mediaTypeTab: _("popupMediaTypeTab")
               , i18n_mediaTypeScreen: _("popupMediaTypeScreen")

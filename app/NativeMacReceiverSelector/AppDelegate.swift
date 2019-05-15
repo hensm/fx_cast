@@ -1,14 +1,13 @@
 import Cocoa
 
 
-class AppDelegate: NSObject {
+class AppDelegate : NSObject, NSApplicationDelegate {
     var mainWindow: NSWindow?
     var mainWindowController: NSWindowController?
     var mainWindowViewController: ViewController?
-}
 
-extension AppDelegate: NSApplicationDelegate {
-    func applicationDidFinishLaunching(_ aNotification: Notification) {
+
+    func applicationDidFinishLaunching (_ aNotification: Notification) {
         let window = NSPanel(
                 contentRect: NSZeroRect
               , styleMask: [
@@ -21,7 +20,7 @@ extension AppDelegate: NSApplicationDelegate {
               , backing: .buffered
               , defer: false)
 
-        window.title = "fx_cast"
+        window.titleVisibility = .hidden
         window.orderFrontRegardless()
         window.center()
 
@@ -39,13 +38,12 @@ extension AppDelegate: NSApplicationDelegate {
         NSApp.activate(ignoringOtherApps: true)
     }
 
-    func applicationDidResignActive(_ aNotification: Notification) {
+    func applicationDidResignActive (_ aNotification: Notification) {
         self.mainWindow?.performClose(aNotification)
     }
 
-    func applicationWillTerminate(_ aNotification: Notification) {}
-
-    func applicationShouldTerminateAfterLastWindowClosed(_ app: NSApplication) -> Bool {
+    func applicationShouldTerminateAfterLastWindowClosed (
+            _ app: NSApplication) -> Bool {
         return true
     }
 }

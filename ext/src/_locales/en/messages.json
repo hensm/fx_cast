@@ -21,10 +21,10 @@
   , "popupMediaSelectToLabel": {
         "message": "to:"
     }
-  , "popupCastButtonLabel": {
+  , "popupCastButtonTitle": {
         "message": "Cast"
     }
-  , "popupCastingButtonLabel": {
+  , "popupCastingButtonTitle": {
         "message": "Casting"
     }
 

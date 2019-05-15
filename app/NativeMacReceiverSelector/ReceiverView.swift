@@ -1,17 +1,29 @@
 import Cocoa
 
-protocol ReceiverViewDelegate: AnyObject {
+
+protocol ReceiverViewDelegate : AnyObject {
     func didCast (_ receiver: Receiver)
 }
 
-class ReceiverView: NSStackView {
+class ReceiverView : NSStackView {
     weak var receiverViewDelegate: ReceiverViewDelegate?
 
     var receiver: Receiver!
     var constraintsSet = false
 
-    var button: NSButton!
-    var spinner: NSProgressIndicator!
+    var castButton: NSButton!
+    var castingSpinner: NSProgressIndicator!
+
+
+    var isEnabled: Bool {
+        get {
+            return self.castButton.isEnabled
+        }
+        set {
+            self.castButton.isEnabled = newValue
+        }
+    }
+
 
     override init (frame: CGRect) {
         super.init(frame: frame)
@@ -20,8 +32,8 @@ class ReceiverView: NSStackView {
         super.init(coder: coder)
     }
 
-    init (receiver: Receiver) {
-        super.init(frame: CGRect(x: 0, y: 0, width: 0, height: 0))
+    init (receiver: Receiver, initData: InitData) {
+        super.init(frame: NSZeroRect)
 
         self.receiver = receiver
 
@@ -37,21 +49,23 @@ class ReceiverView: NSStackView {
         metaStackView.spacing = 4
 
 
-        self.button = WideButton(
-                title: "Cast"
+        self.castButton = NSButton(
+                title: initData.i18n_castButtonTitle
               , target: self
               , action: #selector(ReceiverView.onCast))
 
-        self.button.bezelStyle = .rounded
+        self.castButton.bezelStyle = .rounded
+        self.castButton.widthAnchor.constraint(equalToConstant: 100).isActive = true
 
-        self.spinner = NSProgressIndicator()
-        self.spinner.style = .spinning
-        self.spinner.controlSize = .small
-        self.spinner.isHidden = true
+
+        self.castingSpinner = NSProgressIndicator()
+        self.castingSpinner.style = .spinning
+        self.castingSpinner.controlSize = .small
+        self.castingSpinner.isHidden = true
 
         self.addArrangedSubview(metaStackView)
-        self.addArrangedSubview(self.spinner)
-        self.addArrangedSubview(self.button)
+        self.addArrangedSubview(self.castingSpinner)
+        self.addArrangedSubview(self.castButton)
 
         self.distribution = .fill
     }
@@ -61,34 +75,24 @@ class ReceiverView: NSStackView {
 
         if !constraintsSet {
             self.translatesAutoresizingMaskIntoConstraints = false
-            self.leadingAnchor.constraint(equalTo: superview!.leadingAnchor, constant: 8).isActive = true
-            self.trailingAnchor.constraint(equalTo: superview!.trailingAnchor, constant: -8).isActive = true
+
+            self.leadingAnchor.constraint(
+                    equalTo: superview!.leadingAnchor
+                  , constant: 8).isActive = true
+            self.trailingAnchor.constraint(
+                    equalTo: superview!.trailingAnchor
+                  , constant: -8).isActive = true
 
             constraintsSet = true
         }
     }
 
-    func disable () {
-        self.button.isEnabled = false
-    }
 
     @objc
     func onCast () {
         self.receiverViewDelegate?.didCast(self.receiver)
 
-        self.spinner.isHidden = false
-        self.spinner.startAnimation(nil)
-    }
-}
-
-
-class WideButton: NSButton {
-    override var intrinsicContentSize: NSSize {
-        var size = super.intrinsicContentSize
-        if size.width < 100 {
-            size.width = 100
-        }
-
-        return size
+        self.castingSpinner.isHidden = false
+        self.castingSpinner.startAnimation(nil)
     }
 }
