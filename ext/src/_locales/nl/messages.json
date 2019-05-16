@@ -33,9 +33,6 @@
   , "optionsBridgeNotFoundStatusText": {
         "message": "Probeer de nieuwste versie te installeren."
     }
-  , "optionsBridgeInfo": {
-        "message": "Bridge-informatie:"
-    }
   , "optionsBridgeStatsName": {
         "message": "Naam:"
     }

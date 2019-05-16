@@ -187,10 +187,10 @@ class ReceiverEntry extends Component<ReceiverEntryProps, ReceiverEntryState> {
                         onClick={ this.handleCast }
                         disabled={this.props.isLoading}>
                     { this.state.isLoading
-                        ? _("popupCastingButtonTitle") +
-                            (this.state.isLoading
-                                ? this.state.ellipsis
-                                : "")
+                        ? _("popupCastingButtonTitle"
+                              , (this.state.isLoading
+                                    ? this.state.ellipsis
+                                    : ""))
                         : _("popupCastButtonTitle") }
                 </button>
             </li>
