@@ -1,6 +1,7 @@
 "use strict";
 
 export interface Options {
+    bridgeApplicationName: string;
     mediaEnabled: boolean;
     mediaSyncElement: boolean;
     mediaStopOnUnload: boolean;

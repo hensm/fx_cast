@@ -535,8 +535,10 @@ const statusBridgeReceivers = new Map<string, Receiver>();
 /**
  * Create status bridge, set event handlers and initialize.
  */
-function initStatusBridge () {
-    statusBridge = nativeMessaging.connectNative(APPLICATION_NAME);
+async function initStatusBridge () {
+    const applicationName = await options.get("bridgeApplicationName");
+
+    statusBridge = nativeMessaging.connectNative(applicationName);
     statusBridge.onDisconnect.addListener(onStatusBridgeDisconnect);
     statusBridge.onMessage.addListener(onStatusBridgeMessage);
 
@@ -705,11 +707,14 @@ async function onConnectShim (port: browser.runtime.Port) {
         shimMap.delete(shimId);
     }
 
+
+    const applicationName = await options.get("bridgeApplicationName");
+
     // Spawn bridge app instance
-    const bridgePort = nativeMessaging.connectNative(APPLICATION_NAME);
+    const bridgePort = nativeMessaging.connectNative(applicationName);
 
     if (bridgePort.error) {
-        console.error(`Failed connect to ${APPLICATION_NAME}:`
+        console.error(`Failed connect to ${applicationName}:`
               , bridgePort.error.message);
     }
 
@@ -722,10 +727,10 @@ async function onConnectShim (port: browser.runtime.Port) {
 
     bridgePort.onDisconnect.addListener(() => {
         if (bridgePort.error) {
-            console.error(`${APPLICATION_NAME} disconnected:`
+            console.error(`${applicationName} disconnected:`
                   , bridgePort.error.message);
         } else {
-            console.info(`${APPLICATION_NAME} disconnected`);
+            console.info(`${applicationName} disconnected`);
         }
     });
 

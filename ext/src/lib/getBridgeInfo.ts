@@ -1,7 +1,10 @@
 "use strict";
 
 import semver from "semver";
+
 import nativeMessaging from "./nativeMessaging";
+import options from "./options";
+
 
 export interface BridgeInfo {
     name: string;
@@ -14,12 +17,16 @@ export interface BridgeInfo {
 }
 
 export default async function getBridgeInfo (): Promise<BridgeInfo> {
+    const applicationName = await options.get("bridgeApplicationName");
     let applicationVersion: string;
+
     try {
+        const { version } = browser.runtime.getManifest();
+
         applicationVersion = await nativeMessaging.sendNativeMessage(
-                APPLICATION_NAME
+                applicationName
               , { subject: "bridge:/getInfo"
-                , data: EXTENSION_VERSION });
+                , data: version });
     } catch (err) {
         return null;
     }
@@ -40,14 +47,14 @@ export default async function getBridgeInfo (): Promise<BridgeInfo> {
 
     // Print compatibility info to console
     if (!isVersionCompatible) {
-        console.error(`Expecting ${APPLICATION_NAME} v${APPLICATION_VERSION}, found v${applicationVersion}.`
+        console.error(`Expecting ${applicationName} v${APPLICATION_VERSION}, found v${applicationVersion}.`
               , isVersionOlder
                     ? "Try updating the native app to the latest version."
                     : "Try updating the extension to the latest version");
     }
 
     return {
-        name: APPLICATION_NAME
+        name: applicationName
       , version: applicationVersion
       , expectedVersion: APPLICATION_VERSION
 
