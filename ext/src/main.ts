@@ -5,6 +5,7 @@ import semver from "semver";
 import defaultOptions, { Options } from "./defaultOptions";
 import getBridgeInfo from "./lib/getBridgeInfo";
 import messageRouter from "./lib/messageRouter";
+import options from "./lib/options";
 import nativeMessaging from "./lib/nativeMessaging";
 
 import { getChromeUserAgent } from "./lib/userAgents";
@@ -29,17 +30,13 @@ browser.runtime.onInstalled.addListener(async details => {
     switch (details.reason) {
         // Set default options
         case "install": {
-            await browser.storage.sync.set({
-                options: defaultOptions
-            });
+            await options.setAll(defaultOptions);
             break;
         }
 
         // Set newly added options
         case "update": {
-            const { options: existingOptions }
-                    = await browser.storage.sync.get("options");
-
+            const existingOptions = await options.getAll();
             const newOptions: Partial<Options> = {};
 
             // Find options not already in storage
@@ -50,11 +47,9 @@ browser.runtime.onInstalled.addListener(async details => {
             }
 
             // Update storage with default values of new options
-            await browser.storage.sync.set({
-                options: {
-                    ...existingOptions
-                  , ...newOptions
-                }
+            options.setAll({
+                ...existingOptions
+              , ...newOptions
             });
 
             break;
@@ -87,17 +82,17 @@ const mediaCastTargetUrlPatterns = new Set([
 const LOCAL_MEDIA_URL_PATTERN = "file://*/*";
 
 async function createMenus () {
-    const { options } = await browser.storage.sync.get("options");
+    const opts = await options.getAll();
 
     /**
      * If options aren't set or menus have already been
      * created, return.
      */
-    if (!options || mirrorCastMenuId || mediaCastMenuId) {
+    if (!opts || mirrorCastMenuId || mediaCastMenuId) {
         return;
     }
 
-    if (options.localMediaEnabled) {
+    if (opts.localMediaEnabled) {
         mediaCastTargetUrlPatterns.add(LOCAL_MEDIA_URL_PATTERN);
     }
 
@@ -107,7 +102,7 @@ async function createMenus () {
       , id: "contextCastMedia"
       , targetUrlPatterns: Array.from(mediaCastTargetUrlPatterns)
       , title: _("contextCast")
-      , visible: options.mediaEnabled
+      , visible: opts.mediaEnabled
     });
 
     // Screen/Tab mirroring "Cast..." context menu item
@@ -115,7 +110,7 @@ async function createMenus () {
         contexts: [ "browser_action", "page", "tools_menu" ]
       , id: "contextCast"
       , title: _("contextCast")
-      , visible: options.mirroringEnabled
+      , visible: opts.mirroringEnabled
 
         // Mirroring doesn't work from local files
       , documentUrlPatterns: [
@@ -317,7 +312,6 @@ let currentUAString: string;
 async function onBeforeSendHeaders (
         details: { requestHeaders?: browser.webRequest.HttpHeaders }) {
 
-    const { options } = await browser.storage.sync.get("options");
     const { os } = await browser.runtime.getPlatformInfo();
 
     // Create Chrome UA from platform info on first run
@@ -353,10 +347,10 @@ async function onBeforeSendHeaders (
  * Updates any extension state based on options changes.
  */
 async function onOptionsUpdated (alteredOptions?: Array<(keyof Options)>) {
-    const { options } = await browser.storage.sync.get("options");
+    const opts = await options.getAll();
 
     // If options aren't set yet, return
-    if (!options) {
+    if (!opts) {
         return;
     }
 
@@ -367,8 +361,8 @@ async function onOptionsUpdated (alteredOptions?: Array<(keyof Options)>) {
     function register_userAgentWhitelist () {
         browser.webRequest.onBeforeSendHeaders.addListener(
                 onBeforeSendHeaders
-              , { urls: options.userAgentWhitelistEnabled
-                    ? options.userAgentWhitelist
+              , { urls: opts.userAgentWhitelistEnabled
+                    ? opts.userAgentWhitelist
                     : [] }
               , [  "blocking", "requestHeaders" ]);
     }
@@ -394,18 +388,18 @@ async function onOptionsUpdated (alteredOptions?: Array<(keyof Options)>) {
 
         if (alteredOptions.includes("mirroringEnabled")) {
             browser.menus.update(mirrorCastMenuId, {
-                visible: options.mirroringEnabled
+                visible: opts.mirroringEnabled
             });
         }
 
         if (alteredOptions.includes("mediaEnabled")) {
             browser.menus.update(mediaCastMenuId, {
-                visible: options.mediaEnabled
+                visible: opts.mediaEnabled
             });
         }
 
         if (alteredOptions.includes("localMediaEnabled")) {
-            if (options.localMediaEnabled) {
+            if (opts.localMediaEnabled) {
                 mediaCastTargetUrlPatterns.add(LOCAL_MEDIA_URL_PATTERN);
             } else {
                 mediaCastTargetUrlPatterns.delete(LOCAL_MEDIA_URL_PATTERN);
@@ -448,7 +442,7 @@ browser.menus.onClicked.addListener(async (info, tab) => {
      || info.menuItemId === mediaCastMenuId) {
 
         const { frameId } = info;
-        const { options } = await browser.storage.sync.get("options");
+        const mirroringAppId = await options.get("mirroringAppId");
 
         // Load cast setup script
         await browser.tabs.executeScript(tab.id, {
@@ -466,7 +460,7 @@ browser.menus.onClicked.addListener(async (info, tab) => {
                         var selectedMedia = ${info.pageUrl
                             ? ReceiverSelectorMediaType.Tab
                             : ReceiverSelectorMediaType.Screen};
-                        var FX_CAST_RECEIVER_APP_ID = "${options.mirroringAppId}";
+                        var FX_CAST_RECEIVER_APP_ID = "${mirroringAppId}";
                     `
                   , frameId
                 });
@@ -513,16 +507,13 @@ browser.menus.onClicked.addListener(async (info, tab) => {
 
     if (info.parentMenuItemId === whitelistMenuId) {
         const matchPattern = whitelistMenuMap.get(info.menuItemId);
-        const options: Options =
-                (await browser.storage.sync.get("options")).options;
+        const userAgentWhitelist = await options.get("userAgentWhitelist");
 
         // Add to whitelist
-        options.userAgentWhitelist.push(matchPattern);
+        userAgentWhitelist.push(matchPattern);
 
         // Update options
-        await browser.storage.sync.set({
-            options
-        });
+        await options.set("userAgentWhitelist", userAgentWhitelist)
     }
 });
 

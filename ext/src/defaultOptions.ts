@@ -10,10 +10,13 @@ export interface Options {
     mirroringAppId: string;
     userAgentWhitelistEnabled: boolean;
     userAgentWhitelist: string[];
+
+    [key: string]: Options[keyof Options];
 }
 
 const options: Options = {
-    mediaEnabled: true
+    bridgeApplicationName: APPLICATION_NAME
+  , mediaEnabled: true
   , mediaSyncElement: false
   , mediaStopOnUnload: false
   , localMediaEnabled: true

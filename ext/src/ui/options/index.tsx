@@ -10,6 +10,7 @@ import Bridge from "./Bridge";
 import EditableList from "./EditableList";
 
 import getBridgeInfo, { BridgeInfo } from "../../lib/getBridgeInfo";
+import options from "../../lib/options";
 import { REMOTE_MATCH_PATTERN_REGEX } from "../../lib/utils";
 
 
@@ -77,11 +78,9 @@ class OptionsApp extends Component<{}, OptionsAppState> {
     }
 
     public async componentDidMount () {
-        const { options } = await browser.storage.sync.get("options");
-
         this.setState({
             hasLoaded: true
-          , options
+          , options: await options.getAll()
         });
 
         const bridgeInfo = await getBridgeInfo();
@@ -259,14 +258,6 @@ class OptionsApp extends Component<{}, OptionsAppState> {
         );
     }
 
-    /**
-     * Set stored option values to current state
-     */
-    private setStorage () {
-        return browser.storage.sync.set({
-            options: this.state.options
-        });
-    }
 
     private handleReset () {
         this.setState({
@@ -280,15 +271,12 @@ class OptionsApp extends Component<{}, OptionsAppState> {
         this.form.reportValidity();
 
         try {
-            const { options: oldOptions }
-                    = await browser.storage.sync.get("options");
-            await this.setStorage();
-            const { options } = await browser.storage.sync.get("options");
+            const oldOpts = await options.getAll();
+            await options.setAll(this.state.options);
 
             const alteredOptions = [];
-
-            for (const [ key, val ] of Object.entries(options)) {
-                const oldVal = oldOptions[key];
+            for (const [ key, val ] of Object.entries(this.state.options)) {
+                const oldVal = oldOpts[key];
                 if (oldVal !== val) {
                     alteredOptions.push(key);
                 }
@@ -325,16 +313,16 @@ class OptionsApp extends Component<{}, OptionsAppState> {
     private handleInputChange (ev: React.ChangeEvent<HTMLInputElement>) {
         const { target } = ev;
 
-        this.setState(({ options }) => {
-            options[target.name as keyof Options] = getInputValue(target);
-            return { options };
+        this.setState(currentState => {
+            currentState.options[target.name] = getInputValue(target);
+            return currentState;
         });
     }
 
     private handleWhitelistChange (whitelist: string[]) {
-        this.setState(({ options }) => {
-            options.userAgentWhitelist = whitelist;
-            return { options };
+        this.setState(currentState => {
+            currentState.options.userAgentWhitelist = whitelist;
+            return currentState;
         });
     }
 
