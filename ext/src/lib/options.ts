@@ -1,6 +1,6 @@
 "use strict";
 
-import { Options } from "../defaultOptions";
+import defaultOptions, { Options } from "../defaultOptions";
 
 
 /**
@@ -48,7 +48,32 @@ async function set<T extends keyof Options> (
 }
 
 
+/**
+ * Gets existing options from storage and compares it
+ * against defaults. Any options in defaults and not in
+ * storage are set. Does not override any existing options.
+ */
+async function update (defaults = defaultOptions): Promise<void> {
+    const oldOpts = await getAll();
+    const newOpts: Partial<Options> = {};
+
+    // Find options not already in storage
+    for (const [ optName, optVal ] of Object.entries(defaults)) {
+        if (!oldOpts.hasOwnProperty(optName)) {
+            newOpts[optName] = optVal;
+        }
+    }
+
+    // Update storage with default values of new options
+    return setAll({
+        ...oldOpts
+      , ...newOpts
+    });
+}
+
+
 export default {
     get, getAll
   , set, setAll
-}
+  , update
+};

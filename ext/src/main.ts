@@ -5,8 +5,8 @@ import semver from "semver";
 import defaultOptions, { Options } from "./defaultOptions";
 import getBridgeInfo from "./lib/getBridgeInfo";
 import messageRouter from "./lib/messageRouter";
-import options from "./lib/options";
 import nativeMessaging from "./lib/nativeMessaging";
+import options from "./lib/options";
 
 import { getChromeUserAgent } from "./lib/userAgents";
 import { getWindowCenteredProps } from "./lib/utils";
@@ -33,25 +33,9 @@ browser.runtime.onInstalled.addListener(async details => {
             await options.setAll(defaultOptions);
             break;
         }
-
         // Set newly added options
         case "update": {
-            const existingOptions = await options.getAll();
-            const newOptions: Partial<Options> = {};
-
-            // Find options not already in storage
-            for (const [ key, val ] of Object.entries(defaultOptions)) {
-                if (!existingOptions.hasOwnProperty(key)) {
-                    (newOptions as any)[key] = val;
-                }
-            }
-
-            // Update storage with default values of new options
-            options.setAll({
-                ...existingOptions
-              , ...newOptions
-            });
-
+            await options.update(defaultOptions);
             break;
         }
     }
@@ -513,7 +497,7 @@ browser.menus.onClicked.addListener(async (info, tab) => {
         userAgentWhitelist.push(matchPattern);
 
         // Update options
-        await options.set("userAgentWhitelist", userAgentWhitelist)
+        await options.set("userAgentWhitelist", userAgentWhitelist);
     }
 });
 

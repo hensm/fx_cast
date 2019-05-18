@@ -1,7 +1,7 @@
 "use strict";
 
-import options from "../../lib/options";
 import nativeMessaging from "../../lib/nativeMessaging";
+import options from "../../lib/options";
 
 import ReceiverSelectorManager, {
         ReceiverSelectorMediaType } from "../ReceiverSelectorManager";
