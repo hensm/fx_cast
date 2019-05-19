@@ -1,7 +1,7 @@
-<img src="docs/images/preview-fg@2x.png"
+<img src="docs/images/preview-fg_macOS@2x.png"
      alt="Preview of cast device selection popup"
      align="right"
-     width="462">
+     width="396">
 
 # fx_cast
 
