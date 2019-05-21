@@ -70,6 +70,7 @@ function onResponse (res) {
         switch (asset.name.match(/.*\.(.*)$/).pop()) {
             case "xpi":
                 downloadExtBtn.href = asset.browser_download_url;
+                downloadExtBtn.dataset.version = res.tag_name;
                 downloadExtBtn.removeAttribute("disabled");
                 downloadExtBtn.removeAttribute("title");
                 break;

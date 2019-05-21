@@ -126,6 +126,7 @@ body {
     margin-bottom: 0.5em;
 }
 
+.download__ext[data-version]::after,
 .download__app[data-version]::after {
     color: var(--text-color-secondary);
     content: attr(data-version);
