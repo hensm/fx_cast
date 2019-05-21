@@ -152,7 +152,8 @@ a:not(.button):focus {
 
 
 /* Behaviours */
-.button:disabled {
+.button:disabled,
+.button[disabled] {
     opacity: 0.4;
 }
 .button:focus,
@@ -163,24 +164,30 @@ a:not(.button):focus {
     border: initial;
 }
 
-.button:not(:disabled):hover {
+.button:not(:disabled):hover,
+.button:not([disabled]):hover {
     background-color: var(--__photon__button_background_hover);
 }
-.button:not(:disabled):hover:active {
+.button:not(:disabled):hover:active,
+.button:not([disabled]):hover:active {
     background-color: var(--__photon__button_background_active);
 }
 
-.button--primary:not(:disabled):hover {
+.button--primary:not(:disabled):hover,
+.button--primary:not([disabled]):hover {
     background-color: var(--__photon__button_background_primary_hover);
 }
-.button--primary:not(:disabled):hover:active {
+.button--primary:not(:disabled):hover:active,
+.button--primary:not([disabled]):hover:active {
     background-color: var(--__photon__button_background_primary_active);
 }
 
-.button--ghost:not(:disabled):hover {
+.button--ghost:not(:disabled):hover,
+.button--ghost:not([disabled]):hover {
     background-color: var(--__photon__button_background_ghost_hover);
 }
-.button--ghost:not(:disabled):hover:active {
+.button--ghost:not(:disabled):hover:active,
+.button--ghost:not([disabled]):hover:active {
     background-color: var(--__photon__button_background_ghost_active);
 }
 
