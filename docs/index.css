@@ -264,6 +264,7 @@ body {
 
 .faq {
     box-sizing: content-box;
+    overflow-x: auto;
 }
 
 .faq__summary {
@@ -276,7 +277,6 @@ body {
 }
 .faq__content {
     max-width: 70rem;
-    overflow-x: auto;
     padding: 2rem;
     padding-top: 1rem;
 }
