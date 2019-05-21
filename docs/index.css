@@ -128,10 +128,10 @@ body {
 
 .download__ext[data-version]::after,
 .download__app[data-version]::after {
-    color: var(--text-color-secondary);
     content: attr(data-version);
     font-size: 0.75em;
     margin-left: 0.5rem;
+    opacity: 0.75;
 }
 
 .download__app-other {
@@ -248,11 +248,6 @@ body {
     transform: translate(-22px, -18px);
 }
 
-:root.theme-light .preview-dark,
-:root.theme-dark .preview--light {
-    display: none;
-}
-
 
 .faqs {
     grid-area: faqs;
@@ -281,6 +276,7 @@ body {
 }
 .faq__content {
     max-width: 70rem;
+    overflow-x: auto;
     padding: 2rem;
     padding-top: 1rem;
 }

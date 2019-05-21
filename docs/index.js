@@ -1,5 +1,21 @@
 "use strict";
 
+function updateThemeClass (mediaQuery) {
+    if (mediaQuery.matches) {
+        document.documentElement.classList.remove("theme-dark");
+        document.documentElement.classList.add("theme-light");
+    } else {
+        document.documentElement.classList.remove("theme-light");
+        document.documentElement.classList.add("theme-dark");
+    }
+}
+
+const prefersLightScheme = window.matchMedia("(prefers-color-scheme: light)");
+
+updateThemeClass(prefersLightScheme);
+prefersLightScheme.addListener(updateThemeClass);
+
+
 const downloadAppBtn = document.querySelector(".download__app");
 const downloadAppOther = document.querySelector(".download__app-other");
 const downloadAppOtherSummary = downloadAppOther.querySelector(":scope > summary");
