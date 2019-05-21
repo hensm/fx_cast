@@ -1,122 +1,187 @@
+:root {
+    --shadow-10: 0 1px 4px rgba(12, 12, 13, 0.1);
+    --shadow-20: 0 2px 8px rgba(12, 12, 13, 0.1);
+    --shadow-30: 0 4px 16px rgba(12, 12, 13, 0.1);
+
+    --__photon__focus_box-shadow:
+            0 0 0 1px #0a84ff inset
+          , 0 0 0 1px #0a84ff
+          , 0 0 0 4px rgba(10, 132, 255, 0.3);
+
+
+    --__photon__link_color: var(--blue-60);
+    --__photon__link_color_hover: var(--blue-60);
+    --__photon__link_color_active: var(--blue-70);
+
+    --__photon__card_background: var(--white-100);
+    --__photon__card_border: 5px solid transparent;
+    --__photon__card_border-color_hover: var(--grey-30);
+    --__photon__card_border-radius: 4px;
+    --__photon__card_box-shadow: var(--shadow-10);
+
+    --__photon__button_background: var(--grey-90-a10);
+    --__photon__button_background_hover: var(--grey-90-a20);
+    --__photon__button_background_active: var(--grey-90-a30);
+    --__photon__button_background_primary: var(--blue-60);
+    --__photon__button_background_primary_hover: var(--blue-70);
+    --__photon__button_background_primary_active: var(--blue-80);
+    --__photon__button_background_ghost: transparent;
+    --__photon__button_background_ghost_hover: var(--grey-90-a10);
+    --__photon__button_background_ghost_active: var(--grey-90-a20);
+    --__photon__button_color: var(--grey-90);
+    --__photon__button_color_primary: var(--white-100);
+    --__photon__button_color_ghost: var(--grey-90-a80);
+}
+
+:root.theme-dark {
+    --__photon__link_color: var(--blue-50);
+    --__photon__link_color_hover: var(--blue-50);
+    --__photon__link_color_active: var(--blue-60);
+
+    --__photon__card_background: #202023;
+    --__photon__card_border-color_hover: var(--grey-60);
+
+    --__photon__button_background: var(--grey-10-a10);
+    --__photon__button_background_hover: rgba(249, 249, 250, 0.15);
+    --__photon__button_background_active: rgba(249, 249, 250, 0.2);
+    --__photon__button_background_ghost_hover: rgba(249, 249, 250, 0.1);
+    --__photon__button_background_ghost_active: rgba(249, 249, 250, 0.15);
+    --__photon__button_color: var(--white-100);
+    --__photon__button_color_ghost: var(--grey-10-a80);
+}
+
+/* ------------------------ */
+/* --------- Links -------- */
+/* ------------------------ */
+
+a:not(.button) {
+    color: var(--__photon__link_color);
+    text-decoration: none;
+}
+a:not(.button):hover {
+    color: var(--__photon__link_color_hover);
+    text-decoration: underline;
+}
+a:not(.button):hover:active {
+    color: var(--__photon__link_color_active);
+}
+a:not(.button):focus {
+    box-shadow: var(--__photon__focus_box-shadow);
+}
+
+/* ------------------------ */
+/* --------- Cards -------- */
+/* ------------------------ */
+
+.card {
+    background-color: var(--__photon__card_background);
+    border: var(--__photon__card_border);
+    border-radius: var(--__photon__card_border-radius);
+    box-shadow: var(--__photon__card_box-shadow);
+}
+
+.card:hover,
+.card[open] {
+    border-color: var(--__photon__card_border-color_hover);
+}
+
 
 /* ------------------------ */
 /* -------- Buttons ------- */
 /* ------------------------ */
 
-a.btn {
-    text-decoration: initial;
-}
-button.btn,
-select.btn {
-    border: initial;
-    font: inherit;
-}
-
-select.btn {
-    -webkit-appearance: none;
-    -moz-appearance: none;
-    background-repeat: no-repeat;
-    background-position: right 12px center;
-    padding-right: 40px;
-}
-
-select.btn {
-    background-image: url("icons/arrow_down_dark.svg");
-}
-select.btn.btn--primary {
-    background-image: url("icons/arrow_down_light.svg");
-}
-
-select.btn:-moz-focusring {
-    color: transparent;
-    text-shadow: 0 0 0 var(--btn-color);
-}
-
-.btn {
-    --btn-bg: var(--grey-90-a10);
-    --btn-bg-hover: var(--grey-90-a20);
-    --btn-bg-active: var(--grey-90-a30);
-    --btn-color: var(--grey-90);
-    --btn-padding: 8px;
-    --btn-height: 32px;
-
+.button {
     align-items: center;
-    background-color: var(--btn-bg);
-    border-radius: 2px;
-    color: var(--btn-color);
-    font-size: 13px;
-    font-weight: 400;
-    height: var(--btn-height);
-    justify-content: center;
-    padding: 0 var(--btn-padding);
-}
-
-.btn:not([hidden]) {
-    display: inline-flex;
-}
-
-.btn--primary {
-    --btn-bg: var(--blue-60);
-    --btn-bg-hover: var(--blue-70);
-    --btn-bg-active: var(--blue-80);
-    --btn-color: var(--white-100);
-}
-
-.btn:hover  { background-color: var(--btn-bg-hover); }
-.btn:active { background-color: var(--btn-bg-active); }
-
-.btn:focus {
-    box-shadow: 0 0 0 1px #0a84ff inset, 0 0 0 1px #0a84ff
-              , 0 0 0 4px rgba(10, 132, 255, 0.3);
-}
-
-.btn:disabled,
-.btn[disabled] {
-    background-color: var(--btn-bg) !important;
-    box-shadow: initial;
-    cursor: default;
-    opacity: 0.4;
-}
-
-.btn::-moz-focus-inner {
-    border: 0;
-}
-
-.btn--micro {
-    font-size: 11px;
-    height: 24px;
-}
-
-.btn--puffy {
-    --btn-padding: 16px;
-    --btn-height: 48px;
-
-    border-radius: 4px;
-    font-size: 15px;
-}
-
-.btn > a {
+    display: flex;
+    border: initial;
+    font-family: inherit;
     text-decoration: initial;
-}
-.btn > a:visited {
-    color: inherit;
+    -moz-user-select: none;
+    -webkit-user-select: none;
+    user-select: none;
 }
 
-.btn__icon {
+.button__icon {
     height: 20px;
     margin-right: 8px;
     width: 20px;
 }
 
-
-:root.theme-dark .btn:not(.btn--primary) {
-    --btn-bg: var(--grey-10-a10);
-    --btn-bg-hover: var(--grey-10-a20);
-    --btn-bg-active: var(--grey-10-a30);
-    --btn-color: var(--grey-10);
+/* Types */
+.button {
+    background-color: var(--__photon__button_background);
+    color: var(--__photon__button_color);
 }
-:root.theme-dark .btn__dropdown-arrow::before {
-    content: url("icons/arrow_down_light.svg");
+.button--primary {
+    background-color: var(--__photon__button_background_primary);
+    color: var(--__photon__button_color_primary);
+}
+.button--ghost {
+    background-color: transparent;
+    color: var(--__photon__button_color_ghost);
+    height: 32px;
+    padding: 8px;
+    width: 32px;
+}
+
+/* Sizes */
+.button {
+    border-radius: 2px;
+    font-size: inherit;
+    font-weight: 400;
+    height: 32px;
+    padding: 0 8px;
+}
+.button--micro {
+    font-size: 11px;
+    height: 24px;
+}
+.button--puffy {
+    border-radius: 4px;
+    font-size: 15px;
+    height: 48px;
+    padding: 0 16px;
+}
+
+.button:not(
+        .button--micro):not(
+        .button--puffy):not(
+        .button--ghost) {
+    min-width: 132px;
+}
+
+
+/* Behaviours */
+.button:disabled {
+    opacity: 0.4;
+}
+.button:focus,
+.button:focus-within {
+    box-shadow: var(--__photon__focus_box-shadow);
+}
+.button::-moz-focus-inner {
+    border: initial;
+}
+
+.button:not(:disabled):hover {
+    background-color: var(--__photon__button_background_hover);
+}
+.button:not(:disabled):hover:active {
+    background-color: var(--__photon__button_background_active);
+}
+
+.button--primary:not(:disabled):hover {
+    background-color: var(--__photon__button_background_primary_hover);
+}
+.button--primary:not(:disabled):hover:active {
+    background-color: var(--__photon__button_background_primary_active);
+}
+
+.button--ghost:not(:disabled):hover {
+    background-color: var(--__photon__button_background_ghost_hover);
+}
+.button--ghost:not(:disabled):hover:active {
+    background-color: var(--__photon__button_background_ghost_active);
 }
 
 

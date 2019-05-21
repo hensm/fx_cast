@@ -41,10 +41,10 @@ switch (navigator.platform) {
         downloadAppOtherSummary.hidden = true;
 
         appList.classList.add("app-list--buttons");
-        appListWinBtn.classList.add("btn", "btn--puffy");
-        appListMacBtn.classList.add("btn", "btn--puffy");
-        appListDebBtn.classList.add("btn", "btn--puffy");
-        appListRpmBtn.classList.add("btn", "btn--puffy");
+        appListWinBtn.classList.add("button", "button--puffy");
+        appListMacBtn.classList.add("button", "button--puffy");
+        appListDebBtn.classList.add("button", "button--puffy");
+        appListRpmBtn.classList.add("button", "button--puffy");
 }
 
 
@@ -106,10 +106,12 @@ function onResponse (res) {
             case "win":
                 downloadAppBtn.href = appListWinBtn.href;
                 downloadAppBtn.title = appListWinBtn.title;
+                downloadAppBtn.dataset.version = res.tag_name;
                 break;
             case "mac":
                 downloadAppBtn.href = appListMacBtn.href;
                 downloadAppBtn.title = appListMacBtn.title;
+                downloadAppBtn.dataset.version = res.tag_name;
                 break;
 
             default: {
