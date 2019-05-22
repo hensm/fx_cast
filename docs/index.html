@@ -67,8 +67,10 @@
                             <details class="faq card" open>
                                 <summary class="faq__summary">How do I cast something?</summary>
                                 <div class="faq__content">
-                                    <img src="images/menu_light.png" alt="Media context menu" class="img-light" style="float: right">
-                                    <img src="images/menu_dark.png" alt="Media context menu" class="img-dark" style="float: right">
+                                    <picture style="float: right">
+                                        <source srcset="images/menu_light.png" alt="Media context menu" media="(prefers-color-scheme: light)">
+                                        <img src="images/menu_dark.png" alt="Media context menu">
+                                    </picture>
                                     <p>
                                         Ignore the toolbar button for now, it's just a placeholder for development.
                                     </p>

@@ -309,12 +309,6 @@ body {
     background-color: var(--grey-10-a10);
 }
 
-:root.theme-light .img-dark,
-:root.theme-dark .img-light {
-    display: none;
-}
-
-
 
 .footer {
     align-items: center;
