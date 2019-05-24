@@ -26,10 +26,15 @@ export class AirPlayAuthCredentials {
     public clientSk: Uint8Array;
     public clientPk: Uint8Array;
 
-    constructor (clientId: string, clientSk: Uint8Array) {
-        if (clientId && clientSk) {
+    constructor (
+            clientId?: string
+          , clientSk?: Uint8Array
+          , clientPk?: Uint8Array) {
+
+        if (clientId && clientSk && clientPk) {
             this.clientId = clientId;
             this.clientSk = clientSk;
+            this.clientPk = clientPk;
         } else {
             // If specified without arguments, generate new credentials
             const keyPair = nacl.sign.keyPair();
@@ -190,7 +195,7 @@ export class AirPlayAuth {
         });
 
         // Append Content-Type header if request has body
-        if (data) {
+        if (data && contentType) {
             requestHeaders.append("Content-Type", contentType);
         }
 

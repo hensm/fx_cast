@@ -20,16 +20,16 @@ export default class Session {
     private referenceId: string;
 
     private client: Client;
-    private clientConnection: Channel;
-    private clientHeartbeat: Channel;
-    private clientReceiver: Channel;
-    private clientHeartbeatIntervalId: NodeJS.Timer;
+    private clientConnection?: Channel;
+    private clientHeartbeat?: Channel;
+    private clientReceiver?: Channel;
+    private clientHeartbeatIntervalId?: NodeJS.Timer;
 
     private isSessionCreated = false;
 
-    private clientId: string;
-    private transportId: string;
-    private transportConnection: Channel;
+    private clientId?: string;
+    private transportId?: string;
+    private transportConnection?: Channel;
     private app: any;
 
     constructor (
@@ -67,7 +67,7 @@ export default class Session {
                     transportHeartbeat.send({ type: "PING" });
                 }
 
-                this.clientHeartbeat.send({ type: "PING" });
+                this.clientHeartbeat!.send({ type: "PING" });
             }, 5000);
 
             this.clientReceiver.send({
@@ -94,7 +94,7 @@ export default class Session {
                         // Close session
                         this.sendMessage("shim:/session/stopped");
                         this.client.close();
-                        clearInterval(this.clientHeartbeatIntervalId);
+                        clearInterval(this.clientHeartbeatIntervalId!);
                         return;
                     }
 
@@ -106,10 +106,10 @@ export default class Session {
                             `client-${Math.floor(Math.random() * 10e5)}`;
 
                         this.transportConnection = this.client.createChannel(
-                                this.clientId, this.transportId
+                                this.clientId, this.transportId!
                               , NS_CONNECTION, "JSON");
                         transportHeartbeat = this.client.createChannel(
-                                this.clientId, this.transportId
+                                this.clientId, this.transportId!
                               , NS_HEARTBEAT, "JSON");
 
                         this.transportConnection.send({ type: "CONNECT" });
@@ -167,12 +167,12 @@ export default class Session {
         if (!this.channelMap.has(namespace)) {
             this.channelMap.set(namespace
                 , this.client.createChannel(
-                        this.clientId, this.transportId, namespace, "JSON"));
+                        this.clientId!, this.transportId!, namespace, "JSON"));
         }
     }
 
     public close () {
-        this.clientConnection.send({ type: "CLOSE" });
+        this.clientConnection!.send({ type: "CLOSE" });
         if (this.transportConnection) {
             this.transportConnection.send({ type: "CLOSE" });
         }
@@ -188,7 +188,7 @@ export default class Session {
 
     private _impl_addMessageListener (namespace: string) {
         this.createChannel(namespace);
-        this.channelMap.get(namespace).on("message", (data: any) => {
+        this.channelMap.get(namespace)!.on("message", (data: any) => {
             this.sendMessage("shim:/session/impl_addMessageListener", {
                 namespace
               , data: JSON.stringify(data)
@@ -205,7 +205,7 @@ export default class Session {
 
         try {
             this.createChannel(namespace);
-            this.channelMap.get(namespace).send(message);
+            this.channelMap.get(namespace)!.send(message);
         } catch (err) {
             error = true;
         }
@@ -221,7 +221,7 @@ export default class Session {
         let error = false;
 
         try {
-            this.clientReceiver.send({
+            this.clientReceiver!.send({
                 type: "SET_VOLUME"
               , volume: { muted }
               , requestId: 0
@@ -241,7 +241,7 @@ export default class Session {
         let error = false;
 
         try {
-            this.clientReceiver.send({
+            this.clientReceiver!.send({
                 type: "SET_VOLUME"
               , volume: { level: newLevel }
               , requestId: 0
@@ -260,7 +260,7 @@ export default class Session {
         let error = false;
 
         try {
-            this.clientReceiver.send({
+            this.clientReceiver!.send({
                 type: "STOP"
               , sessionId: this.sessionId
               , requestId: 0
@@ -271,7 +271,7 @@ export default class Session {
 
         this.client.close();
 
-        clearInterval(this.clientHeartbeatIntervalId);
+        clearInterval(this.clientHeartbeatIntervalId!);
 
         this.sendMessage("shim:/session/impl_stop", {
             stopId

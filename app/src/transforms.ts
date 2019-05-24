@@ -43,7 +43,7 @@ export class ResponseTransform extends Transform {
 export class DecodeTransform extends Transform {
     // Message data
     private _messageBuffer = Buffer.alloc(0);
-    private _messageLength: number = null;
+    private _messageLength?: number;
 
     constructor () {
         super({
@@ -64,7 +64,7 @@ export class DecodeTransform extends Transform {
        ]);
 
        for (;;) {
-           if (this._messageLength === null) {
+           if (this._messageLength === undefined) {
                if (this._messageBuffer.length >= 4) {
                    // Read message length and offset buffer
                    this._messageLength = this._messageBuffer.readUInt32LE(0);
@@ -85,7 +85,7 @@ export class DecodeTransform extends Transform {
                    // Offset buffer to start of next message
                    this._messageBuffer = this._messageBuffer.slice(
                            this._messageLength);
-                   this._messageLength = null;
+                   this._messageLength = undefined;
 
                    // Next message
                    continue;

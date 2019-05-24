@@ -14,8 +14,8 @@ const NS_RECEIVER = "urn:x-cast:com.google.cast.receiver";
  */
 export default class StatusListener extends EventEmitter {
     private client: Client;
-    private clientReceiver: Channel;
-    private clientHeartbeatIntervalId: number;
+    private clientReceiver?: Channel;
+    private clientHeartbeatIntervalId?: number;
 
     constructor (
             private host: string
@@ -35,7 +35,10 @@ export default class StatusListener extends EventEmitter {
      * Closes status listener connection.
      */
     public deregister (): void {
-        this.clientReceiver.send({ type: "CLOSE" });
+        if (this.clientReceiver) {
+            this.clientReceiver.send({ type: "CLOSE" });
+        }
+
         this.client.close();
     }
 

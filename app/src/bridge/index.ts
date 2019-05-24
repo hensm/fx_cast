@@ -82,22 +82,26 @@ let receiverSelectorApp: child_process.ChildProcess;
  */
 async function handleMessage (message: Message) {
     if (message.subject.startsWith("bridge:/media/")) {
-        if (existingMedia.has(message._id)) {
+        const mediaId = message._id!;
+
+        if (existingMedia.has(mediaId)) {
             // Forward message to instance message handler
-            existingMedia.get(message._id).messageHandler(message);
+            existingMedia.get(mediaId)!.messageHandler(message);
         } else {
             if (message.subject.endsWith("/initialize")) {
                 // Get Session object media belongs to
                 const parentSession = existingSessions.get(
                         message.data._internalSessionId);
 
-                // Create Media
-                existingMedia.set(message._id, new Media(
-                        message.data.sessionId
-                      , message.data.mediaSessionId
-                      , message._id
-                      , parentSession
-                      , sendMessage));
+                if (parentSession) {
+                    // Create Media
+                    existingMedia.set(mediaId, new Media(
+                            message.data.sessionId
+                          , message.data.mediaSessionId
+                          , mediaId
+                          , parentSession
+                          , sendMessage));
+                }
             }
         }
 
@@ -105,18 +109,20 @@ async function handleMessage (message: Message) {
     }
 
     if (message.subject.startsWith("bridge:/session/")) {
-        if (existingSessions.has(message._id)) {
+        const sessionId = message._id!;
+
+        if (existingSessions.has(sessionId)) {
             // Forward message to instance message handler
-            existingSessions.get(message._id).messageHandler(message);
+            existingSessions.get(sessionId)!.messageHandler(message);
         } else {
             if (message.subject.endsWith("/initialize")) {
                 // Create Session
-                existingSessions.set(message._id, new Session(
+                existingSessions.set(sessionId, new Session(
                         message.data.address
                       , message.data.port
                       , message.data.appId
                       , message.data.sessionId
-                      , message._id
+                      , sessionId
                       , sendMessage));
             }
         }
@@ -161,8 +167,8 @@ async function handleMessage (message: Message) {
                     path.join(process.cwd(), "selector")
                   , [ receiverSelectorData ]);
 
-            receiverSelectorApp.stdout.setEncoding("utf8");
-            receiverSelectorApp.stdout.on("data", data => {
+            receiverSelectorApp.stdout!.setEncoding("utf8");
+            receiverSelectorApp.stdout!.on("data", data => {
                 sendMessage({
                     subject: "main:/receiverSelector/selected"
                   , data: JSON.parse(data)
@@ -280,7 +286,7 @@ function initialize (options: InitializeOptions) {
                 }
             };
 
-            if ("applications" in status) {
+            if (status.applications && status.applications.length) {
                 const application = status.applications[0];
 
                 receiverStatusMessage.data.status.application = {
@@ -300,7 +306,7 @@ function initialize (options: InitializeOptions) {
         const { id } = service.txt;
 
         if (statusListeners.has(id)) {
-            statusListeners.get(id).deregister();
+            statusListeners.get(id)!.deregister();
             statusListeners.delete(id);
         }
     }

@@ -4,4 +4,7 @@
         "./src/**/*"
       , "./@types/**/*"
     ]
+  , "compilerOptions": {
+        "strict": true
+    }
 }

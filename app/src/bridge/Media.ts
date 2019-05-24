@@ -46,7 +46,7 @@ export default class Media {
         this.sendMessageCallback = sendMessageCallback;
 
         this.session.createChannel(MEDIA_NAMESPACE);
-        this.channel = this.session.channelMap.get(MEDIA_NAMESPACE);
+        this.channel = this.session.channelMap.get(MEDIA_NAMESPACE)!;
 
         this.channel.on("message", (data: any) => {
             if (data && data.type === "MEDIA_STATUS"
