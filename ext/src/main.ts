@@ -41,7 +41,7 @@ browser.runtime.onInstalled.addListener(async details => {
     }
 
     // Call after default options have been set
-    createMenus();
+    init();
 });
 
 
@@ -65,17 +65,21 @@ const mediaCastTargetUrlPatterns = new Set([
 
 const LOCAL_MEDIA_URL_PATTERN = "file://*/*";
 
-async function createMenus () {
-    const opts = await options.getAll();
 
-    /**
-     * If options aren't set or menus have already been
-     * created, return.
-     */
-    if (!opts || mirrorCastMenuId || mediaCastMenuId) {
+async function initCreateMenus (opts: Options) {
+
+    // If menus have already been created, return.
+    if (mirrorCastMenuId
+     || mediaCastMenuId
+     || whitelistMenuId
+     || whitelistRecommendedMenuId) {
         return;
     }
 
+    /**
+     * If local media casting is enabled, allow the media cast
+     * menu item to appear on file URIs.
+     */
     if (opts.localMediaEnabled) {
         mediaCastTargetUrlPatterns.add(LOCAL_MEDIA_URL_PATTERN);
     }
@@ -328,15 +332,11 @@ async function onBeforeSendHeaders (
 }
 
 /**
- * Updates any extension state based on options changes.
+ * Initializes any functionality based on options state.
  */
-async function onOptionsUpdated (alteredOptions?: Array<(keyof Options)>) {
-    const opts = await options.getAll();
-
-    // If options aren't set yet, return
-    if (!opts) {
-        return;
-    }
+async function initRegisterOptionalFeatures (
+        opts: Options
+      , alteredOptions?: Array<(keyof Options)>) {
 
     /**
      * Adds a webRequest listener that intercepts and modifies user
@@ -396,10 +396,11 @@ async function onOptionsUpdated (alteredOptions?: Array<(keyof Options)>) {
     }
 }
 
-browser.runtime.onMessage.addListener(message => {
+browser.runtime.onMessage.addListener(async message => {
     switch (message.subject) {
         case "optionsUpdated": {
-            onOptionsUpdated(message.data.alteredOptions);
+            const opts = await options.getAll();
+            initRegisterOptionalFeatures(opts, message.data.alteredOptions);
             break;
         }
     }
@@ -519,10 +520,13 @@ const statusBridgeReceivers = new Map<string, Receiver>();
 /**
  * Create status bridge, set event handlers and initialize.
  */
-async function initStatusBridge () {
-    const applicationName = await options.get("bridgeApplicationName");
+async function initCreateStatusBridge (opts: Options) {
+    // Status bridge already initialized
+    if (statusBridge) {
+        return;
+    }
 
-    statusBridge = nativeMessaging.connectNative(applicationName);
+    statusBridge = nativeMessaging.connectNative(opts.bridgeApplicationName);
     statusBridge.onDisconnect.addListener(onStatusBridgeDisconnect);
     statusBridge.onMessage.addListener(onStatusBridgeMessage);
 
@@ -533,8 +537,6 @@ async function initStatusBridge () {
         }
     });
 }
-
-initStatusBridge();
 
 /**
  * Runs once the status bridge has disconnected. Sends
@@ -565,8 +567,9 @@ function onStatusBridgeDisconnect () {
     statusBridge = null;
 
     // After 10 seconds, attempt to reinitialize
-    window.setTimeout(() => {
-        initStatusBridge();
+    window.setTimeout(async () => {
+        const opts = await options.getAll();
+        initCreateStatusBridge(opts);
     }, 10000);
 }
 
@@ -807,5 +810,15 @@ browser.runtime.onMessage.addListener((message, sender) => {
 
 
 // Misc init
-createMenus();
-onOptionsUpdated();
+async function init () {
+    const opts = await options.getAll();
+    if (!opts) {
+        return;
+    }
+
+    initCreateMenus(opts);
+    initRegisterOptionalFeatures(opts);
+    initCreateStatusBridge(opts);
+}
+
+init();
