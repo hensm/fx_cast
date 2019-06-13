@@ -11,10 +11,10 @@ import options from "./lib/options";
 import { getChromeUserAgent } from "./lib/userAgents";
 import { getWindowCenteredProps } from "./lib/utils";
 
-import { getReceiverSelectorManager
-       , ReceiverSelectorManagerType
+import { getReceiverSelector
+       , ReceiverSelectorType
        , ReceiverSelectorMediaType
-       , ReceiverSelectorSelectedEvent } from "./receiverSelectorManager";
+       , ReceiverSelectorSelectedEvent } from "./receiver_selectors";
 
 import { Message, Receiver } from "./types";
 
@@ -452,7 +452,7 @@ browser.menus.onClicked.addListener(async (info, tab) => {
 
                 // Load mirroring sender app
                 await browser.tabs.executeScript(tab.id, {
-                    file: "mirroringCast.js"
+                    file: "senders/mirroringCast.js"
                   , frameId
                 });
 
@@ -472,7 +472,7 @@ browser.menus.onClicked.addListener(async (info, tab) => {
 
                 // Load media sender app
                 await browser.tabs.executeScript(tab.id, {
-                    file: "mediaCast.js"
+                    file: "senders/mediaCast.js"
                   , frameId
                 });
 
@@ -641,11 +641,11 @@ async function onConnectShim (port: browser.runtime.Port) {
 
     const { os } = await browser.runtime.getPlatformInfo();
 
-    const receiverSelectorManager = getReceiverSelectorManager(os === "mac"
-        ? ReceiverSelectorManagerType.NativeMac
-        : ReceiverSelectorManagerType.Popup);
+    const receiverSelector = getReceiverSelector(os === "mac"
+        ? ReceiverSelectorType.NativeMac
+        : ReceiverSelectorType.Popup);
 
-    function onReceiverSelectorManagerSelected (
+    function onReceiverSelectorSelected (
             ev: ReceiverSelectorSelectedEvent) {
 
         port.postMessage({
@@ -654,33 +654,33 @@ async function onConnectShim (port: browser.runtime.Port) {
         });
     }
 
-    function onReceiverSelectorManagerCancelled () {
+    function onReceiverSelectorCancelled () {
         port.postMessage({
             subject: "shim:/selectReceiverCancelled"
         });
     }
 
-    function onReceiverSelectorManagerError () {
+    function onReceiverSelectorError () {
         // TODO: Report errors properly
         port.postMessage({
             subject: "shim:/selectReceiverCancelled"
         });
     }
 
-    receiverSelectorManager.addEventListener("selected"
-          , onReceiverSelectorManagerSelected);
-    receiverSelectorManager.addEventListener("cancelled"
-          , onReceiverSelectorManagerCancelled);
-    receiverSelectorManager.addEventListener("error"
-          , onReceiverSelectorManagerError);
+    receiverSelector.addEventListener("selected"
+          , onReceiverSelectorSelected);
+    receiverSelector.addEventListener("cancelled"
+          , onReceiverSelectorCancelled);
+    receiverSelector.addEventListener("error"
+          , onReceiverSelectorError);
 
     port.onDisconnect.addListener(() => {
-        receiverSelectorManager.removeEventListener("selected"
-              , onReceiverSelectorManagerSelected);
-        receiverSelectorManager.removeEventListener("cancelled"
-              , onReceiverSelectorManagerCancelled);
-        receiverSelectorManager.removeEventListener("error"
-              , onReceiverSelectorManagerError);
+        receiverSelector.removeEventListener("selected"
+              , onReceiverSelectorSelected);
+        receiverSelector.removeEventListener("cancelled"
+              , onReceiverSelectorCancelled);
+        receiverSelector.removeEventListener("error"
+              , onReceiverSelectorError);
     });
 
 
@@ -756,12 +756,12 @@ async function onConnectShim (port: browser.runtime.Port) {
             }
 
             case "main:/sessionCreated": {
-                receiverSelectorManager.close();
+                receiverSelector.close();
                 break;
             }
 
             case "main:/selectReceiverBegin": {
-                receiverSelectorManager.open(
+                receiverSelector.open(
                         Array.from(statusBridgeReceivers.values())
                       , message.data.defaultMediaType);
                 break;

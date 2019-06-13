@@ -1,24 +1,24 @@
 "use strict";
 
-import nativeMessaging from "../../lib/nativeMessaging";
-import options from "../../lib/options";
+import nativeMessaging from "../lib/nativeMessaging";
+import options from "../lib/options";
 
-import ReceiverSelectorManager, {
-        ReceiverSelectorMediaType } from "../ReceiverSelectorManager";
+import ReceiverSelector, {
+        ReceiverSelectorMediaType } from "./ReceiverSelector";
 
-import { Message, Receiver } from "../../types";
+import { Message, Receiver } from "../types";
 
 import { NativeReceiverSelectorCloseMessage
        , NativeReceiverSelectorErrorMessage
-       , NativeReceiverSelectorSelectedMessage } from "../../messageTypes";
+       , NativeReceiverSelectorSelectedMessage } from "../messageTypes";
 
 
 const _ = browser.i18n.getMessage;
 
 
-export default class NativeMacReceiverSelectorManager
+export default class NativeMacReceiverSelector
         extends EventTarget
-        implements ReceiverSelectorManager {
+        implements ReceiverSelector {
 
     private bridgePort: browser.runtime.Port;
     private bridgePortDisconnected: boolean = false;

@@ -1,7 +1,7 @@
 "use strict";
 
 import { ReceiverSelectorMediaType }
-        from "./receiverSelectorManager/ReceiverSelectorManager":
+        from "../receiver_selectors/ReceiverSelector":
 
 let chrome;
 let logMessage;

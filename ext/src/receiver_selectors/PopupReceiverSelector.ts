@@ -1,15 +1,15 @@
 "use strict";
 
-import ReceiverSelectorManager, {
-        ReceiverSelectorMediaType } from "../ReceiverSelectorManager";
+import ReceiverSelector, {
+        ReceiverSelectorMediaType } from "./ReceiverSelector";
 
-import { getWindowCenteredProps } from "../../lib/utils";
-import { Message, Receiver } from "../../types";
+import { getWindowCenteredProps } from "../lib/utils";
+import { Message, Receiver } from "../types";
 
 
-export default class PopupReceiverSelectorManager
+export default class PopupReceiverSelector
         extends EventTarget
-        implements ReceiverSelectorManager {
+        implements ReceiverSelector {
 
     private windowId: number;
     private openerWindowId: number;
@@ -104,7 +104,7 @@ export default class PopupReceiverSelectorManager
      */
     private onPopupMessage (message: Message) {
         switch (message.subject) {
-            case "receiverSelectorManager:/selected": {
+            case "receiverSelector:/selected": {
                 this.wasReceiverSelected = true;
                 this.dispatchEvent(new CustomEvent("selected", {
                     detail: message.data

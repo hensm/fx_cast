@@ -8,7 +8,7 @@ import { getNextEllipsis } from "../../lib/utils";
 import { Message, Receiver } from "../../types";
 
 import { ReceiverSelectorMediaType }
-    from "../../receiverSelectorManager/ReceiverSelectorManager";
+    from "../../receiver_selectors/ReceiverSelector";
 
 
 const _ = browser.i18n.getMessage;
@@ -134,7 +134,7 @@ class PopupApp extends Component<{}, PopupAppState> {
         });
 
         this.port.postMessage({
-            subject: "receiverSelectorManager:/selected"
+            subject: "receiverSelector:/selected"
           , data: {
                 receiver
               , mediaType: this.state.mediaType

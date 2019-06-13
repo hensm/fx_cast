@@ -7,7 +7,7 @@ import { AutoJoinPolicy
        , DefaultActionPolicy } from "../enums";
 
 import { ReceiverSelectorMediaType }
-        from "../../../receiverSelectorManager/ReceiverSelectorManager";
+        from "../../../receiver_selectors/ReceiverSelector";
 
 
 export default class ApiConfig {

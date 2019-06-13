@@ -19,7 +19,7 @@ export type ReceiverSelectorErrorEvent = CustomEvent;
 export type ReceiverSelectorCancelledEvent = CustomEvent;
 
 
-export default interface ReceiverSelectorManager extends EventTarget {
+export default interface ReceiverSelector extends EventTarget {
     open (receivers: Receiver[]
         , defaultMediaType: ReceiverSelectorMediaType): void;
 
