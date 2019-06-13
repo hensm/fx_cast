@@ -12,9 +12,9 @@ import { getChromeUserAgent } from "./lib/userAgents";
 import { getWindowCenteredProps } from "./lib/utils";
 
 import { getReceiverSelector
-       , ReceiverSelectorType
        , ReceiverSelectorMediaType
-       , ReceiverSelectorSelectedEvent } from "./receiver_selectors";
+       , ReceiverSelectorSelectedEvent
+       , ReceiverSelectorType } from "./receiver_selectors";
 
 import { Message, Receiver } from "./types";
 

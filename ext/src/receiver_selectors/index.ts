@@ -18,9 +18,7 @@ export enum ReceiverSelectorType {
   , NativeMac
 }
 
-export function getReceiverSelector (
-        type: ReceiverSelectorType) {
-
+export function getReceiverSelector (type: ReceiverSelectorType) {
     switch (type) {
         case ReceiverSelectorType.Popup: {
             return new PopupReceiverSelector();
