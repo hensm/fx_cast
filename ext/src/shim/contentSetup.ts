@@ -1,18 +1,13 @@
 "use strict";
 
+import { CAST_LOADER_SCRIPT_URL
+       , CAST_SCRIPT_URLS } from "../endpoints";
+
+
 const _window = (window.wrappedJSObject as any);
 
 _window.chrome = cloneInto({}, window);
 _window.navigator.presentation = cloneInto({}, window);
-
-
-
-const EXT_SENDER_SCRIPT_URLS = [
-    "chrome-extension://pkedcjkdefgpdelpbcmbmeomcjbeemfm/cast_sender.js"
-  , "chrome-extension://enhhojjnijigcajfphajepfemndkmdlo/cast_sender.js"
-];
-
-const SENDER_SCRIPT_URL = "https://www.gstatic.com/cv/js/sender/v1/cast_sender.js";
 
 
 /**
@@ -34,8 +29,8 @@ Reflect.defineProperty(
   , get
 
   , set: exportFunction(function (value) {
-        if (EXT_SENDER_SCRIPT_URLS.includes(value)) {
-            return set.call(this, SENDER_SCRIPT_URL);
+        if (CAST_SCRIPT_URLS.includes(value)) {
+            return set.call(this, CAST_LOADER_SCRIPT_URL);
         }
 
         return set.call(this, value);

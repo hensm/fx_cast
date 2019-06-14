@@ -1,7 +1,7 @@
 "use strict";
 
-import Timeout from "./Timeout";
 import { Capability } from "../enums";
+import Timeout from "./Timeout";
 
 
 // https://developers.google.com/cast/docs/reference/chrome/chrome.cast.SessionRequest
@@ -15,5 +15,5 @@ export default class SessionRequest {
                 Capability.VIDEO_OUT
               , Capability.AUDIO_OUT ]
           , public requestSessionTimeout: number
-                    = (new Timeout).requestSession) {}
+                    = (new Timeout()).requestSession) {}
 }

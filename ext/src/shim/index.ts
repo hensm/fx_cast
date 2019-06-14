@@ -2,6 +2,7 @@
 
 import * as cast from "./cast";
 
+import { CAST_FRAMEWORK_SCRIPT_URL } from "../endpoints";
 import { loadScript } from "../lib/utils";
 import { onMessage } from "./messageBridge";
 
@@ -12,11 +13,9 @@ if (!_window.chrome) {
     _window.chrome = {};
 }
 
+// Create page-accessible API object
 _window.chrome.cast = cast;
 
-
-const CAST_FRAMEWORK_SCRIPT_URL =
-        "https://www.gstatic.com/cast/sdk/libs/sender/1.0/cast_framework.js";
 
 let bridgeInfo: any;
 let isFramework = false;

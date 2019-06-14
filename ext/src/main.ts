@@ -22,6 +22,9 @@ import { ReceiverStatusMessage
        , ServiceDownMessage
        , ServiceUpMessage } from "./messageTypes";
 
+import { CAST_FRAMEWORK_LOADER_SCRIPT_URL
+       , CAST_LOADER_SCRIPT_URL } from "./endpoints";
+
 
 const _ = browser.i18n.getMessage;
 
@@ -244,13 +247,6 @@ browser.menus.onShown.addListener(info => {
 });
 
 
-// Google-hosted API loader script
-const SENDER_SCRIPT_URL =
-        "https://www.gstatic.com/cv/js/sender/v1/cast_sender.js";
-
-const SENDER_SCRIPT_FRAMEWORK_URL =
-        `${SENDER_SCRIPT_URL}?loadCastFramework=1`;
-
 /**
  * Sender applications load a cast_sender.js script that
  * functions as a loader for the internal chrome-extension:
@@ -261,11 +257,9 @@ const SENDER_SCRIPT_FRAMEWORK_URL =
  */
 browser.webRequest.onBeforeRequest.addListener(
         async details => {
-
-            const isFramework = details.url === SENDER_SCRIPT_FRAMEWORK_URL;
-
             await browser.tabs.executeScript(details.tabId, {
-                code: `window._isFramework = ${isFramework}`
+                code: `window._isFramework = ${
+                        details.url === CAST_FRAMEWORK_LOADER_SCRIPT_URL}`
               , frameId: details.frameId
               , runAt: "document_start"
             });
@@ -276,14 +270,13 @@ browser.webRequest.onBeforeRequest.addListener(
               , runAt: "document_start"
             });
 
-
             return {
                 redirectUrl: browser.runtime.getURL("shim/bundle.js")
             };
         }
       , { urls: [
-            SENDER_SCRIPT_URL
-          , SENDER_SCRIPT_FRAMEWORK_URL
+            CAST_LOADER_SCRIPT_URL
+          , CAST_FRAMEWORK_LOADER_SCRIPT_URL
         ]}
       , [ "blocking" ]);
 
