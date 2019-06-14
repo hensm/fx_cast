@@ -29,7 +29,6 @@ import * as media from "./media";
 import { ReceiverSelectorMediaType }
         from "../../receiver_selectors/ReceiverSelector";
 import { onMessage, sendMessageResponse } from "../messageBridge";
-import { requestSession as requestSessionTimeout } from "../timeout";
 
 
 type ReceiverActionListener = (
