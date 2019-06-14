@@ -429,16 +429,16 @@ browser.menus.onClicked.addListener(async (info, tab) => {
         const { frameId } = info;
         const mirroringAppId = await options.get("mirroringAppId");
 
-        // Load cast setup script
-        await browser.tabs.executeScript(tab.id, {
-            file: "shim/content.js"
-          , frameId
-        });
-
         switch (info.menuItemId) {
             case mirrorCastMenuId: {
                 mirrorCastTabId = tab.id;
                 mirrorCastFrameId = frameId;
+
+                // Load cast setup script
+                await browser.tabs.executeScript(tab.id, {
+                    file: "shim/content.js"
+                  , frameId
+                });
 
                 await browser.tabs.executeScript(tab.id, {
                     code: `
@@ -456,6 +456,12 @@ browser.menus.onClicked.addListener(async (info, tab) => {
                   , frameId
                 });
 
+                // Load cast API
+                await browser.tabs.executeScript(tab.id, {
+                    file: "shim/bundle.js"
+                  , frameId
+                });
+
                 break;
             }
 
@@ -465,8 +471,10 @@ browser.menus.onClicked.addListener(async (info, tab) => {
 
                 // Pass media URL to media sender app
                 await browser.tabs.executeScript(tab.id, {
-                    code: `var srcUrl = "${info.srcUrl}";
-                           var targetElementId = ${info.targetElementId};`
+                    code: `
+                        window.srcUrl = "${info.srcUrl}";
+                        window.targetElementId = ${info.targetElementId};
+                    `
                   , frameId
                 });
 
@@ -479,12 +487,6 @@ browser.menus.onClicked.addListener(async (info, tab) => {
                 break;
             }
         }
-
-        // Load cast API
-        await browser.tabs.executeScript(tab.id, {
-            file: "shim/bundle.js"
-          , frameId
-        });
 
         return;
     }

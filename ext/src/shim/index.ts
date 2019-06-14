@@ -2,9 +2,8 @@
 
 import * as cast from "./cast";
 
-import { onMessage } from "./messageBridge";
-
 import { loadScript } from "../lib/utils";
+import { onMessage } from "./messageBridge";
 
 
 const _window = (window as any);

@@ -1,20 +1,28 @@
 "use strict";
 
-let options;
-
-let chrome;
-let logMessage;
+import { Options } from "../defaultOptions";
+import cast, { init } from "../shim/export";
 
 
-let session;
-let currentMedia;
+// Variables passed from background
+const { srcUrl
+      , targetElementId }
+    : { srcUrl: string
+      , targetElementId: number } = (window as any);
+
+
+let options: Options;
+
+let session: cast.Session;
+let currentMedia: cast.media.Media;
 
 let ignoreMediaEvents = false;
 
 
 const isLocalFile = srcUrl.startsWith("file:");
 
-const mediaElement = browser.menus.getTargetElement(targetElementId);
+const mediaElement = browser.menus.getTargetElement(
+        targetElementId) as HTMLMediaElement;
 
 window.addEventListener("beforeunload", () => {
     browser.runtime.sendMessage({
@@ -22,7 +30,7 @@ window.addEventListener("beforeunload", () => {
     });
 
     if (options.mediaStopOnUnload) {
-        session.stop();
+        session.stop(null, null);
         /*currentMedia.stop(null
               , onMediaStopSuccess
               , onMediaStopError);*/
@@ -47,8 +55,8 @@ function getLocalAddress () {
 }
 
 
-async function onRequestSessionSuccess (session_) {
-    logMessage("onRequestSessionSuccess");
+async function onRequestSessionSuccess (session_: cast.Session) {
+    cast.logMessage("onRequestSessionSuccess");
 
     session = session_;
 
@@ -77,16 +85,16 @@ async function onRequestSessionSuccess (session_) {
         mediaUrl = new URL(`http://${await getLocalAddress()}:${port}/`);
     }
 
-    const mediaInfo = new chrome.cast.media.MediaInfo(mediaUrl.href);
+    const mediaInfo = new cast.media.MediaInfo(mediaUrl.href, null);
 
     // Media metadata (title/poster)
-    mediaInfo.metadata = new chrome.cast.media.GenericMediaMetadata();
-    mediaInfo.metadata.metadataType = chrome.cast.media.MetadataType.GENERIC;
+    mediaInfo.metadata = new cast.media.GenericMediaMetadata();
+    mediaInfo.metadata.metadataType = cast.media.MetadataType.GENERIC;
     mediaInfo.metadata.title = mediaUrl.pathname;
 
-    if (mediaElement.poster) {
+    if (mediaElement instanceof HTMLVideoElement && mediaElement.poster) {
         mediaInfo.metadata.images = [
-            new chrome.cast.Image(mediaElement.poster)
+            new cast.Image(mediaElement.poster)
         ];
     }
 
@@ -97,13 +105,13 @@ async function onRequestSessionSuccess (session_) {
         const trackElements = mediaElement.querySelectorAll("track");
 
         let index = 0;
-        for (const textTrack of mediaElement.textTracks) {
+        for (const textTrack of Array.from(mediaElement.textTracks)) {
             const trackElement = trackElements[index];
 
             // Create Track object
-            const track = new chrome.cast.media.Track(
+            const track = new cast.media.Track(
                     index                              // trackId
-                  , chrome.cast.media.TrackType.TEXT); // trackType
+                  , cast.media.TrackType.TEXT); // trackType
 
             // Copy TextTrack properties to Track
             track.name = textTrack.label;
@@ -111,7 +119,7 @@ async function onRequestSessionSuccess (session_) {
             track.trackContentId = trackElement.src;
             track.trackContentType = "text/vtt";
 
-            const { TextTrackType } = chrome.cast.media;
+            const { TextTrackType } = cast.media;
 
             switch (textTrack.kind) {
                 case "subtitles":
@@ -147,7 +155,7 @@ async function onRequestSessionSuccess (session_) {
         }
     }
 
-    const loadRequest = new chrome.cast.media.LoadRequest(mediaInfo);
+    const loadRequest = new cast.media.LoadRequest(mediaInfo);
     loadRequest.autoplay = false;
     loadRequest.activeTrackIds = activeTrackIds;
 
@@ -156,31 +164,31 @@ async function onRequestSessionSuccess (session_) {
           , onLoadMediaError);
 }
 function onRequestSessionError () {
-    logMessage("onRequestSessionError");
+    cast.logMessage("onRequestSessionError");
 }
 
-function sessionListener (session) {
-    logMessage("sessionListener");
+function sessionListener (session: cast.Session) {
+    cast.logMessage("sessionListener");
 }
-function receiverListener (availability) {
-    logMessage("receiverListener");
+function receiverListener (availability: string) {
+    cast.logMessage("receiverListener");
 
-    if (availability === chrome.cast.ReceiverAvailability.AVAILABLE) {
-        chrome.cast.requestSession(
+    if (availability === cast.ReceiverAvailability.AVAILABLE) {
+        cast.requestSession(
                 onRequestSessionSuccess
               , onRequestSessionError);
     }
 }
 
 function onInitializeSuccess () {
-    logMessage("onInitializeSuccess");
+    cast.logMessage("onInitializeSuccess");
 }
 function onInitializeError () {
-    logMessage("onInitializeError");
+    cast.logMessage("onInitializeError");
 }
 
-function onLoadMediaSuccess (media) {
-    logMessage("onLoadMediaSuccess");
+function onLoadMediaSuccess (media: cast.media.Media) {
+    cast.logMessage("onLoadMediaSuccess");
 
     currentMedia = media;
 
@@ -219,7 +227,7 @@ function onLoadMediaSuccess (media) {
                 return;
             }
 
-            const seekRequest = new chrome.cast.media.SeekRequest();
+            const seekRequest = new cast.media.SeekRequest();
             seekRequest.currentTime = mediaElement.currentTime;
 
             currentMedia.seek(seekRequest
@@ -228,21 +236,21 @@ function onLoadMediaSuccess (media) {
         });
 
         mediaElement.addEventListener("ratechange", () => {
-            currentMedia._sendMediaMessage({
+            (currentMedia as any)._sendMediaMessage({
                 type: "SET_PLAYBACK_RATE"
               , playbackRate: mediaElement.playbackRate
             });
         });
 
         mediaElement.addEventListener("volumechange", () => {
-            const newVolume = new chrome.cast.Volume(
-                    currentMedia.volume
-                  , currentMedia.muted);
+            const newVolume = new cast.Volume(
+                    currentMedia.volume.level
+                  , currentMedia.volume.muted);
 
             const volumeRequest =
-                    new chrome.cast.media.VolumeRequest(newVolume);
+                    new cast.media.VolumeRequest(newVolume);
 
-            logMessage("Volume change");
+            cast.logMessage("Volume change");
             currentMedia.setVolume(volumeRequest);
         });
 
@@ -254,17 +262,17 @@ function onLoadMediaSuccess (media) {
 
             // PlayerState
             const localPlayerState = mediaElement.paused
-                ? chrome.cast.media.PlayerState.PAUSED
-                : chrome.cast.media.PlayerState.PLAYING;
+                ? cast.media.PlayerState.PAUSED
+                : cast.media.PlayerState.PLAYING;
 
             if (localPlayerState !== currentMedia.playerState) {
                 ignoreMediaEvents = true;
                 switch (currentMedia.playerState) {
-                    case chrome.cast.media.PlayerState.PLAYING:
+                    case cast.media.PlayerState.PLAYING:
                         mediaElement.play();
                         break;
 
-                    case chrome.cast.media.PlayerState.PAUSED:
+                    case cast.media.PlayerState.PAUSED:
                         mediaElement.pause();
                         break;
                 }
@@ -272,17 +280,17 @@ function onLoadMediaSuccess (media) {
 
             // RepeatMode
             const localRepeatMode = mediaElement.loop
-                ? chrome.cast.media.RepeatMode.SINGLE
-                : chrome.cast.media.RepeatMode.OFF;
+                ? cast.media.RepeatMode.SINGLE
+                : cast.media.RepeatMode.OFF;
 
             if (localRepeatMode !== currentMedia.repeatMode) {
                 ignoreMediaEvents = true;
                 switch (currentMedia.repeatMode) {
-                    case chrome.cast.media.RepeatMode.SINGLE:
+                    case cast.media.RepeatMode.SINGLE:
                         mediaElement.loop = true;
                         break;
 
-                    case chrome.cast.media.RepeatMode.OFF:
+                    case cast.media.RepeatMode.OFF:
                         mediaElement.loop = false;
                         break;
                 }
@@ -298,70 +306,64 @@ function onLoadMediaSuccess (media) {
     }
 }
 function onLoadMediaError () {
-    logMessage("onLoadMediaError");
+    cast.logMessage("onLoadMediaError");
 }
 
 /* play */
 function onMediaPlaySuccess () {
-    logMessage("onMediaPlaySuccess");
+    cast.logMessage("onMediaPlaySuccess");
 }
-function onMediaPlayError (err) {
-    logMessage("onMediaPlayError");
+function onMediaPlayError (err: cast.Error) {
+    cast.logMessage("onMediaPlayError");
 }
 
 /* pause */
 function onMediaPauseSuccess () {
-    logMessage("onMediaPauseSuccess");
+    cast.logMessage("onMediaPauseSuccess");
 }
-function onMediaPauseError (err) {
-    logMessage("onMediaPauseError");
+function onMediaPauseError (err: cast.Error) {
+    cast.logMessage("onMediaPauseError");
 }
 
 /* stop */
 function onMediaStopSuccess () {
-    logMessage("onMediaStopSuccess");
+    cast.logMessage("onMediaStopSuccess");
 }
-function onMediaStopError (err) {
-    logMessage("onMediaStopError");
+function onMediaStopError (err: cast.Error) {
+    cast.logMessage("onMediaStopError");
 }
 
 /* seek */
 function onMediaSeekSuccess () {
-    logMessage("onMediaSeekSuccess");
+    cast.logMessage("onMediaSeekSuccess");
 }
-function onMediaSeekError (err) {
-    logMessage("onMediaSeekError");
+function onMediaSeekError (err: cast.Error) {
+    cast.logMessage("onMediaSeekError");
 }
 
 
-window.__onGCastApiAvailable = async function (loaded, errorInfo) {
-    if (!loaded) {
+init().then(async bridgeInfo => {
+    if (!bridgeInfo.isVersionCompatible) {
         console.error("__onGCastApiAvailable error");
         return;
     }
 
-    chrome = window.chrome;
-    logMessage = chrome.cast.logMessage;
-
-    logMessage("__onGCastApiAvailable success");
-
-
     options = (await browser.storage.sync.get("options")).options;
 
     if (isLocalFile && !options.localMediaEnabled) {
-        logMessage("Local media casting not enabled");
+        cast.logMessage("Local media casting not enabled");
         return;
     }
 
 
-    const sessionRequest = new chrome.cast.SessionRequest(
-            chrome.cast.media.DEFAULT_MEDIA_RECEIVER_APP_ID);
+    const sessionRequest = new cast.SessionRequest(
+            cast.media.DEFAULT_MEDIA_RECEIVER_APP_ID);
 
-    const apiConfig = new chrome.cast.ApiConfig(sessionRequest
+    const apiConfig = new cast.ApiConfig(sessionRequest
           , sessionListener
           , receiverListener);
 
-    chrome.cast.initialize(apiConfig
+    cast.initialize(apiConfig
           , onInitializeSuccess
           , onInitializeError);
-};
+});
