@@ -1,17 +1,24 @@
 "use strict";
 
-import { ReceiverSelectorMediaType }
-        from "../receiver_selectors/ReceiverSelector":
+import options from "../lib/options";
+import cast, { init } from "../shim/export";
 
-let chrome;
-let logMessage;
+import { ReceiverSelectorMediaType }
+        from "../receiver_selectors/ReceiverSelector";
+
+
+// Variables passed from background
+const { selectedMedia }
+    : { selectedMedia: ReceiverSelectorMediaType } = (window as any);
+
 
 const FX_CAST_NAMESPACE = "urn:x-cast:fx_cast";
 
-let session;
+let session: cast.Session;
 let sessionRequested = false;
 
-let pc;
+let pc: RTCPeerConnection;
+
 
 const canvas = document.createElement("canvas");
 const ctx = canvas.getContext("2d");
@@ -35,19 +42,24 @@ window.addEventListener("resize", () => {
 let interval;
 
 
-function sendMessage (subject, data) {
+function sendMessage (subject: string, data: any) {
     session.sendMessage(FX_CAST_NAMESPACE, {
         subject
       , data
-    });
+    }, null, null);
 }
 
 window.addEventListener("beforeunload", () => {
-    sendMessage("close");
+    sendMessage("close", null);
 });
 
-async function onRequestSessionSuccess (session_, selectedMedia) {
-    logMessage("onRequestSessionSuccess");
+
+async function onRequestSessionSuccess (
+        // tslint:disable-next-line:variable-name
+        session_: cast.Session
+      , newSelectedMedia: ReceiverSelectorMediaType) {
+
+    cast.logMessage("onRequestSessionSuccess");
 
     session = session_;
 
@@ -72,8 +84,8 @@ async function onRequestSessionSuccess (session_, selectedMedia) {
         sendMessage("iceCandidate", ev.candidate);
     });
 
-    switch (selectedMedia) {
-        case ReceiverSelectorMediaType.Tab:
+    switch (newSelectedMedia) {
+        case ReceiverSelectorMediaType.Tab: {
             interval = setInterval(() => {
                 ctx.clearRect(0, 0, canvas.width, canvas.height);
                 ctx.drawWindow(
@@ -85,15 +97,21 @@ async function onRequestSessionSuccess (session_, selectedMedia) {
                       , "white"                    // bgColor
                       , ctx.DRAWWINDOW_DRAW_VIEW); // flags
             }, 1000 / 30);
-            pc.addStream(canvas.captureStream());
-            break;
 
-        case ReceiverSelectorMediaType.Screen:
-            const stream = await navigator.mediaDevices.getUserMedia({
-                video: { mediaSource: "window" }
-            });
-            pc.addStream(stream);
+            pc.addStream(canvas.captureStream());
+
             break;
+        }
+
+        case ReceiverSelectorMediaType.Screen: {
+            const stream = await navigator.mediaDevices.getUserMedia({
+                video: { mediaSource: "screen" }
+            });
+
+            pc.addStream(stream);
+
+            break;
+        }
     }
 
     const desc = await pc.createOffer();
@@ -101,19 +119,22 @@ async function onRequestSessionSuccess (session_, selectedMedia) {
 
     sendMessage("peerConnectionOffer", desc);
 }
+
 function onRequestSessionError () {
-    logMessage("onRequestSessionError");
+    cast.logMessage("onRequestSessionError");
 }
 
-function sessionListener (session) {
-    logMessage("sessionListener");
-}
-function receiverListener (availability) {
-    logMessage("receiverListener");
 
-    if (!sessionRequested && availability === chrome.cast.ReceiverAvailability.AVAILABLE) {
+function sessionListener (newSession: cast.Session) {
+    cast.logMessage("sessionListener");
+}
+function receiverListener (availability: string) {
+    cast.logMessage("receiverListener");
+
+    if (!sessionRequested
+            && availability === cast.ReceiverAvailability.AVAILABLE) {
         sessionRequested = true;
-        chrome.cast.requestSession(
+        cast.requestSession(
                 onRequestSessionSuccess
               , onRequestSessionError);
     }
@@ -121,29 +142,31 @@ function receiverListener (availability) {
 
 
 function onInitializeSuccess () {
-    logMessage("onInitializeSuccess");
+    cast.logMessage("onInitializeSuccess");
 }
 function onInitializeError () {
-    logMessage("onInitializeError");
+    cast.logMessage("onInitializeError");
 }
 
 
-window.__onGCastApiAvailable = (loaded, errorInfo) => {
-    chrome = window.chrome;
-    logMessage = chrome.cast.logMessage;
+init().then(async bridgeInfo => {
+    if (!bridgeInfo.isVersionCompatible) {
+        console.error("__onGCastApiAvailable error");
+        return;
+    }
 
-    logMessage("__onGCastApiAvailable success");
 
-    const sessionRequest = new chrome.cast.SessionRequest(
-            FX_CAST_RECEIVER_APP_ID);
+    const mirroringAppId = await options.get("mirroringAppId");
+    const sessionRequest = new cast.SessionRequest(mirroringAppId);
 
-    const apiConfig = new chrome.cast.ApiConfig(sessionRequest
+    const apiConfig = new cast.ApiConfig(
+            sessionRequest
           , sessionListener
           , receiverListener
           , undefined, undefined
           , selectedMedia);
 
-    chrome.cast.initialize(apiConfig
+    cast.initialize(apiConfig
           , onInitializeSuccess
           , onInitializeError);
-}
+});

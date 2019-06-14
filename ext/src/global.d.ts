@@ -12,6 +12,33 @@ declare interface Object {
     wrappedJSObject: Object;
 }
 
+declare interface CanvasRenderingContext2D {
+    DRAWWINDOW_DRAW_CARET: 0x01;
+    DRAWWINDOW_DO_NOT_FLUSH: 0x02;
+    DRAWWINDOW_DRAW_VIEW: 0x04;
+    DRAWWINDOW_USE_WIDGET_LAYERS: 0x08;
+    DRAWWINDOW_ASYNC_DECODE_IMAGES: 0x10;
+
+    drawWindow (
+            window: Window
+          , x: number, y: number
+          , w: number, h: number
+          , bgColor: string
+          , flags: number): void;
+}
+
+declare interface HTMLCanvasElement {
+    captureStream (frameRate?: number): MediaStream;
+}
+
+declare interface MediaTrackConstraints {
+    mediaSource: "screen" | "window";
+}
+
+declare interface RTCPeerConnection {
+    addStream (mediaStream: MediaStream): void;
+}
+
 
 interface CloneIntoOptions {
     cloneFunctions?: boolean;

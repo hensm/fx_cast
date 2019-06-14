@@ -427,25 +427,17 @@ browser.menus.onClicked.addListener(async (info, tab) => {
      || info.menuItemId === mediaCastMenuId) {
 
         const { frameId } = info;
-        const mirroringAppId = await options.get("mirroringAppId");
 
         switch (info.menuItemId) {
             case mirrorCastMenuId: {
                 mirrorCastTabId = tab.id;
                 mirrorCastFrameId = frameId;
 
-                // Load cast setup script
-                await browser.tabs.executeScript(tab.id, {
-                    file: "shim/content.js"
-                  , frameId
-                });
-
                 await browser.tabs.executeScript(tab.id, {
                     code: `
-                        var selectedMedia = ${info.pageUrl
+                        window.selectedMedia = ${info.pageUrl
                             ? ReceiverSelectorMediaType.Tab
                             : ReceiverSelectorMediaType.Screen};
-                        var FX_CAST_RECEIVER_APP_ID = "${mirroringAppId}";
                     `
                   , frameId
                 });
@@ -453,12 +445,6 @@ browser.menus.onClicked.addListener(async (info, tab) => {
                 // Load mirroring sender app
                 await browser.tabs.executeScript(tab.id, {
                     file: "senders/mirroringCast.js"
-                  , frameId
-                });
-
-                // Load cast API
-                await browser.tabs.executeScript(tab.id, {
-                    file: "shim/bundle.js"
                   , frameId
                 });
 

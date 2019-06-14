@@ -27,7 +27,7 @@ export function init (): Promise<BridgeInfo> {
                     resolve(bridgeInfo);
                 }
             }
-        })
+        });
     });
 }
 

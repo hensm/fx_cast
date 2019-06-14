@@ -55,10 +55,10 @@ function getLocalAddress () {
 }
 
 
-async function onRequestSessionSuccess (session_: cast.Session) {
+async function onRequestSessionSuccess (newSession: cast.Session) {
     cast.logMessage("onRequestSessionSuccess");
 
-    session = session_;
+    session = newSession;
 
     let mediaUrl = new URL(srcUrl);
     const port = options.localMediaServerPort;
@@ -163,13 +163,16 @@ async function onRequestSessionSuccess (session_: cast.Session) {
           , onLoadMediaSuccess
           , onLoadMediaError);
 }
+
 function onRequestSessionError () {
     cast.logMessage("onRequestSessionError");
 }
 
-function sessionListener (session: cast.Session) {
+
+function sessionListener (newSession: cast.Session) {
     cast.logMessage("sessionListener");
 }
+
 function receiverListener (availability: string) {
     cast.logMessage("receiverListener");
 
@@ -180,12 +183,15 @@ function receiverListener (availability: string) {
     }
 }
 
+
 function onInitializeSuccess () {
     cast.logMessage("onInitializeSuccess");
 }
+
 function onInitializeError () {
     cast.logMessage("onInitializeError");
 }
+
 
 function onLoadMediaSuccess (media: cast.media.Media) {
     cast.logMessage("onLoadMediaSuccess");
@@ -305,38 +311,47 @@ function onLoadMediaSuccess (media: cast.media.Media) {
         });
     }
 }
+
 function onLoadMediaError () {
     cast.logMessage("onLoadMediaError");
 }
+
 
 /* play */
 function onMediaPlaySuccess () {
     cast.logMessage("onMediaPlaySuccess");
 }
+
 function onMediaPlayError (err: cast.Error) {
     cast.logMessage("onMediaPlayError");
 }
+
 
 /* pause */
 function onMediaPauseSuccess () {
     cast.logMessage("onMediaPauseSuccess");
 }
+
 function onMediaPauseError (err: cast.Error) {
     cast.logMessage("onMediaPauseError");
 }
+
 
 /* stop */
 function onMediaStopSuccess () {
     cast.logMessage("onMediaStopSuccess");
 }
+
 function onMediaStopError (err: cast.Error) {
     cast.logMessage("onMediaStopError");
 }
+
 
 /* seek */
 function onMediaSeekSuccess () {
     cast.logMessage("onMediaSeekSuccess");
 }
+
 function onMediaSeekError (err: cast.Error) {
     cast.logMessage("onMediaSeekError");
 }

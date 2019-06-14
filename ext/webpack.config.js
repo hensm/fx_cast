@@ -21,7 +21,7 @@ module.exports = (env) => ({
 
         // Sender apps
       , "senders/mediaCast": `${env.includePath}/senders/mediaCast.ts`
-      , "senders/mirroringCast": `${env.includePath}/senders/mirroringCast.js`
+      , "senders/mirroringCast": `${env.includePath}/senders/mirroringCast.ts`
 
         // Shim entries
       , "shim/bundle": `${env.includePath}/shim/index.ts`

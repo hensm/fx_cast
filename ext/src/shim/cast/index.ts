@@ -26,9 +26,10 @@ import { AutoJoinPolicy
 
 import * as media from "./media";
 
-import { requestSession as requestSessionTimeout } from "../timeout";
-
+import { ReceiverSelectorMediaType }
+        from "../../receiver_selectors/ReceiverSelector";
 import { onMessage, sendMessageResponse } from "../messageBridge";
+import { requestSession as requestSessionTimeout } from "../timeout";
 
 
 type ReceiverActionListener = (
@@ -37,7 +38,7 @@ type ReceiverActionListener = (
 
 type RequestSessionSuccessCallback = (
         session: Session
-      , selectedMedia: string) => void;
+      , selectedMedia: ReceiverSelectorMediaType) => void;
 
 type SuccessCallback = () => void;
 type ErrorCallback = (err: Error_) => void;
@@ -94,6 +95,7 @@ export function initialize (
         errorCallback(new Error_(ErrorCode.INVALID_PARAMETER));
         return;
     }
+
 
     apiConfig = newApiConfig;
 
@@ -209,8 +211,10 @@ onMessage(async message => {
 
             receiverList.push(receiver);
 
-            // Notify listeners of new cast destination
-            apiConfig.receiverListener(ReceiverAvailability.AVAILABLE);
+            if (apiConfig) {
+                // Notify listeners of new cast destination
+                apiConfig.receiverListener(ReceiverAvailability.AVAILABLE);
+            }
 
             break;
         }
@@ -224,8 +228,10 @@ onMessage(async message => {
                     receiver => receiver.id !== message.data.id);
 
             if (receiverList.length === 0) {
-                apiConfig.receiverListener(
-                        ReceiverAvailability.UNAVAILABLE);
+                if (apiConfig) {
+                    apiConfig.receiverListener(
+                            ReceiverAvailability.UNAVAILABLE);
+                }
             }
 
             break;
