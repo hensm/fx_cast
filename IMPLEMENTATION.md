@@ -1,38 +1,35 @@
-# OUTDATED
-
 # Extension Lifetime
+
+A bridge application instance (`statusBridge`) is created to keep track of receivers’ statuses. This is expected to exist throughout the lifetime of the extension and will automatically reconnect if unexpectedly disconnected.
+
+The `shim/contentSetup.ts` content script is registered for all pages. It creates an empty `window.chrome` object in the page context since some sites may expect it to exist. It also intercepts any `src` attribute changes on `<script>` elements where the cast API may be loaded directly from a `chrome-extension://` URL, then sets them to the regular cast API script URL.
 
 ## Shim Initialization
 
-The background script registers a `webRequest.onBeforeRequest` handler that intercepts requests to Google's [Cast SDK library](https://developers.google.com/cast/docs/developers#chrome_sender_api_library).
+The background script registers a `webRequest.onBeforeRequest` listener that intercepts requests to Google’s Cast API library.
 
-When a request is intercepted, the `shim/content.js` script is executed in the content script context. This facilitates message passing across [content/page script isolation](https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/Sharing_objects_with_page_scripts) (the shim itself is executed in the page context since it interacts substantially with page scripts).  
+When a request is intercepted, the `shim/content.ts` script is executed in the content script context. This facilitates any message passing across content/page script isolation (the shim itself is executed in the page context, both for convenience — since it interacts substantially with page scripts — and security reasons).
 
-Messages passed to the shim are custom events of type `__castMessage`. Messages passed back from the shim are custom events of type `__castMessageResponse`. Event listening and creation is handled by the `shim/messageBridge.js` script.
+Messages passed to the shim are custom events of type `__castMessage`. Messages passed back from the shim are custom events of type `__castMessageResponse`. Event listening and creation is handled by the `shim/messageBridge.ts` module.
 
-The request is then redirected to the shim bundle (`shim/index.js`) which creates the `window.chrome.cast` API object.
+The `shim/content.ts` script creates a message port connection (named `shim`) to the background script through which messages from the shim are forwarded. Messages are forwarded to the bridge and other parts of the extension via the background script.  
+The connection triggers the background script to spawn a bridge application instance. The tab/frame ID is stored and used identify shim instances.
 
-The `shim/content.js` script creates a message port connection (named `shim`) to the background script through which messages from the shim (except `popup:/` messages) are forwarded to the background script. The connection triggers the background script to spawn a bridge application instance. The tab/frame ID is stored and used to associate shim instances with popup windows.
+The request is then redirected to the shim bundle (`shim/index.ts`) which creates the `window.chrome.cast` API object.
 
-Messages are forwarded to the bridge and other parts of the extension via the background script (except for popups which make a direct connection to the shim).
-
-The `shim:/initialized` message is sent to the shim and the `window.__onGCastApiAvailable` API callback is called with the availability state (bridge availability/compatibility is passed as the message data).
+The `shim:/initialized` message is sent to the shim and the `window.__onGCastApiAvailable` callback is called with the availability state (bridge availability/compatibility is passed as the message data).
 
 The cast API is now available to the web app.
 
-The web app calls `chrome.cast.initialize` with an `ApiConfig` object containing the Chromecast receiver app ID to use. The shim sends the `bridge:/discover` message to the bridge and triggers network discovery. The bridge sends `shim:/serviceUp` messages for any discovered devices with device info (address, port, label, etc...) which are stored in the `state.receiverList` array.
-
+The web app calls `chrome.cast.initialize` with an `ApiConfig` object containing the Chromecast receiver app ID to use. The shim sends a `main:/shimInitialized` message to the background script. The bridge sends `shim:/serviceUp` messages for any discovered devices with device info (address, port, label, etc…).
 
 ## User Interaction
 
-A user will trigger casting through the web app interface and the app calls `chrome.cast.requestSession`. The shim sends a `main:/openPopup` message to the background script to open the receiver selection popup.
+A user will trigger casting through the web app interface and the app calls `chrome.cast.requestSession`. The shim sends a `main:/selectReceiverBegin` message to the background script to open the receiver selector.
 
-The popup window is created and the ID of the shim is stored as the popup opener (`popupShimId`). The popup script creates a message port connection (named `popup`) to the background script and receives a `popup:/assignShim` message containing the tab/frame ID of the opener shim.
+The receiver selector is opened (popup browser window or native window depending on the receiver type). The receiver selector will handle user input and emit a `selected`, `cancelled`, or `error` event. Depending on the event, the background script will send a `shim:/selectReceiverEnd`, `shim:/selectReceiverCancelled` message to the shim. The `shim:/selectReceiverEnd` message contains info about the selected receiver and media type (`ReceiverSelection`).
 
-The popup creates a message port connection to the shim, sends a `shim:/popupReady` message and receives a `popup:/populateReceiverList` message in response containing the `state.receiverList` and type of session (sender app, media, or screen mirroring).
-
-Once the user selects a receiver device to cast to, the popup sends a `shim:/selectReceiver` message to the shim which then establishes the session.
-
+The shim then makes a connection to the selected receiver device and establishes the session.
 
 ## Shim Implementation
 
