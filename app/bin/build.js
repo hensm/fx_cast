@@ -204,13 +204,13 @@ async function build () {
             .map(fileName => `"${fileName}"`)
             .join(" ");
 
-        const buildCommand = `
+        let buildCommand = `
             swiftc -o "${path.join(BUILD_PATH, selectorExecutableName)}" \
                    ${formattedSourceFiles}`;
 
         // Build with optimizations if packaging
         if (argv.package) {
-            buildCommand += " -0size";
+            buildCommand += " -Osize";
         }
 
         spawnSync(buildCommand, spawnOptions);
@@ -329,7 +329,7 @@ function packageDarwin (
     fs.ensureDirSync(rootManifestPath, { recursive: true });
 
     // Move files to root
-    fs.moveSync(path.join(BUILD_PATH, platformExecutableName)
+    fs.moveSync(path.join(BUILD_PATH, `${platformExecutableName}.temp`)
           , path.join(rootExecutablePath, platformExecutableName));
     fs.moveSync(path.join(BUILD_PATH, manifestName)
           , path.join(rootManifestPath, manifestName));
