@@ -258,14 +258,7 @@ browser.menus.onShown.addListener(info => {
 browser.webRequest.onBeforeRequest.addListener(
         async details => {
             await browser.tabs.executeScript(details.tabId, {
-                code: `window._isFramework = ${
-                        details.url === CAST_FRAMEWORK_LOADER_SCRIPT_URL}`
-              , frameId: details.frameId
-              , runAt: "document_start"
-            });
-
-            await browser.tabs.executeScript(details.tabId, {
-                file: "shim/content.js"
+                file: "shim/contentBridge.js"
               , frameId: details.frameId
               , runAt: "document_start"
             });
@@ -402,7 +395,7 @@ browser.runtime.onMessage.addListener(async message => {
 // Defines window.chrome for site compatibility
 browser.contentScripts.register({
     allFrames: true
-  , js: [{ file: "shim/contentSetup.js" }]
+  , js: [{ file: "shim/content.js" }]
   , matches: [ "<all_urls>" ]
   , runAt: "document_start"
 });

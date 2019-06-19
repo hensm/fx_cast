@@ -28,7 +28,7 @@ import { ActiveInputState
 
 import GoogleCastLauncher from "./GoogleCastLauncher";
 
-import { onMessage } from "../messageBridge";
+import { onMessage } from "../eventMessageChannel";
 
 
 export default {

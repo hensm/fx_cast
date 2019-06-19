@@ -4,7 +4,7 @@ import * as cast from "./cast";
 
 import { BridgeInfo } from "../lib/getBridgeInfo";
 import { Message } from "../types";
-import { onMessage } from "./messageBridge";
+import { onMessage } from "./eventMessageChannel";
 
 
 /**
@@ -18,7 +18,7 @@ export function init (): Promise<BridgeInfo> {
     return new Promise(async (resolve, reject) => {
 
         // Trigger message port setup side-effects
-        import("./content");
+        import("./contentBridge");
 
         onMessage(message => {
             switch (message.subject) {

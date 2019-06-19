@@ -26,7 +26,7 @@ module.exports = (env) => ({
         // Shim entries
       , "shim/bundle": `${env.includePath}/shim/index.ts`
       , "shim/content": `${env.includePath}/shim/content.ts`
-      , "shim/contentSetup": `${env.includePath}/shim/contentSetup.ts`
+      , "shim/contentBridge": `${env.includePath}/shim/contentBridge.ts`
     }
   , output: {
         filename: "[name].js"

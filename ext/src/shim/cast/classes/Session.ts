@@ -18,7 +18,7 @@ import { ErrorCode
 
 import { ListenerObject
        , onMessage
-       , sendMessageResponse } from "../../messageBridge";
+       , sendMessageResponse } from "../../eventMessageChannel";
 
 import { Callbacks
        , CallbacksMap

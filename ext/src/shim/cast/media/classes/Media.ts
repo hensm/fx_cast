@@ -23,7 +23,7 @@ import { PlayerState
 import _Error from "../../classes/Error";
 import { ErrorCode } from "../../enums";
 
-import { onMessage, sendMessageResponse } from "../../../messageBridge";
+import { onMessage, sendMessageResponse } from "../../../eventMessageChannel";
 
 import { Callbacks
        , CallbacksMap

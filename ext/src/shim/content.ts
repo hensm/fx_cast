@@ -1,42 +1,38 @@
 "use strict";
 
-import { Message } from "../types";
-import { onMessageResponse, sendMessage } from "./messageBridge";
-
-import { loadScript } from "../lib/utils";
+import { CAST_LOADER_SCRIPT_URL
+       , CAST_SCRIPT_URLS } from "../endpoints";
 
 
-if ((window as any)._isFramework) {
-    loadScript(browser.runtime.getURL("vendor/webcomponents-lite.js"));
-}
+const _window = (window.wrappedJSObject as any);
+
+_window.chrome = cloneInto({}, window);
+_window.navigator.presentation = cloneInto({}, window);
 
 
-// Message ports
-const backgroundPort = browser.runtime.connect({ name: "shim" });
-let popupPort: browser.runtime.Port;
+/**
+ * Replace the src property setter on <script> elements to
+ * intercept the new value.
+ *
+ * If it matches one of Chrome's cast extension sender script
+ * URLs, replace it with the standard API URL, the request for
+ * which is handled in the main script.
+ */
+const { get, set } = Reflect.getOwnPropertyDescriptor(
+        HTMLScriptElement.prototype.wrappedJSObject, "src");
 
+Reflect.defineProperty(
+        HTMLScriptElement.prototype.wrappedJSObject, "src", {
 
-// Set popupPort once it connects
-browser.runtime.onConnect.addListener(port => {
-    if (port.name === "popup") {
-        popupPort = port;
-    }
+    configurable: true
+  , enumerable: true
+  , get
 
-    port.onMessage.addListener(sendMessage);
-});
-
-// Forward background messages to shim
-backgroundPort.onMessage.addListener(sendMessage);
-
-// Forward shim messages to popup and background script
-onMessageResponse((message: Message) => {
-    const [ destination ] = message.subject.split(":/");
-
-    if (destination === "popup") {
-        if (popupPort) {
-            popupPort.postMessage(message);
+  , set: exportFunction(function (value) {
+        if (CAST_SCRIPT_URLS.includes(value)) {
+            return set.call(this, CAST_LOADER_SCRIPT_URL);
         }
-    } else {
-        backgroundPort.postMessage(message);
-    }
+
+        return set.call(this, value);
+    }, window)
 });

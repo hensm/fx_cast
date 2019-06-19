@@ -2,13 +2,13 @@
 
 A bridge application instance (`statusBridge`) is created to keep track of receivers’ statuses. This is expected to exist throughout the lifetime of the extension and will automatically reconnect if unexpectedly disconnected.
 
-The `shim/contentSetup.ts` content script is registered for all pages. It creates an empty `window.chrome` object in the page context since some sites may expect it to exist. It also intercepts any `src` attribute changes on `<script>` elements where the cast API may be loaded directly from a `chrome-extension://` URL, then sets them to the regular cast API script URL.
+The `shim/content.ts` content script is registered for all pages. It creates an empty `window.chrome` object in the page context since some sites may expect it to exist. It also intercepts any `src` attribute changes on `<script>` elements where the cast API may be loaded directly from a `chrome-extension://` URL, then sets them to the regular cast API script URL.
 
 ## Shim Initialization
 
 The background script registers a `webRequest.onBeforeRequest` listener that intercepts requests to Google’s Cast API library.
 
-When a request is intercepted, the `shim/content.ts` script is executed in the content script context. This facilitates any message passing across content/page script isolation (the shim itself is executed in the page context, both for convenience — since it interacts substantially with page scripts — and security reasons).
+When a request is intercepted, the `shim/contentBridge.ts` script is executed in the content script context. This facilitates any message passing across content/page script isolation (the shim itself is executed in the page context, both for convenience — since it interacts substantially with page scripts — and security reasons).
 
 Messages passed to the shim are custom events of type `__castMessage`. Messages passed back from the shim are custom events of type `__castMessageResponse`. Event listening and creation is handled by the `shim/messageBridge.ts` module.
 
@@ -22,6 +22,12 @@ The `shim:/initialized` message is sent to the shim and the `window.__onGCastApi
 The cast API is now available to the web app.
 
 The web app calls `chrome.cast.initialize` with an `ApiConfig` object containing the Chromecast receiver app ID to use. The shim sends a `main:/shimInitialized` message to the background script. The bridge sends `shim:/serviceUp` messages for any discovered devices with device info (address, port, label, etc…).
+
+### Extension Sender Apps
+
+The initialization for built-in sender apps (media/mirroring) works slightly differently. They run in the content script context and import the shim, rather than running in the page script context.
+
+The exported shim comes from `shim/export.ts`. Instead of setting the `window.__onGCastApiAvailable` callback, the module provides an init function which returns a promise. The `shim/contentBridge.ts` script is executed from that module and the initialization process is identical until the `shim:/initialized` message is received, at which point the promise is resolved.
 
 ## User Interaction
 
