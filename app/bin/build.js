@@ -184,7 +184,7 @@ async function build () {
      * With the BUILD_PATH/bridge dir, cannot build to
      * BUILD_PATH/bridge file.
      */
-    const tempExecutableName = `${executableName[argv.platform]}.temp`;
+    const tempExecutableName = `_${executableName[argv.platform]}`;
 
     // Run pkg to create a single executable
     await pkg.exec([
@@ -329,7 +329,7 @@ function packageDarwin (
     fs.ensureDirSync(rootManifestPath, { recursive: true });
 
     // Move files to root
-    fs.moveSync(path.join(BUILD_PATH, `${platformExecutableName}.temp`)
+    fs.moveSync(path.join(BUILD_PATH, `_${platformExecutableName}`)
           , path.join(rootExecutablePath, platformExecutableName));
     fs.moveSync(path.join(BUILD_PATH, manifestName)
           , path.join(rootManifestPath, manifestName));
