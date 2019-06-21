@@ -105,16 +105,15 @@
                                     </p>
                                     <p>
                                         It's possible that this functionality will be re-exposed to extensions, in which case the bridge will be made redundant:
-
-                                        <ul>
-                                            <li>
-                                                <a href="https://bugzilla.mozilla.org/show_bug.cgi?id=1247628">bug 1247628 — Enable "TCP and UDP Socket API" for WebExtensions</a>
-                                            </li>
-                                            <li>
-                                                <a href="https://bugzilla.mozilla.org/show_bug.cgi?id=1461830">bug 1461830 — [experimental api] mDNS APIs for IoT and p2p extensions</a>
-                                            </li>
-                                        </ul>
                                     </p>
+                                    <ul>
+                                        <li>
+                                            <a href="https://bugzilla.mozilla.org/show_bug.cgi?id=1247628">bug 1247628 — Enable "TCP and UDP Socket API" for WebExtensions</a>
+                                        </li>
+                                        <li>
+                                            <a href="https://bugzilla.mozilla.org/show_bug.cgi?id=1461830">bug 1461830 — [experimental api] mDNS APIs for IoT and p2p extensions</a>
+                                        </li>
+                                    </ul>
                                 </div>
                             </details>
                         </li>
@@ -122,67 +121,63 @@
                             <details class="faq card">
                                 <summary class="faq__summary">How do I completely remove the bridge?</summary>
                                 <div class="faq__content">
-                                    <p>
-                                        <ul>
-                                            <li>
-                                                <h3>Windows</h3>
-                                                <p>
-                                                    Removing the bridge on Windows should be as easy as running the uninstaller (<code>C:\Program Files\fx_cast\uninstaller.exe</code>) found in the control panel or settings application.
-                                                </p>
-                                                <p>
-                                                    To manually uninstall, remove the following files/folders and registry keys:
-
-                                                    <ul>
-                                                        <li>
-                                                            <code>C:\Program Files\fx_cast\</code>
-                                                        </li>
-        
-                                                        <li>
-                                                            <code>HKLM\Software\Mozilla\NativeMessagingHosts\fx_cast_bridge</code>
-                                                        </li>
-                                                        <li>
-                                                            <code>HKLM\Software\Microsoft\Windows\CurrentVersion\Uninstall\fx_cast_bridge</code>
-                                                        </li>
-                                                    </ul>
-                                                </p>
-                                            </li>
-                                            <li>
-                                                <h3>macOS</h3>
-                                                <p>
-                                                    Remove the following files/folders:
-                                                    <ul>
-                                                        <li>
-                                                            <code>/Library/Application Support/fx_cast/</code>
-                                                        </li>
-                                                        <li>
-                                                            <code>/Library/Application Support/Mozilla/NativeMessagingHosts/fx_cast_bridge.json</code>
-                                                        </li>
-                                                    </ul>
-                                                </p>
-                                            </li>
-                                            <li>
-                                                <h3>Linux</h3>
-                                                <p>
-                                                    On Debian-based systems, remove the <code>fx-cast-bridge</code> package, otherwise remove the <code>fx_cast_bridge</code> package.
-                                                </p>
-                                                <p>
-                                                    To manually uninstall, remove the following files/folders:
-
-                                                    <ul>
-                                                        <li>
-                                                            <code>/opt/fx_cast/</code>
-                                                        </li>
-                                                        <li>
-                                                            <code>/usr/lib/mozilla/native-messaging-hosts/fx_cast_bridge.json</code> OR
-                                                        </li>
-                                                        <li>
-                                                            <code>/usr/lib64/mozilla/native-messaging-hosts/fx_cast_bridge.json</code>
-                                                        </li>
-                                                    </ul>
-                                                </p>
-                                            </li>
-                                        </ul>
-                                    </p>
+                                    <ul>
+                                        <li>
+                                            <h3>Windows</h3>
+                                            <p>
+                                                Removing the bridge on Windows should be as easy as running the uninstaller (<code>C:\Program Files\fx_cast\uninstaller.exe</code>) found in the control panel or settings application.
+                                            </p>
+                                            <p>
+                                                To manually uninstall, remove the following files/folders and registry keys:
+                                            </p>
+                                            <ul>
+                                                <li>
+                                                    <code>C:\Program Files\fx_cast\</code>
+                                                </li>
+                                            
+                                                <li>
+                                                    <code>HKLM\Software\Mozilla\NativeMessagingHosts\fx_cast_bridge</code>
+                                                </li>
+                                                <li>
+                                                    <code>HKLM\Software\Microsoft\Windows\CurrentVersion\Uninstall\fx_cast_bridge</code>
+                                                </li>
+                                            </ul>
+                                        </li>
+                                        <li>
+                                            <h3>macOS</h3>
+                                            <p>
+                                                Remove the following files/folders:
+                                            </p>
+                                            <ul>
+                                                <li>
+                                                    <code>/Library/Application Support/fx_cast/</code>
+                                                </li>
+                                                <li>
+                                                    <code>/Library/Application Support/Mozilla/NativeMessagingHosts/fx_cast_bridge.json</code>
+                                                </li>
+                                            </ul>
+                                        </li>
+                                        <li>
+                                            <h3>Linux</h3>
+                                            <p>
+                                                On Debian-based systems, remove the <code>fx-cast-bridge</code> package, otherwise remove the <code>fx_cast_bridge</code> package.
+                                            </p>
+                                            <p>
+                                                To manually uninstall, remove the following files/folders:
+                                            </p>
+                                            <ul>
+                                                <li>
+                                                    <code>/opt/fx_cast/</code>
+                                                </li>
+                                                <li>
+                                                    <code>/usr/lib/mozilla/native-messaging-hosts/fx_cast_bridge.json</code> OR
+                                                </li>
+                                                <li>
+                                                    <code>/usr/lib64/mozilla/native-messaging-hosts/fx_cast_bridge.json</code>
+                                                </li>
+                                            </ul>
+                                        </li>
+                                    </ul>
                                 </div>
                             </details>
                         </li>
@@ -192,16 +187,15 @@
                                 <div class="faq__content">
                                     <p>
                                         API limitations. There's no method of obtaining the audio streams. Merging of audio streams from remote media is also not possible due to cross-origin issues.
-
-                                        <ul>
-                                            <li>
-                                                <a href="https://bugzilla.mozilla.org/show_bug.cgi?id=1391223">bug 1391223 — Implement tabCapture API</a>
-                                            </li>
-                                            <li>
-                                                <a href="https://bugzilla.mozilla.org/show_bug.cgi?id=1541425">bug 1541425 — Implement audio capture for getDisplayMedia</a>
-                                            </li>
-                                        </ul>
                                     </p>
+                                    <ul>
+                                        <li>
+                                            <a href="https://bugzilla.mozilla.org/show_bug.cgi?id=1391223">bug 1391223 — Implement tabCapture API</a>
+                                        </li>
+                                        <li>
+                                            <a href="https://bugzilla.mozilla.org/show_bug.cgi?id=1541425">bug 1541425 — Implement audio capture for getDisplayMedia</a>
+                                        </li>
+                                    </ul>
                                 </div>
                             </details>
                         </li>
