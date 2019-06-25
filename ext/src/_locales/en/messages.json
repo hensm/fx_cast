@@ -166,20 +166,8 @@
    }
   , "optionsBridgeUpdateAvailable": {
         "message": "An update is available:"
-      , "description": "Update status an update was found."
+      , "description": "Update status if an update was found."
    }
-  , "optionsBridgeUpdatePackageTypeSelect": {
-        "message": "Select package type"
-      , "description": "Placeholder <select> value for Linux package type selection."
-    }
-  , "optionsBridgeUpdatePackageTypeDeb": {
-        "message": ".deb (Debian/Ubuntu)"
-      , "description": "Linux .deb package type <option> text"
-    }
-  , "optionsBridgeUpdatePackageTypeRpm": {
-        "message": ".rpm (Fedora)"
-      , "description": "Linux .rpm package type <option> text"
-    }
   , "optionsBridgeUpdate": {
         "message": "Update Now..."
       , "description": "Update now button title. Ellipsis indicates additional information as it triggers an update window popup."
@@ -302,31 +290,5 @@
   , "optionsSaved": {
         "message": "Saved!"
       , "description": "Status text displayed by save button once options have been successfully saved."
-    }
-
-
-  , "updaterCancel": {
-        "message": "Cancel"
-      , "description": "Updater cancel update download button title."
-    }
-  , "updaterDescriptionDownloading": {
-        "message": "Downloading..."
-      , "description": "Updater status downloading title text."
-    }
-  , "updaterAdditionalDescriptionDownloading": {
-        "message": "Fetching update package"
-      , "description": "Updater status downloading description text."
-    }
-  , "updaterDescriptionInstallReady": {
-        "message": "Ready to install"
-      , "description": "Updater status ready to install title text."
-    }
-  , "updaterAdditionalDescriptionInstallReady": {
-        "message": "The install package has been downloaded to your default downloads location."
-      , "description": "Updater status ready to install description text."
-    }
-  , "updaterInstall": {
-        "message": "Install..."
-      , "description": "Updater install button title. Ellipsis indicates additional information as it triggers the some native UI for installing the package."
     }
 }

@@ -81,15 +81,6 @@
   , "optionsBridgeUpdateAvailable": {
         "message": "Er is een update beschikbaar:"
    }
-  , "optionsBridgeUpdatePackageTypeSelect": {
-        "message": "Kies het soort pakket"
-    }
-  , "optionsBridgeUpdatePackageTypeDeb": {
-        "message": ".deb (Debian/Ubuntu)"
-    }
-  , "optionsBridgeUpdatePackageTypeRpm": {
-        "message": ".rpm (Fedora)"
-    }
   , "optionsBridgeUpdate": {
         "message": "Nu bijwerken..."
     }
@@ -178,25 +169,5 @@
     }
   , "optionsSaved": {
         "message": "Opgeslagen!"
-    }
-
-
-  , "updaterCancel": {
-        "message": "Annuleren"
-    }
-  , "updaterDescriptionDownloading": {
-        "message": "Bezig met downloaden..."
-    }
-  , "updaterAdditionalDescriptionDownloading": {
-        "message": "Bezig met ophalen van updatepakket"
-    }
-  , "updaterDescriptionInstallReady": {
-        "message": "Klaar voor installatie"
-    }
-  , "updaterAdditionalDescriptionInstallReady": {
-        "message": "Het installatiepakket is opgeslagen in je standaard downloadmap."
-    }
-  , "updaterInstall": {
-        "message": "Installeren..."
     }
 }
