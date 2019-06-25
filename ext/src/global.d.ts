@@ -1,7 +1,4 @@
 // Define replacement types
-declare const EXTENSION_NAME: string;
-declare const EXTENSION_ID: string;
-declare const EXTENSION_VERSION: string;
 declare const MIRRORING_APP_ID: string;
 declare const APPLICATION_NAME: string;
 declare const APPLICATION_VERSION: string;

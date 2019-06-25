@@ -33,10 +33,7 @@ module.exports = (env) => ({
     }
   , plugins: [
         new webpack.DefinePlugin({
-            "EXTENSION_NAME": JSON.stringify(env.extensionName)
-          , "EXTENSION_ID": JSON.stringify(env.extensionId)
-          , "EXTENSION_VERSION": JSON.stringify(env.extensionVersion)
-          , "MIRRORING_APP_ID": JSON.stringify(env.mirroringAppId)
+            "MIRRORING_APP_ID": JSON.stringify(env.mirroringAppId)
           , "APPLICATION_NAME": JSON.stringify(env.applicationName)
           , "APPLICATION_VERSION": JSON.stringify(env.applicationVersion)
         })
@@ -54,9 +51,6 @@ module.exports = (env) => ({
                             .replace("EXTENSION_NAME", env.extensionName)
                             .replace("EXTENSION_ID", env.extensionId)
                             .replace("EXTENSION_VERSION", env.extensionVersion)
-                            .replace("MIRRORING_APP_ID", env.mirroringAppId)
-                            .replace("APPLICATION_NAME", env.applicationName)
-                            .replace("APPLICATION_VERSION", env.applicationVersion)
                             .replace("CONTENT_SECURITY_POLICY", env.contentSecurityPolicy)
                             .replace("AUTHOR", env.author)
                             .replace("AUTHOR_HOMEPAGE", env.authorHomepage));
