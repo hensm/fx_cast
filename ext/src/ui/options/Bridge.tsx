@@ -112,7 +112,6 @@ interface BridgeState {
     wasErrorCheckingUpdates: boolean;
     checkUpdatesEllipsis: string;
     updateStatus: string;
-    packageType: string;
 }
 
 export default class Bridge extends Component<BridgeProps, BridgeState> {
@@ -128,14 +127,12 @@ export default class Bridge extends Component<BridgeProps, BridgeState> {
           , wasErrorCheckingUpdates: false
           , checkUpdatesEllipsis: "..."
           , updateStatus: null
-          , packageType: null
         };
 
         this.onCheckUpdates = this.onCheckUpdates.bind(this);
         this.onCheckUpdatesResponse = this.onCheckUpdatesResponse.bind(this);
         this.onCheckUpdatesError = this.onCheckUpdatesError.bind(this);
         this.onUpdate = this.onUpdate.bind(this);
-        this.onPackageTypeChange = this.onPackageTypeChange.bind(this);
     }
 
     public render () {
@@ -156,24 +153,8 @@ export default class Bridge extends Component<BridgeProps, BridgeState> {
                                         { _("optionsBridgeUpdateAvailable") }
                                     </p>
                                     <div className="bridge__update-options">
-                                        { this.props.platform === "linux" &&
-                                            <select className="bridge__update-package-type"
-                                                    onChange={ this.onPackageTypeChange }
-                                                    value={ this.state.packageType }>
-                                                <option value="" disabled selected>
-                                                    { _("optionsBridgeUpdatePackageTypeSelect") }
-                                                </option>
-                                                <option value="deb">
-                                                    { _("optionsBridgeUpdatePackageTypeDeb") }
-                                                </option>
-                                                <option value="rpm">
-                                                    { _("optionsBridgeUpdatePackageTypeRpm") }
-                                                </option>
-                                            </select> }
                                         <button className="bridge__update-start"
-                                                onClick={ this.onUpdate }
-                                                disabled={ this.props.platform === "linux"
-                                                        && !this.state.packageType }>
+                                                onClick={ this.onUpdate }>
                                             { _("optionsBridgeUpdate") }
                                         </button>
                                     </div>
@@ -264,65 +245,9 @@ export default class Bridge extends Component<BridgeProps, BridgeState> {
             .catch(this.onCheckUpdatesError);
     }
 
-    private showUpdateStatus () {
-        if (this.updateStatusTimeout) {
-            window.clearTimeout(this.updateStatusTimeout);
-        }
-        this.updateStatusTimeout = window.setTimeout(() => {
-            this.setState({
-                updateStatus: null
-            });
-        }, 1500);
-    }
-
-    private async onUpdate () {
-        // Current window to base centered position on
-        const win = await browser.windows.getCurrent();
-        const centeredProps = getWindowCenteredProps(win, 400, 150);
-
-        const updaterPopup = await browser.windows.create({
-            url: "../updater/index.html"
-          , type: "popup"
-          , ...centeredProps
-        });
-
-        // Size/position not set correctly on creation (bug?)
-        await browser.windows.update(updaterPopup.id, {
-            ...centeredProps
-        });
-
-        browser.runtime.onConnect.addListener(port => {
-            if (port.name === "updater") {
-                const asset = this.updateData.assets.find((currentAsset: any) => {
-                    const fileExtension = currentAsset.name.match(/.*\.(.*)$/).pop();
-                    const currentPlatform = (this.props.platform === "linux")
-                        ? this.state.packageType
-                        : this.props.platform;
-
-                    switch (fileExtension) {
-                        case "exe": return "win" === currentPlatform;
-                        case "pkg": return "mac" === currentPlatform;
-                        case "deb": return "deb" === currentPlatform;
-                        case "rpm": return "rpm" === currentPlatform;
-                    }
-                });
-
-                port.postMessage({
-                    subject: "updater:/updateData"
-                  , data: asset
-                });
-
-                port.onDisconnect.addListener(() => {
-                    browser.windows.remove(updaterPopup.id);
-                });
-            }
-        });
-    }
-
-
     private async onCheckUpdatesResponse (res: any) {
-        const isUpdateAvailable = !this.props.info || semver.lt(
-                this.props.info.version, res.tag_name);
+        const isUpdateAvailable = !this.props.info ||
+                semver.lt(this.props.info.version, res.tag_name);
 
         if (isUpdateAvailable) {
             this.updateData = res;
@@ -349,9 +274,23 @@ export default class Bridge extends Component<BridgeProps, BridgeState> {
         this.showUpdateStatus();
     }
 
-    private onPackageTypeChange (ev: React.ChangeEvent<HTMLSelectElement>) {
-        this.setState({
-            packageType: ev.target.value
-        });
+    private showUpdateStatus () {
+        if (this.updateStatusTimeout) {
+            window.clearTimeout(this.updateStatusTimeout);
+        }
+        this.updateStatusTimeout = window.setTimeout(() => {
+            this.setState({
+                updateStatus: null
+            });
+        }, 1500);
+    }
+
+    private async onUpdate () {
+        // Open downloads page
+        if (this.updateData.html_url) {
+            browser.tabs.create({
+                url: this.updateData.html_url
+            });
+        }
     }
 }

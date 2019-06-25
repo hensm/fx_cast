@@ -17,7 +17,6 @@ module.exports = (env) => ({
         // UI
       , "ui/popup/bundle": `${env.includePath}/ui/popup/index.tsx`
       , "ui/options/bundle": `${env.includePath}/ui/options/index.tsx`
-      , "ui/updater/bundle": `${env.includePath}/ui/updater/index.tsx`
 
         // Sender apps
       , "senders/mediaCast": `${env.includePath}/senders/mediaCast.ts`
