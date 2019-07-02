@@ -258,6 +258,15 @@ browser.menus.onShown.addListener(info => {
 browser.webRequest.onBeforeRequest.addListener(
         async details => {
             await browser.tabs.executeScript(details.tabId, {
+                code: `
+                    window.isFramework = ${
+                        details.url === CAST_FRAMEWORK_LOADER_SCRIPT_URL};
+                `
+              , frameId: details.frameId
+              , runAt: "document_start"
+            });
+
+            await browser.tabs.executeScript(details.tabId, {
                 file: "shim/contentBridge.js"
               , frameId: details.frameId
               , runAt: "document_start"

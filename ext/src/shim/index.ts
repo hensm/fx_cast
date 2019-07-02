@@ -47,12 +47,6 @@ if (document.currentScript) {
 
         isFramework = true;
 
-        /**
-         * Framework API library requires webcomponents for the cast
-         * button custom element (<google-cast-launcher>).
-         */
-        loadScript(browser.runtime.getURL("vendor/webcomponents-lite.js"));
-
         const script = loadScript(CAST_FRAMEWORK_SCRIPT_URL);
         script.addEventListener("load", ev => {
             callPageReadyFunction();
