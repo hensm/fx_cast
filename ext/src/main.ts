@@ -450,6 +450,7 @@ browser.menus.onClicked.addListener(async (info, tab) => {
                 await loadMirrorCastSender(tab.id, frameId, info.pageUrl
                     ? ReceiverSelectorMediaType.Tab
                     : ReceiverSelectorMediaType.Screen);
+                break;
             }
 
             case mediaCastMenuId: {

@@ -12,128 +12,138 @@ const { selectedMedia }
     : { selectedMedia: ReceiverSelectorMediaType } = (window as any);
 
 
-const FX_CAST_NAMESPACE = "urn:x-cast:fx_cast";
+const FX_CAST_RECEIVER_APP_NAMESPACE = "urn:x-cast:fx_cast";
+
 
 let session: cast.Session;
-let sessionRequested = false;
+let wasSessionRequested = false;
 
-let pc: RTCPeerConnection;
-
-
-const canvas = document.createElement("canvas");
-const ctx = canvas.getContext("2d");
-
-function size_canvas (
-        width = window.innerWidth
-      , height = window.innerHeight) {
-
-    canvas.width = width;
-    canvas.height = height;
-}
-
- // Set initial size
-size_canvas();
-
-// Resize canvas whenever the window resizes
-window.addEventListener("resize", () => {
-    size_canvas();
-});
-
-let interval;
+let peerConnection: RTCPeerConnection;
+let drawWindowIntervalId: number;
 
 
-function sendMessage (subject: string, data: any) {
-    session.sendMessage(FX_CAST_NAMESPACE, {
+/**
+ * Sends a message to the fx_cast app running on the
+ * receiver device.
+ */
+function sendAppMessage (subject: string, data: any) {
+    session.sendMessage(FX_CAST_RECEIVER_APP_NAMESPACE, {
         subject
       , data
     }, null, null);
 }
 
+
 window.addEventListener("beforeunload", () => {
-    sendMessage("close", null);
+    sendAppMessage("close", null);
 });
 
 
 async function onRequestSessionSuccess (
-        // tslint:disable-next-line:variable-name
-        session_: cast.Session
+        newSession: cast.Session
       , newSelectedMedia: ReceiverSelectorMediaType) {
 
     cast.logMessage("onRequestSessionSuccess");
 
-    session = session_;
-
-    session.addMessageListener(FX_CAST_NAMESPACE
+    session = newSession;
+    session.addMessageListener(FX_CAST_RECEIVER_APP_NAMESPACE
           , async (namespace, message) => {
 
         const { subject, data } = JSON.parse(message);
 
         switch (subject) {
-            case "peerConnectionAnswer":
-                pc.setRemoteDescription(data);
+            case "peerConnectionAnswer": {
+                peerConnection.setRemoteDescription(data);
                 break;
-
-            case "iceCandidate":
-                pc.addIceCandidate(data);
+            }
+            case "iceCandidate": {
+                peerConnection.addIceCandidate(data);
                 break;
+            }
         }
     });
 
-    pc = new RTCPeerConnection();
-    pc.addEventListener("icecandidate", (ev) => {
-        sendMessage("iceCandidate", ev.candidate);
+    peerConnection = new RTCPeerConnection();
+    peerConnection.addEventListener("icecandidate", (ev) => {
+        sendAppMessage("iceCandidate", ev.candidate);
     });
 
     switch (newSelectedMedia) {
         case ReceiverSelectorMediaType.Tab: {
-            interval = setInterval(() => {
+
+            const canvas = document.createElement("canvas");
+            const ctx = canvas.getContext("2d");
+
+            // Set initial size
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+
+            // Resize canvas whenever the window resizes
+            window.addEventListener("resize", () => {
+                canvas.width = window.innerWidth;
+                canvas.height = window.innerHeight;
+            });
+
+            // TODO: Test performance
+            const drawFlags =
+                    ctx.DRAWWINDOW_DRAW_CARET
+                  | ctx.DRAWWINDOW_DRAW_VIEW
+                  | ctx.DRAWWINDOW_ASYNC_DECODE_IMAGES;
+
+            /**
+             * Clears the canvas and draws the window. Called repeatedly,
+             * currently at 30FPS rate because performance is quite poor.
+             */
+            function drawWindow () {
                 ctx.clearRect(0, 0, canvas.width, canvas.height);
                 ctx.drawWindow(
-                        window                     // window
-                      , 0                          // x
-                      , 0                          // y
-                      , window.innerWidth          // w
-                      , window.innerHeight         // h
-                      , "white"                    // bgColor
-                      , ctx.DRAWWINDOW_DRAW_VIEW); // flags
-            }, 1000 / 30);
+                        window        // window
+                      , 0, 0          // x, y
+                      , canvas.width  // w
+                      , canvas.height // h
+                      , "white"       // bgColor
+                      , drawFlags);   // flags
+            }
 
-            pc.addStream(canvas.captureStream());
+
+            drawWindowIntervalId = window.setInterval(drawWindow, 1000 / 30);
+
+            /**
+             * Capture video stream from canvas and feed into the RTC
+             * connection.
+             */
+            peerConnection.addStream(canvas.captureStream());
 
             break;
         }
 
         case ReceiverSelectorMediaType.Screen: {
+
             const stream = await navigator.mediaDevices.getUserMedia({
                 video: { mediaSource: "screen" }
             });
 
-            pc.addStream(stream);
+            peerConnection.addStream(stream);
 
             break;
         }
     }
 
-    const desc = await pc.createOffer();
-    await pc.setLocalDescription(desc);
+    // Create SDP offer and set locally
+    const offer = await peerConnection.createOffer();
+    await peerConnection.setLocalDescription(offer);
 
-    sendMessage("peerConnectionOffer", desc);
+    // Send local offer to receiver app
+    sendAppMessage("peerConnectionOffer", offer);
 }
 
-function onRequestSessionError () {
-    cast.logMessage("onRequestSessionError");
-}
 
-
-function sessionListener (newSession: cast.Session) {
-    cast.logMessage("sessionListener");
-}
 function receiverListener (availability: string) {
     cast.logMessage("receiverListener");
 
-    if (!sessionRequested
+    if (!wasSessionRequested
             && availability === cast.ReceiverAvailability.AVAILABLE) {
-        sessionRequested = true;
+        wasSessionRequested = true;
         cast.requestSession(
                 onRequestSessionSuccess
               , onRequestSessionError);
@@ -141,6 +151,12 @@ function receiverListener (availability: string) {
 }
 
 
+function onRequestSessionError () {
+    cast.logMessage("onRequestSessionError");
+}
+function sessionListener () {
+    cast.logMessage("sessionListener");
+}
 function onInitializeSuccess () {
     cast.logMessage("onInitializeSuccess");
 }
