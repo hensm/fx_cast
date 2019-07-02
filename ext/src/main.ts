@@ -417,6 +417,28 @@ let mirrorCastTabId: number;
 let mirrorCastFrameId: number;
 
 
+async function loadMirrorCastSender (
+        tabId: number
+      , frameId: number
+      , selectedMedia: ReceiverSelectorMediaType) {
+
+    mirrorCastTabId = tabId;
+    mirrorCastFrameId = frameId;
+
+    await browser.tabs.executeScript(tabId, {
+        code: `
+            window.selectedMedia = ${selectedMedia};
+        `
+      , frameId
+    });
+
+    await browser.tabs.executeScript(tabId, {
+        file: "senders/mirroringCast.js"
+      , frameId
+    });
+}
+
+
 browser.menus.onClicked.addListener(async (info, tab) => {
     if (info.menuItemId === mirrorCastMenuId
      || info.menuItemId === mediaCastMenuId) {
@@ -425,25 +447,9 @@ browser.menus.onClicked.addListener(async (info, tab) => {
 
         switch (info.menuItemId) {
             case mirrorCastMenuId: {
-                mirrorCastTabId = tab.id;
-                mirrorCastFrameId = frameId;
-
-                await browser.tabs.executeScript(tab.id, {
-                    code: `
-                        window.selectedMedia = ${info.pageUrl
-                            ? ReceiverSelectorMediaType.Tab
-                            : ReceiverSelectorMediaType.Screen};
-                    `
-                  , frameId
-                });
-
-                // Load mirroring sender app
-                await browser.tabs.executeScript(tab.id, {
-                    file: "senders/mirroringCast.js"
-                  , frameId
-                });
-
-                break;
+                await loadMirrorCastSender(tab.id, frameId, info.pageUrl
+                    ? ReceiverSelectorMediaType.Tab
+                    : ReceiverSelectorMediaType.Screen);
             }
 
             case mediaCastMenuId: {
@@ -621,6 +627,16 @@ async function onConnectShim (port: browser.runtime.Port) {
         return;
     }
 
+    const tabId = port.sender.tab.id;
+    const frameId = port.sender.frameId;
+    const shimId = `${tabId}:${frameId}`;
+
+    // Disconnect existing shim
+    if (shimMap.has(shimId)) {
+        shimMap.get(shimId).port.disconnect();
+        shimMap.delete(shimId);
+    }
+
 
     const { os } = await browser.runtime.getPlatformInfo();
 
@@ -628,8 +644,37 @@ async function onConnectShim (port: browser.runtime.Port) {
         ? ReceiverSelectorType.NativeMac
         : ReceiverSelectorType.Popup);
 
+
+    // Media type for initial opener sender
+    let openerMediaType: ReceiverSelectorMediaType;
+
     function onReceiverSelectorSelected (
             ev: ReceiverSelectorSelectedEvent) {
+
+        /**
+         * If the media type returned from the selector has been
+         * changed, we need to cancel the current sender and switch
+         * it out for the right one.
+         *
+         * TODO: Seamlessly connect selector to the new sender
+         */
+        if (ev.detail.mediaType !== openerMediaType) {
+            onReceiverSelectorCancelled();
+
+            switch (ev.detail.mediaType) {
+                case ReceiverSelectorMediaType.App: {
+                    // TODO: Keep track of page apps
+                    break;
+                }
+
+                case ReceiverSelectorMediaType.Screen:
+                case ReceiverSelectorMediaType.Tab: {
+                    loadMirrorCastSender(tabId, frameId, ev.detail.mediaType);
+                    break;
+                }
+            }
+        }
+
 
         port.postMessage({
             subject: "shim:/selectReceiverEnd"
@@ -665,17 +710,6 @@ async function onConnectShim (port: browser.runtime.Port) {
         receiverSelector.removeEventListener("error"
               , onReceiverSelectorError);
     });
-
-
-    const tabId = port.sender.tab.id;
-    const frameId = port.sender.frameId;
-    const shimId = `${tabId}:${frameId}`;
-
-    // Disconnect existing shim
-    if (shimMap.has(shimId)) {
-        shimMap.get(shimId).port.disconnect();
-        shimMap.delete(shimId);
-    }
 
 
     const applicationName = await options.get("bridgeApplicationName");
@@ -744,9 +778,10 @@ async function onConnectShim (port: browser.runtime.Port) {
             }
 
             case "main:/selectReceiverBegin": {
+                openerMediaType = message.data.defaultMediaType;
                 receiverSelector.open(
                         Array.from(statusBridgeReceivers.values())
-                      , message.data.defaultMediaType);
+                      , openerMediaType);
                 break;
             }
 
