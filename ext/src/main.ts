@@ -674,6 +674,8 @@ async function onConnectShim (port: browser.runtime.Port) {
                     break;
                 }
             }
+
+            return;
         }
 
 
