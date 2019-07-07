@@ -646,8 +646,39 @@ async function onConnectShim (port: browser.runtime.Port) {
         : ReceiverSelectorType.Popup);
 
 
+    // Media type for initial opener sender
+    let openerMediaType: ReceiverSelectorMediaType;
+
     function onReceiverSelectorSelected (
             ev: ReceiverSelectorSelectedEvent) {
+
+        /**
+         * If the media type returned from the selector has been
+         * changed, we need to cancel the current sender and switch
+         * it out for the right one.
+         *
+         * TODO: Seamlessly connect selector to the new sender
+         */
+        if (ev.detail.mediaType !== openerMediaType) {
+            onReceiverSelectorCancelled();
+
+            switch (ev.detail.mediaType) {
+                case ReceiverSelectorMediaType.App: {
+                    // TODO: Keep track of page apps
+                    break;
+                }
+
+                case ReceiverSelectorMediaType.Screen:
+                case ReceiverSelectorMediaType.Tab: {
+                    loadMirrorCastSender(tabId, frameId, ev.detail.mediaType);
+                    break;
+                }
+            }
+
+            return;
+        }
+
+
         port.postMessage({
             subject: "shim:/selectReceiverEnd"
           , data: ev.detail
@@ -750,10 +781,13 @@ async function onConnectShim (port: browser.runtime.Port) {
             }
 
             case "main:/selectReceiverBegin": {
+                openerMediaType = message.data.defaultMediaType;
+
                 receiverSelector.open(
                         Array.from(statusBridgeReceivers.values())
-                      , message.data.defaultMediaType
+                      , openerMediaType
                       , message.data.availableMediaTypes);
+
                 break;
             }
 
