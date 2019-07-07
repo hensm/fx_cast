@@ -119,8 +119,9 @@ async function onRequestSessionSuccess (
 
         case ReceiverSelectorMediaType.Screen: {
 
-            const stream = await navigator.mediaDevices.getUserMedia({
-                video: { mediaSource: "screen" }
+            const stream = await navigator.mediaDevices.getDisplayMedia({
+                video: { cursor: "motion" }
+              , audio: false
             });
 
             peerConnection.addStream(stream);

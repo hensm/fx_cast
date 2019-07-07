@@ -262,7 +262,7 @@ onMessage(async message => {
 
                             sessionSuccessCallback(
                                     session
-                                  , message.data.selectedMedia);
+                                  , message.data.mediaType);
                         }));
             }
 

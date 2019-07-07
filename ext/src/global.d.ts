@@ -29,11 +29,15 @@ declare interface HTMLCanvasElement {
 }
 
 declare interface MediaTrackConstraints {
-    mediaSource: "screen" | "window";
+    cursor: "always" | "motion" | "never";
 }
 
 declare interface RTCPeerConnection {
     addStream (mediaStream: MediaStream): void;
+}
+
+declare interface MediaDevices {
+     getDisplayMedia(constraints: MediaStreamConstraints): Promise<MediaStream>;
 }
 
 
