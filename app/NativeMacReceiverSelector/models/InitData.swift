@@ -8,6 +8,7 @@ struct InitData : Codable {
     let i18n_mediaTypeApp: String
     let i18n_mediaTypeTab: String
     let i18n_mediaTypeScreen: String
+    let i18n_mediaTypeFile: String
     let i18n_mediaSelectCastLabel: String
     let i18n_mediaSelectToLabel: String
 }

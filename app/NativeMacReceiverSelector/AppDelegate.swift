@@ -8,15 +8,9 @@ class AppDelegate : NSObject, NSApplicationDelegate {
 
 
     func applicationDidFinishLaunching (_ aNotification: Notification) {
-        let window = NSPanel(
+        let window = NSWindow(
                 contentRect: NSZeroRect
-              , styleMask: [
-                    .titled
-                  , .closable
-                  , .hudWindow
-                  , .utilityWindow
-                  , .nonactivatingPanel
-                ]
+              , styleMask: [ .titled, .closable ]
               , backing: .buffered
               , defer: false)
 

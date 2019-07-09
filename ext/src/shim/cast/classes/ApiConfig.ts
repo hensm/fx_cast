@@ -31,6 +31,7 @@ export default class ApiConfig {
           , public _availableMediaTypes: ReceiverSelectorMediaType
                     = ReceiverSelectorMediaType.App
                     | ReceiverSelectorMediaType.Tab
-                    | ReceiverSelectorMediaType.Screen) {
+                    | ReceiverSelectorMediaType.Screen
+                    | ReceiverSelectorMediaType.File) {
     }
 }

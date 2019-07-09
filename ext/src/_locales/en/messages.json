@@ -21,6 +21,10 @@
         "message": "Screen"
       , "description": "Receiver selector media type <option> text for screen."
     }
+  , "popupMediaTypeFile": {
+        "message": "Browse..."
+      , "description": "Receiver selector media type <option> text for opening a file selector dialog."
+    }
 
   , "popupMediaSelectCastLabel": {
         "message": "Cast"
