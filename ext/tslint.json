@@ -2,4 +2,7 @@
     "extends": [
         "../common/tslint.json"
     ]
+  , "rules": {
+        "no-bitwise": false
+    }
 }

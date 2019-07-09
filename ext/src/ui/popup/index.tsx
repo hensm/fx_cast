@@ -28,6 +28,7 @@ browser.runtime.getPlatformInfo()
 interface PopupAppState {
     receivers: Receiver[];
     mediaType: ReceiverSelectorMediaType;
+    availableMediaTypes: ReceiverSelectorMediaType;
     isLoading: boolean;
 }
 
@@ -41,6 +42,7 @@ class PopupApp extends Component<{}, PopupAppState> {
         this.state = {
             receivers: []
           , mediaType: ReceiverSelectorMediaType.App
+          , availableMediaTypes: ReceiverSelectorMediaType.App
           , isLoading: false
         };
 
@@ -64,6 +66,7 @@ class PopupApp extends Component<{}, PopupAppState> {
                     this.setState({
                         receivers: message.data.receivers
                       , mediaType: message.data.defaultMediaType
+                      , availableMediaTypes: message.data.availableMediaTypes
                     });
 
                     break;
@@ -90,10 +93,6 @@ class PopupApp extends Component<{}, PopupAppState> {
     }
 
     public render () {
-        const shareMedia =
-                this.state.mediaType === ReceiverSelectorMediaType.Tab
-             || this.state.mediaType === ReceiverSelectorMediaType.Screen;
-
         return (
             <div>
                 <div className="media-select">
@@ -102,15 +101,18 @@ class PopupApp extends Component<{}, PopupAppState> {
                             onChange={ this.onSelectChange }
                             className="media-select-dropdown">
                         <option value={ ReceiverSelectorMediaType.App }
-                                disabled={ shareMedia }>
+                                disabled={ !(this.state.availableMediaTypes
+                                        & ReceiverSelectorMediaType.App) }>
                             { _("popupMediaTypeApp") }
                         </option>
                         <option value={ ReceiverSelectorMediaType.Tab }
-                                disabled={ !shareMedia }>
+                                disabled={ !(this.state.availableMediaTypes
+                                        & ReceiverSelectorMediaType.Tab) }>
                             { _("popupMediaTypeTab") }
                         </option>
                         <option value={ ReceiverSelectorMediaType.Screen }
-                                disabled={ !shareMedia }>
+                                disabled={ !(this.state.availableMediaTypes
+                                        & ReceiverSelectorMediaType.Screen) }>
                             { _("popupMediaTypeScreen") }
                         </option>
                     </select>

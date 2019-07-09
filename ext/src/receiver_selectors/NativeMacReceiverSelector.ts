@@ -28,7 +28,8 @@ export default class NativeMacReceiverSelector
 
     public async open (
             receivers: Receiver[]
-          , defaultMediaType: ReceiverSelectorMediaType): Promise<void> {
+          , defaultMediaType: ReceiverSelectorMediaType
+          , availableMediaTypes: ReceiverSelectorMediaType): Promise<void> {
 
         const applicationName = await options.get("bridgeApplicationName");
         this.bridgePort = nativeMessaging.connectNative(applicationName);
@@ -62,6 +63,7 @@ export default class NativeMacReceiverSelector
           , data: JSON.stringify({
                 receivers
               , defaultMediaType
+              , availableMediaTypes
 
               , i18n_extensionName: _("extensionName")
               , i18n_castButtonTitle: _("popupCastButtonTitle")

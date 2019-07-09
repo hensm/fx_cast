@@ -541,7 +541,7 @@ async function initCreateStatusBridge (opts: Options) {
  */
 function onStatusBridgeDisconnect () {
     // Notify shims for receiver availability
-    for (const [ , receiver ] of statusBridgeReceivers) {
+    for (const [, receiver ] of statusBridgeReceivers) {
         for (const [, shim ] of shimMap) {
             shim.port.postMessage({
                 subject: "shim:/serviceDown"
@@ -752,7 +752,8 @@ async function onConnectShim (port: browser.runtime.Port) {
             case "main:/selectReceiverBegin": {
                 receiverSelector.open(
                         Array.from(statusBridgeReceivers.values())
-                      , message.data.defaultMediaType);
+                      , message.data.defaultMediaType
+                      , message.data.availableMediaTypes);
                 break;
             }
 

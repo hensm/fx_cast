@@ -17,6 +17,7 @@ export default class PopupReceiverSelector
 
     private receivers: Receiver[];
     private defaultMediaType: ReceiverSelectorMediaType;
+    private availableMediaTypes: ReceiverSelectorMediaType;
 
     private wasReceiverSelected: boolean = false;
 
@@ -53,6 +54,7 @@ export default class PopupReceiverSelector
               , data: {
                     receivers: this.receivers
                   , defaultMediaType: this.defaultMediaType
+                  , availableMediaTypes: this.availableMediaTypes
                 }
             });
         });
@@ -61,7 +63,8 @@ export default class PopupReceiverSelector
 
     public async open (
             receivers: Receiver[]
-          , defaultMediaType: ReceiverSelectorMediaType): Promise<void> {
+          , defaultMediaType: ReceiverSelectorMediaType
+          , availableMediaTypes: ReceiverSelectorMediaType): Promise<void> {
 
         // If popup already exists, close it
         if (this.windowId) {
@@ -70,6 +73,7 @@ export default class PopupReceiverSelector
 
         this.receivers = receivers;
         this.defaultMediaType = defaultMediaType;
+        this.availableMediaTypes = availableMediaTypes;
 
         // Current window to base centered position on
         const openerWindow = await browser.windows.getCurrent();

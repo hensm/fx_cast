@@ -66,14 +66,43 @@ class ViewController : NSViewController {
 
 
         self.mediaTypePopUpButton = NSPopUpButton()
+        self.mediaTypePopUpButton.autoenablesItems = false
         self.mediaTypePopUpButton.addItems(withTitles: [
             initData.i18n_mediaTypeApp
           , initData.i18n_mediaTypeTab
           , initData.i18n_mediaTypeScreen
         ])
 
+        let appItem = self.mediaTypePopUpButton
+            .item(withTitle: initData.i18n_mediaTypeApp)!
+        let tabItem = self.mediaTypePopUpButton
+            .item(withTitle: initData.i18n_mediaTypeTab)!
+        let screenItem = self.mediaTypePopUpButton
+            .item(withTitle: initData.i18n_mediaTypeScreen)!
+
+        // Set tags to enum value
+        appItem.tag = MediaType.app.rawValue
+        tabItem.tag = MediaType.tab.rawValue
+        screenItem.tag = MediaType.screen.rawValue
+
+        if (initData.availableMediaTypes & appItem.tag) == 0 {
+            self.mediaTypePopUpButton
+                .item(withTitle: initData.i18n_mediaTypeApp)?
+                .isEnabled = false
+        }
+        if (initData.availableMediaTypes & tabItem.tag) == 0 {
+            self.mediaTypePopUpButton
+                .item(withTitle: initData.i18n_mediaTypeTab)?
+                .isEnabled = false
+        }
+        if (initData.availableMediaTypes & screenItem.tag) == 0 {
+            self.mediaTypePopUpButton
+                .item(withTitle: initData.i18n_mediaTypeScreen)?
+                .isEnabled = false
+        }
+
         self.mediaTypePopUpButton.selectItem(
-                at: initData.defaultMediaType.rawValue)
+                withTag: initData.defaultMediaType.rawValue)
 
 
         let mediaTypeStackView = NSStackView(views: [
@@ -140,7 +169,7 @@ extension ViewController : ReceiverViewDelegate {
 
         do {
             let mediaType = MediaType(
-                    rawValue: self.mediaTypePopUpButton.indexOfSelectedItem)!
+                    rawValue: self.mediaTypePopUpButton.selectedItem!.tag)!
 
             let selection = ReceiverSelection(
                     receiver: receiver

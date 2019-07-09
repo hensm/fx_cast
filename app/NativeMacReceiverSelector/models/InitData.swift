@@ -1,6 +1,7 @@
 struct InitData : Codable {
     let receivers: [Receiver]
     let defaultMediaType: MediaType
+    let availableMediaTypes: Int
 
     let i18n_extensionName: String
     let i18n_castButtonTitle: String

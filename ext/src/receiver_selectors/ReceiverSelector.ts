@@ -4,9 +4,9 @@ import { Receiver } from "../types";
 
 
 export enum ReceiverSelectorMediaType {
-    App
-  , Tab
-  , Screen
+    App = 1
+  , Tab = 2
+  , Screen = 4
 }
 
 export interface ReceiverSelection {
@@ -21,7 +21,8 @@ export type ReceiverSelectorCancelledEvent = CustomEvent;
 
 export default interface ReceiverSelector extends EventTarget {
     open (receivers: Receiver[]
-        , defaultMediaType: ReceiverSelectorMediaType): void;
+        , defaultMediaType: ReceiverSelectorMediaType
+        , availableMediaTypes: ReceiverSelectorMediaType): void;
 
     close (): void;
 }

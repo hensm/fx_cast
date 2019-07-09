@@ -37,7 +37,8 @@ declare interface RTCPeerConnection {
 }
 
 declare interface MediaDevices {
-     getDisplayMedia(constraints: MediaStreamConstraints): Promise<MediaStream>;
+     getDisplayMedia (constraints: MediaStreamConstraints)
+             : Promise<MediaStream>;
 }
 
 
