@@ -1,7 +1,7 @@
 "use strict";
 
-import { onMessageResponse, sendMessage } from "./eventMessageChannel";
 import { loadScript } from "../lib/utils";
+import { onMessageResponse, sendMessage } from "./eventMessageChannel";
 
 
 const { isFramework }

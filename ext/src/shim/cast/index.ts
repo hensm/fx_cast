@@ -160,7 +160,8 @@ export function requestSession (
     sendMessageResponse({
         subject: "main:/selectReceiverBegin"
       , data: {
-            defaultMediaType: apiConfig._selectedMedia
+            defaultMediaType: apiConfig._defaultMediaType
+          , availableMediaTypes: apiConfig._availableMediaTypes
         }
     });
 }
@@ -262,7 +263,7 @@ onMessage(async message => {
 
                             sessionSuccessCallback(
                                     session
-                                  , message.data.selectedMedia);
+                                  , message.data.mediaType);
                         }));
             }
 

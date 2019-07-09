@@ -26,7 +26,12 @@ export default class ApiConfig {
                     = DefaultActionPolicy.CREATE_SESSION
 
             // TODO: Remove awful hack for mirror casting
-          , public _selectedMedia: ReceiverSelectorMediaType
-                    = ReceiverSelectorMediaType.App) {
+          , public _defaultMediaType: ReceiverSelectorMediaType
+                    = ReceiverSelectorMediaType.App
+          , public _availableMediaTypes: ReceiverSelectorMediaType
+                    = ReceiverSelectorMediaType.App
+                    | ReceiverSelectorMediaType.Tab
+                    | ReceiverSelectorMediaType.Screen
+                    | ReceiverSelectorMediaType.File) {
     }
 }

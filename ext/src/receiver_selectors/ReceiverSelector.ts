@@ -4,14 +4,16 @@ import { Receiver } from "../types";
 
 
 export enum ReceiverSelectorMediaType {
-    App
-  , Tab
-  , Screen
+    App = 1
+  , Tab = 2
+  , Screen = 4
+  , File = 8
 }
 
 export interface ReceiverSelection {
     receiver: Receiver;
     mediaType: ReceiverSelectorMediaType;
+    filePath?: string;
 }
 
 export type ReceiverSelectorSelectedEvent = CustomEvent<ReceiverSelection>;
@@ -21,7 +23,8 @@ export type ReceiverSelectorCancelledEvent = CustomEvent;
 
 export default interface ReceiverSelector extends EventTarget {
     open (receivers: Receiver[]
-        , defaultMediaType: ReceiverSelectorMediaType): void;
+        , defaultMediaType: ReceiverSelectorMediaType
+        , availableMediaTypes: ReceiverSelectorMediaType): void;
 
     close (): void;
 }

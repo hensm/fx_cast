@@ -28,12 +28,15 @@ browser.runtime.getPlatformInfo()
 interface PopupAppState {
     receivers: Receiver[];
     mediaType: ReceiverSelectorMediaType;
+    availableMediaTypes: ReceiverSelectorMediaType;
     isLoading: boolean;
+    filePath: string;
 }
 
 class PopupApp extends Component<{}, PopupAppState> {
     private port: browser.runtime.Port;
     private win: browser.windows.Window;
+    private defaultMediaType: ReceiverSelectorMediaType;
 
     constructor (props: {}) {
         super(props);
@@ -41,7 +44,9 @@ class PopupApp extends Component<{}, PopupAppState> {
         this.state = {
             receivers: []
           , mediaType: ReceiverSelectorMediaType.App
+          , availableMediaTypes: ReceiverSelectorMediaType.App
           , isLoading: false
+          , filePath: null
         };
 
         // Store window ref
@@ -61,9 +66,12 @@ class PopupApp extends Component<{}, PopupAppState> {
         this.port.onMessage.addListener((message: Message) => {
             switch (message.subject) {
                 case "popup:/populateReceiverList": {
+                    this.defaultMediaType = message.data.defaultMediaType;
+
                     this.setState({
                         receivers: message.data.receivers
-                      , mediaType: message.data.defaultMediaType
+                      , mediaType: this.defaultMediaType
+                      , availableMediaTypes: message.data.availableMediaTypes
                     });
 
                     break;
@@ -90,9 +98,17 @@ class PopupApp extends Component<{}, PopupAppState> {
     }
 
     public render () {
-        const shareMedia =
-                this.state.mediaType === ReceiverSelectorMediaType.Tab
-             || this.state.mediaType === ReceiverSelectorMediaType.Screen;
+        let truncatedFileName: string;
+
+        if (this.state.filePath) {
+            const filePath = this.state.filePath;
+            const fileName = filePath.substring(filePath.lastIndexOf("/") + 1);
+
+            truncatedFileName = fileName.length > 12
+                ? `${fileName.substring(0, 12)}...`
+                : fileName;
+        }
+
 
         return (
             <div>
@@ -102,16 +118,29 @@ class PopupApp extends Component<{}, PopupAppState> {
                             onChange={ this.onSelectChange }
                             className="media-select-dropdown">
                         <option value={ ReceiverSelectorMediaType.App }
-                                disabled={ shareMedia }>
+                                disabled={ !(this.state.availableMediaTypes
+                                        & ReceiverSelectorMediaType.App) }>
                             { _("popupMediaTypeApp") }
                         </option>
                         <option value={ ReceiverSelectorMediaType.Tab }
-                                disabled={ !shareMedia }>
+                                disabled={ !(this.state.availableMediaTypes
+                                        & ReceiverSelectorMediaType.Tab) }>
                             { _("popupMediaTypeTab") }
                         </option>
                         <option value={ ReceiverSelectorMediaType.Screen }
-                                disabled={ !shareMedia }>
+                                disabled={ !(this.state.availableMediaTypes
+                                        & ReceiverSelectorMediaType.Screen) }>
                             { _("popupMediaTypeScreen") }
+                        </option>
+                        <option disabled>
+                            ─────
+                        </option>
+                        <option value={ ReceiverSelectorMediaType.File }
+                                disabled={ !(this.state.availableMediaTypes
+                                        & ReceiverSelectorMediaType.File) }>
+                            { this.state.filePath
+                                ? truncatedFileName
+                                : _("popupMediaTypeFile") }
                         </option>
                     </select>
                     { _("popupMediaSelectToLabel") }
@@ -138,13 +167,45 @@ class PopupApp extends Component<{}, PopupAppState> {
           , data: {
                 receiver
               , mediaType: this.state.mediaType
+              , filePath: this.state.filePath
             }
         });
     }
 
     private onSelectChange (ev: React.ChangeEvent<HTMLSelectElement>) {
+        const mediaType = parseInt(ev.target.value);
+
+        if (mediaType === ReceiverSelectorMediaType.File) {
+            try {
+                const filePath = window.prompt();
+
+                // Validate URL
+                const fileUrl = new URL(filePath.startsWith("file://")
+                    ? filePath
+                    : `file://${filePath}`);
+
+                this.setState({
+                    mediaType
+                  , filePath
+                });
+
+                return;
+            } catch (err) {
+                // Don't need to handle any errors
+            }
+
+            // Set media type to default if failed to set filePath
+            this.setState({
+                mediaType: this.defaultMediaType
+            });
+        } else {
+            this.setState({
+                mediaType
+            });
+        }
+
         this.setState({
-            mediaType: parseInt(ev.target.value)
+            filePath: null
         });
     }
 }

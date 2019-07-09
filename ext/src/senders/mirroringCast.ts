@@ -22,6 +22,21 @@ let peerConnection: RTCPeerConnection;
 let drawWindowIntervalId: number;
 
 
+let availableMediaTypes =
+        ReceiverSelectorMediaType.Screen
+      | ReceiverSelectorMediaType.Tab;
+
+/**
+ * Remove "Screen" option when on an insecure origin as
+ * MediaDevices.getDisplayMedia will not exist (and legacy
+ * MediaDevices.getUserMedia mediaSource constraint will
+ * fail).
+ */
+if (typeof navigator.mediaDevices.getDisplayMedia === "undefined") {
+    availableMediaTypes &= ~ReceiverSelectorMediaType.Screen;
+}
+
+
 /**
  * Sends a message to the fx_cast app running on the
  * receiver device.
@@ -70,7 +85,6 @@ async function onRequestSessionSuccess (
 
     switch (newSelectedMedia) {
         case ReceiverSelectorMediaType.Tab: {
-
             const canvas = document.createElement("canvas");
             const ctx = canvas.getContext("2d");
 
@@ -118,9 +132,9 @@ async function onRequestSessionSuccess (
         }
 
         case ReceiverSelectorMediaType.Screen: {
-
-            const stream = await navigator.mediaDevices.getUserMedia({
-                video: { mediaSource: "screen" }
+            const stream = await navigator.mediaDevices.getDisplayMedia({
+                video: { cursor: "motion" }
+              , audio: false
             });
 
             peerConnection.addStream(stream);
@@ -141,8 +155,11 @@ async function onRequestSessionSuccess (
 function receiverListener (availability: string) {
     cast.logMessage("receiverListener");
 
-    if (!wasSessionRequested
-            && availability === cast.ReceiverAvailability.AVAILABLE) {
+    if (wasSessionRequested) {
+        return;
+    }
+
+    if (availability === cast.ReceiverAvailability.AVAILABLE) {
         wasSessionRequested = true;
         cast.requestSession(
                 onRequestSessionSuccess
@@ -180,7 +197,8 @@ init().then(async bridgeInfo => {
           , sessionListener
           , receiverListener
           , undefined, undefined
-          , selectedMedia);
+          , selectedMedia
+          , availableMediaTypes);
 
     cast.initialize(apiConfig
           , onInitializeSuccess
