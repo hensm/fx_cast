@@ -10,7 +10,7 @@
 
 
   , "popupMediaTypeApp": {
-        "message": "this site's app"
+        "message": "la aplicación de este sitio"
       , "description": "Receiver selector media type <option> text for current site's sender application."
     }
   , "popupMediaTypeTab": {
