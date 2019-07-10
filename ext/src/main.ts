@@ -660,22 +660,32 @@ async function onConnectShim (port: browser.runtime.Port) {
          * TODO: Seamlessly connect selector to the new sender
          */
         if (ev.detail.mediaType !== openerMediaType) {
-            onReceiverSelectorCancelled();
-
             switch (ev.detail.mediaType) {
                 case ReceiverSelectorMediaType.App: {
                     // TODO: Keep track of page apps
-                    break;
+                    onReceiverSelectorCancelled();
+                    return;
                 }
 
                 case ReceiverSelectorMediaType.Screen:
                 case ReceiverSelectorMediaType.Tab: {
+                    // Mirroring sender handles media type changes itself
+                    if (openerMediaType === ReceiverSelectorMediaType.Tab
+                     || openerMediaType === ReceiverSelectorMediaType.Screen) {
+                        break;
+                    }
+
+                    onReceiverSelectorCancelled();
                     loadMirrorCastSender(tabId, frameId, ev.detail.mediaType);
-                    break;
+
+                    return;
+                }
+
+                case ReceiverSelectorMediaType.File: {
+                    onReceiverSelectorCancelled();
+                    return;
                 }
             }
-
-            return;
         }
 
 
