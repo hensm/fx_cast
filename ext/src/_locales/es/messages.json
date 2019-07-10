@@ -82,7 +82,7 @@
 
 
   , "optionsBridgeLoading": {
-        "message": "Cargando info de aplicación puente..."
+        "message": "Cargando información de la aplicación puente..."
       , "description": "Loading placeholder text for bridge section on options page."
     }
   , "optionsBridgeFoundStatusTitle": {
@@ -98,7 +98,7 @@
       , "description": "Bridge missing status title text."
     }
   , "optionsBridgeNotFoundStatusText": {
-        "message": "Intenta descargar e instalar la última versión."
+        "message": "Intente descargar e instalar la última versión."
       , "description": "Bridge not found additional description text"
     }
 
@@ -135,11 +135,11 @@
       , "description": "Compatibility status is definitely incompatible."
     }
   , "optionsBridgeOlderAction": {
-        "message": "Versión de la aplicación puente inferior a la esperada, intenta actualizarla a la última versión."
+        "message": "Versión de la aplicación puente inferior a la esperada, intente actualizarla a la última versión."
       , "description": "Recommended action for when the installed bridge version is older than the installed extension version."
     }
   , "optionsBridgeNewerAction": {
-        "message": "Versión de la aplicación puente superior a la esperada, intenta actualizar la extensión a la última versión."
+        "message": "Versión de la aplicación puente superior a la esperada, intente actualizar la extensión a la última versión."
       , "description": "Recommended action for when the installed bridge version is newer than the installed extension version."
     }
   , "optionsBridgeNoAction": {
@@ -203,7 +203,7 @@
       , "description": "Options page local media category title."
     }
   , "optionsLocalMediaCategoryDescription": {
-        "message": "Servidor HTTP iniciado por la aplicación puente para transmitir archivos locales al receptor."
+        "message": "Servidor HTTP iniciado por la aplicación puente para transmitir archivos de medios locales al receptor."
       , "description": "Options page local media category description."
     }
   , "optionsLocalMediaEnabled": {
