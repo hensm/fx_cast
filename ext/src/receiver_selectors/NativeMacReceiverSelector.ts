@@ -82,6 +82,8 @@ export default class NativeMacReceiverSelector
             this.bridgePort.postMessage({
                 subject: "bridge:/receiverSelector/close"
             });
+
+            this.bridgePort.disconnect();
         }
     }
 

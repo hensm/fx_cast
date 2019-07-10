@@ -13,7 +13,9 @@ export default class PopupReceiverSelector
 
     private windowId: number;
     private openerWindowId: number;
+
     private messagePort: browser.runtime.Port;
+    private messagePortDisconnected: boolean;
 
     private receivers: Receiver[];
     private defaultMediaType: ReceiverSelectorMediaType;
@@ -48,6 +50,9 @@ export default class PopupReceiverSelector
 
             this.messagePort = port;
             this.messagePort.onMessage.addListener(this.onPopupMessage);
+            this.messagePort.onDisconnect.addListener(() => {
+                this.messagePortDisconnected = true;
+            });
 
             this.messagePort.postMessage({
                 subject: "popup:/populateReceiverList"
@@ -99,7 +104,13 @@ export default class PopupReceiverSelector
     }
 
     public close (): void {
-        browser.windows.remove(this.windowId);
+        if (this.windowId) {
+            browser.windows.remove(this.windowId);
+        }
+
+        if (this.messagePort && !this.messagePortDisconnected) {
+            this.messagePort.disconnect();
+        }
     }
 
 

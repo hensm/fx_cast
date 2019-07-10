@@ -12,6 +12,8 @@ import { getChromeUserAgent } from "./lib/userAgents";
 import { getWindowCenteredProps } from "./lib/utils";
 
 import { getReceiverSelector
+       , ReceiverSelectorCancelledEvent
+       , ReceiverSelectorErrorEvent
        , ReceiverSelectorMediaType
        , ReceiverSelectorSelectedEvent
        , ReceiverSelectorType } from "./receiver_selectors";
@@ -492,6 +494,9 @@ browser.menus.onClicked.addListener(async (info, tab) => {
     }
 });
 
+browser.browserAction.onClicked.addListener(async tab => {
+    openReceiverSelector(tab.id, 0);
+});
 
 
 interface Shim {
@@ -619,6 +624,59 @@ async function onStatusBridgeMessage (message: Message) {
             break;
         }
     }
+}
+
+
+async function openReceiverSelector (tabId: number, frameId: number) {
+    const { os } = await browser.runtime.getPlatformInfo();
+
+    const receiverSelector = getReceiverSelector(os === "mac"
+        ? ReceiverSelectorType.NativeMac
+        : ReceiverSelectorType.Popup);
+
+    function onReceiverSelectorSelected (
+            ev: ReceiverSelectorSelectedEvent) {
+        console.info("fx_cast (Debug): Selected receiver", ev.detail);
+        unregister();
+    }
+    function onReceiverSelectorCancelled (
+            ev: ReceiverSelectorCancelledEvent) {
+        console.info("fx_cast (Debug): Cancelled receiver selection");
+        unregister();
+    }
+    function onReceiverSelectorError (
+            ev: ReceiverSelectorErrorEvent) {
+        console.error("fx_cast (Debug): Failed to select receiver");
+        unregister();
+    }
+
+
+    receiverSelector.addEventListener("selected"
+          , onReceiverSelectorSelected);
+    receiverSelector.addEventListener("cancelled"
+          , onReceiverSelectorCancelled);
+    receiverSelector.addEventListener("error"
+          , onReceiverSelectorError);
+
+    function unregister () {
+        receiverSelector.removeEventListener("selected"
+              , onReceiverSelectorSelected);
+        receiverSelector.removeEventListener("cancelled"
+              , onReceiverSelectorCancelled);
+        receiverSelector.removeEventListener("error"
+              , onReceiverSelectorError);
+    }
+
+
+    const availableMediaTypes =
+            ReceiverSelectorMediaType.Tab
+          | ReceiverSelectorMediaType.Screen
+          | ReceiverSelectorMediaType.File;
+
+    receiverSelector.open(
+            Array.from(statusBridgeReceivers.values()) // receivers
+          , ReceiverSelectorMediaType.Tab              // defaultMediaType
+          , availableMediaTypes);                      // availableMediaTypes
 }
 
 
