@@ -6,6 +6,7 @@ import options from "../lib/options";
 import ReceiverSelector, {
         ReceiverSelectorMediaType } from "./ReceiverSelector";
 
+import { getWindowCenteredProps } from "../lib/utils";
 import { Message, Receiver } from "../types";
 
 import { NativeReceiverSelectorCloseMessage
@@ -58,12 +59,20 @@ export default class NativeMacReceiverSelector
             this.bridgePortDisconnected = true;
         });
 
+
+        // Current window to base centered position on
+        const openerWindow = await browser.windows.getCurrent();
+        const centeredProps = getWindowCenteredProps(openerWindow, 350, 0);
+
         this.bridgePort.postMessage({
             subject: "bridge:/receiverSelector/open"
           , data: JSON.stringify({
                 receivers
               , defaultMediaType
               , availableMediaTypes
+
+              , windowPositionX: centeredProps.left
+              , windowPositionY: centeredProps.top
 
               , i18n_extensionName: _("extensionName")
               , i18n_castButtonTitle: _("popupCastButtonTitle")
