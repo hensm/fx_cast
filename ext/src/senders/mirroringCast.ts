@@ -6,10 +6,14 @@ import cast, { init } from "../shim/export";
 import { ReceiverSelectorMediaType }
         from "../receiver_selectors/ReceiverSelector";
 
+import { Receiver } from "../types";
+
 
 // Variables passed from background
-const { selectedMedia }
-    : { selectedMedia: ReceiverSelectorMediaType } = (window as any);
+const { selectedMedia
+      , selectedReceiver }
+    : { selectedMedia: ReceiverSelectorMediaType
+      , selectedReceiver: Receiver } = (window as any);
 
 
 const FX_CAST_RECEIVER_APP_NAMESPACE = "urn:x-cast:fx_cast";
@@ -54,9 +58,7 @@ window.addEventListener("beforeunload", () => {
 });
 
 
-async function onRequestSessionSuccess (
-        newSession: cast.Session
-      , newSelectedMedia: ReceiverSelectorMediaType) {
+async function onRequestSessionSuccess (newSession: cast.Session) {
 
     cast.logMessage("onRequestSessionSuccess");
 
@@ -83,7 +85,7 @@ async function onRequestSessionSuccess (
         sendAppMessage("iceCandidate", ev.candidate);
     });
 
-    switch (newSelectedMedia) {
+    switch (selectedMedia) {
         case ReceiverSelectorMediaType.Tab: {
             const canvas = document.createElement("canvas");
             const ctx = canvas.getContext("2d");
@@ -161,9 +163,10 @@ function receiverListener (availability: string) {
 
     if (availability === cast.ReceiverAvailability.AVAILABLE) {
         wasSessionRequested = true;
-        cast.requestSession(
+        cast._requestSession(
                 onRequestSessionSuccess
-              , onRequestSessionError);
+              , onRequestSessionError
+              , selectedReceiver);
     }
 }
 
@@ -196,9 +199,7 @@ init().then(async bridgeInfo => {
             sessionRequest
           , sessionListener
           , receiverListener
-          , undefined, undefined
-          , selectedMedia
-          , availableMediaTypes);
+          , undefined, undefined);
 
     cast.initialize(apiConfig
           , onInitializeSuccess

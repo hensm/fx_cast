@@ -4,7 +4,7 @@ import ApiConfig from "./classes/ApiConfig";
 import DialRequest from "./classes/DialRequest";
 import Error_ from "./classes/Error";
 import Image_ from "./classes/Image";
-import Receiver from "./classes/Receiver";
+import Receiver_ from "./classes/Receiver";
 import ReceiverDisplayStatus from "./classes/ReceiverDisplayStatus";
 import SenderApplication from "./classes/SenderApplication";
 import Session from "./classes/Session";
@@ -24,20 +24,19 @@ import { AutoJoinPolicy
        , SessionStatus
        , VolumeControlType } from "./enums";
 
-import * as media from "./media";
+import * as media from "./media"
 
+import { Receiver } from "../../types";
 import { ReceiverSelectorMediaType }
         from "../../receiver_selectors/ReceiverSelector";
 import { onMessage, sendMessageResponse } from "../eventMessageChannel";
 
 
 type ReceiverActionListener = (
-        receiver: Receiver
+        receiver: Receiver_
       , receiverAction: string) => void;
 
-type RequestSessionSuccessCallback = (
-        session: Session
-      , selectedMedia: ReceiverSelectorMediaType) => void;
+type RequestSessionSuccessCallback = (session: Session) => void;
 
 type SuccessCallback = () => void;
 type ErrorCallback = (err: Error_) => void;
@@ -61,12 +60,13 @@ export {
   , SenderPlatform, SessionStatus, VolumeControlType
 
     // Classes
-  , ApiConfig, DialRequest, Receiver, ReceiverDisplayStatus
+  , ApiConfig, DialRequest, ReceiverDisplayStatus
   , SenderApplication, Session, SessionRequest, Timeout
   , Volume
 
   , Error_ as Error
   , Image_ as Image
+  , Receiver_ as Receiver
 
   , media
 };
@@ -127,8 +127,7 @@ export function removeReceiverActionListener (
 export function requestSession (
         successCallback: RequestSessionSuccessCallback
       , errorCallback: ErrorCallback
-      , sessionRequest: SessionRequest
-                = apiConfig.sessionRequest): void {
+      , sessionRequest: SessionRequest = apiConfig.sessionRequest): void {
 
     console.info("fx_cast (Debug): cast.requestSession");
 
@@ -159,11 +158,68 @@ export function requestSession (
     // Open destination chooser
     sendMessageResponse({
         subject: "main:/selectReceiverBegin"
-      , data: {
-            defaultMediaType: apiConfig._defaultMediaType
-          , availableMediaTypes: apiConfig._availableMediaTypes
-        }
     });
+}
+
+export function _requestSession (
+        successCallback: RequestSessionSuccessCallback
+      , errorCallback: ErrorCallback
+      , _receiver: Receiver): void {
+
+    console.info("fx_cast (Debug): cast._requestSession");
+
+    if (!apiConfig) {
+        errorCallback(new Error_(ErrorCode.API_NOT_INITIALIZED));
+        return;
+    }
+
+    if (sessionRequestInProgress) {
+        errorCallback(new Error_(ErrorCode.INVALID_PARAMETER
+              , "Session request already in progress"));
+        return;
+    }
+
+    if (!receiverList.length) {
+        errorCallback(new Error_(ErrorCode.RECEIVER_UNAVAILABLE));
+        return;
+    }
+
+    sessionRequestInProgress = true;
+
+    sessionSuccessCallback = successCallback;
+    sessionErrorCallback = errorCallback;
+
+
+    const selectedReceiver = new Receiver_(
+            _receiver.id
+          , _receiver.friendlyName);
+
+    (selectedReceiver as any)._address = _receiver.host;
+    (selectedReceiver as any)._port = _receiver.port;
+
+    function createSession () {
+        sessionList.push(new Session(
+                sessionList.length.toString()  // sessionId
+              , apiConfig.sessionRequest.appId // appId
+              , _receiver.friendlyName         // displayName
+              , []                             // appImages
+              , selectedReceiver               // receiver
+              , (session: Session) => {
+                    sessionRequestInProgress = false;
+                    sessionSuccessCallback(session);
+                }));
+    }
+
+    // If an existing session is active, stop it and start new one
+    if (sessionList.length) {
+        const lastSession = sessionList[sessionList.length - 1];
+
+        if (lastSession.status !== SessionStatus.STOPPED) {
+            lastSession.stop(createSession, null);
+        }
+    } else {
+        createSession();
+    }
 }
 
 export function requestSessionById (sessionId: string): void {
@@ -171,7 +227,7 @@ export function requestSessionById (sessionId: string): void {
 }
 
 export function setCustomReceivers (
-        receivers: Receiver[]
+        receivers: Receiver_[]
       , successCallback: SuccessCallback
       , errorCallback: ErrorCallback): void {
 
@@ -240,7 +296,7 @@ onMessage(async message => {
         case "shim:/selectReceiverEnd": {
             console.info("fx_cast (Debug): Selected receiver");
 
-            const selectedReceiver = new Receiver(
+            const selectedReceiver = new Receiver_(
                     message.data.receiver.id
                   , message.data.receiver.friendlyName);
 
@@ -260,10 +316,7 @@ onMessage(async message => {
                             });
 
                             sessionRequestInProgress = false;
-
-                            sessionSuccessCallback(
-                                    session
-                                  , message.data.mediaType);
+                            sessionSuccessCallback(session);
                         }));
             }
 

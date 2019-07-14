@@ -422,7 +422,8 @@ let mirrorCastFrameId: number;
 async function loadMirrorCastSender (
         tabId: number
       , frameId: number
-      , selectedMedia: ReceiverSelectorMediaType) {
+      , selectedMedia: ReceiverSelectorMediaType
+      , selectedReceiver: Receiver) {
 
     mirrorCastTabId = tabId;
     mirrorCastFrameId = frameId;
@@ -430,6 +431,7 @@ async function loadMirrorCastSender (
     await browser.tabs.executeScript(tabId, {
         code: `
             window.selectedMedia = ${selectedMedia};
+            window.selectedReceiver = ${JSON.stringify(selectedReceiver)}
         `
       , frameId
     });
@@ -449,9 +451,9 @@ browser.menus.onClicked.addListener(async (info, tab) => {
 
         switch (info.menuItemId) {
             case mirrorCastMenuId: {
-                await loadMirrorCastSender(tab.id, frameId, info.pageUrl
+                /*await loadMirrorCastSender(tab.id, frameId, info.pageUrl
                     ? ReceiverSelectorMediaType.Tab
-                    : ReceiverSelectorMediaType.Screen);
+                    : ReceiverSelectorMediaType.Screen);*/
                 break;
             }
 
@@ -638,6 +640,25 @@ async function openReceiverSelector (tabId: number, frameId: number) {
             ev: ReceiverSelectorSelectedEvent) {
         console.info("fx_cast (Debug): Selected receiver", ev.detail);
         unregister();
+
+        // TODO: Keep open until session established
+        receiverSelector.close();
+
+        switch (ev.detail.mediaType) {
+            case ReceiverSelectorMediaType.Tab:
+            case ReceiverSelectorMediaType.Screen: {
+                loadMirrorCastSender(
+                        tabId, frameId
+                      , ev.detail.mediaType
+                      , ev.detail.receiver)
+
+                break;
+            }
+
+            case ReceiverSelectorMediaType.File: {
+                break;
+            }
+        }
     }
     function onReceiverSelectorCancelled (
             ev: ReceiverSelectorCancelledEvent) {
@@ -703,10 +724,6 @@ async function onConnectShim (port: browser.runtime.Port) {
         ? ReceiverSelectorType.NativeMac
         : ReceiverSelectorType.Popup);
 
-
-    // Media type for initial opener sender
-    let openerMediaType: ReceiverSelectorMediaType;
-
     function onReceiverSelectorSelected (
             ev: ReceiverSelectorSelectedEvent) {
 
@@ -717,24 +734,17 @@ async function onConnectShim (port: browser.runtime.Port) {
          *
          * TODO: Seamlessly connect selector to the new sender
          */
-        if (ev.detail.mediaType !== openerMediaType) {
+        if (ev.detail.mediaType !== ReceiverSelectorMediaType.App) {
             switch (ev.detail.mediaType) {
-                case ReceiverSelectorMediaType.App: {
-                    // TODO: Keep track of page apps
-                    onReceiverSelectorCancelled();
-                    return;
-                }
-
                 case ReceiverSelectorMediaType.Screen:
                 case ReceiverSelectorMediaType.Tab: {
-                    // Mirroring sender handles media type changes itself
-                    if (openerMediaType === ReceiverSelectorMediaType.Tab
-                     || openerMediaType === ReceiverSelectorMediaType.Screen) {
-                        break;
-                    }
+                    receiverSelector.close();
 
                     onReceiverSelectorCancelled();
-                    loadMirrorCastSender(tabId, frameId, ev.detail.mediaType);
+                    loadMirrorCastSender(
+                            tabId, frameId
+                          , ev.detail.mediaType
+                          , ev.detail.receiver)
 
                     return;
                 }
@@ -849,12 +859,22 @@ async function onConnectShim (port: browser.runtime.Port) {
             }
 
             case "main:/selectReceiverBegin": {
-                openerMediaType = message.data.defaultMediaType;
+                const allMediaTypes =
+                        ReceiverSelectorMediaType.App
+                      | ReceiverSelectorMediaType.Tab
+                      | ReceiverSelectorMediaType.Screen
+                      | ReceiverSelectorMediaType.File;
 
+                /**
+                 * If a receiver selection request is coming from the shim,
+                 * it can only be triggered by an app (including mediaCast),
+                 * so default to app media type and allow a switch to all
+                 * other media types.
+                 */
                 receiverSelector.open(
                         Array.from(statusBridgeReceivers.values())
-                      , openerMediaType
-                      , message.data.availableMediaTypes);
+                      , ReceiverSelectorMediaType.App
+                      , allMediaTypes);
 
                 break;
             }

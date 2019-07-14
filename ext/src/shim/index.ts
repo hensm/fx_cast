@@ -13,6 +13,10 @@ if (!_window.chrome) {
     _window.chrome = {};
 }
 
+
+// Remove private APIs
+delete cast._requestSession;
+
 // Create page-accessible API object
 _window.chrome.cast = cast;
 
