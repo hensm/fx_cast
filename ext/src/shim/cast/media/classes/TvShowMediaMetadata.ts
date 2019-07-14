@@ -6,16 +6,16 @@ import { MetadataType } from "../enums";
 
 
 export default class TvShowMediaMetadata {
-    public episode: number = null;
-    public episodeNumber: number = null;
-    public episodeTitle: string = null;
-    public images: Image[] = null;
+    public episode: number = undefined;
+    public episodeNumber: number = undefined;
+    public episodeTitle: string = undefined;
+    public images: Image[] = undefined;
     public metadataType: number = MetadataType.TV_SHOW;
-    public originalAirdate: string = null;
-    public releaseYear: number = null;
-    public season: number = null;
-    public seasonNumber: number = null;
-    public seriesTitle: string = null;
-    public title: string = null;
+    public originalAirdate: string = undefined;
+    public releaseYear: number = undefined;
+    public season: number = undefined;
+    public seasonNumber: number = undefined;
+    public seriesTitle: string = undefined;
+    public title: string = undefined;
     public type: number = MetadataType.TV_SHOW;
 }
