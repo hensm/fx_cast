@@ -444,45 +444,34 @@ async function loadMirrorCastSender (
 
 
 browser.menus.onClicked.addListener(async (info, tab) => {
-    if (info.menuItemId === mirrorCastMenuId
-     || info.menuItemId === mediaCastMenuId) {
-
-        const { frameId } = info;
-
-        switch (info.menuItemId) {
-            case mirrorCastMenuId: {
-                /*await loadMirrorCastSender(tab.id, frameId, info.pageUrl
-                    ? ReceiverSelectorMediaType.Tab
-                    : ReceiverSelectorMediaType.Screen);*/
-                break;
-            }
-
-            case mediaCastMenuId: {
-                mediaCastTabId = tab.id;
-                mediaCastFrameId = frameId;
-
-                // Pass media URL to media sender app
-                await browser.tabs.executeScript(tab.id, {
-                    code: `
-                        window.srcUrl = "${info.srcUrl}";
-                        window.targetElementId = ${info.targetElementId};
-                    `
-                  , frameId
-                });
-
-                // Load media sender app
-                await browser.tabs.executeScript(tab.id, {
-                    file: "senders/mediaCast.js"
-                  , frameId
-                });
-
-                break;
-            }
+    switch (info.menuItemId) {
+        case mirrorCastMenuId: {
+            openReceiverSelector(tab.id, info.frameId);
+            return;
         }
 
-        return;
-    }
+        case mediaCastMenuId: {
+            mediaCastTabId = tab.id;
+            mediaCastFrameId = info.frameId;
 
+            // Pass media URL to media sender app
+            await browser.tabs.executeScript(mediaCastTabId, {
+                code: `
+                    window.srcUrl = "${info.srcUrl}";
+                    window.targetElementId = ${info.targetElementId};
+                `
+              , frameId: mediaCastFrameId
+            });
+
+            // Load media sender app
+            await browser.tabs.executeScript(mediaCastTabId, {
+                file: "senders/mediaCast.js"
+              , frameId: mediaCastFrameId
+            });
+
+            return;
+        }
+    }
 
     if (info.parentMenuItemId === whitelistMenuId) {
         const matchPattern = whitelistMenuMap.get(info.menuItemId);
