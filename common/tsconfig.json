@@ -1,7 +1,6 @@
 {
     "compilerOptions": {
-        "allowJs": true
-      , "esModuleInterop": true
+        "esModuleInterop": true
       , "module": "commonjs"
       , "noImplicitAny": true
       , "removeComments": true

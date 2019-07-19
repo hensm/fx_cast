@@ -11,6 +11,43 @@ issues if you're going to work on something to avoid duplication of effort.
 Submit an issue for new features before submitting a PR.
 
 
-## Compatibility Report
+## Compatibility Reports
 
 Compatibility reports are always helpful. Use the "Compatibility Report" issue template. Ensure you have a working environment and that the site is in the whitelist (check options page).
+
+
+## Localizations
+
+Missing strings:
+
+* `es`
+    * `optionsMediaSyncElementDescription`
+    * `optionsReceiverSelectorCategoryName`
+    * `optionsReceiverSelectorCategoryDescription`
+    * `optionsReceiverSelectorType`
+    * `optionsReceiverSelectorTypeBrowser`
+    * `optionsReceiverSelectorTypeNative`
+    * `optionsReceiverSelectorWaitForConnection`
+    * `optionsReceiverSelectorWaitForConnectionDescription`
+    * `optionsReceiverSelectorCloseIfFocusLost`
+    * `optionsMirroringAppIdDescription`
+* `nl`
+    * `popupMediaTypeApp`
+    * `popupMediaTypeTab`
+    * `popupMediaTypeScreen`
+    * `popupMediaTypeFile`
+    * `popupMediaSelectCastLabel`
+    * `popupMediaSelectToLabel`
+    * `contextAddToWhitelist`
+    * `contextAddToWhitelistRecommended`
+    * `contextAddToWhitelistAdvancedAdd`
+    * `optionsMediaSyncElementDescription`
+    * `optionsReceiverSelectorCategoryName`
+    * `optionsReceiverSelectorCategoryDescription`
+    * `optionsReceiverSelectorType`
+    * `optionsReceiverSelectorTypeBrowser`
+    * `optionsReceiverSelectorTypeNative`
+    * `optionsReceiverSelectorWaitForConnection`
+    * `optionsReceiverSelectorWaitForConnectionDescription`
+    * `optionsReceiverSelectorCloseIfFocusLost`
+    * `optionsMirroringAppIdDescription`

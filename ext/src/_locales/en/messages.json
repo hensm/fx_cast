@@ -193,6 +193,10 @@
         "message": "Sync receiver state with media element"
       , "description": "Media casting sync checkbox label."
     }
+  , "optionsMediaSyncElementDescription": {
+        "message": "Synchronize state (playback, volume, captions, etc...) between the media element and the receiver device."
+      , "description": "Media casting sync option description."
+    }
   , "optionsMediaStopOnUnload": {
         "message": "Stop receiver playback on page unload"
       , "description": "Media stop on unload checkbox label."
@@ -213,6 +217,39 @@
   , "optionsLocalMediaServerPort": {
         "message": "HTTP server port:"
       , "description": "HTTP server port input label."
+    }
+
+  , "optionsReceiverSelectorCategoryName": {
+        "message": "Receiver selector"
+      , "description": "Options page receiver selector category title."
+    }
+  , "optionsReceiverSelectorCategoryDescription": {
+        "message": "Receiver device selection interface."
+      , "description": "Options page receiver selector category description."
+    }
+  , "optionsReceiverSelectorType": {
+        "message": "Type:"
+      , "description": "Receiver selector type option label."
+    }
+  , "optionsReceiverSelectorTypeBrowser": {
+        "message": "Browser"
+      , "description": "Receiver selector type browser radio option label."
+    }
+  , "optionsReceiverSelectorTypeNative": {
+        "message": "Native"
+      , "description": "Receiver selector type native radio option label."
+    }
+  , "optionsReceiverSelectorWaitForConnection": {
+        "message": "Wait for connection"
+      , "description": "Receiver selector wait for connection option checkbox label."
+    }
+  , "optionsReceiverSelectorWaitForConnectionDescription": {
+        "message": "Keep receiver selector open until the session is established or connection fails."
+      , "description": "Receiver selector wait for connection option description."
+    }
+  , "optionsReceiverSelectorCloseIfFocusLost": {
+        "message": "Close after losing focus"
+      , "description": "Receiver selector close if focus lost option checkbox label."
     }
 
   , "optionsUserAgentWhitelistCategoryName": {
@@ -281,6 +318,10 @@
   , "optionsMirroringAppId": {
         "message": "Receiver app ID:"
       , "description": "Mirroring app ID input label."
+    }
+  , "optionsMirroringAppIdDescription": {
+        "message": "App ID for a registered Chromecast receiver application. Advanced use only. Must be compatible with the default app (see GitHub repo)."
+      , "description": "Mirroring app ID option description."
     }
 
   , "optionsReset": {

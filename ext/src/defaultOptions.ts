@@ -1,5 +1,7 @@
 "use strict";
 
+import { ReceiverSelectorType } from "./receiver_selectors";
+
 export interface Options {
     bridgeApplicationName: string;
     mediaEnabled: boolean;
@@ -9,6 +11,12 @@ export interface Options {
     localMediaServerPort: number;
     mirroringEnabled: boolean;
     mirroringAppId: string;
+    receiverSelectorType: ReceiverSelectorType;
+
+    // TODO: Implement
+    receiverSelectorCloseIfFocusLost: boolean;
+    receiverSelectorWaitForConnection: boolean;
+
     userAgentWhitelistEnabled: boolean;
     userAgentWhitelist: string[];
 
@@ -24,6 +32,9 @@ const options: Options = {
   , localMediaServerPort: 9555
   , mirroringEnabled: false
   , mirroringAppId: MIRRORING_APP_ID
+  , receiverSelectorType: ReceiverSelectorType.Popup
+  , receiverSelectorCloseIfFocusLost: true
+  , receiverSelectorWaitForConnection: false
   , userAgentWhitelistEnabled: true
   , userAgentWhitelist: [
         "https://www.netflix.com/*"

@@ -22,3 +22,11 @@ button,
 select {
     height: 22px;
 }
+
+input[type="checkbox"],
+input[type="radio"] {
+    height: 16px;
+    margin-bottom: 1px;
+    margin-top: 1px;
+    width: 16px;
+}
