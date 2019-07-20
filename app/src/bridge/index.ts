@@ -58,7 +58,7 @@ function sendMessage (message: object) {
     try {
         encodeTransform.write(message);
     } catch (err) {
-        console.error("Failed to encode message");
+        console.error("Failed to encode message", err);
     }
 }
 
@@ -72,6 +72,7 @@ const existingSessions: Map<string, Session> = new Map();
 const existingMedia: Map<string, Media> = new Map();
 
 let receiverSelectorApp: child_process.ChildProcess;
+let receiverSelectorAppClosed = true;
 
 /**
  * Handle incoming messages from the extension and forward
@@ -167,6 +168,8 @@ async function handleMessage (message: Message) {
                     path.join(process.cwd(), "selector")
                   , [ receiverSelectorData ]);
 
+            receiverSelectorAppClosed = false;
+
             receiverSelectorApp.stdout!.setEncoding("utf8");
             receiverSelectorApp.stdout!.on("data", data => {
                 sendMessage({
@@ -175,7 +178,7 @@ async function handleMessage (message: Message) {
                 });
             });
 
-            receiverSelectorApp.addListener("error", err => {
+            receiverSelectorApp.on("error", err => {
                 sendMessage({
                     subject: "main:/receiverSelector/error"
                   , data: err.message
@@ -183,9 +186,13 @@ async function handleMessage (message: Message) {
             });
 
             receiverSelectorApp.on("close", () => {
-                sendMessage({
-                    subject: "main:/receiverSelector/close"
-                });
+                if (!receiverSelectorAppClosed) {
+                    receiverSelectorAppClosed = true;
+
+                    sendMessage({
+                        subject: "main:/receiverSelector/close"
+                    });
+                }
             });
 
             break;
@@ -193,6 +200,8 @@ async function handleMessage (message: Message) {
 
         case "bridge:/receiverSelector/close": {
             receiverSelectorApp.kill();
+            receiverSelectorAppClosed = true;
+
             break;
         }
 

@@ -22,6 +22,8 @@ export type ReceiverSelectorCancelledEvent = CustomEvent;
 
 
 export default interface ReceiverSelector extends EventTarget {
+    readonly isOpen: boolean;
+
     open (receivers: Receiver[]
         , defaultMediaType: ReceiverSelectorMediaType
         , availableMediaTypes: ReceiverSelectorMediaType): void;

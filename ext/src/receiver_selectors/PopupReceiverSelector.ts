@@ -23,6 +23,8 @@ export default class PopupReceiverSelector
 
     private wasReceiverSelected: boolean = false;
 
+    private _isOpen: boolean = false;
+
 
     constructor () {
         super();
@@ -65,6 +67,9 @@ export default class PopupReceiverSelector
         });
     }
 
+    get isOpen () {
+        return this._isOpen;
+    }
 
     public async open (
             receivers: Receiver[]
@@ -90,6 +95,8 @@ export default class PopupReceiverSelector
           , ...centeredProps
         });
 
+        this._isOpen = true;
+
         this.windowId = popup.id;
         this.openerWindowId = openerWindow.id;
 
@@ -103,10 +110,12 @@ export default class PopupReceiverSelector
                 this.onWindowsFocusChanged);
     }
 
-    public close (): void {
+    public async close (): Promise<void> {
         if (this.windowId) {
-            browser.windows.remove(this.windowId);
+            await browser.windows.remove(this.windowId);
         }
+
+        this._isOpen = false;
 
         if (this.messagePort && !this.messagePortDisconnected) {
             this.messagePort.disconnect();

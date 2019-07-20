@@ -205,6 +205,10 @@ export function _requestSession (
               , []                             // appImages
               , selectedReceiver               // receiver
               , (session: Session) => {
+                    sendMessageResponse({
+                        subject: "main:/sessionCreated"
+                    });
+
                     sessionRequestInProgress = false;
                     sessionSuccessCallback(session);
                 }));
