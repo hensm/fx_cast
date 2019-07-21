@@ -1,17 +1,20 @@
 "use strict";
 
-import { Options } from "../defaultOptions";
-import cast, { init } from "../shim/export";
+import options from "../lib/options";
+import cast, { ensureInit } from "../shim/export";
+
+import { Receiver } from "../types";
+import { getMediaSession } from "./media";
 
 
 // Variables passed from background
-const { srcUrl
+const { selectedReceiver
+      , srcUrl
       , targetElementId }
-    : { srcUrl: string
+    : { selectedReceiver: Receiver
+      , srcUrl: string
       , targetElementId: number } = (window as any);
 
-
-let options: Options;
 
 let session: cast.Session;
 let currentMedia: cast.media.Media;
@@ -24,12 +27,12 @@ const isLocalFile = srcUrl.startsWith("file:");
 const mediaElement = browser.menus.getTargetElement(
         targetElementId) as HTMLMediaElement;
 
-window.addEventListener("beforeunload", () => {
+window.addEventListener("beforeunload", async () => {
     browser.runtime.sendMessage({
         subject: "bridge:/mediaServer/stop"
     });
 
-    if (options.mediaStopOnUnload) {
+    if (await options.get("mediaStopOnUnload")) {
         session.stop(null, null);
         /*currentMedia.stop(null
               , onMediaStopSuccess
@@ -55,13 +58,9 @@ function getLocalAddress () {
 }
 
 
-async function onRequestSessionSuccess (newSession: cast.Session) {
-    cast.logMessage("onRequestSessionSuccess");
-
-    session = newSession;
-
+async function loadMedia () {
     let mediaUrl = new URL(srcUrl);
-    const port = options.localMediaServerPort;
+    const port = await options.get("localMediaServerPort");
 
     if (isLocalFile) {
         await new Promise((resolve, reject) => {
@@ -164,41 +163,13 @@ async function onRequestSessionSuccess (newSession: cast.Session) {
           , onLoadMediaError);
 }
 
-function onRequestSessionError () {
-    cast.logMessage("onRequestSessionError");
-}
 
-
-function sessionListener (newSession: cast.Session) {
-    cast.logMessage("sessionListener");
-}
-
-function receiverListener (availability: string) {
-    cast.logMessage("receiverListener");
-
-    if (availability === cast.ReceiverAvailability.AVAILABLE) {
-        cast.requestSession(
-                onRequestSessionSuccess
-              , onRequestSessionError);
-    }
-}
-
-
-function onInitializeSuccess () {
-    cast.logMessage("onInitializeSuccess");
-}
-
-function onInitializeError () {
-    cast.logMessage("onInitializeError");
-}
-
-
-function onLoadMediaSuccess (media: cast.media.Media) {
+async function onLoadMediaSuccess (media: cast.media.Media) {
     cast.logMessage("onLoadMediaSuccess");
 
     currentMedia = media;
 
-    if (options.mediaSyncElement) {
+    if (await options.get("mediaSyncElement")) {
         mediaElement.addEventListener("play", () => {
             if (ignoreMediaEvents) {
                 ignoreMediaEvents = false;
@@ -312,73 +283,57 @@ function onLoadMediaSuccess (media: cast.media.Media) {
     }
 }
 
+function onRequestSessionError () {
+    cast.logMessage("onRequestSessionError");
+}
+function sessionListener (newSession: cast.Session) {
+    cast.logMessage("sessionListener");
+}
+function onInitializeSuccess () {
+    cast.logMessage("onInitializeSuccess");
+}
+function onInitializeError () {
+    cast.logMessage("onInitializeError");
+}
 function onLoadMediaError () {
     cast.logMessage("onLoadMediaError");
 }
-
-
-/* play */
 function onMediaPlaySuccess () {
     cast.logMessage("onMediaPlaySuccess");
 }
-
 function onMediaPlayError (err: cast.Error) {
     cast.logMessage("onMediaPlayError");
 }
-
-
-/* pause */
 function onMediaPauseSuccess () {
     cast.logMessage("onMediaPauseSuccess");
 }
-
 function onMediaPauseError (err: cast.Error) {
     cast.logMessage("onMediaPauseError");
 }
-
-
-/* stop */
 function onMediaStopSuccess () {
     cast.logMessage("onMediaStopSuccess");
 }
-
 function onMediaStopError (err: cast.Error) {
     cast.logMessage("onMediaStopError");
 }
-
-
-/* seek */
 function onMediaSeekSuccess () {
     cast.logMessage("onMediaSeekSuccess");
 }
-
 function onMediaSeekError (err: cast.Error) {
     cast.logMessage("onMediaSeekError");
 }
 
 
-init().then(async bridgeInfo => {
-    if (!bridgeInfo.isVersionCompatible) {
-        console.error("__onGCastApiAvailable error");
-        return;
-    }
+ensureInit().then(async bridgeInfo => {
+    await ensureInit();
 
-    options = (await browser.storage.sync.get("options")).options;
-
-    if (isLocalFile && !options.localMediaEnabled) {
+    const isLocalMediaEnabled = await options.get("localMediaEnabled");
+    if (isLocalFile && !isLocalMediaEnabled) {
         cast.logMessage("Local media casting not enabled");
         return;
     }
 
+    session = await getMediaSession(selectedReceiver);
 
-    const sessionRequest = new cast.SessionRequest(
-            cast.media.DEFAULT_MEDIA_RECEIVER_APP_ID);
-
-    const apiConfig = new cast.ApiConfig(sessionRequest
-          , sessionListener
-          , receiverListener);
-
-    cast.initialize(apiConfig
-          , onInitializeSuccess
-          , onInitializeError);
+    loadMedia();
 });

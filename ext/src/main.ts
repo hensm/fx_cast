@@ -413,49 +413,92 @@ browser.contentScripts.register({
 });
 
 
-async function loadMirrorCastSender (
+/**
+ * Loads the appropriate sender for a given receiver
+ * selector response.
+ */
+async function loadSenderForReceiverSelection (
         tabId: number
       , frameId: number
-      , selectedMedia: ReceiverSelectorMediaType
-      , selectedReceiver: Receiver) {
+      , selection: ReceiverSelection) {
 
-    await browser.tabs.executeScript(tabId, {
-        code: `
-            window.selectedMedia = ${selectedMedia};
-            window.selectedReceiver = ${JSON.stringify(selectedReceiver)}
-        `
-      , frameId
-    });
+    switch (selection.mediaType) {
+        case ReceiverSelectorMediaType.Tab:
+        case ReceiverSelectorMediaType.Screen: {
+            await browser.tabs.executeScript(tabId, {
+                code: `
+                    window.selectedMedia = ${selection.mediaType};
+                    window.selectedReceiver = ${
+                            JSON.stringify(selection.receiver)};
+                `
+              , frameId
+            });
 
-    await browser.tabs.executeScript(tabId, {
-        file: "senders/mirroringCast.js"
-      , frameId
-    });
+            await browser.tabs.executeScript(tabId, {
+                file: "senders/mirroringCast.js"
+              , frameId
+            });
+
+            break;
+        }
+
+        case ReceiverSelectorMediaType.App:
+        case ReceiverSelectorMediaType.File: {
+            break;
+        }
+    }
 }
 
+
+let mediaCastTabId: number;
+let mediaCastFrameId: number;
 
 browser.menus.onClicked.addListener(async (info, tab) => {
     switch (info.menuItemId) {
         case mirrorCastMenuId: {
-            openReceiverSelector(tab.id, info.frameId);
+            loadSenderForReceiverSelection(
+                    tab.id, info.frameId
+                  , await getUserReceiverSelection());
+
             return;
         }
 
         case mediaCastMenuId: {
-            // Pass media URL to media sender app
-            await browser.tabs.executeScript(tab.id, {
-                code: `
-                    window.srcUrl = "${info.srcUrl}";
-                    window.targetElementId = ${info.targetElementId};
-                `
-              , frameId: info.frameId
-            });
+            const allMediaTypes =
+                    ReceiverSelectorMediaType.App
+                  | ReceiverSelectorMediaType.Tab
+                  | ReceiverSelectorMediaType.Screen
+                  | ReceiverSelectorMediaType.File;
 
-            // Load media sender app
-            await browser.tabs.executeScript(tab.id, {
-                file: "senders/mediaCast.js"
-              , frameId: info.frameId
-            });
+            const selection = await getUserReceiverSelection(
+                    ReceiverSelectorMediaType.App
+                  , allMediaTypes);
+
+            if (selection && selection.mediaType
+                    === ReceiverSelectorMediaType.App) {
+
+                mediaCastTabId = tab.id;
+                mediaCastFrameId = info.frameId;
+
+                await browser.tabs.executeScript(mediaCastTabId, {
+                    code: `
+                        window.selectedReceiver = ${
+                                JSON.stringify(selection.receiver)};
+                        window.srcUrl = ${JSON.stringify(info.srcUrl)};
+                        window.targetElementId = ${info.targetElementId};
+                    `
+                  , frameId: mediaCastFrameId
+                });
+
+                await browser.tabs.executeScript(mediaCastTabId, {
+                    file: "senders/mediaCast.js"
+                  , frameId: mediaCastFrameId
+                });
+            } else {
+                // Handle other responses
+                await loadSenderForReceiverSelection(
+                        tab.id, info.frameId, selection);
+            }
 
             return;
         }
@@ -473,8 +516,16 @@ browser.menus.onClicked.addListener(async (info, tab) => {
     }
 });
 
+/**
+ * When the browser action is clicked, open a receiver
+ * selector and load a sender for the response. The
+ * mirroring sender is loaded into the current tab at the
+ * top-level frame.
+ */
 browser.browserAction.onClicked.addListener(async tab => {
-    openReceiverSelector(tab.id, 0);
+    loadSenderForReceiverSelection(
+            tab.id, 0
+          , await getUserReceiverSelection());
 });
 
 
@@ -607,18 +658,32 @@ async function onStatusBridgeMessage (message: Message) {
 
 let globalReceiverSelector: ReceiverSelector;
 
-function openReceiverSelector (
-        tabId: number, frameId: number
-      , defaultMediaType =
-                  ReceiverSelectorMediaType.Tab
+
+/**
+ * Opens a receiver selector with the specified
+ * default/available media types.
+ *
+ * Returns a promise that:
+ *   - Resolves to a ReceiverSelection object if selection is
+ *      successful.
+ *   - Resolves to null if the selection is cancelled.
+ *   - Rejects if the selection fails.
+ */
+function getUserReceiverSelection (
+        defaultMediaType =
+                ReceiverSelectorMediaType.Tab
       , availableMediaTypes =
-                  ReceiverSelectorMediaType.Tab
-                | ReceiverSelectorMediaType.Screen
-                | ReceiverSelectorMediaType.File): Promise<ReceiverSelection> {
+                ReceiverSelectorMediaType.Tab
+              | ReceiverSelectorMediaType.Screen
+              | ReceiverSelectorMediaType.File): Promise<ReceiverSelection> {
 
     return new Promise(async (resolve, reject) => {
         const { os } = await browser.runtime.getPlatformInfo();
 
+        /**
+         * If a receiver selector has already been created,
+         * unregister it and close it if it's still open.
+         */
         if (globalReceiverSelector) {
             unregister();
 
@@ -637,29 +702,13 @@ function openReceiverSelector (
             unregister();
 
             resolve(ev.detail);
-
-            switch (ev.detail.mediaType) {
-                case ReceiverSelectorMediaType.Tab:
-                case ReceiverSelectorMediaType.Screen: {
-                    loadMirrorCastSender(
-                            tabId, frameId
-                          , ev.detail.mediaType
-                          , ev.detail.receiver)
-
-                    break;
-                }
-
-                case ReceiverSelectorMediaType.File: {
-                    break;
-                }
-            }
         }
 
         function onReceiverSelectorCancelled (
                 ev: ReceiverSelectorCancelledEvent) {
             console.info("fx_cast (Debug): Cancelled receiver selection");
             unregister();
-            
+
             resolve(null);
         }
 
@@ -667,6 +716,7 @@ function openReceiverSelector (
                 ev: ReceiverSelectorErrorEvent) {
             console.error("fx_cast (Debug): Failed to select receiver");
             unregister();
+
             reject();
         }
 
@@ -746,16 +796,22 @@ async function onConnectShim (port: browser.runtime.Port) {
 
 
     bridgePort.onMessage.addListener((message: Message) => {
+        const [ destination ] = message.subject.split(":/");
+        if (destination === "mediaCast") {
+            browser.tabs.sendMessage(
+                    mediaCastTabId, message, { frameId: mediaCastFrameId });
+
+            return;
+        }
+
         port.postMessage(message);
     });
 
     port.onMessage.addListener(async (message: Message) => {
         const [ destination ] = message.subject.split(":/");
-        switch (destination) {
-            case "bridge": {
-                bridgePort.postMessage(message);
-                break;
-            }
+        if (destination === "bridge") {
+            bridgePort.postMessage(message);
+            return;
         }
 
         switch (message.subject) {
@@ -788,9 +844,8 @@ async function onConnectShim (port: browser.runtime.Port) {
                       | ReceiverSelectorMediaType.File;
 
                 try {
-                    const selection = await openReceiverSelector(
-                            tabId, frameId
-                          , ReceiverSelectorMediaType.App
+                    const selection = await getUserReceiverSelection(
+                            ReceiverSelectorMediaType.App
                           , allMediaTypes);
 
                     if (!selection) {
@@ -842,9 +897,20 @@ async function onConnectShim (port: browser.runtime.Port) {
 
 browser.runtime.onConnect.addListener(port => {
     switch (port.name) {
-        case "shim":
+        case "shim": {
             onConnectShim(port);
             break;
+        }
+    }
+});
+
+browser.runtime.onMessage.addListener((message: Message, sender) => {
+    if (message.subject.startsWith("bridge:/")) {
+        const shimId = `${sender.tab.id}:${sender.frameId}`;
+        if (shimMap.has(shimId)) {
+            const shim = shimMap.get(shimId);
+            shim.bridgePort.postMessage(message);
+        }
     }
 });
 

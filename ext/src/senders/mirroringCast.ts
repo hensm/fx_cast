@@ -1,7 +1,7 @@
 "use strict";
 
 import options from "../lib/options";
-import cast, { init } from "../shim/export";
+import cast, { ensureInit } from "../shim/export";
 
 import { ReceiverSelectorMediaType }
         from "../receiver_selectors/ReceiverSelector";
@@ -164,9 +164,9 @@ function receiverListener (availability: string) {
     if (availability === cast.ReceiverAvailability.AVAILABLE) {
         wasSessionRequested = true;
         cast._requestSession(
-                onRequestSessionSuccess
-              , onRequestSessionError
-              , selectedReceiver);
+                selectedReceiver
+              , onRequestSessionSuccess
+              , onRequestSessionError);
     }
 }
 
@@ -185,12 +185,8 @@ function onInitializeError () {
 }
 
 
-init().then(async bridgeInfo => {
-    if (!bridgeInfo.isVersionCompatible) {
-        console.error("__onGCastApiAvailable error");
-        return;
-    }
-
+ensureInit().then(async bridgeInfo => {
+    await ensureInit();
 
     const mirroringAppId = await options.get("mirroringAppId");
     const sessionRequest = new cast.SessionRequest(mirroringAppId);
