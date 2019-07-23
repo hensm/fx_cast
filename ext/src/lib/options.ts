@@ -2,6 +2,9 @@
 
 import defaultOptions from "../defaultOptions";
 
+import { TypedEventTarget } from "./typedEvents";
+import { Message } from "../types";
+
 
 export interface Options {
     bridgeApplicationName: string;
@@ -18,77 +21,91 @@ export interface Options {
     [key: string]: Options[keyof Options];
 }
 
-/**
- * Fetches `options` key from storage and returns it as
- * Options interface type.
- */
-async function getAll (): Promise<Options> {
-    const { options }: { options: Options } =
-            await browser.storage.sync.get("options");
 
-    return options;
+class DispatcherEvents {
+    "changed": Array<keyof Options>
 }
 
-/**
- * Takes Options object and sets to `options` storage key.
- * Returns storage promise.
- */
-async function setAll (options: Options): Promise<void> {
-    return browser.storage.sync.set({ options });
-}
+class Dispatcher extends TypedEventTarget<DispatcherEvents> {
+    constructor () {
+        super();
 
-/**
- * Gets specific option from storage and returns it as its
- * type from Options interface type.
- */
-async function get<T extends keyof Options> (name: T): Promise<Options[T]> {
-    const options = await getAll();
-
-    if (options.hasOwnProperty(name)) {
-        return options[name];
+        browser.runtime.onMessage.addListener((message: Message) => {
+            if (message.subject === "optionsUpdated") {
+                this.dispatchEvent(new CustomEvent("changed", {
+                    detail: message.data.alteredOptions
+                }));
+            }
+        });
     }
-}
 
-/**
- * Sets specific option to storage. Returns storage
- * promise.
- */
-async function set<T extends keyof Options> (
-        name: T
-      , value: Options[T]): Promise<void> {
+    /**
+     * Fetches `options` key from storage and returns it as
+     * Options interface type.
+     */
+    async getAll (): Promise<Options> {
+        const { options }: { options: Options } =
+                await browser.storage.sync.get("options");
 
-    const options = await getAll();
-    options[name] = value;
-    return setAll(options);
-}
+        return options;
+    }
 
+    /**
+     * Takes Options object and sets to `options` storage key.
+     * Returns storage promise.
+     */
+    async setAll (options: Options): Promise<void> {
+        return browser.storage.sync.set({ options });
+    }
 
-/**
- * Gets existing options from storage and compares it
- * against defaults. Any options in defaults and not in
- * storage are set. Does not override any existing options.
- */
-async function update (defaults = defaultOptions): Promise<void> {
-    const oldOpts = await getAll();
-    const newOpts: Partial<Options> = {};
+    /**
+     * Gets specific option from storage and returns it as its
+     * type from Options interface type.
+     */
+    async get<T extends keyof Options> (name: T): Promise<Options[T]> {
+        const options = await this.getAll();
 
-    // Find options not already in storage
-    for (const [ optName, optVal ] of Object.entries(defaults)) {
-        if (!oldOpts.hasOwnProperty(optName)) {
-            newOpts[optName] = optVal;
+        if (options.hasOwnProperty(name)) {
+            return options[name];
         }
     }
 
-    // Update storage with default values of new options
-    return setAll({
-        ...oldOpts
-      , ...newOpts
-    });
+    /**
+     * Sets specific option to storage. Returns storage
+     * promise.
+     */
+    async set<T extends keyof Options> (
+            name: T
+          , value: Options[T]): Promise<void> {
+
+        const options = await this.getAll();
+        options[name] = value;
+        return this.setAll(options);
+    }
+
+
+    /**
+     * Gets existing options from storage and compares it
+     * against defaults. Any options in defaults and not in
+     * storage are set. Does not override any existing options.
+     */
+    async update (defaults = defaultOptions): Promise<void> {
+        const oldOpts = await this.getAll();
+        const newOpts: Partial<Options> = {};
+
+        // Find options not already in storage
+        for (const [ optName, optVal ] of Object.entries(defaults)) {
+            if (!oldOpts.hasOwnProperty(optName)) {
+                newOpts[optName] = optVal;
+            }
+        }
+
+        // Update storage with default values of new options
+        return this.setAll({
+            ...oldOpts
+          , ...newOpts
+        });
+    }
 }
 
-
-export default {
-    get, getAll
-  , set, setAll
-  , update
-};
+export default new Dispatcher();

@@ -11,6 +11,9 @@ const URL_PATTERN_HTTP = "http://*/*";
 const URL_PATTERN_HTTPS = "http://*/*";
 const URL_PATTERN_FILE = "file://*/*";
 
+const URL_PATTERNS_REMOTE = [ URL_PATTERN_HTTP, URL_PATTERN_HTTPS ];
+const URL_PATTERNS_ALL = [ ...URL_PATTERNS_REMOTE, URL_PATTERN_FILE ];
+
 
 type MenuId = string | number;
 
@@ -40,18 +43,32 @@ class MenuManager extends TypedEventTarget<MenuManagerEvents> {
     constructor () {
         super();
 
-        this.onMenuClicked = this.onMenuClicked.bind(this);
-        this.onMenuShown = this.onMenuShown.bind(this);
+        browser.menus.onClicked.addListener(this.onMenuClicked.bind(this));
+        browser.menus.onShown.addListener(this.onMenuShown.bind(this));
 
-        browser.menus.onClicked.addListener(this.onMenuClicked);
-        browser.menus.onShown.addListener(this.onMenuShown);
-    }
+        options.addEventListener("changed", async ev => {
+            const alteredOpts = ev.detail;
+            const opts = await options.getAll();
 
-    public set isLocalMediaEnabled (state: boolean) {
-        browser.menus.update(this.mediaCastMenuId, {
-            targetUrlPatterns: state
-                ? [ URL_PATTERN_HTTP, URL_PATTERN_HTTPS ]
-                : [ URL_PATTERN_HTTP, URL_PATTERN_HTTPS, URL_PATTERN_FILE ]
+            if (alteredOpts.includes("mirroringEnabled")) {
+                browser.menus.update(this.mirrorCastMenuId, {
+                    visible: opts.mirroringEnabled
+                });
+            }
+
+            if (alteredOpts.includes("mediaEnabled")) {
+                browser.menus.update(this.mediaCastMenuId, {
+                    visible: opts.mediaEnabled
+                });
+            }
+
+            if (alteredOpts.includes("localMediaEnabled")) {
+                browser.menus.update(this.mediaCastMenuId, {
+                    targetUrlPatterns: opts.localMediaEnabled
+                        ? URL_PATTERNS_REMOTE
+                        : URL_PATTERNS_ALL
+                });
+            }
         });
     }
 
@@ -71,9 +88,10 @@ class MenuManager extends TypedEventTarget<MenuManagerEvents> {
             contexts: [ "audio", "video" ]
           , title: _("contextCast")
           , visible: opts.mediaEnabled
+          , targetUrlPatterns: opts.localMediaEnabled
+                ? URL_PATTERNS_REMOTE
+                : URL_PATTERNS_ALL
         });
-
-        this.isLocalMediaEnabled = opts.localMediaEnabled;
 
         // Screen/Tab mirroring "Cast..." context menu item
         this.mirrorCastMenuId = await browser.menus.create({
@@ -82,10 +100,7 @@ class MenuManager extends TypedEventTarget<MenuManagerEvents> {
           , visible: opts.mirroringEnabled
 
             // Mirroring doesn't work from file:// urls
-          , documentUrlPatterns: [
-                URL_PATTERN_HTTP
-              , URL_PATTERN_HTTPS
-            ]
+          , documentUrlPatterns: URL_PATTERNS_REMOTE
         });
 
 

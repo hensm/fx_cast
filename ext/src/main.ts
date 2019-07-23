@@ -272,14 +272,6 @@ browser.runtime.onMessage.addListener(async (message: Message, sender) => {
 
         return;
     }
-
-    switch (message.subject) {
-        case "optionsUpdated": {
-            const opts = await options.getAll();
-            initRegisterOptionalFeatures(opts, message.data.alteredOptions);
-            break;
-        }
-    }
 });
 
 
@@ -287,7 +279,7 @@ browser.runtime.onMessage.addListener(async (message: Message, sender) => {
 /**
  * Initializes any functionality based on options state.
  */
-async function initRegisterOptionalFeatures (
+async function registerOptionalFeatures (
         opts: Options
       , alteredOptions?: Array<(keyof Options)>) {
 
@@ -315,31 +307,22 @@ async function initRegisterOptionalFeatures (
         // If no altered properties specified, register all listeners
         register_userAgentWhitelist();
     } else {
-
         if (alteredOptions.includes("userAgentWhitelist")
              || alteredOptions.includes("userAgentWhitelistEnabled")) {
 
             unregister_userAgentWhitelist();
             register_userAgentWhitelist();
         }
-
-        if (alteredOptions.includes("mirroringEnabled")) {
-            browser.menus.update(MenuManager.mirrorCastMenuId, {
-                visible: opts.mirroringEnabled
-            });
-        }
-
-        if (alteredOptions.includes("mediaEnabled")) {
-            browser.menus.update(MenuManager.mediaCastMenuId, {
-                visible: opts.mediaEnabled
-            });
-        }
-
-        if (alteredOptions.includes("localMediaEnabled")) {
-            MenuManager.isLocalMediaEnabled = opts.localMediaEnabled;
-        }
     }
 }
+
+options.addEventListener("changed", async ev => {
+    const opts = await options.getAll();
+    const alteredOpts = ev.detail;
+
+    registerOptionalFeatures(opts, alteredOpts);
+});
+
 
 // Misc init
 async function init () {
@@ -348,8 +331,8 @@ async function init () {
         return;
     }
 
-    MenuManager.createMenus();
-    initRegisterOptionalFeatures(opts);
+    MenuManager.createMenus();    
+    registerOptionalFeatures(opts);
 }
 
 init();
