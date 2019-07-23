@@ -1,14 +1,16 @@
 "use strict";
 
 import ReceiverSelector, {
-        ReceiverSelectorMediaType } from "./ReceiverSelector";
+        ReceiverSelectorEvents
+      , ReceiverSelectorMediaType } from "./ReceiverSelector";
 
+import { TypedEventTarget } from "../lib/typedEvents";
 import { getWindowCenteredProps } from "../lib/utils";
 import { Message, Receiver } from "../types";
 
 
 export default class PopupReceiverSelector
-        extends EventTarget
+        extends TypedEventTarget<ReceiverSelectorEvents>
         implements ReceiverSelector {
 
     private windowId: number;

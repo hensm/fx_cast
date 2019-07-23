@@ -185,7 +185,7 @@ function onInitializeError () {
 }
 
 
-ensureInit().then(async bridgeInfo => {
+ensureInit().then(async () => {
     await ensureInit();
 
     const mirroringAppId = await options.get("mirroringAppId");

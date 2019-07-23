@@ -1,10 +1,10 @@
 "use strict";
 
+import mediaCasting from "../lib/mediaCasting";
 import options from "../lib/options";
 import cast, { ensureInit } from "../shim/export";
 
 import { Receiver } from "../types";
-import { getMediaSession } from "./media";
 
 
 // Variables passed from background
@@ -324,7 +324,7 @@ function onMediaSeekError (err: cast.Error) {
 }
 
 
-ensureInit().then(async bridgeInfo => {
+ensureInit().then(async () => {
     await ensureInit();
 
     const isLocalMediaEnabled = await options.get("localMediaEnabled");
@@ -333,7 +333,7 @@ ensureInit().then(async bridgeInfo => {
         return;
     }
 
-    session = await getMediaSession(selectedReceiver);
+    session = await mediaCasting.getMediaSession(selectedReceiver);
 
     loadMedia();
 });

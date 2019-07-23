@@ -179,11 +179,6 @@ class PopupApp extends Component<{}, PopupAppState> {
             try {
                 const filePath = window.prompt();
 
-                // Validate URL
-                const fileUrl = new URL(filePath.startsWith("file://")
-                    ? filePath
-                    : `file://${filePath}`);
-
                 this.setState({
                     mediaType
                   , filePath

@@ -1,5 +1,6 @@
 "use strict";
 
+import { ReceiverSelection } from "./receiver_selectors/ReceiverSelector";
 import { Message, Receiver, ReceiverStatus } from "./types";
 
 
@@ -26,7 +27,7 @@ export interface ServiceUpMessage extends Message {
 
 export interface NativeReceiverSelectorSelectedMessage extends Message {
     subject: "main:/receiverSelector/selected";
-    data: Receiver;
+    data: ReceiverSelection;
 }
 
 export interface NativeReceiverSelectorCloseMessage extends Message {

@@ -1,12 +1,12 @@
 "use strict";
 
-import options from "../lib/options";
 import cast, { ensureInit } from "../shim/export";
+import options from "./options";
 
 import { Receiver } from "../types";
 
 
-export function getMediaSession (
+function getMediaSession (
         receiver?: Receiver): Promise<cast.Session> {
 
     return new Promise(async (resolve, reject) => {
@@ -39,7 +39,7 @@ export function getMediaSession (
     });
 }
 
-export function loadMediaUrl (
+function loadMediaUrl (
         mediaUrl: string
       , receiver: Receiver): Promise<cast.Session> {
 
@@ -72,3 +72,10 @@ export function loadMediaUrl (
               , () => { reject(); }); // errorCallback
     });
 }
+
+
+export default {
+    getMediaSession
+  , loadMediaUrl
+};
+

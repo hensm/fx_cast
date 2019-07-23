@@ -4,13 +4,13 @@
 import React, { Component } from "react";
 import ReactDOM from "react-dom";
 
-import defaultOptions, { Options } from "../../defaultOptions";
+import defaultOptions from "../../defaultOptions";
 
 import Bridge from "./Bridge";
 import EditableList from "./EditableList";
 
 import getBridgeInfo, { BridgeInfo } from "../../lib/getBridgeInfo";
-import options from "../../lib/options";
+import options, { Options } from "../../lib/options";
 import { REMOTE_MATCH_PATTERN_REGEX } from "../../lib/utils";
 
 

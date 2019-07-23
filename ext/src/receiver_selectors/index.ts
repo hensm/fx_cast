@@ -6,20 +6,15 @@ import PopupReceiverSelector
     from "./PopupReceiverSelector";
 
 
-import ReceiverSelector, {
-         ReceiverSelection
-       , ReceiverSelectorCancelledEvent
-       , ReceiverSelectorErrorEvent
-       , ReceiverSelectorMediaType
-       , ReceiverSelectorSelectedEvent } from "./ReceiverSelector";
+import { ReceiverSelection
+       , ReceiverSelectorMediaType } from "./ReceiverSelector";
+
+type ReceiverSelector = ReturnType<typeof getReceiverSelector>;
 
 export {
     ReceiverSelector
   , ReceiverSelection
-  , ReceiverSelectorCancelledEvent
-  , ReceiverSelectorErrorEvent
   , ReceiverSelectorMediaType
-  , ReceiverSelectorSelectedEvent
 };
 
 export enum ReceiverSelectorType {

@@ -1,7 +1,22 @@
 "use strict";
 
-import defaultOptions, { Options } from "../defaultOptions";
+import defaultOptions from "../defaultOptions";
 
+
+export interface Options {
+    bridgeApplicationName: string;
+    mediaEnabled: boolean;
+    mediaSyncElement: boolean;
+    mediaStopOnUnload: boolean;
+    localMediaEnabled: boolean;
+    localMediaServerPort: number;
+    mirroringEnabled: boolean;
+    mirroringAppId: string;
+    userAgentWhitelistEnabled: boolean;
+    userAgentWhitelist: string[];
+
+    [key: string]: Options[keyof Options];
+}
 
 /**
  * Fetches `options` key from storage and returns it as

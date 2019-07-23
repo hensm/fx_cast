@@ -4,8 +4,10 @@ import nativeMessaging from "../lib/nativeMessaging";
 import options from "../lib/options";
 
 import ReceiverSelector, {
-        ReceiverSelectorMediaType } from "./ReceiverSelector";
+        ReceiverSelectorEvents
+      , ReceiverSelectorMediaType } from "./ReceiverSelector";
 
+import { TypedEventTarget } from "../lib/typedEvents";
 import { Message, Receiver } from "../types";
 
 import { NativeReceiverSelectorCloseMessage
@@ -18,7 +20,7 @@ const _ = browser.i18n.getMessage;
 
 // TODO: Figure out lifetime properly
 export default class NativeMacReceiverSelector
-        extends EventTarget
+        extends TypedEventTarget<ReceiverSelectorEvents>
         implements ReceiverSelector {
 
     private bridgePort: browser.runtime.Port;

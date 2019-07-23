@@ -1,23 +1,20 @@
 "use strict";
 
-import semver from "semver";
-
-import defaultOptions, { Options } from "./defaultOptions";
+import defaultOptions from "./defaultOptions";
 import getBridgeInfo from "./lib/getBridgeInfo";
+import mediaCasting from "./lib/mediaCasting";
 import nativeMessaging from "./lib/nativeMessaging";
-import options from "./lib/options";
+import options, { Options } from "./lib/options";
 
 import { getChromeUserAgent } from "./lib/userAgents";
 import { getWindowCenteredProps } from "./lib/utils";
 
-import { getReceiverSelector
-       , ReceiverSelection
-       , ReceiverSelector
-       , ReceiverSelectorCancelledEvent
-       , ReceiverSelectorErrorEvent
-       , ReceiverSelectorMediaType
-       , ReceiverSelectorSelectedEvent
-       , ReceiverSelectorType } from "./receiver_selectors";
+import SelectorManager from "./managers/selector";
+import ShimManager from "./managers/shim";
+import StatusManager from "./managers/status";
+
+import { ReceiverSelection
+       , ReceiverSelectorMediaType } from "./receiver_selectors";
 
 import { Message, Receiver } from "./types";
 
@@ -422,6 +419,11 @@ async function loadSenderForReceiverSelection (
       , frameId: number
       , selection: ReceiverSelection) {
 
+    // Cancelled
+    if (selection === null) {
+        return;
+    }
+
     switch (selection.mediaType) {
         case ReceiverSelectorMediaType.Tab:
         case ReceiverSelectorMediaType.Screen: {
@@ -442,8 +444,13 @@ async function loadSenderForReceiverSelection (
             break;
         }
 
-        case ReceiverSelectorMediaType.App:
         case ReceiverSelectorMediaType.File: {
+            const fileUrl = new URL(`file://${selection.filePath}`);
+            const mediaSession = await mediaCasting.loadMediaUrl(
+                    fileUrl.href, selection.receiver);
+
+            console.log(mediaSession);
+
             break;
         }
     }
@@ -458,7 +465,7 @@ browser.menus.onClicked.addListener(async (info, tab) => {
         case mirrorCastMenuId: {
             loadSenderForReceiverSelection(
                     tab.id, info.frameId
-                  , await getUserReceiverSelection());
+                  , await SelectorManager.getSelection());
 
             return;
         }
@@ -470,7 +477,7 @@ browser.menus.onClicked.addListener(async (info, tab) => {
                   | ReceiverSelectorMediaType.Screen
                   | ReceiverSelectorMediaType.File;
 
-            const selection = await getUserReceiverSelection(
+            const selection = await SelectorManager.getSelection(
                     ReceiverSelectorMediaType.App
                   , allMediaTypes);
 
@@ -525,380 +532,30 @@ browser.menus.onClicked.addListener(async (info, tab) => {
 browser.browserAction.onClicked.addListener(async tab => {
     loadSenderForReceiverSelection(
             tab.id, 0
-          , await getUserReceiverSelection());
+          , await SelectorManager.getSelection());
 });
 
 
-interface Shim {
-    port: browser.runtime.Port;
-    bridgePort: browser.runtime.Port;
-    tabId: number;
-    frameId: number;
-}
-
-const shimMap = new Map<string, Shim>();
-
-
-let statusBridge: browser.runtime.Port;
-const statusBridgeReceivers = new Map<string, Receiver>();
-
-/**
- * Create status bridge, set event handlers and initialize.
- */
-async function initCreateStatusBridge (opts: Options) {
-    // Status bridge already initialized
-    if (statusBridge) {
-        return;
-    }
-
-    statusBridge = nativeMessaging.connectNative(opts.bridgeApplicationName);
-    statusBridge.onDisconnect.addListener(onStatusBridgeDisconnect);
-    statusBridge.onMessage.addListener(onStatusBridgeMessage);
-
-    statusBridge.postMessage({
-        subject: "bridge:/initialize"
-      , data: {
-            shouldWatchStatus: true
-        }
-    });
-}
-
-/**
- * Runs once the status bridge has disconnected. Sends
- * serviceDown messages for all receivers to all shims to
- * update receiver availability, then clears the receiver
- * list.
- *
- * Attempts to reinitialize the status bridge after 10
- * seconds. If it fails immediately, this handler will be
- * triggered again and the timer is reset for another 10
- * seconds.
- */
-function onStatusBridgeDisconnect () {
-    // Notify shims for receiver availability
-    for (const [, receiver ] of statusBridgeReceivers) {
-        for (const [, shim ] of shimMap) {
-            shim.port.postMessage({
-                subject: "shim:/serviceDown"
-              , data: { id: receiver.id }
-            });
-        }
-    }
-
-    // Cleanup
-    statusBridgeReceivers.clear();
-    statusBridge.onDisconnect.removeListener(onStatusBridgeDisconnect);
-    statusBridge.onMessage.removeListener(onStatusBridgeMessage);
-    statusBridge = null;
-
-    // After 10 seconds, attempt to reinitialize
-    window.setTimeout(async () => {
-        const opts = await options.getAll();
-        initCreateStatusBridge(opts);
-    }, 10000);
-}
-
-/**
- * Handles incoming status bridge messages.
- */
-async function onStatusBridgeMessage (message: Message) {
-    switch (message.subject) {
-        case "shim:/serviceUp": {
-            const receiver = (message as ServiceUpMessage).data;
-            statusBridgeReceivers.set(receiver.id, receiver);
-
-            // Forward update to shims
-            for (const shim of shimMap.values()) {
-                shim.port.postMessage({
-                    subject: "shim:/serviceUp"
-                  , data: { id: receiver.id }
-                });
-            }
-
-            break;
-        }
-
-        case "shim:/serviceDown": {
-            const { id } = (message as ServiceDownMessage).data;
-
-            if (statusBridgeReceivers.has(id)) {
-                statusBridgeReceivers.delete(id);
-            }
-
-            // Forward update to shims
-            for (const shim of shimMap.values()) {
-                shim.port.postMessage({
-                    subject: "shim:/serviceDown"
-                  , data: { id }
-                });
-            }
-
-            break;
-        }
-
-        case "receiverStatus": {
-            const { id, status } = (message as ReceiverStatusMessage).data;
-
-            const receiver = statusBridgeReceivers.get(id);
-
-            // Merge new status with old status
-            statusBridgeReceivers.set(id, {
-                ...receiver
-              , status: {
-                    ...receiver.status
-                  , ...status
-                }
-            });
-
-            break;
-        }
-    }
-}
-
-
-let globalReceiverSelector: ReceiverSelector;
-
-
-/**
- * Opens a receiver selector with the specified
- * default/available media types.
- *
- * Returns a promise that:
- *   - Resolves to a ReceiverSelection object if selection is
- *      successful.
- *   - Resolves to null if the selection is cancelled.
- *   - Rejects if the selection fails.
- */
-function getUserReceiverSelection (
-        defaultMediaType =
-                ReceiverSelectorMediaType.Tab
-      , availableMediaTypes =
-                ReceiverSelectorMediaType.Tab
-              | ReceiverSelectorMediaType.Screen
-              | ReceiverSelectorMediaType.File): Promise<ReceiverSelection> {
-
-    return new Promise(async (resolve, reject) => {
-        const { os } = await browser.runtime.getPlatformInfo();
-
-        /**
-         * If a receiver selector has already been created,
-         * unregister it and close it if it's still open.
-         */
-        if (globalReceiverSelector) {
-            unregister();
-
-            if (globalReceiverSelector.isOpen) {
-                globalReceiverSelector.close();
-            }
-        }
-
-        globalReceiverSelector = getReceiverSelector(os === "mac"
-            ? ReceiverSelectorType.NativeMac
-            : ReceiverSelectorType.Popup);
-
-        function onReceiverSelectorSelected (
-                ev: ReceiverSelectorSelectedEvent) {
-            console.info("fx_cast (Debug): Selected receiver", ev.detail);
-            unregister();
-
-            resolve(ev.detail);
-        }
-
-        function onReceiverSelectorCancelled (
-                ev: ReceiverSelectorCancelledEvent) {
-            console.info("fx_cast (Debug): Cancelled receiver selection");
-            unregister();
-
-            resolve(null);
-        }
-
-        function onReceiverSelectorError (
-                ev: ReceiverSelectorErrorEvent) {
-            console.error("fx_cast (Debug): Failed to select receiver");
-            unregister();
-
-            reject();
-        }
-
-
-        globalReceiverSelector.addEventListener("selected"
-              , onReceiverSelectorSelected);
-        globalReceiverSelector.addEventListener("cancelled"
-              , onReceiverSelectorCancelled);
-        globalReceiverSelector.addEventListener("error"
-              , onReceiverSelectorError);
-
-        function unregister () {
-            globalReceiverSelector.removeEventListener("selected"
-                  , onReceiverSelectorSelected);
-            globalReceiverSelector.removeEventListener("cancelled"
-                  , onReceiverSelectorCancelled);
-            globalReceiverSelector.removeEventListener("error"
-                  , onReceiverSelectorError);
-        }
-
-        globalReceiverSelector.open(
-                Array.from(statusBridgeReceivers.values())
-              , defaultMediaType
-              , availableMediaTypes);
-    });
-}
-
-
-async function onConnectShim (port: browser.runtime.Port) {
-    const bridgeInfo = await getBridgeInfo();
-    if (bridgeInfo && !bridgeInfo.isVersionCompatible) {
-        return;
-    }
-
-    const tabId = port.sender.tab.id;
-    const frameId = port.sender.frameId;
-    const shimId = `${tabId}:${frameId}`;
-
-    // Disconnect existing shim
-    if (shimMap.has(shimId)) {
-        shimMap.get(shimId).port.disconnect();
-        shimMap.delete(shimId);
-    }
-
-
-    const applicationName = await options.get("bridgeApplicationName");
-
-    // Spawn bridge app instance
-    const bridgePort = nativeMessaging.connectNative(applicationName);
-
-    if (bridgePort.error) {
-        console.error(`Failed connect to ${applicationName}:`
-              , bridgePort.error.message);
-    }
-
-    shimMap.set(shimId, {
-        port
-      , bridgePort
-      , tabId
-      , frameId
-    });
-
-    bridgePort.onDisconnect.addListener(() => {
-        if (bridgePort.error) {
-            console.error(`${applicationName} disconnected:`
-                  , bridgePort.error.message);
-        } else {
-            console.info(`${applicationName} disconnected`);
-        }
-    });
-
-    // Handle disconnect
-    port.onDisconnect.addListener(() => {
-        bridgePort.disconnect();
-        shimMap.delete(shimId);
-    });
-
-
-    bridgePort.onMessage.addListener((message: Message) => {
-        const [ destination ] = message.subject.split(":/");
-        if (destination === "mediaCast") {
-            browser.tabs.sendMessage(
-                    mediaCastTabId, message, { frameId: mediaCastFrameId });
-
-            return;
-        }
-
-        port.postMessage(message);
-    });
-
-    port.onMessage.addListener(async (message: Message) => {
-        const [ destination ] = message.subject.split(":/");
-        if (destination === "bridge") {
-            bridgePort.postMessage(message);
-            return;
-        }
-
-        switch (message.subject) {
-            case "main:/shimInitialized": {
-
-                // Send existing receivers as serviceUp messages
-                for (const receiver of statusBridgeReceivers.values()) {
-                    port.postMessage({
-                        subject: "shim:/serviceUp"
-                      , data: { id: receiver.id }
-                    });
-                }
-
-                break;
-            }
-
-            case "main:/sessionCreated": {
-                if (globalReceiverSelector && globalReceiverSelector.isOpen) {
-                    globalReceiverSelector.close();
-                }
-
-                break;
-            }
-
-            case "main:/selectReceiverBegin": {
-                const allMediaTypes =
-                        ReceiverSelectorMediaType.App
-                      | ReceiverSelectorMediaType.Tab
-                      | ReceiverSelectorMediaType.Screen
-                      | ReceiverSelectorMediaType.File;
-
-                try {
-                    const selection = await getUserReceiverSelection(
-                            ReceiverSelectorMediaType.App
-                          , allMediaTypes);
-
-                    if (!selection) {
-                        // Handle cancellation
-                        port.postMessage({
-                            subject: "shim:/selectReceiverCancelled"
-                        });
-
-                        return;
-                    }
-
-                    /**
-                     * If the media type returned from the selector has been
-                     * changed, we need to cancel the current sender and switch
-                     * it out for the right one.
-                     *
-                     * TODO: Seamlessly connect selector to the new sender
-                     */
-                    if (selection.mediaType !== ReceiverSelectorMediaType.App) {
-                        port.postMessage({
-                            subject: "shim:/selectReceiverCancelled"
-                        });
-
-                        return;
-                    }
-
-                    // Pass selection back to shim
-                    port.postMessage({
-                        subject: "shim:/selectReceiverEnd"
-                      , data: selection
-                    });
-                } catch (err) {
-                    // TODO: Report errors properly
-                    port.postMessage({
-                        subject: "shim:/selectReceiverCancelled"
-                    });
-                }
-
-                break;
-            }
-        }
-    });
-
-    port.postMessage({
-        subject: "shim:/initialized"
-      , data: bridgeInfo
-    });
-}
-
-browser.runtime.onConnect.addListener(port => {
+browser.runtime.onConnect.addListener(async port => {
     switch (port.name) {
         case "shim": {
-            onConnectShim(port);
+            const shim = await ShimManager.createShim(port);
+
+            shim.bridgePort.onMessage.addListener((message: Message) => {
+                const [ destination ] = message.subject.split(":/");
+
+                if (destination === "mediaCast") {
+                    browser.tabs.sendMessage(
+                            mediaCastTabId
+                          , message
+                          , { frameId: mediaCastFrameId });
+
+                    return;
+                }
+
+                port.postMessage(message);
+            });
+
             break;
         }
     }
@@ -906,11 +563,12 @@ browser.runtime.onConnect.addListener(port => {
 
 browser.runtime.onMessage.addListener((message: Message, sender) => {
     if (message.subject.startsWith("bridge:/")) {
-        const shimId = `${sender.tab.id}:${sender.frameId}`;
-        if (shimMap.has(shimId)) {
-            const shim = shimMap.get(shimId);
+        const shim = ShimManager.getShimForSender(sender);
+        if (shim) {
             shim.bridgePort.postMessage(message);
         }
+
+        return;
     }
 });
 
@@ -924,7 +582,6 @@ async function init () {
 
     initCreateMenus(opts);
     initRegisterOptionalFeatures(opts);
-    initCreateStatusBridge(opts);
 }
 
 init();

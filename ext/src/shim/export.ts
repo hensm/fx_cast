@@ -30,8 +30,18 @@ export function ensureInit (): Promise<BridgeInfo> {
             return;
         }
 
-        // Trigger message port setup side-effects
-        import("./contentBridge");
+        /**
+         * If the module is imported into a background script
+         * context, the location will be the internal extension URL,
+         * whereas in a content script, it will be the content page
+         * URL.
+         */
+        if (window.location.protocol === "moz-extension:") {
+            //
+        } else {
+            // Trigger message port setup side-effects
+            import("./contentBridge");
+        }
 
         onMessage(message => {
             switch (message.subject) {

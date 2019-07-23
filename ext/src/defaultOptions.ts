@@ -1,21 +1,9 @@
 "use strict";
 
-export interface Options {
-    bridgeApplicationName: string;
-    mediaEnabled: boolean;
-    mediaSyncElement: boolean;
-    mediaStopOnUnload: boolean;
-    localMediaEnabled: boolean;
-    localMediaServerPort: number;
-    mirroringEnabled: boolean;
-    mirroringAppId: string;
-    userAgentWhitelistEnabled: boolean;
-    userAgentWhitelist: string[];
+import { Options } from "./lib/options";
 
-    [key: string]: Options[keyof Options];
-}
 
-const options: Options = {
+export default {
     bridgeApplicationName: APPLICATION_NAME
   , mediaEnabled: true
   , mediaSyncElement: false
@@ -28,6 +16,4 @@ const options: Options = {
   , userAgentWhitelist: [
         "https://www.netflix.com/*"
     ]
-};
-
-export default options;
+} as Options;
