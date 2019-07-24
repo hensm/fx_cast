@@ -2,7 +2,7 @@
 
 import * as cast from "./cast";
 
-import { BridgeInfo } from "../lib/getBridgeInfo";
+import { BridgeInfo } from "../lib/bridge";
 import { Message } from "../types";
 import { onMessage } from "./eventMessageChannel";
 

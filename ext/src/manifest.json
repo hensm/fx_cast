@@ -27,6 +27,15 @@
         "scripts": [ "main.js" ]
     }
 
+  , "content_scripts": [
+        {
+            "all_frames": true
+          , "js": [ "shim/content.js" ]
+          , "matches": [ "<all_urls>" ]
+          , "run_at": "document_start"
+        }
+    ]
+
   , "content_security_policy": "CONTENT_SECURITY_POLICY"
   , "default_locale": "en"
   , "manifest_version": 2

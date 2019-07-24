@@ -1,10 +1,12 @@
 "use strict";
 
 import defaultOptions from "./defaultOptions";
+import bridge from "./lib/bridge";
 import mediaCasting from "./lib/mediaCasting";
 import options, { Options } from "./lib/options";
 
 import { getChromeUserAgent } from "./lib/userAgents";
+import { stringify } from "./lib/utils";
 
 import { ReceiverSelection
        , ReceiverSelectorMediaType } from "./receiver_selectors";
@@ -12,12 +14,14 @@ import { ReceiverSelection
 import { Message } from "./types";
 
 import { CAST_FRAMEWORK_LOADER_SCRIPT_URL
-       , CAST_LOADER_SCRIPT_URL } from "./endpoints";
+       , CAST_LOADER_SCRIPT_URL } from "./lib/endpoints";
 
-import MenuManager from "./managers/menu";
-import SelectorManager from "./managers/selector";
-import ShimManager from "./managers/shim";
-import StatusManager from "./managers/status";
+
+import SelectorManager from "./SelectorManager";
+import StatusManager from "./StatusManager";
+
+import { createMenus } from "./createMenus";
+import { createShim } from "./createShim";
 
 
 const _ = browser.i18n.getMessage;
@@ -28,146 +32,64 @@ browser.runtime.onInstalled.addListener(async details => {
         // Set default options
         case "install": {
             await options.setAll(defaultOptions);
+
+            // Call after default options have been set
+            init();
+
             break;
         }
+
         // Set newly added options
         case "update": {
             await options.update(defaultOptions);
             break;
         }
     }
-
-    // Call after default options have been set
-    init();
 });
 
 
-/**
- * Sender applications load a cast_sender.js script that
- * functions as a loader for the internal chrome-extension:
- * hosted script.
- *
- * We can redirect this and inject our own script to setup
- * the API shim.
- */
-browser.webRequest.onBeforeRequest.addListener(
-        async details => {
-            await browser.tabs.executeScript(details.tabId, {
-                code: `
-                    window.isFramework = ${
-                        details.url === CAST_FRAMEWORK_LOADER_SCRIPT_URL};
-                `
-              , frameId: details.frameId
-              , runAt: "document_start"
-            });
 
-            await browser.tabs.executeScript(details.tabId, {
-                file: "shim/contentBridge.js"
-              , frameId: details.frameId
-              , runAt: "document_start"
-            });
-
-            return {
-                redirectUrl: browser.runtime.getURL("shim/bundle.js")
-            };
-        }
-      , { urls: [
-            CAST_LOADER_SCRIPT_URL
-          , CAST_FRAMEWORK_LOADER_SCRIPT_URL
-        ]}
-      , [ "blocking" ]);
-
-
-// Current user agent string for all whitelisted requests
-let currentUAString: string;
-
-/**
- * Web apps usually only load the sender library and
- * provide cast functionality if the browser is detected
- * as Chrome, so we should rewrite the User-Agent header
- * to reflect this on whitelisted sites.
- */
-async function onBeforeSendHeaders (
-        details: { requestHeaders?: browser.webRequest.HttpHeaders }) {
-
-    const { os } = await browser.runtime.getPlatformInfo();
-
-    // Create Chrome UA from platform info on first run
-    if (!currentUAString) {
-        currentUAString = getChromeUserAgent(os);
-    }
-
-    const host = details.requestHeaders.find(
-            (header: any) => header.name === "Host");
-
-    // Find and rewrite the User-Agent header
-    for (const header of details.requestHeaders) {
-        if (header.name.toLowerCase() === "user-agent") {
-
-            // TODO: Remove need for this
-            if (host.value === "www.youtube.com") {
-                header.value = getChromeUserAgent(os, true);
-                break;
-            }
-
-            header.value = currentUAString;
-
-            break;
-        }
-    }
-
-    return {
-        requestHeaders: details.requestHeaders
-    };
+interface LoadSenderOptions {
+    tabId: number;
+    frameId: number;
+    selection: ReceiverSelection;
 }
-
-// Defines window.chrome for site compatibility
-browser.contentScripts.register({
-    allFrames: true
-  , js: [{ file: "shim/content.js" }]
-  , matches: [ "<all_urls>" ]
-  , runAt: "document_start"
-});
-
 
 /**
  * Loads the appropriate sender for a given receiver
  * selector response.
  */
-async function loadSenderForReceiverSelection (
-        tabId: number
-      , frameId: number
-      , selection: ReceiverSelection) {
-
+async function loadSender (opts: LoadSenderOptions) {
     // Cancelled
-    if (selection === null) {
+    if (!opts.selection) {
         return;
     }
 
-    switch (selection.mediaType) {
+    switch (opts.selection.mediaType) {
         case ReceiverSelectorMediaType.Tab:
         case ReceiverSelectorMediaType.Screen: {
-            await browser.tabs.executeScript(tabId, {
-                code: `
-                    window.selectedMedia = ${selection.mediaType};
-                    window.selectedReceiver = ${
-                            JSON.stringify(selection.receiver)};
+
+            await browser.tabs.executeScript(opts.tabId, {
+                code: stringify`
+                    window.selectedMedia = ${opts.selection.mediaType};
+                    window.selectedReceiver = ${opts.selection.receiver};
                 `
-              , frameId
+              , frameId: opts.frameId
             });
 
-            await browser.tabs.executeScript(tabId, {
+            await browser.tabs.executeScript(opts.tabId, {
                 file: "senders/mirroringCast.js"
-              , frameId
+              , frameId: opts.frameId
             });
 
             break;
         }
 
         case ReceiverSelectorMediaType.File: {
-            const fileUrl = new URL(`file://${selection.filePath}`);
+
+            const fileUrl = new URL(`file://${opts.selection.filePath}`);
             const mediaSession = await mediaCasting.loadMediaUrl(
-                    fileUrl.href, selection.receiver);
+                    fileUrl.href, opts.selection.receiver);
 
             console.log(mediaSession);
 
@@ -177,54 +99,6 @@ async function loadSenderForReceiverSelection (
 }
 
 
-let mediaCastTabId: number;
-let mediaCastFrameId: number;
-
-MenuManager.addEventListener("mediaCastMenuClicked", async ev => {
-    const allMediaTypes =
-            ReceiverSelectorMediaType.App
-          | ReceiverSelectorMediaType.Tab
-          | ReceiverSelectorMediaType.Screen
-          | ReceiverSelectorMediaType.File;
-
-    const selection = await SelectorManager.getSelection(
-            ReceiverSelectorMediaType.App
-          , allMediaTypes);
-
-    if (selection && selection.mediaType
-            === ReceiverSelectorMediaType.App) {
-
-        mediaCastTabId = ev.detail.tab.id;
-        mediaCastFrameId = ev.detail.info.frameId;
-
-        await browser.tabs.executeScript(mediaCastTabId, {
-            code: `
-                window.selectedReceiver = ${
-                        JSON.stringify(selection.receiver)};
-                window.srcUrl = ${JSON.stringify(ev.detail.info.srcUrl)};
-                window.targetElementId = ${ev.detail.info.targetElementId};
-            `
-          , frameId: mediaCastFrameId
-        });
-
-        await browser.tabs.executeScript(mediaCastTabId, {
-            file: "senders/mediaCast.js"
-          , frameId: mediaCastFrameId
-        });
-    } else {
-        // Handle other responses
-        await loadSenderForReceiverSelection(
-                ev.detail.tab.id, ev.detail.info.frameId, selection);
-    }
-});
-
-MenuManager.addEventListener("mirrorCastMenuClicked", async ev => {
-    loadSenderForReceiverSelection(
-            ev.detail.tab.id
-          , ev.detail.info.frameId
-          , await SelectorManager.getSelection());
-});
-
 /**
  * When the browser action is clicked, open a receiver
  * selector and load a sender for the response. The
@@ -232,107 +106,299 @@ MenuManager.addEventListener("mirrorCastMenuClicked", async ev => {
  * top-level frame.
  */
 browser.browserAction.onClicked.addListener(async tab => {
-    loadSenderForReceiverSelection(
-            tab.id, 0
-          , await SelectorManager.getSelection());
+    const selection = await SelectorManager.getSelection();
+
+    loadSender({
+        tabId: tab.id
+      , frameId: 0
+      , selection
+    });
 });
 
 
+
+interface Shim {
+    bridgePort: browser.runtime.Port;
+    contentPort?: browser.runtime.Port;
+    contentTabId?: number;
+    contentFrameId?: number;
+}
+
+const shims = new Set<Shim>();
+
 browser.runtime.onConnect.addListener(async port => {
-    switch (port.name) {
-        case "shim": {
-            const shim = await ShimManager.createShim(port);
+    if (port.name === "shim") {
+        const shim = await createShim(port);
 
-            shim.bridgePort.onMessage.addListener((message: Message) => {
-                const [ destination ] = message.subject.split(":/");
+        // Add additional listener for mediaCast messages
+        shim.bridgePort.onMessage.addListener((message: Message) => {
+            const [ destination ] = message.subject.split(":/");
+            if (destination === "mediaCast") {
+                browser.tabs.sendMessage(
+                        mediaCastTabId
+                      , message
+                      , { frameId: mediaCastFrameId });
 
-                if (destination === "mediaCast") {
-                    browser.tabs.sendMessage(
-                            mediaCastTabId
-                          , message
-                          , { frameId: mediaCastFrameId });
+                return;
+            }
+        });
 
-                    return;
-                }
-
-                port.postMessage(message);
-            });
-
-            break;
-        }
+        shims.add(shim);
     }
 });
 
 browser.runtime.onMessage.addListener(async (message: Message, sender) => {
     if (message.subject.startsWith("bridge:/")) {
-        const shim = ShimManager.getShimForSender(sender);
-        if (shim) {
-            shim.bridgePort.postMessage(message);
+        for (const shim of shims) {
+            if (shim.contentPort
+                  && shim.contentTabId === sender.tab.id
+                  && shim.contentFrameId === sender.frameId) {
+
+                shim.bridgePort.postMessage(message);
+            }
         }
 
         return;
     }
 });
 
+StatusManager.addEventListener("serviceUp", ev => {
+    for (const shim of shims) {
+        shim.contentPort.postMessage({
+            subject: "shim:/serviceUp"
+          , data: { id: ev.detail.id }
+        });
+    }
+});
+
+StatusManager.addEventListener("serviceDown", ev => {
+    for (const shim of shims) {
+        shim.contentPort.postMessage({
+            subject: "shim:/serviceDown"
+          , data: { id: ev.detail.id }
+        });
+    }
+});
 
 
-/**
- * Initializes any functionality based on options state.
- */
-async function registerOptionalFeatures (
-        opts: Options
-      , alteredOptions?: Array<(keyof Options)>) {
+
+let mediaCastTabId: number;
+let mediaCastFrameId: number;
+
+async function initMenus () {
+    console.info("fx_cast (Debug): init (menus)");
+
+    const { menuIdMediaCast
+          , menuIdMirroringCast
+          , menuIdWhitelist
+          , menuIdWhitelistRecommended } = await createMenus();
+
+    browser.menus.onClicked.addListener(async (info, tab) => {
+        switch (info.menuItemId) {
+            case menuIdMediaCast: {
+                const allMediaTypes =
+                        ReceiverSelectorMediaType.App
+                      | ReceiverSelectorMediaType.Tab
+                      | ReceiverSelectorMediaType.Screen
+                      | ReceiverSelectorMediaType.File;
+
+                const selection = await SelectorManager.getSelection(
+                        ReceiverSelectorMediaType.App
+                      , allMediaTypes);
+
+                // Selection cancelled
+                if (!selection) {
+                    break;
+                }
+
+                /**
+                 * If the selected media type is App, that refers to the
+                 * media sender in this context, so load media sender.
+                 */
+                if (selection.mediaType === ReceiverSelectorMediaType.App) {
+                    await browser.tabs.executeScript(tab.id, {
+                        code: stringify`
+                            window.selectedReceiver = ${selection.receiver};
+                            window.srcUrl = ${info.srcUrl};
+                            window.targetElementId = ${info.targetElementId};
+                        `
+                      , frameId: info.frameId
+                    });
+
+                    await browser.tabs.executeScript(tab.id, {
+                        file: "senders/mediaCast.js"
+                      , frameId: info.frameId
+                    });
+
+                    // Store for later
+                    mediaCastTabId = tab.id;
+                    mediaCastFrameId = info.frameId;
+                } else {
+
+                    // Handle other responses
+                    loadSender({
+                        tabId: tab.id
+                      , frameId: info.frameId
+                      , selection
+                    });
+                }
+
+                break;
+            }
+
+            case menuIdMirroringCast: {
+                const selection = await SelectorManager.getSelection();
+
+                loadSender({
+                    tabId: tab.id
+                  , frameId: info.frameId
+                  , selection
+                });
+
+                break;
+            }
+        }
+    });
+}
+
+
+async function initRequestListener () {
+    console.info("fx_cast (Debug): init (request listener)");
+
+    type OnBeforeRequestDetails = Parameters<Parameters<
+            typeof browser.webRequest.onBeforeRequest.addListener>[0]>[0];
+
+    async function onBeforeRequest (details: OnBeforeRequestDetails) {
+        await browser.tabs.executeScript(details.tabId, {
+            code: `
+                window.isFramework = ${
+                    details.url === CAST_FRAMEWORK_LOADER_SCRIPT_URL};
+            `
+          , frameId: details.frameId
+          , runAt: "document_start"
+        });
+
+        await browser.tabs.executeScript(details.tabId, {
+            file: "shim/contentBridge.js"
+          , frameId: details.frameId
+          , runAt: "document_start"
+        });
+
+        return {
+            redirectUrl: browser.runtime.getURL("shim/bundle.js")
+        };
+    }
 
     /**
-     * Adds a webRequest listener that intercepts and modifies user
-     * agent.
+     * Sender applications load a cast_sender.js script that
+     * functions as a loader for the internal chrome-extension:
+     * hosted script.
+     *
+     * We can redirect this and inject our own script to setup
+     * the API shim.
      */
-    function register_userAgentWhitelist () {
+    browser.webRequest.onBeforeRequest.addListener(
+            onBeforeRequest
+          , { urls: [
+                CAST_LOADER_SCRIPT_URL
+              , CAST_FRAMEWORK_LOADER_SCRIPT_URL ]}
+          , [ "blocking" ]);
+}
+
+
+function initWhitelist () {
+    console.info("fx_cast (Debug): init (whitelist)");
+
+    type OnBeforeSendHeadersDetails = Parameters<Parameters<
+            typeof browser.webRequest.onBeforeSendHeaders.addListener>[0]>[0];
+
+    /**
+     * Web apps usually only load the sender library and
+     * provide cast functionality if the browser is detected
+     * as Chrome, so we should rewrite the User-Agent header
+     * to reflect this on whitelisted sites.
+     */
+    async function onBeforeSendHeaders (details: OnBeforeSendHeadersDetails) {
+        const { os } = await browser.runtime.getPlatformInfo();
+        const chromeUserAgent = getChromeUserAgent(os);
+
+        const host = details.requestHeaders.find(
+                header => header.name === "Host");
+
+        for (const header of details.requestHeaders) {
+            if (header.name.toLowerCase() === "user-agent") {
+                /**
+                 * New YouTube breaks without the default user agent string,
+                 * so pretend to be an old version of Chrome to get the old
+                 * site.
+                 */
+                if (host.value === "www.youtube.com") {
+                    header.value = getChromeUserAgent(os, true);
+                    break;
+                }
+
+                header.value = chromeUserAgent;
+                break;
+            }
+        }
+
+        return {
+            requestHeaders: details.requestHeaders
+        };
+    }
+
+    async function registerUserAgentWhitelist () {
+        const { userAgentWhitelist
+              , userAgentWhitelistEnabled } = await options.getAll();
+
+        if (userAgentWhitelistEnabled) {
+            return;
+        }
+
         browser.webRequest.onBeforeSendHeaders.addListener(
                 onBeforeSendHeaders
-              , { urls: opts.userAgentWhitelistEnabled
-                    ? opts.userAgentWhitelist
-                    : [] }
+              , { urls: userAgentWhitelist }
               , [  "blocking", "requestHeaders" ]);
     }
 
-    function unregister_userAgentWhitelist () {
+    function unregisterUserAgentWhitelist () {
         browser.webRequest.onBeforeSendHeaders.removeListener(
               onBeforeSendHeaders);
     }
 
+    // Register on first run
+    registerUserAgentWhitelist();
 
+    // Re-register when options change
+    options.addEventListener("changed", ev => {
+        const alteredOpts = ev.detail;
 
-    if (!alteredOptions) {
-        // If no altered properties specified, register all listeners
-        register_userAgentWhitelist();
-    } else {
-        if (alteredOptions.includes("userAgentWhitelist")
-             || alteredOptions.includes("userAgentWhitelistEnabled")) {
-
-            unregister_userAgentWhitelist();
-            register_userAgentWhitelist();
+        if (alteredOpts.includes("userAgentWhitelist")
+         || alteredOpts.includes("userAgentWhitelistEnabled")) {
+            unregisterUserAgentWhitelist();
+            registerUserAgentWhitelist();
         }
-    }
+    });
 }
 
-options.addEventListener("changed", async ev => {
-    const opts = await options.getAll();
-    const alteredOpts = ev.detail;
-
-    registerOptionalFeatures(opts, alteredOpts);
-});
 
 
-// Misc init
 async function init () {
-    const opts = await options.getAll();
-    if (!opts) {
+    /**
+     * If options haven't been set yet, we can't properly
+     * initialize, so wait until init is called again in the
+     * onInstalled listener.
+     */
+    if (!(await options.getAll())) {
         return;
     }
 
-    MenuManager.createMenus();    
-    registerOptionalFeatures(opts);
+    console.info("fx_cast (Debug): init");
+
+
+    initMenus();
+    initRequestListener();
+    initWhitelist();
 }
 
 init();

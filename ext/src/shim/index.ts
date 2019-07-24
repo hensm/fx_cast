@@ -2,7 +2,7 @@
 
 import * as cast from "./cast";
 
-import { CAST_FRAMEWORK_SCRIPT_URL } from "../endpoints";
+import { CAST_FRAMEWORK_SCRIPT_URL } from "../lib/endpoints";
 import { loadScript } from "../lib/utils";
 import { onMessage } from "./eventMessageChannel";
 

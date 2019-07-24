@@ -2,8 +2,8 @@
 
 import defaultOptions from "../defaultOptions";
 
-import { TypedEventTarget } from "./typedEvents";
 import { Message } from "../types";
+import { TypedEventTarget } from "./typedEvents";
 
 
 export interface Options {
@@ -22,18 +22,58 @@ export interface Options {
 }
 
 
-class DispatcherEvents {
-    "changed": Array<keyof Options>
+interface EventMap {
+    "changed": Array<keyof Options>;
 }
 
-class Dispatcher extends TypedEventTarget<DispatcherEvents> {
+// tslint:disable-next-line:new-parens
+export default new class extends TypedEventTarget<EventMap> {
     constructor () {
         super();
 
-        browser.runtime.onMessage.addListener((message: Message) => {
-            if (message.subject === "optionsUpdated") {
+        browser.storage.onChanged.addListener((changes, areaName) => {
+            if (areaName !== "sync") {
+                return;
+            }
+
+            // Types issue
+            const _changes = changes as {
+                [key: string]: browser.storage.StorageChange
+            };
+
+            if ("options" in _changes) {
+                const { oldValue, newValue } = _changes.options;
+                const changedKeys = [];
+
+                for (const key in newValue) {
+                    // Don't track added keys
+                    if (!(key in oldValue)) {
+                        continue;
+                    }
+
+                    const oldKeyValue = oldValue[key];
+                    const newKeyValue = newValue[key];
+
+                    // Equality comparison
+                    if (oldKeyValue === newKeyValue) {
+                        continue;
+                    }
+
+                    // Array comparison
+                    if (oldKeyValue instanceof Array
+                     && newKeyValue instanceof Array) {
+                        if (oldKeyValue.length === newKeyValue.length
+                              && oldKeyValue.every((value, index) =>
+                                         value === newKeyValue[index])) {
+                            continue;
+                        }
+                    }
+
+                    changedKeys.push(key);
+                }
+
                 this.dispatchEvent(new CustomEvent("changed", {
-                    detail: message.data.alteredOptions
+                    detail: changedKeys
                 }));
             }
         });
@@ -43,7 +83,7 @@ class Dispatcher extends TypedEventTarget<DispatcherEvents> {
      * Fetches `options` key from storage and returns it as
      * Options interface type.
      */
-    async getAll (): Promise<Options> {
+    public async getAll (): Promise<Options> {
         const { options }: { options: Options } =
                 await browser.storage.sync.get("options");
 
@@ -54,7 +94,7 @@ class Dispatcher extends TypedEventTarget<DispatcherEvents> {
      * Takes Options object and sets to `options` storage key.
      * Returns storage promise.
      */
-    async setAll (options: Options): Promise<void> {
+    public async setAll (options: Options): Promise<void> {
         return browser.storage.sync.set({ options });
     }
 
@@ -62,7 +102,7 @@ class Dispatcher extends TypedEventTarget<DispatcherEvents> {
      * Gets specific option from storage and returns it as its
      * type from Options interface type.
      */
-    async get<T extends keyof Options> (name: T): Promise<Options[T]> {
+    public async get<T extends keyof Options> (name: T): Promise<Options[T]> {
         const options = await this.getAll();
 
         if (options.hasOwnProperty(name)) {
@@ -74,7 +114,7 @@ class Dispatcher extends TypedEventTarget<DispatcherEvents> {
      * Sets specific option to storage. Returns storage
      * promise.
      */
-    async set<T extends keyof Options> (
+    public async set<T extends keyof Options> (
             name: T
           , value: Options[T]): Promise<void> {
 
@@ -89,7 +129,7 @@ class Dispatcher extends TypedEventTarget<DispatcherEvents> {
      * against defaults. Any options in defaults and not in
      * storage are set. Does not override any existing options.
      */
-    async update (defaults = defaultOptions): Promise<void> {
+    public async update (defaults = defaultOptions): Promise<void> {
         const oldOpts = await this.getAll();
         const newOpts: Partial<Options> = {};
 
@@ -106,6 +146,4 @@ class Dispatcher extends TypedEventTarget<DispatcherEvents> {
           , ...newOpts
         });
     }
-}
-
-export default new Dispatcher();
+};

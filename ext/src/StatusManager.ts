@@ -1,14 +1,14 @@
 "use strict";
 
-import nativeMessaging from "../lib/nativeMessaging";
-import options from "../lib/options";
+import bridge from "./lib/bridge";
+import options from "./lib/options";
 
-import { TypedEventTarget } from "../lib/typedEvents";
-import { Message, Receiver, ReceiverStatus } from "../types";
+import { TypedEventTarget } from "./lib/typedEvents";
+import { Message, Receiver, ReceiverStatus } from "./types";
 
 import { ReceiverStatusMessage
        , ServiceDownMessage
-       , ServiceUpMessage } from "../messageTypes";
+       , ServiceUpMessage } from "./messageTypes";
 
 
 let applicationName: string;
@@ -24,11 +24,7 @@ class StatusManager
         extends TypedEventTarget<StatusManagerEvents> {
 
     private bridgePort: browser.runtime.Port;
-    private _receivers = new Map<string, Receiver>();
-
-    public get receivers () {
-        return this._receivers;
-    }
+    private receivers = new Map<string, Receiver>();
 
     constructor () {
         super();
@@ -40,12 +36,16 @@ class StatusManager
         this.initBridgePort();
     }
 
+    public getReceivers () {
+        return Array.from(this.receivers.values());
+    }
+
     private async initBridgePort () {
         if (!applicationName) {
             applicationName = await options.get("bridgeApplicationName");
         }
 
-        this.bridgePort = nativeMessaging.connectNative(applicationName);
+        this.bridgePort = await bridge.connect();
         this.bridgePort.onMessage.addListener(this.onBridgePortMessage);
         this.bridgePort.onDisconnect.addListener(this.onBridgePortDisconnect);
 
@@ -65,7 +65,7 @@ class StatusManager
         switch (message.subject) {
             case "shim:/serviceUp": {
                 const { data: receiver } = (message as ServiceUpMessage);
-                this._receivers.set(receiver.id, receiver);
+                this.receivers.set(receiver.id, receiver);
 
                 const serviceUpEvent = new CustomEvent("serviceUp", {
                     detail: receiver
@@ -79,8 +79,8 @@ class StatusManager
             case "shim:/serviceDown": {
                 const { data: { id }} = (message as ServiceDownMessage);
 
-                if (this._receivers.has(id)) {
-                    this._receivers.delete(id);
+                if (this.receivers.has(id)) {
+                    this.receivers.delete(id);
                 }
 
                 const serviceDownEvent = new CustomEvent("serviceDown", {
@@ -96,10 +96,10 @@ class StatusManager
                 const { data: { id, status }}
                         = (message as ReceiverStatusMessage);
 
-                const receiver = this._receivers.get(id);
+                const receiver = this.receivers.get(id);
 
                 // Merge with existing
-                this._receivers.set(id, {
+                this.receivers.set(id, {
                     ...receiver
                   , status: {
                         ...receiver.status
@@ -122,7 +122,7 @@ class StatusManager
      * seconds.
      */
     private onBridgePortDisconnect () {
-        for (const [, receiver] of this._receivers) {
+        for (const [, receiver] of this.receivers) {
             const serviceDownEvent = new CustomEvent("serviceDown", {
                 detail: { id: receiver.id }
             });
@@ -131,7 +131,7 @@ class StatusManager
         }
 
         // Cleanup
-        this._receivers.clear();
+        this.receivers.clear();
         this.bridgePort.onDisconnect.removeListener(
                 this.onBridgePortDisconnect);
         this.bridgePort.onMessage.removeListener(this.onBridgePortMessage);

@@ -1,6 +1,6 @@
 "use strict";
 
-import nativeMessaging from "../lib/nativeMessaging";
+import bridge from "../lib/bridge";
 import options from "../lib/options";
 
 import ReceiverSelector, {
@@ -36,8 +36,7 @@ export default class NativeMacReceiverSelector
           , defaultMediaType: ReceiverSelectorMediaType
           , availableMediaTypes: ReceiverSelectorMediaType): Promise<void> {
 
-        const applicationName = await options.get("bridgeApplicationName");
-        this.bridgePort = nativeMessaging.connectNative(applicationName);
+        this.bridgePort = await bridge.connect();
 
         this.bridgePort.onMessage.addListener((message: Message) => {
             switch (message.subject) {
