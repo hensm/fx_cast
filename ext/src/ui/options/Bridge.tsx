@@ -7,7 +7,7 @@ import semver from "semver";
 import { getNextEllipsis
        , getWindowCenteredProps } from "../../lib/utils";
 
-import { BridgeInfo } from "../../lib/getBridgeInfo";
+import { BridgeInfo } from "../../lib/bridge";
 
 const _ = browser.i18n.getMessage;
 

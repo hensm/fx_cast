@@ -1,7 +1,7 @@
 "use strict";
 
 import { CAST_LOADER_SCRIPT_URL
-       , CAST_SCRIPT_URLS } from "../endpoints";
+       , CAST_SCRIPT_URLS } from "../lib/endpoints";
 
 
 (window.wrappedJSObject as any).chrome = cloneInto({}, window);

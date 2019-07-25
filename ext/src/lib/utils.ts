@@ -9,6 +9,28 @@ export function getNextEllipsis (ellipsis: string): string {
     /* tslint:enable:curly */
 }
 
+/**
+ * Template literal tag function, JSON-encodes substitutions.
+ */
+export function stringify (
+        templateStrings: TemplateStringsArray
+      , ...substitutions: any[]) {
+
+    let formattedString = "";
+
+    for (const templateString of templateStrings) {
+        if (!formattedString) {
+            formattedString += templateString;
+            continue;
+        }
+
+        formattedString += JSON.stringify(substitutions.shift());
+        formattedString += templateString;
+    }
+
+    return formattedString;
+}
+
 
 interface WindowCenteredProps {
     width: number;

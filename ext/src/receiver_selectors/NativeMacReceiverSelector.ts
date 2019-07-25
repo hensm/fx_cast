@@ -1,39 +1,56 @@
 "use strict";
 
-import nativeMessaging from "../lib/nativeMessaging";
+import bridge from "../lib/bridge";
 import options from "../lib/options";
 
 import ReceiverSelector, {
-        ReceiverSelectorMediaType } from "./ReceiverSelector";
+        ReceiverSelection
+      , ReceiverSelectorEvents
+      , ReceiverSelectorMediaType } from "./ReceiverSelector";
 
+import { TypedEventTarget } from "../lib/typedEvents";
 import { getWindowCenteredProps } from "../lib/utils";
 import { Message, Receiver } from "../types";
-
-import { NativeReceiverSelectorCloseMessage
-       , NativeReceiverSelectorErrorMessage
-       , NativeReceiverSelectorSelectedMessage } from "../messageTypes";
 
 
 const _ = browser.i18n.getMessage;
 
 
+interface NativeReceiverSelectorSelectedMessage extends Message {
+    subject: "main:/receiverSelector/selected";
+    data: ReceiverSelection;
+}
+
+interface NativeReceiverSelectorCloseMessage extends Message {
+    subject: "main:/receiverSelector/error";
+    data: string;
+}
+
+interface NativeReceiverSelectorErrorMessage extends Message {
+    subject: "main:/receiverSelector/error";
+    data: string;
+}
+
+
+// TODO: Figure out lifetime properly
 export default class NativeMacReceiverSelector
-        extends EventTarget
+        extends TypedEventTarget<ReceiverSelectorEvents>
         implements ReceiverSelector {
 
     private bridgePort: browser.runtime.Port;
-    private bridgePortDisconnected: boolean = false;
-
     private wasReceiverSelected: boolean = false;
+    private _isOpen: boolean = false;
 
+    get isOpen () {
+        return this._isOpen;
+    }
 
     public async open (
             receivers: Receiver[]
           , defaultMediaType: ReceiverSelectorMediaType
           , availableMediaTypes: ReceiverSelectorMediaType): Promise<void> {
 
-        const applicationName = await options.get("bridgeApplicationName");
-        this.bridgePort = nativeMessaging.connectNative(applicationName);
+        this.bridgePort = await bridge.connect();
 
         this.bridgePort.onMessage.addListener((message: Message) => {
             switch (message.subject) {
@@ -56,7 +73,9 @@ export default class NativeMacReceiverSelector
         });
 
         this.bridgePort.onDisconnect.addListener(() => {
-            this.bridgePortDisconnected = true;
+            this.bridgePort = null;
+            this.wasReceiverSelected = false;
+            this._isOpen = false;
         });
 
 
@@ -84,14 +103,18 @@ export default class NativeMacReceiverSelector
               , i18n_mediaSelectToLabel: _("popupMediaSelectToLabel")
             })
         });
+
+        this._isOpen = true;
     }
 
     public close (): void {
-        if (this.bridgePort && !this.bridgePortDisconnected) {
+        if (this.bridgePort) {
             this.bridgePort.postMessage({
                 subject: "bridge:/receiverSelector/close"
             });
         }
+
+        this._isOpen = false;
     }
 
 
@@ -115,12 +138,12 @@ export default class NativeMacReceiverSelector
             this.dispatchEvent(new CustomEvent("cancelled"));
         }
 
-        if (!this.bridgePortDisconnected) {
+        if (this.bridgePort) {
             this.bridgePort.disconnect();
         }
 
         this.bridgePort = null;
-        this.bridgePortDisconnected = false;
         this.wasReceiverSelected = false;
+        this._isOpen = false;
     }
 }

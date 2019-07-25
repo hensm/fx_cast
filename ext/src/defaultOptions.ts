@@ -1,29 +1,10 @@
 "use strict";
 
+import { Options } from "./lib/options";
 import { ReceiverSelectorType } from "./receiver_selectors";
 
-export interface Options {
-    bridgeApplicationName: string;
-    mediaEnabled: boolean;
-    mediaSyncElement: boolean;
-    mediaStopOnUnload: boolean;
-    localMediaEnabled: boolean;
-    localMediaServerPort: number;
-    mirroringEnabled: boolean;
-    mirroringAppId: string;
-    receiverSelectorType: ReceiverSelectorType;
 
-    // TODO: Implement
-    receiverSelectorCloseIfFocusLost: boolean;
-    receiverSelectorWaitForConnection: boolean;
-
-    userAgentWhitelistEnabled: boolean;
-    userAgentWhitelist: string[];
-
-    [key: string]: Options[keyof Options];
-}
-
-const options: Options = {
+export default {
     bridgeApplicationName: APPLICATION_NAME
   , mediaEnabled: true
   , mediaSyncElement: false
@@ -39,6 +20,4 @@ const options: Options = {
   , userAgentWhitelist: [
         "https://www.netflix.com/*"
     ]
-};
-
-export default options;
+} as Options;

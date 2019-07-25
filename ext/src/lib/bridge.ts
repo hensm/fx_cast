@@ -6,6 +6,23 @@ import nativeMessaging from "./nativeMessaging";
 import options from "./options";
 
 
+async function connect (): Promise<browser.runtime.Port> {
+    const applicationName = await options.get("bridgeApplicationName");
+    const bridgePort = nativeMessaging.connectNative(applicationName);
+
+    bridgePort.onDisconnect.addListener(() => {
+        if (bridgePort.error) {
+            console.error(`${applicationName} disconnected:`
+                  , this.bridgePort.error.message);
+        } else {
+            console.info(`${applicationName} disconnected`);
+        }
+    });
+
+    return bridgePort;
+}
+
+
 export interface BridgeInfo {
     name: string;
     version: string;
@@ -16,7 +33,7 @@ export interface BridgeInfo {
     isVersionNewer: boolean;
 }
 
-export default async function getBridgeInfo (): Promise<BridgeInfo> {
+async function getInfo (): Promise<BridgeInfo> {
     const applicationName = await options.get("bridgeApplicationName");
     let applicationVersion: string;
 
@@ -65,3 +82,9 @@ export default async function getBridgeInfo (): Promise<BridgeInfo> {
       , isVersionNewer
     };
 }
+
+
+export default {
+    connect
+  , getInfo
+};

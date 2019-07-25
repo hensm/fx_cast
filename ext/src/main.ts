@@ -1,29 +1,28 @@
 "use strict";
 
-import semver from "semver";
-
-import defaultOptions, { Options } from "./defaultOptions";
-import getBridgeInfo from "./lib/getBridgeInfo";
-import messageRouter from "./lib/messageRouter";
-import nativeMessaging from "./lib/nativeMessaging";
-import options from "./lib/options";
+import defaultOptions from "./defaultOptions";
+import bridge from "./lib/bridge";
+import loadSender from "./lib/loadSender";
+import mediaCasting from "./lib/mediaCasting";
+import options, { Options } from "./lib/options";
 
 import { getChromeUserAgent } from "./lib/userAgents";
-import { getWindowCenteredProps } from "./lib/utils";
+import { stringify } from "./lib/utils";
 
-import { getReceiverSelector
-       , ReceiverSelectorMediaType
-       , ReceiverSelectorSelectedEvent
-       , ReceiverSelectorType } from "./receiver_selectors";
+import { ReceiverSelection
+       , ReceiverSelectorMediaType } from "./receiver_selectors";
 
-import { Message, Receiver } from "./types";
-
-import { ReceiverStatusMessage
-       , ServiceDownMessage
-       , ServiceUpMessage } from "./messageTypes";
+import { Message } from "./types";
 
 import { CAST_FRAMEWORK_LOADER_SCRIPT_URL
-       , CAST_LOADER_SCRIPT_URL } from "./endpoints";
+       , CAST_LOADER_SCRIPT_URL } from "./lib/endpoints";
+
+
+import SelectorManager from "./SelectorManager";
+import StatusManager from "./StatusManager";
+
+import createMenus from "./createMenus";
+import createShim, { Shim } from "./createShim";
 
 
 const _ = browser.i18n.getMessage;
@@ -34,778 +33,313 @@ browser.runtime.onInstalled.addListener(async details => {
         // Set default options
         case "install": {
             await options.setAll(defaultOptions);
+
+            // Call after default options have been set
+            init();
+
             break;
         }
+
         // Set newly added options
         case "update": {
             await options.update(defaultOptions);
             break;
         }
     }
-
-    // Call after default options have been set
-    init();
 });
 
 
-type MenuId = string | number;
+/**
+ * When the browser action is clicked, open a receiver
+ * selector and load a sender for the response. The
+ * mirroring sender is loaded into the current tab at the
+ * top-level frame.
+ */
+browser.browserAction.onClicked.addListener(async tab => {
+    const selection = await SelectorManager.getSelection();
 
-// Menu IDs
-let mirrorCastMenuId: MenuId;
-let mediaCastMenuId: MenuId;
-
-
-let whitelistMenuId: MenuId;
-let whitelistRecommendedMenuId: MenuId;
-
-const whitelistMenuMap = new Map<MenuId, string>();
-
-
-const mediaCastTargetUrlPatterns = new Set([
-    "http://*/*"
-  , "https://*/*"
-]);
-
-const LOCAL_MEDIA_URL_PATTERN = "file://*/*";
-
-
-async function initCreateMenus (opts: Options) {
-
-    // If menus have already been created, return.
-    if (mirrorCastMenuId
-     || mediaCastMenuId
-     || whitelistMenuId
-     || whitelistRecommendedMenuId) {
-        return;
-    }
-
-    /**
-     * If local media casting is enabled, allow the media cast
-     * menu item to appear on file URIs.
-     */
-    if (opts.localMediaEnabled) {
-        mediaCastTargetUrlPatterns.add(LOCAL_MEDIA_URL_PATTERN);
-    }
-
-    // <video>/<audio> "Cast..." context menu item
-    mediaCastMenuId = await browser.menus.create({
-        contexts: [ "audio", "video" ]
-      , id: "contextCastMedia"
-      , targetUrlPatterns: Array.from(mediaCastTargetUrlPatterns)
-      , title: _("contextCast")
-      , visible: opts.mediaEnabled
+    loadSender({
+        tabId: tab.id
+      , frameId: 0
+      , selection
     });
+});
 
-    // Screen/Tab mirroring "Cast..." context menu item
-    mirrorCastMenuId = await browser.menus.create({
-        contexts: [ "browser_action", "page", "tools_menu" ]
-      , id: "contextCast"
-      , title: _("contextCast")
-      , visible: opts.mirroringEnabled
 
-        // Mirroring doesn't work from local files
-      , documentUrlPatterns: [
-            "http://*/*"
-          , "https://*/*"
-        ]
-    });
-
-    whitelistMenuId = await browser.menus.create({
-        contexts: [ "browser_action" ]
-      , title: _("contextAddToWhitelist")
-      , enabled: false
-    });
-
-    whitelistRecommendedMenuId = await browser.menus.create({
-        title: _("contextAddToWhitelistRecommended")
-      , parentId: whitelistMenuId
-    });
-
-    await browser.menus.create({
-        type: "separator"
-      , parentId: whitelistMenuId
-    });
+export interface Shim {
+    bridgePort: browser.runtime.Port;
+    contentPort?: browser.runtime.Port;
+    contentTabId?: number;
+    contentFrameId?: number;
 }
 
+const activeShims = new Set<Shim>();
 
-browser.menus.onShown.addListener(info => {
-    // Only rebuild menus if whitelist menu present
-    // Workaround type issues
-    const menuIds = info.menuIds as unknown as number[];
-    if (!menuIds.includes(whitelistMenuId as number)) {
-        return;
-    }
+browser.runtime.onConnect.addListener(async port => {
+    if (port.name === "shim") {
+        /**
+         * If there's already an active shim for the sender
+         * tab/frame ID, disconnect it.
+         */
+        for (const activeShim of activeShims) {
+            if (activeShim.contentTabId === port.sender.tab.id
+             && activeShim.contentFrameId === port.sender.frameId) {
 
-    if (!info.pageUrl) {
-        browser.menus.update(whitelistMenuId, {
-            enabled: false
+                activeShim.contentPort.disconnect();
+                activeShim.bridgePort.disconnect();
+            }
+        }
+
+
+        const shim = await createShim(port);
+
+        shim.bridgePort.onDisconnect.addListener(() => {
+            activeShims.delete(shim);
+        });
+        shim.contentPort.onDisconnect.addListener(() => {
+            activeShims.delete(shim);
         });
 
-        browser.menus.refresh();
-        return;
+        activeShims.add(shim);
     }
+});
 
-    const url = new URL(info.pageUrl);
-    const hasOrigin = url.origin !== "null";
-
-
-    /**
-     * If .origin is "null", hide top-level menu and don't
-     * bother re-building submenus, since we're probably not on
-     * a remote page.
-     */
-    browser.menus.update(whitelistMenuId, {
-        enabled: hasOrigin
-    });
-
-    if (!hasOrigin) {
-        browser.menus.refresh();
-        return;
-    }
-
-
-    function addWhitelistMenuItem (pattern: string) {
-        const menuId = browser.menus.create({
-            title: _("contextAddToWhitelistAdvancedAdd", pattern)
-          , parentId: whitelistMenuId
+StatusManager.addEventListener("serviceUp", ev => {
+    for (const shim of activeShims) {
+        shim.contentPort.postMessage({
+            subject: "shim:/serviceUp"
+          , data: { id: ev.detail.id }
         });
-
-        whitelistMenuMap.set(menuId, pattern);
-    }
-
-
-    for (const [ menuId ] of whitelistMenuMap) {
-        // Remove all temporary menus
-        if (menuId !== whitelistRecommendedMenuId) {
-            browser.menus.remove(menuId);
-        }
-
-        // Clear map
-        whitelistMenuMap.delete(menuId);
-    }
-
-
-    const baseHost = (url.host.match(/\./g) || []).length > 1
-        ? url.host.substring(url.host.indexOf(".") + 1)
-        : url.host;
-
-
-    const patternRecommended = `${url.origin}/*`;
-    const patternSearch = `${url.origin}${url.pathname}${url.search}`;
-    const patternWildcardProtocol = `*://${url.host}/*`;
-    const patternWildcardSubdomain = `${url.protocol}//*.${baseHost}/*`;
-    const patternWildcardProtocolAndSubdomain = `*://*.${baseHost}/*`;
-
-
-    // Update recommended menu item
-    browser.menus.update(whitelistRecommendedMenuId, {
-        title: _("contextAddToWhitelistRecommended", patternRecommended)
-    });
-    whitelistMenuMap.set(whitelistRecommendedMenuId, patternRecommended);
-
-
-    if (url.search) {
-        addWhitelistMenuItem(patternSearch);
-    }
-
-
-    /**
-     * Split url path into segments and add menu items for each
-     * partial path as the segments are removed.
-     */
-    {
-        const pathTrimmed = url.pathname.endsWith("/")
-            ? url.pathname.substring(0, url.pathname.length - 1)
-            : url.pathname;
-
-        const pathSegments = pathTrimmed.split("/")
-                .filter(segment => segment)
-                .reverse();
-
-        if (pathSegments.length) {
-            let index = 0;
-
-            for (const pathSegment of pathSegments) {
-                const partialPath = pathSegments
-                        .slice(index)
-                        .reverse()
-                        .join("/");
-
-                addWhitelistMenuItem(`${url.origin}/${partialPath}/*`);
-                index++;
-            }
-        }
-    }
-
-
-    // Add remaining menu items
-    addWhitelistMenuItem(patternWildcardProtocol);
-    addWhitelistMenuItem(patternWildcardSubdomain);
-    addWhitelistMenuItem(patternWildcardProtocolAndSubdomain);
-
-    browser.menus.refresh();
-});
-
-
-/**
- * Sender applications load a cast_sender.js script that
- * functions as a loader for the internal chrome-extension:
- * hosted script.
- *
- * We can redirect this and inject our own script to setup
- * the API shim.
- */
-browser.webRequest.onBeforeRequest.addListener(
-        async details => {
-            await browser.tabs.executeScript(details.tabId, {
-                code: `
-                    window.isFramework = ${
-                        details.url === CAST_FRAMEWORK_LOADER_SCRIPT_URL};
-                `
-              , frameId: details.frameId
-              , runAt: "document_start"
-            });
-
-            await browser.tabs.executeScript(details.tabId, {
-                file: "shim/contentBridge.js"
-              , frameId: details.frameId
-              , runAt: "document_start"
-            });
-
-            return {
-                redirectUrl: browser.runtime.getURL("shim/bundle.js")
-            };
-        }
-      , { urls: [
-            CAST_LOADER_SCRIPT_URL
-          , CAST_FRAMEWORK_LOADER_SCRIPT_URL
-        ]}
-      , [ "blocking" ]);
-
-
-// Current user agent string for all whitelisted requests
-let currentUAString: string;
-
-/**
- * Web apps usually only load the sender library and
- * provide cast functionality if the browser is detected
- * as Chrome, so we should rewrite the User-Agent header
- * to reflect this on whitelisted sites.
- */
-async function onBeforeSendHeaders (
-        details: { requestHeaders?: browser.webRequest.HttpHeaders }) {
-
-    const { os } = await browser.runtime.getPlatformInfo();
-
-    // Create Chrome UA from platform info on first run
-    if (!currentUAString) {
-        currentUAString = getChromeUserAgent(os);
-    }
-
-    const host = details.requestHeaders.find(
-            (header: any) => header.name === "Host");
-
-    // Find and rewrite the User-Agent header
-    for (const header of details.requestHeaders) {
-        if (header.name.toLowerCase() === "user-agent") {
-
-            // TODO: Remove need for this
-            if (host.value === "www.youtube.com") {
-                header.value = getChromeUserAgent(os, true);
-                break;
-            }
-
-            header.value = currentUAString;
-
-            break;
-        }
-    }
-
-    return {
-        requestHeaders: details.requestHeaders
-    };
-}
-
-/**
- * Initializes any functionality based on options state.
- */
-async function initRegisterOptionalFeatures (
-        opts: Options
-      , alteredOptions?: Array<(keyof Options)>) {
-
-    /**
-     * Adds a webRequest listener that intercepts and modifies user
-     * agent.
-     */
-    function register_userAgentWhitelist () {
-        browser.webRequest.onBeforeSendHeaders.addListener(
-                onBeforeSendHeaders
-              , { urls: opts.userAgentWhitelistEnabled
-                    ? opts.userAgentWhitelist
-                    : [] }
-              , [  "blocking", "requestHeaders" ]);
-    }
-
-    function unregister_userAgentWhitelist () {
-        browser.webRequest.onBeforeSendHeaders.removeListener(
-              onBeforeSendHeaders);
-    }
-
-
-
-    if (!alteredOptions) {
-        // If no altered properties specified, register all listeners
-        register_userAgentWhitelist();
-    } else {
-
-        if (alteredOptions.includes("userAgentWhitelist")
-             || alteredOptions.includes("userAgentWhitelistEnabled")) {
-
-            unregister_userAgentWhitelist();
-            register_userAgentWhitelist();
-        }
-
-        if (alteredOptions.includes("mirroringEnabled")) {
-            browser.menus.update(mirrorCastMenuId, {
-                visible: opts.mirroringEnabled
-            });
-        }
-
-        if (alteredOptions.includes("mediaEnabled")) {
-            browser.menus.update(mediaCastMenuId, {
-                visible: opts.mediaEnabled
-            });
-        }
-
-        if (alteredOptions.includes("localMediaEnabled")) {
-            if (opts.localMediaEnabled) {
-                mediaCastTargetUrlPatterns.add(LOCAL_MEDIA_URL_PATTERN);
-            } else {
-                mediaCastTargetUrlPatterns.delete(LOCAL_MEDIA_URL_PATTERN);
-            }
-
-            browser.menus.update(mediaCastMenuId, {
-                targetUrlPatterns: Array.from(mediaCastTargetUrlPatterns)
-            });
-        }
-    }
-}
-
-browser.runtime.onMessage.addListener(async message => {
-    switch (message.subject) {
-        case "optionsUpdated": {
-            const opts = await options.getAll();
-            initRegisterOptionalFeatures(opts, message.data.alteredOptions);
-            break;
-        }
     }
 });
 
-// Defines window.chrome for site compatibility
-browser.contentScripts.register({
-    allFrames: true
-  , js: [{ file: "shim/content.js" }]
-  , matches: [ "<all_urls>" ]
-  , runAt: "document_start"
+StatusManager.addEventListener("serviceDown", ev => {
+    for (const shim of activeShims) {
+        shim.contentPort.postMessage({
+            subject: "shim:/serviceDown"
+          , data: { id: ev.detail.id }
+        });
+    }
 });
+
 
 
 let mediaCastTabId: number;
 let mediaCastFrameId: number;
 
-let mirrorCastTabId: number;
-let mirrorCastFrameId: number;
+async function initMenus () {
+    console.info("fx_cast (Debug): init (menus)");
 
+    const { menuIdMediaCast
+          , menuIdMirroringCast
+          , menuIdWhitelist
+          , menuIdWhitelistRecommended } = await createMenus();
 
-async function loadMirrorCastSender (
-        tabId: number
-      , frameId: number
-      , selectedMedia: ReceiverSelectorMediaType) {
-
-    mirrorCastTabId = tabId;
-    mirrorCastFrameId = frameId;
-
-    await browser.tabs.executeScript(tabId, {
-        code: `
-            window.selectedMedia = ${selectedMedia};
-        `
-      , frameId
-    });
-
-    await browser.tabs.executeScript(tabId, {
-        file: "senders/mirroringCast.js"
-      , frameId
-    });
-}
-
-
-browser.menus.onClicked.addListener(async (info, tab) => {
-    if (info.menuItemId === mirrorCastMenuId
-     || info.menuItemId === mediaCastMenuId) {
-
-        const { frameId } = info;
-
+    browser.menus.onClicked.addListener(async (info, tab) => {
         switch (info.menuItemId) {
-            case mirrorCastMenuId: {
-                await loadMirrorCastSender(tab.id, frameId, info.pageUrl
-                    ? ReceiverSelectorMediaType.Tab
-                    : ReceiverSelectorMediaType.Screen);
-                break;
-            }
+            case menuIdMediaCast: {
+                const allMediaTypes =
+                        ReceiverSelectorMediaType.App
+                      | ReceiverSelectorMediaType.Tab
+                      | ReceiverSelectorMediaType.Screen;
+                      // | ReceiverSelectorMediaType.File;
 
-            case mediaCastMenuId: {
-                mediaCastTabId = tab.id;
-                mediaCastFrameId = frameId;
+                const selection = await SelectorManager.getSelection(
+                        ReceiverSelectorMediaType.App
+                      , allMediaTypes);
 
-                // Pass media URL to media sender app
-                await browser.tabs.executeScript(tab.id, {
-                    code: `
-                        window.srcUrl = "${info.srcUrl}";
-                        window.targetElementId = ${info.targetElementId};
-                    `
-                  , frameId
-                });
-
-                // Load media sender app
-                await browser.tabs.executeScript(tab.id, {
-                    file: "senders/mediaCast.js"
-                  , frameId
-                });
-
-                break;
-            }
-        }
-
-        return;
-    }
-
-
-    if (info.parentMenuItemId === whitelistMenuId) {
-        const matchPattern = whitelistMenuMap.get(info.menuItemId);
-        const userAgentWhitelist = await options.get("userAgentWhitelist");
-
-        // Add to whitelist
-        userAgentWhitelist.push(matchPattern);
-
-        // Update options
-        await options.set("userAgentWhitelist", userAgentWhitelist);
-    }
-});
-
-
-
-interface Shim {
-    port: browser.runtime.Port;
-    bridgePort: browser.runtime.Port;
-    tabId: number;
-    frameId: number;
-}
-
-const shimMap = new Map<string, Shim>();
-
-let statusBridge: browser.runtime.Port;
-const statusBridgeReceivers = new Map<string, Receiver>();
-
-
-/**
- * Create status bridge, set event handlers and initialize.
- */
-async function initCreateStatusBridge (opts: Options) {
-    // Status bridge already initialized
-    if (statusBridge) {
-        return;
-    }
-
-    statusBridge = nativeMessaging.connectNative(opts.bridgeApplicationName);
-    statusBridge.onDisconnect.addListener(onStatusBridgeDisconnect);
-    statusBridge.onMessage.addListener(onStatusBridgeMessage);
-
-    statusBridge.postMessage({
-        subject: "bridge:/initialize"
-      , data: {
-            mode: "status"
-        }
-    });
-}
-
-/**
- * Runs once the status bridge has disconnected. Sends
- * serviceDown messages for all receivers to all shims to
- * update receiver availability, then clears the receiver
- * list.
- *
- * Attempts to reinitialize the status bridge after 10
- * seconds. If it fails immediately, this handler will be
- * triggered again and the timer is reset for another 10
- * seconds.
- */
-function onStatusBridgeDisconnect () {
-    // Notify shims for receiver availability
-    for (const [, receiver ] of statusBridgeReceivers) {
-        for (const [, shim ] of shimMap) {
-            shim.port.postMessage({
-                subject: "shim:/serviceDown"
-              , data: { id: receiver.id }
-            });
-        }
-    }
-
-    // Cleanup
-    statusBridgeReceivers.clear();
-    statusBridge.onDisconnect.removeListener(onStatusBridgeDisconnect);
-    statusBridge.onMessage.removeListener(onStatusBridgeMessage);
-    statusBridge = null;
-
-    // After 10 seconds, attempt to reinitialize
-    window.setTimeout(async () => {
-        const opts = await options.getAll();
-        initCreateStatusBridge(opts);
-    }, 10000);
-}
-
-/**
- * Handles incoming status bridge messages.
- */
-async function onStatusBridgeMessage (message: Message) {
-    switch (message.subject) {
-
-        case "shim:/serviceUp": {
-            const receiver = (message as ServiceUpMessage).data;
-            statusBridgeReceivers.set(receiver.id, receiver);
-
-            // Forward update to shims
-            for (const shim of shimMap.values()) {
-                shim.port.postMessage({
-                    subject: "shim:/serviceUp"
-                  , data: { id: receiver.id }
-                });
-            }
-
-            break;
-        }
-
-        case "shim:/serviceDown": {
-            const { id } = (message as ServiceDownMessage).data;
-
-            if (statusBridgeReceivers.has(id)) {
-                statusBridgeReceivers.delete(id);
-            }
-
-            // Forward update to shims
-            for (const shim of shimMap.values()) {
-                shim.port.postMessage({
-                    subject: "shim:/serviceDown"
-                  , data: { id }
-                });
-            }
-
-            break;
-        }
-
-        case "receiverStatus": {
-            const { id, status } = (message as ReceiverStatusMessage).data;
-
-            const receiver = statusBridgeReceivers.get(id);
-
-            // Merge new status with old status
-            statusBridgeReceivers.set(id, {
-                ...receiver
-              , status: {
-                    ...receiver.status
-                  , ...status
+                // Selection cancelled
+                if (!selection) {
+                    break;
                 }
-            });
 
-            break;
-        }
-    }
-}
+                /**
+                 * If the selected media type is App, that refers to the
+                 * media sender in this context, so load media sender.
+                 */
+                if (selection.mediaType === ReceiverSelectorMediaType.App) {
+                    await browser.tabs.executeScript(tab.id, {
+                        code: stringify`
+                            window.selectedReceiver = ${selection.receiver};
+                            window.srcUrl = ${info.srcUrl};
+                            window.targetElementId = ${info.targetElementId};
+                        `
+                      , frameId: info.frameId
+                    });
 
+                    await browser.tabs.executeScript(tab.id, {
+                        file: "senders/mediaCast.js"
+                      , frameId: info.frameId
+                    });
 
-async function onConnectShim (port: browser.runtime.Port) {
-    const bridgeInfo = await getBridgeInfo();
-    if (bridgeInfo && !bridgeInfo.isVersionCompatible) {
-        return;
-    }
+                    // Store for later
+                    mediaCastTabId = tab.id;
+                    mediaCastFrameId = info.frameId;
+                } else {
 
-    const tabId = port.sender.tab.id;
-    const frameId = port.sender.frameId;
-    const shimId = `${tabId}:${frameId}`;
-
-    // Disconnect existing shim
-    if (shimMap.has(shimId)) {
-        shimMap.get(shimId).port.disconnect();
-        shimMap.delete(shimId);
-    }
-
-
-    const receiverSelector = getReceiverSelector(
-            await options.get("receiverSelectorType"));
-
-
-    function onReceiverSelectorSelected (
-            ev: ReceiverSelectorSelectedEvent) {
-        port.postMessage({
-            subject: "shim:/selectReceiverEnd"
-          , data: ev.detail
-        });
-    }
-
-    function onReceiverSelectorCancelled () {
-        port.postMessage({
-            subject: "shim:/selectReceiverCancelled"
-        });
-    }
-
-    function onReceiverSelectorError () {
-        // TODO: Report errors properly
-        port.postMessage({
-            subject: "shim:/selectReceiverCancelled"
-        });
-    }
-
-    receiverSelector.addEventListener("selected"
-          , onReceiverSelectorSelected);
-    receiverSelector.addEventListener("cancelled"
-          , onReceiverSelectorCancelled);
-    receiverSelector.addEventListener("error"
-          , onReceiverSelectorError);
-
-    port.onDisconnect.addListener(() => {
-        receiverSelector.removeEventListener("selected"
-              , onReceiverSelectorSelected);
-        receiverSelector.removeEventListener("cancelled"
-              , onReceiverSelectorCancelled);
-        receiverSelector.removeEventListener("error"
-              , onReceiverSelectorError);
-    });
-
-
-    const applicationName = await options.get("bridgeApplicationName");
-
-    // Spawn bridge app instance
-    const bridgePort = nativeMessaging.connectNative(applicationName);
-
-    if (bridgePort.error) {
-        console.error(`Failed connect to ${applicationName}:`
-              , bridgePort.error.message);
-    }
-
-    shimMap.set(shimId, {
-        port
-      , bridgePort
-      , tabId
-      , frameId
-    });
-
-    bridgePort.onDisconnect.addListener(() => {
-        if (bridgePort.error) {
-            console.error(`${applicationName} disconnected:`
-                  , bridgePort.error.message);
-        } else {
-            console.info(`${applicationName} disconnected`);
-        }
-    });
-
-    // Handle disconnect
-    port.onDisconnect.addListener(() => {
-        bridgePort.disconnect();
-        shimMap.delete(shimId);
-    });
-
-
-    bridgePort.onMessage.addListener((message: Message) => {
-        port.postMessage(message);
-    });
-
-    port.onMessage.addListener(async (message: Message) => {
-        const [ destination ] = message.subject.split(":/");
-        switch (destination) {
-            case "bridge": {
-                bridgePort.postMessage(message);
-                break;
-            }
-        }
-
-        switch (message.subject) {
-            case "main:/shimInitialized": {
-
-                // Send existing receivers as serviceUp messages
-                for (const receiver of statusBridgeReceivers.values()) {
-                    port.postMessage({
-                        subject: "shim:/serviceUp"
-                      , data: { id: receiver.id }
+                    // Handle other responses
+                    loadSender({
+                        tabId: tab.id
+                      , frameId: info.frameId
+                      , selection
                     });
                 }
 
                 break;
             }
 
-            case "main:/sessionCreated": {
-                receiverSelector.close();
-                break;
-            }
+            case menuIdMirroringCast: {
+                const selection = await SelectorManager.getSelection();
 
-            case "main:/selectReceiverBegin": {
-                receiverSelector.open(
-                        Array.from(statusBridgeReceivers.values())
-                      , message.data.defaultMediaType
-                      , message.data.availableMediaTypes);
-                break;
-            }
+                loadSender({
+                    tabId: tab.id
+                  , frameId: info.frameId
+                  , selection
+                });
 
-            default: {
-                // TODO: Remove need for this
-                messageRouter.handleMessage(message);
                 break;
             }
         }
     });
+}
 
-    port.postMessage({
-        subject: "shim:/initialized"
-      , data: bridgeInfo
+
+async function initRequestListener () {
+    console.info("fx_cast (Debug): init (request listener)");
+
+    type OnBeforeRequestDetails = Parameters<Parameters<
+            typeof browser.webRequest.onBeforeRequest.addListener>[0]>[0];
+
+    async function onBeforeRequest (details: OnBeforeRequestDetails) {
+        await browser.tabs.executeScript(details.tabId, {
+            code: `
+                window.isFramework = ${
+                    details.url === CAST_FRAMEWORK_LOADER_SCRIPT_URL};
+            `
+          , frameId: details.frameId
+          , runAt: "document_start"
+        });
+
+        await browser.tabs.executeScript(details.tabId, {
+            file: "shim/contentBridge.js"
+          , frameId: details.frameId
+          , runAt: "document_start"
+        });
+
+        return {
+            redirectUrl: browser.runtime.getURL("shim/bundle.js")
+        };
+    }
+
+    /**
+     * Sender applications load a cast_sender.js script that
+     * functions as a loader for the internal chrome-extension:
+     * hosted script.
+     *
+     * We can redirect this and inject our own script to setup
+     * the API shim.
+     */
+    browser.webRequest.onBeforeRequest.addListener(
+            onBeforeRequest
+          , { urls: [
+                CAST_LOADER_SCRIPT_URL
+              , CAST_FRAMEWORK_LOADER_SCRIPT_URL ]}
+          , [ "blocking" ]);
+}
+
+
+function initWhitelist () {
+    console.info("fx_cast (Debug): init (whitelist)");
+
+    type OnBeforeSendHeadersDetails = Parameters<Parameters<
+            typeof browser.webRequest.onBeforeSendHeaders.addListener>[0]>[0];
+
+    /**
+     * Web apps usually only load the sender library and
+     * provide cast functionality if the browser is detected
+     * as Chrome, so we should rewrite the User-Agent header
+     * to reflect this on whitelisted sites.
+     */
+    async function onBeforeSendHeaders (details: OnBeforeSendHeadersDetails) {
+        const { os } = await browser.runtime.getPlatformInfo();
+        const chromeUserAgent = getChromeUserAgent(os);
+
+        const host = details.requestHeaders.find(
+                header => header.name === "Host");
+
+        for (const header of details.requestHeaders) {
+            if (header.name.toLowerCase() === "user-agent") {
+                /**
+                 * New YouTube breaks without the default user agent string,
+                 * so pretend to be an old version of Chrome to get the old
+                 * site.
+                 */
+                if (host.value === "www.youtube.com") {
+                    header.value = getChromeUserAgent(os, true);
+                    break;
+                }
+
+                header.value = chromeUserAgent;
+                break;
+            }
+        }
+
+        return {
+            requestHeaders: details.requestHeaders
+        };
+    }
+
+    async function registerUserAgentWhitelist () {
+        const { userAgentWhitelist
+              , userAgentWhitelistEnabled } = await options.getAll();
+
+        if (!userAgentWhitelistEnabled) {
+            return;
+        }
+        browser.webRequest.onBeforeSendHeaders.addListener(
+                onBeforeSendHeaders
+              , { urls: userAgentWhitelist }
+              , [  "blocking", "requestHeaders" ]);
+    }
+
+    function unregisterUserAgentWhitelist () {
+        browser.webRequest.onBeforeSendHeaders.removeListener(
+              onBeforeSendHeaders);
+    }
+
+    // Register on first run
+    registerUserAgentWhitelist();
+
+    // Re-register when options change
+    options.addEventListener("changed", ev => {
+        const alteredOpts = ev.detail;
+
+        if (alteredOpts.includes("userAgentWhitelist")
+         || alteredOpts.includes("userAgentWhitelistEnabled")) {
+            unregisterUserAgentWhitelist();
+            registerUserAgentWhitelist();
+        }
     });
 }
 
-browser.runtime.onConnect.addListener(port => {
-    switch (port.name) {
-        case "shim":
-            onConnectShim(port);
-            break;
-    }
-});
 
 
-messageRouter.register("mirrorCast", message => {
-    browser.tabs.sendMessage(mirrorCastTabId, message
-          , { frameId: mirrorCastFrameId });
-});
-messageRouter.register("mediaCast", message => {
-    browser.tabs.sendMessage(mediaCastTabId, message
-          , { frameId: mediaCastFrameId });
-});
-
-
-// Forward messages into messageRouter
-browser.runtime.onMessage.addListener((message, sender) => {
-    messageRouter.handleMessage(message, {
-        tabId: sender.tab.id
-      , frameId: sender.frameId
-    });
-});
-
-
-// Misc init
 async function init () {
-    const opts = await options.getAll();
-    if (!opts) {
+    /**
+     * If options haven't been set yet, we can't properly
+     * initialize, so wait until init is called again in the
+     * onInstalled listener.
+     */
+    if (!(await options.getAll())) {
         return;
     }
 
-    initCreateMenus(opts);
-    initRegisterOptionalFeatures(opts);
-    initCreateStatusBridge(opts);
+    console.info("fx_cast (Debug): init");
+
+
+    initMenus();
+    initRequestListener();
+    initWhitelist();
 }
 
 init();

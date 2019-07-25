@@ -6,9 +6,6 @@ import SessionRequest from "./SessionRequest";
 import { AutoJoinPolicy
        , DefaultActionPolicy } from "../enums";
 
-import { ReceiverSelectorMediaType }
-        from "../../../receiver_selectors/ReceiverSelector";
-
 
 export default class ApiConfig {
     public additionalSessionRequests: any[] = [];
@@ -23,15 +20,5 @@ export default class ApiConfig {
           , public autoJoinPolicy: string
                     = AutoJoinPolicy.TAB_AND_ORIGIN_SCOPED
           , public defaultActionPolicy: string
-                    = DefaultActionPolicy.CREATE_SESSION
-
-            // TODO: Remove awful hack for mirror casting
-          , public _defaultMediaType: ReceiverSelectorMediaType
-                    = ReceiverSelectorMediaType.App
-          , public _availableMediaTypes: ReceiverSelectorMediaType
-                    = ReceiverSelectorMediaType.App
-                    | ReceiverSelectorMediaType.Tab
-                    | ReceiverSelectorMediaType.Screen
-                    | ReceiverSelectorMediaType.File) {
-    }
+                    = DefaultActionPolicy.CREATE_SESSION) {}
 }

@@ -4,13 +4,13 @@
 import React, { Component } from "react";
 import ReactDOM from "react-dom";
 
-import defaultOptions, { Options } from "../../defaultOptions";
+import defaultOptions from "../../defaultOptions";
 
 import Bridge from "./Bridge";
 import EditableList from "./EditableList";
 
-import getBridgeInfo, { BridgeInfo } from "../../lib/getBridgeInfo";
-import options from "../../lib/options";
+import bridge, { BridgeInfo } from "../../lib/bridge";
+import options, { Options } from "../../lib/options";
 import { REMOTE_MATCH_PATTERN_REGEX } from "../../lib/utils";
 
 import { ReceiverSelectorType } from "../../receiver_selectors";
@@ -88,7 +88,7 @@ class OptionsApp extends Component<{}, OptionsAppState> {
           , options: await options.getAll()
         });
 
-        const bridgeInfo = await getBridgeInfo();
+        const bridgeInfo = await bridge.getInfo();
         const { os } = await browser.runtime.getPlatformInfo();
 
         this.setState({
@@ -350,16 +350,7 @@ class OptionsApp extends Component<{}, OptionsAppState> {
         this.form.reportValidity();
 
         try {
-            const oldOpts = await options.getAll();
             await options.setAll(this.state.options);
-
-            const alteredOptions = [];
-            for (const [ key, val ] of Object.entries(this.state.options)) {
-                const oldVal = oldOpts[key];
-                if (oldVal !== val) {
-                    alteredOptions.push(key);
-                }
-            }
 
             this.setState({
                 hasSaved: true
@@ -369,12 +360,6 @@ class OptionsApp extends Component<{}, OptionsAppState> {
                         hasSaved: false
                     });
                 }, 1000);
-            });
-
-            // Send update message / event
-            browser.runtime.sendMessage({
-                subject: "optionsUpdated"
-              , data: { alteredOptions }
             });
         } catch (err) {
             console.error("Failed to save options");
@@ -421,7 +406,7 @@ class OptionsApp extends Component<{}, OptionsAppState> {
             bridgeLoading: true
         });
 
-        const bridgeInfo = await getBridgeInfo();
+        const bridgeInfo = await bridge.getInfo();
 
         this.setState({
             bridgeInfo
