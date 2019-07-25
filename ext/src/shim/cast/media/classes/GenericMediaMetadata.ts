@@ -6,11 +6,11 @@ import { MetadataType } from "../enums";
 
 
 export default class GenericMediaMetadata {
-    public images: Image[] = null;
+    public images: Image[] = undefined;
     public metadataType: number = MetadataType.GENERIC;
-    public releaseDate: string = null;
-    public releaseYear: number = null;
-    public subtitle: string = null;
-    public title: string = null;
+    public releaseDate: string = undefined;
+    public releaseYear: number = undefined;
+    public subtitle: string = undefined;
+    public title: string = undefined;
     public type: number = MetadataType.GENERIC;
 }

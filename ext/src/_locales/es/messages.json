@@ -4,42 +4,42 @@
       , "description": "Name of the extension and the native receiver selector window title."
     }
   , "extensionDescription": {
-        "message": ""
+        "message": "Habilita el soporte de Chromecast para transmitir aplicaciones web (como Netflix y BBC iPlayer), video HTML5 y enviar pantalla/pestañas."
       , "description": "Description of the extension shown in the add-ons manager."
     }
 
 
   , "popupMediaTypeApp": {
-        "message": "this site's app"
+        "message": "la aplicación de este sitio"
       , "description": "Receiver selector media type <option> text for current site's sender application."
     }
   , "popupMediaTypeTab": {
-        "message": "Tab"
+        "message": "Pestaña"
       , "description": "Receiver selector media type <option> text for current tab."
     }
   , "popupMediaTypeScreen": {
-        "message": "Screen"
+        "message": "Pantalla"
       , "description": "Receiver selector media type <option> text for screen."
     }
   , "popupMediaTypeFile": {
-        "message": "Browse..."
+        "message": "Examinar..."
       , "description": "Receiver selector media type <option> text for opening a file selector dialog."
     }
 
   , "popupMediaSelectCastLabel": {
-        "message": "Cast"
+        "message": "Transmitir"
       , "description": "(Cast) <select> to:"
     }
   , "popupMediaSelectToLabel": {
-        "message": "to:"
+        "message": "a:"
       , "description": "Cast <select> (to:)"
     }
   , "popupCastButtonTitle": {
-        "message": "Cast"
+        "message": "Transmitir"
       , "description": "Button text for each receiver entry in the receiver selector."
     }
   , "popupCastingButtonTitle": {
-        "message": "Casting$ellipsis$"
+        "message": "Transmitiendo$ellipsis$"
       , "description": "Button text while establishing a session in the receiver selector. Ellipsis cycles (. → .. → ...) as loading indicator."
       , "placeholders": {
             "ellipsis": {
@@ -51,16 +51,16 @@
 
 
   , "contextCast": {
-        "message": "Cast..."
+        "message": "Transmitir a..."
       , "description": "Main context menu item title. Ellipsis indicates additional information required as it triggers opening of receiver selector."
     }
 
   , "contextAddToWhitelist": {
-        "message": "Add to Whitelist"
+        "message": "Añadir a la lista blanca"
       , "description": "Top-level whitelist context menu item title."
     }
   , "contextAddToWhitelistRecommended": {
-        "message": "Add $matchPattern$ (Recommended)"
+        "message": "Añadir $matchPattern$ (Recomendado)"
       , "description": "Context menu item title for recomended match pattern."
       , "placeholders": {
             "matchPattern": {
@@ -70,7 +70,7 @@
         }
     }
   , "contextAddToWhitelistAdvancedAdd": {
-        "message": "Add $matchPattern$"
+        "message": "Añadir $matchPattern$"
       , "description": "Context menu item title for all other match patterns."
       , "placeholders": {
             "matchPattern": {
@@ -82,44 +82,44 @@
 
 
   , "optionsBridgeLoading": {
-        "message": "Loading bridge info..."
+        "message": "Cargando información de la aplicación puente..."
       , "description": "Loading placeholder text for bridge section on options page."
     }
   , "optionsBridgeFoundStatusTitle": {
-        "message": "Bridge found"
+        "message": "Aplicación puente encontrada"
       , "description": "Bridge OK status title text."
     }
   , "optionsBridgeIssueStatusTitle": {
-        "message": "Bridge issue"
+        "message": "Problema con aplicación puente"
       , "description": "Bridge error status title text."
     }
   , "optionsBridgeNotFoundStatusTitle": {
-        "message": "Bridge not found"
+        "message": "Aplicación puente no encontrada"
       , "description": "Bridge missing status title text."
     }
   , "optionsBridgeNotFoundStatusText": {
-        "message": "Try downloading and installing the latest version."
+        "message": "Intente descargar e instalar la última versión."
       , "description": "Bridge not found additional description text"
     }
 
   , "optionsBridgeStatsName": {
-        "message": "Name:"
+        "message": "Nombre:"
       , "description": "Bridge stats name row title."
     }
   , "optionsBridgeStatsVersion": {
-        "message": "Version:"
+        "message": "Versión:"
       , "description": "Bridge stats version row title."
     }
   , "optionsBridgeStatsExpectedVersion": {
-        "message": "Expected version:"
+        "message": "Versión esperada:"
       , "description": "Bridge stats expected version row title."
     }
   , "optionsBridgeStatsCompatibility": {
-        "message": "Compatibility:"
+        "message": "Compatibilidad:"
       , "description": "Bridge stats compatibility row title."
     }
   , "optionsBridgeStatsRecommendedAction": {
-        "message": "Recommended action:"
+        "message": "Acción recomendada:"
       , "description": "Bridge stats recommended action row title."
     }
   , "optionsBridgeCompatible": {
@@ -127,7 +127,7 @@
       , "description": "Compatibility status is definitely compatible."
     }
   , "optionsBridgeLikelyCompatible": {
-        "message": "LIKELY COMPATIBLE"
+        "message": "PROBABLEMENTE COMPATIBLE"
       , "description": "Compatibility status is probably compatible."
     }
   , "optionsBridgeIncompatible": {
@@ -135,23 +135,23 @@
       , "description": "Compatibility status is definitely incompatible."
     }
   , "optionsBridgeOlderAction": {
-        "message": "Bridge version older than expected, try updating bridge to the latest version."
+        "message": "Versión de la aplicación puente inferior a la esperada, intente actualizarla a la última versión."
       , "description": "Recommended action for when the installed bridge version is older than the installed extension version."
     }
   , "optionsBridgeNewerAction": {
-        "message": "Bridge version newer than expected, try updating extension to the latest version."
+        "message": "Versión de la aplicación puente superior a la esperada, intente actualizar la extensión a la última versión."
       , "description": "Recommended action for when the installed bridge version is newer than the installed extension version."
     }
   , "optionsBridgeNoAction": {
-        "message": "No action needed."
+        "message": "No se requieren acciones."
       , "description": "Recommended action for when both bridge and extension versions are compatible or likely compatible."
     }
   , "optionsBridgeUpdateCheck": {
-        "message": "Check for Updates"
+        "message": "Buscar actualizaciones"
       , "description": "Update check button title."
     }
   , "optionsBridgeUpdateChecking": {
-        "message": "Checking for Updates$ellipsis$"
+        "message": "Buscando actualizaciones para Updates$ellipsis$"
       , "description": "Update check button title while in progress. Ellipsis cycles (. → .. → ...) as loading indicator."
       , "placeholders": {
             "ellipsis": {
@@ -161,139 +161,102 @@
         }
     }
   , "optionsBridgeUpdateStatusNoUpdates": {
-        "message": "No updates available"
+        "message": "No hay actualizaciones disponibles"
       , "description": "Update status if no updates are found."
    }
   , "optionsBridgeUpdateStatusError": {
-        "message": "Error checking for updates"
+        "message": "Error al buscar actualizaciones"
       , "description": "Update status if an error was encountered checking for updates."
    }
   , "optionsBridgeUpdateAvailable": {
-        "message": "An update is available:"
+        "message": "Hay una actualización disponible:"
       , "description": "Update status if an update was found."
    }
   , "optionsBridgeUpdate": {
-        "message": "Update Now..."
+        "message": "Actualizar ahora..."
       , "description": "Update now button title. Ellipsis indicates additional information as it triggers an update window popup."
     }
 
   , "optionsMediaCategoryName": {
-        "message": "Media casting"
+        "message": "Transmisión de contenidos"
       , "description": "Options page media casting category title."
     }
   , "optionsMediaCategoryDescription": {
-        "message": "HTML5 video/audio media casting."
+        "message": "Transmisión de video/audio HTML5."
       , "description": "Options page media casting category description."
     }
   , "optionsMediaEnabled": {
-        "message": "Enable media casting"
+        "message": "Activar transmisión de contenidos"
       , "description": "Media casting enabled checkbox label."
     }
   , "optionsMediaSyncElement": {
-        "message": "Sync receiver state with media element"
+        "message": "Sincronizar estado del receptor con el contenido"
       , "description": "Media casting sync checkbox label."
     }
-  , "optionsMediaSyncElementDescription": {
-        "message": "Synchronize state (playback, volume, captions, etc...) between the media element and the receiver device."
-      , "description": "Media casting sync option description."
-    }
   , "optionsMediaStopOnUnload": {
-        "message": "Stop receiver playback on page unload"
+        "message": "Detener reproducción del receptor al cerrar la página"
       , "description": "Media stop on unload checkbox label."
     }
 
   , "optionsLocalMediaCategoryName": {
-        "message": "Local media casting"
+        "message": "Transmisión de contenidos locales"
       , "description": "Options page local media category title."
     }
   , "optionsLocalMediaCategoryDescription": {
-        "message": "HTTP server started by the bridge app to stream local media files to the cast receiver."
+        "message": "Servidor HTTP iniciado por la aplicación puente para transmitir archivos de medios locales al receptor."
       , "description": "Options page local media category description."
     }
   , "optionsLocalMediaEnabled": {
-        "message": "Enable local media casting"
+        "message": "Activar transmisión de medios locales"
       , "description": "Local media enabled checkbox label."
     }
   , "optionsLocalMediaServerPort": {
-        "message": "HTTP server port:"
+        "message": "Puerto del servidor HTTP:"
       , "description": "HTTP server port input label."
     }
 
-  , "optionsReceiverSelectorCategoryName": {
-        "message": "Receiver selector"
-      , "description": "Options page receiver selector category title."
-    }
-  , "optionsReceiverSelectorCategoryDescription": {
-        "message": "Receiver device selection interface."
-      , "description": "Options page receiver selector category description."
-    }
-  , "optionsReceiverSelectorType": {
-        "message": "Type:"
-      , "description": "Receiver selector type option label."
-    }
-  , "optionsReceiverSelectorTypeBrowser": {
-        "message": "Browser"
-      , "description": "Receiver selector type browser radio option label."
-    }
-  , "optionsReceiverSelectorTypeNative": {
-        "message": "Native"
-      , "description": "Receiver selector type native radio option label."
-    }
-  , "optionsReceiverSelectorWaitForConnection": {
-        "message": "Wait for connection"
-      , "description": "Receiver selector wait for connection option checkbox label."
-    }
-  , "optionsReceiverSelectorWaitForConnectionDescription": {
-        "message": "Keep receiver selector open until the session is established or connection fails."
-      , "description": "Receiver selector wait for connection option description."
-    }
-  , "optionsReceiverSelectorCloseIfFocusLost": {
-        "message": "Close after losing focus"
-      , "description": "Receiver selector close if focus lost option checkbox label."
-    }
-
   , "optionsUserAgentWhitelistCategoryName": {
-        "message": "User agent whitelist"
+        "message": "Lista blanca de agentes de usuario"
       , "description": "Options page whitelist category title."
     }
   , "optionsUserAgentWhitelistCategoryDescription": {
-        "message": "Sites for which to replace the user agent with a Chrome version for compatibility. Must be valid match patterns."
+        "message": "Sitios en los cuales reemplazar el agente de usuario con una versión de Chrome para compatibilidad. Deben ser patrones de coincidencia válidos."
       , "description": "Options page whitelist category description."
     }
   , "optionsUserAgentWhitelistEnabled": {
-        "message": "Enable site whitelist"
+        "message": "Activar lista blanca de sitios"
       , "description": "Whitelist enabled checkbox label."
     }
   , "optionsUserAgentWhitelistContent": {
-        "message": "Match patterns (newline-separated):"
+        "message": "Patrones de coincidencia (uno por línea):"
       , "description": "Match patterns editor widget label."
     }
   , "optionsUserAgentWhitelistBasicView": {
-        "message": "Basic View"
+        "message": "Vista básica"
       , "description": "Switch to basic view button title."
     }
   , "optionsUserAgentWhitelistRawView": {
-        "message": "Raw View"
+        "message": "Vista en bruto"
       , "description": "Switch to raw view button title."
     }
   , "optionsUserAgentWhitelistSaveRaw": {
-        "message": "Save Raw"
+        "message": "Guardar archivo en bruto"
       , "description": "Save raw view edits button title."
     }
   , "optionsUserAgentWhitelistAddItem": {
-        "message": "Add Item"
+        "message": "Añadir elemento"
       , "description": "Add new whitelist item button title."
     }
   , "optionsUserAgentWhitelistEditItem": {
-        "message": "Edit"
+        "message": "Editar"
       , "description": "Edit whitelist item button title. Displayed on each item."
     }
   , "optionsUserAgentWhitelistRemoveItem": {
-        "message": "Remove"
+        "message": "Eliminar"
       , "description": "Remove whitelist item button title. Displayed on each item."
     }
   , "optionsUserAgentWhitelistInvalidMatchPattern": {
-        "message": "Invalid match pattern $matchPattern$"
+        "message": "Patrón de coincidencia $matchPattern$ inválido"
       , "description": "Error displayed by input indicating an invalid match pattern."
       , "placeholders": {
             "matchPattern": {
@@ -304,36 +267,32 @@
     }
 
   , "optionsMirroringCategoryName": {
-        "message": "Screen mirroring"
+        "message": "Enviar pantalla"
       , "description": "Options page mirroring category name."
     }
   , "optionsMirroringCategoryDescription": {
-        "message": "Screen/Tab mirroring to a Chromecast receiver app."
+        "message": "Envío de pantalla/pestaña a la aplicación receptora de Chromecast."
       , "description": "Options page mirroring category description."
     }
   , "optionsMirroringEnabled": {
-        "message": "Enable screen mirroring"
+        "message": "Activar envío de pantalla"
       , "description": "Mirroring enabled checkbox label."
     }
   , "optionsMirroringAppId": {
-        "message": "Receiver app ID:"
+        "message": "ID de aplicación receptora:"
       , "description": "Mirroring app ID input label."
-    }
-  , "optionsMirroringAppIdDescription": {
-        "message": "App ID for a registered Chromecast receiver application. Advanced use only. Must be compatible with the default app (see GitHub repo)."
-      , "description": "Mirroring app ID option description."
     }
 
   , "optionsReset": {
-        "message": "Restore Defaults"
+        "message": "Restaurar predeterminados"
       , "description": "Restore default options button label."
     }
   , "optionsSave": {
-        "message": "Save"
+        "message": "Guardar"
       , "description": "Save options button label."
     }
   , "optionsSaved": {
-        "message": "Saved!"
+        "message": "¡Guardado!"
       , "description": "Status text displayed by save button once options have been successfully saved."
     }
 }

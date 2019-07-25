@@ -6,15 +6,15 @@ import { MetadataType } from "../enums";
 
 
 export default class PhotoMediaMetadata {
-    public artist: string = null;
-    public creationDateTime: string = null;
-    public height: number = null;
-    public images: Image[] = null;
-    public latitude: number = null;
-    public location: string = null;
-    public longitude: number = null;
+    public artist: string = undefined;
+    public creationDateTime: string = undefined;
+    public height: number = undefined;
+    public images: Image[] = undefined;
+    public latitude: number = undefined;
+    public location: string = undefined;
+    public longitude: number = undefined;
     public metadataType: number = MetadataType.PHOTO;
-    public title: string = null;
+    public title: string = undefined;
     public type: number = MetadataType.PHOTO;
-    public width: number = null;
+    public width: number = undefined;
 }

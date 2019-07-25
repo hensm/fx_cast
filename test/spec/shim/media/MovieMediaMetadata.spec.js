@@ -4,13 +4,13 @@ describe("chrome.cast.media.MovieMediaMetadata", () => {
     it("should have all properties", async () => {
         const movieMediaMetadata = new chrome.cast.media.MovieMediaMetadata();
 
-        expect(movieMediaMetadata.images).toBe(null);
+        expect(movieMediaMetadata.images).toBe(undefined);
         expect(movieMediaMetadata.metadataType).toBe(1);
-        expect(movieMediaMetadata.releaseDate).toBe(null);
-        expect(movieMediaMetadata.releaseYear).toBe(null);
-        expect(movieMediaMetadata.studio).toBe(null);
-        expect(movieMediaMetadata.subtitle).toBe(null);
-        expect(movieMediaMetadata.title).toBe(null);
+        expect(movieMediaMetadata.releaseDate).toBe(undefined);
+        expect(movieMediaMetadata.releaseYear).toBe(undefined);
+        expect(movieMediaMetadata.studio).toBe(undefined);
+        expect(movieMediaMetadata.subtitle).toBe(undefined);
+        expect(movieMediaMetadata.title).toBe(undefined);
         expect(movieMediaMetadata.type).toBe(1);
     });
 });

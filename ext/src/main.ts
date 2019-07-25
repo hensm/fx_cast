@@ -296,7 +296,6 @@ function initWhitelist () {
         if (!userAgentWhitelistEnabled) {
             return;
         }
-
         browser.webRequest.onBeforeSendHeaders.addListener(
                 onBeforeSendHeaders
               , { urls: userAgentWhitelist }
