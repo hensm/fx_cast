@@ -46,6 +46,10 @@ if (typeof navigator.mediaDevices.getDisplayMedia === "undefined") {
  * receiver device.
  */
 function sendAppMessage (subject: string, data: any) {
+    if (!session) {
+        return;
+    }
+
     session.sendMessage(FX_CAST_RECEIVER_APP_NAMESPACE, {
         subject
       , data

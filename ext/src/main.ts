@@ -20,8 +20,8 @@ import { CAST_FRAMEWORK_LOADER_SCRIPT_URL
 import SelectorManager from "./SelectorManager";
 import StatusManager from "./StatusManager";
 
-import { createMenus } from "./createMenus";
-import { createShim } from "./createShim";
+import createMenus from "./createMenus";
+import createShim, { Shim } from "./createShim";
 
 
 const _ = browser.i18n.getMessage;
@@ -117,18 +117,32 @@ browser.browserAction.onClicked.addListener(async tab => {
 
 
 
-interface Shim {
-    bridgePort: browser.runtime.Port;
-    contentPort?: browser.runtime.Port;
-    contentTabId?: number;
-    contentFrameId?: number;
-}
-
-const shims = new Set<Shim>();
+const activeShims = new Set<Shim>();
 
 browser.runtime.onConnect.addListener(async port => {
     if (port.name === "shim") {
+        /**
+         * If there's already an active shim for the sender
+         * tab/frame ID, disconnect it.
+         */
+        for (const activeShim of activeShims) {
+            if (activeShim.contentTabId === port.sender.tab.id
+             && activeShim.contentFrameId === port.sender.frameId) {
+
+                activeShim.contentPort.disconnect();
+                activeShim.bridgePort.disconnect();
+            }
+        }
+
+
         const shim = await createShim(port);
+
+        shim.bridgePort.onDisconnect.addListener(() => {
+            activeShims.delete(shim);
+        });
+        shim.contentPort.onDisconnect.addListener(() => {
+            activeShims.delete(shim);
+        });
 
         // Add additional listener for mediaCast messages
         shim.bridgePort.onMessage.addListener((message: Message) => {
@@ -143,18 +157,19 @@ browser.runtime.onConnect.addListener(async port => {
             }
         });
 
-        shims.add(shim);
+        activeShims.add(shim);
     }
 });
 
 browser.runtime.onMessage.addListener(async (message: Message, sender) => {
     if (message.subject.startsWith("bridge:/")) {
-        for (const shim of shims) {
+        for (const shim of activeShims) {
             if (shim.contentPort
                   && shim.contentTabId === sender.tab.id
                   && shim.contentFrameId === sender.frameId) {
 
                 shim.bridgePort.postMessage(message);
+                break;
             }
         }
 
@@ -163,7 +178,7 @@ browser.runtime.onMessage.addListener(async (message: Message, sender) => {
 });
 
 StatusManager.addEventListener("serviceUp", ev => {
-    for (const shim of shims) {
+    for (const shim of activeShims) {
         shim.contentPort.postMessage({
             subject: "shim:/serviceUp"
           , data: { id: ev.detail.id }
@@ -172,7 +187,7 @@ StatusManager.addEventListener("serviceUp", ev => {
 });
 
 StatusManager.addEventListener("serviceDown", ev => {
-    for (const shim of shims) {
+    for (const shim of activeShims) {
         shim.contentPort.postMessage({
             subject: "shim:/serviceDown"
           , data: { id: ev.detail.id }

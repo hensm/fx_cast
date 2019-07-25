@@ -47,8 +47,10 @@ const encodeTransform = new EncodeTransform();
 // stdin -> stdout
 process.stdin
     .pipe(decodeTransform)
-    .pipe(new ResponseTransform(handleMessage))
-    .pipe(encodeTransform)
+
+decodeTransform.on("data", handleMessage);
+
+encodeTransform
     .pipe(process.stdout);
 
 /**
@@ -134,7 +136,7 @@ async function handleMessage (message: Message) {
     switch (message.subject) {
         case "bridge:/getInfo": {
             const extensionVersion = message.data;
-            return __applicationVersion;
+            encodeTransform.write(__applicationVersion);
         }
 
         case "bridge:/initialize": {

@@ -6,23 +6,36 @@ import options from "./lib/options";
 import { TypedEventTarget } from "./lib/typedEvents";
 import { Message, Receiver, ReceiverStatus } from "./types";
 
-import { ReceiverStatusMessage
-       , ServiceDownMessage
-       , ServiceUpMessage } from "./messageTypes";
+
+interface ReceiverStatusMessage extends Message {
+    subject: "receiverStatus";
+    data: {
+        id: string;
+        status: ReceiverStatus;
+    };
+}
+
+interface ServiceDownMessage extends Message {
+    subject: "shim:/serviceDown";
+    data: {
+        id: string;
+    };
+}
+
+interface ServiceUpMessage extends Message {
+    subject: "shim:/serviceUp";
+    data: Receiver;
+}
 
 
-let applicationName: string;
 
-
-interface StatusManagerEvents {
+interface EventMap {
     "serviceUp": ServiceUpMessage["data"];
     "serviceDown": ServiceDownMessage["data"];
     "statusUpdate": ReceiverStatusMessage["data"];
 }
 
-class StatusManager
-        extends TypedEventTarget<StatusManagerEvents> {
-
+export default new class extends TypedEventTarget<EventMap> {
     private bridgePort: browser.runtime.Port;
     private receivers = new Map<string, Receiver>();
 
@@ -41,10 +54,6 @@ class StatusManager
     }
 
     private async initBridgePort () {
-        if (!applicationName) {
-            applicationName = await options.get("bridgeApplicationName");
-        }
-
         this.bridgePort = await bridge.connect();
         this.bridgePort.onMessage.addListener(this.onBridgePortMessage);
         this.bridgePort.onDisconnect.addListener(this.onBridgePortDisconnect);
@@ -141,7 +150,4 @@ class StatusManager
             this.initBridgePort();
         }, 10000);
     }
-}
-
-
-export default new StatusManager();
+};

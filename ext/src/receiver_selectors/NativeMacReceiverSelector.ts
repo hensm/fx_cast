@@ -4,18 +4,31 @@ import bridge from "../lib/bridge";
 import options from "../lib/options";
 
 import ReceiverSelector, {
-        ReceiverSelectorEvents
+        ReceiverSelection
+      , ReceiverSelectorEvents
       , ReceiverSelectorMediaType } from "./ReceiverSelector";
 
 import { TypedEventTarget } from "../lib/typedEvents";
 import { Message, Receiver } from "../types";
 
-import { NativeReceiverSelectorCloseMessage
-       , NativeReceiverSelectorErrorMessage
-       , NativeReceiverSelectorSelectedMessage } from "../messageTypes";
-
 
 const _ = browser.i18n.getMessage;
+
+
+interface NativeReceiverSelectorSelectedMessage extends Message {
+    subject: "main:/receiverSelector/selected";
+    data: ReceiverSelection;
+}
+
+interface NativeReceiverSelectorCloseMessage extends Message {
+    subject: "main:/receiverSelector/error";
+    data: string;
+}
+
+interface NativeReceiverSelectorErrorMessage extends Message {
+    subject: "main:/receiverSelector/error";
+    data: string;
+}
 
 
 // TODO: Figure out lifetime properly

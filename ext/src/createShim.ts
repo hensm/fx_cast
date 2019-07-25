@@ -12,26 +12,49 @@ import SelectorManager from "./SelectorManager";
 import StatusManager from "./StatusManager";
 
 
-interface Shim {
+export interface Shim {
     bridgePort: browser.runtime.Port;
-
     contentPort?: browser.runtime.Port;
     contentTabId?: number;
     contentFrameId?: number;
 }
 
-export async function createShim (port: browser.runtime.Port): Promise<Shim> {
+export default async function createShim (
+        port: browser.runtime.Port): Promise<Shim> {
+
     const contentPort = port;
     const contentTabId = port.sender.tab.id;
     const contentFrameId = port.sender.frameId;
 
     const bridgePort = await bridge.connect();
 
-    bridgePort.onMessage.addListener((message: Message) => {
-        contentPort.postMessage(message);
-    });
 
-    contentPort.onMessage.addListener(async (message: Message) => {
+    /**
+     * If either the bridge port or the content port disconnects,
+     * just teardown all communication.
+     */
+    function onDisconnect () {
+        bridgePort.onMessage.removeListener(onBridgePortMessage);
+        contentPort.onMessage.removeListener(onContentPortMessage);
+
+        // Ensure all ports are disconnected
+        contentPort.disconnect();
+        bridgePort.disconnect();
+    }
+
+    bridgePort.onDisconnect.addListener(onDisconnect);
+    contentPort.onDisconnect.addListener(onDisconnect);
+
+
+    // Add listeners
+    bridgePort.onMessage.addListener(onBridgePortMessage);
+    contentPort.onMessage.addListener(onContentPortMessage);
+
+    function onBridgePortMessage (message: Message) {
+        contentPort.postMessage(message);
+    }
+
+    async function onContentPortMessage (message: Message) {
         const [ destination ] = message.subject.split(":/");
         if (destination === "bridge") {
             bridgePort.postMessage(message);
@@ -88,6 +111,7 @@ export async function createShim (port: browser.runtime.Port): Promise<Shim> {
                         subject: "shim:/selectReceiverEnd"
                       , data: selection
                     });
+
                 } catch (err) {
                     // TODO: Report errors properly
                     contentPort.postMessage({
@@ -107,6 +131,12 @@ export async function createShim (port: browser.runtime.Port): Promise<Shim> {
                 break;
             }
         }
+    }
+
+
+    contentPort.postMessage({
+        subject: "shim:/initialized"
+      , data: await bridge.getInfo()
     });
 
     return {

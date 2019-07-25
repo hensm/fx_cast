@@ -27,7 +27,7 @@ const whitelistChildMenuPatterns = new Map<MenuId, string>();
 
 let hasCreatedMenus = false;
 
-export async function createMenus () {
+export default async function createMenus () {
     if (!hasCreatedMenus) {
         hasCreatedMenus = true;
 

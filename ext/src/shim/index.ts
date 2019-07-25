@@ -65,7 +65,6 @@ if (document.currentScript) {
     }
 }
 
-
 onMessage(message => {
     switch (message.subject) {
         case "shim:/initialized": {
