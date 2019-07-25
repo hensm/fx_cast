@@ -1,5 +1,7 @@
 "use strict";
 
+import mediaCasting from "./mediaCasting";
+
 import { stringify } from "./utils";
 
 import { ReceiverSelection

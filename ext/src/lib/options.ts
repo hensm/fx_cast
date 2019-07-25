@@ -2,6 +2,7 @@
 
 import defaultOptions from "../defaultOptions";
 
+import { ReceiverSelectorType } from "../receiver_selectors";
 import { Message } from "../types";
 import { TypedEventTarget } from "./typedEvents";
 
@@ -15,6 +16,9 @@ export interface Options {
     localMediaServerPort: number;
     mirroringEnabled: boolean;
     mirroringAppId: string;
+    receiverSelectorType: ReceiverSelectorType.Popup;
+    receiverSelectorCloseIfFocusLost: boolean;
+    receiverSelectorWaitForConnection: boolean;
     userAgentWhitelistEnabled: boolean;
     userAgentWhitelist: string[];
 
