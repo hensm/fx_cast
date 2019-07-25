@@ -2,6 +2,7 @@
 
 import defaultOptions from "./defaultOptions";
 import bridge from "./lib/bridge";
+import loadSender from "./lib/loadSender";
 import mediaCasting from "./lib/mediaCasting";
 import options, { Options } from "./lib/options";
 
@@ -48,57 +49,6 @@ browser.runtime.onInstalled.addListener(async details => {
 });
 
 
-
-interface LoadSenderOptions {
-    tabId: number;
-    frameId: number;
-    selection: ReceiverSelection;
-}
-
-/**
- * Loads the appropriate sender for a given receiver
- * selector response.
- */
-async function loadSender (opts: LoadSenderOptions) {
-    // Cancelled
-    if (!opts.selection) {
-        return;
-    }
-
-    switch (opts.selection.mediaType) {
-        case ReceiverSelectorMediaType.Tab:
-        case ReceiverSelectorMediaType.Screen: {
-
-            await browser.tabs.executeScript(opts.tabId, {
-                code: stringify`
-                    window.selectedMedia = ${opts.selection.mediaType};
-                    window.selectedReceiver = ${opts.selection.receiver};
-                `
-              , frameId: opts.frameId
-            });
-
-            await browser.tabs.executeScript(opts.tabId, {
-                file: "senders/mirroringCast.js"
-              , frameId: opts.frameId
-            });
-
-            break;
-        }
-
-        case ReceiverSelectorMediaType.File: {
-
-            const fileUrl = new URL(`file://${opts.selection.filePath}`);
-            const mediaSession = await mediaCasting.loadMediaUrl(
-                    fileUrl.href, opts.selection.receiver);
-
-            console.log(mediaSession);
-
-            break;
-        }
-    }
-}
-
-
 /**
  * When the browser action is clicked, open a receiver
  * selector and load a sender for the response. The
@@ -116,6 +66,12 @@ browser.browserAction.onClicked.addListener(async tab => {
 });
 
 
+export interface Shim {
+    bridgePort: browser.runtime.Port;
+    contentPort?: browser.runtime.Port;
+    contentTabId?: number;
+    contentFrameId?: number;
+}
 
 const activeShims = new Set<Shim>();
 
@@ -144,36 +100,7 @@ browser.runtime.onConnect.addListener(async port => {
             activeShims.delete(shim);
         });
 
-        // Add additional listener for mediaCast messages
-        shim.bridgePort.onMessage.addListener((message: Message) => {
-            const [ destination ] = message.subject.split(":/");
-            if (destination === "mediaCast") {
-                browser.tabs.sendMessage(
-                        mediaCastTabId
-                      , message
-                      , { frameId: mediaCastFrameId });
-
-                return;
-            }
-        });
-
         activeShims.add(shim);
-    }
-});
-
-browser.runtime.onMessage.addListener(async (message: Message, sender) => {
-    if (message.subject.startsWith("bridge:/")) {
-        for (const shim of activeShims) {
-            if (shim.contentPort
-                  && shim.contentTabId === sender.tab.id
-                  && shim.contentFrameId === sender.frameId) {
-
-                shim.bridgePort.postMessage(message);
-                break;
-            }
-        }
-
-        return;
     }
 });
 
@@ -214,8 +141,8 @@ async function initMenus () {
                 const allMediaTypes =
                         ReceiverSelectorMediaType.App
                       | ReceiverSelectorMediaType.Tab
-                      | ReceiverSelectorMediaType.Screen
-                      | ReceiverSelectorMediaType.File;
+                      | ReceiverSelectorMediaType.Screen;
+                      // | ReceiverSelectorMediaType.File;
 
                 const selection = await SelectorManager.getSelection(
                         ReceiverSelectorMediaType.App
@@ -366,7 +293,7 @@ function initWhitelist () {
         const { userAgentWhitelist
               , userAgentWhitelistEnabled } = await options.getAll();
 
-        if (userAgentWhitelistEnabled) {
+        if (!userAgentWhitelistEnabled) {
             return;
         }
 

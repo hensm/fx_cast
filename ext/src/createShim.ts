@@ -1,6 +1,7 @@
 "use strict";
 
 import bridge from "./lib/bridge";
+import loadSender from "./lib/loadSender";
 import options from "./lib/options";
 
 import { TypedEventTarget } from "./lib/typedEvents";
@@ -101,6 +102,12 @@ export default async function createShim (
                     if (selection.mediaType !== ReceiverSelectorMediaType.App) {
                         contentPort.postMessage({
                             subject: "shim:/selectReceiverCancelled"
+                        });
+
+                        loadSender({
+                            tabId: contentTabId
+                          , frameId: contentFrameId
+                          , selection
                         });
 
                         break;

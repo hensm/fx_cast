@@ -8,7 +8,6 @@ import mime from "mime-types";
 import path from "path";
 
 import Media from "./Media";
-import MediaServer from "./MediaServer";
 import Session from "./Session";
 import StatusListener from "./StatusListener";
 
@@ -32,11 +31,11 @@ events.EventEmitter.defaultMaxListeners = 50;
 const browser = new dnssd.Browser(dnssd.tcp("googlecast"));
 
 // Local media server
-let mediaServer: MediaServer;
+let mediaServer: http.Server;
 
 process.on("SIGTERM", () => {
-    if (mediaServer) {
-        mediaServer.stop();
+    if (mediaServer && mediaServer.listening) {
+        mediaServer.close();
     }
 });
 
@@ -54,11 +53,19 @@ encodeTransform
     .pipe(process.stdout);
 
 /**
- * Encode and send a message to the extension.
+ * Encode and send a message to the extension. If message is
+ * a string, send that as the message subject, else send a
+ * passed message object.
  */
-function sendMessage (message: object) {
+function sendMessage (message: string | object) {
     try {
-        encodeTransform.write(message);
+        if (typeof message === "string") {
+            encodeTransform.write({
+                subject: message
+            });
+        } else {
+            encodeTransform.write(message);    
+        }
     } catch (err) {
         console.error("Failed to encode message", err);
     }
@@ -133,6 +140,14 @@ async function handleMessage (message: Message) {
         return;
     }
 
+    if (message.subject.startsWith("bridge:/receiverSelector/")) {
+        handleReceiverSelectorMessage(message);
+    }
+
+    if (message.subject.startsWith("bridge:/mediaServer/")) {
+        handleMediaServerMessage(message);
+    }
+
     switch (message.subject) {
         case "bridge:/getInfo": {
             const extensionVersion = message.data;
@@ -145,8 +160,11 @@ async function handleMessage (message: Message) {
 
             break;
         }
+    }
+}
 
-
+function handleReceiverSelectorMessage (message: Message) {
+    switch (message.subject) {
         case "bridge:/receiverSelector/open": {
             const receiverSelectorData = message.data;
 
@@ -206,32 +224,74 @@ async function handleMessage (message: Message) {
 
             break;
         }
+    }
+}
 
-
+function handleMediaServerMessage (message: Message) {
+    switch (message.subject) {
         case "bridge:/mediaServer/start": {
-            const { filePath, port } = message.data;
+            const { filePath, port }
+                : { filePath: string, port: number } = message.data;
 
-            mediaServer = new MediaServer(filePath, port);
-            mediaServer.start();
+            const contentType = mime.lookup(filePath);
 
-            mediaServer.on("started", () => {
-                sendMessage({
-                    subject: "mediaCast:/mediaServer/started"
-                });
+            if (!contentType) {
+                sendMessage("mediaCast:/mediaServer/error");
+                break;
+            }
+
+            if (mediaServer && mediaServer.listening) {
+                mediaServer.close();
+            }
+
+            mediaServer = http.createServer((req, res) => {
+                const { size: fileSize } = fs.statSync(filePath);
+                const { range } = req.headers;
+
+                // Partial content HTTP 206
+                if (range) {
+                    const bounds = range.substring(6).split("-");
+                    const start = parseInt(bounds[0]);
+                    const end = bounds[1] ? parseInt(bounds[1]) : fileSize - 1;
+
+                    res.writeHead(206, {
+                        "Accept-Ranges": "bytes"
+                      , "Content-Range": `bytes ${start}-${end}/${fileSize}`
+                      , "Content-Length": (end - start) + 1
+                      , "Content-Type": contentType
+                    });
+
+                    fs.createReadStream(filePath, { start, end }).pipe(res);
+                } else {
+                    res.writeHead(200, {
+                        "Content-Length": fileSize
+                      , "Content-Type": contentType
+                    });
+
+                    fs.createReadStream(filePath).pipe(res);
+                }
             });
 
-            mediaServer.on("stopped", () => {
-                sendMessage({
-                    subject: "mediaCast:/mediaServer/stopped"
-                });
+            mediaServer.on("listening", () => {
+                sendMessage("mediaCast:/mediaServer/started");
             });
+            mediaServer.on("close", () => {
+                console.error("mediaServer close");
+                sendMessage("mediaCast:/mediaServer/stopped");
+            });
+            mediaServer.on("error", (a) => {
+                console.error("mediaServer error", a);
+                sendMessage("mediaCast:/mediaServer/error");
+            });
+
+            mediaServer.listen(port);
 
             break;
         }
 
         case "bridge:/mediaServer/stop": {
-            if (mediaServer) {
-                mediaServer.stop();
+            if (mediaServer && mediaServer.listening) {
+                mediaServer.close();
             }
 
             break;

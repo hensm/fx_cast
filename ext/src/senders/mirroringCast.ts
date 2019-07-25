@@ -190,8 +190,6 @@ function onInitializeError () {
 
 
 ensureInit().then(async () => {
-    await ensureInit();
-
     const mirroringAppId = await options.get("mirroringAppId");
     const sessionRequest = new cast.SessionRequest(mirroringAppId);
 

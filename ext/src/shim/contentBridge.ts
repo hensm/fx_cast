@@ -18,7 +18,7 @@ if (isFramework) {
 
 
 // Message port to background script
-const backgroundPort = browser.runtime.connect({ name: "shim" });
+export const backgroundPort = browser.runtime.connect({ name: "shim" });
 
 const forwardToShim = (message: Message) => sendMessage(message);
 const forwardToMain = (message: Message) => backgroundPort.postMessage(message);
@@ -27,7 +27,7 @@ const forwardToMain = (message: Message) => backgroundPort.postMessage(message);
 backgroundPort.onMessage.addListener(forwardToShim);
 const listener = onMessageResponse(forwardToMain);
 
-// Remove listeners if main disconnects
+// Remove listeners
 backgroundPort.onDisconnect.addListener(() => {
     backgroundPort.onMessage.removeListener(forwardToShim);
     listener.disconnect();

@@ -8,6 +8,7 @@ import { onMessage } from "./eventMessageChannel";
 
 
 let initializedBridgeInfo: BridgeInfo;
+let initializedBackgroundPort: browser.runtime.Port;
 
 /**
  * To support exporting an API from a module, we need to
@@ -16,13 +17,13 @@ let initializedBridgeInfo: BridgeInfo;
  * for and emits these messages, and changing that behavior
  * is too messy.
  */
-export function ensureInit (): Promise<BridgeInfo> {
+export function ensureInit (): Promise<browser.runtime.Port> {
     return new Promise(async (resolve, reject) => {
 
         // If already initialized, just return existing bridge info
         if (initializedBridgeInfo) {
             if (initializedBridgeInfo.isVersionCompatible) {
-                resolve(initializedBridgeInfo);
+                resolve(initializedBackgroundPort);
             } else {
                 reject();
             }
@@ -40,21 +41,20 @@ export function ensureInit (): Promise<BridgeInfo> {
             //
         } else {
             // Trigger message port setup side-effects
-            import("./contentBridge");
+            const { backgroundPort } = await import("./contentBridge");
+            initializedBackgroundPort = backgroundPort;
         }
 
         onMessage(message => {
             switch (message.subject) {
                 case "shim:/initialized": {
-                    const bridgeInfo: BridgeInfo = message.data;
+                    initializedBridgeInfo = message.data;
 
-                    if (bridgeInfo.isVersionCompatible) {
-                        resolve(bridgeInfo);
+                    if (initializedBridgeInfo.isVersionCompatible) {
+                        resolve(initializedBackgroundPort);
                     } else {
                         reject();
                     }
-
-                    initializedBridgeInfo = bridgeInfo;
                 }
             }
         });

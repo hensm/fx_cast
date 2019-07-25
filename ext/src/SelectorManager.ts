@@ -44,8 +44,8 @@ async function getSelection (
                 ReceiverSelectorMediaType.Tab
       , availableMediaTypes =
                 ReceiverSelectorMediaType.Tab
-              | ReceiverSelectorMediaType.Screen
-              | ReceiverSelectorMediaType.File)
+              | ReceiverSelectorMediaType.Screen)
+              // | ReceiverSelectorMediaType.File)
         : Promise<ReceiverSelection> {
 
     return new Promise(async (resolve, reject) => {

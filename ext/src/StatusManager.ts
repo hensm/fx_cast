@@ -35,6 +35,7 @@ interface EventMap {
     "statusUpdate": ReceiverStatusMessage["data"];
 }
 
+// tslint:disable-next-line:new-parens
 export default new class extends TypedEventTarget<EventMap> {
     private bridgePort: browser.runtime.Port;
     private receivers = new Map<string, Receiver>();

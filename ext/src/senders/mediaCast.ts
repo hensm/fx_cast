@@ -4,7 +4,7 @@ import mediaCasting from "../lib/mediaCasting";
 import options from "../lib/options";
 import cast, { ensureInit } from "../shim/export";
 
-import { Receiver } from "../types";
+import { Message, Receiver } from "../types";
 
 
 // Variables passed from background
@@ -15,6 +15,8 @@ const { selectedReceiver
       , srcUrl: string
       , targetElementId: number } = (window as any);
 
+
+let backgroundPort: browser.runtime.Port;
 
 let session: cast.Session;
 let currentMedia: cast.media.Media;
@@ -28,15 +30,12 @@ const mediaElement = browser.menus.getTargetElement(
         targetElementId) as HTMLMediaElement;
 
 window.addEventListener("beforeunload", async () => {
-    browser.runtime.sendMessage({
+    backgroundPort.postMessage({
         subject: "bridge:/mediaServer/stop"
     });
 
     if (await options.get("mediaStopOnUnload")) {
         session.stop(null, null);
-        /*currentMedia.stop(null
-              , onMediaStopSuccess
-              , onMediaStopError);*/
     }
 });
 
@@ -58,38 +57,63 @@ function getLocalAddress () {
 }
 
 
-async function loadMedia () {
-    let mediaUrl = new URL(srcUrl);
-    const port = await options.get("localMediaServerPort");
-
-    if (isLocalFile) {
-        await new Promise((resolve, reject) => {
-            browser.runtime.sendMessage({
-                subject: "bridge:/mediaServer/start"
-              , data: {
-                    filePath: decodeURI(mediaUrl.pathname)
-                  , port
-                }
-            });
-
-            browser.runtime.onMessage.addListener(function onMessage (message) {
-                if (message.subject === "mediaCast:/mediaServer/started") {
-                    browser.runtime.onMessage.removeListener(onMessage);
-                    resolve();
-                }
-            });
+function startMediaServer (filePath: string, port: number) {
+    return new Promise((resolve, reject) => {
+        backgroundPort.postMessage({
+            subject: "bridge:/mediaServer/start"
+          , data: {
+                filePath: decodeURI(filePath)
+              , port
+            }
         });
 
-        // Address of local HTTP server
-        mediaUrl = new URL(`http://${await getLocalAddress()}:${port}/`);
+        backgroundPort.onMessage.addListener(
+                function onMessage (message: Message) {
+
+            switch (message.subject) {
+                case "mediaCast:/mediaServer/started": {
+                    backgroundPort.onMessage.removeListener(onMessage);
+                    resolve();
+                }
+                case "mediaCast:/mediaServer/error": {
+                    backgroundPort.onMessage.removeListener(onMessage);
+                    reject();
+                }
+            }
+        });
+    });
+}
+
+async function loadMedia () {
+    let mediaUrl = new URL(srcUrl);
+    const mediaTitle = mediaUrl.pathname;
+
+    /**
+     * If the media is a local file, start an HTTP media server
+     * and change the media URL to point to it.
+     */
+    if (isLocalFile) {
+        const host = await getLocalAddress();
+        const port = await options.get("localMediaServerPort");
+
+        try {
+            // Wait until media server is listening
+            await startMediaServer(mediaUrl.pathname, port);
+        } catch (err) {
+            console.error("Failed to start media server");
+            return;
+        }
+
+        mediaUrl = new URL(`http://${host}:${port}/`);
     }
+
 
     const mediaInfo = new cast.media.MediaInfo(mediaUrl.href, null);
 
     // Media metadata (title/poster)
     mediaInfo.metadata = new cast.media.GenericMediaMetadata();
     mediaInfo.metadata.metadataType = cast.media.MetadataType.GENERIC;
-    mediaInfo.metadata.title = mediaUrl.pathname;
+    mediaInfo.metadata.title = mediaTitle;
 
     if (mediaElement instanceof HTMLVideoElement && mediaElement.poster) {
         mediaInfo.metadata.images = [
@@ -324,8 +348,8 @@ function onMediaSeekError (err: cast.Error) {
 }
 
 
-ensureInit().then(async () => {
-    await ensureInit();
+ensureInit().then(async (port) => {
+    backgroundPort = port;
 
     const isLocalMediaEnabled = await options.get("localMediaEnabled");
     if (isLocalFile && !isLocalMediaEnabled) {
