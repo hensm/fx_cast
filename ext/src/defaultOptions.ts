@@ -1,6 +1,7 @@
 "use strict";
 
 import { Options } from "./lib/options";
+import { ReceiverSelectorType } from "./receiver_selectors";
 
 
 export default {
@@ -12,6 +13,9 @@ export default {
   , localMediaServerPort: 9555
   , mirroringEnabled: false
   , mirroringAppId: MIRRORING_APP_ID
+  , receiverSelectorType: ReceiverSelectorType.Popup
+  , receiverSelectorCloseIfFocusLost: true
+  , receiverSelectorWaitForConnection: false
   , userAgentWhitelistEnabled: true
   , userAgentWhitelist: [
         "https://www.netflix.com/*"

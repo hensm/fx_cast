@@ -14,11 +14,8 @@ import StatusManager from "./StatusManager";
 let sharedSelector: ReceiverSelector;
 
 async function getSelector () {
-    const { os } = await browser.runtime.getPlatformInfo();
-
-    return getReceiverSelector(os === "mac"
-        ? ReceiverSelectorType.NativeMac
-        : ReceiverSelectorType.Popup);
+    return getReceiverSelector(
+            await options.get("receiverSelectorType"));
 }
 
 async function getSharedSelector () {
