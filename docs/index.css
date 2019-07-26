@@ -241,11 +241,11 @@ body {
     margin-top: 1rem;
 }
 
-.preview--fg[src="images/preview-fg.png"] {
-    transform: translate(-56px, -28px);
-}
-.preview--fg[src="images/preview-fg_macOS.png"] {
-    transform: translate(-22px, -18px);
+.preview--fg[src="images/preview-fg_macOS_dark.png"],
+.preview--fg[src="images/preview-fg_macOS_dark@2x.png"],
+.preview--fg[src="images/preview-fg_macOS_light.png"],
+.preview--fg[src="images/preview-fg_macOS_light@2x.png"] {
+    transform: translate(-55px, -36px);
 }
 
 

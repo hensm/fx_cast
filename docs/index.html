@@ -263,12 +263,19 @@
                  src="images/preview-bg.png"
                  srcset="images/preview-bg.png,
                          images/preview-bg@2x.png 2x">
-            <img class="preview preview--fg"
-                 alt="Screenshot preview, foreground"
-                 width="396"
-                 src="images/preview-fg_macOS.png"
-                 srcset="images/preview-fg_macOS.png,
-                         images/preview-fg_macOS@2x.png 2x">
+
+            <picture style="display: contents">
+                <source alt="Media context menu"
+                        srcset="images/preview-fg_macOS_light.png,
+                                images/preview-fg_macOS_light@2x.png 2x"
+                        media="(prefers-color-scheme: light)">
+                <img class="preview preview--fg"
+                     alt="Media context menu"
+                     width="462"
+                     src="images/preview-fg_macOS_dark.png"
+                     srcset="images/preview-fg_macOS_dark.png,
+                             images/preview-fg_macOS_dark@2x.png 2x">
+            </picture>
 
             <footer class="footer">
                 <div class="links">
