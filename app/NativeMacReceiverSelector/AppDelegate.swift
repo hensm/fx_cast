@@ -10,7 +10,7 @@ class AppDelegate : NSObject, NSApplicationDelegate {
 
 
     func applicationDidFinishLaunching (_ aNotification: Notification) {
-        if (CommandLine.argc < 2) {
+        if CommandLine.argc < 2 {
             fputs("Error: Not enough args\n", stderr)
             exit(1)
         }
@@ -59,7 +59,9 @@ class AppDelegate : NSObject, NSApplicationDelegate {
     }
 
     func applicationDidResignActive (_ aNotification: Notification) {
-        self.mainWindow?.performClose(aNotification)
+        if self.initData.closeIfFocusLost {
+            self.mainWindow?.performClose(aNotification)
+        }
     }
 
     func applicationShouldTerminateAfterLastWindowClosed (

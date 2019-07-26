@@ -83,12 +83,17 @@ export default class NativeMacReceiverSelector
         const openerWindow = await browser.windows.getCurrent();
         const centeredProps = getWindowCenteredProps(openerWindow, 350, 0);
 
+        const closeIfFocusLost = await options.get(
+                "receiverSelectorCloseIfFocusLost");
+
         this.bridgePort.postMessage({
             subject: "bridge:/receiverSelector/open"
           , data: JSON.stringify({
                 receivers
               , defaultMediaType
               , availableMediaTypes
+
+              , closeIfFocusLost
 
               , windowPositionX: centeredProps.left
               , windowPositionY: centeredProps.top
@@ -118,20 +123,27 @@ export default class NativeMacReceiverSelector
     }
 
 
-    private onBridgePortMessageSelected (
+    private async onBridgePortMessageSelected (
             message: NativeReceiverSelectorSelectedMessage) {
+
         this.wasReceiverSelected = true;
+
         this.dispatchEvent(new CustomEvent("selected", {
             detail: message.data
         }));
+
+        if (!(await options.get("receiverSelectorWaitForConnection"))) {
+            this.close();
+        }
     }
 
-    private onBridgePortMessageError (
+    private async onBridgePortMessageError (
             message: NativeReceiverSelectorErrorMessage) {
+
         this.dispatchEvent(new CustomEvent("error"));
     }
 
-    private onBridgePortMessageClose (
+    private async onBridgePortMessageClose (
             message: NativeReceiverSelectorCloseMessage) {
 
         if (!this.wasReceiverSelected) {

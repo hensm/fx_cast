@@ -3,6 +3,8 @@ struct InitData : Codable {
     let defaultMediaType: MediaType
     let availableMediaTypes: Int
 
+    let closeIfFocusLost: Bool
+
     let windowPositionX: Int
     let windowPositionY: Int
 

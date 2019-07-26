@@ -129,9 +129,17 @@ export default async function createShim (
                 break;
             }
 
+            /**
+             * TODO: If we're closing a selector, make sure it's the
+             * same one that caused the session creation.
+             */
             case "main:/sessionCreated": {
                 const selector = await SelectorManager.getSharedSelector();
-                if (selector.isOpen) {
+
+                const shouldClose = await options.get(
+                        "receiverSelectorWaitForConnection");
+
+                if (selector.isOpen && shouldClose) {
                     selector.close();
                 }
 

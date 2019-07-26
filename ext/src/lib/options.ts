@@ -2,7 +2,7 @@
 
 import defaultOptions from "../defaultOptions";
 
-import { ReceiverSelectorType } from "../receiver_selectors";
+import { ReceiverSelectorType } from "../receiver_selectors/";
 import { Message } from "../types";
 import { TypedEventTarget } from "./typedEvents";
 

@@ -4,6 +4,8 @@ import ReceiverSelector, {
         ReceiverSelectorEvents
       , ReceiverSelectorMediaType } from "./ReceiverSelector";
 
+import options from "../lib/options";
+
 import { TypedEventTarget } from "../lib/typedEvents";
 import { getWindowCenteredProps } from "../lib/utils";
 import { Message, Receiver } from "../types";
@@ -107,9 +109,15 @@ export default class PopupReceiverSelector
             ...centeredProps
         });
 
-        // Add focus listener
-        browser.windows.onFocusChanged.addListener(
-                this.onWindowsFocusChanged);
+
+        const closeIfFocusLost = await options.get(
+                "receiverSelectorCloseIfFocusLost");
+
+        if (closeIfFocusLost) {
+            // Add focus listener
+            browser.windows.onFocusChanged.addListener(
+                    this.onWindowsFocusChanged);
+        }
     }
 
     public async close (): Promise<void> {
