@@ -326,9 +326,6 @@ body {
     display: flex;
     justify-content: center;
 }
-.links__link-github img {
-    margin-right: 1rem;
-}
 
 :root.theme-dark .links__link-github img {
     filter: invert(1);
