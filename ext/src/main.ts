@@ -66,12 +66,6 @@ browser.browserAction.onClicked.addListener(async tab => {
 });
 
 
-export interface Shim {
-    bridgePort: browser.runtime.Port;
-    contentPort?: browser.runtime.Port;
-    contentTabId?: number;
-    contentFrameId?: number;
-}
 
 const activeShims = new Set<Shim>();
 
