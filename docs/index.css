@@ -44,10 +44,9 @@ body {
 
 .container {
     display: grid;
-    font-size: 15px;
+    font-size: 1.5rem;
     margin: auto;
     margin-top: initial;
-    min-width: 480px;
     grid-row-gap: 2rem;
     grid-template-areas:
         "header preview"
@@ -81,7 +80,7 @@ body {
 .site-header__subtitle {
     background-color: var(--text-color-secondary);
     color: var(--page-color);
-    font-size: 2.75rem;
+    font-size: 2.5rem;
     padding: 0.25rem 1rem;
     margin-right: -1rem;
 }
@@ -95,7 +94,7 @@ body {
     grid-area: description;
     padding-right: 4rem;
     text-align: right;
-    width: 45rem;
+    max-width: 45rem;
 }
 .description__disclaimer {
     color: var(--text-color-secondary);
@@ -295,7 +294,8 @@ body {
 .faq__content code {
     background-color: var(--grey-90-a10);
     border-radius: 3px;
-    white-space: nowrap;
+    vertical-align: top;
+    word-break: break-all;
 }
 
 
@@ -330,4 +330,83 @@ body {
 
 :root.theme-dark .links__link-github img {
     filter: invert(1);
+}
+
+
+@media (max-width: 700px) {
+    .container {
+        align-items: center;
+        display: flex;
+        flex-direction: column;
+        gap: 0;
+        padding: initial;
+    }
+
+    .site-content > section {
+        padding: 2rem;
+    }
+
+    .site-header,
+    .preview--fg {
+        order: -1;
+    }
+
+    .preview--bg {
+        display: none;
+    }
+
+    .preview--fg {
+        align-self: center;
+        margin: initial;
+        margin-bottom: -50px;
+        max-width: 100vw;
+        object-fit: cover;
+        overflow: visible;
+        transform: initial !important;
+    }
+
+    .site-header {
+        align-items: center;
+        align-self: center;
+        height: initial;
+        margin-top: 2rem;
+    }
+
+    .site-header__subtitle {
+        margin-right: initial;
+        text-align: center;
+        width: 100vw;
+    }
+
+    .description {
+        padding-right: initial;
+        text-align: center;
+        width: initial;
+    }
+
+    .download {
+        align-items: center;
+        margin: initial;
+    }
+
+    .faq__content {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .faq__content p {
+        margin: 0.5rem 0;
+    }
+
+    .faq__content img,
+    .faq__content picture {
+        display: block;
+        float: none !important;
+        margin: 0 auto;
+        order: 1;
+    }
+
+    .footer {
+        margin-bottom: 5rem;
+    }
 }
