@@ -70,6 +70,7 @@ body {
     grid-area: header;
     justify-content: flex-end;
     margin-top: 5rem;
+    height: 105px;
 }
 
 .site-header__title {
