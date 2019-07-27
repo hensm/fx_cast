@@ -210,9 +210,6 @@ export function _requestSession (
 
     sessionRequestInProgress = true;
 
-    sessionSuccessCallback = successCallback;
-    sessionErrorCallback = errorCallback;
-
 
     const selectedReceiver = new Receiver_(
             _receiver.id
@@ -235,8 +232,8 @@ export function _requestSession (
 
                     sessionRequestInProgress = false;
 
-                    if (sessionSuccessCallback) {
-                        sessionSuccessCallback(session);
+                    if (successCallback) {
+                        successCallback(session);
                     }
                 }));
     }

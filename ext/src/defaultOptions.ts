@@ -15,7 +15,7 @@ export default {
   , mirroringAppId: MIRRORING_APP_ID
   , receiverSelectorType: ReceiverSelectorType.Popup
   , receiverSelectorCloseIfFocusLost: true
-  , receiverSelectorWaitForConnection: false
+  , receiverSelectorWaitForConnection: true
   , userAgentWhitelistEnabled: true
   , userAgentWhitelist: [
         "https://www.netflix.com/*"

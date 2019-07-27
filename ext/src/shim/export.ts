@@ -4,11 +4,12 @@ import * as cast from "./cast";
 
 import { BridgeInfo } from "../lib/bridge";
 import { Message } from "../types";
-import { onMessage } from "./eventMessageChannel";
+
+import { onMessage, onMessageResponse, sendMessage } from "./eventMessageChannel";
 
 
 let initializedBridgeInfo: BridgeInfo;
-let initializedBackgroundPort: browser.runtime.Port;
+let initializedBackgroundPort: MessagePort;
 
 /**
  * To support exporting an API from a module, we need to
@@ -17,7 +18,7 @@ let initializedBackgroundPort: browser.runtime.Port;
  * for and emits these messages, and changing that behavior
  * is too messy.
  */
-export function ensureInit (): Promise<browser.runtime.Port> {
+export function ensureInit (): Promise<MessagePort> {
     return new Promise(async (resolve, reject) => {
 
         // If already initialized, just return existing bridge info
@@ -31,6 +32,9 @@ export function ensureInit (): Promise<browser.runtime.Port> {
             return;
         }
 
+        const channel = new MessageChannel();
+        initializedBackgroundPort = channel.port1;
+
         /**
          * If the module is imported into a background script
          * context, the location will be the internal extension URL,
@@ -38,14 +42,48 @@ export function ensureInit (): Promise<browser.runtime.Port> {
          * URL.
          */
         if (window.location.protocol === "moz-extension:") {
-            //
+            const { default: createShim } = await import("../createShim");
+
+            // port2 will post bridge messages to port 1
+            await createShim(channel.port2);
+
+            // bridge -> shim
+            channel.port1.onmessage = ev => {
+                const message = ev.data as Message;
+
+                // Send message to shim
+                sendMessage(message);
+                handleIncomingMessageToShim(message);
+            };
+
+            // shim -> bridge
+            onMessageResponse(message => {
+                channel.port1.postMessage(message);
+            });
         } else {
-            // Trigger message port setup side-effects
+            /**
+             * Import reference to message port created by contentBridge.
+             * Creation of the port triggers side-effects in the
+             * background script.
+             */
             const { backgroundPort } = await import("./contentBridge");
-            initializedBackgroundPort = backgroundPort;
+
+            // backgroundPort -> channel.port2
+            backgroundPort.onMessage.addListener((message: Message) => {
+                channel.port2.postMessage(message);
+            });
+
+            // channel.port2 -> backgroundPort
+            channel.port2.onmessage = ev => {
+                const message = ev.data as Message;
+                backgroundPort.postMessage(message);
+            };
+
+            // Handle shim messages
+            onMessage(handleIncomingMessageToShim);
         }
 
-        onMessage(message => {
+        function handleIncomingMessageToShim (message: Message) {
             switch (message.subject) {
                 case "shim:/initialized": {
                     initializedBridgeInfo = message.data;
@@ -57,7 +95,7 @@ export function ensureInit (): Promise<browser.runtime.Port> {
                     }
                 }
             }
-        });
+        }
     });
 }
 

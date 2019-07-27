@@ -293,7 +293,7 @@ export default class Media {
     }
 
 
-    private _sendMediaMessage (
+    public _sendMediaMessage (
             message: any
           , successCallback?: SuccessCallback
           , errorCallback?: ErrorCallback) {

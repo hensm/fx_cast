@@ -1,43 +1,10 @@
 "use strict";
 
-import mediaCasting from "../lib/mediaCasting";
 import options from "../lib/options";
 import cast, { ensureInit } from "../shim/export";
 
 import { Message, Receiver } from "../types";
 
-
-// Variables passed from background
-const { selectedReceiver
-      , srcUrl
-      , targetElementId }
-    : { selectedReceiver: Receiver
-      , srcUrl: string
-      , targetElementId: number } = (window as any);
-
-
-let backgroundPort: browser.runtime.Port;
-
-let session: cast.Session;
-let currentMedia: cast.media.Media;
-
-let ignoreMediaEvents = false;
-
-
-const isLocalFile = srcUrl.startsWith("file:");
-
-const mediaElement = browser.menus.getTargetElement(
-        targetElementId) as HTMLMediaElement;
-
-window.addEventListener("beforeunload", async () => {
-    backgroundPort.postMessage({
-        subject: "bridge:/mediaServer/stop"
-    });
-
-    if (await options.get("mediaStopOnUnload")) {
-        session.stop(null, null);
-    }
-});
 
 function getLocalAddress () {
     const pc = new RTCPeerConnection();
@@ -56,7 +23,6 @@ function getLocalAddress () {
     });
 }
 
-
 function startMediaServer (filePath: string, port: number) {
     return new Promise((resolve, reject) => {
         backgroundPort.postMessage({
@@ -67,177 +33,235 @@ function startMediaServer (filePath: string, port: number) {
             }
         });
 
-        backgroundPort.onMessage.addListener(
-                function onMessage (message: Message) {
+        backgroundPort.addEventListener("message", function onMessage (ev) {
+            const message = ev.data as Message;
+
+            if (message.subject.startsWith("mediaCast:/mediaServer/")) {
+                backgroundPort.removeEventListener("message", onMessage);
+            }
 
             switch (message.subject) {
                 case "mediaCast:/mediaServer/started": {
-                    backgroundPort.onMessage.removeListener(onMessage);
                     resolve();
+                    break;
                 }
                 case "mediaCast:/mediaServer/error": {
-                    backgroundPort.onMessage.removeListener(onMessage);
                     reject();
+                    break;
                 }
             }
         });
+
+        backgroundPort.start();
     });
 }
 
-async function loadMedia () {
-    let mediaUrl = new URL(srcUrl);
-    const mediaTitle = mediaUrl.pathname;
 
-    /**
-     * If the media is a local file, start an HTTP media server
-     * and change the media URL to point to it.
-     */
-    if (isLocalFile) {
-        const host = await getLocalAddress();
-        const port = await options.get("localMediaServerPort");
+let backgroundPort: MessagePort;
 
-        try {
-            // Wait until media server is listening
-            await startMediaServer(mediaUrl.pathname, port);
-        } catch (err) {
-            console.error("Failed to start media server");
-            return;
+let currentSession: cast.Session;
+let currentMedia: cast.media.Media;
+
+let mediaElement: HTMLMediaElement;
+
+
+function getSession (opts: InitOptions): Promise<cast.Session> {
+    return new Promise(async (resolve, reject) => {
+        /**
+         * If a receiver is available, call requestSession. If a
+         * specific receiver was specified, bypass receiver selector
+         * and create session directly.
+         */
+        function receiverListener (availability: string) {
+            if (availability === cast.ReceiverAvailability.AVAILABLE) {
+                if (opts.receiver) {
+                    cast._requestSession(
+                            opts.receiver
+                          , onRequestSessionSuccess
+                          , onRequestSessionError);
+                } else {
+                    cast.requestSession(
+                            onRequestSessionSuccess
+                          , onRequestSessionError);
+                }
+            }
         }
 
-        mediaUrl = new URL(`http://${host}:${port}/`);
-    }
-
-
-    const mediaInfo = new cast.media.MediaInfo(mediaUrl.href, null);
-
-    // Media metadata (title/poster)
-    mediaInfo.metadata = new cast.media.GenericMediaMetadata();
-    mediaInfo.metadata.metadataType = cast.media.MetadataType.GENERIC;
-    mediaInfo.metadata.title = mediaTitle;
-
-    if (mediaElement instanceof HTMLVideoElement && mediaElement.poster) {
-        mediaInfo.metadata.images = [
-            new cast.Image(mediaElement.poster)
-        ];
-    }
-
-
-    const activeTrackIds = [];
-
-    if (mediaElement.textTracks.length) {
-        const trackElements = mediaElement.querySelectorAll("track");
-
-        let index = 0;
-        for (const textTrack of Array.from(mediaElement.textTracks)) {
-            const trackElement = trackElements[index];
-
-            // Create Track object
-            const track = new cast.media.Track(
-                    index                              // trackId
-                  , cast.media.TrackType.TEXT); // trackType
-
-            // Copy TextTrack properties to Track
-            track.name = textTrack.label;
-            track.language = textTrack.language;
-            track.trackContentId = trackElement.src;
-            track.trackContentType = "text/vtt";
-
-            const { TextTrackType } = cast.media;
-
-            switch (textTrack.kind) {
-                case "subtitles":
-                    track.subtype = TextTrackType.SUBTITLES;
-                    break;
-                case "captions":
-                    track.subtype = TextTrackType.CAPTIONS;
-                    break;
-                case "descriptions":
-                    track.subtype = TextTrackType.DESCRIPTIONS;
-                    break;
-                case "chapters":
-                    track.subtype = TextTrackType.CHAPTERS;
-                    break;
-                case "metadata":
-                    track.subtype = TextTrackType.METADATA;
-                    break;
-
-                // Default to subtitles
-                default:
-                    track.subtype = TextTrackType.SUBTITLES;
-            }
-
-            // Add track to mediaInfo
-            mediaInfo.tracks.push(track);
-
-            // If enabled, set as active track for load request
-            if (textTrack.mode === "showing" || trackElement.default) {
-                activeTrackIds.push(index);
-            }
-
-            index++;
+        function onRequestSessionSuccess (session: cast.Session) {
+            resolve(session);
         }
-    }
+        function onRequestSessionError (err: cast.Error) {
+            reject(err.description);
+        }
 
-    const loadRequest = new cast.media.LoadRequest(mediaInfo);
-    loadRequest.autoplay = false;
-    loadRequest.activeTrackIds = activeTrackIds;
 
-    session.loadMedia(loadRequest
-          , onLoadMediaSuccess
-          , onLoadMediaError);
+        const sessionRequest = new cast.SessionRequest(
+                cast.media.DEFAULT_MEDIA_RECEIVER_APP_ID);
+
+        const apiConfig = new cast.ApiConfig(
+                sessionRequest
+              , null               // sessionListener
+              , receiverListener); // receiverListener
+
+
+        cast.initialize(apiConfig);
+    });
+}
+
+function getMedia (opts: InitOptions): Promise<cast.media.Media> {
+    return new Promise(async (resolve, reject) => {
+        let mediaUrlObject = new URL(opts.mediaUrl);
+        const mediaTitle = mediaUrlObject.pathname;
+
+        /**
+         * If the media is a local file, start an HTTP media server
+         * and change the media URL to point to it.
+         */
+        if (opts.mediaUrl.startsWith("file://")) {
+            const host = await getLocalAddress();
+            const port = await options.get("localMediaServerPort");
+
+            try {
+                // Wait until media server is listening
+                await startMediaServer(mediaUrlObject.pathname, port);
+            } catch (err) {
+                console.error("Failed to start media server");
+                return;
+            }
+
+            mediaUrlObject = new URL(`http://${host}:${port}/`);
+        }
+
+
+        const activeTrackIds: number[] = [];
+        const mediaInfo = new cast.media.MediaInfo(mediaUrlObject.href, null);
+
+        mediaInfo.metadata = new cast.media.GenericMediaMetadata();
+        mediaInfo.metadata.metadataType = cast.media.MetadataType.GENERIC;
+        mediaInfo.metadata.title = mediaTitle;
+        mediaInfo.tracks = [];
+
+
+        if (mediaElement) {
+            if (mediaElement instanceof HTMLVideoElement) {
+                if (mediaElement.poster) {
+                    mediaInfo.metadata.images = [
+                        new cast.Image(mediaElement.poster)
+                    ];
+                }
+            }
+
+            if (mediaElement.textTracks.length) {
+                const tracks = Array.from(mediaElement.textTracks);
+                const trackElements = mediaElement.querySelectorAll("track");
+
+                tracks.forEach((track, index) => {
+                    const trackElement = trackElements[index];
+
+                    /**
+                     * Create media.Track object with the index as the track ID
+                     * and type as TrackType.TEXT.
+                     */
+                    const castTrack = new cast.media.Track(
+                            index, cast.media.TrackType.TEXT);
+
+                    // Copy TextTrack properties
+                    castTrack.name = track.label;
+                    castTrack.language = track.language;
+                    castTrack.trackContentId = trackElement.src;
+                    castTrack.trackContentType = "text/vtt";
+
+                    switch (track.kind) {
+                        case "subtitles":
+                            castTrack.subtype =
+                                    cast.media.TextTrackType.SUBTITLES;
+                            break;
+                        case "captions":
+                            castTrack.subtype =
+                                    cast.media.TextTrackType.CAPTIONS;
+                            break;
+                        case "descriptions":
+                            castTrack.subtype =
+                                    cast.media.TextTrackType.DESCRIPTIONS;
+                            break;
+                        case "chapters":
+                            castTrack.subtype =
+                                    cast.media.TextTrackType.CHAPTERS;
+                            break;
+                        case "metadata":
+                            castTrack.subtype =
+                                    cast.media.TextTrackType.METADATA;
+                            break;
+
+                        // Default to subtitles
+                        default:
+                            castTrack.subtype =
+                                    cast.media.TextTrackType.SUBTITLES;
+                    }
+
+                    // Add track to mediaInfo
+                    mediaInfo.tracks.push(castTrack);
+
+                    // If enabled, mark as active track for load request
+                    if (track.mode === "showing" || trackElement.default) {
+                        activeTrackIds.push(index);
+                    }
+                });
+            }
+        }
+
+        const loadRequest = new cast.media.LoadRequest(mediaInfo);
+        loadRequest.autoplay = false;
+        loadRequest.activeTrackIds = activeTrackIds;
+
+        currentSession.loadMedia(loadRequest
+              , (media) => resolve(media)
+              , null);
+    });
 }
 
 
-async function onLoadMediaSuccess (media: cast.media.Media) {
-    cast.logMessage("onLoadMediaSuccess");
+let ignoreMediaEvents = false;
 
-    currentMedia = media;
-
+async function registerMediaElementListeners () {
     if (await options.get("mediaSyncElement")) {
-        mediaElement.addEventListener("play", () => {
+
+        function checkIgnore (ev: Event) {
             if (ignoreMediaEvents) {
                 ignoreMediaEvents = false;
-                return;
+                ev.stopImmediatePropagation();
             }
+        }
 
-            currentMedia.play(null
-                  , onMediaPlaySuccess
-                  , onMediaPlayError);
+        mediaElement.addEventListener("play", checkIgnore, true);
+        mediaElement.addEventListener("pause", checkIgnore, true);
+        mediaElement.addEventListener("suspend", checkIgnore, true);
+        mediaElement.addEventListener("seeking", checkIgnore, true);
+        mediaElement.addEventListener("ratechange", checkIgnore, true);
+        mediaElement.addEventListener("volumechange", checkIgnore, true);
+
+
+        mediaElement.addEventListener("play", () => {
+            currentMedia.play(null, null, null);
         });
 
         mediaElement.addEventListener("pause", () => {
-            if (ignoreMediaEvents) {
-                ignoreMediaEvents = false;
-                return;
-            }
-
-            currentMedia.pause(null
-                  , onMediaPauseSuccess
-                  , onMediaPauseError);
+            currentMedia.pause(null, null, null);
         });
 
         mediaElement.addEventListener("suspend", () => {
-            /*currentMedia.stop(null
-                  , onMediaStopSuccess
-                  , onMediaStopError);*/
+            // currentMedia.stop(null, null, null);
         });
 
-        mediaElement.addEventListener("seeking", () => {
-            if (ignoreMediaEvents) {
-                ignoreMediaEvents = false;
-                return;
-            }
-
+        mediaElement.addEventListener("seeked", () => {
             const seekRequest = new cast.media.SeekRequest();
             seekRequest.currentTime = mediaElement.currentTime;
 
-            currentMedia.seek(seekRequest
-                  , onMediaSeekSuccess
-                  , onMediaSeekError);
+            currentMedia.seek(seekRequest, null, null);
         });
 
         mediaElement.addEventListener("ratechange", () => {
-            (currentMedia as any)._sendMediaMessage({
+            currentMedia._sendMediaMessage({
                 type: "SET_PLAYBACK_RATE"
               , playbackRate: mediaElement.playbackRate
             });
@@ -248,10 +272,8 @@ async function onLoadMediaSuccess (media: cast.media.Media) {
                     currentMedia.volume.level
                   , currentMedia.volume.muted);
 
-            const volumeRequest =
-                    new cast.media.VolumeRequest(newVolume);
+            const volumeRequest = new cast.media.VolumeRequest(newVolume);
 
-            cast.logMessage("Volume change");
             currentMedia.setVolume(volumeRequest);
         });
 
@@ -261,44 +283,46 @@ async function onLoadMediaSuccess (media: cast.media.Media) {
                 return;
             }
 
-            // PlayerState
             const localPlayerState = mediaElement.paused
                 ? cast.media.PlayerState.PAUSED
                 : cast.media.PlayerState.PLAYING;
 
             if (localPlayerState !== currentMedia.playerState) {
                 ignoreMediaEvents = true;
+
                 switch (currentMedia.playerState) {
-                    case cast.media.PlayerState.PLAYING:
+                    case cast.media.PlayerState.PLAYING: {
                         mediaElement.play();
                         break;
-
-                    case cast.media.PlayerState.PAUSED:
+                    }
+                    case cast.media.PlayerState.PAUSED: {
                         mediaElement.pause();
                         break;
+                    }
                 }
             }
 
-            // RepeatMode
+
             const localRepeatMode = mediaElement.loop
                 ? cast.media.RepeatMode.SINGLE
                 : cast.media.RepeatMode.OFF;
 
             if (localRepeatMode !== currentMedia.repeatMode) {
                 ignoreMediaEvents = true;
+
                 switch (currentMedia.repeatMode) {
-                    case cast.media.RepeatMode.SINGLE:
+                    case cast.media.RepeatMode.SINGLE: {
                         mediaElement.loop = true;
                         break;
-
-                    case cast.media.RepeatMode.OFF:
+                    }
+                    case cast.media.RepeatMode.OFF: {
                         mediaElement.loop = false;
                         break;
+                    }
                 }
             }
 
 
-            // currentTime
             if (currentMedia.currentTime !== mediaElement.currentTime) {
                 ignoreMediaEvents = true;
                 mediaElement.currentTime = currentMedia.currentTime;
@@ -307,57 +331,57 @@ async function onLoadMediaSuccess (media: cast.media.Media) {
     }
 }
 
-function onRequestSessionError () {
-    cast.logMessage("onRequestSessionError");
-}
-function sessionListener (newSession: cast.Session) {
-    cast.logMessage("sessionListener");
-}
-function onInitializeSuccess () {
-    cast.logMessage("onInitializeSuccess");
-}
-function onInitializeError () {
-    cast.logMessage("onInitializeError");
-}
-function onLoadMediaError () {
-    cast.logMessage("onLoadMediaError");
-}
-function onMediaPlaySuccess () {
-    cast.logMessage("onMediaPlaySuccess");
-}
-function onMediaPlayError (err: cast.Error) {
-    cast.logMessage("onMediaPlayError");
-}
-function onMediaPauseSuccess () {
-    cast.logMessage("onMediaPauseSuccess");
-}
-function onMediaPauseError (err: cast.Error) {
-    cast.logMessage("onMediaPauseError");
-}
-function onMediaStopSuccess () {
-    cast.logMessage("onMediaStopSuccess");
-}
-function onMediaStopError (err: cast.Error) {
-    cast.logMessage("onMediaStopError");
-}
-function onMediaSeekSuccess () {
-    cast.logMessage("onMediaSeekSuccess");
-}
-function onMediaSeekError (err: cast.Error) {
-    cast.logMessage("onMediaSeekError");
+
+interface InitOptions {
+    mediaUrl: string;
+    receiver: Receiver;
+    targetElementId?: number;
 }
 
+export async function init (opts: InitOptions) {
+    backgroundPort = await ensureInit();
 
-ensureInit().then(async (port) => {
-    backgroundPort = port;
-
+    const isLocalMedia = opts.mediaUrl.startsWith("file://");
     const isLocalMediaEnabled = await options.get("localMediaEnabled");
-    if (isLocalFile && !isLocalMediaEnabled) {
+
+    if (isLocalMedia && !isLocalMediaEnabled) {
         cast.logMessage("Local media casting not enabled");
         return;
     }
 
-    session = await mediaCasting.getMediaSession(selectedReceiver);
+    if (opts.targetElementId) {
+        mediaElement = browser.menus.getTargetElement(
+                opts.targetElementId) as HTMLMediaElement;
+    }
 
-    loadMedia();
-});
+    currentSession = await getSession(opts);
+    currentMedia = await getMedia(opts);
+
+    if (opts.targetElementId) {
+        registerMediaElementListeners();
+
+        window.addEventListener("beforeunload", async () => {
+            backgroundPort.postMessage({
+                subject: "bridge:/mediaServer/stop"
+            });
+
+            if (await options.get("mediaStopOnUnload")) {
+                currentSession.stop(null, null);
+            }
+        });
+    }
+}
+
+/**
+ * If loaded as a content script, the init values are
+ * provided on the window object.
+ */
+if (window.location.protocol !== "moz-extension:") {
+    const _window = (window as any);
+
+    init({
+        mediaUrl: _window.mediaUrl
+      , receiver: _window.receiver
+      , targetElementId: _window.targetElementId
+    });
+}

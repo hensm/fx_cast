@@ -1,7 +1,5 @@
 "use strict";
 
-import mediaCasting from "./mediaCasting";
-
 import { stringify } from "./utils";
 
 import { ReceiverSelection
@@ -45,8 +43,12 @@ export default async function loadSender (opts: LoadSenderOptions) {
 
         case ReceiverSelectorMediaType.File: {
             const fileUrl = new URL(`file://${opts.selection.filePath}`);
-            const mediaSession = await mediaCasting.loadMediaUrl(
-                    fileUrl.href, opts.selection.receiver);
+            const { init } = await import("../senders/mediaCast");
+
+            init({
+                mediaUrl: fileUrl.href
+              , receiver: opts.selection.receiver
+            });
 
             break;
         }

@@ -16,6 +16,8 @@ import { ErrorCode
        , SessionStatus
        , VolumeControlType } from "../enums";
 
+import { RepeatMode } from "../media/enums";
+
 import { ListenerObject
        , onMessage
        , sendMessageResponse } from "../../eventMessageChannel";
@@ -305,8 +307,9 @@ export default class Session {
           , autoplay: loadRequest.autoplay || false
           , currentTime: loadRequest.currentTime || 0
           , customData: loadRequest.customData || {}
-          , repeatMode: "REPEAT_OFF"
+          , repeatMode: RepeatMode.OFF
         });
+
 
         let hasResponded = false;
 
@@ -318,23 +321,28 @@ export default class Session {
                 return;
             }
 
-            const mediaObject = JSON.parse(data);
+            const message = JSON.parse(data);
 
-            if (mediaObject.status && mediaObject.status.length > 0) {
+            if (message.status && message.status.length > 0) {
                 hasResponded = true;
 
                 const media = new Media(
                         this.sessionId
-                      , mediaObject.status[0].mediaSessionId
+                      , message.status[0].mediaSessionId
                       , _id.get(this));
 
                 media.media = loadRequest.media;
                 this.media = [ media ];
 
                 media.play();
-                successCallback(media);
+
+                if (successCallback) {
+                    successCallback(media);
+                }
             } else {
-                errorCallback(new _Error(ErrorCode.SESSION_ERROR));
+                if (errorCallback) {
+                    errorCallback(new _Error(ErrorCode.SESSION_ERROR));
+                }
             }
         });
     }

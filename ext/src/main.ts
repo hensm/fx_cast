@@ -3,7 +3,6 @@
 import defaultOptions from "./defaultOptions";
 import bridge from "./lib/bridge";
 import loadSender from "./lib/loadSender";
-import mediaCasting from "./lib/mediaCasting";
 import options, { Options } from "./lib/options";
 
 import { getChromeUserAgent } from "./lib/userAgents";
@@ -50,6 +49,17 @@ browser.runtime.onInstalled.addListener(async details => {
 
 
 /**
+ * When a message port connection with the name "shim" is
+ * established, pass it to createShim to handle the setup
+ * and maintenance.
+ */
+browser.runtime.onConnect.addListener(async port => {
+    if (port.name === "shim") {
+        createShim(port);
+    }
+});
+
+/**
  * When the browser action is clicked, open a receiver
  * selector and load a sender for the response. The
  * mirroring sender is loaded into the current tab at the
@@ -66,61 +76,6 @@ browser.browserAction.onClicked.addListener(async tab => {
 });
 
 
-
-const activeShims = new Set<Shim>();
-
-browser.runtime.onConnect.addListener(async port => {
-    if (port.name === "shim") {
-        /**
-         * If there's already an active shim for the sender
-         * tab/frame ID, disconnect it.
-         */
-        for (const activeShim of activeShims) {
-            if (activeShim.contentTabId === port.sender.tab.id
-             && activeShim.contentFrameId === port.sender.frameId) {
-
-                activeShim.contentPort.disconnect();
-                activeShim.bridgePort.disconnect();
-            }
-        }
-
-
-        const shim = await createShim(port);
-
-        shim.bridgePort.onDisconnect.addListener(() => {
-            activeShims.delete(shim);
-        });
-        shim.contentPort.onDisconnect.addListener(() => {
-            activeShims.delete(shim);
-        });
-
-        activeShims.add(shim);
-    }
-});
-
-StatusManager.addEventListener("serviceUp", ev => {
-    for (const shim of activeShims) {
-        shim.contentPort.postMessage({
-            subject: "shim:/serviceUp"
-          , data: { id: ev.detail.id }
-        });
-    }
-});
-
-StatusManager.addEventListener("serviceDown", ev => {
-    for (const shim of activeShims) {
-        shim.contentPort.postMessage({
-            subject: "shim:/serviceDown"
-          , data: { id: ev.detail.id }
-        });
-    }
-});
-
-
-
-let mediaCastTabId: number;
-let mediaCastFrameId: number;
-
 async function initMenus () {
     console.info("fx_cast (Debug): init (menus)");
 
@@ -135,8 +90,8 @@ async function initMenus () {
                 const allMediaTypes =
                         ReceiverSelectorMediaType.App
                       | ReceiverSelectorMediaType.Tab
-                      | ReceiverSelectorMediaType.Screen;
-                      // | ReceiverSelectorMediaType.File;
+                      | ReceiverSelectorMediaType.Screen
+                      | ReceiverSelectorMediaType.File;
 
                 const selection = await SelectorManager.getSelection(
                         ReceiverSelectorMediaType.App
@@ -154,8 +109,8 @@ async function initMenus () {
                 if (selection.mediaType === ReceiverSelectorMediaType.App) {
                     await browser.tabs.executeScript(tab.id, {
                         code: stringify`
-                            window.selectedReceiver = ${selection.receiver};
-                            window.srcUrl = ${info.srcUrl};
+                            window.receiver = ${selection.receiver};
+                            window.mediaUrl = ${info.srcUrl};
                             window.targetElementId = ${info.targetElementId};
                         `
                       , frameId: info.frameId
@@ -165,10 +120,6 @@ async function initMenus () {
                         file: "senders/mediaCast.js"
                       , frameId: info.frameId
                     });
-
-                    // Store for later
-                    mediaCastTabId = tab.id;
-                    mediaCastFrameId = info.frameId;
                 } else {
 
                     // Handle other responses

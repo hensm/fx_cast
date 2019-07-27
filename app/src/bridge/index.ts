@@ -276,11 +276,9 @@ function handleMediaServerMessage (message: Message) {
                 sendMessage("mediaCast:/mediaServer/started");
             });
             mediaServer.on("close", () => {
-                console.error("mediaServer close");
                 sendMessage("mediaCast:/mediaServer/stopped");
             });
             mediaServer.on("error", (a) => {
-                console.error("mediaServer error", a);
                 sendMessage("mediaCast:/mediaServer/error");
             });
 
