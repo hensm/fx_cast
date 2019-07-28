@@ -22,7 +22,7 @@ export interface Options {
     userAgentWhitelistEnabled: boolean;
     userAgentWhitelist: string[];
 
-    [key: string]: Options[keyof Options];
+    [key: string]: Options[keyof Options]
 }
 
 
@@ -77,7 +77,7 @@ export default new class extends TypedEventTarget<EventMap> {
                 }
 
                 this.dispatchEvent(new CustomEvent("changed", {
-                    detail: changedKeys
+                    detail: changedKeys as Array<keyof Options>
                 }));
             }
         });
@@ -88,8 +88,8 @@ export default new class extends TypedEventTarget<EventMap> {
      * Options interface type.
      */
     public async getAll (): Promise<Options> {
-        const { options }: { options: Options } =
-                await browser.storage.sync.get("options");
+        const { options } = await browser.storage.sync.get(
+                "options") as { options: Options };
 
         return options;
     }
