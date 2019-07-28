@@ -7,8 +7,7 @@ import ReactDOM from "react-dom";
 import { getNextEllipsis } from "../../lib/utils";
 import { Message, Receiver } from "../../types";
 
-import { ReceiverSelectorMediaType }
-    from "../../receiver_selectors/ReceiverSelector";
+import { ReceiverSelectorMediaType } from "../../background/receiverSelector";
 
 
 const _ = browser.i18n.getMessage;

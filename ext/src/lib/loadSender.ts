@@ -3,7 +3,7 @@
 import { stringify } from "./utils";
 
 import { ReceiverSelection
-       , ReceiverSelectorMediaType } from "../receiver_selectors";
+       , ReceiverSelectorMediaType } from "../background/receiverSelector";
 
 
 interface LoadSenderOptions {

@@ -1,7 +1,7 @@
 "use strict";
 
-import options from "./lib/options";
-import { TypedEventTarget } from "./lib/typedEvents";
+import options from "../lib/options";
+import { TypedEventTarget } from "../lib/typedEvents";
 
 
 const _ = browser.i18n.getMessage;

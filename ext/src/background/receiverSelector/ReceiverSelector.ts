@@ -1,7 +1,7 @@
 "use strict";
 
-import { TypedEventTarget } from "../lib/typedEvents";
-import { Receiver } from "../types";
+import { TypedEventTarget } from "../../lib/typedEvents";
+import { Receiver } from "../../types";
 
 
 export enum ReceiverSelectorMediaType {

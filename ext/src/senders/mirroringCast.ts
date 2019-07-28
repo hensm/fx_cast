@@ -3,9 +3,7 @@
 import options from "../lib/options";
 import cast, { ensureInit } from "../shim/export";
 
-import { ReceiverSelectorMediaType }
-        from "../receiver_selectors/ReceiverSelector";
-
+import { ReceiverSelectorMediaType } from "../background/receiverSelector";
 import { Receiver } from "../types";
 
 

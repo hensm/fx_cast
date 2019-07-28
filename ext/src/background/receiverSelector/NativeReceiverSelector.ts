@@ -1,16 +1,16 @@
 "use strict";
 
-import bridge from "../lib/bridge";
-import options from "../lib/options";
+import bridge from "../../lib/bridge";
+import options from "../../lib/options";
+
+import { TypedEventTarget } from "../../lib/typedEvents";
+import { getWindowCenteredProps } from "../../lib/utils";
+import { Message, Receiver } from "../../types";
 
 import ReceiverSelector, {
         ReceiverSelection
       , ReceiverSelectorEvents
       , ReceiverSelectorMediaType } from "./ReceiverSelector";
-
-import { TypedEventTarget } from "../lib/typedEvents";
-import { getWindowCenteredProps } from "../lib/utils";
-import { Message, Receiver } from "../types";
 
 
 const _ = browser.i18n.getMessage;
@@ -33,7 +33,7 @@ interface NativeReceiverSelectorErrorMessage extends Message {
 
 
 // TODO: Figure out lifetime properly
-export default class NativeMacReceiverSelector
+export default class NativeReceiverSelector
         extends TypedEventTarget<ReceiverSelectorEvents>
         implements ReceiverSelector {
 

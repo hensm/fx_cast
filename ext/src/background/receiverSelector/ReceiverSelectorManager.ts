@@ -1,30 +1,42 @@
 "use strict";
 
-import options from "./lib/options";
+import options from "../../lib/options";
 
-import { getReceiverSelector
-       , ReceiverSelection
-       , ReceiverSelector
-       , ReceiverSelectorMediaType
-       , ReceiverSelectorType } from "./receiver_selectors";
+import StatusManager from "../StatusManager";
 
-import StatusManager from "./StatusManager";
+import { ReceiverSelector
+       , ReceiverSelectorType } from "./";
+import { ReceiverSelection
+       , ReceiverSelectorMediaType } from "./ReceiverSelector";
+
+import NativeReceiverSelector from "./NativeReceiverSelector";
+import PopupReceiverSelector from "./PopupReceiverSelector";
+
+
+async function createSelector () {
+    const type = await options.get("receiverSelectorType");
+
+    switch (type) {
+        case ReceiverSelectorType.Native: {
+            return new NativeReceiverSelector();
+        }
+        case ReceiverSelectorType.Popup: {
+            return new PopupReceiverSelector();
+        }
+    }
+}
 
 
 let sharedSelector: ReceiverSelector;
 
 async function getSelector () {
-    return getReceiverSelector(
-            await options.get("receiverSelectorType"));
-}
-
-async function getSharedSelector () {
     if (!sharedSelector) {
-        sharedSelector = await getSelector();
+        sharedSelector = await createSelector();
     }
 
     return sharedSelector;
 }
+
 
 /**
  * Opens a receiver selector with the specified
@@ -46,16 +58,14 @@ async function getSelection (
         : Promise<ReceiverSelection> {
 
     return new Promise(async (resolve, reject) => {
-        /**
-         * Close any existing selector, and renew to minimize issues
-         * with bridge failing.
-         */
-        await getSharedSelector();
-        if (sharedSelector.isOpen) {
+
+        // Close an existing open selector
+        if (sharedSelector && sharedSelector.isOpen) {
             sharedSelector.close();
         }
 
-        sharedSelector = await getSelector();
+        // Get a new selector for each selection
+        sharedSelector = await createSelector();
 
         sharedSelector.addEventListener("selected", ev => {
             console.info("fx_cast (Debug): Selected receiver", ev.detail);
@@ -72,6 +82,10 @@ async function getSelection (
             reject();
         });
 
+
+        // Ensure status manager is initialized
+        await StatusManager.init();
+
         sharedSelector.open(
                 StatusManager.getReceivers()
               , defaultMediaType
@@ -81,5 +95,5 @@ async function getSelection (
 
 export default {
     getSelection
-  , getSharedSelector
+  , getSelector
 };

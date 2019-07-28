@@ -4,11 +4,11 @@ import ReceiverSelector, {
         ReceiverSelectorEvents
       , ReceiverSelectorMediaType } from "./ReceiverSelector";
 
-import options from "../lib/options";
+import options from "../../lib/options";
 
-import { TypedEventTarget } from "../lib/typedEvents";
-import { getWindowCenteredProps } from "../lib/utils";
-import { Message, Receiver } from "../types";
+import { TypedEventTarget } from "../../lib/typedEvents";
+import { getWindowCenteredProps } from "../../lib/utils";
+import { Message, Receiver } from "../../types";
 
 
 export default class PopupReceiverSelector

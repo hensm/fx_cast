@@ -5,7 +5,11 @@ import * as cast from "./cast";
 import { BridgeInfo } from "../lib/bridge";
 import { Message } from "../types";
 
-import { onMessage, onMessageResponse, sendMessage } from "./eventMessageChannel";
+import { onMessage
+       , onMessageResponse
+       , sendMessage } from "./eventMessageChannel";
+
+import ShimManager from "../background/ShimManager";
 
 
 let initializedBridgeInfo: BridgeInfo;
@@ -42,10 +46,9 @@ export function ensureInit (): Promise<MessagePort> {
          * URL.
          */
         if (window.location.protocol === "moz-extension:") {
-            const { default: createShim } = await import("../createShim");
-
             // port2 will post bridge messages to port 1
-            await createShim(channel.port2);
+            await ShimManager.init();
+            await ShimManager.createShim(channel.port2);
 
             // bridge -> shim
             channel.port1.onmessage = ev => {

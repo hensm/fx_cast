@@ -8,20 +8,19 @@ import options, { Options } from "./lib/options";
 import { getChromeUserAgent } from "./lib/userAgents";
 import { stringify } from "./lib/utils";
 
-import { ReceiverSelection
-       , ReceiverSelectorMediaType } from "./receiver_selectors";
-
 import { Message } from "./types";
 
 import { CAST_FRAMEWORK_LOADER_SCRIPT_URL
        , CAST_LOADER_SCRIPT_URL } from "./lib/endpoints";
 
+import { ReceiverSelection
+       , ReceiverSelectorMediaType } from "./background/receiverSelector";
 
-import SelectorManager from "./SelectorManager";
-import StatusManager from "./StatusManager";
+import ReceiverSelectorManager
+        from "./background/receiverSelector/ReceiverSelectorManager";
 
-import createMenus from "./createMenus";
-import createShim, { Shim } from "./createShim";
+import createMenus from "./background/createMenus";
+import ShimManager from "./background/ShimManager";
 
 
 const _ = browser.i18n.getMessage;
@@ -48,33 +47,6 @@ browser.runtime.onInstalled.addListener(async details => {
 });
 
 
-/**
- * When a message port connection with the name "shim" is
- * established, pass it to createShim to handle the setup
- * and maintenance.
- */
-browser.runtime.onConnect.addListener(async port => {
-    if (port.name === "shim") {
-        createShim(port);
-    }
-});
-
-/**
- * When the browser action is clicked, open a receiver
- * selector and load a sender for the response. The
- * mirroring sender is loaded into the current tab at the
- * top-level frame.
- */
-browser.browserAction.onClicked.addListener(async tab => {
-    const selection = await SelectorManager.getSelection();
-
-    loadSender({
-        tabId: tab.id
-      , frameId: 0
-      , selection
-    });
-});
-
 
 async function initMenus () {
     console.info("fx_cast (Debug): init (menus)");
@@ -93,7 +65,7 @@ async function initMenus () {
                       | ReceiverSelectorMediaType.Screen
                       | ReceiverSelectorMediaType.File;
 
-                const selection = await SelectorManager.getSelection(
+                const selection = await ReceiverSelectorManager.getSelection(
                         ReceiverSelectorMediaType.App
                       , allMediaTypes);
 
@@ -134,7 +106,7 @@ async function initMenus () {
             }
 
             case menuIdMirroringCast: {
-                const selection = await SelectorManager.getSelection();
+                const selection = await ReceiverSelectorManager.getSelection();
 
                 loadSender({
                     tabId: tab.id
@@ -268,8 +240,13 @@ function initWhitelist () {
 }
 
 
+let isInitialized = false;
 
 async function init () {
+    if (isInitialized) {
+        return;
+    }
+
     /**
      * If options haven't been set yet, we can't properly
      * initialize, so wait until init is called again in the
@@ -281,10 +258,42 @@ async function init () {
 
     console.info("fx_cast (Debug): init");
 
+    isInitialized = true;
 
-    initMenus();
-    initRequestListener();
-    initWhitelist();
+
+    await initMenus();
+    await initRequestListener();
+    await initWhitelist();
+
+    await ShimManager.init();
+
+
+    /**
+     * When a message port connection with the name "shim" is
+     * established, pass it to createShim to handle the setup
+     * and maintenance.
+     */
+    browser.runtime.onConnect.addListener(async port => {
+        if (port.name === "shim") {
+            ShimManager.createShim(port);
+        }
+    });
+
+    /**
+     * When the browser action is clicked, open a receiver
+     * selector and load a sender for the response. The
+     * mirroring sender is loaded into the current tab at the
+     * top-level frame.
+     */
+    browser.browserAction.onClicked.addListener(async tab => {
+        const selection = await ReceiverSelectorManager.getSelection();
+
+        loadSender({
+            tabId: tab.id
+          , frameId: 0
+          , selection
+        });
+    });
 }
 
 init();

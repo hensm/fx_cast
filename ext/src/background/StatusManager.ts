@@ -1,10 +1,10 @@
 "use strict";
 
-import bridge from "./lib/bridge";
-import options from "./lib/options";
+import bridge from "../lib/bridge";
+import options from "../lib/options";
 
-import { TypedEventTarget } from "./lib/typedEvents";
-import { Message, Receiver, ReceiverStatus } from "./types";
+import { TypedEventTarget } from "../lib/typedEvents";
+import { Message, Receiver, ReceiverStatus } from "../types";
 
 
 interface ReceiverStatusMessage extends Message {
@@ -36,7 +36,9 @@ interface EventMap {
 }
 
 // tslint:disable-next-line:new-parens
-export default new class extends TypedEventTarget<EventMap> {
+export default new class StatusManager
+        extends TypedEventTarget<EventMap> {
+
     private bridgePort: browser.runtime.Port;
     private receivers = new Map<string, Receiver>();
 
@@ -46,25 +48,31 @@ export default new class extends TypedEventTarget<EventMap> {
         // Bind listeners
         this.onBridgePortMessage = this.onBridgePortMessage.bind(this);
         this.onBridgePortDisconnect = this.onBridgePortDisconnect.bind(this);
+    }
 
-        this.initBridgePort();
+    public async init () {
+        if (!this.bridgePort) {
+            await this.createBridgePort();
+        }
     }
 
     public getReceivers () {
         return Array.from(this.receivers.values());
     }
 
-    private async initBridgePort () {
-        this.bridgePort = await bridge.connect();
-        this.bridgePort.onMessage.addListener(this.onBridgePortMessage);
-        this.bridgePort.onDisconnect.addListener(this.onBridgePortDisconnect);
+    private async createBridgePort () {
+        const bridgePort = await bridge.connect();
+        bridgePort.onMessage.addListener(this.onBridgePortMessage);
+        bridgePort.onDisconnect.addListener(this.onBridgePortDisconnect);
 
-        this.bridgePort.postMessage({
+        bridgePort.postMessage({
             subject: "bridge:/initialize"
           , data: {
                 shouldWatchStatus: true
             }
         });
+
+        return bridgePort;
     }
 
     /**
@@ -148,7 +156,7 @@ export default new class extends TypedEventTarget<EventMap> {
         this.bridgePort = null;
 
         window.setTimeout(async () => {
-            this.initBridgePort();
+            this.bridgePort = await this.createBridgePort();
         }, 10000);
     }
 };

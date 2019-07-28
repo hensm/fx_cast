@@ -2,7 +2,7 @@
 
 import defaultOptions from "../defaultOptions";
 
-import { ReceiverSelectorType } from "../receiver_selectors/";
+import { ReceiverSelectorType } from "../background/receiverSelector";
 import { Message } from "../types";
 import { TypedEventTarget } from "./typedEvents";
 
@@ -16,13 +16,13 @@ export interface Options {
     localMediaServerPort: number;
     mirroringEnabled: boolean;
     mirroringAppId: string;
-    receiverSelectorType: ReceiverSelectorType.Popup;
+    receiverSelectorType: ReceiverSelectorType;
     receiverSelectorCloseIfFocusLost: boolean;
     receiverSelectorWaitForConnection: boolean;
     userAgentWhitelistEnabled: boolean;
     userAgentWhitelist: string[];
 
-    [key: string]: Options[keyof Options]
+    [key: string]: Options[keyof Options];
 }
 
 
@@ -49,27 +49,29 @@ export default new class extends TypedEventTarget<EventMap> {
                 const { oldValue, newValue } = _changes.options;
                 const changedKeys = [];
 
-                for (const key in newValue) {
-                    // Don't track added keys
-                    if (!(key in oldValue)) {
-                        continue;
-                    }
-
-                    const oldKeyValue = oldValue[key];
-                    const newKeyValue = newValue[key];
-
-                    // Equality comparison
-                    if (oldKeyValue === newKeyValue) {
-                        continue;
-                    }
-
-                    // Array comparison
-                    if (oldKeyValue instanceof Array
-                     && newKeyValue instanceof Array) {
-                        if (oldKeyValue.length === newKeyValue.length
-                              && oldKeyValue.every((value, index) =>
-                                         value === newKeyValue[index])) {
+                for (const key of Object.keys(newValue)) {
+                    if (oldValue) {
+                        // Don't track added keys
+                        if (!(key in oldValue)) {
                             continue;
+                        }
+
+                        const oldKeyValue = oldValue[key];
+                        const newKeyValue = newValue[key];
+
+                        // Equality comparison
+                        if (oldKeyValue === newKeyValue) {
+                            continue;
+                        }
+
+                        // Array comparison
+                        if (oldKeyValue instanceof Array
+                         && newKeyValue instanceof Array) {
+                            if (oldKeyValue.length === newKeyValue.length
+                                  && oldKeyValue.every((value, index) =>
+                                             value === newKeyValue[index])) {
+                                continue;
+                            }
                         }
                     }
 

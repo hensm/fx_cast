@@ -6,7 +6,7 @@ import { Message } from "../types";
 const WEBSOCKET_DAEMON_URL = "ws://localhost:9556";
 
 
-type DisconnectListener = (port: browser.runtime.Port) => void;;
+type DisconnectListener = (port: browser.runtime.Port) => void;
 type MessageListener = (message: any) => void;
 
 function connectNative (application: string) {

@@ -13,7 +13,7 @@ import bridge, { BridgeInfo } from "../../lib/bridge";
 import options, { Options } from "../../lib/options";
 import { REMOTE_MATCH_PATTERN_REGEX } from "../../lib/utils";
 
-import { ReceiverSelectorType } from "../../receiver_selectors";
+import { ReceiverSelectorType } from "../../background/receiverSelector";
 
 
 const _ = browser.i18n.getMessage;
@@ -250,7 +250,7 @@ class OptionsApp extends Component<{}, OptionsAppState> {
                                         <option value={ ReceiverSelectorType.Popup }>
                                             { _("optionsReceiverSelectorTypeBrowser") }
                                         </option>
-                                        <option value={ ReceiverSelectorType.NativeMac }>
+                                        <option value={ ReceiverSelectorType.Native }>
                                             { _("optionsReceiverSelectorTypeNative") }
                                         </option>
                                     </select>
