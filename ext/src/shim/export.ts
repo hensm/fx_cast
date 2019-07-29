@@ -9,8 +9,6 @@ import { onMessage
        , onMessageResponse
        , sendMessage } from "./eventMessageChannel";
 
-import ShimManager from "../background/ShimManager";
-
 
 let initializedBridgeInfo: BridgeInfo;
 let initializedBackgroundPort: MessagePort;
@@ -46,6 +44,9 @@ export function ensureInit (): Promise<MessagePort> {
          * URL.
          */
         if (window.location.protocol === "moz-extension:") {
+            const { default: ShimManager } =
+                    await import("../background/ShimManager");
+
             // port2 will post bridge messages to port 1
             await ShimManager.init();
             await ShimManager.createShim(channel.port2);
