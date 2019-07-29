@@ -21,6 +21,7 @@ import ReceiverSelectorManager
 
 import createMenus from "./background/createMenus";
 import ShimManager from "./background/ShimManager";
+import StatusManager from "./background/StatusManager";
 
 
 const _ = browser.i18n.getMessage;
@@ -46,6 +47,39 @@ browser.runtime.onInstalled.addListener(async details => {
     }
 });
 
+
+
+function initBrowserAction () {
+    browser.browserAction.disable();
+
+    function onServiceChange () {
+        if (StatusManager.getReceivers().length) {
+            browser.browserAction.enable();
+        } else {
+            browser.browserAction.disable();
+        }
+    }
+
+    StatusManager.addEventListener("serviceUp", onServiceChange);
+    StatusManager.addEventListener("serviceDown", onServiceChange);
+
+
+    /**
+     * When the browser action is clicked, open a receiver
+     * selector and load a sender for the response. The
+     * mirroring sender is loaded into the current tab at the
+     * top-level frame.
+     */
+    browser.browserAction.onClicked.addListener(async tab => {
+        const selection = await ReceiverSelectorManager.getSelection();
+
+        loadSender({
+            tabId: tab.id
+          , frameId: 0
+          , selection
+        });
+    });
+}
 
 
 async function initMenus () {
@@ -265,7 +299,11 @@ async function init () {
     await initRequestListener();
     await initWhitelist();
 
+    await StatusManager.init();
     await ShimManager.init();
+
+
+    await initBrowserAction();
 
 
     /**
@@ -277,22 +315,6 @@ async function init () {
         if (port.name === "shim") {
             ShimManager.createShim(port);
         }
-    });
-
-    /**
-     * When the browser action is clicked, open a receiver
-     * selector and load a sender for the response. The
-     * mirroring sender is loaded into the current tab at the
-     * top-level frame.
-     */
-    browser.browserAction.onClicked.addListener(async tab => {
-        const selection = await ReceiverSelectorManager.getSelection();
-
-        loadSender({
-            tabId: tab.id
-          , frameId: 0
-          , selection
-        });
     });
 }
 
