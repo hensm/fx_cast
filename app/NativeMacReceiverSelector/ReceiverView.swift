@@ -37,15 +37,24 @@ class ReceiverView : NSStackView {
 
         self.receiver = receiver
 
+
         let statusText = receiver.status.application.isIdleScreen
             ? "\(receiver.host):\(receiver.port)"
             : receiver.status.application.statusText
 
+        let addressLabel = makeLabel(statusText
+              , size: NSFont.smallSystemFontSize
+              , color: .secondaryLabelColor)
+
+        // Truncate long status text
+        addressLabel.toolTip = statusText
+        addressLabel.cell?.lineBreakMode = .byTruncatingTail
+        addressLabel.setContentCompressionResistancePriority(
+                .defaultLow, for: .horizontal)
+
         let metaStackView = NSStackView(views: [
             makeLabel(receiver.friendlyName, size: 14)
-          , makeLabel(statusText
-                  , size: NSFont.smallSystemFontSize
-                  , color: .secondaryLabelColor)
+          , addressLabel
         ])
 
         metaStackView.alignment = .leading
