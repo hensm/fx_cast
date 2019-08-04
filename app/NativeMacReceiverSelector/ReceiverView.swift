@@ -37,9 +37,13 @@ class ReceiverView : NSStackView {
 
         self.receiver = receiver
 
+        let statusText = receiver.status.application.isIdleScreen
+            ? "\(receiver.host):\(receiver.port)"
+            : receiver.status.application.statusText
+
         let metaStackView = NSStackView(views: [
             makeLabel(receiver.friendlyName, size: 14)
-          , makeLabel("\(receiver.host):\(receiver.port)"
+          , makeLabel(statusText
                   , size: NSFont.smallSystemFontSize
                   , color: .secondaryLabelColor)
         ])

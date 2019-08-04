@@ -17,10 +17,9 @@ export interface Receiver {
 export interface ReceiverStatus {
     application: {
         displayName: string;
-        isIdleScreen: string;
+        isIdleScreen: boolean;
         statusText: string;
     };
-    id: string;
     volume: {
         level: number;
         muted: boolean

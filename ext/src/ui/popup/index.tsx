@@ -235,9 +235,10 @@ class ReceiverEntry extends Component<ReceiverEntryProps, ReceiverEntryState> {
                     { this.props.receiver.friendlyName }
                 </div>
                 <div className="receiver-address">
-                    { `${this.props.receiver.host}:${this.props.receiver.port}` }
+                    { this.props.receiver.status.application.isIdleScreen
+                        ? `${this.props.receiver.host}:${this.props.receiver.port}`
+                        : this.props.receiver.status.application.statusText }
                 </div>
-                <div className="receiver-status"></div>
                 <button className="receiver-connect"
                         onClick={ this.handleCast }
                         disabled={this.props.isLoading}>

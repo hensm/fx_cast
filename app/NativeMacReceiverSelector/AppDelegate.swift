@@ -24,7 +24,7 @@ class AppDelegate : NSObject, NSApplicationDelegate {
             // Decode and store initialization JSON data
             self.initData = try JSONDecoder().decode(InitData.self, from: data)
         } catch {
-            fputs("Error: Failed to parse input data\n", stderr)
+            fputs("Error: Failed to parse input data\n (\(error))", stderr)
             exit(1)
         }
 
