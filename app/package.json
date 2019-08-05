@@ -2,7 +2,7 @@
     "__applicationName": "fx_cast_bridge",
     "__applicationVersion": "0.0.3",
     "__applicationDirectoryName": "fx_cast",
-    "__applicationExecutableName": "bridge",
+    "__applicationExecutableName": "fx_cast_bridge",
     "scripts": {
         "build": "node bin/build.js",
         "package": "node bin/build.js --package",
