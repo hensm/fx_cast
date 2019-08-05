@@ -1,7 +1,6 @@
 "use strict";
 
 import defaultOptions from "./defaultOptions";
-import bridge from "./lib/bridge";
 import loadSender from "./lib/loadSender";
 import options, { Options } from "./lib/options";
 
@@ -13,8 +12,7 @@ import { Message } from "./types";
 import { CAST_FRAMEWORK_LOADER_SCRIPT_URL
        , CAST_LOADER_SCRIPT_URL } from "./lib/endpoints";
 
-import { ReceiverSelection
-       , ReceiverSelectorMediaType } from "./background/receiverSelector";
+import { ReceiverSelectorMediaType } from "./background/receiverSelector";
 
 import ReceiverSelectorManager
         from "./background/receiverSelector/ReceiverSelectorManager";
@@ -73,11 +71,13 @@ function initBrowserAction () {
     browser.browserAction.onClicked.addListener(async tab => {
         const selection = await ReceiverSelectorManager.getSelection();
 
-        loadSender({
-            tabId: tab.id
-          , frameId: 0
-          , selection
-        });
+        if (selection) {
+            loadSender({
+                tabId: tab.id
+              , frameId: 0
+              , selection
+            });
+        }
     });
 }
 

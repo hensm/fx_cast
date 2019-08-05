@@ -44,13 +44,9 @@ const decodeTransform = new DecodeTransform();
 const encodeTransform = new EncodeTransform();
 
 // stdin -> stdout
-process.stdin
-    .pipe(decodeTransform)
-
+process.stdin.pipe(decodeTransform)
 decodeTransform.on("data", handleMessage);
-
-encodeTransform
-    .pipe(process.stdout);
+encodeTransform.pipe(process.stdout);
 
 /**
  * Encode and send a message to the extension. If message is
