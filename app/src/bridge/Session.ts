@@ -23,7 +23,7 @@ export default class Session {
     private clientConnection?: Channel;
     private clientHeartbeat?: Channel;
     private clientReceiver?: Channel;
-    private clientHeartbeatIntervalId?: NodeJS.Timer;
+    private clientHeartbeatIntervalId?: NodeJS.Timeout;
 
     private isSessionCreated = false;
 

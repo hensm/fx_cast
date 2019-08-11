@@ -15,7 +15,7 @@ const NS_RECEIVER = "urn:x-cast:com.google.cast.receiver";
 export default class StatusListener extends EventEmitter {
     private client: Client;
     private clientReceiver?: Channel;
-    private clientHeartbeatIntervalId?: number;
+    private clientHeartbeatIntervalId?: NodeJS.Timeout;
 
     constructor (
             private host: string
@@ -27,7 +27,7 @@ export default class StatusListener extends EventEmitter {
         this.client.connect({ host, port }, this.onConnect.bind(this));
 
         this.client.on("close", () => {
-            clearInterval(this.clientHeartbeatIntervalId);
+            clearInterval(this.clientHeartbeatIntervalId!);
         });
     }
 
@@ -80,6 +80,6 @@ export default class StatusListener extends EventEmitter {
 
         this.clientHeartbeatIntervalId = setInterval(() => {
             clientHeartbeat.send({ type: "PING" });
-        });
+        }, 5000);
     }
 }

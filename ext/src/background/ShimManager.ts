@@ -30,7 +30,6 @@ export default new class ShimManager {
     private activeShims = new Set<Shim>();
 
     public async init () {
-        await StatusManager.init();
         await this.initStatusListeners();
     }
 
