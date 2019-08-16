@@ -44,7 +44,7 @@ const decodeTransform = new DecodeTransform();
 const encodeTransform = new EncodeTransform();
 
 // stdin -> stdout
-process.stdin.pipe(decodeTransform)
+process.stdin.pipe(decodeTransform);
 decodeTransform.on("data", handleMessage);
 encodeTransform.pipe(process.stdout);
 
@@ -60,7 +60,7 @@ function sendMessage (message: string | object) {
                 subject: message
             });
         } else {
-            encodeTransform.write(message);    
+            encodeTransform.write(message);
         }
     } catch (err) {
         console.error("Failed to encode message", err);

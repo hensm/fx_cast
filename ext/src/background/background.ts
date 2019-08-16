@@ -380,23 +380,23 @@ async function initMenus () {
 
     options.addEventListener("changed", async ev => {
         const alteredOpts = ev.detail;
-        const opts = await options.getAll();
+        const newOpts = await options.getAll();
 
         if (alteredOpts.includes("mirroringEnabled")) {
             browser.menus.update(menuIdMirroringCast, {
-                visible: opts.mirroringEnabled
+                visible: newOpts.mirroringEnabled
             });
         }
 
         if (alteredOpts.includes("mediaEnabled")) {
             browser.menus.update(menuIdMediaCast, {
-                visible: opts.mediaEnabled
+                visible: newOpts.mediaEnabled
             });
         }
 
         if (alteredOpts.includes("localMediaEnabled")) {
             browser.menus.update(menuIdMediaCast, {
-                targetUrlPatterns: opts.localMediaEnabled
+                targetUrlPatterns: newOpts.localMediaEnabled
                     ? URL_PATTERNS_ALL
                     : URL_PATTERNS_REMOTE
             });

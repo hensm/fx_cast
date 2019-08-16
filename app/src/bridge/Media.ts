@@ -65,8 +65,8 @@ export default class Media {
                 } as UpdateMessageData;
 
                 if (status.volume) {
-                    messageData._volumeLevel = status.volume.level
-                    messageData._volumeMuted = status.volume.muted
+                    messageData._volumeLevel = status.volume.level;
+                    messageData._volumeMuted = status.volume.muted;
                 }
 
                 if (status.media) {
