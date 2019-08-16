@@ -50,7 +50,7 @@ async function onRequestSessionSuccess (newSession: cast.Session) {
 
     session = newSession;
     session.addMessageListener(FX_CAST_RECEIVER_APP_NAMESPACE
-          , async (namespace, message) => {
+          , async (_namespace, message) => {
 
         const { subject, data } = JSON.parse(message);
 

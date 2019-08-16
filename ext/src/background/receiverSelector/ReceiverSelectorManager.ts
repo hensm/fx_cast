@@ -72,12 +72,12 @@ async function getSelection (
             resolve(ev.detail);
         });
 
-        sharedSelector.addEventListener("cancelled", ev => {
+        sharedSelector.addEventListener("cancelled", () => {
             console.info("fx_cast (Debug): Cancelled receiver selection");
             resolve(null);
         });
 
-        sharedSelector.addEventListener("error", ev => {
+        sharedSelector.addEventListener("error", () => {
             console.error("fx_cast (Debug): Failed to select receiver");
             reject();
         });

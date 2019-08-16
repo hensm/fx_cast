@@ -20,7 +20,7 @@ export interface ReceiverSelection {
 
 export interface ReceiverSelectorEvents {
     "selected": ReceiverSelection;
-    "error": void;
+    "error": string;
     "cancelled": void;
 }
 

@@ -175,7 +175,7 @@ export default class EditableList extends Component<
         });
     }
 
-    private handleNewItemEdit (item: string, newItem: string) {
+    private handleNewItemEdit (_item: string, newItem: string) {
         this.setState({
             addingNewItem: false
         }, () => {

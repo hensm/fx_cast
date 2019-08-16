@@ -9,19 +9,19 @@ type MessageListener = (namespace: string, message: string) => void;
 
 
 export default class CastSession extends EventTarget {
-    constructor (sessionObj: cast.Session, state: string) {
+    constructor (_sessionObj: cast.Session, _state: string) {
         super();
         console.info("STUB :: CastSession#constructor");
     }
 
     public addMessageListener (
-            namespace: string
-          , listener: MessageListener): void {
+            _namespace: string
+          , _listener: MessageListener): void {
 
         console.info("STUB :: CastSession#addMessageListener");
     }
 
-    public endSession (stopCasting: boolean): void {
+    public endSession (_stopCasting: boolean): void {
         console.info("STUB :: CastSession#endSession");
     }
 
@@ -76,32 +76,32 @@ export default class CastSession extends EventTarget {
     }
 
     // @ts-ignore
-    public loadMedia (loadRequest: cast.media.LoadRequest): Promise<string> {
+    public loadMedia (_loadRequest: cast.media.LoadRequest): Promise<string> {
         console.info("STUB :: CastSession#loadMedia");
     }
 
     public removeMessageListener (
-            namespace: string
-          , listener: MessageListener): void {
+            _namespace: string
+          , _listener: MessageListener): void {
 
         console.info("STUB :: CastSession#removeMessageListener");
     }
 
     public sendMessage (
-            namespace: string
+            _namespace: string
             // @ts-ignore
-          , data: any): Promise<string> {
+          , _data: any): Promise<string> {
 
         console.info("STUB :: CastSession#sendMessage");
     }
 
     // @ts-ignore
-    public setMute (isMute: boolean): Promise<string> {
+    public setMute (_isMute: boolean): Promise<string> {
         console.info("STUB :: CastSession#setMute");
     }
 
     // @ts-ignore
-    public setVolume (volume: number): Promise<string> {
+    public setVolume (_volume: number): Promise<string> {
         console.info("STUB :: CastSession#setVolume");
     }
 }

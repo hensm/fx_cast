@@ -17,7 +17,7 @@ function getLocalAddress () {
                 resolve(ev.candidate.candidate.split(" ")[4]);
             }
         });
-        pc.addEventListener("error", ev => {
+        pc.addEventListener("error", () => {
             reject();
         });
     });
@@ -109,7 +109,7 @@ function getSession (opts: InitOptions): Promise<cast.Session> {
 }
 
 function getMedia (opts: InitOptions): Promise<cast.media.Media> {
-    return new Promise(async (resolve, reject) => {
+    return new Promise(async resolve => {
         let mediaUrlObject = new URL(opts.mediaUrl);
         const mediaTitle = mediaUrlObject.pathname;
 

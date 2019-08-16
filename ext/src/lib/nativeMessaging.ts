@@ -100,7 +100,7 @@ function connectNative (application: string) {
 
             socket = new WebSocket(WEBSOCKET_DAEMON_URL);
 
-            socket.addEventListener("open", ev => {
+            socket.addEventListener("open", () => {
                 // Send all messages in queue
                 while (messageQueue.length) {
                     const message = messageQueue.pop();

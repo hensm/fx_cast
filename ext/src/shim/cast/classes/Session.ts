@@ -249,7 +249,7 @@ export default class Session {
     }
 
 
-    public addMediaListener (listener: MediaListener) {
+    public addMediaListener (_mediaListener: MediaListener) {
         console.info("STUB :: Session#addMediaListener");
     }
 
@@ -313,7 +313,7 @@ export default class Session {
 
         this.addMessageListener(
                 "urn:x-cast:com.google.cast.media"
-              , (namespace, data) => {
+              , (_namespace, data) => {
 
             if (hasResponded) {
                 return;
@@ -346,14 +346,14 @@ export default class Session {
     }
 
     public queueLoad (
-            queueLoadRequest: QueueLoadRequest
-          , successCallback: LoadSuccessCallback
-          , errorCallback: ErrorCallback): void {
+            _queueLoadRequest: QueueLoadRequest
+          , _successCallback: LoadSuccessCallback
+          , _errorCallback: ErrorCallback): void {
 
         console.info("STUB :: Session#queueLoad");
     }
 
-    public removeMediaListener (listener: MediaListener): void {
+    public removeMediaListener (_mediaListener: MediaListener): void {
         console.info("STUB :: Session#removeMediaListener");
     }
 
@@ -365,7 +365,7 @@ export default class Session {
     }
 
     public removeUpdateListener (
-            namespace: string
+            _namespace: string
           , listener: UpdateListener): void {
 
         _updateListeners.get(this).delete(listener);

@@ -100,9 +100,7 @@ async function handleMessage (message: Message) {
                 if (parentSession) {
                     // Create Media
                     existingMedia.set(mediaId, new Media(
-                            message.data.sessionId
-                          , message.data.mediaSessionId
-                          , mediaId
+                            mediaId
                           , parentSession
                           , sendMessage));
                 }
@@ -271,7 +269,7 @@ function handleMediaServerMessage (message: Message) {
             mediaServer.on("close", () => {
                 sendMessage("mediaCast:/mediaServer/stopped");
             });
-            mediaServer.on("error", (a) => {
+            mediaServer.on("error", () => {
                 sendMessage("mediaCast:/mediaServer/error");
             });
 

@@ -4,7 +4,7 @@ import RemotePlayer from "./RemotePlayer";
 
 
 export default class RemotePlayerController extends EventTarget {
-    constructor (player: RemotePlayer) {
+    constructor (_player: RemotePlayer) {
         super();
         console.info("STUB :: RemotePlayerController#constructor");
     }

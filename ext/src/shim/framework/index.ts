@@ -54,7 +54,7 @@ export default {
 
   , VERSION: "1.0.07"
 
-  , setLoggerLevel (level: number) {
+  , setLoggerLevel (_level: number) {
         console.info("STUB :: cast.framework.setLoggerLevel");
     }
 };

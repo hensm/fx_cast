@@ -20,7 +20,7 @@ export class ResponseTransform extends Transform {
 
     public _transform (
             chunk: Message
-          , encoding: string
+          , _encoding: string
             // tslint:disable-next-line:ban-types
           , callback: Function) {
 
@@ -53,7 +53,7 @@ export class DecodeTransform extends Transform {
 
     public _transform (
             chunk: any
-          , encoding: string
+          , _encoding: string
             // tslint:disable-next-line:ban-types
           , callback: Function) {
 
@@ -113,7 +113,7 @@ export class EncodeTransform extends Transform {
 
     public _transform (
             chunk: any
-          , encoding: string
+          , _encoding: string
             // tslint:disable-next-line:ban-types
           , callback: Function) {
 

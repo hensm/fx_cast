@@ -117,7 +117,7 @@ export function logMessage (message: string): void {
     console.log("CAST MSG:", message);
 }
 
-export function precache (data: string): void {
+export function precache (_data: string): void {
     console.info("STUB :: cast.precache");
 }
 
@@ -130,7 +130,7 @@ export function removeReceiverActionListener (
 export function requestSession (
         successCallback?: RequestSessionSuccessCallback
       , errorCallback?: ErrorCallback
-      , sessionRequest: SessionRequest = apiConfig.sessionRequest): void {
+      , _sessionRequest: SessionRequest = apiConfig.sessionRequest): void {
 
     console.info("fx_cast (Debug): cast.requestSession");
 
@@ -247,23 +247,23 @@ export function _requestSession (
     }
 }
 
-export function requestSessionById (sessionId: string): void {
+export function requestSessionById (_sessionId: string): void {
     console.info("STUB :: cast.requestSessionById");
 }
 
 export function setCustomReceivers (
-        receivers: Receiver_[]
-      , successCallback?: SuccessCallback
-      , errorCallback?: ErrorCallback): void {
+        _receivers: Receiver_[]
+      , _successCallback?: SuccessCallback
+      , _errorCallback?: ErrorCallback): void {
 
     console.info("STUB :: cast.setCustomReceivers");
 }
 
-export function setPageContext (win: Window): void {
+export function setPageContext (_win: Window): void {
     console.info("STUB :: cast.setPageContext");
 }
 
-export function setReceiverDisplayStatus (sessionId: string): void {
+export function setReceiverDisplayStatus (_sessionId: string): void {
     console.info("STUB :: cast.setReceiverDisplayStatus");
 }
 

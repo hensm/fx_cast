@@ -21,11 +21,6 @@ interface NativeReceiverSelectorSelectedMessage extends Message {
     data: ReceiverSelection;
 }
 
-interface NativeReceiverSelectorCloseMessage extends Message {
-    subject: "main:/receiverSelector/error";
-    data: string;
-}
-
 interface NativeReceiverSelectorErrorMessage extends Message {
     subject: "main:/receiverSelector/error";
     data: string;
@@ -65,8 +60,7 @@ export default class NativeReceiverSelector
                     break;
                 }
                 case "main:/receiverSelector/close": {
-                    this.onBridgePortMessageClose(
-                            message as NativeReceiverSelectorCloseMessage);
+                    this.onBridgePortMessageClose();
                     break;
                 }
             }
@@ -140,12 +134,13 @@ export default class NativeReceiverSelector
     private async onBridgePortMessageError (
             message: NativeReceiverSelectorErrorMessage) {
 
+        console.error("fx_cast (Debug): Native receiver selector error"
+              , message.data);
+
         this.dispatchEvent(new CustomEvent("error"));
     }
 
-    private async onBridgePortMessageClose (
-            message: NativeReceiverSelectorCloseMessage) {
-
+    private async onBridgePortMessageClose () {
         if (!this.wasReceiverSelected) {
             this.dispatchEvent(new CustomEvent("cancelled"));
         }

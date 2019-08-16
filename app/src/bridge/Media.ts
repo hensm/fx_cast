@@ -11,8 +11,8 @@ import { Message
 const MEDIA_NAMESPACE = "urn:x-cast:com.google.cast.media";
 
 export interface UpdateMessageData {
-    _volumeLevel: number;
-    _volumeMuted: boolean;
+    _volumeLevel?: number;
+    _volumeMuted?: boolean;
     _lastCurrentTime: number;
     currentTime: number;
     customData?: any;
@@ -28,9 +28,7 @@ export default class Media {
     private channel: Channel;
 
     constructor (
-            sessionId: number
-          , mediaSessionId: number
-          , private referenceId: string
+            private referenceId: string
           , private session: Session
           , private sendMessageCallback: SendMessageCallback) {
 
@@ -43,7 +41,7 @@ export default class Media {
 
                 const status = data.status[0];
 
-                const messageData = {
+                const messageData: UpdateMessageData = {
                     _lastCurrentTime: Date.now() / 1000
 
                   , currentTime: status.currentTime
@@ -51,7 +49,7 @@ export default class Media {
                   , playbackRate: status.playbackRate
                   , playerState: status.playerState
                   , repeatMode: status.repeatMode
-                } as UpdateMessageData;
+                };
 
                 if (status.volume) {
                     messageData._volumeLevel = status.volume.level;

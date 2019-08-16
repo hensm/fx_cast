@@ -5,7 +5,7 @@ import CastSession from "./CastSession";
 
 
 export default class CastContext extends EventTarget {
-    public endCurrentSession (stopCasting: boolean): void {
+    public endCurrentSession (_stopCasting: boolean): void {
         console.info("STUB :: CastContext#endCurrentSession");
     }
 
@@ -29,7 +29,7 @@ export default class CastContext extends EventTarget {
         console.info("STUB :: CastContext#requestSession");
     }
 
-    public setOptions (options: CastOptions): void {
+    public setOptions (_options: CastOptions): void {
         console.info("STUB :: CastContext#setOptions");
     }
 }

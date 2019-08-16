@@ -52,7 +52,7 @@ if (document.currentScript) {
         isFramework = true;
 
         const script = loadScript(CAST_FRAMEWORK_SCRIPT_URL);
-        script.addEventListener("load", ev => {
+        script.addEventListener("load", () => {
             callPageReadyFunction();
         });
 
