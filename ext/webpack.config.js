@@ -12,11 +12,7 @@ const sourceFileExtensions = [
 
 module.exports = (env) => ({
     entry: {
-        "main": `${env.includePath}/main.ts`
-
-        // UI
-      , "ui/popup/bundle": `${env.includePath}/ui/popup/index.tsx`
-      , "ui/options/bundle": `${env.includePath}/ui/options/index.tsx`
+        "background": `${env.includePath}/background/background.ts`
 
         // Sender apps
       , "senders/mediaCast": `${env.includePath}/senders/mediaCast.ts`
@@ -26,6 +22,10 @@ module.exports = (env) => ({
       , "shim/bundle": `${env.includePath}/shim/index.ts`
       , "shim/content": `${env.includePath}/shim/content.ts`
       , "shim/contentBridge": `${env.includePath}/shim/contentBridge.ts`
+
+        // UI
+      , "ui/popup/bundle": `${env.includePath}/ui/popup/index.tsx`
+      , "ui/options/bundle": `${env.includePath}/ui/options/index.tsx`
     }
   , output: {
         filename: "[name].js"

@@ -1,25 +1,25 @@
 "use strict";
 
-import defaultOptions from "./defaultOptions";
-import loadSender from "./lib/loadSender";
-import options, { Options } from "./lib/options";
+import defaultOptions from "../defaultOptions";
+import loadSender from "../lib/loadSender";
+import options, { Options } from "../lib/options";
 
-import { getChromeUserAgent } from "./lib/userAgents";
-import { stringify } from "./lib/utils";
+import { getChromeUserAgent } from "../lib/userAgents";
+import { stringify } from "../lib/utils";
 
-import { Message } from "./types";
+import { Message } from "../types";
 
 import { CAST_FRAMEWORK_LOADER_SCRIPT_URL
-       , CAST_LOADER_SCRIPT_URL } from "./lib/endpoints";
+       , CAST_LOADER_SCRIPT_URL } from "../lib/endpoints";
 
-import { ReceiverSelectorMediaType } from "./background/receiverSelector";
+import { ReceiverSelectorMediaType } from "./receiverSelector";
 
 import ReceiverSelectorManager
-        from "./background/receiverSelector/ReceiverSelectorManager";
+        from "./receiverSelector/ReceiverSelectorManager";
 
-import createMenus from "./background/createMenus";
-import ShimManager from "./background/ShimManager";
-import StatusManager from "./background/StatusManager";
+import createMenus from "./createMenus";
+import ShimManager from "./ShimManager";
+import StatusManager from "./StatusManager";
 
 
 const _ = browser.i18n.getMessage;
