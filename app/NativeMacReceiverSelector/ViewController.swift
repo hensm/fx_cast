@@ -119,6 +119,12 @@ class ViewController : NSViewController {
 
             receiverView.receiverViewDelegate = self
 
+            if UInt(initData!.availableMediaTypes) == 0
+                    || (initData!.availableMediaTypes
+                            & initData!.defaultMediaType.rawValue) == 0 {
+                receiverView.isEnabled = false
+            }
+
 
             self.receiverViews.append(receiverView)
 
@@ -145,6 +151,12 @@ extension ViewController : NSMenuDelegate {
     func menuDidClose (_ menu: NSMenu) {
         let mediaType = MediaType(
                 rawValue: self.mediaTypePopUpButton.selectedItem!.tag)!
+
+        if self.initData.availableMediaTypes & mediaType.rawValue != 0 {
+            for receiverView in self.receiverViews {
+                receiverView.isEnabled = true
+            }
+        }
 
         let fileItem = self.mediaTypePopUpButton
                 .item(at: self.mediaTypePopUpButton.indexOfItem(

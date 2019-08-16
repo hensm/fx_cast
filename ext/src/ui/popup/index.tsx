@@ -109,6 +109,9 @@ class PopupApp extends Component<{}, PopupAppState> {
         }
 
 
+        const canCast = !!(this.state.availableMediaTypes
+                && this.state.availableMediaTypes & this.state.mediaType);
+
         return (
             <div>
                 <div className="media-select">
@@ -150,6 +153,7 @@ class PopupApp extends Component<{}, PopupAppState> {
                         <ReceiverEntry receiver={ receiver }
                                        onCast={ this.onCast }
                                        isLoading={ this.state.isLoading }
+                                       canCast={ canCast }
                                        key={ i }/> ))}
                 </ul>
             </div>
@@ -208,6 +212,7 @@ class PopupApp extends Component<{}, PopupAppState> {
 interface ReceiverEntryProps {
     receiver: Receiver;
     isLoading: boolean;
+    canCast: boolean;
     onCast (receiver: Receiver): void;
 }
 
@@ -244,7 +249,7 @@ class ReceiverEntry extends Component<ReceiverEntryProps, ReceiverEntryState> {
                 </div>
                 <button className="receiver-connect"
                         onClick={ this.handleCast }
-                        disabled={this.props.isLoading}>
+                        disabled={this.props.isLoading || !this.props.canCast}>
                     { this.state.isLoading
                         ? _("popupCastingButtonTitle"
                               , (this.state.isLoading

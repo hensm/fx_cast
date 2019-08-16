@@ -97,14 +97,6 @@ async function getSelection (
             availableMediaTypes &= ~ReceiverSelectorMediaType.File;
         }
 
-        if (!availableMediaTypes || availableMediaTypes
-                === ReceiverSelectorMediaType.File) {
-            console.error("fx_cast (Debug): No available media types");
-            resolve(null);
-
-            return;
-        }
-
 
         // Ensure status manager is initialized
         await StatusManager.init();
