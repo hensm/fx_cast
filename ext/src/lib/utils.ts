@@ -19,12 +19,10 @@ export function stringify (
     let formattedString = "";
 
     for (const templateString of templateStrings) {
-        if (!formattedString) {
-            formattedString += templateString;
-            continue;
+        if (formattedString) {
+            formattedString += JSON.stringify(substitutions.shift());
         }
 
-        formattedString += JSON.stringify(substitutions.shift());
         formattedString += templateString;
     }
 
