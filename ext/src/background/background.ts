@@ -220,7 +220,7 @@ async function initMenus () {
         // Only rebuild menus if whitelist menu present
         // WebExt typings are broken again here, so ugly casting
         const menuIds = info.menuIds as unknown as number[];
-        if (menuIds.includes(menuIdWhitelist as number)) {
+        if (!menuIds.includes(menuIdWhitelist as number)) {
             return;
         }
 
