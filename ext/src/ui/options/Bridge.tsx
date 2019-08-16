@@ -4,54 +4,11 @@
 import React, { Component } from "react";
 import semver from "semver";
 
-import { getNextEllipsis
-       , getWindowCenteredProps } from "../../lib/utils";
-
 import { BridgeInfo } from "../../lib/bridge";
+import { getNextEllipsis } from "../../lib/utils";
+
 
 const _ = browser.i18n.getMessage;
-
-const ENDPOINT_URL = "https://api.github.com/repos/hensm/fx_cast/releases/latest";
-
-
-async function downloadApp (info: any, platform: string) {
-    const download = browser.downloads.download({
-        filename: info[platform].name
-      , url: info[platform].url
-    });
-}
-
-
-interface BridgeDownloadsProps {
-    info: any;
-}
-
-const BridgeDownloads = (props: BridgeDownloadsProps) => (
-    <div className="bridge-downloads">
-        <button className="bridge-downloads__download
-                           bridge-downloads__win"
-                disabled
-                onClick={ () => downloadApp(props.info, "win") }>
-            Windows
-        </button>
-        <button className="bridge-downloads__download
-                           bridge-downloads__mac"
-                onClick={ () => downloadApp(props.info, "mac") }>
-            macOS
-        </button>
-
-        <div className="bridge-downloads__linux">
-            <button className="bridge-downloads__download"
-                    onClick={ () => downloadApp(props.info, "deb") }>
-                Linux (deb)
-            </button>
-            <button className="bridge-downloads__download"
-                    onClick={ () => downloadApp(props.info, "rpm") }>
-                Linux (rpm)
-            </button>
-        </div>
-    </div>
-);
 
 
 interface BridgeStatsProps {
@@ -236,7 +193,7 @@ export default class Bridge extends Component<BridgeProps, BridgeState> {
             }));
         }, 500);
 
-        fetch(ENDPOINT_URL)
+        fetch("https://api.github.com/repos/hensm/fx_cast/releases/latest")
             .then(res => {
                 window.clearTimeout(timeout);
                 return res.json();

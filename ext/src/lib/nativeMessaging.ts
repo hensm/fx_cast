@@ -1,8 +1,5 @@
 "use strict";
 
-import { Message } from "../types";
-
-
 const WEBSOCKET_DAEMON_URL = "ws://localhost:9556";
 
 

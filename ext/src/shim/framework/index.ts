@@ -1,6 +1,5 @@
 "use strict";
 
-import * as cast from "../cast";
 
 import ActiveInputStateEventData from "./classes/ActiveInputStateEventData";
 import ApplicationMetadata from "./classes/ApplicationMetadata";
@@ -27,8 +26,6 @@ import { ActiveInputState
        , SessionState } from "./enums";
 
 import GoogleCastLauncher from "./GoogleCastLauncher";
-
-import { onMessage } from "../eventMessageChannel";
 
 
 export default {

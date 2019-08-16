@@ -25,25 +25,14 @@ export interface UpdateMessageData {
 
 
 export default class Media {
-    private sessionId: number;
-    private mediaSessionId: number;
-    private referenceId: string;
-    private session: Session;
     private channel: Channel;
-    private sendMessageCallback: SendMessageCallback;
 
     constructor (
             sessionId: number
           , mediaSessionId: number
-          , referenceId: string
-          , session: Session
-          , sendMessageCallback: SendMessageCallback) {
-
-        this.sessionId = sessionId;
-        this.mediaSessionId = mediaSessionId;
-        this.referenceId = referenceId;
-        this.session = session;
-        this.sendMessageCallback = sendMessageCallback;
+          , private referenceId: string
+          , private session: Session
+          , private sendMessageCallback: SendMessageCallback) {
 
         this.session.createChannel(MEDIA_NAMESPACE);
         this.channel = this.session.channelMap.get(MEDIA_NAMESPACE)!;
@@ -77,11 +66,6 @@ export default class Media {
                 }
 
                 this.sendMessage("shim:/media/update", messageData);
-
-                // Update ID
-                if (status.mediaSessionId) {
-                    this.mediaSessionId = status.mediaSessionId;
-                }
             }
         });
     }

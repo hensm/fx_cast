@@ -16,7 +16,6 @@ export default class PopupReceiverSelector
         implements ReceiverSelector {
 
     private windowId: number;
-    private openerWindowId: number;
 
     private messagePort: browser.runtime.Port;
     private messagePortDisconnected: boolean;
@@ -102,7 +101,6 @@ export default class PopupReceiverSelector
         this._isOpen = true;
 
         this.windowId = popup.id;
-        this.openerWindowId = openerWindow.id;
 
         // Size/position not set correctly on creation (bug?)
         await browser.windows.update(this.windowId, {
@@ -168,7 +166,6 @@ export default class PopupReceiverSelector
 
         // Cleanup
         this.windowId = null;
-        this.openerWindowId = null;
         this.messagePort = null;
         this.receivers = null;
         this.defaultMediaType = null;

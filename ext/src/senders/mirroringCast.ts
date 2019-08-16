@@ -21,22 +21,6 @@ let session: cast.Session;
 let wasSessionRequested = false;
 
 let peerConnection: RTCPeerConnection;
-let drawWindowIntervalId: number;
-
-
-let availableMediaTypes =
-        ReceiverSelectorMediaType.Screen
-      | ReceiverSelectorMediaType.Tab;
-
-/**
- * Remove "Screen" option when on an insecure origin as
- * MediaDevices.getDisplayMedia will not exist (and legacy
- * MediaDevices.getUserMedia mediaSource constraint will
- * fail).
- */
-if (typeof navigator.mediaDevices.getDisplayMedia === "undefined") {
-    availableMediaTypes &= ~ReceiverSelectorMediaType.Screen;
-}
 
 
 /**
@@ -124,7 +108,7 @@ async function onRequestSessionSuccess (newSession: cast.Session) {
             }
 
 
-            drawWindowIntervalId = window.setInterval(drawWindow, 1000 / 30);
+            window.setInterval(drawWindow, 1000 / 30);
 
             /**
              * Capture video stream from canvas and feed into the RTC

@@ -3,7 +3,6 @@
 import defaultOptions from "../defaultOptions";
 
 import { ReceiverSelectorType } from "../background/receiverSelector";
-import { Message } from "../types";
 import { TypedEventTarget } from "./typedEvents";
 
 

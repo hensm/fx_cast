@@ -12,11 +12,9 @@ import Session from "./Session";
 import StatusListener from "./StatusListener";
 
 import { DecodeTransform
-       , EncodeTransform
-       , ResponseTransform } from "../transforms";
+       , EncodeTransform } from "../transforms";
 
-import { MediaStatus
-       , ReceiverStatus } from "./castTypes";
+import { ReceiverStatus } from "./castTypes";
 
 import { Message } from "./types";
 
@@ -146,7 +144,6 @@ async function handleMessage (message: Message) {
 
     switch (message.subject) {
         case "bridge:/getInfo": {
-            const extensionVersion = message.data;
             encodeTransform.write(__applicationVersion);
         }
 

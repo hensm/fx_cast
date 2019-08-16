@@ -3,6 +3,7 @@
         "esModuleInterop": true
       , "module": "commonjs"
       , "noImplicitAny": true
+      , "noUnusedLocals": true
       , "removeComments": true
       , "resolveJsonModule": true
       , "target": "es6"

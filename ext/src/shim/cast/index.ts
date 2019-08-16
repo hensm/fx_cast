@@ -26,8 +26,6 @@ import { AutoJoinPolicy
 
 import * as media from "./media";
 
-
-import { ReceiverSelectorMediaType } from "../../background/receiverSelector";
 import { Receiver } from "../../types";
 import { onMessage, sendMessageResponse } from "../eventMessageChannel";
 

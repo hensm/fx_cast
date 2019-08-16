@@ -1,5 +1,8 @@
 "use strict";
 
+import { ReceiverSelectorMediaType } from "../background/receiverSelector";
+
+
 export function getNextEllipsis (ellipsis: string): string {
     /* tslint:disable:curly */
     if (ellipsis === "") return ".";
@@ -27,6 +30,28 @@ export function stringify (
     }
 
     return formattedString;
+}
+
+export function getMediaTypesForPageUrl (
+        pageUrl: string): ReceiverSelectorMediaType {
+
+    let availableMediaTypes =
+            ReceiverSelectorMediaType.App
+          | ReceiverSelectorMediaType.Tab
+          | ReceiverSelectorMediaType.Screen
+          | ReceiverSelectorMediaType.File;
+
+    /**
+     * Remove "Screen" option when on an insecure origin as
+     * MediaDevices.getDisplayMedia will not exist (and legacy
+     * MediaDevices.getUserMedia mediaSource constraint will
+     * fail).
+     */
+    if (!pageUrl.startsWith("https://")) {
+        availableMediaTypes &= ~ReceiverSelectorMediaType.Screen;
+    }
+
+    return availableMediaTypes;
 }
 
 

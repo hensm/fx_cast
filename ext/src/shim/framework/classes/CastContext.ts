@@ -1,11 +1,7 @@
 "use strict";
 
-import * as cast from "../../cast";
-
 import CastOptions from "./CastOptions";
 import CastSession from "./CastSession";
-import CastStateEventData from "./CastStateEventData";
-import SessionStateEventData from "./SessionStateEventData";
 
 
 export default class CastContext extends EventTarget {

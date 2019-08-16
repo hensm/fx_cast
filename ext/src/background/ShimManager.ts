@@ -4,9 +4,9 @@ import bridge from "../lib/bridge";
 import loadSender from "../lib/loadSender";
 import options from "../lib/options";
 
-import { TypedEventTarget } from "../lib/typedEvents";
 import { Message } from "../types";
 
+import { getMediaTypesForPageUrl } from "../lib/utils";
 import { ReceiverSelectorMediaType } from "./receiverSelector";
 
 import ReceiverSelectorManager
@@ -140,17 +140,15 @@ export default new class ShimManager {
             }
 
             case "main:/selectReceiverBegin": {
-                const allMediaTypes =
-                        ReceiverSelectorMediaType.App
-                      | ReceiverSelectorMediaType.Tab
-                      | ReceiverSelectorMediaType.Screen
-                      | ReceiverSelectorMediaType.File;
+                const contentTab = await browser.tabs.get(shim.contentTabId);
+                const availableMediaTypes = getMediaTypesForPageUrl(
+                        contentTab.url);
 
                 try {
                     const selection = await ReceiverSelectorManager
                             .getSelection(
                                     ReceiverSelectorMediaType.App
-                                  , allMediaTypes);
+                                  , availableMediaTypes);
 
                     // Handle cancellation
                     if (!selection) {

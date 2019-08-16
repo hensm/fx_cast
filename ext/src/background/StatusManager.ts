@@ -1,7 +1,6 @@
 "use strict";
 
 import bridge from "../lib/bridge";
-import options from "../lib/options";
 
 import { TypedEventTarget } from "../lib/typedEvents";
 import { Message, Receiver, ReceiverStatus } from "../types";

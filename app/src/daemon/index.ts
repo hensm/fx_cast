@@ -3,7 +3,6 @@
 import { spawn } from "child_process";
 import { Readable } from "stream";
 
-import path from "path";
 import WebSocket from "ws";
 
 import { DecodeTransform

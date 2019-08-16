@@ -25,8 +25,7 @@ import { ErrorCode } from "../../enums";
 
 import { onMessage, sendMessageResponse } from "../../../eventMessageChannel";
 
-import { Callbacks
-       , CallbacksMap
+import { CallbacksMap
        , ErrorCallback
        , SuccessCallback
        , UpdateListener } from "../../../types";

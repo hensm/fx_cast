@@ -83,6 +83,29 @@ async function getSelection (
         });
 
 
+        const opts = await options.getAll();
+
+        // Remove mirroring media types if mirroring is not enabled.
+        if (!opts.mirroringEnabled) {
+            availableMediaTypes &= ~(
+                    ReceiverSelectorMediaType.Tab
+                  | ReceiverSelectorMediaType.Screen);
+        }
+
+        // Remove file media type if local media is not enabled
+        if (!opts.mediaEnabled || !opts.localMediaEnabled) {
+            availableMediaTypes &= ~ReceiverSelectorMediaType.File;
+        }
+
+        if (!availableMediaTypes || availableMediaTypes
+                === ReceiverSelectorMediaType.File) {
+            console.error("fx_cast (Debug): No available media types");
+            resolve(null);
+
+            return;
+        }
+
+
         // Ensure status manager is initialized
         await StatusManager.init();
 

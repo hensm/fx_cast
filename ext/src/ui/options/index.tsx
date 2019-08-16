@@ -400,19 +400,6 @@ class OptionsApp extends Component<{}, OptionsAppState> {
     private getWhitelistItemPatternError (info: string): string {
         return _("optionsUserAgentWhitelistInvalidMatchPattern", info);
     }
-
-    private async updateBridgeInfo () {
-        this.setState({
-            bridgeLoading: true
-        });
-
-        const bridgeInfo = await bridge.getInfo();
-
-        this.setState({
-            bridgeInfo
-          , bridgeLoading: false
-        });
-    }
 }
 
 

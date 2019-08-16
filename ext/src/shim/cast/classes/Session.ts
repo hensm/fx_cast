@@ -13,8 +13,7 @@ import Media from "../media/classes/Media";
 import QueueLoadRequest from "../media/classes/QueueLoadRequest";
 
 import { ErrorCode
-       , SessionStatus
-       , VolumeControlType } from "../enums";
+       , SessionStatus } from "../enums";
 
 import { RepeatMode } from "../media/enums";
 
@@ -22,8 +21,7 @@ import { ListenerObject
        , onMessage
        , sendMessageResponse } from "../../eventMessageChannel";
 
-import { Callbacks
-       , CallbacksMap
+import { CallbacksMap
        , ErrorCallback
        , LoadSuccessCallback
        , MediaListener
@@ -51,7 +49,7 @@ export default class Session {
     public media: Media[];
     public namespaces: Array<{ name: "string" }>;
     public senderApps: SenderApplication[];
-    public status: string;
+    public status: SessionStatus;
     public statusText: string;
     public transportId: string;
 

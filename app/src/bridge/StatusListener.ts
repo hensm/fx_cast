@@ -17,10 +17,7 @@ export default class StatusListener extends EventEmitter {
     private clientReceiver?: Channel;
     private clientHeartbeatIntervalId?: NodeJS.Timeout;
 
-    constructor (
-            private host: string
-          , private port: number) {
-
+    constructor (host: string, port: number) {
         super();
 
         this.client = new Client();

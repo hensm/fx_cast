@@ -2,12 +2,10 @@
 
 import defaultOptions from "../defaultOptions";
 import loadSender from "../lib/loadSender";
-import options, { Options } from "../lib/options";
+import options from "../lib/options";
 
 import { getChromeUserAgent } from "../lib/userAgents";
-import { stringify } from "../lib/utils";
-
-import { Message } from "../types";
+import { getMediaTypesForPageUrl, stringify } from "../lib/utils";
 
 import { CAST_FRAMEWORK_LOADER_SCRIPT_URL
        , CAST_LOADER_SCRIPT_URL } from "../lib/endpoints";
@@ -45,7 +43,6 @@ browser.runtime.onInstalled.addListener(async details => {
 });
 
 
-
 function initBrowserAction () {
     browser.browserAction.disable();
 
@@ -68,7 +65,10 @@ function initBrowserAction () {
      * top-level frame.
      */
     browser.browserAction.onClicked.addListener(async tab => {
-        const selection = await ReceiverSelectorManager.getSelection();
+        const selection = await ReceiverSelectorManager.getSelection(
+                ReceiverSelectorMediaType.Tab
+              , getMediaTypesForPageUrl(tab.url)
+                      & ~ReceiverSelectorMediaType.App);
 
         if (selection) {
             loadSender({
@@ -154,17 +154,14 @@ async function initMenus () {
             return;
         }
 
+
+        const availableMediaTypes = getMediaTypesForPageUrl(info.pageUrl);
+
         switch (info.menuItemId) {
             case menuIdMediaCast: {
-                const allMediaTypes =
-                        ReceiverSelectorMediaType.App
-                      | ReceiverSelectorMediaType.Tab
-                      | ReceiverSelectorMediaType.Screen
-                      | ReceiverSelectorMediaType.File;
-
                 const selection = await ReceiverSelectorManager.getSelection(
                         ReceiverSelectorMediaType.App
-                      , allMediaTypes);
+                      , availableMediaTypes);
 
                 // Selection cancelled
                 if (!selection) {
@@ -203,7 +200,9 @@ async function initMenus () {
             }
 
             case menuIdMirroringCast: {
-                const selection = await ReceiverSelectorManager.getSelection();
+                const selection = await ReceiverSelectorManager.getSelection(
+                        ReceiverSelectorMediaType.Tab
+                      , availableMediaTypes & ~ReceiverSelectorMediaType.App);
 
                 loadSender({
                     tabId: tab.id
@@ -319,11 +318,9 @@ async function initMenus () {
                     .reverse();
 
             if (pathSegments.length) {
-                let index = 0;
-
-                for (const pathSegment of pathSegments) {
+                for (let i = 0; i < pathSegments.length; i++) {
                     const partialPath = pathSegments
-                            .slice(index)
+                            .slice(i)
                             .reverse()
                             .join("/");
 
@@ -336,8 +333,6 @@ async function initMenus () {
 
                     whitelistChildMenuPatterns.set(
                             partialPathMenuId, pattern);
-
-                    index++;
                 }
             }
         }
