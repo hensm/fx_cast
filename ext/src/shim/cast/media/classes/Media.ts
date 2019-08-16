@@ -92,12 +92,15 @@ export default class Media {
                     this.currentTime = status.currentTime;
                     _lastCurrentTime.set(this, status._lastCurrentTime);
                     this.customData = status.customData;
-                    this.volume = new Volume(
-                            status._volumeLevel
-                          , status._volumeMuted);
                     this.playbackRate = status.playbackRate;
                     this.playerState = status.playerState;
                     this.repeatMode = status.repeatMode;
+
+                    if (status.volume) {
+                        this.volume = new Volume(
+                                status._volumeLevel
+                              , status._volumeMuted);
+                    }
 
                     if (status.media) {
                         this.media = status.media;

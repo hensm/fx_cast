@@ -56,8 +56,6 @@ export default class Media {
 
                 const messageData = {
                     _lastCurrentTime: Date.now() / 1000
-                  , _volumeLevel: status.volume.level
-                  , _volumeMuted: status.volume.muted
 
                   , currentTime: status.currentTime
                   , customData: status.customData
@@ -65,6 +63,11 @@ export default class Media {
                   , playerState: status.playerState
                   , repeatMode: status.repeatMode
                 } as UpdateMessageData;
+
+                if (status.volume) {
+                    messageData._volumeLevel = status.volume.level
+                    messageData._volumeMuted = status.volume.muted
+                }
 
                 if (status.media) {
                     messageData.media = status.media;
