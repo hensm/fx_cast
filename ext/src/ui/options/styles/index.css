@@ -64,7 +64,6 @@ body {
 .bridge__status {
     align-items: center;
     display: flex;
-    flex-basis: min-content;
     flex-direction: column;
     margin-inline-end: 25px;
 }
