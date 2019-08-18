@@ -47,27 +47,13 @@ export default class EditableList extends Component<
     public render () {
         return (
             <div className="editable-list">
-                <div className="editable-list__view-actions">
-                    { this.state.rawView &&
-                        <button className="editable-list__save-raw-button"
-                                onClick={ this.handleSaveRaw }
-                                type="button">
-                            { _("optionsUserAgentWhitelistSaveRaw") }
-                        </button> }
-                    <button className="editable-list__view-button"
-                            onClick={ this.handleSwitchView }
-                            type="button">
-                        { this.state.rawView
-                            ? _("optionsUserAgentWhitelistBasicView")
-                            : _("optionsUserAgentWhitelistRawView") }
-                    </button>
-                </div>
-                <hr />
                 { this.state.rawView
                     ? (
                         <textarea className="editable-list__raw-view"
-                                  rows={ this.props.data.length}
-                                  value={ this.state.rawViewValue}
+                                  rows={ this.props.data.length > 10
+                                             ? this.props.data.length
+                                             : 10 }
+                                  value={ this.state.rawViewValue }
                                   onChange={ this.handleRawViewTextAreaChange }
                                   ref={ el => { this.rawViewTextArea = el; }}>
                         </textarea>
@@ -88,15 +74,30 @@ export default class EditableList extends Component<
                                                   onEdit={ this.handleNewItemEdit }
                                                   editing={ true } /> }
 
-                            <div className="editable-list__item editable-list__item-actions">
-                                <button className="editable-list__add-button"
-                                        onClick={ this.handleAddItem }
-                                        type="button">
-                                    { _("optionsUserAgentWhitelistAddItem") }
-                                </button>
-                            </div>
                         </ul>
                     )}
+                <hr />
+                <div className="editable-list__view-actions">
+                    { !this.state.rawView &&
+                        <button className="editable-list__add-button"
+                                onClick={ this.handleAddItem }
+                                type="button">
+                            { _("optionsUserAgentWhitelistAddItem") }
+                        </button> }
+                    { this.state.rawView &&
+                        <button className="editable-list__save-raw-button"
+                                onClick={ this.handleSaveRaw }
+                                type="button">
+                            { _("optionsUserAgentWhitelistSaveRaw") }
+                        </button> }
+                    <button className="editable-list__view-button"
+                            onClick={ this.handleSwitchView }
+                            type="button">
+                        { this.state.rawView
+                            ? _("optionsUserAgentWhitelistBasicView")
+                            : _("optionsUserAgentWhitelistRawView") }
+                    </button>
+                </div>
             </div>
         );
     }
@@ -174,7 +175,7 @@ export default class EditableList extends Component<
         });
     }
 
-    private handleNewItemEdit (item: string, newItem: string) {
+    private handleNewItemEdit (_item: string, newItem: string) {
         this.setState({
             addingNewItem: false
         }, () => {

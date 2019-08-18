@@ -25,8 +25,7 @@ import { ErrorCode } from "../../enums";
 
 import { onMessage, sendMessageResponse } from "../../../eventMessageChannel";
 
-import { Callbacks
-       , CallbacksMap
+import { CallbacksMap
        , ErrorCallback
        , SuccessCallback
        , UpdateListener } from "../../../types";
@@ -92,12 +91,15 @@ export default class Media {
                     this.currentTime = status.currentTime;
                     _lastCurrentTime.set(this, status._lastCurrentTime);
                     this.customData = status.customData;
-                    this.volume = new Volume(
-                            status._volumeLevel
-                          , status._volumeMuted);
                     this.playbackRate = status.playbackRate;
                     this.playerState = status.playerState;
                     this.repeatMode = status.repeatMode;
+
+                    if (status.volume) {
+                        this.volume = new Volume(
+                                status._volumeLevel
+                              , status._volumeMuted);
+                    }
 
                     if (status.media) {
                         this.media = status.media;
@@ -139,9 +141,9 @@ export default class Media {
     }
 
     public editTracksInfo (
-            editTracksInfoRequest: EditTracksInfoRequest
-          , successCallback?: SuccessCallback
-          , errorCallback?: ErrorCallback): void {
+            _editTracksInfoRequest: EditTracksInfoRequest
+          , _successCallback?: SuccessCallback
+          , _errorCallback?: ErrorCallback): void {
 
         console.info("STUB :: Media#editTracksInfo");
     }
@@ -156,7 +158,7 @@ export default class Media {
     }
 
     public getStatus (
-            getStatusRequest?: GetStatusRequest
+            _getStatusRequest?: GetStatusRequest
           , successCallback?: SuccessCallback
           , errorCallback?: ErrorCallback): void {
 
@@ -165,7 +167,7 @@ export default class Media {
     }
 
     public pause (
-            pauseRequest: PauseRequest
+            _pauseRequest: PauseRequest
           , successCallback?: SuccessCallback
           , errorCallback?: ErrorCallback): void {
 
@@ -174,7 +176,7 @@ export default class Media {
     }
 
     public play (
-            playRequest?: PlayRequest
+            _playRequest?: PlayRequest
           , successCallback?: SuccessCallback
           , errorCallback?: ErrorCallback): void {
 
@@ -183,71 +185,71 @@ export default class Media {
     }
 
     public queueAppendItem (
-            item: QueueItem
-          , successCallback?: SuccessCallback
-          , errorCallback?: ErrorCallback): void {
+            _item: QueueItem
+          , _successCallback?: SuccessCallback
+          , _errorCallback?: ErrorCallback): void {
         console.info("STUB :: Media#queueAppendItem");
     }
 
     public queueInsertItems (
-            queueInsertItemsRequest: QueueInsertItemsRequest
-          , successCallback?: SuccessCallback
-          , errorCallback?: ErrorCallback): void {
+            _queueInsertItemsRequest: QueueInsertItemsRequest
+          , _successCallback?: SuccessCallback
+          , _errorCallback?: ErrorCallback): void {
         console.info("STUB :: Media#queueInsertItems");
     }
 
     public queueJumpToItem (
-            itemId: number
-          , successCallback?: SuccessCallback
-          , errorCallback?: ErrorCallback): void {
+            _itemId: number
+          , _successCallback?: SuccessCallback
+          , _errorCallback?: ErrorCallback): void {
         console.info("STUB :: Media#queueJumpToItem");
     }
 
     public queueMoveItemToNewIndex (
-            itemId: number
-          , newIndex: number
-          , successCallback?: SuccessCallback
-          , errorCallback?: ErrorCallback): void {
+            _itemId: number
+          , _newIndex: number
+          , _successCallback?: SuccessCallback
+          , _errorCallback?: ErrorCallback): void {
         console.info("STUB :: Media#queueMoveItemToNewIndex");
     }
 
     public queueNext (
-            successCallback?: SuccessCallback
-          , errorCallback?: ErrorCallback): void {
+            _successCallback?: SuccessCallback
+          , _errorCallback?: ErrorCallback): void {
         console.info("STUB :: Media#queueNext");
     }
 
     public queuePrev (
-            successCallback?: SuccessCallback
-          , errorCallback?: ErrorCallback): void {
+            _successCallback?: SuccessCallback
+          , _errorCallback?: ErrorCallback): void {
         console.info("STUB :: Media#queuePrev");
     }
 
     public queueRemoveItem (
-            itemId: number
-          , successCallback?: SuccessCallback
-          , errorCallback?: ErrorCallback): void {
+            _itemId: number
+          , _successCallback?: SuccessCallback
+          , _errorCallback?: ErrorCallback): void {
         console.info("STUB :: Media#queueRemoveItem");
     }
 
     public queueReorderItems (
-            queueReorderItemsRequest: QueueReorderItemsRequest
-          , successCallback?: SuccessCallback
-          , errorCallback?: ErrorCallback): void {
+            _queueReorderItemsRequest: QueueReorderItemsRequest
+          , _successCallback?: SuccessCallback
+          , _errorCallback?: ErrorCallback): void {
         console.info("STUB :: Media#queueReorderItems");
     }
 
     public queueSetRepeatMode (
-            repeatMode: string
-          , successCallback?: SuccessCallback
-          , errorCallback?: ErrorCallback): void {
+            _repeatMode: string
+          , _successCallback?: SuccessCallback
+          , _errorCallback?: ErrorCallback): void {
         console.info("STUB :: Media#queueSetRepeatMode");
     }
 
     public queueUpdateItems (
-            queueUpdateItemsRequest: QueueUpdateItemsRequest
-          , successCallback?: SuccessCallback
-          , errorCallback?: ErrorCallback): void {
+            _queueUpdateItemsRequest: QueueUpdateItemsRequest
+          , _successCallback?: SuccessCallback
+          , _errorCallback?: ErrorCallback): void {
         console.info("STUB :: Media#queueUpdateItems");
     }
 
@@ -278,7 +280,7 @@ export default class Media {
     }
 
     public stop (
-            stopRequest: StopRequest
+            _stopRequest: StopRequest
           , successCallback?: SuccessCallback
           , errorCallback?: ErrorCallback): void {
 
@@ -287,13 +289,13 @@ export default class Media {
         }, successCallback, errorCallback);
     }
 
-    public supportsCommand (command: string): boolean {
+    public supportsCommand (_command: string): boolean {
         console.info("STUB :: Media#supportsCommand");
         return true;
     }
 
 
-    private _sendMediaMessage (
+    public _sendMediaMessage (
             message: any
           , successCallback?: SuccessCallback
           , errorCallback?: ErrorCallback) {

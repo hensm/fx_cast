@@ -4,7 +4,7 @@ import ApiConfig from "./classes/ApiConfig";
 import DialRequest from "./classes/DialRequest";
 import Error_ from "./classes/Error";
 import Image_ from "./classes/Image";
-import Receiver from "./classes/Receiver";
+import Receiver_ from "./classes/Receiver";
 import ReceiverDisplayStatus from "./classes/ReceiverDisplayStatus";
 import SenderApplication from "./classes/SenderApplication";
 import Session from "./classes/Session";
@@ -26,18 +26,15 @@ import { AutoJoinPolicy
 
 import * as media from "./media";
 
-import { ReceiverSelectorMediaType }
-        from "../../receiver_selectors/ReceiverSelector";
+import { Receiver } from "../../types";
 import { onMessage, sendMessageResponse } from "../eventMessageChannel";
 
 
 type ReceiverActionListener = (
-        receiver: Receiver
+        receiver: Receiver_
       , receiverAction: string) => void;
 
-type RequestSessionSuccessCallback = (
-        session: Session
-      , selectedMedia: ReceiverSelectorMediaType) => void;
+type RequestSessionSuccessCallback = (session: Session) => void;
 
 type SuccessCallback = () => void;
 type ErrorCallback = (err: Error_) => void;
@@ -61,12 +58,13 @@ export {
   , SenderPlatform, SessionStatus, VolumeControlType
 
     // Classes
-  , ApiConfig, DialRequest, Receiver, ReceiverDisplayStatus
+  , ApiConfig, DialRequest, ReceiverDisplayStatus
   , SenderApplication, Session, SessionRequest, Timeout
   , Volume
 
   , Error_ as Error
   , Image_ as Image
+  , Receiver_ as Receiver
 
   , media
 };
@@ -84,14 +82,17 @@ export function addReceiverActionListener (
 
 export function initialize (
         newApiConfig: ApiConfig
-      , successCallback: SuccessCallback
-      , errorCallback: ErrorCallback): void {
+      , successCallback?: SuccessCallback
+      , errorCallback?: ErrorCallback): void {
 
     console.info("fx_cast (Debug): cast.initialize");
 
     // Already initialized
     if (apiConfig) {
-        errorCallback(new Error_(ErrorCode.INVALID_PARAMETER));
+        if (errorCallback) {
+            errorCallback(new Error_(ErrorCode.INVALID_PARAMETER));
+        }
+
         return;
     }
 
@@ -106,7 +107,9 @@ export function initialize (
         ? ReceiverAvailability.AVAILABLE
         : ReceiverAvailability.UNAVAILABLE);
 
-    successCallback();
+    if (successCallback) {
+        successCallback();
+    }
 }
 
 export function logMessage (message: string): void {
@@ -114,7 +117,7 @@ export function logMessage (message: string): void {
     console.log("CAST MSG:", message);
 }
 
-export function precache (data: string): void {
+export function precache (_data: string): void {
     console.info("STUB :: cast.precache");
 }
 
@@ -125,29 +128,37 @@ export function removeReceiverActionListener (
 }
 
 export function requestSession (
-        successCallback: RequestSessionSuccessCallback
-      , errorCallback: ErrorCallback
-      , sessionRequest: SessionRequest
-                = apiConfig.sessionRequest): void {
+        successCallback?: RequestSessionSuccessCallback
+      , errorCallback?: ErrorCallback
+      , _sessionRequest: SessionRequest = apiConfig.sessionRequest): void {
 
     console.info("fx_cast (Debug): cast.requestSession");
 
     // Called before initialization
     if (!apiConfig) {
-        errorCallback(new Error_(ErrorCode.API_NOT_INITIALIZED));
+        if (errorCallback) {
+            errorCallback(new Error_(ErrorCode.API_NOT_INITIALIZED));
+        }
+
         return;
     }
 
     // Already requesting session
     if (sessionRequestInProgress) {
-        errorCallback(new Error_(ErrorCode.INVALID_PARAMETER
-              , "Session request already in progress."));
+        if (errorCallback) {
+            errorCallback(new Error_(ErrorCode.INVALID_PARAMETER
+                  , "Session request already in progress."));
+        }
+
         return;
     }
 
     // No available receivers
     if (!receiverList.length) {
-        errorCallback(new Error_(ErrorCode.RECEIVER_UNAVAILABLE));
+        if (errorCallback) {
+            errorCallback(new Error_(ErrorCode.RECEIVER_UNAVAILABLE));
+        }
+
         return;
     }
 
@@ -159,30 +170,100 @@ export function requestSession (
     // Open destination chooser
     sendMessageResponse({
         subject: "main:/selectReceiverBegin"
-      , data: {
-            defaultMediaType: apiConfig._defaultMediaType
-          , availableMediaTypes: apiConfig._availableMediaTypes
-        }
     });
 }
 
-export function requestSessionById (sessionId: string): void {
+export function _requestSession (
+        _receiver: Receiver
+      , successCallback?: RequestSessionSuccessCallback
+      , errorCallback?: ErrorCallback): void {
+
+    console.info("fx_cast (Debug): cast._requestSession");
+
+    if (!apiConfig) {
+        if (errorCallback) {
+            errorCallback(new Error_(ErrorCode.API_NOT_INITIALIZED));
+        }
+
+        return;
+    }
+
+    if (sessionRequestInProgress) {
+        if (errorCallback) {
+            errorCallback(new Error_(ErrorCode.INVALID_PARAMETER
+                  , "Session request already in progress."));
+        }
+
+        return;
+    }
+
+    if (!receiverList.length) {
+        if (errorCallback) {
+            errorCallback(new Error_(ErrorCode.RECEIVER_UNAVAILABLE));
+        }
+
+        return;
+    }
+
+    sessionRequestInProgress = true;
+
+
+    const selectedReceiver = new Receiver_(
+            _receiver.id
+          , _receiver.friendlyName);
+
+    (selectedReceiver as any)._address = _receiver.host;
+    (selectedReceiver as any)._port = _receiver.port;
+
+    function createSession () {
+        sessionList.push(new Session(
+                sessionList.length.toString()  // sessionId
+              , apiConfig.sessionRequest.appId // appId
+              , _receiver.friendlyName         // displayName
+              , []                             // appImages
+              , selectedReceiver               // receiver
+              , (session: Session) => {
+                    sendMessageResponse({
+                        subject: "main:/sessionCreated"
+                    });
+
+                    sessionRequestInProgress = false;
+
+                    if (successCallback) {
+                        successCallback(session);
+                    }
+                }));
+    }
+
+    // If an existing session is active, stop it and start new one
+    if (sessionList.length) {
+        const lastSession = sessionList[sessionList.length - 1];
+
+        if (lastSession.status !== SessionStatus.STOPPED) {
+            lastSession.stop(createSession, null);
+        }
+    } else {
+        createSession();
+    }
+}
+
+export function requestSessionById (_sessionId: string): void {
     console.info("STUB :: cast.requestSessionById");
 }
 
 export function setCustomReceivers (
-        receivers: Receiver[]
-      , successCallback: SuccessCallback
-      , errorCallback: ErrorCallback): void {
+        _receivers: Receiver_[]
+      , _successCallback?: SuccessCallback
+      , _errorCallback?: ErrorCallback): void {
 
     console.info("STUB :: cast.setCustomReceivers");
 }
 
-export function setPageContext (win: Window): void {
+export function setPageContext (_win: Window): void {
     console.info("STUB :: cast.setPageContext");
 }
 
-export function setReceiverDisplayStatus (sessionId: string): void {
+export function setReceiverDisplayStatus (_sessionId: string): void {
     console.info("STUB :: cast.setReceiverDisplayStatus");
 }
 
@@ -240,7 +321,7 @@ onMessage(async message => {
         case "shim:/selectReceiverEnd": {
             console.info("fx_cast (Debug): Selected receiver");
 
-            const selectedReceiver = new Receiver(
+            const selectedReceiver = new Receiver_(
                     message.data.receiver.id
                   , message.data.receiver.friendlyName);
 
@@ -261,9 +342,9 @@ onMessage(async message => {
 
                             sessionRequestInProgress = false;
 
-                            sessionSuccessCallback(
-                                    session
-                                  , message.data.mediaType);
+                            if (sessionSuccessCallback) {
+                                sessionSuccessCallback(session);
+                            }
                         }));
             }
 
@@ -287,7 +368,10 @@ onMessage(async message => {
         case "shim:/selectReceiverCancelled": {
             if (sessionRequestInProgress) {
                 sessionRequestInProgress = false;
-                sessionErrorCallback(new Error_(ErrorCode.CANCEL));
+
+                if (sessionErrorCallback) {
+                    sessionErrorCallback(new Error_(ErrorCode.CANCEL));
+                }
             }
 
             break;

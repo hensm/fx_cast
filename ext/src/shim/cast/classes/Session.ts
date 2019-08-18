@@ -13,15 +13,15 @@ import Media from "../media/classes/Media";
 import QueueLoadRequest from "../media/classes/QueueLoadRequest";
 
 import { ErrorCode
-       , SessionStatus
-       , VolumeControlType } from "../enums";
+       , SessionStatus } from "../enums";
+
+import { RepeatMode } from "../media/enums";
 
 import { ListenerObject
        , onMessage
        , sendMessageResponse } from "../../eventMessageChannel";
 
-import { Callbacks
-       , CallbacksMap
+import { CallbacksMap
        , ErrorCallback
        , LoadSuccessCallback
        , MediaListener
@@ -49,7 +49,7 @@ export default class Session {
     public media: Media[];
     public namespaces: Array<{ name: "string" }>;
     public senderApps: SenderApplication[];
-    public status: string;
+    public status: SessionStatus;
     public statusText: string;
     public transportId: string;
 
@@ -249,7 +249,7 @@ export default class Session {
     }
 
 
-    public addMediaListener (listener: MediaListener) {
+    public addMediaListener (_mediaListener: MediaListener) {
         console.info("STUB :: Session#addMediaListener");
     }
 
@@ -305,49 +305,55 @@ export default class Session {
           , autoplay: loadRequest.autoplay || false
           , currentTime: loadRequest.currentTime || 0
           , customData: loadRequest.customData || {}
-          , repeatMode: "REPEAT_OFF"
+          , repeatMode: RepeatMode.OFF
         });
+
 
         let hasResponded = false;
 
         this.addMessageListener(
                 "urn:x-cast:com.google.cast.media"
-              , (namespace, data) => {
+              , (_namespace, data) => {
 
             if (hasResponded) {
                 return;
             }
 
-            const mediaObject = JSON.parse(data);
+            const message = JSON.parse(data);
 
-            if (mediaObject.status && mediaObject.status.length > 0) {
+            if (message.status && message.status.length > 0) {
                 hasResponded = true;
 
                 const media = new Media(
                         this.sessionId
-                      , mediaObject.status[0].mediaSessionId
+                      , message.status[0].mediaSessionId
                       , _id.get(this));
 
                 media.media = loadRequest.media;
                 this.media = [ media ];
 
                 media.play();
-                successCallback(media);
+
+                if (successCallback) {
+                    successCallback(media);
+                }
             } else {
-                errorCallback(new _Error(ErrorCode.SESSION_ERROR));
+                if (errorCallback) {
+                    errorCallback(new _Error(ErrorCode.SESSION_ERROR));
+                }
             }
         });
     }
 
     public queueLoad (
-            queueLoadRequest: QueueLoadRequest
-          , successCallback: LoadSuccessCallback
-          , errorCallback: ErrorCallback): void {
+            _queueLoadRequest: QueueLoadRequest
+          , _successCallback: LoadSuccessCallback
+          , _errorCallback: ErrorCallback): void {
 
         console.info("STUB :: Session#queueLoad");
     }
 
-    public removeMediaListener (listener: MediaListener): void {
+    public removeMediaListener (_mediaListener: MediaListener): void {
         console.info("STUB :: Session#removeMediaListener");
     }
 
@@ -359,7 +365,7 @@ export default class Session {
     }
 
     public removeUpdateListener (
-            namespace: string
+            _namespace: string
           , listener: UpdateListener): void {
 
         _updateListeners.get(this).delete(listener);

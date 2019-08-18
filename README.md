@@ -1,7 +1,7 @@
-<img src="docs/images/preview-fg_macOS@2x.png"
+<img src="docs/images/preview-fg_macOS_dark@2x.png"
      alt="Preview of cast device selection popup"
      align="right"
-     width="396">
+     width="462">
 
 # fx_cast
 
@@ -41,7 +41,6 @@ sudo dnf install fx_cast_bridge-<version>-<arch>.rpm
 
 ### Requirements
 
-* Node.js 10.x (https://git.io/fjmgL)
 * dpkg (for building deb packages)
 * rpm (for building rpm packages)
 * macOS (for building macOS installer packages)

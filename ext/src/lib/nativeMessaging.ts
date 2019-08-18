@@ -1,12 +1,9 @@
 "use strict";
 
-import { Message } from "../types";
-
-
 const WEBSOCKET_DAEMON_URL = "ws://localhost:9556";
 
 
-type DisconnectListener = () => void;
+type DisconnectListener = (port: browser.runtime.Port) => void;
 type MessageListener = (message: any) => void;
 
 function connectNative (application: string) {
@@ -103,7 +100,7 @@ function connectNative (application: string) {
 
             socket = new WebSocket(WEBSOCKET_DAEMON_URL);
 
-            socket.addEventListener("open", ev => {
+            socket.addEventListener("open", () => {
                 // Send all messages in queue
                 while (messageQueue.length) {
                     const message = messageQueue.pop();
@@ -126,7 +123,7 @@ function connectNative (application: string) {
                 }
 
                 for (const listener of onDisconnectListeners) {
-                    listener();
+                    listener(portObject);
                 }
             });
         }

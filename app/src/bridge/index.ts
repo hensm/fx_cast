@@ -8,16 +8,13 @@ import mime from "mime-types";
 import path from "path";
 
 import Media from "./Media";
-import MediaServer from "./MediaServer";
 import Session from "./Session";
 import StatusListener from "./StatusListener";
 
 import { DecodeTransform
-       , EncodeTransform
-       , ResponseTransform } from "../transforms";
+       , EncodeTransform } from "../transforms";
 
-import { MediaStatus
-       , ReceiverStatus } from "./castTypes";
+import { ReceiverStatus } from "./castTypes";
 
 import { Message } from "./types";
 
@@ -32,11 +29,11 @@ events.EventEmitter.defaultMaxListeners = 50;
 const browser = new dnssd.Browser(dnssd.tcp("googlecast"));
 
 // Local media server
-let mediaServer: MediaServer;
+let mediaServer: http.Server;
 
 process.on("SIGTERM", () => {
-    if (mediaServer) {
-        mediaServer.stop();
+    if (mediaServer && mediaServer.listening) {
+        mediaServer.close();
     }
 });
 
@@ -45,20 +42,26 @@ const decodeTransform = new DecodeTransform();
 const encodeTransform = new EncodeTransform();
 
 // stdin -> stdout
-process.stdin
-    .pipe(decodeTransform)
-    .pipe(new ResponseTransform(handleMessage))
-    .pipe(encodeTransform)
-    .pipe(process.stdout);
+process.stdin.pipe(decodeTransform);
+decodeTransform.on("data", handleMessage);
+encodeTransform.pipe(process.stdout);
 
 /**
- * Encode and send a message to the extension.
+ * Encode and send a message to the extension. If message is
+ * a string, send that as the message subject, else send a
+ * passed message object.
  */
-function sendMessage (message: object) {
+function sendMessage (message: string | object) {
     try {
-        encodeTransform.write(message);
+        if (typeof message === "string") {
+            encodeTransform.write({
+                subject: message
+            });
+        } else {
+            encodeTransform.write(message);
+        }
     } catch (err) {
-        console.error("Failed to encode message");
+        console.error("Failed to encode message", err);
     }
 }
 
@@ -72,6 +75,7 @@ const existingSessions: Map<string, Session> = new Map();
 const existingMedia: Map<string, Media> = new Map();
 
 let receiverSelectorApp: child_process.ChildProcess;
+let receiverSelectorAppClosed = true;
 
 /**
  * Handle incoming messages from the extension and forward
@@ -96,9 +100,7 @@ async function handleMessage (message: Message) {
                 if (parentSession) {
                     // Create Media
                     existingMedia.set(mediaId, new Media(
-                            message.data.sessionId
-                          , message.data.mediaSessionId
-                          , mediaId
+                            mediaId
                           , parentSession
                           , sendMessage));
                 }
@@ -130,10 +132,17 @@ async function handleMessage (message: Message) {
         return;
     }
 
+    if (message.subject.startsWith("bridge:/receiverSelector/")) {
+        handleReceiverSelectorMessage(message);
+    }
+
+    if (message.subject.startsWith("bridge:/mediaServer/")) {
+        handleMediaServerMessage(message);
+    }
+
     switch (message.subject) {
         case "bridge:/getInfo": {
-            const extensionVersion = message.data;
-            return __applicationVersion;
+            encodeTransform.write(__applicationVersion);
         }
 
         case "bridge:/initialize": {
@@ -142,8 +151,11 @@ async function handleMessage (message: Message) {
 
             break;
         }
+    }
+}
 
-
+function handleReceiverSelectorMessage (message: Message) {
+    switch (message.subject) {
         case "bridge:/receiverSelector/open": {
             const receiverSelectorData = message.data;
 
@@ -167,6 +179,8 @@ async function handleMessage (message: Message) {
                     path.join(process.cwd(), "selector")
                   , [ receiverSelectorData ]);
 
+            receiverSelectorAppClosed = false;
+
             receiverSelectorApp.stdout!.setEncoding("utf8");
             receiverSelectorApp.stdout!.on("data", data => {
                 sendMessage({
@@ -175,7 +189,7 @@ async function handleMessage (message: Message) {
                 });
             });
 
-            receiverSelectorApp.addListener("error", err => {
+            receiverSelectorApp.on("error", err => {
                 sendMessage({
                     subject: "main:/receiverSelector/error"
                   , data: err.message
@@ -183,9 +197,13 @@ async function handleMessage (message: Message) {
             });
 
             receiverSelectorApp.on("close", () => {
-                sendMessage({
-                    subject: "main:/receiverSelector/close"
-                });
+                if (!receiverSelectorAppClosed) {
+                    receiverSelectorAppClosed = true;
+
+                    sendMessage({
+                        subject: "main:/receiverSelector/close"
+                    });
+                }
             });
 
             break;
@@ -193,34 +211,76 @@ async function handleMessage (message: Message) {
 
         case "bridge:/receiverSelector/close": {
             receiverSelectorApp.kill();
+            receiverSelectorAppClosed = true;
+
             break;
         }
+    }
+}
 
-
+function handleMediaServerMessage (message: Message) {
+    switch (message.subject) {
         case "bridge:/mediaServer/start": {
-            const { filePath, port } = message.data;
+            const { filePath, port }
+                : { filePath: string, port: number } = message.data;
 
-            mediaServer = new MediaServer(filePath, port);
-            mediaServer.start();
+            const contentType = mime.lookup(filePath);
 
-            mediaServer.on("started", () => {
-                sendMessage({
-                    subject: "mediaCast:/mediaServer/started"
-                });
+            if (!contentType) {
+                sendMessage("mediaCast:/mediaServer/error");
+                break;
+            }
+
+            if (mediaServer && mediaServer.listening) {
+                mediaServer.close();
+            }
+
+            mediaServer = http.createServer((req, res) => {
+                const { size: fileSize } = fs.statSync(filePath);
+                const { range } = req.headers;
+
+                // Partial content HTTP 206
+                if (range) {
+                    const bounds = range.substring(6).split("-");
+                    const start = parseInt(bounds[0]);
+                    const end = bounds[1] ? parseInt(bounds[1]) : fileSize - 1;
+
+                    res.writeHead(206, {
+                        "Accept-Ranges": "bytes"
+                      , "Content-Range": `bytes ${start}-${end}/${fileSize}`
+                      , "Content-Length": (end - start) + 1
+                      , "Content-Type": contentType
+                    });
+
+                    fs.createReadStream(filePath, { start, end }).pipe(res);
+                } else {
+                    res.writeHead(200, {
+                        "Content-Length": fileSize
+                      , "Content-Type": contentType
+                    });
+
+                    fs.createReadStream(filePath).pipe(res);
+                }
             });
 
-            mediaServer.on("stopped", () => {
-                sendMessage({
-                    subject: "mediaCast:/mediaServer/stopped"
-                });
+            mediaServer.on("listening", () => {
+                sendMessage("mediaCast:/mediaServer/started");
             });
+            mediaServer.on("close", () => {
+                sendMessage("mediaCast:/mediaServer/stopped");
+            });
+            mediaServer.on("error", () => {
+                sendMessage("mediaCast:/mediaServer/error");
+            });
+
+            mediaServer.listen(port);
 
             break;
         }
 
         case "bridge:/mediaServer/stop": {
-            if (mediaServer) {
-                mediaServer.stop();
+            if (mediaServer && mediaServer.listening) {
+                mediaServer.close();
             }
 
             break;

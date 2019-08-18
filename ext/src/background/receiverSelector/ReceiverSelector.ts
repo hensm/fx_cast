@@ -1,6 +1,7 @@
 "use strict";
 
-import { Receiver } from "../types";
+import { TypedEventTarget } from "../../lib/typedEvents";
+import { Receiver } from "../../types";
 
 
 export enum ReceiverSelectorMediaType {
@@ -16,12 +17,18 @@ export interface ReceiverSelection {
     filePath?: string;
 }
 
-export type ReceiverSelectorSelectedEvent = CustomEvent<ReceiverSelection>;
-export type ReceiverSelectorErrorEvent = CustomEvent;
-export type ReceiverSelectorCancelledEvent = CustomEvent;
 
+export interface ReceiverSelectorEvents {
+    "selected": ReceiverSelection;
+    "error": string;
+    "cancelled": void;
+}
 
-export default interface ReceiverSelector extends EventTarget {
+export default interface ReceiverSelector
+        extends TypedEventTarget<ReceiverSelectorEvents> {
+
+    readonly isOpen: boolean;
+
     open (receivers: Receiver[]
         , defaultMediaType: ReceiverSelectorMediaType
         , availableMediaTypes: ReceiverSelectorMediaType): void;

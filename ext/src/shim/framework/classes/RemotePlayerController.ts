@@ -1,11 +1,10 @@
 "use strict";
 
 import RemotePlayer from "./RemotePlayer";
-import RemotePlayerChangedEvent from "./RemotePlayerChangedEvent";
 
 
 export default class RemotePlayerController extends EventTarget {
-    constructor (player: RemotePlayer) {
+    constructor (_player: RemotePlayer) {
         super();
         console.info("STUB :: RemotePlayerController#constructor");
     }

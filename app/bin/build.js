@@ -180,17 +180,11 @@ async function build () {
     fs.writeFileSync(path.join(BUILD_PATH, "package.json")
           , JSON.stringify(pkgManifest))
 
-    /**
-     * With the BUILD_PATH/bridge dir, cannot build to
-     * BUILD_PATH/bridge file.
-     */
-    const tempExecutableName = `_${executableName[argv.platform]}`;
-
     // Run pkg to create a single executable
     await pkg.exec([
         BUILD_PATH
       , "--target", `${pkgPlatform[argv.platform]}-${argv.arch}`
-      , "--output", path.join(BUILD_PATH, tempExecutableName)
+      , "--output", path.join(BUILD_PATH, executableName[argv.platform])
     ]);
 
     // Build NativeMacReceiverSelector
@@ -238,7 +232,7 @@ async function build () {
               , path.join(DIST_PATH, manifestName)
               , { overwrite: true });
         fs.moveSync(
-                path.join(BUILD_PATH, tempExecutableName)
+                path.join(BUILD_PATH, executableName[argv.platform])
               , path.join(DIST_PATH, executableName[argv.platform])
               , { overwrite: true });
 
@@ -329,7 +323,7 @@ function packageDarwin (
     fs.ensureDirSync(rootManifestPath, { recursive: true });
 
     // Move files to root
-    fs.moveSync(path.join(BUILD_PATH, `_${platformExecutableName}`)
+    fs.moveSync(path.join(BUILD_PATH, platformExecutableName)
           , path.join(rootExecutablePath, platformExecutableName));
     fs.moveSync(path.join(BUILD_PATH, manifestName)
           , path.join(rootManifestPath, manifestName));

@@ -7,8 +7,7 @@ import ReactDOM from "react-dom";
 import { getNextEllipsis } from "../../lib/utils";
 import { Message, Receiver } from "../../types";
 
-import { ReceiverSelectorMediaType }
-    from "../../receiver_selectors/ReceiverSelector";
+import { ReceiverSelectorMediaType } from "../../background/receiverSelector";
 
 
 const _ = browser.i18n.getMessage;
@@ -110,6 +109,9 @@ class PopupApp extends Component<{}, PopupAppState> {
         }
 
 
+        const canCast = !!(this.state.availableMediaTypes
+                && this.state.availableMediaTypes & this.state.mediaType);
+
         return (
             <div>
                 <div className="media-select">
@@ -151,6 +153,7 @@ class PopupApp extends Component<{}, PopupAppState> {
                         <ReceiverEntry receiver={ receiver }
                                        onCast={ this.onCast }
                                        isLoading={ this.state.isLoading }
+                                       canCast={ canCast }
                                        key={ i }/> ))}
                 </ul>
             </div>
@@ -178,11 +181,6 @@ class PopupApp extends Component<{}, PopupAppState> {
         if (mediaType === ReceiverSelectorMediaType.File) {
             try {
                 const filePath = window.prompt();
-
-                // Validate URL
-                const fileUrl = new URL(filePath.startsWith("file://")
-                    ? filePath
-                    : `file://${filePath}`);
 
                 this.setState({
                     mediaType
@@ -214,6 +212,7 @@ class PopupApp extends Component<{}, PopupAppState> {
 interface ReceiverEntryProps {
     receiver: Receiver;
     isLoading: boolean;
+    canCast: boolean;
     onCast (receiver: Receiver): void;
 }
 
@@ -235,18 +234,22 @@ class ReceiverEntry extends Component<ReceiverEntryProps, ReceiverEntryState> {
     }
 
     public render () {
+        const { application } = this.props.receiver.status;
+
         return (
             <li className="receiver">
                 <div className="receiver-name">
                     { this.props.receiver.friendlyName }
                 </div>
-                <div className="receiver-address">
-                    { `${this.props.receiver.host}:${this.props.receiver.port}` }
+                <div className="receiver-address"
+                     title={ !application.isIdleScreen && application.statusText }>
+                    { application.isIdleScreen
+                        ? `${this.props.receiver.host}:${this.props.receiver.port}`
+                        : application.statusText }
                 </div>
-                <div className="receiver-status"></div>
                 <button className="receiver-connect"
                         onClick={ this.handleCast }
-                        disabled={this.props.isLoading}>
+                        disabled={this.props.isLoading || !this.props.canCast}>
                     { this.state.isLoading
                         ? _("popupCastingButtonTitle"
                               , (this.state.isLoading

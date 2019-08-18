@@ -1,3 +1,5 @@
+# SOMEWHAT OUTDATED (again)!
+
 # Extension Lifetime
 
 A bridge application instance (`statusBridge`) is created to keep track of receivers’ statuses. This is expected to exist throughout the lifetime of the extension and will automatically reconnect if unexpectedly disconnected.

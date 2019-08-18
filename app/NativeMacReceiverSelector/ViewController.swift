@@ -21,24 +21,7 @@ class ViewController : NSViewController {
     override func viewDidLoad () {
         super.viewDidLoad()
 
-        if (CommandLine.argc < 2) {
-            fputs("Error: Not enough args\n", stderr)
-            exit(1)
-        }
-
-        guard let data = CommandLine.arguments[1].data(using: .utf8) else {
-            fputs("Error: Failed to convert input to data\n", stderr)
-            exit(1)
-        }
-
-        do {
-            // Decode and store initialization JSON data
-            self.initData = try JSONDecoder().decode(InitData.self, from: data)
-        } catch {
-            fputs("Error: Failed to parse input data\n", stderr)
-            exit(1)
-        }
-
+        self.initData = (NSApplication.shared.delegate as! AppDelegate).initData
 
         /**
          * View Hierarchy
@@ -136,6 +119,12 @@ class ViewController : NSViewController {
 
             receiverView.receiverViewDelegate = self
 
+            if UInt(initData!.availableMediaTypes) == 0
+                    || (initData!.availableMediaTypes
+                            & initData!.defaultMediaType.rawValue) == 0 {
+                receiverView.isEnabled = false
+            }
+
 
             self.receiverViews.append(receiverView)
 
@@ -162,6 +151,12 @@ extension ViewController : NSMenuDelegate {
     func menuDidClose (_ menu: NSMenu) {
         let mediaType = MediaType(
                 rawValue: self.mediaTypePopUpButton.selectedItem!.tag)!
+
+        if self.initData.availableMediaTypes & mediaType.rawValue != 0 {
+            for receiverView in self.receiverViews {
+                receiverView.isEnabled = true
+            }
+        }
 
         let fileItem = self.mediaTypePopUpButton
                 .item(at: self.mediaTypePopUpButton.indexOfItem(

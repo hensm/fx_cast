@@ -1,7 +1,5 @@
 "use strict";
 
-import uuid from "uuid";
-
 import { Channel, Client } from "castv2";
 
 import { Message
@@ -23,7 +21,7 @@ export default class Session {
     private clientConnection?: Channel;
     private clientHeartbeat?: Channel;
     private clientReceiver?: Channel;
-    private clientHeartbeatIntervalId?: NodeJS.Timer;
+    private clientHeartbeatIntervalId?: NodeJS.Timeout;
 
     private isSessionCreated = false;
 

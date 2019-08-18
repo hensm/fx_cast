@@ -2,7 +2,7 @@
 
 import * as cast from "./cast";
 
-import { CAST_FRAMEWORK_SCRIPT_URL } from "../endpoints";
+import { CAST_FRAMEWORK_SCRIPT_URL } from "../lib/endpoints";
 import { loadScript } from "../lib/utils";
 import { onMessage } from "./eventMessageChannel";
 
@@ -12,6 +12,10 @@ const _window = (window as any);
 if (!_window.chrome) {
     _window.chrome = {};
 }
+
+
+// Remove private APIs
+delete cast._requestSession;
 
 // Create page-accessible API object
 _window.chrome.cast = cast;
@@ -48,7 +52,7 @@ if (document.currentScript) {
         isFramework = true;
 
         const script = loadScript(CAST_FRAMEWORK_SCRIPT_URL);
-        script.addEventListener("load", ev => {
+        script.addEventListener("load", () => {
             callPageReadyFunction();
         });
 
@@ -60,7 +64,6 @@ if (document.currentScript) {
         */
     }
 }
-
 
 onMessage(message => {
     switch (message.subject) {

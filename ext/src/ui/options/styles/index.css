@@ -7,6 +7,10 @@
     box-shadow: 0 0 1.5px 1px red;
 }
 
+body {
+    margin: 20px 10px;
+}
+
 #form {
     display: flex;
     flex-direction: column;
@@ -26,7 +30,6 @@
 #status-line {
     color: var(--secondary-color);
 }
-
 
 .bridge {
     border-bottom: 1px solid var(--border-color);
@@ -61,7 +64,6 @@
 .bridge__status {
     align-items: center;
     display: flex;
-    flex-basis: min-content;
     flex-direction: column;
     margin-inline-end: 25px;
 }
@@ -172,14 +174,12 @@
     border-top: 1px solid var(--border-color);
 }
 
-.category > .category {
-    padding: 5px 0;
-    box-shadow: inset 2px 0 0 0 var(--border-color);
-}
 
-.category > .category > .category__name,
-.category > .category > .category__description {
-    margin-inline-start: 16px;
+.category > hr {
+    border: initial;
+    border-top: 1px solid var(--border-color);
+    grid-column: span 2;
+    width: 100%;
 }
 
 .category__name {
@@ -210,8 +210,26 @@
 }
 
 .option--inline {
-    display: block;
+    align-items: center;
+    display: grid;
     grid-column-start: 2;
+    grid-template-columns: min-content 1fr;
+    grid-template-rows: min-content min-content;
+    grid-template-areas:
+        "input label"
+        ". description";
+}
+
+.option--inline > input {
+    grid-area: input;
+    width: 16px;
+}
+.option--inline > .option__label {
+    grid-area: label;
+    text-align: initial;
+}
+.option--inline > .option__description {
+    grid-area: description;
 }
 
 .option__label {
@@ -219,7 +237,16 @@
     display: inline-block;
 }
 
-.option > input {
+.option__description {
+    color: var(--secondary-color);
+    font-size: smaller;
+    grid-column: span 2;
+    margin: 5px 0;
+    max-width: 45ch;
+}
+
+.option > input,
+.option > select {
     align-self: center;
     justify-self: flex-start;
     margin-inline-start: initial;
@@ -239,9 +266,8 @@
     justify-content: end;
 }
 
-.editable-list__view-button,
 .editable-list__save-raw-button {
-
+    margin-inline-end: 5px;
 }
 
 .editable-list hr {
@@ -266,10 +292,10 @@
     padding: 0 5px;
 }
 
-.editable-list__item:nth-child(even):not(:last-child) {
+.editable-list__item:nth-child(even) {
     background-color: -moz-eventreerow;
 }
-.editable-list__item:nth-child(odd):not(:last-child) {
+.editable-list__item:nth-child(odd) {
     background-color: -moz-oddtreerow;
 }
 
@@ -280,6 +306,10 @@
 
 .editable-list__title {
     flex: 1;
+}
+
+.editable-list__title + button {
+    margin-inline-end: 5px;
 }
 
 .editable-list__edit-field {
@@ -294,6 +324,5 @@
 }
 
 .editable-list__add-button {
-    align-self: end;
-    margin-top: 5px;
+    margin-inline-end: auto;
 }

@@ -11,7 +11,7 @@ const UA_CHROME_LEGACY = "AppleWebKit/537.36 (KHTML, like Gecko) Chrome/53.0.288
 const UA_SAFARI = "AppleWebKit/605.1.15 (KHTML, like Gecko) Version/12.0 Safari/605.1.15";
 
 
-function getPlatformComponent (platform: string) {
+function getPlatformComponent (platform: string): string {
     switch (platform) {
         case "mac": return PLATFORM_MAC; break;
         case "win": return PLATFORM_WIN; break;
@@ -31,6 +31,6 @@ export function getChromeUserAgent (
     return `${UA_PREFIX} (${platformComponent}) ${browserComponent}`;
 }
 
-export function getSafariUserAgent (platform: string): string {
+export function getSafariUserAgent (): string {
     return `${UA_PREFIX} (${PLATFORM_MAC}) ${UA_SAFARI}`;
 }

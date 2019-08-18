@@ -71,7 +71,7 @@ export default class GoogleCastLauncher extends HTMLElement {
         shadow.append(icon, style);
 
 
-        this.addEventListener("click", ev => {
+        this.addEventListener("click", () => {
             console.info("<google-cast-launcher> onClick");
         });
     }

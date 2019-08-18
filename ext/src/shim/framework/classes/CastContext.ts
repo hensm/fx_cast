@@ -1,15 +1,11 @@
 "use strict";
 
-import * as cast from "../../cast";
-
 import CastOptions from "./CastOptions";
 import CastSession from "./CastSession";
-import CastStateEventData from "./CastStateEventData";
-import SessionStateEventData from "./SessionStateEventData";
 
 
 export default class CastContext extends EventTarget {
-    public endCurrentSession (stopCasting: boolean): void {
+    public endCurrentSession (_stopCasting: boolean): void {
         console.info("STUB :: CastContext#endCurrentSession");
     }
 
@@ -33,7 +29,7 @@ export default class CastContext extends EventTarget {
         console.info("STUB :: CastContext#requestSession");
     }
 
-    public setOptions (options: CastOptions): void {
+    public setOptions (_options: CastOptions): void {
         console.info("STUB :: CastContext#setOptions");
     }
 }

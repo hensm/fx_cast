@@ -2,6 +2,7 @@
 <html class="theme-dark">
     <head>
         <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
         <title>fx_cast</title>
 
         <link rel="stylesheet" href="fonts/stylesheet.css">
@@ -9,13 +10,13 @@
         <link rel="stylesheet" href="photon.css">
         <link rel="stylesheet" href="index.css">
 
-        <script type="text/javascript" src="index.js" defer></script>
+        <script src="index.js" defer></script>
     </head>
     <body>
         <div class="container">
             <header class="site-header">
                 <h1 class="site-header__title">fx_cast</h1>
-                <p class="site-header__subtitle">chromecast for firefox</p>
+                <p class="site-header__subtitle">chromecast <nobr>for firefox</nobr></p>
             </header>
             <main class="site-content">
                 <section class="description">
@@ -57,9 +58,6 @@
                         </div>
                     </details>
                 </section>
-                <section class="other-downloads">
-                    
-                </section>
                 <section class="faqs">
                     <h1>FAQs</h1>
                     <ul class="faqs__list">
@@ -78,13 +76,13 @@
                                                      images/menu_dark@2x.png 2x">
                                     </picture>
                                     <p>
-                                        Ignore the toolbar button for now, it's just a placeholder for development.
-                                    </p>
-                                    <p>
                                         For sites with built-in cast support, click the cast button in the page and select the destination in the receiver selector popup. You may have to add the site to the whitelist to get the cast button to appear.
                                     </p>
                                     <p>
                                         For other sites, there is a "Cast..." item in the context menu when right-clicking on a media player. This may not be visible depending on whether the site has chosen to obscure the player with an overlay or if the media is DRM-encumbered (see below).
+                                    </p>
+                                    <p>
+                                        Clicking the toolbar button will open the popup, but depending on the context, it may not be possible to cast anything.
                                     </p>
                                     <p>
                                         As a last resort, casting the tab or screen may provide a means of displaying this media on the Chromecast, but it has its own limitations: the performance is very poor and there's no audio casting.
@@ -263,12 +261,19 @@
                  src="images/preview-bg.png"
                  srcset="images/preview-bg.png,
                          images/preview-bg@2x.png 2x">
-            <img class="preview preview--fg"
-                 alt="Screenshot preview, foreground"
-                 width="396"
-                 src="images/preview-fg_macOS.png"
-                 srcset="images/preview-fg_macOS.png,
-                         images/preview-fg_macOS@2x.png 2x">
+
+            <picture style="display: contents">
+                <source alt="Media context menu"
+                        srcset="images/preview-fg_macOS_light.png,
+                                images/preview-fg_macOS_light@2x.png 2x"
+                        media="(prefers-color-scheme: light)">
+                <img class="preview preview--fg"
+                     alt="Media context menu"
+                     width="462" height="275"
+                     src="images/preview-fg_macOS_dark.png"
+                     srcset="images/preview-fg_macOS_dark.png,
+                             images/preview-fg_macOS_dark@2x.png 2x">
+            </picture>
 
             <footer class="footer">
                 <div class="links">

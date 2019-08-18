@@ -1,6 +1,7 @@
 "use strict";
 
 import { loadScript } from "../lib/utils";
+import { Message } from "../types";
 import { onMessageResponse, sendMessage } from "./eventMessageChannel";
 
 
@@ -17,12 +18,17 @@ if (isFramework) {
 
 
 // Message port to background script
-const backgroundPort = browser.runtime.connect({ name: "shim" });
+export const backgroundPort = browser.runtime.connect({ name: "shim" });
 
-// Forward background messages to shim
-backgroundPort.onMessage.addListener(sendMessage);
+const forwardToShim = (message: Message) => sendMessage(message);
+const forwardToMain = (message: Message) => backgroundPort.postMessage(message);
 
-// Forward shim messages to background
-onMessageResponse(message => {
-    backgroundPort.postMessage(message);
+// Add message listeners
+backgroundPort.onMessage.addListener(forwardToShim);
+const listener = onMessageResponse(forwardToMain);
+
+// Remove listeners
+backgroundPort.onDisconnect.addListener(() => {
+    backgroundPort.onMessage.removeListener(forwardToShim);
+    listener.disconnect();
 });

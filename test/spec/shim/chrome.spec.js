@@ -22,6 +22,10 @@ describe("chrome", () => {
             expect(chrome.cast.unescape).toBeDefined();
         });
 
+        it("should not have private api methods", () => {
+            expect(chrome.cast._requestSession).toBeUndefined();
+        });
+
         it("should have all api classes", () => {
             expect(chrome.cast.ApiConfig).toBeDefined();
             expect(chrome.cast.DialRequest).toBeDefined();

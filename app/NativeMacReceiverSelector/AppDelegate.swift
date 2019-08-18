@@ -2,21 +2,47 @@ import Cocoa
 
 
 class AppDelegate : NSObject, NSApplicationDelegate {
+    var initData: InitData!
+
     var mainWindow: NSWindow?
     var mainWindowController: NSWindowController?
     var mainWindowViewController: ViewController?
 
 
     func applicationDidFinishLaunching (_ aNotification: Notification) {
+        if CommandLine.argc < 2 {
+            fputs("Error: Not enough args\n", stderr)
+            exit(1)
+        }
+
+        guard let data = CommandLine.arguments[1].data(using: .utf8) else {
+            fputs("Error: Failed to convert input to data\n", stderr)
+            exit(1)
+        }
+
+        do {
+            // Decode and store initialization JSON data
+            self.initData = try JSONDecoder().decode(InitData.self, from: data)
+        } catch {
+            fputs("Error: Failed to parse input data\n (\(error))", stderr)
+            exit(1)
+        }
+
+
         let window = NSWindow(
                 contentRect: NSZeroRect
               , styleMask: [ .titled, .closable ]
               , backing: .buffered
               , defer: false)
 
+        let screenHeight = NSScreen.main!.frame.height
+
         window.titleVisibility = .hidden
+        window.isMovableByWindowBackground = true
         window.orderFrontRegardless()
-        window.center()
+        window.setFrameTopLeftPoint(NSPoint(
+                x: self.initData.windowPositionX
+              , y: Int(screenHeight - CGFloat(self.initData.windowPositionY))))
 
         let windowController = NSWindowController(window: window)
         windowController.showWindow(window)
@@ -33,7 +59,9 @@ class AppDelegate : NSObject, NSApplicationDelegate {
     }
 
     func applicationDidResignActive (_ aNotification: Notification) {
-        self.mainWindow?.performClose(aNotification)
+        if self.initData.closeIfFocusLost {
+            self.mainWindow?.performClose(aNotification)
+        }
     }
 
     func applicationShouldTerminateAfterLastWindowClosed (

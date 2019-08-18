@@ -6,18 +6,18 @@ import { MetadataType } from "../enums";
 
 
 export default class MusicTrackMediaMetadata {
-    public albumArtist: string = null;
-    public albumName: string = null;
-    public artist: string = null;
-    public artistName: string = null;
-    public composer: string = null;
-    public discNumber: number = null;
-    public images: Image[] = null;
+    public albumArtist: string = undefined;
+    public albumName: string = undefined;
+    public artist: string = undefined;
+    public artistName: string = undefined;
+    public composer: string = undefined;
+    public discNumber: number = undefined;
+    public images: Image[] = undefined;
     public metadataType: number = MetadataType.MUSIC_TRACK;
-    public releaseDate: string = null;
-    public releaseYear: number = null;
-    public songName: string = null;
-    public title: string = null;
-    public trackNumber: number = null;
+    public releaseDate: string = undefined;
+    public releaseYear: number = undefined;
+    public songName: string = undefined;
+    public title: string = undefined;
+    public trackNumber: number = undefined;
     public type: number = MetadataType.MUSIC_TRACK;
 }

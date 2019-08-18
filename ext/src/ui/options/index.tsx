@@ -4,14 +4,16 @@
 import React, { Component } from "react";
 import ReactDOM from "react-dom";
 
-import defaultOptions, { Options } from "../../defaultOptions";
+import defaultOptions from "../../defaultOptions";
 
 import Bridge from "./Bridge";
 import EditableList from "./EditableList";
 
-import getBridgeInfo, { BridgeInfo } from "../../lib/getBridgeInfo";
-import options from "../../lib/options";
+import bridge, { BridgeInfo } from "../../lib/bridge";
+import options, { Options } from "../../lib/options";
 import { REMOTE_MATCH_PATTERN_REGEX } from "../../lib/utils";
+
+import { ReceiverSelectorType } from "../../background/receiverSelector";
 
 
 const _ = browser.i18n.getMessage;
@@ -73,6 +75,9 @@ class OptionsApp extends Component<{}, OptionsAppState> {
         this.handleInputChange = this.handleInputChange.bind(this);
         this.handleWhitelistChange = this.handleWhitelistChange.bind(this);
 
+        this.handleReceiverSelectorTypeChange
+                = this.handleReceiverSelectorTypeChange.bind(this);
+
         this.getWhitelistItemPatternError
                 = this.getWhitelistItemPatternError.bind(this);
     }
@@ -83,7 +88,7 @@ class OptionsApp extends Component<{}, OptionsAppState> {
           , options: await options.getAll()
         });
 
-        const bridgeInfo = await getBridgeInfo();
+        const bridgeInfo = await bridge.getInfo();
         const { os } = await browser.runtime.getPlatformInfo();
 
         this.setState({
@@ -117,58 +122,66 @@ class OptionsApp extends Component<{}, OptionsAppState> {
                         </p>
 
                         <label className="option option--inline">
-                            <input name="mediaEnabled"
-                                   type="checkbox"
-                                   checked={ this.state.options.mediaEnabled }
-                                   onChange={ this.handleInputChange } />
+                            <div className="option__control">
+                                <input name="mediaEnabled"
+                                       type="checkbox"
+                                       checked={ this.state.options.mediaEnabled }
+                                       onChange={ this.handleInputChange } />
+                            </div>
                             <div className="option__label">
                                 { _("optionsMediaEnabled") }
                             </div>
                         </label>
 
                         <label className="option option--inline">
-                            <input name="mediaSyncElement"
-                                   type="checkbox"
-                                   checked={ this.state.options.mediaSyncElement }
-                                   onChange={ this.handleInputChange } />
+                            <div className="option__control">
+                                <input name="mediaSyncElement"
+                                       type="checkbox"
+                                       checked={ this.state.options.mediaSyncElement }
+                                       onChange={ this.handleInputChange } />
+                            </div>
                             <div className="option__label">
                                 { _("optionsMediaSyncElement") }
+                            </div>
+                            <div className="option__description">
+                                { _("optionsMediaSyncElementDescription") }
                             </div>
                         </label>
 
                         <label className="option option--inline">
-                            <input name="mediaStopOnUnload"
-                                   type="checkbox"
-                                   checked={ this.state.options.mediaStopOnUnload }
-                                   onChange={ this.handleInputChange } />
+                            <div className="option__control">
+                                <input name="mediaStopOnUnload"
+                                       type="checkbox"
+                                       checked={ this.state.options.mediaStopOnUnload }
+                                       onChange={ this.handleInputChange } />
+                            </div>
                             <div className="option__label">
                                 { _("optionsMediaStopOnUnload") }
                             </div>
                         </label>
 
-                        <fieldset className="category"
-                                  disabled={ !this.state.options.mediaEnabled }>
-                            <legend className="category__name">
-                                <h2>{ _("optionsLocalMediaCategoryName") }</h2>
-                            </legend>
-                            <p className="category__description">
-                                { _("optionsLocalMediaCategoryDescription") }
-                            </p>
+                        <hr />
 
-                            <label className="option option--inline">
+                        <label className="option option--inline">
+                            <div className="option__control">
                                 <input name="localMediaEnabled"
                                        type="checkbox"
                                        checked={ this.state.options.localMediaEnabled }
                                        onChange={ this.handleInputChange } />
-                                <div className="option__label">
-                                    { _("optionsLocalMediaEnabled") }
-                                </div>
-                            </label>
+                            </div>
+                            <div className="option__label">
+                                { _("optionsLocalMediaEnabled") }
+                            </div>
+                            <div className="option__description">
+                                { _("optionsLocalMediaCategoryDescription") }
+                            </div>
+                        </label>
 
-                            <label className="option">
-                                <div className="option__label">
-                                    { _("optionsLocalMediaServerPort") }
-                                </div>
+                        <label className="option">
+                            <div className="option__label">
+                                { _("optionsLocalMediaServerPort") }
+                            </div>
+                            <div className="option__control">
                                 <input name="localMediaServerPort"
                                        type="number"
                                        required
@@ -176,8 +189,8 @@ class OptionsApp extends Component<{}, OptionsAppState> {
                                        max="65535"
                                        value={ this.state.options.localMediaServerPort }
                                        onChange={ this.handleInputChange } />
-                            </label>
-                        </fieldset>
+                            </div>
+                        </label>
                     </fieldset>
 
                     <fieldset className="category">
@@ -189,10 +202,12 @@ class OptionsApp extends Component<{}, OptionsAppState> {
                         </p>
 
                         <label className="option option--inline">
-                            <input name="mirroringEnabled"
-                                   type="checkbox"
-                                   checked={ this.state.options.mirroringEnabled }
-                                   onChange={ this.handleInputChange } />
+                            <div className="option__control">
+                                <input name="mirroringEnabled"
+                                       type="checkbox"
+                                       checked={ this.state.options.mirroringEnabled }
+                                       onChange={ this.handleInputChange } />
+                            </div>
                             <div className="option__label">
                                 { _("optionsMirroringEnabled") }
                             </div>
@@ -202,11 +217,71 @@ class OptionsApp extends Component<{}, OptionsAppState> {
                             <div className="option__label">
                                 { _("optionsMirroringAppId") }
                             </div>
-                            <input name="mirroringAppId"
-                                   type="text"
-                                   required
-                                   value={ this.state.options.mirroringAppId }
-                                   onChange={ this.handleInputChange } />
+                            <div className="option__control">
+                                <input name="mirroringAppId"
+                                       type="text"
+                                       required
+                                       value={ this.state.options.mirroringAppId }
+                                       onChange={ this.handleInputChange } />
+                                <div className="option__description">
+                                    { _("optionsMirroringAppIdDescription") }
+                                </div>
+                            </div>
+                        </label>
+                    </fieldset>
+
+                    <fieldset className="category">
+                        <legend className="category__name">
+                            <h2>{ _("optionsReceiverSelectorCategoryName") }</h2>
+                        </legend>
+                        <p className="category__description">
+                            { _("optionsReceiverSelectorCategoryDescription") }
+                        </p>
+
+                        { this.state.platform === "mac" &&
+                            <label className="option">
+                                <div className="option__label">
+                                    { _("optionsReceiverSelectorType") }
+                                </div>
+                                <div className="option__control">
+                                    <select name="receiverSelectorType"
+                                            value={ this.state.options.receiverSelectorType }
+                                            onChange={ this.handleReceiverSelectorTypeChange }>
+                                        <option value={ ReceiverSelectorType.Popup }>
+                                            { _("optionsReceiverSelectorTypeBrowser") }
+                                        </option>
+                                        <option value={ ReceiverSelectorType.Native }>
+                                            { _("optionsReceiverSelectorTypeNative") }
+                                        </option>
+                                    </select>
+                                </div>
+                            </label> }
+
+                        <label className="option option--inline">
+                            <div className="option__control">
+                                <input name="receiverSelectorWaitForConnection"
+                                       type="checkbox"
+                                       checked={ this.state.options.receiverSelectorWaitForConnection }
+                                       onChange={ this.handleInputChange } />
+                            </div>
+                            <div className="option__label">
+                                { _("optionsReceiverSelectorWaitForConnection") }
+                            </div>
+                            <div className="option__description">
+                                { _("optionsReceiverSelectorWaitForConnectionDescription") }
+                            </div>
+                        </label>
+
+                        <label className="option option--inline">
+                            <div className="option__control">
+                                <input name="receiverSelectorCloseIfFocusLost"
+                                       type="checkbox"
+                                       checked={ this.state.options.receiverSelectorCloseIfFocusLost }
+                                       onChange={ this.handleInputChange } />
+                            </div>
+                            <div className="option__label">
+                                { _("optionsReceiverSelectorCloseIfFocusLost") }
+                            </div>
                         </label>
                     </fieldset>
 
@@ -219,10 +294,12 @@ class OptionsApp extends Component<{}, OptionsAppState> {
                         </p>
 
                         <label className="option option--inline">
-                            <input name="userAgentWhitelistEnabled"
-                                   type="checkbox"
-                                   checked={ this.state.options.userAgentWhitelistEnabled }
-                                   onChange={ this.handleInputChange } />
+                            <div className="option__control">
+                                <input name="userAgentWhitelistEnabled"
+                                       type="checkbox"
+                                       checked={ this.state.options.userAgentWhitelistEnabled }
+                                       onChange={ this.handleInputChange } />
+                            </div>
                             <div className="option__label">
                                 { _("optionsUserAgentWhitelistEnabled") }
                             </div>
@@ -232,10 +309,12 @@ class OptionsApp extends Component<{}, OptionsAppState> {
                             <div className="option__label">
                                 { _("optionsUserAgentWhitelistContent") }
                             </div>
-                            <EditableList data={ this.state.options.userAgentWhitelist }
-                                          onChange={ this.handleWhitelistChange }
-                                          itemPattern={ REMOTE_MATCH_PATTERN_REGEX }
-                                          itemPatternError={ this.getWhitelistItemPatternError } />
+                            <div className="option__control">
+                                <EditableList data={ this.state.options.userAgentWhitelist }
+                                              onChange={ this.handleWhitelistChange }
+                                              itemPattern={ REMOTE_MATCH_PATTERN_REGEX }
+                                              itemPatternError={ this.getWhitelistItemPatternError } />
+                            </div>
                         </div>
                     </fieldset>
 
@@ -271,16 +350,7 @@ class OptionsApp extends Component<{}, OptionsAppState> {
         this.form.reportValidity();
 
         try {
-            const oldOpts = await options.getAll();
             await options.setAll(this.state.options);
-
-            const alteredOptions = [];
-            for (const [ key, val ] of Object.entries(this.state.options)) {
-                const oldVal = oldOpts[key];
-                if (oldVal !== val) {
-                    alteredOptions.push(key);
-                }
-            }
 
             this.setState({
                 hasSaved: true
@@ -290,12 +360,6 @@ class OptionsApp extends Component<{}, OptionsAppState> {
                         hasSaved: false
                     });
                 }, 1000);
-            });
-
-            // Send update message / event
-            browser.runtime.sendMessage({
-                subject: "optionsUpdated"
-              , data: { alteredOptions }
             });
         } catch (err) {
             console.error("Failed to save options");
@@ -311,10 +375,17 @@ class OptionsApp extends Component<{}, OptionsAppState> {
     }
 
     private handleInputChange (ev: React.ChangeEvent<HTMLInputElement>) {
-        const { target } = ev;
+        this.setState(currentState => {
+            currentState.options[ev.target.name] = getInputValue(ev.target);
+            return currentState;
+        });
+    }
+
+    private handleReceiverSelectorTypeChange (
+            ev: React.ChangeEvent<HTMLSelectElement>) {
 
         this.setState(currentState => {
-            currentState.options[target.name] = getInputValue(target);
+            currentState.options[ev.target.name] = parseInt(ev.target.value);
             return currentState;
         });
     }
@@ -328,19 +399,6 @@ class OptionsApp extends Component<{}, OptionsAppState> {
 
     private getWhitelistItemPatternError (info: string): string {
         return _("optionsUserAgentWhitelistInvalidMatchPattern", info);
-    }
-
-    private async updateBridgeInfo () {
-        this.setState({
-            bridgeLoading: true
-        });
-
-        const bridgeInfo = await getBridgeInfo();
-
-        this.setState({
-            bridgeInfo
-          , bridgeLoading: false
-        });
     }
 }
 

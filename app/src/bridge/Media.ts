@@ -11,8 +11,8 @@ import { Message
 const MEDIA_NAMESPACE = "urn:x-cast:com.google.cast.media";
 
 export interface UpdateMessageData {
-    _volumeLevel: number;
-    _volumeMuted: boolean;
+    _volumeLevel?: number;
+    _volumeMuted?: boolean;
     _lastCurrentTime: number;
     currentTime: number;
     customData?: any;
@@ -25,25 +25,12 @@ export interface UpdateMessageData {
 
 
 export default class Media {
-    private sessionId: number;
-    private mediaSessionId: number;
-    private referenceId: string;
-    private session: Session;
     private channel: Channel;
-    private sendMessageCallback: SendMessageCallback;
 
     constructor (
-            sessionId: number
-          , mediaSessionId: number
-          , referenceId: string
-          , session: Session
-          , sendMessageCallback: SendMessageCallback) {
-
-        this.sessionId = sessionId;
-        this.mediaSessionId = mediaSessionId;
-        this.referenceId = referenceId;
-        this.session = session;
-        this.sendMessageCallback = sendMessageCallback;
+            private referenceId: string
+          , private session: Session
+          , private sendMessageCallback: SendMessageCallback) {
 
         this.session.createChannel(MEDIA_NAMESPACE);
         this.channel = this.session.channelMap.get(MEDIA_NAMESPACE)!;
@@ -54,17 +41,20 @@ export default class Media {
 
                 const status = data.status[0];
 
-                const messageData = {
+                const messageData: UpdateMessageData = {
                     _lastCurrentTime: Date.now() / 1000
-                  , _volumeLevel: status.volume.level
-                  , _volumeMuted: status.volume.muted
 
                   , currentTime: status.currentTime
                   , customData: status.customData
                   , playbackRate: status.playbackRate
                   , playerState: status.playerState
                   , repeatMode: status.repeatMode
-                } as UpdateMessageData;
+                };
+
+                if (status.volume) {
+                    messageData._volumeLevel = status.volume.level;
+                    messageData._volumeMuted = status.volume.muted;
+                }
 
                 if (status.media) {
                     messageData.media = status.media;
@@ -74,11 +64,6 @@ export default class Media {
                 }
 
                 this.sendMessage("shim:/media/update", messageData);
-
-                // Update ID
-                if (status.mediaSessionId) {
-                    this.mediaSessionId = status.mediaSessionId;
-                }
             }
         });
     }

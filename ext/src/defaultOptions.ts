@@ -1,21 +1,10 @@
 "use strict";
 
-export interface Options {
-    bridgeApplicationName: string;
-    mediaEnabled: boolean;
-    mediaSyncElement: boolean;
-    mediaStopOnUnload: boolean;
-    localMediaEnabled: boolean;
-    localMediaServerPort: number;
-    mirroringEnabled: boolean;
-    mirroringAppId: string;
-    userAgentWhitelistEnabled: boolean;
-    userAgentWhitelist: string[];
+import { ReceiverSelectorType } from "./background/receiverSelector";
+import { Options } from "./lib/options";
 
-    [key: string]: Options[keyof Options];
-}
 
-const options: Options = {
+export default {
     bridgeApplicationName: APPLICATION_NAME
   , mediaEnabled: true
   , mediaSyncElement: false
@@ -24,10 +13,11 @@ const options: Options = {
   , localMediaServerPort: 9555
   , mirroringEnabled: false
   , mirroringAppId: MIRRORING_APP_ID
+  , receiverSelectorType: ReceiverSelectorType.Popup
+  , receiverSelectorCloseIfFocusLost: true
+  , receiverSelectorWaitForConnection: true
   , userAgentWhitelistEnabled: true
   , userAgentWhitelist: [
         "https://www.netflix.com/*"
     ]
-};
-
-export default options;
+} as Options;

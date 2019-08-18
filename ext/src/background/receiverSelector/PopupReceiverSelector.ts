@@ -1,25 +1,32 @@
 "use strict";
 
 import ReceiverSelector, {
-        ReceiverSelectorMediaType } from "./ReceiverSelector";
+        ReceiverSelectorEvents
+      , ReceiverSelectorMediaType } from "./ReceiverSelector";
 
-import { getWindowCenteredProps } from "../lib/utils";
-import { Message, Receiver } from "../types";
+import options from "../../lib/options";
+
+import { TypedEventTarget } from "../../lib/typedEvents";
+import { getWindowCenteredProps } from "../../lib/utils";
+import { Message, Receiver } from "../../types";
 
 
 export default class PopupReceiverSelector
-        extends EventTarget
+        extends TypedEventTarget<ReceiverSelectorEvents>
         implements ReceiverSelector {
 
     private windowId: number;
-    private openerWindowId: number;
+
     private messagePort: browser.runtime.Port;
+    private messagePortDisconnected: boolean;
 
     private receivers: Receiver[];
     private defaultMediaType: ReceiverSelectorMediaType;
     private availableMediaTypes: ReceiverSelectorMediaType;
 
     private wasReceiverSelected: boolean = false;
+
+    private _isOpen: boolean = false;
 
 
     constructor () {
@@ -48,6 +55,9 @@ export default class PopupReceiverSelector
 
             this.messagePort = port;
             this.messagePort.onMessage.addListener(this.onPopupMessage);
+            this.messagePort.onDisconnect.addListener(() => {
+                this.messagePortDisconnected = true;
+            });
 
             this.messagePort.postMessage({
                 subject: "popup:/populateReceiverList"
@@ -60,6 +70,9 @@ export default class PopupReceiverSelector
         });
     }
 
+    get isOpen () {
+        return this._isOpen;
+    }
 
     public async open (
             receivers: Receiver[]
@@ -85,21 +98,36 @@ export default class PopupReceiverSelector
           , ...centeredProps
         });
 
+        this._isOpen = true;
+
         this.windowId = popup.id;
-        this.openerWindowId = openerWindow.id;
 
         // Size/position not set correctly on creation (bug?)
         await browser.windows.update(this.windowId, {
             ...centeredProps
         });
 
-        // Add focus listener
-        browser.windows.onFocusChanged.addListener(
-                this.onWindowsFocusChanged);
+
+        const closeIfFocusLost = await options.get(
+                "receiverSelectorCloseIfFocusLost");
+
+        if (closeIfFocusLost) {
+            // Add focus listener
+            browser.windows.onFocusChanged.addListener(
+                    this.onWindowsFocusChanged);
+        }
     }
 
-    public close (): void {
-        browser.windows.remove(this.windowId);
+    public async close (): Promise<void> {
+        if (this.windowId) {
+            await browser.windows.remove(this.windowId);
+        }
+
+        this._isOpen = false;
+
+        if (this.messagePort && !this.messagePortDisconnected) {
+            this.messagePort.disconnect();
+        }
     }
 
 
@@ -138,7 +166,6 @@ export default class PopupReceiverSelector
 
         // Cleanup
         this.windowId = null;
-        this.openerWindowId = null;
         this.messagePort = null;
         this.receivers = null;
         this.defaultMediaType = null;
