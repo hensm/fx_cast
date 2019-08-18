@@ -20,17 +20,6 @@ Compatibility reports are always helpful. Use the "Compatibility Report" issue t
 
 Missing strings:
 
-* `es`
-    * `optionsMediaSyncElementDescription`
-    * `optionsReceiverSelectorCategoryName`
-    * `optionsReceiverSelectorCategoryDescription`
-    * `optionsReceiverSelectorType`
-    * `optionsReceiverSelectorTypeBrowser`
-    * `optionsReceiverSelectorTypeNative`
-    * `optionsReceiverSelectorWaitForConnection`
-    * `optionsReceiverSelectorWaitForConnectionDescription`
-    * `optionsReceiverSelectorCloseIfFocusLost`
-    * `optionsMirroringAppIdDescription`
 * `nl`
     * `popupMediaTypeApp`
     * `popupMediaTypeTab`
