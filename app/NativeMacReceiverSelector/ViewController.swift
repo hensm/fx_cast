@@ -91,11 +91,19 @@ class ViewController : NSViewController {
                 withTag: initData.defaultMediaType.rawValue)
 
 
-        let mediaTypeStackView = NSStackView(views: [
-            makeLabel(initData.i18n_mediaSelectCastLabel),
-            self.mediaTypePopUpButton,
-            makeLabel(initData.i18n_mediaSelectToLabel)
-        ])
+        let mediaTypeStackView = NSStackView()
+
+        if initData.i18n_mediaSelectCastLabel != "" {
+            mediaTypeStackView.addView(
+                    makeLabel(initData.i18n_mediaSelectCastLabel), in: .leading)
+        }
+
+        mediaTypeStackView.addView(self.mediaTypePopUpButton, in: .leading)
+
+        if initData.i18n_mediaSelectToLabel != "" {
+            mediaTypeStackView.addView(
+                    makeLabel(initData.i18n_mediaSelectToLabel), in: .leading)
+        }
 
         stackView.addArrangedSubview(mediaTypeStackView)
 
