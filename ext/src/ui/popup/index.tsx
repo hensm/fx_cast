@@ -115,10 +115,12 @@ class PopupApp extends Component<{}, PopupAppState> {
         return (
             <div>
                 <div className="media-select">
-                    { _("popupMediaSelectCastLabel") }
+                    <div className="media-select__label-cast">
+                        { _("popupMediaSelectCastLabel") }
+                    </div>
                     <select value={ this.state.mediaType }
                             onChange={ this.onSelectChange }
-                            className="media-select-dropdown">
+                            className="media-select__dropdown">
                         <option value={ ReceiverSelectorMediaType.App }
                                 disabled={ !(this.state.availableMediaTypes
                                         & ReceiverSelectorMediaType.App) }>
@@ -145,7 +147,9 @@ class PopupApp extends Component<{}, PopupAppState> {
                                 : _("popupMediaTypeFile") }
                         </option>
                     </select>
-                    { _("popupMediaSelectToLabel") }
+                    <div className="media-select__label-to">
+                        { _("popupMediaSelectToLabel") }
+                    </div>
                 </div>
                 <ul className="receivers">
                     { this.state.receivers && this.state.receivers.map(
@@ -238,16 +242,16 @@ class ReceiverEntry extends Component<ReceiverEntryProps, ReceiverEntryState> {
 
         return (
             <li className="receiver">
-                <div className="receiver-name">
+                <div className="receiver__name">
                     { this.props.receiver.friendlyName }
                 </div>
-                <div className="receiver-address"
+                <div className="receiver__address"
                      title={ !application.isIdleScreen && application.statusText }>
                     { application.isIdleScreen
                         ? `${this.props.receiver.host}:${this.props.receiver.port}`
                         : application.statusText }
                 </div>
-                <button className="receiver-connect"
+                <button className="receiver__connect"
                         onClick={ this.handleCast }
                         disabled={this.props.isLoading || !this.props.canCast}>
                     { this.state.isLoading

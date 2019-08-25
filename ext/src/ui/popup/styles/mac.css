@@ -12,11 +12,11 @@ button:not([disabled]):hover:active {
     color: -moz-mac-buttonactivetext;
 }
 
-.receiver-address,
-.receiver-status {
+.receiver__address,
+.receiver__status {
     font: message-box;
 }
 
-.receiver-connect {
+.receiver__connect {
     height: 22px;
 }
