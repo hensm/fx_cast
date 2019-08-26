@@ -2,8 +2,6 @@ import Cocoa
 
 
 class ViewController : NSViewController {
-    var initData: InitData!
-
     var mediaTypePopUpButton: NSPopUpButton!
     var receiverViews = [ReceiverView]()
 
@@ -21,7 +19,7 @@ class ViewController : NSViewController {
     override func viewDidLoad () {
         super.viewDidLoad()
 
-        self.initData = (NSApplication.shared.delegate as! AppDelegate).initData
+        let initData = InitDataProvider.shared.data
 
         /**
          * View Hierarchy
@@ -59,27 +57,27 @@ class ViewController : NSViewController {
           , initData.i18n_mediaTypeFile
         ])
 
-        let mediaTypePopUpButtonMenu = self.mediaTypePopUpButton.menu!
-        mediaTypePopUpButtonMenu.delegate = self
+        if let appItem = self.mediaTypePopUpButton
+                .item(withTitle: initData.i18n_mediaTypeApp)
+         , let tabItem = self.mediaTypePopUpButton
+                .item(withTitle: initData.i18n_mediaTypeTab)
+         , let screenItem = self.mediaTypePopUpButton
+                .item(withTitle: initData.i18n_mediaTypeScreen)
+         , let fileItem = self.mediaTypePopUpButton
+                .item(withTitle: initData.i18n_mediaTypeFile) {
 
-        let appItem = self.mediaTypePopUpButton
-            .item(withTitle: initData.i18n_mediaTypeApp)!
-        let tabItem = self.mediaTypePopUpButton
-            .item(withTitle: initData.i18n_mediaTypeTab)!
-        let screenItem = self.mediaTypePopUpButton
-            .item(withTitle: initData.i18n_mediaTypeScreen)!
-        let fileItem = self.mediaTypePopUpButton
-            .item(withTitle: initData.i18n_mediaTypeFile)!
+            if let mediaTypePopUpButtonMenu = self.mediaTypePopUpButton.menu {
+                mediaTypePopUpButtonMenu.delegate = self
+                mediaTypePopUpButtonMenu.insertItem(NSMenuItem.separator()
+                      , at: mediaTypePopUpButtonMenu.index(of: fileItem))
+            }
 
-        mediaTypePopUpButtonMenu
-            .insertItem(NSMenuItem.separator()
-                  , at: mediaTypePopUpButtonMenu.index(of: fileItem))
-
-        // Set tags to enum value
-        appItem.tag = MediaType.app.rawValue
-        tabItem.tag = MediaType.tab.rawValue
-        screenItem.tag = MediaType.screen.rawValue
-        fileItem.tag = MediaType.file.rawValue
+            // Set tags to enum value
+            appItem.tag = MediaType.app.rawValue
+            tabItem.tag = MediaType.tab.rawValue
+            screenItem.tag = MediaType.screen.rawValue
+            fileItem.tag = MediaType.file.rawValue
+        }
 
         for item in self.mediaTypePopUpButton.itemArray {
             if (initData.availableMediaTypes & item.tag) == 0 {
@@ -121,15 +119,12 @@ class ViewController : NSViewController {
             let receiverSeparator = NSBox()
             receiverSeparator.boxType = .separator
 
-            let receiverView = ReceiverView(
-                    receiver: receiver
-                  , initData: self.initData)
-
+            let receiverView = ReceiverView(receiver: receiver)
             receiverView.receiverViewDelegate = self
 
-            if UInt(initData!.availableMediaTypes) == 0
-                    || (initData!.availableMediaTypes
-                            & initData!.defaultMediaType.rawValue) == 0 {
+            if UInt(initData.availableMediaTypes) == 0
+                    || (initData.availableMediaTypes
+                            & initData.defaultMediaType.rawValue) == 0 {
                 receiverView.isEnabled = false
             }
 
@@ -149,26 +144,33 @@ class ViewController : NSViewController {
 
     override func viewDidAppear () {
         // Set window title and update visibility
-        let window = self.view.window!
-        window.title = initData.i18n_extensionName
-        window.titleVisibility = .visible
+        if let window = self.view.window {
+            window.title = InitDataProvider.shared.data.i18n_extensionName
+            window.titleVisibility = .visible
+        }
     }
 }
 
 extension ViewController : NSMenuDelegate {
     func menuDidClose (_ menu: NSMenu) {
-        let mediaType = MediaType(
-                rawValue: self.mediaTypePopUpButton.selectedItem!.tag)!
+        let initData = InitDataProvider.shared.data
 
-        if self.initData.availableMediaTypes & mediaType.rawValue != 0 {
+        guard let selectedItem = self.mediaTypePopUpButton.selectedItem
+            , let mediaType = MediaType(rawValue: selectedItem.tag) else {
+            return
+        }
+
+        if initData.availableMediaTypes & mediaType.rawValue != 0 {
             for receiverView in self.receiverViews {
                 receiverView.isEnabled = true
             }
         }
 
-        let fileItem = self.mediaTypePopUpButton
+        guard let fileItem = self.mediaTypePopUpButton
                 .item(at: self.mediaTypePopUpButton.indexOfItem(
-                        withTag: MediaType.file.rawValue))!
+                        withTag: MediaType.file.rawValue)) else {
+            return
+        }
 
         if (mediaType == .file) {
             let panel = NSOpenPanel()
@@ -178,7 +180,9 @@ extension ViewController : NSMenuDelegate {
             panel.canCreateDirectories = false
             panel.canChooseFiles = true
 
-            panel.beginSheetModal(for: self.view.window!) { (result) in
+            guard let window = self.view.window else { return }
+
+            panel.beginSheetModal(for: window) { (result) in
                 if (result == .OK) {
                     let url = panel.urls[0]
                     let fileName = url.lastPathComponent
@@ -194,14 +198,21 @@ extension ViewController : NSMenuDelegate {
                 } else {
                     // Re-select the default media type item
                     self.mediaTypePopUpButton.selectItem(
-                            withTag: self.initData.defaultMediaType.rawValue)
+                            withTag: initData.defaultMediaType.rawValue)
+
+                    let defaultMediaTypeAvailable = initData.availableMediaTypes
+                            & initData.defaultMediaType.rawValue != 0
+
+                    for receiverView in self.receiverViews {
+                        receiverView.isEnabled = defaultMediaTypeAvailable
+                    }
                 }
             }
         }
 
 
         // Reset file item
-        fileItem.title = self.initData.i18n_mediaTypeFile
+        fileItem.title = initData.i18n_mediaTypeFile
         self.filePath = nil
     }
 }
@@ -217,23 +228,23 @@ extension ViewController : ReceiverViewDelegate {
             receiverView.isEnabled = false
         }
 
-        do {
-            let mediaType = MediaType(
-                    rawValue: self.mediaTypePopUpButton.selectedItem!.tag)!
 
-            let selection = ReceiverSelection(
-                    receiver: receiver
-                  , mediaType: mediaType
-                  , filePath: self.filePath ?? nil)
+        guard let selectedItem = self.mediaTypePopUpButton.selectedItem
+            , let mediaType = MediaType(rawValue: selectedItem.tag) else {
+            return
+        }
 
-            let jsonData = try JSONEncoder().encode(selection)
-            let jsonString = String(data: jsonData, encoding: .utf8)
+        let selection = ReceiverSelection(
+                receiver: receiver
+              , mediaType: mediaType
+              , filePath: self.filePath ?? nil)
 
-            print(jsonString!)
+        if let jsonData = try? JSONEncoder().encode(selection)
+         , let jsonString = String(data: jsonData, encoding: .utf8) {
+            print(jsonString)
             fflush(stdout)
-        } catch {
-            fputs("Error: Failed to encode output data", stderr)
-            exit(1)
+        } else {
+            fatalError("Error: Failed to encode output data")
         }
     }
 }

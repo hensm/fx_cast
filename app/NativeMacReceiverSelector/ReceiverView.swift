@@ -32,7 +32,7 @@ class ReceiverView : NSStackView {
         super.init(coder: coder)
     }
 
-    init (receiver: Receiver, initData: InitData) {
+    init (receiver: Receiver) {
         super.init(frame: NSZeroRect)
 
         self.receiver = receiver
@@ -63,7 +63,7 @@ class ReceiverView : NSStackView {
 
 
         self.castButton = NSButton(
-                title: initData.i18n_castButtonTitle
+                title: InitDataProvider.shared.data.i18n_castButtonTitle
               , target: self
               , action: #selector(ReceiverView.onCast))
 
@@ -89,12 +89,14 @@ class ReceiverView : NSStackView {
         if !constraintsSet {
             self.translatesAutoresizingMaskIntoConstraints = false
 
-            self.leadingAnchor.constraint(
-                    equalTo: superview!.leadingAnchor
-                  , constant: 8).isActive = true
-            self.trailingAnchor.constraint(
-                    equalTo: superview!.trailingAnchor
-                  , constant: -8).isActive = true
+            if let superview = self.superview {
+                self.leadingAnchor.constraint(
+                        equalTo: superview.leadingAnchor
+                      , constant: 8).isActive = true
+                self.trailingAnchor.constraint(
+                        equalTo: superview.trailingAnchor
+                      , constant: -8).isActive = true
+            }
 
             constraintsSet = true
         }
