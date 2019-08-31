@@ -7,8 +7,8 @@
     box-shadow: 0 0 1.5px 1px red;
 }
 
-body {
-    margin: 20px 10px;
+#root {
+    padding: 20px 10px;
 }
 
 #form {
