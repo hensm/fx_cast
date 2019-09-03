@@ -51,7 +51,7 @@ export default new class StatusManager
 
     public async init () {
         if (!this.bridgePort) {
-            await this.createBridgePort();
+            this.bridgePort = await this.createBridgePort();
         }
     }
 
