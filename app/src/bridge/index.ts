@@ -26,18 +26,6 @@ import { __applicationName
 events.EventEmitter.defaultMaxListeners = 50;
 
 
-const browser = new dnssd.Browser(dnssd.tcp("googlecast"));
-
-// Local media server
-let mediaServer: http.Server;
-
-process.on("SIGTERM", () => {
-    if (mediaServer && mediaServer.listening) {
-        mediaServer.close();
-    }
-});
-
-
 const decodeTransform = new DecodeTransform();
 const encodeTransform = new EncodeTransform();
 
@@ -45,6 +33,10 @@ const encodeTransform = new EncodeTransform();
 process.stdin.pipe(decodeTransform);
 decodeTransform.on("data", handleMessage);
 encodeTransform.pipe(process.stdout);
+
+decodeTransform.on("error", err => {
+    console.error("Failed to decode message", err);
+});
 
 /**
  * Encode and send a message to the extension. If message is
@@ -70,12 +62,33 @@ interface InitializeOptions {
     shouldWatchStatus?: boolean;
 }
 
+
+let receiverSelectorApp: child_process.ChildProcess;
+let receiverSelectorAppClosed = true;
+
+// Local media server
+let mediaServer: http.Server;
+
+let browser: dnssd.Browser;
+
+
 // Existing counterpart Media/Session objects
 const existingSessions: Map<string, Session> = new Map();
 const existingMedia: Map<string, Media> = new Map();
 
-let receiverSelectorApp: child_process.ChildProcess;
-let receiverSelectorAppClosed = true;
+
+process.on("SIGTERM", () => {
+    if (mediaServer && mediaServer.listening) {
+        mediaServer.close();
+    }
+
+    if (receiverSelectorApp && !receiverSelectorAppClosed) {
+        receiverSelectorApp.kill()
+    }
+
+    browser.stop();
+});
+
 
 /**
  * Handle incoming messages from the extension and forward
@@ -86,7 +99,12 @@ let receiverSelectorAppClosed = true;
  */
 async function handleMessage (message: Message) {
     if (message.subject.startsWith("bridge:/media/")) {
-        const mediaId = message._id!;
+        if (!message._id) {
+            console.error("Media message missing _id");
+            return;
+        }
+
+        const mediaId = message._id;
 
         if (existingMedia.has(mediaId)) {
             // Forward message to instance message handler
@@ -111,7 +129,12 @@ async function handleMessage (message: Message) {
     }
 
     if (message.subject.startsWith("bridge:/session/")) {
-        const sessionId = message._id!;
+        if (!message._id) {
+            console.error("Session message missing _id");
+            return;
+        }
+
+        const sessionId = message._id;
 
         if (existingSessions.has(sessionId)) {
             // Forward message to instance message handler
@@ -173,6 +196,11 @@ function handleReceiverSelectorMessage (message: Message) {
                 } catch (err) {
                     console.error("Invalid native selector data.");
                 }
+            }
+
+            // Kill existing process if it exists
+            if (receiverSelectorApp && !receiverSelectorAppClosed) {
+                receiverSelectorApp.kill();
             }
 
             receiverSelectorApp = child_process.spawn(
@@ -290,6 +318,11 @@ function handleMediaServerMessage (message: Message) {
 
 
 function initialize (options: InitializeOptions) {
+    browser = new dnssd.Browser(dnssd.tcp("googlecast"));
+    browser.on("error", err => {
+        console.error("Discovery failed", err);
+    });
+
     if (options.shouldWatchStatus) {
         browser.on("serviceUp", onStatusBrowserServiceUp);
         browser.on("serviceDown", onStatusBrowserServiceDown);
