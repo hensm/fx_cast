@@ -183,17 +183,14 @@ class PopupApp extends Component<{}, PopupAppState> {
         const mediaType = parseInt(ev.target.value);
 
         if (mediaType === ReceiverSelectorMediaType.File) {
-            try {
-                const filePath = window.prompt();
-
+            const fileUrl = window.prompt();
+            if (fileUrl) {
                 this.setState({
                     mediaType
-                  , filePath
+                  , filePath: fileUrl.href
                 });
 
                 return;
-            } catch (err) {
-                // Don't need to handle any errors
             }
 
             // Set media type to default if failed to set filePath
