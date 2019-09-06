@@ -187,7 +187,7 @@ class PopupApp extends Component<{}, PopupAppState> {
             if (fileUrl) {
                 this.setState({
                     mediaType
-                  , filePath: fileUrl.href
+                  , filePath: fileUrl
                 });
 
                 return;
