@@ -166,6 +166,7 @@ async function handleMessage (message: Message) {
     switch (message.subject) {
         case "bridge:/getInfo": {
             encodeTransform.write(__applicationVersion);
+            break;
         }
 
         case "bridge:/initialize": {
