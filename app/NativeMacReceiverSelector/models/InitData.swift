@@ -16,4 +16,5 @@ struct InitData : Codable {
     let i18n_mediaTypeFile: String
     let i18n_mediaSelectCastLabel: String
     let i18n_mediaSelectToLabel: String
+    let i18n_noReceiversFound: String
 }

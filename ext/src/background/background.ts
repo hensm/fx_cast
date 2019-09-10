@@ -44,7 +44,7 @@ browser.runtime.onInstalled.addListener(async details => {
 
 
 function initBrowserAction () {
-    browser.browserAction.disable();
+    /*browser.browserAction.disable();
 
     function onServiceChange () {
         if (StatusManager.getReceivers().length) {
@@ -55,7 +55,7 @@ function initBrowserAction () {
     }
 
     StatusManager.addEventListener("serviceUp", onServiceChange);
-    StatusManager.addEventListener("serviceDown", onServiceChange);
+    StatusManager.addEventListener("serviceDown", onServiceChange);*/
 
 
     /**

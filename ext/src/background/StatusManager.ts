@@ -149,10 +149,15 @@ export default new class StatusManager
 
         // Cleanup
         this.receivers.clear();
-        this.bridgePort.onDisconnect.removeListener(
-                this.onBridgePortDisconnect);
-        this.bridgePort.onMessage.removeListener(this.onBridgePortMessage);
-        this.bridgePort = null;
+
+        if (this.bridgePort) {
+            this.bridgePort.onDisconnect.removeListener(
+                    this.onBridgePortDisconnect);
+            this.bridgePort.onMessage.removeListener(
+                    this.onBridgePortMessage);
+
+            this.bridgePort = null;
+        }
 
         window.setTimeout(async () => {
             this.bridgePort = await this.createBridgePort();

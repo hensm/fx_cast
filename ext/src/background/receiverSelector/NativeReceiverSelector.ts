@@ -100,6 +100,7 @@ export default class NativeReceiverSelector
               , i18n_mediaTypeFile: _("popupMediaTypeFile")
               , i18n_mediaSelectCastLabel: _("popupMediaSelectCastLabel")
               , i18n_mediaSelectToLabel: _("popupMediaSelectToLabel")
+              , i18n_noReceiversFound: _("popupNoReceiversFound")
             })
         });
 

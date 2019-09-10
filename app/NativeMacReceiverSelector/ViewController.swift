@@ -106,33 +106,48 @@ class ViewController : NSViewController {
         stackView.addArrangedSubview(mediaTypeStackView)
 
 
-        /**
-         * For each receiver in the initData list, create a new
-         * ReceiverView, set self as a ReceiverViewDelegate and
-         * appends to main stack view.
-         *
-         * Keeps a reference to the receiver view to call disable()
-         * later.
-         */
-        for receiver in initData.receivers {
-            // Create separator between last receiver / media type
-            let receiverSeparator = NSBox()
-            receiverSeparator.boxType = .separator
+        if initData.receivers.count < 1 {
+            let separator = NSBox()
+            separator.boxType = .separator
 
-            let receiverView = ReceiverView(receiver: receiver)
-            receiverView.receiverViewDelegate = self
+            let notFoundStackView = NSStackView(views: [
+                makeLabel(initData.i18n_noReceiversFound)
+            ])
 
-            if UInt(initData.availableMediaTypes) == 0
-                    || (initData.availableMediaTypes
-                            & initData.defaultMediaType.rawValue) == 0 {
-                receiverView.isEnabled = false
+            notFoundStackView.alignment = .centerX
+            notFoundStackView.edgeInsets = NSEdgeInsetsMake(18, 0, 18, 0)
+
+            stackView.addArrangedSubview(separator)
+            stackView.addArrangedSubview(notFoundStackView)
+        } else {
+            /**
+             * For each receiver in the initData list, create a new
+             * ReceiverView, set self as a ReceiverViewDelegate and
+             * appends to main stack view.
+             *
+             * Keeps a reference to the receiver view to call disable()
+             * later.
+             */
+            for receiver in initData.receivers {
+                // Create separator between last receiver / media type
+                let receiverSeparator = NSBox()
+                receiverSeparator.boxType = .separator
+
+                let receiverView = ReceiverView(receiver: receiver)
+                receiverView.receiverViewDelegate = self
+
+                if UInt(initData.availableMediaTypes) == 0
+                        || (initData.availableMediaTypes
+                                & initData.defaultMediaType.rawValue) == 0 {
+                    receiverView.isEnabled = false
+                }
+
+
+                self.receiverViews.append(receiverView)
+
+                stackView.addArrangedSubview(receiverSeparator)
+                stackView.addArrangedSubview(receiverView)
             }
-
-
-            self.receiverViews.append(receiverView)
-
-            stackView.addArrangedSubview(receiverSeparator)
-            stackView.addArrangedSubview(receiverView)
         }
 
 

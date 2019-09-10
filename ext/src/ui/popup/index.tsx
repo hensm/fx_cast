@@ -152,13 +152,17 @@ class PopupApp extends Component<{}, PopupAppState> {
                     </div>
                 </div>
                 <ul className="receivers">
-                    { this.state.receivers && this.state.receivers.map(
-                            (receiver, i) => (
-                        <ReceiverEntry receiver={ receiver }
-                                       onCast={ this.onCast }
-                                       isLoading={ this.state.isLoading }
-                                       canCast={ canCast }
-                                       key={ i }/> ))}
+                    { this.state.receivers && this.state.receivers.length
+                        ? this.state.receivers.map((receiver, i) => (
+                            <ReceiverEntry receiver={ receiver }
+                                           onCast={ this.onCast }
+                                           isLoading={ this.state.isLoading }
+                                           canCast={ canCast }
+                                           key={ i } /> ))
+                        : (
+                            <div className="receivers__not-found">
+                                { _("popupNoReceiversFound") }
+                            </div> )}
                 </ul>
             </div>
         );
