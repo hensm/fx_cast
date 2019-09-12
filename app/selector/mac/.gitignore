@@ -1,0 +1,4 @@
+# Ignore contents of xcodeproj, besides main project file
+*.xcodeproj/*
+!*.xcodeproj/project.pbxproj
+build/

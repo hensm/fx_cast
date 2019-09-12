@@ -1,6 +1,5 @@
 import Cocoa
 
-
 protocol ReceiverViewDelegate : AnyObject {
     func didCast (_ receiver: Receiver)
 }
@@ -14,16 +13,10 @@ class ReceiverView : NSStackView {
     var castButton: NSButton!
     var castingSpinner: NSProgressIndicator!
 
-
     var isEnabled: Bool {
-        get {
-            return self.castButton.isEnabled
-        }
-        set {
-            self.castButton.isEnabled = newValue
-        }
+        get { return self.castButton.isEnabled }
+        set { self.castButton.isEnabled = newValue }
     }
-
 
     override init (frame: CGRect) {
         super.init(frame: frame)
@@ -68,8 +61,8 @@ class ReceiverView : NSStackView {
               , action: #selector(ReceiverView.onCast))
 
         self.castButton.bezelStyle = .rounded
-        self.castButton.widthAnchor.constraint(equalToConstant: 100).isActive = true
-
+        self.castButton.widthAnchor.constraint(
+                equalToConstant: 100).isActive = true
 
         self.castingSpinner = NSProgressIndicator()
         self.castingSpinner.style = .spinning

@@ -204,8 +204,11 @@ function handleReceiverSelectorMessage (message: Message) {
                 receiverSelectorApp.kill();
             }
 
+            const receiverSelectorPath = path.join(process.cwd()
+                  , "fx_cast_selector.app/Contents/MacOS/fx_cast_selector");
+
             receiverSelectorApp = child_process.spawn(
-                    path.join(process.cwd(), "selector")
+                    receiverSelectorPath
                   , [ receiverSelectorData ]);
 
             receiverSelectorAppClosed = false;
