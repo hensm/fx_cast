@@ -1,5 +1,19 @@
 "use strict";
 
+// Set FAQ fragment IDs
+for (const faq of document.querySelectorAll(".faq")) {
+    const summary = faq.querySelector(".faq__summary");
+    const formattedSummary = summary.textContent.trim().replace(/ /g, "_");
+
+    faq.id = formattedSummary;
+
+    if (window.location.hash) {
+        faq.open = decodeURIComponent(
+                window.location.hash.slice(1)) === formattedSummary;
+    }
+}
+
+
 function updateThemeClass (mediaQuery) {
     if (mediaQuery.matches) {
         document.documentElement.classList.remove("theme-dark");
