@@ -37,7 +37,7 @@ browser.runtime.getPlatformInfo()
                 const input = document.createElement("input");
                 const inputWrapper = document.createElement("div");
 
-                inputWrapper.append(input)
+                inputWrapper.append(input);
                 document.documentElement.append(inputWrapper);
 
                 input.type = "text";
@@ -55,7 +55,7 @@ browser.runtime.getPlatformInfo()
                         }
                     `;
 
-                    document.body.append(style)
+                    document.body.append(style);
                 }
 
                 break;

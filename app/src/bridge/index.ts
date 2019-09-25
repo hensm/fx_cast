@@ -83,7 +83,7 @@ process.on("SIGTERM", () => {
     }
 
     if (receiverSelectorApp && !receiverSelectorAppClosed) {
-        receiverSelectorApp.kill()
+        receiverSelectorApp.kill();
     }
 
     browser.stop();

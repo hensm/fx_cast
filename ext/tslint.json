@@ -1,6 +1,6 @@
 {
     "extends": [
-        "../common/tslint.json"
+        "../tslint.json"
     ]
   , "rules": {
         "no-bitwise": false
