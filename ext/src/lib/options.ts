@@ -4,7 +4,12 @@ import defaultOptions from "../defaultOptions";
 
 import { ReceiverSelectorType } from "../background/receiverSelector";
 import { TypedEventTarget } from "./typedEvents";
+import { TypedStorageArea } from "./typedStorage";
 
+
+const storageArea = new TypedStorageArea<{
+    options: Options
+}>(browser.storage.sync);
 
 export interface Options {
     bridgeApplicationName: string;
@@ -89,9 +94,7 @@ export default new class extends TypedEventTarget<EventMap> {
      * Options interface type.
      */
     public async getAll (): Promise<Options> {
-        const { options } = await browser.storage.sync.get(
-                "options") as { options: Options };
-
+        const { options } = await storageArea.get("options");
         return options;
     }
 
@@ -100,7 +103,7 @@ export default new class extends TypedEventTarget<EventMap> {
      * Returns storage promise.
      */
     public async setAll (options: Options): Promise<void> {
-        return browser.storage.sync.set({ options });
+        return storageArea.set({  options })
     }
 
     /**
