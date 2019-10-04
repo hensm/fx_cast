@@ -327,6 +327,75 @@
         "message": "App ID for a registered Chromecast receiver application. Advanced use only. Must be compatible with the default app (see GitHub repo)."
       , "description": "Mirroring app ID option description."
     }
+  
+  , "optionsAirPlayCategoryName": {
+        "message": "AirPlay"
+      , "description": "Options page AirPlay category name."
+    }
+  , "optionsAirPlayCategoryDescription": {
+        "message": "Management of AirPlay devices and API settings."
+      , "description": "Options page AirPlay category description."
+    }
+  , "optionsAirPlayDeviceManager": {
+        "message": "Device manager"
+      , "description": "Label for the options page AirPlay device manager control."
+    }
+  , "optionsAirPlayDeviceManagerNoDevices": {
+        "message": "No devices paired"
+      , "description": "Message displayed in the AirPlay device manager when there are no paired devices to display."
+    }
+  , "optionsAirPlayDeviceManagerNewName": {
+        "message": "Device name"
+      , "description": "Label for the AirPlay device manager new device name field."
+    }
+  , "optionsAirPlayDeviceManagerNewAddress": {
+        "message": "Device address"
+      , "description": "Label for the AirPlay device manager new device name field."
+    }
+  , "optionsAirPlayDeviceManagerNewSubmit": {
+        "message": "Add Device"
+      , "description": "Label for the AirPlay device manager new device submit button."
+    }
+  , "optionsAirPlayDeviceRemove": {
+        "message": "Remove Device"
+      , "description": "AirPlay device remove button label."
+    }
+  , "optionsAirPlayDevicePair": {
+        "message": "Pair Device"
+      , "description": "AirPlay device pair button label. Ellipsis indicates additional action required as it requires the user to enter additional info (pairing PIN)."
+    }
+  , "optionsAirPlayDevicePairedStatusPaired": {
+        "message": "Paired"
+      , "description": "AirPlay device status for paired devices."
+    }
+  , "optionsAirPlayDevicePairedStatusUnpaired": {
+        "message": "Unpaired"
+      , "description": "AirPlay device status for unpaired devices."
+    }
+  , "optionsAirPlayDeviceCredentials": {
+        "message": "Credentials"
+      , "description": "AirPlay device credentials <summary> label."
+    }
+  , "optionsAirPlayDeviceCredentialsClientId": {
+        "message": "Client ID"
+      , "description": "AirPlay device credentials client ID table header."
+    }
+  , "optionsAirPlayDeviceCredentialsPrivateKey": {
+        "message": "Private key"
+      , "description": "AirPlay device credentials private key table header."
+    }
+  , "optionsAirPlayDeviceCredentialsPublicKey": {
+        "message": "Public key"
+      , "description": "AirPlay device credentials public key table header."
+    }
+  , "optionsAirPlayDeviceCredentialsRegenerate": {
+        "message": "Regenerate Credentials"
+      , "description": "AirPlay device credentials regenerate button label."
+    }
+  , "optionsAirPlayDeviceCredentialsCopyToClipboard": {
+        "message": "Copy to Clipboard"
+      , "description": "AirPlay device credentials copy to clipbard button label."
+    }
 
   , "optionsReset": {
         "message": "Restore Defaults"

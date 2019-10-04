@@ -313,15 +313,15 @@ class OptionsApp extends Component<{}, OptionsAppState> {
 
                     <fieldset className="category">
                         <legend className="category__name">
-                            <h2>AirPlay</h2>
+                            <h2>{ _("optionsAirPlayCategoryName") }</h2>
                         </legend>
                         <p className="category__description">
-                            Management of AirPlay devices and API settings.
+                            { _("optionsAirPlayCategoryDescription") }
                         </p>
 
                         <div className="option">
                             <div className="option__label">
-                                Device manager
+                            { _("optionsAirPlayDeviceManager") }
                             </div>
                             <div className="option__control">
                                 <AirPlayDeviceManager />

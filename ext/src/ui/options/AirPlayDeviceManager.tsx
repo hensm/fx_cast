@@ -7,7 +7,7 @@ import * as base64 from "../../lib/base64";
 import * as devices from "./devices";
 
 
-//const _ = browser.i18n.getMessage;
+const _ = browser.i18n.getMessage;
 
 
 interface AirPlayDeviceProps {
@@ -41,7 +41,7 @@ const AirPlayDevice = (props: AirPlayDeviceProps) => {
                         onClick={ () => {
                             props.onRemove(props.data);
                         }}>
-                    Remove Device
+                    { _("optionsAirPlayDeviceRemove") }
                 </button>
 
                 { props.data.isPaired ||
@@ -49,14 +49,16 @@ const AirPlayDevice = (props: AirPlayDeviceProps) => {
                             onClick={ () => {
                                 props.onPairCredentials(props.data);
                             }}>
-                        Pair Device
+                        { _("optionsAirPlayDevicePair") }
                     </button> }
             </div>
             <div className="device__meta">
                 <div className="device__name">
                     { props.data.name }
                     <span className={pairedStatusClassName}>
-                        { props.data.isPaired ? "Paired" : "Unpaired" }
+                        { props.data.isPaired
+                            ? _("optionsAirPlayDevicePairedStatusPaired")
+                            : _("optionsAirPlayDevicePairedStatusUnpaired") }
                     </span>
                 </div>
                 <div className="device__address">
@@ -64,19 +66,19 @@ const AirPlayDevice = (props: AirPlayDeviceProps) => {
                 </div>
             </div>
             <details className="device__credentials">
-                <summary>Credentials</summary>
+                <summary>{ _("optionsAirPlayDeviceCredentials") }</summary>
 
                 <table>
                     <tr>
-                        <th>Client ID</th>
+                        <th>{ _("optionsAirPlayDeviceCredentialsClientId") }</th>
                         <td>{ props.data.credentials.clientId }</td>
                     </tr>
                     <tr>
-                        <th>Private key</th>
+                        <th>{ _("optionsAirPlayDeviceCredentialsPrivateKey") }</th>
                         <td>{ clientSk }</td>
                     </tr>
                     <tr>
-                        <th>Public key</th>
+                        <th>{ _("optionsAirPlayDeviceCredentialsPublicKey") }</th>
                         <td>{ clientPk }</td>
                     </tr>
                 </table>
@@ -86,11 +88,11 @@ const AirPlayDevice = (props: AirPlayDeviceProps) => {
                             onClick={ () => {
                                 props.onRegenCredentials(props.data);
                             }}>
-                        Regenerate Credentials
+                        { _("optionsAirPlayDeviceCredentialsRegenerate") }
                     </button>
                     <button className="small"
                             onClick={ copyCredentials }>
-                        Copy to Clipboard
+                        { _("optionsAirPlayDeviceCredentialsCopyToClipboard") }
                     </button>
                 </div>
             </details>
@@ -154,7 +156,7 @@ export default class AirPlayDeviceManager extends Component<
                                           onRegenCredentials={this.onDeviceRegenCredentials }
                                           onPairCredentials={ this.onDevicePairCredentials } /> ))
                         : <div className="device-manager__no-devices">
-                              No devices added
+                              { _("optionsAirPlayDeviceManagerNoDevices") }
                           </div> }
                 </ul>
 
@@ -164,7 +166,7 @@ export default class AirPlayDeviceManager extends Component<
 
                     <label className="device-manager-new__label">
                         <div className="device-manager-new__input-label">
-                            Device name
+                            { _("optionsAirPlayDeviceManagerNewName") }
                         </div>                    
                         <input className="device-manager-new__input-name"
                                type="text"
@@ -177,8 +179,8 @@ export default class AirPlayDeviceManager extends Component<
 
                     <label className="device-manager-new__label">
                         <div className="device-manager-new__input-label">
-                            Device address
-                        </div>                    
+                            { _("optionsAirPlayDeviceManagerNewAddress") }
+                        </div>
                         <input className="device-manager-new__input-address"
                                type="text"
                                pattern="^[a-zA-Z0-9][a-zA-Z0-9-]*[a-zA-Z0-9]$"
@@ -194,7 +196,7 @@ export default class AirPlayDeviceManager extends Component<
                     <button className="device-manager-new__submit"
                            type="submit"
                            disabled={ !this.state.isFormValid }>
-                        Add Device
+                        { _("optionsAirPlayDeviceManagerNewSubmit") }
                     </button>
                 </form>
             </div>
