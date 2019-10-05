@@ -234,7 +234,7 @@ export default class AirPlayDeviceManager extends Component<
           , isPaired: false
         };
 
-        // Use generated address if user left it blank
+        // Use generated suggested address if user left it blank
         if (!this.state.newDeviceAddress) {
             device.address = this.state.newDeviceAddressSuggestion;
         }
@@ -257,8 +257,14 @@ export default class AirPlayDeviceManager extends Component<
     private onDeviceRegenCredentials (device: devices.Device) {
         this.setState(state => {
             devices: state.devices.map(d => {
+                /**
+                 * Generate and set new credentials with an empty
+                 * AirPlayAuthCredentials call. Then, since the new credentials
+                 * aren't paired, set isPaired to false.
+                 */
                 if (d.name === device.name) {
                     d.credentials = new AirPlayAuthCredentials();
+                    d.isPaired = false;
                 }
 
                 return d;
@@ -269,17 +275,37 @@ export default class AirPlayDeviceManager extends Component<
     private onDevicePairCredentials () {}
 
 
+    /**
+     * Each time the new device name field is changed, provided the
+     * user has not already set an address in the address field,
+     * make a best-guess at what the actual address is and set the
+     * placeholder attribute of the address field to display it as
+     * indication.
+     * 
+     * If, once the new device form is submitted, the address field
+     * was left blank, the suggested address is used instead.
+     */
     private onNewDeviceNameChange (ev: React.ChangeEvent<HTMLInputElement>) {
         this.setState({
             newDeviceName: ev.target.value
         });
 
         if (!this.state.newDeviceAddress) {
+            /**
+             * Use the same-ish formatting rules as macOS for service
+             * names:
+             *  - Consecutive whitespace is replaced by a single space. No
+             *     need for tabs or newlines.
+             *  - All remaining spaces are replaced by hyphens.
+             *  - Any characters that aren't alpha-numerics or hyphens are
+             *     removed.
+             */
             const formattedName = ev.target.value
                 .replace(/\s{2,}/g, " ")
                 .replace(/ /g, "-")
                 .replace(/[^a-zA-Z0-9-]/g, "");
 
+            // Set new suggestion
             this.setState({
                 newDeviceAddressSuggestion: `${formattedName}.local`
             });
