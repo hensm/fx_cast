@@ -1,8 +1,9 @@
-# SOMEWHAT OUTDATED (again)!
-
 # Extension Lifetime
 
-A bridge application instance (`statusBridge`) is created to keep track of receivers’ statuses. This is expected to exist throughout the lifetime of the extension and will automatically reconnect if unexpectedly disconnected.
+A bridge application instance is created via the StatusManager (`background/StatusManager.ts`) to keep track of receivers’ statuses. The StatusManager emits events `serviceUp`, `serviceDown` and `statusUpdate` containing relevant data.
+
+This is expected to exist throughout the lifetime of the extension and will automatically reconnect with a 10-second interval if unexpectedly disconnected.
+
 
 The `shim/content.ts` content script is registered for all pages. It creates an empty `window.chrome` object in the page context since some sites may expect it to exist. It also intercepts any `src` attribute changes on `<script>` elements where the cast API may be loaded directly from a `chrome-extension://` URL, then sets them to the regular cast API script URL.
 
@@ -10,12 +11,11 @@ The `shim/content.ts` content script is registered for all pages. It creates an 
 
 The background script registers a `webRequest.onBeforeRequest` listener that intercepts requests to Google’s Cast API library.
 
-When a request is intercepted, the `shim/contentBridge.ts` script is executed in the content script context. This facilitates any message passing across content/page script isolation (the shim itself is executed in the page context, both for convenience — since it interacts substantially with page scripts — and security reasons).
+When a request is intercepted, the `shim/contentBridge.ts` script is executed in the content script context. This facilitates any message passing across content/page script isolation (the shim itself is executed in the page context, both for convenience — since it interacts substantially with page scripts — and to avoid page scripts calling into extension contexts).
 
 Messages passed to the shim are custom events of type `__castMessage`. Messages passed back from the shim are custom events of type `__castMessageResponse`. Event listening and creation is handled by the `shim/messageBridge.ts` module.
 
-The `shim/content.ts` script creates a message port connection (named `shim`) to the background script through which messages from the shim are forwarded. Messages are forwarded to the bridge and other parts of the extension via the background script.  
-The connection triggers the background script to spawn a bridge application instance. The tab/frame ID is stored and used identify shim instances.
+The `shim/contentBridge.ts` script creates a message port connection (named `"shim"`) to the background script through which messages from the shim are forwarded. Messages are forwarded to the bridge and other parts of the extension via the background script.  
 
 The request is then redirected to the shim bundle (`shim/index.ts`) which creates the `window.chrome.cast` API object.
 
@@ -25,11 +25,58 @@ The cast API is now available to the web app.
 
 The web app calls `chrome.cast.initialize` with an `ApiConfig` object containing the Chromecast receiver app ID to use. The shim sends a `main:/shimInitialized` message to the background script. The bridge sends `shim:/serviceUp` messages for any discovered devices with device info (address, port, label, etc…).
 
-### Extension Sender Apps
+### ShimManager
 
-The initialization for built-in sender apps (media/mirroring) works slightly differently. They run in the content script context and import the shim, rather than running in the page script context.
+The ShimManager (`background/ShimManager.ts`) handles initialization of shims and communication between them and a bridge instance. Once creates, it listens for and passes status updates from the StatusManager directly to any registered shims via `shim:/serviceUp`/`shim:/serviceDown` messages.
 
-The exported shim comes from `shim/export.ts`. Instead of setting the `window.__onGCastApiAvailable` callback, the module provides an init function which returns a promise. The `shim/contentBridge.ts` script is executed from that module and the initialization process is identical until the `shim:/initialized` message is received, at which point the promise is resolved.
+It provides a public `createShim` method which takes a `MessagePort` or `runtime.Port` port object as an input, but has different behavior depending on what type of port.
+
+If the passed content port object is of type `MessagePort`, the shim was initialzied in the background context, since we can't have a `runtime.Port` that outputs to itself (and we need some sort of message channel to pass as an output to the API consumer).
+
+The `createShim` method passes off to the internal `createShimFromBackground` and `createShimFromContent` methods, which do mostly the same thing, except that content script context shims have extra checking for tab/frame IDs. The shim is registered, the bridge port is hooked up to the content port (and vice-versa with the other content message handling in internal method `handleContentMessage`).
+
+A `Shim` object is returned which contains the required `bridgePort` and `contentPort` and optionally `contentTabId` and `contentFrameId` if initialized with a content script context shim.
+
+
+
+### Module
+
+The shim is designed to injected into a running page or imported (via `shim/export.ts`) into another script. This is used for the built-in sender apps (media/mirroring) that run in the content script context.
+
+If the shim is injected into a page, `contentBridge.ts` is executed in the content script context and the main shim bundle (`shim/index.ts`) replaces the page-loaded cast API loader script.
+
+If the shim module is imported into another script, instead of setting the `window.__onGCastApiAvailable` callback, the module provides an `ensureInit` function which returns a promise. The consumer script must call this function and resolve the promise before calling any APIs (default export). The `ensureInit`-returned promise will resolve to a `MessagePort` object which can be used similarly to a WebExtension `runtime.Port`.
+
+````ts
+import cast, { ensureInit } from "./shim/export";
+
+ensureInit().then(backgroundPort => {
+    backgroundPort.postMessage({
+        subject: "bridge:/doSomething"
+    });
+
+    const sessionRequest = new cast.SessionRequest(
+            cast.media.DEFAULT_MEDIA_RECEIVER_APP_ID);
+    
+    // ...
+});
+````
+
+It creates a `MessageChannel` object where the `port1` property is a `MessagePort` used by the API consumer to communicate with the background script.
+
+Though the shim can only be imported into an extension context, hooking up message port communication is different depending on whether the it's a content script or background context.
+It determines this by checking the current URL protocol for `moz-extension:`, which is only true for the background script.
+
+The goal is for messages to be passed through the custom `MessageChannel` and routed appropriately, even if it's for a message that crosses no context boundaries (shim created and used in background context) where extension messaging cannot work.
+
+**Note: This could be needlessly complex, so PRs welcome for any kind of simplification here.**
+
+If in background context, the `ShimManager` is imported, initialized and the `port2` message port is passed to the `createShim` method which will setup the shim, pass messages from `port1` to the background script and pass messages from the background script back to `port1`. Incoming messages from `port1` are then passed over `shim/eventMessageChannel.ts` to the shim. Incoming messages from the shim over `shim/eventMessageChannel.ts` are posted to `port1`.
+
+If instead in a content script context, `shim/contentBridge.ts` is imported and with side-effects (background script still calls into ShimManager), it creates and exports a `backgroundPort`. The incoming messages on that port are posted to `port2` and the incoming messages on `port2` are posted to `backgroundPort`.
+
+In either case, `port1` as part of a message channel to the background script is resolved as the result of the `ensureInit` promise as soon as the `shim:/initialized` message is passed to the shim.
+
 
 ## User Interaction
 
@@ -43,12 +90,12 @@ The shim then makes a connection to the selected receiver device and establishes
 
 Cast SDK API calls are translated into Chromecast protocol messages and sent via `node-castv2`. Based on [@GPMDP/electron-chromecast](https://github.com/GPMDP/electron-chromecast), so there are many similarities. The shim and the bridge exchange messages to implement API methods which require communication with the receiver device.
 
-`Session` and `Media` objects have a counterpart object within the bridge. Some messages are routed directly to these objects. For `Session`, these are in the format `bridge:/session/impl_<methodName>`. For `Media`, it's `bridge:/media/impl_<methodName>`.
+`Session` and `Media` objects have a counterpart object within the bridge. Some messages are routed directly to these objects. For `Session`, these are in the format `bridge:/session/impl_<methodName>`.
 
 
-# Messages (WIP)
+# Message Table (OUTDATED)
 
-<img src="diagram.png" width="866">
+<!--<img src="diagram.png" width="866">-->
 
 | No. | Subject                                       | Origin     | Destination | Description |
 | --: | --------------------------------------------- | ---------- | ----------- | ----------- |
