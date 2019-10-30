@@ -75,6 +75,12 @@ If in background context, the `ShimManager` is imported, initialized and the `po
 
 If instead in a content script context, `shim/contentBridge.ts` is imported and with side-effects (background script still calls into ShimManager), it creates and exports a `backgroundPort`. The incoming messages on that port are posted to `port2` and the incoming messages on `port2` are posted to `backgroundPort`.
 
+<p align="center">
+    <img src="diagram_module.svg"
+         width="562"
+         vspace="10" hspace="10">
+</p>
+
 In either case, `port1` as part of a message channel to the background script is resolved as the result of the `ensureInit` promise as soon as the `shim:/initialized` message is passed to the shim.
 
 
