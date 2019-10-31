@@ -1,6 +1,9 @@
 /* tslint:disable:max-line-length */
 "use strict";
 
+// Include platform-specific CSS
+import "./platform_styles";
+
 import React, { Component } from "react";
 import ReactDOM from "react-dom";
 
@@ -8,6 +11,7 @@ import defaultOptions from "../../defaultOptions";
 
 import Bridge from "./Bridge";
 import EditableList from "./EditableList";
+import AirPlayDeviceManager from "./AirPlayDeviceManager";
 
 import bridge, { BridgeInfo } from "../../lib/bridge";
 import options, { Options } from "../../lib/options";
@@ -17,55 +21,6 @@ import { ReceiverSelectorType } from "../../background/receiverSelector";
 
 
 const _ = browser.i18n.getMessage;
-
-// macOS styles
-browser.runtime.getPlatformInfo()
-    .then(platformInfo => {
-        const link = document.createElement("link");
-        link.rel = "stylesheet";
-
-        switch (platformInfo.os) {
-            case "mac": {
-                link.href = "styles/mac.css";
-                break;
-            }
-
-            // Fix issue with input[type="number"] height
-            case "linux": {
-                link.href = "styles/linux.css";
-
-                const input = document.createElement("input");
-                const inputWrapper = document.createElement("div");
-
-                inputWrapper.append(input);
-                document.documentElement.append(inputWrapper);
-
-                input.type = "text";
-                const textInputHeight = window.getComputedStyle(input).height;
-                input.type = "number";
-                const numberInputHeight = window.getComputedStyle(input).height;
-
-                inputWrapper.remove();
-
-                if (numberInputHeight !== textInputHeight) {
-                    const style = document.createElement("style");
-                    style.textContent = `
-                        input[type="number"] {
-                            height: ${textInputHeight};
-                        }
-                    `;
-
-                    document.body.append(style);
-                }
-
-                break;
-            }
-        }
-
-        if (link.href) {
-            document.head.appendChild(link);
-        }
-    });
 
 
 function getInputValue (input: HTMLInputElement) {
@@ -352,6 +307,24 @@ class OptionsApp extends Component<{}, OptionsAppState> {
                                               onChange={ this.handleWhitelistChange }
                                               itemPattern={ REMOTE_MATCH_PATTERN_REGEX }
                                               itemPatternError={ this.getWhitelistItemPatternError } />
+                            </div>
+                        </div>
+                    </fieldset>
+
+                    <fieldset className="category">
+                        <legend className="category__name">
+                            <h2>AirPlay</h2>
+                        </legend>
+                        <p className="category__description">
+                            Management of AirPlay devices and API settings.
+                        </p>
+
+                        <div className="option">
+                            <div className="option__label">
+                                Device manager
+                            </div>
+                            <div className="option__control">
+                                <AirPlayDeviceManager />
                             </div>
                         </div>
                     </fieldset>

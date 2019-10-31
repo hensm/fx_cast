@@ -326,3 +326,128 @@
 .editable-list__add-button {
     margin-inline-end: auto;
 }
+
+
+.device:not(:first-child) {
+    border-top: 1px solid var(--border-color);
+    padding-top: 15px;
+}
+
+.device__meta {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.device__name {
+    align-items: center;
+    display: flex;
+    font-size: 16px;
+    gap: 5px;
+}
+
+.device__paired-status {
+    background-color: var(--secondary-color);
+    border-radius: 9999px;
+    color: white;
+    font-size: 11px;
+    padding: 1px 5px;
+    text-transform: uppercase;
+}
+.device__paired-status--paired {
+    background-color: #058b00;
+}
+
+.device__address {
+    font-size: small;
+    color: var(--secondary-color);
+}
+
+
+.device__credentials {
+    margin-top: 5px;
+    padding: 5px;
+    width: 100%;
+}
+
+.device__credentials > table {
+    border-collapse: collapse;
+    font-size: smaller;
+    margin-top: 5px;
+}
+
+.device__credentials > table th {
+    text-align: end;
+    white-space: nowrap;
+}
+
+.device__credentials > table td {
+    word-break: break-all;
+}
+
+.device__credentials > table th,
+.device__credentials > table td {
+    padding: 0 4px;
+}
+
+.device__credentials-actions {
+    display: flex;
+    gap: 5px;
+    margin-top: 10px;
+}
+
+
+.device__actions {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    float: right;
+}
+
+.device__action {
+    text-align: center;
+}
+
+
+.device-manager {
+    display: flex;
+    flex-direction: column;
+    gap: 30px;
+}
+
+.device-manager__devices {
+    border: 1px solid var(--border-color);
+    margin: initial;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding: 10px;
+}
+
+.device-manager__no-devices {
+    align-self: center;
+    padding: 20px;
+    font-size: 14px;
+}
+
+.device-manager-new {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    max-width: 35%;
+}
+
+.device-manager-new__label {
+    display: contents;
+}
+
+.device-manager-new__input-label {
+    margin-bottom: -3px;    
+}
+
+.device-manager-new__submit {
+    margin-top: 5px;
+    grid-column-start: 2;
+    align-self: flex-end;
+}

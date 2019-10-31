@@ -8,47 +8,23 @@
  *  - https://github.com/postlund/pyatv/blob/master/docs/airplay.rst
  */
 
+"use strict";
+
+import { Buffer } from "buffer";
 import crypto from "crypto";
+
+import bplistCreate from "bplist-creator";
+import bplistParse from "bplist-parser";
 import srp6a from "fast-srp-hap";
-import fetch, { Headers } from "node-fetch";
-import nacl from "tweetnacl";
-import bplist from "./bplist";
+
+import AirPlayAuthCredentials from "./AirPlayAuthCredentials";
 
 
 const AIRPLAY_PORT = 7000;
 const MIMETYPE_BPLIST = "application/x-apple-binary-plist";
 
-/**
- * Client ID and keypair
- */
-export class AirPlayAuthCredentials {
-    public clientId: string;
-    public clientSk: Uint8Array;
-    public clientPk: Uint8Array;
 
-    constructor (
-            clientId?: string
-          , clientSk?: Uint8Array
-          , clientPk?: Uint8Array) {
-
-        if (clientId && clientSk && clientPk) {
-            this.clientId = clientId;
-            this.clientSk = clientSk;
-            this.clientPk = clientPk;
-        } else {
-            // If specified without arguments, generate new credentials
-            const keyPair = nacl.sign.keyPair();
-
-            // Random 16-len string
-            this.clientId = crypto.randomBytes(8).toString("hex");
-
-            this.clientSk = keyPair.secretKey.slice(0, 32);
-            this.clientPk = keyPair.publicKey;
-        }
-    }
-}
-
-export class AirPlayAuth {
+export default class AirPlayAuth {
     private address: string;
     private credentials: AirPlayAuthCredentials;
     private baseUrl: URL;
@@ -63,7 +39,7 @@ export class AirPlayAuth {
     /**
      * Begins pairing process.
      */
-    public async beginPairing () {
+    public async beginPairing (): Promise<any> {
         return this.sendPostRequest("/pair-pin-start");
     }
 
@@ -72,7 +48,7 @@ export class AirPlayAuth {
      * beginPairing(). Coordinates the three pairing stages and
      * manages request responses.
      */
-    public async finishPairing (pin: string) {
+    public async finishPairing (pin: string): Promise<void> {
         // Stage 1 response
         const { pk: serverPk
               , salt: serverSalt } = await this.pairSetupPin1();
@@ -81,13 +57,15 @@ export class AirPlayAuth {
         const srpParams = srp6a.params[2048];
         srpParams.hash = "sha1";
 
+        const { clientId, clientSk } = this.credentials;
+
         // Create SRP client
         const srpClient = new srp6a.Client(
-                srpParams                                // Params
-              , serverSalt                               // Receiver salt
-              , Buffer.from(this.credentials.clientId)   // Username
-              , Buffer.from(pin)                         // Password (receiver pin)
-              , Buffer.from(this.credentials.clientSk)); // Client secret key
+                srpParams                           // Params
+              , serverSalt                          // Receiver salt
+              , Buffer.from(clientId)               // Username
+              , Buffer.from(pin)                    // Password (receiver pin)
+              , Buffer.from(Array.from(clientSk))); // Client secret key
 
         // Add receiver's public key
         srpClient.setB(serverPk);
@@ -107,7 +85,7 @@ export class AirPlayAuth {
      * Triggering the receiver passcode display and receiving
      * its public key / salt.
      */
-    public async pairSetupPin1 (): Promise<any> {
+    private async pairSetupPin1 (): Promise<any> {
         const [ response ] = await this.sendPostRequestBplist(
                 "/pair-setup-pin"
               , {
@@ -125,9 +103,10 @@ export class AirPlayAuth {
      * public keys, sending them to the receiver and receiving its
      * proof.
      */
-    public async pairSetupPin2 (
+    private async pairSetupPin2 (
             pk: Buffer
-          , proof: Buffer): Promise<any> {
+          , proof: Buffer)
+            : Promise<any> {
 
         const [ response ] = await this.sendPostRequestBplist(
                 "/pair-setup-pin"
@@ -143,7 +122,7 @@ export class AirPlayAuth {
      * secret hash and sending it to the receiver. Receiver then
      * responds confirming the pairing is complete.
      */
-    public async pairSetupPin3 (
+    private async pairSetupPin3 (
             sharedSecretHash: crypto.BinaryLike): Promise<any> {
 
         // Create AES key
@@ -182,14 +161,14 @@ export class AirPlayAuth {
      * Sends a POST request to receiver and returns the
      * response.
      */
-    public async sendPostRequest (
+    private async sendPostRequest (
             path: string
           , contentType?: string
-          , data?: Buffer | string): Promise<any> {
+          , data?: Buffer | string)
+            : Promise<any> {
 
         // Create URL from base receiver URL and path
         const requestUrl = new URL(path, this.baseUrl);
-
         const requestHeaders = new Headers({
             "User-Agent": "AirPlay/320.20"
         });
@@ -209,26 +188,27 @@ export class AirPlayAuth {
             throw new Error(`AirPlay request error: ${response.status}`);
         }
 
-        return await response.buffer();
+        return await response.arrayBuffer();
     }
 
     /**
      * Encodes binary plist data, sends a POST request to
      * receiver, then decodes and returns the response.
      */
-    public async sendPostRequestBplist (
+    private async sendPostRequestBplist (
             path: string
-          , data?: object): Promise<any> {
+          , data?: object)
+            : Promise<any> {
 
         // Convert data to compatible type
         const requestBody = data
-            ? bplist.create(data)
+            ? bplistCreate(data)
             : undefined;
 
         const response = await this.sendPostRequest(
                 path, MIMETYPE_BPLIST, requestBody);
 
         // Convert response data to Buffer for bplist-parser
-        return bplist.parse.parseBuffer(response);
+        return bplistParse.parseBuffer(Buffer.from(response));
     }
 }

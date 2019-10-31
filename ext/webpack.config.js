@@ -86,4 +86,7 @@ module.exports = (env) => ({
           , "react-dom": "preact-compat"
         }
     }
+  , node: {
+        fs: "empty"
+    }
 });

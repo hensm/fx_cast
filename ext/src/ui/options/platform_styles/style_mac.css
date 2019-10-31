@@ -1,0 +1,34 @@
+body {
+    font: menu;
+}
+
+button:not(.small),
+select:not(.small),
+input:not(.small) {
+    font: inherit;
+}
+
+
+button:not(.small),
+select:not(.small) {
+    height: 22px;
+}
+
+input[type="checkbox"]:not(.small),
+input[type="radio"]:not(.small) {
+    height: 16px;
+    margin-bottom: 1px;
+    margin-top: 1px;
+    width: 16px;
+}
+
+
+button:not([disabled]):hover:active {
+  color: -moz-mac-buttonactivetext;
+}
+button[default]:not([disabled]):not(:-moz-window-inactive) {
+  color: -moz-mac-defaultbuttontext;
+}
+button[default]:not(:hover):active {
+  color: ButtonText;
+}
