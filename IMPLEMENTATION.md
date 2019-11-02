@@ -13,7 +13,7 @@ The background script registers a `webRequest.onBeforeRequest` listener that int
 
 When a request is intercepted, the `shim/contentBridge.ts` script is executed in the content script context. This facilitates any message passing across content/page script isolation (the shim itself is executed in the page context, both for convenience — since it interacts substantially with page scripts — and to avoid page scripts calling into extension contexts).
 
-Messages passed to the shim are custom events of type `__castMessage`. Messages passed back from the shim are custom events of type `__castMessageResponse`. Event listening and creation is handled by the `shim/messageBridge.ts` module.
+Messages passed to the shim are custom events of type `__castMessage`. Messages passed back from the shim are custom events of type `__castMessageResponse`. Event listening and creation is handled by the `shim/eventMessageChannel.ts` module.
 
 The `shim/contentBridge.ts` script creates a message port connection (named `"shim"`) to the background script through which messages from the shim are forwarded. Messages are forwarded to the bridge and other parts of the extension via the background script.  
 
@@ -27,11 +27,11 @@ The web app calls `chrome.cast.initialize` with an `ApiConfig` object containing
 
 ### ShimManager
 
-The ShimManager (`background/ShimManager.ts`) handles initialization of shims and communication between them and a bridge instance. Once creates, it listens for and passes status updates from the StatusManager directly to any registered shims via `shim:/serviceUp`/`shim:/serviceDown` messages.
+The ShimManager (`background/ShimManager.ts`) handles initialization of shims and communication between them and a bridge instance. Once created, it listens for and passes status updates from the StatusManager directly to any registered shims via `shim:/serviceUp`/`shim:/serviceDown` messages.
 
 It provides a public `createShim` method which takes a `MessagePort` or `runtime.Port` port object as an input, but has different behavior depending on what type of port.
 
-If the passed content port object is of type `MessagePort`, the shim was initialzied in the background context, since we can't have a `runtime.Port` that outputs to itself (and we need some sort of message channel to pass as an output to the API consumer).
+If the passed content port object is of type `MessagePort`, the shim was initialized in the background context, since we can't have a `runtime.Port` that outputs to itself (and we need some sort of message channel to pass as an output to the API consumer).
 
 The `createShim` method passes off to the internal `createShimFromBackground` and `createShimFromContent` methods, which do mostly the same thing, except that content script context shims have extra checking for tab/frame IDs. The shim is registered, the bridge port is hooked up to the content port (and vice-versa with the other content message handling in internal method `handleContentMessage`).
 
@@ -41,7 +41,7 @@ A `Shim` object is returned which contains the required `bridgePort` and `conten
 
 ### Module
 
-The shim is designed to injected into a running page or imported (via `shim/export.ts`) into another script. This is used for the built-in sender apps (media/mirroring) that run in the content script context.
+The shim is designed to be injected into a running page or imported (via `shim/export.ts`) into another script. This is used for the built-in sender apps (media/mirroring) that run in the content script context.
 
 If the shim is injected into a page, `contentBridge.ts` is executed in the content script context and the main shim bundle (`shim/index.ts`) replaces the page-loaded cast API loader script.
 
