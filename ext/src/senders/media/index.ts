@@ -1,9 +1,9 @@
 "use strict";
 
-import options from "../lib/options";
-import cast, { ensureInit } from "../shim/export";
+import options from "../../lib/options";
+import cast, { ensureInit } from "../../shim/export";
 
-import { Message, Receiver } from "../types";
+import { Message, Receiver } from "../../types";
 
 
 function getLocalAddress () {
@@ -359,6 +359,10 @@ export async function init (opts: InitOptions) {
 
     if (opts.targetElementId) {
         registerMediaElementListeners();
+
+        if (options.get("mediaOverlayEnabled")) {
+            // TODO: Un-hide overlay here
+        }
 
         window.addEventListener("beforeunload", async () => {
             backgroundPort.postMessage({

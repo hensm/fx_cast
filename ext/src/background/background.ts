@@ -183,7 +183,7 @@ async function initMenus () {
                     });
 
                     await browser.tabs.executeScript(tab.id, {
-                        file: "senders/mediaCast.js"
+                        file: "senders/media/bundle.js"
                       , frameId: info.frameId
                     });
                 } else {

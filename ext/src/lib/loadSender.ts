@@ -34,7 +34,7 @@ export default async function loadSender (opts: LoadSenderOptions) {
             });
 
             await browser.tabs.executeScript(opts.tabId, {
-                file: "senders/mirroringCast.js"
+                file: "senders/mirroring.js"
               , frameId: opts.frameId
             });
 
@@ -43,7 +43,7 @@ export default async function loadSender (opts: LoadSenderOptions) {
 
         case ReceiverSelectorMediaType.File: {
             const fileUrl = new URL(`file://${opts.selection.filePath}`);
-            const { init } = await import("../senders/mediaCast");
+            const { init } = await import("../senders/media");
 
             init({
                 mediaUrl: fileUrl.href

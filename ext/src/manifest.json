@@ -30,7 +30,10 @@
   , "content_scripts": [
         {
             "all_frames": true
-          , "js": [ "shim/content.js" ]
+          , "js": [
+                "shim/content.js"
+              , "senders/media/overlay/overlayContentLoader.js"
+            ]
           , "matches": [ "<all_urls>" ]
           , "run_at": "document_start"
         }
@@ -58,5 +61,8 @@
   , "web_accessible_resources": [
         "shim/bundle.js"
       , "vendor/webcomponents-lite.js"
+      , "senders/media/overlay/overlayContent.js"
+      , "senders/media/overlay/AirPlay_Audio.svg"
+      , "senders/media/overlay/AirPlay_Video.svg"
     ]
 }

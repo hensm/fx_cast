@@ -15,8 +15,10 @@ module.exports = (env) => ({
         "background": `${env.includePath}/background/background.ts`
 
         // Sender apps
-      , "senders/mediaCast": `${env.includePath}/senders/mediaCast.ts`
-      , "senders/mirroringCast": `${env.includePath}/senders/mirroringCast.ts`
+      , "senders/media/bundle": `${env.includePath}/senders/media/index.ts`
+      , "senders/media/overlay/overlayContent": `${env.includePath}/senders/media/overlay/overlayContent.ts`
+      , "senders/media/overlay/overlayContentLoader": `${env.includePath}/senders/media/overlay/overlayContentLoader.ts`
+      , "senders/mirroring": `${env.includePath}/senders/mirroring.ts`
 
         // Shim entries
       , "shim/bundle": `${env.includePath}/shim/index.ts`
