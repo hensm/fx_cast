@@ -34,7 +34,7 @@
         "message": "streamen an:"
       , "description": "Cast <select> (to:)"
     }
-    , "popupNoReceiversFound": {
+  , "popupNoReceiversFound": {
         "message": "Keine Empfänger gefunden"
       , "description": "Message displayed in the receiver selector if there are no available receivers."
     }
