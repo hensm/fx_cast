@@ -34,7 +34,7 @@ exports.manifestPath = {
     }
 };
 
-exports.selectorExecutableName = "selector";
+exports.selectorExecutableName = "fx_cast_selector.app";
 
 exports.pkgPlatform = {
     win32: "win"

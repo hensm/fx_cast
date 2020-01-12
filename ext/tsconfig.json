@@ -1,5 +1,5 @@
 {
-    "extends": "../common/tsconfig"
+    "extends": "../tsconfig"
   , "compilerOptions": {
         "jsx": "react"
       , "lib": [ "esnext", "dom" ]

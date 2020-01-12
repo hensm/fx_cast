@@ -1,10 +1,14 @@
-<html>
+<html manifest="cache.manifest">
     <head>
-        <script src="//www.gstatic.com/cast/sdk/libs/receiver/2.0.0/cast_receiver.js"></script>
         <link rel="stylesheet" href="index.css">
+        <script src="//www.gstatic.com/cast/sdk/libs/receiver/2.0.0/cast_receiver.js" defer></script>
+        <script src="index.js" defer></script>
     </head>
     <body>
-        <video id="media" autoplay></video>
-        <script src="index.js"></script>
+        <div class="splash">
+            <div class="splash__title">fx_cast</div>
+            <div class="splash__action">Waiting for connection</div>
+        </div>
+        <video class="media" autoplay></video>
     </body>
 </html>

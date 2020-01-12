@@ -21,10 +21,48 @@ const _ = browser.i18n.getMessage;
 // macOS styles
 browser.runtime.getPlatformInfo()
     .then(platformInfo => {
-        if (platformInfo.os === "mac") {
-            const link = document.createElement("link");
-            link.rel = "stylesheet";
-            link.href = "styles/mac.css";
+        const link = document.createElement("link");
+        link.rel = "stylesheet";
+
+        switch (platformInfo.os) {
+            case "mac": {
+                link.href = "styles/mac.css";
+                break;
+            }
+
+            // Fix issue with input[type="number"] height
+            case "linux": {
+                link.href = "styles/linux.css";
+
+                const input = document.createElement("input");
+                const inputWrapper = document.createElement("div");
+
+                inputWrapper.append(input);
+                document.documentElement.append(inputWrapper);
+
+                input.type = "text";
+                const textInputHeight = window.getComputedStyle(input).height;
+                input.type = "number";
+                const numberInputHeight = window.getComputedStyle(input).height;
+
+                inputWrapper.remove();
+
+                if (numberInputHeight !== textInputHeight) {
+                    const style = document.createElement("style");
+                    style.textContent = `
+                        input[type="number"] {
+                            height: ${textInputHeight};
+                        }
+                    `;
+
+                    document.body.append(style);
+                }
+
+                break;
+            }
+        }
+
+        if (link.href) {
             document.head.appendChild(link);
         }
     });

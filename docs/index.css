@@ -265,6 +265,11 @@ body {
 .faq {
     box-sizing: content-box;
     overflow-x: auto;
+    
+}
+
+.faq:target {
+    border-color: var(--blue-50) !important;
 }
 
 .faq__summary {
@@ -275,6 +280,7 @@ body {
     -webkit-user-select: none;
     user-select: none;
 }
+
 .faq__content {
     max-width: 70rem;
     padding: 2rem;

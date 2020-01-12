@@ -1,0 +1,15 @@
+:root {
+    --border-color: graytext;
+    --secondary-color: graytext;
+}
+
+body {
+    padding: 20px 0;
+}
+
+#root {
+    background-color: -moz-dialog;
+    border-radius: 5px;
+    color: -moz-dialogtext;
+    overflow: hidden;
+}

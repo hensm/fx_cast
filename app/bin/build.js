@@ -189,25 +189,23 @@ async function build () {
 
     // Build NativeMacReceiverSelector
     if (isBuildingForMacOnMac) {
-        const sourceFiles = glob.sync("**/*.swift", {
-            cwd: path.join(__dirname, "../NativeMacReceiverSelector")
-          , absolute: true
-        });
-
-        const formattedSourceFiles = sourceFiles
-            .map(fileName => `"${fileName}"`)
-            .join(" ");
+        const selectorPath = path.join(__dirname, "../selector/mac/");
+        const derivedDataPath = path.join(__dirname, "../selector/mac/build/");
 
         let buildCommand = `
-            swiftc -o "${path.join(BUILD_PATH, selectorExecutableName)}" \
-                   ${formattedSourceFiles}`;
-
-        // Build with optimizations if packaging
-        if (argv.package) {
-            buildCommand += " -Osize";
-        }
+            xcodebuild -project ${selectorPath}/fx_cast_selector.xcodeproj \
+                       -configuration Release \
+                       -scheme fx_cast_selector \
+                       -derivedDataPath ${derivedDataPath} \
+                       build`;
 
         spawnSync(buildCommand, spawnOptions);
+
+        const selectorBundlePath = path.join(derivedDataPath
+              , "Build/Products/Release/", selectorExecutableName);
+
+        fs.moveSync(selectorBundlePath, path.join(BUILD_PATH, selectorExecutableName));
+        fs.removeSync(derivedDataPath);
     }
 
 

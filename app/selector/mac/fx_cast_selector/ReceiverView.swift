@@ -1,6 +1,5 @@
 import Cocoa
 
-
 protocol ReceiverViewDelegate : AnyObject {
     func didCast (_ receiver: Receiver)
 }
@@ -14,16 +13,10 @@ class ReceiverView : NSStackView {
     var castButton: NSButton!
     var castingSpinner: NSProgressIndicator!
 
-
     var isEnabled: Bool {
-        get {
-            return self.castButton.isEnabled
-        }
-        set {
-            self.castButton.isEnabled = newValue
-        }
+        get { return self.castButton.isEnabled }
+        set { self.castButton.isEnabled = newValue }
     }
-
 
     override init (frame: CGRect) {
         super.init(frame: frame)
@@ -32,7 +25,7 @@ class ReceiverView : NSStackView {
         super.init(coder: coder)
     }
 
-    init (receiver: Receiver, initData: InitData) {
+    init (receiver: Receiver) {
         super.init(frame: NSZeroRect)
 
         self.receiver = receiver
@@ -63,13 +56,13 @@ class ReceiverView : NSStackView {
 
 
         self.castButton = NSButton(
-                title: initData.i18n_castButtonTitle
+                title: InitDataProvider.shared.data.i18n_castButtonTitle
               , target: self
               , action: #selector(ReceiverView.onCast))
 
         self.castButton.bezelStyle = .rounded
-        self.castButton.widthAnchor.constraint(equalToConstant: 100).isActive = true
-
+        self.castButton.widthAnchor.constraint(
+                equalToConstant: 100).isActive = true
 
         self.castingSpinner = NSProgressIndicator()
         self.castingSpinner.style = .spinning
@@ -89,12 +82,14 @@ class ReceiverView : NSStackView {
         if !constraintsSet {
             self.translatesAutoresizingMaskIntoConstraints = false
 
-            self.leadingAnchor.constraint(
-                    equalTo: superview!.leadingAnchor
-                  , constant: 8).isActive = true
-            self.trailingAnchor.constraint(
-                    equalTo: superview!.trailingAnchor
-                  , constant: -8).isActive = true
+            if let superview = self.superview {
+                self.leadingAnchor.constraint(
+                        equalTo: superview.leadingAnchor
+                      , constant: 8).isActive = true
+                self.trailingAnchor.constraint(
+                        equalTo: superview.trailingAnchor
+                      , constant: -8).isActive = true
+            }
 
             constraintsSet = true
         }

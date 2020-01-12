@@ -19,7 +19,7 @@ Communication with receiver devices is handled by a native application (bridge).
 * macOS
 * Windows
 
-Install the Firefox extension and companion bridge application. Downloads can be found on the website or in the [GitHub releases](https://github.com/hensm/fx_cast/releases) section.
+Install the Firefox extension and companion bridge application. These are separate downloads that can be found on the [website](https://hensm.github.io/fx_cast/) or in the [GitHub releases](https://github.com/hensm/fx_cast/releases) section.
 
 macOS/Windows version has an installer, Linux packages can be installed via the command line:
 
@@ -159,8 +159,6 @@ SELENIUM_BROWSER=chrome npm test
 
 
 ## Usage
-
-Extension can be loaded from `about:debugging` as a temporary extension.
 
 Most sites won't load the cast API unless the browser presents itself as Chrome. The extension includes a method of spoofing the user agent string, sites can be whitelisted via the options page. Whitelist entries are specified as [match patterns](https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/Match_patterns). To whitelist all sites, add `<all_urls>` to the whitelist, though this could cause breakage on random sites.
 

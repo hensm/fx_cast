@@ -1,13 +1,13 @@
-struct InitData : Codable {
+struct InitData : Decodable {
     let receivers: [Receiver]
     let defaultMediaType: MediaType
     let availableMediaTypes: Int
-
+    
     let closeIfFocusLost: Bool
-
+    
     let windowPositionX: Int
     let windowPositionY: Int
-
+    
     let i18n_extensionName: String
     let i18n_castButtonTitle: String
     let i18n_mediaTypeApp: String
@@ -16,4 +16,5 @@ struct InitData : Codable {
     let i18n_mediaTypeFile: String
     let i18n_mediaSelectCastLabel: String
     let i18n_mediaSelectToLabel: String
+    let i18n_noReceiversFound: String
 }

@@ -13,7 +13,7 @@
     "dependencies": {
         "bplist-creator": "0.0.8",
         "bplist-parser": "^0.2.0",
-        "castv2": "^0.1.9",
+        "castv2": "^0.1.10",
         "dnssd": "^0.4.1",
         "fast-srp-hap": "^1.0.1",
         "mime-types": "^2.1.24",
