@@ -116,7 +116,14 @@ async function build () {
         spawnSync("mv", [ path.join(BUILD_PATH, "src/*"), BUILD_PATH ]
               , spawnOptions);
     } else {
-        fs.moveSync(path.join(BUILD_PATH, "src"), BUILD_PATH);
+        const buildSrcDir = path.join(BUILD_PATH, "src");
+
+        for (const fileName of fs.readdirSync(buildSrcDir)) {
+            fs.moveSync(path.join(buildSrcDir, fileName)
+                      , path.join(BUILD_PATH, fileName));
+        }
+
+        fs.removeSync(buildSrcDir);
     }
 
     // Copy other files
@@ -183,7 +190,7 @@ async function build () {
     // Run pkg to create a single executable
     await pkg.exec([
         BUILD_PATH
-      , "--target", `${pkgPlatform[argv.platform]}-${argv.arch}`
+      , "--target", `node12-${pkgPlatform[argv.platform]}-${argv.arch}`
       , "--output", path.join(BUILD_PATH, executableName[argv.platform])
     ]);
 
