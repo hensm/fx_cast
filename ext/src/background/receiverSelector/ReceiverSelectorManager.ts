@@ -102,7 +102,7 @@ async function getSelection (
         await StatusManager.init();
 
         sharedSelector.open(
-                StatusManager.getReceivers()
+                Array.from(StatusManager.getReceivers())
               , defaultMediaType
               , availableMediaTypes);
     });

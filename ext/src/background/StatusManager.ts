@@ -55,8 +55,13 @@ export default new class StatusManager
         }
     }
 
-    public getReceivers () {
-        return Array.from(this.receivers.values());
+    public * getReceivers() {
+        for (const [, receiver ] of this.receivers) {
+            if (receiver.status && receiver.status.application
+                                && receiver.status.volume) {
+                yield receiver;
+            }
+        }
     }
 
     private async createBridgePort () {
