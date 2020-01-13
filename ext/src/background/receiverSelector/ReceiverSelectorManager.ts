@@ -54,7 +54,8 @@ async function getSelection (
       , availableMediaTypes =
                 ReceiverSelectorMediaType.Tab
               | ReceiverSelectorMediaType.Screen
-              | ReceiverSelectorMediaType.File)
+              | ReceiverSelectorMediaType.File
+      , requestedAppId: string)
         : Promise<ReceiverSelection> {
 
     return new Promise(async (resolve, reject) => {
@@ -104,7 +105,8 @@ async function getSelection (
         sharedSelector.open(
                 Array.from(StatusManager.getReceivers())
               , defaultMediaType
-              , availableMediaTypes);
+              , availableMediaTypes
+              , requestedAppId);
     });
 }
 

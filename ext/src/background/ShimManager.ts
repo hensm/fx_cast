@@ -22,6 +22,7 @@ export interface Shim {
     contentPort: Port;
     contentTabId?: number;
     contentFrameId?: number;
+    requestedAppId?: string;
 }
 
 
@@ -31,6 +32,18 @@ export default new class ShimManager {
 
     public async init () {
         await this.initStatusListeners();
+    }
+
+    public getShim (tabId: number, frameId?: number) {
+        for (const activeShim of this.activeShims) {
+            if (activeShim.contentTabId === tabId) {
+                if (frameId && activeShim.contentFrameId !== frameId) {
+                    continue;
+                }
+
+                return activeShim;
+            }
+        }
     }
 
     public async createShim (port: Port) {
@@ -129,6 +142,8 @@ export default new class ShimManager {
 
         switch (message.subject) {
             case "main:/shimInitialized": {
+                shim.requestedAppId = message.data.appId;
+
                 for (const receiver of StatusManager.getReceivers()) {
                     shim.contentPort.postMessage({
                         subject: "shim:/serviceUp"
@@ -148,7 +163,8 @@ export default new class ShimManager {
                     const selection = await ReceiverSelectorManager
                             .getSelection(
                                     ReceiverSelectorMediaType.App
-                                  , availableMediaTypes);
+                                  , availableMediaTypes
+                                  , shim.requestedAppId);
 
                     // Handle cancellation
                     if (!selection) {

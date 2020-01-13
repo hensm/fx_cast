@@ -101,6 +101,7 @@ export function initialize (
 
     sendMessageResponse({
         subject: "main:/shimInitialized"
+      , data: { appId: apiConfig.sessionRequest.appId }
     });
 
     apiConfig.receiverListener(receiverList.length

@@ -65,10 +65,12 @@ function initBrowserAction () {
      * top-level frame.
      */
     browser.browserAction.onClicked.addListener(async tab => {
+        const currentShim = ShimManager.getShim(tab.id);
         const selection = await ReceiverSelectorManager.getSelection(
                 ReceiverSelectorMediaType.Tab
               , getMediaTypesForPageUrl(tab.url)
-                      & ~ReceiverSelectorMediaType.App);
+                      & ~ReceiverSelectorMediaType.App
+              , currentShim.requestedAppId);
 
         if (selection) {
             loadSender({
@@ -159,9 +161,11 @@ async function initMenus () {
 
         switch (info.menuItemId) {
             case menuIdMediaCast: {
+                const currentShim = ShimManager.getShim(tab.id, info.frameId);
                 const selection = await ReceiverSelectorManager.getSelection(
                         ReceiverSelectorMediaType.App
-                      , availableMediaTypes);
+                      , availableMediaTypes
+                      , currentShim.requestedAppId);
 
                 // Selection cancelled
                 if (!selection) {
@@ -200,9 +204,11 @@ async function initMenus () {
             }
 
             case menuIdMirroringCast: {
+                const currentShim = ShimManager.getShim(tab.id, info.frameId);
                 const selection = await ReceiverSelectorManager.getSelection(
                         ReceiverSelectorMediaType.Tab
-                      , availableMediaTypes & ~ReceiverSelectorMediaType.App);
+                      , availableMediaTypes & ~ReceiverSelectorMediaType.App
+                      , currentShim.requestedAppId);
 
                 loadSender({
                     tabId: tab.id

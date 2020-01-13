@@ -387,7 +387,8 @@ function initialize (options: InitializeOptions) {
                 const application = status.applications[0];
 
                 receiverStatusMessage.data.status.application = {
-                    displayName: application.displayName
+                    appId: application.appId
+                  , displayName: application.displayName
                   , isIdleScreen: application.isIdleScreen
                   , statusText: application.statusText
                 };

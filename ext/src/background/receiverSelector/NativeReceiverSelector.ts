@@ -1,6 +1,7 @@
 "use strict";
 
 import bridge from "../../lib/bridge";
+import knownApps from "../../lib/knownApps";
 import options from "../../lib/options";
 
 import { TypedEventTarget } from "../../lib/typedEvents";
@@ -43,7 +44,8 @@ export default class NativeReceiverSelector
     public async open (
             receivers: Receiver[]
           , defaultMediaType: ReceiverSelectorMediaType
-          , availableMediaTypes: ReceiverSelectorMediaType): Promise<void> {
+          , availableMediaTypes: ReceiverSelectorMediaType
+          , requestedAppId: string): Promise<void> {
 
         this.bridgePort = await bridge.connect();
 
@@ -94,7 +96,8 @@ export default class NativeReceiverSelector
 
               , i18n_extensionName: _("extensionName")
               , i18n_castButtonTitle: _("popupCastButtonTitle")
-              , i18n_mediaTypeApp: _("popupMediaTypeApp")
+              , i18n_mediaTypeApp:
+                        knownApps[requestedAppId] ?? _("popupMediaTypeApp")
               , i18n_mediaTypeTab: _("popupMediaTypeTab")
               , i18n_mediaTypeScreen: _("popupMediaTypeScreen")
               , i18n_mediaTypeFile: _("popupMediaTypeFile")

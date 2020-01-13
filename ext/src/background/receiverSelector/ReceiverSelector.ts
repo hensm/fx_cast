@@ -31,7 +31,8 @@ export default interface ReceiverSelector
 
     open (receivers: Receiver[]
         , defaultMediaType: ReceiverSelectorMediaType
-        , availableMediaTypes: ReceiverSelectorMediaType): void;
+        , availableMediaTypes: ReceiverSelectorMediaType
+        , requestedAppId: string): void;
 
     close (): void;
 }

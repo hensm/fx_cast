@@ -4,6 +4,8 @@
 import React, { Component } from "react";
 import ReactDOM from "react-dom";
 
+import knownApps from "../../lib/knownApps";
+
 import { getNextEllipsis } from "../../lib/utils";
 import { Message, Receiver } from "../../types";
 
@@ -30,6 +32,7 @@ interface PopupAppState {
     availableMediaTypes: ReceiverSelectorMediaType;
     isLoading: boolean;
     filePath: string;
+    requestedAppId: string;
 }
 
 class PopupApp extends Component<{}, PopupAppState> {
@@ -46,6 +49,7 @@ class PopupApp extends Component<{}, PopupAppState> {
           , availableMediaTypes: ReceiverSelectorMediaType.App
           , isLoading: false
           , filePath: null
+          , requestedAppId: null
         };
 
         // Store window ref
@@ -64,6 +68,14 @@ class PopupApp extends Component<{}, PopupAppState> {
 
         this.port.onMessage.addListener((message: Message) => {
             switch (message.subject) {
+                case "popup:/sendRequestedAppId": {
+                    this.setState({
+                        requestedAppId: message.data.requestedAppId
+                    });
+
+                    break;
+                }
+
                 case "popup:/populateReceiverList": {
                     this.defaultMediaType = message.data.defaultMediaType;
 
@@ -124,7 +136,8 @@ class PopupApp extends Component<{}, PopupAppState> {
                         <option value={ ReceiverSelectorMediaType.App }
                                 disabled={ !(this.state.availableMediaTypes
                                         & ReceiverSelectorMediaType.App) }>
-                            { _("popupMediaTypeApp") }
+                            { knownApps[this.state.requestedAppId]
+                                    ?? _("popupMediaTypeApp") }
                         </option>
                         <option value={ ReceiverSelectorMediaType.Tab }
                                 disabled={ !(this.state.availableMediaTypes

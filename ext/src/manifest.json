@@ -32,7 +32,7 @@
             "all_frames": true
           , "js": [
                 "shim/content.js"
-              , "senders/media/overlay/overlayContentLoader.js"
+            //, "senders/media/overlay/overlayContentLoader.js"
             ]
           , "matches": [ "<all_urls>" ]
           , "run_at": "document_start"

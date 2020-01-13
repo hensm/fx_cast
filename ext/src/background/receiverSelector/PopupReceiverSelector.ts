@@ -27,6 +27,7 @@ export default class PopupReceiverSelector
     private wasReceiverSelected: boolean = false;
 
     private _isOpen: boolean = false;
+    private requestedAppId: string;
 
 
     constructor () {
@@ -60,6 +61,11 @@ export default class PopupReceiverSelector
             });
 
             this.messagePort.postMessage({
+                subject: "popup:/sendRequestedAppId"
+              , data: { requestedAppId: this.requestedAppId }
+            });
+
+            this.messagePort.postMessage({
                 subject: "popup:/populateReceiverList"
               , data: {
                     receivers: this.receivers
@@ -77,7 +83,10 @@ export default class PopupReceiverSelector
     public async open (
             receivers: Receiver[]
           , defaultMediaType: ReceiverSelectorMediaType
-          , availableMediaTypes: ReceiverSelectorMediaType): Promise<void> {
+          , availableMediaTypes: ReceiverSelectorMediaType
+          , requestedAppId: string): Promise<void> {
+
+        this.requestedAppId = requestedAppId;
 
         // If popup already exists, close it
         if (this.windowId) {
@@ -124,6 +133,7 @@ export default class PopupReceiverSelector
         }
 
         this._isOpen = false;
+        this.requestedAppId = null;
 
         if (this.messagePort && !this.messagePortDisconnected) {
             this.messagePort.disconnect();
