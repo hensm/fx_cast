@@ -279,7 +279,7 @@ function createElementNS (
  */
 Object.defineProperties(createElement, clonePropsDescriptor(
         _createElement, ["toString", "toSource"]));
-Object.defineProperties(createElement, clonePropsDescriptor(
+Object.defineProperties(createElementNS, clonePropsDescriptor(
         _createElementNS, ["toString", "toSource"]));
 
 // Re-define element creation functions
