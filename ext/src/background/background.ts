@@ -153,9 +153,22 @@ async function initMenus () {
         const availableMediaTypes = getMediaTypesForPageUrl(info.pageUrl);
 
         switch (info.menuItemId) {
-            case menuIdMediaCast: {
+            case menuIdCast: {
                 const selection = await ReceiverSelectorManager.getSelection(
                         tab.id, info.frameId);
+
+                loadSender({
+                    tabId: tab.id
+                  , frameId: info.frameId
+                  , selection
+                });
+
+                break;
+            }
+
+            case menuIdMediaCast: {
+                const selection = await ReceiverSelectorManager.getSelection(
+                        tab.id, info.frameId, true);
 
                 // Selection cancelled
                 if (!selection) {
@@ -189,19 +202,6 @@ async function initMenus () {
                       , selection
                     });
                 }
-
-                break;
-            }
-
-            case menuIdCast: {
-                const selection = await ReceiverSelectorManager.getSelection(
-                        tab.id, info.frameId);
-
-                loadSender({
-                    tabId: tab.id
-                  , frameId: info.frameId
-                  , selection
-                });
 
                 break;
             }

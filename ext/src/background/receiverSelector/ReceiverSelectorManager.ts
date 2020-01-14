@@ -7,6 +7,8 @@ import StatusManager from "../StatusManager";
 
 import { getMediaTypesForPageUrl } from "../../lib/utils";
 
+import { DEFAULT_MEDIA_RECEIVER_APP_ID } from "../../shim/cast/media/";
+
 import { ReceiverSelector
        , ReceiverSelectorType } from "./";
 import { ReceiverSelection
@@ -53,7 +55,8 @@ async function getSelector () {
  */
 async function getSelection (
         contextTabId: number
-      , contextFrameId = 0)
+      , contextFrameId = 0
+      , withMediaSender = false)
         : Promise<ReceiverSelection> {
 
     return new Promise(async (resolve, reject) => {
@@ -77,7 +80,7 @@ async function getSelection (
         }
 
         // Enable app media type if initialized sender app is found
-        if (currentShim) {
+        if (currentShim || withMediaSender) {
             defaultMediaType = ReceiverSelectorMediaType.App;
             availableMediaTypes |= ReceiverSelectorMediaType.App;
         }
@@ -95,7 +98,6 @@ async function getSelection (
         if (!opts.mediaEnabled || !opts.localMediaEnabled) {
             availableMediaTypes &= ~ReceiverSelectorMediaType.File;
         }
-
 
         // Close an existing open selector
         if (sharedSelector && sharedSelector.isOpen) {
@@ -128,7 +130,8 @@ async function getSelection (
                 Array.from(StatusManager.getReceivers())
               , defaultMediaType
               , availableMediaTypes
-              , currentShim?.requestedAppId);
+              , currentShim?.requestedAppId
+                      ?? (withMediaSender && DEFAULT_MEDIA_RECEIVER_APP_ID));
     });
 }
 

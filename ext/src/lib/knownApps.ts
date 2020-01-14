@@ -1,5 +1,7 @@
 "use strict";
 
+const _ = browser.i18n.getMessage;
+
 /**
  * TODO: Just keep a list of IDs and cache names from the Google API:
  * https://clients3.google.com/cast/chromecast/device/app?a=[appId]
@@ -19,5 +21,5 @@ export default {
   , "CD7B9F59": "Global Player Live"
   , "B3DCF968": "Twitch"
   , "B88B034A": "Dailymotion"
-  , "CC1AD845": "TEST"
+  , "CC1AD845": _("popupMediaTypeAppMedia")
 } as Record<string, string>;
