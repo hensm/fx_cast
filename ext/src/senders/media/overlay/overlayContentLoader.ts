@@ -9,6 +9,7 @@ const _ = browser.i18n.getMessage;
 const req = new XMLHttpRequest();
 req.open("GET", browser.runtime.getURL(
         "senders/media/overlay/overlayContent.js"), false);
+
 req.send();
 
 if (req.status === 200) {

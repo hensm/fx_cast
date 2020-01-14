@@ -44,6 +44,8 @@ browser.runtime.onInstalled.addListener(async details => {
 
 
 function initBrowserAction () {
+    console.info("fx_cast (Debug): init (browser action)");
+
     /*browser.browserAction.disable();
 
     function onServiceChange () {
@@ -504,6 +506,46 @@ function initWhitelist () {
 }
 
 
+async function initMediaOverlay () {
+    console.info("fx_cast (Debug): init (media overlay)");
+
+    let contentScript: browser.contentScripts.RegisteredContentScript;
+
+    async function registerMediaOverlayContentScript () {
+        if (!(await options.get("mediaOverlayEnabled"))) {
+            return;
+        }
+
+        try {
+            contentScript = await browser.contentScripts.register({
+                allFrames: true
+              , js: [{ file: "senders/media/overlay/overlayContentLoader.js" }]
+              , matches: [ "<all_urls>" ]
+              , runAt: "document_start"
+            });
+        } catch (err) {
+            console.error("fx_cast (Debug): Failed to register media overlay");
+        }
+    }
+
+    async function unregisterMediaOverlayContentScript () {
+        contentScript?.unregister();
+    }
+
+
+    registerMediaOverlayContentScript();
+
+    options.addEventListener("changed", ev => {
+        const alteredOpts = ev.detail;
+
+        if (alteredOpts.includes("mediaOverlayEnabled")) {
+            unregisterMediaOverlayContentScript();
+            registerMediaOverlayContentScript();
+        }
+    })
+}
+
+
 let isInitialized = false;
 
 async function init () {
@@ -528,6 +570,7 @@ async function init () {
     await initMenus();
     await initRequestListener();
     await initWhitelist();
+    await initMediaOverlay();
 
     await StatusManager.init();
     await ShimManager.init();
