@@ -63,9 +63,7 @@ export function getMediaTypesForPageUrl (
 
     // Only meant to run on normal web pages
     if (url.protocol === "http:" || url.protocol === "https:") {
-        availableMediaTypes |= (
-                ReceiverSelectorMediaType.App
-              | ReceiverSelectorMediaType.Tab);
+        availableMediaTypes |= ReceiverSelectorMediaType.Tab;
     }
 
     /**

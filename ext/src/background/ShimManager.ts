@@ -156,15 +156,11 @@ export default new class ShimManager {
 
             case "main:/selectReceiverBegin": {
                 const contentTab = await browser.tabs.get(shim.contentTabId);
-                const availableMediaTypes = getMediaTypesForPageUrl(
-                        contentTab.url);
 
                 try {
-                    const selection = await ReceiverSelectorManager
-                            .getSelection(
-                                    ReceiverSelectorMediaType.App
-                                  , availableMediaTypes
-                                  , shim.requestedAppId);
+                    const selection =
+                            await ReceiverSelectorManager.getSelection(
+                                    shim.contentTabId, shim.contentFrameId);
 
                     // Handle cancellation
                     if (!selection) {
