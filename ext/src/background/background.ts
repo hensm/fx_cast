@@ -91,8 +91,8 @@ async function initMenus () {
 
     type MenuId = string | number;
 
+    let menuIdCast: MenuId;
     let menuIdMediaCast: MenuId;
-    let menuIdMirroringCast: MenuId;
     let menuIdWhitelist: MenuId;
     let menuIdWhitelistRecommended: MenuId;
 
@@ -100,6 +100,12 @@ async function initMenus () {
 
 
     const opts = await options.getAll();
+
+    // Global "Cast..." menu item
+    menuIdCast = await browser.menus.create({
+        contexts: [ "browser_action", "page", "tools_menu" ]
+      , title: _("contextCast")
+    });
 
     // <video>/<audio> "Cast..." context menu item
     menuIdMediaCast = await browser.menus.create({
@@ -109,16 +115,6 @@ async function initMenus () {
       , targetUrlPatterns: opts.localMediaEnabled
             ? URL_PATTERNS_ALL
             : URL_PATTERNS_REMOTE
-    });
-
-    // Screen/Tab mirroring "Cast..." context menu item
-    menuIdMirroringCast = await browser.menus.create({
-        contexts: [ "browser_action", "page", "tools_menu" ]
-      , title: _("contextCast")
-      , visible: opts.mirroringEnabled
-
-        // Mirroring doesn't work from file:// urls
-      , documentUrlPatterns: URL_PATTERNS_REMOTE
     });
 
 
@@ -195,7 +191,7 @@ async function initMenus () {
                 break;
             }
 
-            case menuIdMirroringCast: {
+            case menuIdCast: {
                 const selection = await ReceiverSelectorManager.getSelection(
                         tab.id, info.frameId);
 
@@ -371,12 +367,6 @@ async function initMenus () {
     options.addEventListener("changed", async ev => {
         const alteredOpts = ev.detail;
         const newOpts = await options.getAll();
-
-        if (alteredOpts.includes("mirroringEnabled")) {
-            browser.menus.update(menuIdMirroringCast, {
-                visible: newOpts.mirroringEnabled
-            });
-        }
 
         if (alteredOpts.includes("mediaEnabled")) {
             browser.menus.update(menuIdMediaCast, {
