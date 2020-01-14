@@ -529,18 +529,18 @@ async function initMediaOverlay () {
     }
 
     async function unregisterMediaOverlayContentScript () {
-        contentScript?.unregister();
+        await contentScript?.unregister();
     }
 
 
     registerMediaOverlayContentScript();
 
-    options.addEventListener("changed", ev => {
+    options.addEventListener("changed", async ev => {
         const alteredOpts = ev.detail;
 
         if (alteredOpts.includes("mediaOverlayEnabled")) {
-            unregisterMediaOverlayContentScript();
-            registerMediaOverlayContentScript();
+            await unregisterMediaOverlayContentScript();
+            await registerMediaOverlayContentScript();
         }
     })
 }
