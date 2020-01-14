@@ -209,7 +209,7 @@ class OptionsApp extends Component<{}, OptionsAppState> {
                                 { _("optionsMediaOverlayEnabledTemp") }
                             </div>
                             <div className="option__description">
-                                { _("optionsMediaOverlayEnabledDescrption") }
+                                { _("optionsMediaOverlayEnabledDescription") }
                             </div>
                         </label>
 

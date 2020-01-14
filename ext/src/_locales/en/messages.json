@@ -213,7 +213,7 @@
         "message": "Enable media element overlay (experimental)"
       , "description": "Experimental-labelled version of above."
     }
-  , "optionsMediaOverlayEnabledDescrption": {
+  , "optionsMediaOverlayEnabledDescription": {
         "message": "Overlay on media elements displaying information about the current session if connected."
       , "description": "Media element overlay option description."
     }
