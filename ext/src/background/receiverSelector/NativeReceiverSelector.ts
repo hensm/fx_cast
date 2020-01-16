@@ -65,6 +65,12 @@ export default class NativeReceiverSelector
                     this.onBridgePortMessageClose();
                     break;
                 }
+                case "main:/receiverSelector/stop": {
+                    this.dispatchEvent(new CustomEvent("stop", {
+                        detail: message.data
+                    }));
+                    break;
+                }
             }
         });
 
@@ -96,6 +102,7 @@ export default class NativeReceiverSelector
 
               , i18n_extensionName: _("extensionName")
               , i18n_castButtonTitle: _("popupCastButtonTitle")
+              , i18n_stopButtonTitle: _("popupStopButtonTitle")
               , i18n_mediaTypeApp:
                         knownApps[requestedAppId] ?? _("popupMediaTypeApp")
               , i18n_mediaTypeTab: _("popupMediaTypeTab")

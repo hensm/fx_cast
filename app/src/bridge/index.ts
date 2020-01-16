@@ -16,10 +16,15 @@ import { DecodeTransform
 
 import { ReceiverStatus } from "./castTypes";
 
-import { Message } from "./types";
+import { Message, Receiver } from "./types";
 
 import { __applicationName
        , __applicationVersion } from "../../package.json";
+
+import { Channel, Client } from "castv2";
+import { NS_CONNECTION
+       , NS_HEARTBEAT
+       , NS_RECEIVER } from "./Session";
 
 
 // Increase listener limit
@@ -86,7 +91,9 @@ process.on("SIGTERM", () => {
         receiverSelectorApp.kill();
     }
 
-    browser.stop();
+    if (browser) {
+        browser.stop();
+    }
 });
 
 
@@ -175,6 +182,24 @@ async function handleMessage (message: Message) {
 
             break;
         }
+
+        case "bridge:/stopReceiverApp": {
+            const receiver: Receiver = message.data.receiver;
+            const client = new Client();
+
+            client.connect({ host: receiver.host, port: receiver.port }, () => {
+                const sourceId = "sender-0";
+                const destinationId = "receiver-0";
+
+                const clientConnection = client.createChannel(
+                        sourceId, destinationId, NS_CONNECTION, "JSON");
+                const clientReceiver = client.createChannel(
+                        sourceId, destinationId, NS_RECEIVER, "JSON");
+
+                clientConnection.send({ type: "CONNECT" });
+                clientReceiver.send({ type: "STOP", requestId: 1 });
+            });
+        }
     }
 }
 
@@ -215,9 +240,13 @@ function handleReceiverSelectorMessage (message: Message) {
 
             receiverSelectorApp.stdout!.setEncoding("utf8");
             receiverSelectorApp.stdout!.on("data", data => {
+                const parsedData = JSON.parse(data);
+
                 sendMessage({
-                    subject: "main:/receiverSelector/selected"
-                  , data: JSON.parse(data)
+                    subject: !parsedData.mediaType
+                        ? "main:/receiverSelector/stop"
+                        : "main:/receiverSelector/selected"
+                  , data: parsedData
                 });
             });
 

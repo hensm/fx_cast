@@ -22,6 +22,7 @@ export interface ReceiverSelectorEvents {
     "selected": ReceiverSelection;
     "error": string;
     "cancelled": void;
+    "stop": { receiver: Receiver };
 }
 
 export default interface ReceiverSelector

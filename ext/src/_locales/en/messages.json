@@ -56,6 +56,10 @@
             }
         }
     }
+  , "popupStopButtonTitle": {
+        "message": "Stop"
+      , "description": "Alternate action button text displayed instead of popupCastButtonTitle."
+    }
 
 
   , "contextCast": {

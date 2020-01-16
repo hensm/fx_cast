@@ -64,6 +64,17 @@ export default new class StatusManager
         }
     }
 
+    public async stopReceiverApp (receiver: Receiver) {
+        if (!this.bridgePort) {
+            return;
+        }
+
+        this.bridgePort.postMessage({
+            subject: "bridge:/stopReceiverApp"
+          , data: { receiver }
+        });
+    }
+
     private async createBridgePort () {
         const bridgePort = await bridge.connect();
         bridgePort.onMessage.addListener(this.onBridgePortMessage);

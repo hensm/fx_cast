@@ -6,12 +6,15 @@ import { Message
        , SendMessageCallback } from "./types";
 
 
-const NS_CONNECTION = "urn:x-cast:com.google.cast.tp.connection";
-const NS_HEARTBEAT = "urn:x-cast:com.google.cast.tp.heartbeat";
-const NS_RECEIVER = "urn:x-cast:com.google.cast.receiver";
+export const NS_CONNECTION = "urn:x-cast:com.google.cast.tp.connection";
+export const NS_HEARTBEAT = "urn:x-cast:com.google.cast.tp.heartbeat";
+export const NS_RECEIVER = "urn:x-cast:com.google.cast.receiver";
 
 export default class Session {
     public channelMap = new Map<string, Channel>();
+
+    public host: string;
+    public port: number;
 
     private sendMessageCallback: SendMessageCallback;
     private sessionId: number;
@@ -37,6 +40,9 @@ export default class Session {
           , sessionId: number
           , referenceId: string
           , sendMessageCallback: SendMessageCallback) {
+
+        this.host = host;
+        this.port = port;
 
         this.sessionId = sessionId;
         this.referenceId = referenceId;
@@ -174,6 +180,10 @@ export default class Session {
         if (this.transportConnection) {
             this.transportConnection.send({ type: "CLOSE" });
         }
+    }
+
+    public stop () {
+        this.clientConnection!.send({ type: "STOP" });
     }
 
     private sendMessage (subject: string, data: any = {}) {

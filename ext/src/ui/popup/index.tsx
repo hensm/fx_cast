@@ -59,6 +59,7 @@ class PopupApp extends Component<{}, PopupAppState> {
 
         this.onSelectChange = this.onSelectChange.bind(this);
         this.onCast = this.onCast.bind(this);
+        this.onStop = this.onStop.bind(this);
     }
 
     public componentDidMount () {
@@ -169,6 +170,7 @@ class PopupApp extends Component<{}, PopupAppState> {
                         ? this.state.receivers.map((receiver, i) => (
                             <ReceiverEntry receiver={ receiver }
                                            onCast={ this.onCast }
+                                           onStop={ this.onStop }
                                            isLoading={ this.state.isLoading }
                                            canCast={ canCast }
                                            key={ i } /> ))
@@ -193,6 +195,13 @@ class PopupApp extends Component<{}, PopupAppState> {
               , mediaType: this.state.mediaType
               , filePath: this.state.filePath
             }
+        });
+    }
+
+    private onStop (receiver: Receiver) {
+        this.port.postMessage({
+            subject: "receiverSelector:/stop"
+          , data: { receiver }
         });
     }
 
@@ -232,11 +241,13 @@ interface ReceiverEntryProps {
     isLoading: boolean;
     canCast: boolean;
     onCast (receiver: Receiver): void;
+    onStop (receiver: Receiver): void;
 }
 
 interface ReceiverEntryState {
     ellipsis: string;
     isLoading: boolean;
+    showAlternateAction: boolean;
 }
 
 class ReceiverEntry extends Component<ReceiverEntryProps, ReceiverEntryState> {
@@ -244,9 +255,25 @@ class ReceiverEntry extends Component<ReceiverEntryProps, ReceiverEntryState> {
         super(props);
 
         this.state = {
-            isLoading: false
-          , ellipsis: ""
+            ellipsis: ""
+          , isLoading: false
+          , showAlternateAction: false
         };
+
+        window.addEventListener("keydown", ev => {
+            if (ev.key === "Alt") {
+                this.setState({
+                    showAlternateAction: true
+                });
+            }
+        });
+        window.addEventListener("keyup", ev => {
+            if (ev.key === "Alt") {
+                this.setState({
+                    showAlternateAction: false
+                });
+            }
+        });
 
         this.handleCast = this.handleCast.bind(this);
     }
@@ -273,25 +300,33 @@ class ReceiverEntry extends Component<ReceiverEntryProps, ReceiverEntryState> {
                               , (this.state.isLoading
                                     ? this.state.ellipsis
                                     : ""))
-                        : _("popupCastButtonTitle") }
+                        : !application.isIdleScreen && this.state.showAlternateAction
+                            ? _("popupStopButtonTitle")
+                            : _("popupCastButtonTitle") }
                 </button>
             </li>
         );
     }
 
     private handleCast () {
-        this.props.onCast(this.props.receiver);
+        const { application } = this.props.receiver.status;
 
-        this.setState({
-            isLoading: true
-        });
+        if (!application.isIdleScreen && this.state.showAlternateAction) {
+            this.props.onStop(this.props.receiver);
+        } else {
+            this.props.onCast(this.props.receiver);
 
-        setInterval(() => {
-            this.setState(state => ({
-                ellipsis: getNextEllipsis(state.ellipsis)
-            }));
+            this.setState({
+                isLoading: true
+            });
 
-        }, 500);
+            setInterval(() => {
+                this.setState(state => ({
+                    ellipsis: getNextEllipsis(state.ellipsis)
+                }));
+
+            }, 500);
+        }
     }
 }
 

@@ -154,6 +154,14 @@ export default class PopupReceiverSelector
 
                 break;
             }
+
+            case "receiverSelector:/stop": {
+                this.dispatchEvent(new CustomEvent("stop", {
+                    detail: message.data
+                }));
+
+                break;
+            }
         }
     }
 

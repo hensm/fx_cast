@@ -197,4 +197,20 @@ extension ViewController : ReceiverViewDelegate {
             fatalError("Error: Failed to encode output data")
         }
     }
+
+    func didStop (_ receiver: Receiver) {
+        // TODO: Use separate type and do proper JSON encoding
+        let selection = ReceiverSelection(
+                receiver: receiver
+              , mediaType: nil
+              , filePath: nil)
+
+        if let jsonData = try? JSONEncoder().encode(selection)
+         , let jsonString = String(data: jsonData, encoding: .utf8) {
+            print(jsonString)
+            fflush(stdout)
+        } else {
+            fatalError("Error: Failed to encode output data")
+        }
+    }
 }

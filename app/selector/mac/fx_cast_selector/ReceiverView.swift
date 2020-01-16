@@ -2,6 +2,7 @@ import Cocoa
 
 protocol ReceiverViewDelegate : AnyObject {
     func didCast (_ receiver: Receiver)
+    func didStop (_ receiver: Receiver)
 }
 
 class ReceiverView : NSStackView {
@@ -74,6 +75,23 @@ class ReceiverView : NSStackView {
         self.addArrangedSubview(self.castButton)
 
         self.distribution = .fill
+        
+        NSEvent.addLocalMonitorForEvents(
+                matching: .flagsChanged) { event in
+
+            if !self.receiver.status.application.isIdleScreen &&
+                    event.modifierFlags.contains(.option) {
+                self.castButton.title =
+                        InitDataProvider.shared.data.i18n_stopButtonTitle
+                self.castButton.action = #selector(ReceiverView.onStop)
+            } else {
+                self.castButton.title =
+                        InitDataProvider.shared.data.i18n_castButtonTitle
+                self.castButton.action = #selector(ReceiverView.onCast)
+            }
+
+            return event
+        }
     }
 
     override func updateConstraints () {
@@ -102,5 +120,10 @@ class ReceiverView : NSStackView {
 
         self.castingSpinner.isHidden = false
         self.castingSpinner.startAnimation(nil)
+    }
+
+    @objc
+    func onStop () {
+        self.receiverViewDelegate?.didStop(self.receiver);
     }
 }

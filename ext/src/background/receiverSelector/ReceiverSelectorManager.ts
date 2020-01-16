@@ -17,6 +17,8 @@ import { ReceiverSelection
 import NativeReceiverSelector from "./NativeReceiverSelector";
 import PopupReceiverSelector from "./PopupReceiverSelector";
 
+import { Receiver } from "../../types";
+
 
 async function createSelector () {
     const type = await options.get("receiverSelectorType");
@@ -60,8 +62,17 @@ async function getSelection (
         : Promise<ReceiverSelection> {
 
     return new Promise(async (resolve, reject) => {
-        const currentShim = ShimManager.getShim(
+        let currentShim = ShimManager.getShim(
                 contextTabId, contextFrameId);
+
+        /**
+         * If the current context is running the mirroring app, pretend
+         * it doesn't exist because it shouldn't be launched like this.
+         */
+        if (currentShim?.requestedAppId ===
+                await options.get("mirroringAppId")) {
+            currentShim = null;
+        }
 
         let defaultMediaType = ReceiverSelectorMediaType.Tab;
         let availableMediaTypes;
@@ -107,20 +118,43 @@ async function getSelection (
         // Get a new selector for each selection
         sharedSelector = await createSelector();
 
-        sharedSelector.addEventListener("selected", ev => {
+        sharedSelector.addEventListener("selected", onSelected);
+        sharedSelector.addEventListener("cancelled", onCancelled);
+        sharedSelector.addEventListener("error", onError);
+        sharedSelector.addEventListener("stop", onStop);
+
+        function removeListeners () {
+            sharedSelector.removeEventListener("selected", onSelected);
+            sharedSelector.removeEventListener("cancelled", onCancelled);
+            sharedSelector.removeEventListener("error", onError);
+            sharedSelector.removeEventListener("stop", onStop);
+        }
+
+        function onSelected (ev: any) {
             console.info("fx_cast (Debug): Selected receiver", ev.detail);
             resolve(ev.detail);
-        });
+            removeListeners();
+        }
 
-        sharedSelector.addEventListener("cancelled", () => {
+        function onCancelled () {
             console.info("fx_cast (Debug): Cancelled receiver selection");
             resolve(null);
-        });
+            removeListeners();
+        }
 
-        sharedSelector.addEventListener("error", () => {
+        function onError () {
             console.error("fx_cast (Debug): Failed to select receiver");
             reject();
-        });
+            removeListeners();
+        }
+
+        function onStop (ev: any) {
+            console.info("fx_cast (Debug): Stopped receiver app", ev.detail);
+
+            StatusManager.init().then(() => {
+                StatusManager.stopReceiverApp(ev.detail.receiver);
+            });
+        }
 
 
         // Ensure status manager is initialized
