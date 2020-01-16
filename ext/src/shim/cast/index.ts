@@ -377,5 +377,14 @@ onMessage(async message => {
 
             break;
         }
+
+        case "shim:/launchApp": {
+            const receiver: Receiver = message.data.receiver;
+            _requestSession(receiver, session => {
+                apiConfig.sessionListener(session);
+            });
+
+            break;
+        }
     }
 });

@@ -5,6 +5,8 @@ import { stringify } from "./utils";
 import { ReceiverSelection
        , ReceiverSelectorMediaType } from "../background/receiverSelector";
 
+import ShimManager from "../background/ShimManager";
+
 
 interface LoadSenderOptions {
     tabId: number;
@@ -23,6 +25,16 @@ export default async function loadSender (opts: LoadSenderOptions) {
     }
 
     switch (opts.selection.mediaType) {
+        case ReceiverSelectorMediaType.App: {
+            const shim = ShimManager.getShim(opts.tabId, opts.frameId);
+            shim.contentPort.postMessage({
+                subject: "shim:/launchApp"
+              , data: { receiver: opts.selection.receiver }
+            });
+
+            break;
+        }
+
         case ReceiverSelectorMediaType.Tab:
         case ReceiverSelectorMediaType.Screen: {
             await browser.tabs.executeScript(opts.tabId, {
