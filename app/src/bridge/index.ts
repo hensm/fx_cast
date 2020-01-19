@@ -441,6 +441,8 @@ async function handleMediaServerMessage (message: Message) {
                             const vttSource = subtitles.get(req.url)!;
                             const vttStream = stream.Readable.from(vttSource);
 
+                            res.setHeader("Access-Control-Allow-Origin", "*");
+
                             vttStream.pipe(res);
                         }
 

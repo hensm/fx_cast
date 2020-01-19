@@ -188,7 +188,7 @@ function getMedia (opts: InitOptions): Promise<cast.media.Media> {
                             trackIndex, cast.media.TrackType.TEXT);
 
                     // Copy TextTrack properties
-                    castTrack.name = track.label;
+                    castTrack.name = track.label || `track-${trackIndex}`;
                     castTrack.language = track.language;
                     castTrack.trackContentId = trackElement.src;
                     castTrack.trackContentType = "text/vtt";
