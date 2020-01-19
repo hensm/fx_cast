@@ -23,7 +23,10 @@ function getLocalAddress () {
     });
 }
 
-function startMediaServer (filePath: string, port: number) {
+function startMediaServer (filePath: string, port: number)
+        : Promise<{ mediaPath: string
+                  , subtitlePaths: string[] }> {
+
     return new Promise((resolve, reject) => {
         backgroundPort.postMessage({
             subject: "bridge:/mediaServer/start"
@@ -42,7 +45,7 @@ function startMediaServer (filePath: string, port: number) {
 
             switch (message.subject) {
                 case "mediaCast:/mediaServer/started": {
-                    resolve();
+                    resolve(message.data);
                     break;
                 }
                 case "mediaCast:/mediaServer/error": {
@@ -110,8 +113,10 @@ function getSession (opts: InitOptions): Promise<cast.Session> {
 
 function getMedia (opts: InitOptions): Promise<cast.media.Media> {
     return new Promise(async resolve => {
-        let mediaUrlObject = new URL(opts.mediaUrl);
-        const mediaTitle = mediaUrlObject.pathname;
+        let mediaUrl = new URL(opts.mediaUrl);
+        let subtitleUrls: URL[] = [];
+
+        const mediaTitle = mediaUrl.pathname;
 
         /**
          * If the media is a local file, start an HTTP media server
@@ -123,24 +128,41 @@ function getMedia (opts: InitOptions): Promise<cast.media.Media> {
 
             try {
                 // Wait until media server is listening
-                await startMediaServer(mediaUrlObject.pathname, port);
+                const { mediaPath, subtitlePaths }
+                        = await startMediaServer(mediaTitle, port);
+
+                const baseUrl = new URL(`http://${host}:${port}/`);
+                mediaUrl = new URL(mediaPath, baseUrl)
+                subtitleUrls = subtitlePaths.map(
+                        path => new URL(path, baseUrl));
+
             } catch (err) {
                 console.error("Failed to start media server");
                 return;
             }
-
-            mediaUrlObject = new URL(`http://${host}:${port}/`);
         }
 
 
         const activeTrackIds: number[] = [];
-        const mediaInfo = new cast.media.MediaInfo(mediaUrlObject.href, null);
+        const mediaInfo = new cast.media.MediaInfo(mediaUrl.href, null);
 
         mediaInfo.metadata = new cast.media.GenericMediaMetadata();
         mediaInfo.metadata.metadataType = cast.media.MetadataType.GENERIC;
         mediaInfo.metadata.title = mediaTitle;
         mediaInfo.tracks = [];
 
+        let trackIndex = 0;
+        for (const subtitleUrl of subtitleUrls) {
+            const castTrack = new cast.media.Track(
+                    trackIndex, cast.media.TrackType.TEXT);
+
+            castTrack.name = subtitleUrl.pathname;
+            castTrack.trackContentId = subtitleUrl.href;
+            castTrack.trackContentType = "text/vtt";
+            castTrack.subtype = cast.media.TextTrackType.SUBTITLES;
+
+            mediaInfo.tracks.push(castTrack);
+        }
 
         if (mediaElement) {
             if (mediaElement instanceof HTMLVideoElement) {
@@ -163,7 +185,7 @@ function getMedia (opts: InitOptions): Promise<cast.media.Media> {
                      * and type as TrackType.TEXT.
                      */
                     const castTrack = new cast.media.Track(
-                            index, cast.media.TrackType.TEXT);
+                            trackIndex, cast.media.TrackType.TEXT);
 
                     // Copy TextTrack properties
                     castTrack.name = track.label;
@@ -204,8 +226,10 @@ function getMedia (opts: InitOptions): Promise<cast.media.Media> {
 
                     // If enabled, mark as active track for load request
                     if (track.mode === "showing" || trackElement.default) {
-                        activeTrackIds.push(index);
+                        activeTrackIds.push(trackIndex);
                     }
+
+                    trackIndex++;
                 });
             }
         }
