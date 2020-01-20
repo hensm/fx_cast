@@ -75,15 +75,26 @@ class ReceiverView : NSStackView {
         self.addArrangedSubview(self.castButton)
 
         self.distribution = .fill
+
+
+        var wasDisabled = false
         
         NSEvent.addLocalMonitorForEvents(
                 matching: .flagsChanged) { event in
 
-            if !self.receiver.status.application.isIdleScreen &&
-                    event.modifierFlags.contains(.option) {
+            if wasDisabled {
+                self.castButton.isEnabled = false
+            }
+
+            if event.modifierFlags.contains(.option) {
                 self.castButton.title =
                         InitDataProvider.shared.data.i18n_stopButtonTitle
                 self.castButton.action = #selector(ReceiverView.onStop)
+                if !self.castButton.isEnabled {
+                    self.castButton.isEnabled =
+                            !self.receiver.status.application.isIdleScreen
+                    wasDisabled = self.castButton.isEnabled
+                }
             } else {
                 self.castButton.title =
                         InitDataProvider.shared.data.i18n_castButtonTitle

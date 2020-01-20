@@ -302,7 +302,7 @@ class ReceiverEntry extends Component<ReceiverEntryProps, ReceiverEntryState> {
                               , (this.state.isLoading
                                     ? this.state.ellipsis
                                     : ""))
-                        : !application.isIdleScreen && this.state.showAlternateAction
+                        : this.state.showAlternateAction
                             ? _("popupStopButtonTitle")
                             : _("popupCastButtonTitle") }
                 </button>
