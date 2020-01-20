@@ -90,25 +90,31 @@ async function onRequestSessionSuccess (newSession: cast.Session) {
             const drawFlags =
                     ctx.DRAWWINDOW_DRAW_CARET
                   | ctx.DRAWWINDOW_DRAW_VIEW
-                  | ctx.DRAWWINDOW_ASYNC_DECODE_IMAGES;
+                  | ctx.DRAWWINDOW_ASYNC_DECODE_IMAGES
+                  | ctx.DRAWWINDOW_USE_WIDGET_LAYERS;
 
-            /**
-             * Clears the canvas and draws the window. Called repeatedly,
-             * currently at 30FPS rate because performance is quite poor.
-             */
-            function drawWindow () {
-                ctx.clearRect(0, 0, canvas.width, canvas.height);
-                ctx.drawWindow(
-                        window        // window
-                      , 0, 0          // x, y
-                      , canvas.width  // w
-                      , canvas.height // h
-                      , "white"       // bgColor
-                      , drawFlags);   // flags
-            }
+            let lastFrame: DOMHighResTimeStamp;
+            window.requestAnimationFrame(
+                    function draw (now: DOMHighResTimeStamp) {
 
+                if (!lastFrame) {
+                    lastFrame = now;
+                }
 
-            window.setInterval(drawWindow, 1000 / 30);
+                if ((now - lastFrame) > (1000 / 30)) {
+                    ctx.drawWindow(
+                            window        // window
+                          , 0, 0          // x, y
+                          , canvas.width  // w
+                          , canvas.height // h
+                          , "white"       // bgColor
+                          , drawFlags);   // flags
+
+                    lastFrame = now;
+                }
+
+                window.requestAnimationFrame(draw);
+            });
 
             /**
              * Capture video stream from canvas and feed into the RTC
