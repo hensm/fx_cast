@@ -97,9 +97,9 @@ export default class PopupReceiverSelector
         this.defaultMediaType = defaultMediaType;
         this.availableMediaTypes = availableMediaTypes;
 
-        // Current window to base centered position on
-        const openerWindow = await browser.windows.getCurrent();
-        const centeredProps = getWindowCenteredProps(openerWindow, 350, 200);
+        // Calculate centered size/position based on current window
+        const centeredProps = getWindowCenteredProps(
+                await browser.windows.getCurrent(), 350, 200);
 
         const popup = await browser.windows.create({
             url: "ui/popup/index.html"
@@ -108,7 +108,6 @@ export default class PopupReceiverSelector
         });
 
         this._isOpen = true;
-
         this.windowId = popup.id;
 
         // Size/position not set correctly on creation (bug?)
@@ -175,6 +174,7 @@ export default class PopupReceiverSelector
             return;
         }
 
+        browser.windows.onRemoved.removeListener(this.onWindowsRemoved);
         browser.windows.onFocusChanged.removeListener(
                 this.onWindowsFocusChanged);
 
