@@ -48,7 +48,7 @@ export default class PopupReceiverSelector
          * window script.
          */
         browser.runtime.onConnect.addListener(port => {
-            // Don't polute history
+            // Don't pollute history
             browser.history.deleteUrl({ url: POPUP_URL });
 
             if (port.name !== "popup") {
