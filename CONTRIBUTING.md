@@ -20,17 +20,47 @@ Compatibility reports are always helpful. Use the "Compatibility Report" issue t
 
 Missing strings:
 
+
+* `de`
+    * `mediaOverlayTitle`
+    * `optionsBridgeBackupEnabled`
+    * `optionsBridgeBackupEnabledDescription`
+    * `optionsMediaOverlayEnabled`
+    * `optionsMediaOverlayEnabledDescription`
+    * `optionsMediaOverlayEnabledTemp`
+    * `popupMediaTypeAppMedia`
+    * `popupStopButtonTitle`
+
+* `es`
+    * `mediaOverlayTitle`
+    * `mediaOverlayTitle`
+    * `optionsBridgeBackupEnabled`
+    * `optionsBridgeBackupEnabledDescription`
+    * `optionsMediaOverlayEnabled`
+    * `optionsMediaOverlayEnabledDescription`
+    * `optionsMediaOverlayEnabledTemp`
+    * `popupMediaTypeAppMedia`
+    * `popupStopButtonTitle`
+
 * `nl`
     * `popupMediaTypeApp`
+    * `popupMediaTypeAppMedia`
     * `popupMediaTypeTab`
     * `popupMediaTypeScreen`
     * `popupMediaTypeFile`
     * `popupMediaSelectCastLabel`
     * `popupMediaSelectToLabel`
+    * `popupNoReceiversFound`
+    * `popupStopButtonTitle`
     * `contextAddToWhitelist`
-    * `contextAddToWhitelistRecommended`
     * `contextAddToWhitelistAdvancedAdd`
-    * `optionsMediaSyncElementDescription`
+    * `contextAddToWhitelistRecommended`
+    * `mediaOverlayTitle`
+    * `optionsBridgeBackupEnabled`
+    * `optionsBridgeBackupEnabledDescription`
+    * `optionsMediaOverlayEnabled`
+    * `optionsMediaOverlayEnabledDescription`
+    * `optionsMediaOverlayEnabledTemp`
     * `optionsReceiverSelectorCategoryName`
     * `optionsReceiverSelectorCategoryDescription`
     * `optionsReceiverSelectorType`
@@ -40,3 +70,4 @@ Missing strings:
     * `optionsReceiverSelectorWaitForConnectionDescription`
     * `optionsReceiverSelectorCloseIfFocusLost`
     * `optionsMirroringAppIdDescription`
+
