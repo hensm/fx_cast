@@ -69,10 +69,10 @@ async function getInfo (): Promise<BridgeInfo> {
 
     // Print compatibility info to console
     if (!isVersionCompatible) {
-        console.error(`Expecting ${applicationName} v${APPLICATION_VERSION}, found v${applicationVersion}.`
-              , isVersionOlder
+        logger.error(`Expecting ${applicationName} v${APPLICATION_VERSION}, found v${applicationVersion}. ${
+                isVersionOlder
                     ? "Try updating the native app to the latest version."
-                    : "Try updating the extension to the latest version");
+                    : "Try updating the extension to the latest version"}`);
     }
 
     return {

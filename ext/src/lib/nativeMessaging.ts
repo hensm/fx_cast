@@ -1,5 +1,7 @@
 "use strict";
 
+import logger from "./logger";
+
 const WEBSOCKET_DAEMON_URL = "ws://localhost:9556";
 
 
@@ -164,7 +166,7 @@ async function sendNativeMessage (
             });
 
             ws.addEventListener("error", () => {
-                console.error("fx_cast (Debug): No bridge application found.");
+                logger.error("No bridge application found.");
                 reject();
             });
         });

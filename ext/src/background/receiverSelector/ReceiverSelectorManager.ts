@@ -90,7 +90,7 @@ async function getSelection (
 
             availableMediaTypes = getMediaTypesForPageUrl(url);
         } catch (err) {
-            console.error("fx_cast (Debug): Failed to locate frame");
+            logger.error("Failed to locate frame");
             reject();
             return;
         }
@@ -136,25 +136,25 @@ async function getSelection (
         }
 
         function onSelected (ev: any) {
-            console.info("fx_cast (Debug): Selected receiver", ev.detail);
+            logger.info("Selected receiver", ev.detail);
             resolve(ev.detail);
             removeListeners();
         }
 
         function onCancelled () {
-            console.info("fx_cast (Debug): Cancelled receiver selection");
+            logger.info("Cancelled receiver selection");
             resolve(null);
             removeListeners();
         }
 
         function onError () {
-            console.error("fx_cast (Debug): Failed to select receiver");
+            logger.error("Failed to select receiver");
             reject();
             removeListeners();
         }
 
         function onStop (ev: any) {
-            console.info("fx_cast (Debug): Stopped receiver app", ev.detail);
+            logger.info("Stopped receiver app", ev.detail);
 
             StatusManager.init().then(() => {
                 StatusManager.stopReceiverApp(ev.detail.receiver);

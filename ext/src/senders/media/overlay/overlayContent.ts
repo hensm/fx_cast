@@ -1,5 +1,7 @@
 "use strict";
 
+import logger from "../../../lib/logger";
+
 import { bindPropertyDescriptor
        , clonePropsDescriptor
        , getPropertyDescriptor
@@ -299,7 +301,7 @@ function wrapMediaElement (mediaElement: HTMLMediaElement) {
     const shadowRoot = internalShadowRoots.get(wrappedMedia);
 
     if (!shadowRoot) {
-        console.error("err: Failed to fetch shadow root!");
+        logger.error("Failed to fetch shadow root!");
         return;
     }
 
@@ -329,7 +331,7 @@ function wrapMediaElement (mediaElement: HTMLMediaElement) {
     for (const source of mediaElement.getElementsByTagName("source")) {
         const internalMedia = shadowRoot.querySelector("audio,video");
         if (!internalMedia) {
-            console.error("err: Failed to fetch internal video element!");
+            logger.error("Failed to fetch internal video element!");
             return;
         }
 

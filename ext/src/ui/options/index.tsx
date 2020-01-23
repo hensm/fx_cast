@@ -422,7 +422,7 @@ class OptionsApp extends Component<{}, OptionsAppState> {
                 });
             }
         } catch (err) {
-            console.error("Failed to save options");
+            logger.error("Failed to save options");
         }
     }
 

@@ -3,15 +3,30 @@
 export class Logger {
     constructor (private prefix: string) {}
 
-    log (message: string) {
-        console.log(`${this.prefix} (Log): ${message}`);
+    log (message: string, data?: any) {
+        const formattedMessage = `${this.prefix} (Log): ${message}`;
+        if (data) {
+            console.log(formattedMessage, data);
+        } else {
+            console.log(formattedMessage);
+        }
     }
-    debug (message: string) {
-        console.debug(`${this.prefix} (Debug): ${message}`);
+    info (message: string, data?: any) {
+        const formattedMessage = `${this.prefix} (Info): ${message}`;
+        if (data) {
+            console.info(formattedMessage, data);
+        } else {
+            console.info(formattedMessage);
+        }
     }
-    error (message: string) {
+    error (message: string, data?: any) {
         const formattedMessage = `${this.prefix} (Error): ${message}`;
-        console.error(formattedMessage);
+        if (data) {
+            console.error(formattedMessage, data);
+        } else {
+            console.error(formattedMessage);
+        }
+
         return new Error(formattedMessage);
     }
 }

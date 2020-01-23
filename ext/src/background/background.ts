@@ -45,7 +45,7 @@ browser.runtime.onInstalled.addListener(async details => {
 
 
 function initBrowserAction () {
-    console.info("fx_cast (Debug): init (browser action)");
+    logger.info("init (browser action)");
 
     /*browser.browserAction.disable();
 
@@ -86,7 +86,7 @@ function initBrowserAction () {
 
 
 async function initMenus () {
-    console.info("fx_cast (Debug): init (menus)");
+    logger.info("init (menus)");
 
     const URL_PATTERN_HTTP = "http://*/*";
     const URL_PATTERN_HTTPS = "https://*/*";
@@ -413,7 +413,7 @@ async function initMenus () {
 
 
 async function initRequestListener () {
-    console.info("fx_cast (Debug): init (request listener)");
+    logger.info("init (request listener)");
 
     type OnBeforeRequestDetails = Parameters<Parameters<
             typeof browser.webRequest.onBeforeRequest.addListener>[0]>[0];
@@ -457,7 +457,7 @@ async function initRequestListener () {
 
 
 function initWhitelist () {
-    console.info("fx_cast (Debug): init (whitelist)");
+    logger.info("init (whitelist)");
 
     type OnBeforeSendHeadersDetails = Parameters<Parameters<
             typeof browser.webRequest.onBeforeSendHeaders.addListener>[0]>[0];
@@ -536,7 +536,7 @@ function initWhitelist () {
 
 
 async function initMediaOverlay () {
-    console.info("fx_cast (Debug): init (media overlay)");
+    logger.info("init (media overlay)");
 
     let contentScript: browser.contentScripts.RegisteredContentScript;
 
@@ -553,7 +553,7 @@ async function initMediaOverlay () {
               , runAt: "document_start"
             });
         } catch (err) {
-            console.error("fx_cast (Debug): Failed to register media overlay");
+            logger.error("Failed to register media overlay")
         }
     }
 
@@ -591,7 +591,7 @@ async function init () {
         return;
     }
 
-    console.info("fx_cast (Debug): init");
+    logger.info("init");
 
     isInitialized = true;
 

@@ -2,6 +2,7 @@
 
 import bridge from "../../lib/bridge";
 import knownApps from "../../lib/knownApps";
+import logger from "../../lib/logger";
 import options from "../../lib/options";
 
 import { TypedEventTarget } from "../../lib/typedEvents";
@@ -145,8 +146,7 @@ export default class NativeReceiverSelector
     private async onBridgePortMessageError (
             message: NativeReceiverSelectorErrorMessage) {
 
-        console.error("fx_cast (Debug): Native receiver selector error"
-              , message.data);
+        logger.error("Native receiver selector error", message.data);
 
         this.dispatchEvent(new CustomEvent("error"));
     }
