@@ -33,7 +33,7 @@ export default class NativeReceiverSelector
         extends TypedEventTarget<ReceiverSelectorEvents>
         implements ReceiverSelector {
 
-    private bridgePort: browser.runtime.Port;
+    private bridgePort: (browser.runtime.Port | null) = null;
     private wasReceiverSelected: boolean = false;
     private _isOpen: boolean = false;
 

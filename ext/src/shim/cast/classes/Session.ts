@@ -50,7 +50,7 @@ export default class Session {
     public namespaces: Array<{ name: "string" }>;
     public senderApps: SenderApplication[];
     public status: SessionStatus;
-    public statusText: string;
+    public statusText: string | null;
     public transportId: string;
 
     constructor (
@@ -102,12 +102,15 @@ export default class Session {
             switch (message.subject) {
                 case "shim:/session/stopped": {
                     // Disconnect from extension messages
-                    _listener.get(this).disconnect();
+                    _listener.get(this)?.disconnect();
 
                     this.status = SessionStatus.STOPPED;
 
-                    for (const listener of _updateListeners.get(this)) {
-                        listener(false);
+                    const updateListeners = _updateListeners.get(this);
+                    if (updateListeners) {
+                        for (const listener of updateListeners) {
+                            listener(false);
+                        }
                     }
 
                     break;
@@ -147,8 +150,11 @@ export default class Session {
                         }
                     }
 
-                    for (const listener of _updateListeners.get(this)) {
-                        listener(true);
+                    const updateListeners = _updateListeners.get(this);
+                    if (updateListeners) {
+                        for (const listener of updateListeners) {
+                            listener(true);
+                        }
                     }
 
                     break;
@@ -156,19 +162,28 @@ export default class Session {
 
 
                 case "shim:/session/impl_addMessageListener": {
-                    const { namespace, data } = message.data;
-                    for (const listener of
-                            _messageListeners.get(this).get(namespace)) {
-                        listener(namespace, data);
+                    const { namespace, data }
+                        : { namespace: string, data: string } = message.data;
+
+                    const messageListeners = _messageListeners
+                            .get(this)?.get(namespace);
+
+                    if (messageListeners) {
+                        for (const listener of messageListeners) {
+                            listener(namespace, data);
+                        }
                     }
 
                     break;
                 }
 
                 case "shim:/session/impl_sendMessage": {
-                    const { messageId, error } = message.data;
-                    const [ successCallback, errorCallback ]
-                            = _sendMessageCallbacks.get(this).get(messageId);
+                    const { messageId, error }
+                        : { messageId: string, error: boolean } = message.data;
+
+                    const [ successCallback, errorCallback ] =
+                            _sendMessageCallbacks
+                                .get(this)?.get(messageId) ?? [];
 
                     if (error && errorCallback) {
                         errorCallback(new _Error(ErrorCode.SESSION_ERROR));
@@ -176,17 +191,16 @@ export default class Session {
                         successCallback();
                     }
 
-                    _sendMessageCallbacks.get(this).delete(messageId);
+                    _sendMessageCallbacks.get(this)?.delete(messageId);
 
                     break;
                 }
 
                 case "shim:/session/impl_setReceiverMuted": {
                     const { volumeId, error } = message.data;
-                    const [ successCallback, errorCallback ]
-                            = _setReceiverMutedCallbacks
-                                .get(this)
-                                .get(volumeId);
+                    const [ successCallback, errorCallback ] =
+                            _setReceiverMutedCallbacks
+                                .get(this)?.get(volumeId) ?? [];
 
                     if (error && errorCallback) {
                         errorCallback(new _Error(ErrorCode.SESSION_ERROR));
@@ -194,16 +208,16 @@ export default class Session {
                         successCallback();
                     }
 
-                    _setReceiverMutedCallbacks.get(this).delete(volumeId);
+                    _setReceiverMutedCallbacks.get(this)?.delete(volumeId);
 
                     break;
                 }
 
                 case "shim:/session/impl_setReceiverVolumeLevel": {
                     const { volumeId, error } = message.data;
-                    const [ successCallback, errorCallback ]
-                            = _setReceiverVolumeLevelCallbacks.get(this)
-                                .get(volumeId);
+                    const [ successCallback, errorCallback ] =
+                            _setReceiverVolumeLevelCallbacks
+                                .get(this)?.get(volumeId) ?? [];
 
                     if (error && errorCallback) {
                         errorCallback(new _Error(ErrorCode.SESSION_ERROR));
@@ -211,7 +225,8 @@ export default class Session {
                         successCallback();
                     }
 
-                    _setReceiverVolumeLevelCallbacks.get(this).delete(volumeId);
+                    _setReceiverVolumeLevelCallbacks
+                        .get(this)?.delete(volumeId);
 
                     break;
                 }
@@ -219,18 +234,21 @@ export default class Session {
                 case "shim:/session/impl_stop": {
                     const { stopId, error } = message.data;
                     const [ successCallback, errorCallback ]
-                            = _stopCallbacks.get(this).get(stopId);
+                            = _stopCallbacks.get(this)?.get(stopId) ?? [];
 
                     // Disconnect from extension messages
-                    _listener.get(this).disconnect();
+                    _listener.get(this)?.disconnect();
 
                     if (error && errorCallback) {
                         errorCallback(new _Error(ErrorCode.SESSION_ERROR));
                     } else {
                         this.status = SessionStatus.STOPPED;
 
-                        for (const listener of _updateListeners.get(this)) {
-                            listener(false);
+                        const updateListeners = _updateListeners.get(this);
+                        if (updateListeners) {
+                            for (const listener of updateListeners) {
+                                listener(false);
+                            }
                         }
 
                         if (successCallback) {
@@ -238,7 +256,7 @@ export default class Session {
                         }
                     }
 
-                    _stopCallbacks.get(this).delete(stopId);
+                    _stopCallbacks.get(this)?.delete(stopId);
 
                     break;
                 }
@@ -257,11 +275,11 @@ export default class Session {
             namespace: string
           , listener: MessageListener) {
 
-        if (!_messageListeners.get(this).has(namespace)) {
-            _messageListeners.get(this).set(namespace, new Set());
+        if (!_messageListeners.get(this)?.has(namespace)) {
+            _messageListeners.get(this)?.set(namespace, new Set());
         }
 
-        _messageListeners.get(this).get(namespace).add(listener);
+        _messageListeners.get(this)?.get(namespace)?.add(listener);
 
         sendMessageResponse({
             subject: "bridge:/session/impl_addMessageListener"
@@ -271,7 +289,7 @@ export default class Session {
     }
 
     public addUpdateListener (listener: UpdateListener) {
-        _updateListeners.get(this).add(listener);
+        _updateListeners.get(this)?.add(listener);
     }
 
     public leave (
@@ -286,7 +304,7 @@ export default class Session {
           , _id: _id.get(this)
         });
 
-        _leaveCallbacks.get(this).set(id, [
+        _leaveCallbacks.get(this)?.set(id, [
             successCallback
           , errorCallback
         ]);
@@ -322,12 +340,17 @@ export default class Session {
             const message = JSON.parse(data);
 
             if (message.status && message.status.length > 0) {
+                const sessionId = _id.get(this);
+                if (!sessionId) {
+                    return;
+                }
+
                 hasResponded = true;
 
                 const media = new Media(
                         this.sessionId
                       , message.status[0].mediaSessionId
-                      , _id.get(this));
+                      , sessionId);
 
                 media.media = loadRequest.media;
                 this.media = [ media ];
@@ -361,14 +384,14 @@ export default class Session {
             namespace: string
           , listener: MessageListener): void {
 
-        _messageListeners.get(this).get(namespace).delete(listener);
+        _messageListeners.get(this)?.get(namespace)?.delete(listener);
     }
 
     public removeUpdateListener (
             _namespace: string
           , listener: UpdateListener): void {
 
-        _updateListeners.get(this).delete(listener);
+        _updateListeners.get(this)?.delete(listener);
     }
 
     public sendMessage (
@@ -389,7 +412,7 @@ export default class Session {
           , _id: _id.get(this)
         });
 
-        _sendMessageCallbacks.get(this).set(messageId, [
+        _sendMessageCallbacks.get(this)?.set(messageId, [
             successCallback
           , errorCallback
         ]);
@@ -408,7 +431,7 @@ export default class Session {
           , _id: _id.get(this)
         });
 
-        _setReceiverMutedCallbacks.get(this).set(volumeId, [
+        _setReceiverMutedCallbacks.get(this)?.set(volumeId, [
             successCallback
           , errorCallback
         ]);
@@ -427,7 +450,7 @@ export default class Session {
           , _id: _id.get(this)
         });
 
-        _setReceiverVolumeLevelCallbacks.get(this).set(volumeId, [
+        _setReceiverVolumeLevelCallbacks.get(this)?.set(volumeId, [
             successCallback
           , errorCallback
         ]);
@@ -445,7 +468,7 @@ export default class Session {
           , _id: _id.get(this)
         });
 
-        _stopCallbacks.get(this).set(stopId, [
+        _stopCallbacks.get(this)?.set(stopId, [
             successCallback
           , errorCallback
         ]);
@@ -456,6 +479,6 @@ export default class Session {
         this.sendMessage(
                 "urn:x-cast:com.google.cast.media"
               , message
-              , null, null);
+              , () => {}, () => {});
     }
 }

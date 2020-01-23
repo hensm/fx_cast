@@ -129,8 +129,8 @@ export function removeReceiverActionListener (
 }
 
 export function requestSession (
-        successCallback?: RequestSessionSuccessCallback
-      , errorCallback?: ErrorCallback
+        successCallback: RequestSessionSuccessCallback
+      , errorCallback: ErrorCallback
       , _sessionRequest: SessionRequest = apiConfig.sessionRequest): void {
 
     console.info("fx_cast (Debug): cast.requestSession");
@@ -176,8 +176,8 @@ export function requestSession (
 
 export function _requestSession (
         _receiver: Receiver
-      , successCallback?: RequestSessionSuccessCallback
-      , errorCallback?: ErrorCallback): void {
+      , successCallback: RequestSessionSuccessCallback
+      , errorCallback: ErrorCallback): void {
 
     console.info("fx_cast (Debug): cast._requestSession");
 
@@ -241,7 +241,7 @@ export function _requestSession (
         const lastSession = sessionList[sessionList.length - 1];
 
         if (lastSession.status !== SessionStatus.STOPPED) {
-            lastSession.stop(createSession, null);
+            lastSession.stop(createSession, () => {});
         }
     } else {
         createSession();
@@ -354,7 +354,7 @@ onMessage(async message => {
                 const lastSession = sessionList[sessionList.length - 1];
 
                 if (lastSession.status !== SessionStatus.STOPPED) {
-                    lastSession.stop(createSession, null);
+                    lastSession.stop(createSession, () => {});
                 }
             } else {
                 createSession();
@@ -380,9 +380,11 @@ onMessage(async message => {
 
         case "shim:/launchApp": {
             const receiver: Receiver = message.data.receiver;
-            _requestSession(receiver, session => {
-                apiConfig.sessionListener(session);
-            });
+            _requestSession(receiver
+                  , session => {
+                        apiConfig.sessionListener(session);
+                    }
+                  , () => {});
 
             break;
         }

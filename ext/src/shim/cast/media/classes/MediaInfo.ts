@@ -20,12 +20,12 @@ type Metadata =
       | TvShowMediaMetadata;
 
 export default class MediaInfo {
-    public customData: string = null;
-    public duration: number = null;
-    public metadata: Metadata = null;
+    public customData: any = null;
+    public duration: (number | null) = null;
+    public metadata: (Metadata | null) = null;
     public streamType: string = StreamType.BUFFERED;
-    public textTrackStyle: TextTrackStyle = null;
-    public tracks: Track[] = null;
+    public textTrackStyle: (TextTrackStyle | null) = null;
+    public tracks: (Track[] | null) = null;
 
     constructor (
             public contentId: string

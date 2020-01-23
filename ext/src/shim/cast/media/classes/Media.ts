@@ -40,17 +40,17 @@ const _lastCurrentTime = new WeakMap<Media, number>();
 
 
 export default class Media {
-    public activeTrackIds: number[] = null;
-    public currentItemId: number = null;
+    public activeTrackIds: (number[] | null) = null;
+    public currentItemId: (number | null) = null;
     public customData: any = null;
     public currentTime: number = 0;
-    public idleReason: string = null;
-    public items: QueueItem[] = null;
-    public loadingItemId: number = null;
-    public media: MediaInfo = null;
+    public idleReason: (string | null) = null;
+    public items: (QueueItem[] | null) = null;
+    public loadingItemId: (number | null) = null;
+    public media: (MediaInfo | null) = null;
     public playbackRate: number = 1;
     public playerState: string = PlayerState.IDLE;
-    public preloadedItemId: number = null;
+    public preloadedItemId: (number | null) = null;
     public repeatMode: string = RepeatMode.OFF;
     public supportedMediaCommands: string[] = [];
     public volume: Volume = new Volume();
@@ -65,8 +65,6 @@ export default class Media {
 
         _updateListeners.set(this, new Set());
         _sendMediaMessageCallbacks.set(this, new Map());
-
-        _lastCurrentTime.set(this, undefined);
 
 
         sendMessageResponse({
@@ -109,19 +107,23 @@ export default class Media {
                     }
 
                     // Call update listeners
-                    for (const listener of _updateListeners.get(this)) {
-                        listener(true);
+                    const updateListeners = _updateListeners.get(this);
+                    if (updateListeners) {
+                        for (const listener of updateListeners) {
+                            listener(true);
+                        }
                     }
 
                     break;
                 }
 
                 case "shim:/media/sendMediaMessageResponse": {
-                    const { messageId, error } = message.data;
+                    const { messageId, error }
+                        : { messageId: string, error: any } = message.data;
+
                     const [ successCallback, errorCallback ]
                             = _sendMediaMessageCallbacks
-                                .get(this)
-                                .get(messageId);
+                                .get(this)?.get(messageId) ?? [];
 
                     if (error && errorCallback) {
                         errorCallback(new _Error(ErrorCode.SESSION_ERROR));
@@ -137,7 +139,7 @@ export default class Media {
     }
 
     public addUpdateListener (listener: UpdateListener): void {
-        _updateListeners.get(this).add(listener);
+        _updateListeners.get(this)?.add(listener);
     }
 
     public editTracksInfo (
@@ -149,12 +151,13 @@ export default class Media {
     }
 
     public getEstimatedTime (): number {
-        if (!this.currentTime) {
+        const lastTime = _lastCurrentTime.get(this);
+
+        if (this.currentTime === undefined || lastTime === undefined) {
             return 0;
         }
 
-        return this.currentTime
-                + ((Date.now() / 1000) - _lastCurrentTime.get(this));
+        return this.currentTime + ((Date.now() / 1000) - lastTime);
     }
 
     public getStatus (
@@ -167,7 +170,7 @@ export default class Media {
     }
 
     public pause (
-            _pauseRequest: PauseRequest
+            _pauseRequest?: PauseRequest
           , successCallback?: SuccessCallback
           , errorCallback?: ErrorCallback): void {
 
@@ -254,7 +257,7 @@ export default class Media {
     }
 
     public removeUpdateListener (listener: UpdateListener) {
-        _updateListeners.get(this).delete(listener);
+        _updateListeners.get(this)?.delete(listener);
     }
 
     public seek (
@@ -307,7 +310,7 @@ export default class Media {
 
         const messageId = uuid();
 
-        _sendMediaMessageCallbacks.get(this).set(messageId, [
+        _sendMediaMessageCallbacks.get(this)?.set(messageId, [
             successCallback
           , errorCallback
         ]);

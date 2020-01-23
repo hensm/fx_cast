@@ -7,5 +7,6 @@
       , "removeComments": true
       , "resolveJsonModule": true
       , "target": "es6"
+      . "strict": true
     }
 }

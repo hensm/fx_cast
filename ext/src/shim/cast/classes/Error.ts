@@ -4,7 +4,7 @@
 export default class Error {
     constructor (
             public code: string
-          , public description: string = null
+          , public description: (string | null) = null
           , public details: any = null) {
     }
 }

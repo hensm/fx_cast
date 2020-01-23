@@ -31,14 +31,15 @@ interface PopupAppState {
     mediaType: ReceiverSelectorMediaType;
     availableMediaTypes: ReceiverSelectorMediaType;
     isLoading: boolean;
-    filePath: string;
-    requestedAppId: string;
+
+    filePath?: string;
+    requestedAppId?: string;
 }
 
 class PopupApp extends Component<{}, PopupAppState> {
-    private port: browser.runtime.Port;
-    private win: browser.windows.Window;
-    private defaultMediaType: ReceiverSelectorMediaType;
+    private port?: browser.runtime.Port;
+    private win?: browser.windows.Window;
+    private defaultMediaType?: ReceiverSelectorMediaType;
 
     constructor (props: {}) {
         super(props);
@@ -48,8 +49,6 @@ class PopupApp extends Component<{}, PopupAppState> {
           , mediaType: ReceiverSelectorMediaType.App
           , availableMediaTypes: ReceiverSelectorMediaType.App
           , isLoading: false
-          , filePath: null
-          , requestedAppId: null
         };
 
         // Store window ref
@@ -78,7 +77,12 @@ class PopupApp extends Component<{}, PopupAppState> {
                 }
 
                 case "popup:/populateReceiverList": {
-                    this.defaultMediaType = message.data.defaultMediaType;
+                    const { receivers, availableMediaTypes, defaultMediaType }
+                        : { receivers: Receiver[]
+                          , availableMediaTypes: ReceiverSelectorMediaType
+                          , defaultMediaType: ReceiverSelectorMediaType } = message.data;
+
+                    this.defaultMediaType = defaultMediaType;
 
                     this.setState({
                         receivers: message.data.receivers
@@ -99,6 +103,10 @@ class PopupApp extends Component<{}, PopupAppState> {
 
     public componentDidUpdate () {
         setTimeout(() => {
+            if (this.win?.id === undefined) {
+                return;
+            }
+
             // Fit window to content height
             const frameHeight = window.outerHeight - window.innerHeight;
             const windowHeight = document.body.clientHeight + frameHeight;
@@ -137,8 +145,9 @@ class PopupApp extends Component<{}, PopupAppState> {
                         <option value={ ReceiverSelectorMediaType.App }
                                 disabled={ !(this.state.availableMediaTypes
                                         & ReceiverSelectorMediaType.App) }>
-                            { knownApps[this.state.requestedAppId]
-                                    ?? _("popupMediaTypeApp") }
+                            { (this.state.requestedAppId
+                                    && knownApps[this.state.requestedAppId])
+                                        ?? _("popupMediaTypeApp") }
                         </option>
                         <option value={ ReceiverSelectorMediaType.Tab }
                                 disabled={ !(this.state.availableMediaTypes
@@ -157,7 +166,7 @@ class PopupApp extends Component<{}, PopupAppState> {
                                 disabled={ !(this.state.availableMediaTypes
                                         & ReceiverSelectorMediaType.File) }>
                             { this.state.filePath
-                                ? truncatedFileName
+                                ? truncatedFileName!
                                 : _("popupMediaTypeFile") }
                         </option>
                     </select>
@@ -188,7 +197,7 @@ class PopupApp extends Component<{}, PopupAppState> {
             isLoading: true
         });
 
-        this.port.postMessage({
+        this.port?.postMessage({
             subject: "receiverSelector:/selected"
           , data: {
                 receiver
@@ -199,7 +208,7 @@ class PopupApp extends Component<{}, PopupAppState> {
     }
 
     private onStop (receiver: Receiver) {
-        this.port.postMessage({
+        this.port?.postMessage({
             subject: "receiverSelector:/stop"
           , data: { receiver }
         });
@@ -220,9 +229,11 @@ class PopupApp extends Component<{}, PopupAppState> {
             }
 
             // Set media type to default if failed to set filePath
-            this.setState({
-                mediaType: this.defaultMediaType
-            });
+            if (this.defaultMediaType) {
+                this.setState({
+                    mediaType: this.defaultMediaType
+                });
+            }
         } else {
             this.setState({
                 mediaType
@@ -230,7 +241,7 @@ class PopupApp extends Component<{}, PopupAppState> {
         }
 
         this.setState({
-            filePath: null
+            filePath: undefined
         });
     }
 }
@@ -279,6 +290,10 @@ class ReceiverEntry extends Component<ReceiverEntryProps, ReceiverEntryState> {
     }
 
     public render () {
+        if (!this.props.receiver.status) {
+            return;
+        }
+
         const { application } = this.props.receiver.status;
 
         return (
@@ -287,7 +302,7 @@ class ReceiverEntry extends Component<ReceiverEntryProps, ReceiverEntryState> {
                     { this.props.receiver.friendlyName }
                 </div>
                 <div className="receiver__address"
-                     title={ !application.isIdleScreen && application.statusText }>
+                     title={ !application.isIdleScreen ? application.statusText : "" }>
                     { application.isIdleScreen
                         ? `${this.props.receiver.host}:${this.props.receiver.port}`
                         : application.statusText }
@@ -311,6 +326,10 @@ class ReceiverEntry extends Component<ReceiverEntryProps, ReceiverEntryState> {
     }
 
     private handleCast () {
+        if (!this.props.receiver.status) {
+            return;
+        }
+
         const { application } = this.props.receiver.status;
 
         if (!application.isIdleScreen && this.state.showAlternateAction) {

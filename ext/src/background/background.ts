@@ -2,6 +2,7 @@
 
 import defaultOptions from "../defaultOptions";
 import loadSender from "../lib/loadSender";
+import logger from "../lib/logger";
 import options from "../lib/options";
 
 import { getChromeUserAgent } from "../lib/userAgents";
@@ -67,6 +68,10 @@ function initBrowserAction () {
      * top-level frame.
      */
     browser.browserAction.onClicked.addListener(async tab => {
+        if (tab.id === undefined) {
+            throw logger.error("Tab ID not found in browser action handler.");
+        }
+
         const selection = await ReceiverSelectorManager.getSelection(tab.id);
 
         if (selection) {
@@ -140,6 +145,10 @@ async function initMenus () {
     browser.menus.onClicked.addListener(async (info, tab) => {
         if (info.parentMenuItemId === menuIdWhitelist) {
             const pattern = whitelistChildMenuPatterns.get(info.menuItemId);
+            if (!pattern) {
+                throw logger.error(`Whitelist pattern not found for menu item ID ${info.menuItemId}.`);
+            }
+
             const whitelist = await options.get("userAgentWhitelist");
 
             // Add to whitelist and update options
@@ -150,12 +159,28 @@ async function initMenus () {
         }
 
 
+        if (tab?.id === undefined) {
+            throw logger.error("Menu handler tab ID not found.");
+        }
+        if (info.frameId === undefined) {
+            throw logger.error("Menu handler frame ID not found.");
+        }
+        if (!info.pageUrl) {
+            throw logger.error("Menu handler page URL not found.");
+        }
+
+
         const availableMediaTypes = getMediaTypesForPageUrl(info.pageUrl);
 
         switch (info.menuItemId) {
             case menuIdCast: {
                 const selection = await ReceiverSelectorManager.getSelection(
                         tab.id, info.frameId);
+
+                // Selection cancelled
+                if (!selection) {
+                    break;
+                }
 
                 loadSender({
                     tabId: tab.id
@@ -447,6 +472,10 @@ function initWhitelist () {
         const { os } = await browser.runtime.getPlatformInfo();
         const chromeUserAgent = getChromeUserAgent(os);
 
+        if (!details.requestHeaders) {
+            throw logger.error("OnBeforeSendHeaders handler details missing requestHeaders.");
+        }
+
         const host = details.requestHeaders.find(
                 header => header.name === "Host");
 
@@ -457,7 +486,7 @@ function initWhitelist () {
                  * so pretend to be an old version of Chrome to get the old
                  * site.
                  */
-                if (host.value === "www.youtube.com") {
+                if (host?.value === "www.youtube.com") {
                     header.value = getChromeUserAgent(os, true);
                     break;
                 }

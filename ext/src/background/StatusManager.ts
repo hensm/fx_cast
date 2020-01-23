@@ -1,6 +1,7 @@
 "use strict";
 
 import bridge from "../lib/bridge";
+import logger from "../lib/logger";
 
 import { TypedEventTarget } from "../lib/typedEvents";
 import { Message, Receiver, ReceiverStatus } from "../types";
@@ -38,7 +39,7 @@ interface EventMap {
 export default new class StatusManager
         extends TypedEventTarget<EventMap> {
 
-    private bridgePort: browser.runtime.Port;
+    private bridgePort: (browser.runtime.Port | null) = null;
     private receivers = new Map<string, Receiver>();
 
     constructor () {
@@ -130,6 +131,10 @@ export default new class StatusManager
                         = (message as ReceiverStatusMessage);
 
                 const receiver = this.receivers.get(id);
+
+                if (!receiver) {
+                    throw logger.error(`Could not find receiver (${id}) specified in status message.`);
+                }
 
                 // Merge with existing
                 this.receivers.set(id, {

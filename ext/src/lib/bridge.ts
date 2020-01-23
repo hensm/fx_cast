@@ -2,6 +2,7 @@
 
 import semver from "semver";
 
+import logger from "./logger";
 import nativeMessaging from "./nativeMessaging";
 import options from "./options";
 
@@ -13,7 +14,7 @@ async function connect (): Promise<browser.runtime.Port> {
     bridgePort.onDisconnect.addListener(() => {
         if (bridgePort.error) {
             console.error(`${applicationName} disconnected:`
-                  , this.bridgePort.error.message);
+                  , bridgePort.error.message);
         } else {
             console.info(`${applicationName} disconnected`);
         }
@@ -35,6 +36,10 @@ export interface BridgeInfo {
 
 async function getInfo (): Promise<BridgeInfo> {
     const applicationName = await options.get("bridgeApplicationName");
+    if (!applicationName) {
+        throw logger.error("Bridge application name not found.");
+    }
+
     let applicationVersion: string;
 
     try {
@@ -45,7 +50,7 @@ async function getInfo (): Promise<BridgeInfo> {
               , { subject: "bridge:/getInfo"
                 , data: version });
     } catch (err) {
-        return null;
+        throw logger.error("Failed to connect to bridge application");
     }
 
     /**

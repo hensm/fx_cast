@@ -1,5 +1,6 @@
 "use strict";
 
+import logger from "../../lib/logger";
 import options from "../../lib/options";
 import cast, { ensureInit } from "../../shim/export";
 
@@ -8,7 +9,7 @@ import { Message, Receiver } from "../../types";
 
 function getLocalAddress () {
     const pc = new RTCPeerConnection();
-    pc.createDataChannel(null);
+    pc.createDataChannel("");
     pc.createOffer().then(pc.setLocalDescription.bind(pc));
 
     return new Promise((resolve, reject) => {
@@ -90,6 +91,9 @@ function getSession (opts: InitOptions): Promise<cast.Session> {
             }
         }
 
+        // TODO: Handle this
+        function sessionListener () {}
+
         function onRequestSessionSuccess (session: cast.Session) {
             resolve(session);
         }
@@ -103,7 +107,7 @@ function getSession (opts: InitOptions): Promise<cast.Session> {
 
         const apiConfig = new cast.ApiConfig(
                 sessionRequest
-              , null               // sessionListener
+              , sessionListener    // sessionListener
               , receiverListener); // receiverListener
 
 
@@ -112,7 +116,7 @@ function getSession (opts: InitOptions): Promise<cast.Session> {
 }
 
 function getMedia (opts: InitOptions): Promise<cast.media.Media> {
-    return new Promise(async resolve => {
+    return new Promise(async (resolve, reject) => {
         let mediaUrl = new URL(opts.mediaUrl);
         let subtitleUrls: URL[] = [];
 
@@ -137,14 +141,13 @@ function getMedia (opts: InitOptions): Promise<cast.media.Media> {
                         path => new URL(path, baseUrl));
 
             } catch (err) {
-                console.error("Failed to start media server");
-                return;
+                throw logger.error("Failed to start media server");
             }
         }
 
 
         const activeTrackIds: number[] = [];
-        const mediaInfo = new cast.media.MediaInfo(mediaUrl.href, null);
+        const mediaInfo = new cast.media.MediaInfo(mediaUrl.href, "");
 
         mediaInfo.metadata = new cast.media.GenericMediaMetadata();
         mediaInfo.metadata.metadataType = cast.media.MetadataType.GENERIC;
@@ -222,7 +225,7 @@ function getMedia (opts: InitOptions): Promise<cast.media.Media> {
                     }
 
                     // Add track to mediaInfo
-                    mediaInfo.tracks.push(castTrack);
+                    mediaInfo.tracks?.push(castTrack);
 
                     // If enabled, mark as active track for load request
                     if (track.mode === "showing" || trackElement.default) {
@@ -238,9 +241,7 @@ function getMedia (opts: InitOptions): Promise<cast.media.Media> {
         loadRequest.autoplay = false;
         loadRequest.activeTrackIds = activeTrackIds;
 
-        currentSession.loadMedia(loadRequest
-              , (media) => resolve(media)
-              , null);
+        currentSession.loadMedia(loadRequest, resolve, reject);
     });
 }
 
@@ -266,11 +267,11 @@ async function registerMediaElementListeners () {
 
 
         mediaElement.addEventListener("play", () => {
-            currentMedia.play(null, null, null);
+            currentMedia.play();
         });
 
         mediaElement.addEventListener("pause", () => {
-            currentMedia.pause(null, null, null);
+            currentMedia.pause();
         });
 
         mediaElement.addEventListener("suspend", () => {
@@ -281,7 +282,7 @@ async function registerMediaElementListeners () {
             const seekRequest = new cast.media.SeekRequest();
             seekRequest.currentTime = mediaElement.currentTime;
 
-            currentMedia.seek(seekRequest, null, null);
+            currentMedia.seek(seekRequest);
         });
 
         mediaElement.addEventListener("ratechange", () => {
@@ -394,7 +395,7 @@ export async function init (opts: InitOptions) {
             });
 
             if (await options.get("mediaStopOnUnload")) {
-                currentSession.stop(null, null);
+                currentSession.stop(() => {}, () => {});
             }
         });
     }

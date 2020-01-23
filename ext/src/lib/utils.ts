@@ -1,5 +1,7 @@
 "use strict";
 
+import logger from "./logger";
+
 import { ReceiverSelectorMediaType } from "../background/receiverSelector";
 
 
@@ -10,6 +12,8 @@ export function getNextEllipsis (ellipsis: string): string {
     if (ellipsis === "..") return "...";
     if (ellipsis === "...") return "";
     /* tslint:enable:curly */
+
+    return "";
 }
 
 /**
@@ -79,7 +83,7 @@ export function getMediaTypesForPageUrl (
 }
 
 
-interface WindowCenteredProps {
+export interface WindowCenteredProps {
     width: number;
     height: number;
     left: number;
@@ -90,6 +94,11 @@ export function getWindowCenteredProps (
         refWin: browser.windows.Window
       , width: number
       , height: number): WindowCenteredProps {
+
+    if (refWin.left === undefined || refWin.width === undefined
+     || refWin.top === undefined || refWin.height === undefined) {
+        throw logger.error("refWin missing positional attributes.");
+    }
 
     const centerX = refWin.left + (refWin.width / 2);
     const centerY = refWin.top + (refWin.height / 3);

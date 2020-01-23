@@ -8,14 +8,14 @@ import { ReceiverType } from "../enums";
 
 // https://developers.google.com/cast/docs/reference/chrome/chrome.cast.Receiver
 export default class Receiver {
-    public displayStatus: ReceiverDisplayStatus = null;
-    public isActiveInput: boolean = null;
+    public displayStatus: (ReceiverDisplayStatus | null) = null;
+    public isActiveInput: (boolean | null) = null;
     public receiverType: string = ReceiverType.CAST;
 
     constructor (
             public label: string
           , public friendlyName: string
           , public capabilities: string[] = []
-          , public volume: Volume = null) {
+          , public volume: (Volume | null) = null) {
     }
 }

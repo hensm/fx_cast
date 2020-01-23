@@ -23,7 +23,7 @@ interface EditableListItemState {
 export default class EditableListItem extends Component<
         EditableListItemProps, EditableListItemState> {
 
-    private input: HTMLInputElement;
+    private input: (HTMLInputElement | null) = null;
 
     constructor (props: EditableListItemProps) {
         super(props);
@@ -96,7 +96,7 @@ export default class EditableListItem extends Component<
             editing: true
           , editValue: this.props.text
         }, () => {
-            this.input.focus();
+            this.input?.focus();
         });
     }
 

@@ -2,6 +2,8 @@
 
 import defaultOptions from "../defaultOptions";
 
+import logger from "./logger";
+
 import { ReceiverSelectorType } from "../background/receiverSelector";
 import { TypedEventTarget } from "./typedEvents";
 import { TypedStorageArea } from "./typedStorage";
@@ -116,6 +118,8 @@ export default new class extends TypedEventTarget<EventMap> {
 
         if (options.hasOwnProperty(name)) {
             return options[name];
+        } else {
+            throw logger.error(`Failed to find option ${name} in storage.`);
         }
     }
 
@@ -139,20 +143,16 @@ export default new class extends TypedEventTarget<EventMap> {
      * storage are set. Does not override any existing options.
      */
     public async update (defaults = defaultOptions): Promise<void> {
-        const oldOpts = await this.getAll();
-        const newOpts: Partial<Options> = {};
+        const newOpts = await this.getAll();
 
         // Find options not already in storage
         for (const [ optName, optVal ] of Object.entries(defaults)) {
-            if (!oldOpts.hasOwnProperty(optName)) {
+            if (!newOpts.hasOwnProperty(optName)) {
                 newOpts[optName] = optVal;
             }
         }
 
         // Update storage with default values of new options
-        return this.setAll({
-            ...oldOpts
-          , ...newOpts
-        });
+        return this.setAll(newOpts);
     }
 };

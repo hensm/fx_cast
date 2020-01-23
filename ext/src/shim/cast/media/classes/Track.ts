@@ -2,11 +2,11 @@
 
 export default class Track {
     public customData: any = null;
-    public language: string = null;
-    public name: string = null;
-    public subtype: string = null;
-    public trackContentId: string = null;
-    public trackContentType: string = null;
+    public language: (string | null) = null;
+    public name: (string | null) = null;
+    public subtype: (string | null) = null;
+    public trackContentId: (string | null) = null;
+    public trackContentType: (string | null) = null;
 
     constructor (
             public trackId: number

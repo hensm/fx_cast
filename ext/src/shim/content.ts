@@ -15,7 +15,7 @@ import { CAST_LOADER_SCRIPT_URL
  * URLs, replace it with the standard API URL, the request for
  * which is handled in the main script.
  */
-const { get, set } = Reflect.getOwnPropertyDescriptor(
+const desc = Reflect.getOwnPropertyDescriptor(
         HTMLScriptElement.prototype.wrappedJSObject, "src");
 
 Reflect.defineProperty(
@@ -23,13 +23,13 @@ Reflect.defineProperty(
 
     configurable: true
   , enumerable: true
-  , get
+  , get: desc?.get
 
-  , set: exportFunction(function (value) {
+  , set: exportFunction(function setFunc (this: HTMLScriptElement, value) {
         if (CAST_SCRIPT_URLS.includes(value)) {
-            return set.call(this, CAST_LOADER_SCRIPT_URL);
+            return desc?.set?.call(this, CAST_LOADER_SCRIPT_URL);
         }
 
-        return set.call(this, value);
+        return desc?.set?.call(this, value);
     }, window)
 });

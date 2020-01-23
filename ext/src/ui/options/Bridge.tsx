@@ -68,12 +68,12 @@ interface BridgeState {
     isUpdateAvailable: boolean;
     wasErrorCheckingUpdates: boolean;
     checkUpdatesEllipsis: string;
-    updateStatus: string;
+    updateStatus?: string;
 }
 
 export default class Bridge extends Component<BridgeProps, BridgeState> {
     private updateData: any;
-    private updateStatusTimeout: number;
+    private updateStatusTimeout?: number;
 
     constructor (props: BridgeProps) {
         super(props);
@@ -83,7 +83,6 @@ export default class Bridge extends Component<BridgeProps, BridgeState> {
           , isUpdateAvailable: false
           , wasErrorCheckingUpdates: false
           , checkUpdatesEllipsis: "..."
-          , updateStatus: null
         };
 
         this.onCheckUpdates = this.onCheckUpdates.bind(this);
@@ -142,7 +141,7 @@ export default class Bridge extends Component<BridgeProps, BridgeState> {
 
         let statusIcon: string;
         let statusTitle: string;
-        let statusText: string;
+        let statusText: (string | null);
 
         if (!this.props.info) {
             statusIcon = "assets/icons8-cancel-120.png";
@@ -156,6 +155,8 @@ export default class Bridge extends Component<BridgeProps, BridgeState> {
                 statusIcon = "assets/icons8-warn-120.png";
                 statusTitle = _("optionsBridgeIssueStatusTitle");
             }
+
+            statusText = null;
         }
 
         return (
@@ -213,10 +214,13 @@ export default class Bridge extends Component<BridgeProps, BridgeState> {
         this.setState({
             isCheckingUpdates: false
           , isUpdateAvailable
-          , updateStatus: !isUpdateAvailable
-                ? _("optionsBridgeUpdateStatusNoUpdates")
-                : null
         });
+
+        if (!isUpdateAvailable) {
+            this.setState({
+                updateStatus: _("optionsBridgeUpdateStatusNoUpdates")
+            });
+        }
 
         this.showUpdateStatus();
     }
@@ -237,7 +241,7 @@ export default class Bridge extends Component<BridgeProps, BridgeState> {
         }
         this.updateStatusTimeout = window.setTimeout(() => {
             this.setState({
-                updateStatus: null
+                updateStatus: undefined
             });
         }, 1500);
     }

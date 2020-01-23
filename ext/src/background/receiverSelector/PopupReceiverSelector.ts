@@ -4,10 +4,11 @@ import ReceiverSelector, {
         ReceiverSelectorEvents
       , ReceiverSelectorMediaType } from "./ReceiverSelector";
 
+import logger from "../../lib/logger";
 import options from "../../lib/options";
 
 import { TypedEventTarget } from "../../lib/typedEvents";
-import { getWindowCenteredProps } from "../../lib/utils";
+import { getWindowCenteredProps, WindowCenteredProps } from "../../lib/utils";
 import { Message, Receiver } from "../../types";
 
 
@@ -15,19 +16,19 @@ export default class PopupReceiverSelector
         extends TypedEventTarget<ReceiverSelectorEvents>
         implements ReceiverSelector {
 
-    private windowId: number;
+    private windowId?: number;
 
-    private messagePort: browser.runtime.Port;
-    private messagePortDisconnected: boolean;
+    private messagePort?: browser.runtime.Port;
+    private messagePortDisconnected?: boolean;
 
-    private receivers: Receiver[];
-    private defaultMediaType: ReceiverSelectorMediaType;
-    private availableMediaTypes: ReceiverSelectorMediaType;
+    private receivers?: Receiver[];
+    private defaultMediaType?: ReceiverSelectorMediaType;
+    private availableMediaTypes?: ReceiverSelectorMediaType;
 
     private wasReceiverSelected: boolean = false;
 
     private _isOpen: boolean = false;
-    private requestedAppId: string;
+    private requestedAppId?: string;
 
 
     constructor () {
@@ -97,15 +98,32 @@ export default class PopupReceiverSelector
         this.defaultMediaType = defaultMediaType;
         this.availableMediaTypes = availableMediaTypes;
 
-        // Calculate centered size/position based on current window
-        const centeredProps = getWindowCenteredProps(
-                await browser.windows.getCurrent(), 350, 200);
+
+        let centeredProps: WindowCenteredProps = {
+            left: 100
+          , top: 100
+          , width: 350
+          , height: 200
+        };
+
+        try {
+            // Calculate centered size/position based on current window
+            centeredProps = getWindowCenteredProps(
+                    await browser.windows.getCurrent()
+                  , centeredProps.width, centeredProps.height);
+        } catch {
+            // Shouldn't ever hit this, but defaults are provided in case
+        }
 
         const popup = await browser.windows.create({
             url: "ui/popup/index.html"
           , type: "popup"
           , ...centeredProps
         });
+
+        if (popup?.id === undefined) {
+            throw logger.error("Failed to create receiver selector popup.");
+        }
 
         this._isOpen = true;
         this.windowId = popup.id;
@@ -132,7 +150,7 @@ export default class PopupReceiverSelector
         }
 
         this._isOpen = false;
-        this.requestedAppId = null;
+        this.requestedAppId = undefined;
 
         if (this.messagePort && !this.messagePortDisconnected) {
             this.messagePort.disconnect();
@@ -183,10 +201,11 @@ export default class PopupReceiverSelector
         }
 
         // Cleanup
-        this.windowId = null;
-        this.messagePort = null;
-        this.receivers = null;
-        this.defaultMediaType = null;
+        this.windowId = undefined;
+        this.messagePort = undefined;
+        this.receivers = undefined;
+        this.defaultMediaType = undefined;
+        this.availableMediaTypes = undefined;
         this.wasReceiverSelected = false;
     }
 
@@ -203,7 +222,9 @@ export default class PopupReceiverSelector
             browser.windows.onFocusChanged.removeListener(
                     this.onWindowsFocusChanged);
 
-            browser.windows.remove(this.windowId);
+            if (this.windowId) {
+                browser.windows.remove(this.windowId);
+            }
         }
     }
 }

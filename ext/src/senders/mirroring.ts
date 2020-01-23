@@ -35,7 +35,7 @@ function sendAppMessage (subject: string, data: any) {
     session.sendMessage(FX_CAST_RECEIVER_APP_NAMESPACE, {
         subject
       , data
-    }, null, null);
+    }, () => {}, () => {});
 }
 
 
@@ -75,6 +75,11 @@ async function onRequestSessionSuccess (newSession: cast.Session) {
         case ReceiverSelectorMediaType.Tab: {
             const canvas = document.createElement("canvas");
             const ctx = canvas.getContext("2d");
+
+            // Shouldn't be possible
+            if (!ctx) {
+                break;
+            }
 
             // Set initial size
             canvas.width = window.innerWidth;

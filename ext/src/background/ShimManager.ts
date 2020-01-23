@@ -2,6 +2,7 @@
 
 import bridge from "../lib/bridge";
 import loadSender from "../lib/loadSender";
+import logger from "../lib/logger";
 import options from "../lib/options";
 
 import { Message } from "../types";
@@ -87,6 +88,11 @@ export default new class ShimManager {
     private async createShimFromContent (
             contentPort: browser.runtime.Port): Promise<Shim> {
 
+        if (contentPort.sender?.tab?.id === undefined
+         || contentPort.sender?.frameId === undefined) {
+            throw logger.error("Content shim created with an invalid port context.");
+        }
+
         /**
          * If there's already an active shim for the sender
          * tab/frame ID, disconnect it.
@@ -135,6 +141,11 @@ export default new class ShimManager {
     }
 
     private async handleContentMessage (shim: Shim, message: Message) {
+        if (shim.contentTabId === undefined
+         || shim.contentFrameId === undefined) {
+            throw logger.error("Shim associated with content sender missing tab/frame ID");
+        }
+        
         const [ destination ] = message.subject.split(":/");
         if (destination === "bridge") {
             shim.bridgePort.postMessage(message);

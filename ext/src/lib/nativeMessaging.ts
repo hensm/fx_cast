@@ -116,7 +116,7 @@ function connectNative (application: string) {
 
             socket.addEventListener("close", ev => {
                 if (ev.code !== 1000) {
-                    this.error = {
+                    portObject.error = {
                         // TODO: Set a proper error message
                         message: ""
                     };

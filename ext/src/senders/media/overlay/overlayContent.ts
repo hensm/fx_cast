@@ -202,11 +202,11 @@ class AudioPlayerElement extends PlayerElement {}
 class VideoPlayerElement extends PlayerElement {
     set overlayHidden (val: boolean) {
         const shadowRoot = internalShadowRoots.get(this);
-        (shadowRoot.querySelector(".overlay") as HTMLDivElement).hidden = val;
+        (shadowRoot?.querySelector(".overlay") as HTMLDivElement).hidden = val;
     }
     get overlayHidden () {
         const shadowRoot = internalShadowRoots.get(this);
-        return (shadowRoot.querySelector(".overlay") as HTMLDivElement).hidden;
+        return (shadowRoot?.querySelector(".overlay") as HTMLDivElement).hidden;
     }
 }
 

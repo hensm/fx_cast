@@ -1,6 +1,7 @@
 "use strict";
 
 import options from "../../lib/options";
+import logger from "../../lib/logger";
 
 import ShimManager from "../ShimManager";
 import StatusManager from "../StatusManager";
@@ -38,7 +39,11 @@ let sharedSelector: ReceiverSelector;
 
 async function getSelector () {
     if (!sharedSelector) {
-        sharedSelector = await createSelector();
+        try {
+            sharedSelector = await createSelector();
+        } catch (err) {
+            throw logger.error("Failed to create receiver selector.");
+        }
     }
 
     return sharedSelector;
@@ -59,7 +64,7 @@ async function getSelection (
         contextTabId: number
       , contextFrameId = 0
       , withMediaSender = false)
-        : Promise<ReceiverSelection> {
+        : Promise<ReceiverSelection | null> {
 
     return new Promise(async (resolve, reject) => {
         let currentShim = ShimManager.getShim(
@@ -71,7 +76,7 @@ async function getSelection (
          */
         if (currentShim?.requestedAppId ===
                 await options.get("mirroringAppId")) {
-            currentShim = null;
+            currentShim = undefined;
         }
 
         let defaultMediaType = ReceiverSelectorMediaType.Tab;
@@ -164,8 +169,7 @@ async function getSelection (
                 Array.from(StatusManager.getReceivers())
               , defaultMediaType
               , availableMediaTypes
-              , currentShim?.requestedAppId
-                      ?? (withMediaSender && DEFAULT_MEDIA_RECEIVER_APP_ID));
+              , currentShim?.requestedAppId ?? DEFAULT_MEDIA_RECEIVER_APP_ID);
     });
 }
 

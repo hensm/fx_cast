@@ -23,7 +23,7 @@ interface EditableListState {
 export default class EditableList extends Component<
         EditableListProps, EditableListState> {
 
-    private rawViewTextArea: HTMLTextAreaElement;
+    private rawViewTextArea: (HTMLTextAreaElement | null) = null;
 
     constructor (props: EditableListProps) {
         super(props);
@@ -140,13 +140,13 @@ export default class EditableList extends Component<
             if ("itemPattern" in this.props) {
                 for (const item of newItems) {
                     if (!this.props.itemPattern.test(item)) {
-                        this.rawViewTextArea.setCustomValidity(
+                        this.rawViewTextArea?.setCustomValidity(
                                 this.props.itemPatternError(item));
                         return;
                     }
                 }
 
-                this.rawViewTextArea.setCustomValidity("");
+                this.rawViewTextArea?.setCustomValidity("");
             }
 
             this.props.onChange(newItems);
@@ -154,6 +154,10 @@ export default class EditableList extends Component<
     }
 
     private handleRawViewTextAreaChange (ev: React.ChangeEvent<HTMLTextAreaElement>) {
+        if (!this.rawViewTextArea) {
+            return;
+        }
+
         if (this.rawViewTextArea.scrollHeight > this.rawViewTextArea.clientHeight) {
             this.rawViewTextArea.style.height = `${this.rawViewTextArea.scrollHeight}px`;
         }
