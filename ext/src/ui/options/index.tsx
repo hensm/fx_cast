@@ -136,6 +136,10 @@ class OptionsApp extends Component<{}, OptionsAppState> {
             });
         } catch {
             logger.error("Failed to fetch bridge/platform info.");
+
+            this.setState({
+                bridgeLoading: false
+            });
         }
     }
 
@@ -146,10 +150,8 @@ class OptionsApp extends Component<{}, OptionsAppState> {
 
         return (
             <div>
-                { this.state.bridgeInfo && this.state.platform &&
-                    <Bridge info={ this.state.bridgeInfo }
-                            platform={ this.state.platform }
-                            loading={ this.state.bridgeLoading } /> }
+                <Bridge info={ this.state.bridgeInfo }
+                        loading={ this.state.bridgeLoading } />
 
                 <form id="form" ref={ form => { this.form = form; }}
                         onSubmit={ this.handleFormSubmit }

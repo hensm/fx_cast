@@ -58,8 +58,7 @@ const BridgeStats = (props: BridgeStatsProps) => (
 
 
 interface BridgeProps {
-    info: BridgeInfo;
-    platform: string;
+    info?: BridgeInfo;
     loading: boolean;
 }
 
