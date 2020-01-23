@@ -47,9 +47,7 @@
         "page": "ui/options/index.html"
     }
   , "permissions": [
-        "downloads"
-      , "downloads.open"
-      , "menus"
+        "menus"
       , "nativeMessaging"
       , "storage"
       , "tabs"
