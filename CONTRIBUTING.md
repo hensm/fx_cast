@@ -41,33 +41,3 @@ Missing strings:
     * `optionsMediaOverlayEnabledTemp`
     * `popupMediaTypeAppMedia`
     * `popupStopButtonTitle`
-
-* `nl`
-    * `popupMediaTypeApp`
-    * `popupMediaTypeAppMedia`
-    * `popupMediaTypeTab`
-    * `popupMediaTypeScreen`
-    * `popupMediaTypeFile`
-    * `popupMediaSelectCastLabel`
-    * `popupMediaSelectToLabel`
-    * `popupNoReceiversFound`
-    * `popupStopButtonTitle`
-    * `contextAddToWhitelist`
-    * `contextAddToWhitelistAdvancedAdd`
-    * `contextAddToWhitelistRecommended`
-    * `mediaOverlayTitle`
-    * `optionsBridgeBackupEnabled`
-    * `optionsBridgeBackupEnabledDescription`
-    * `optionsMediaOverlayEnabled`
-    * `optionsMediaOverlayEnabledDescription`
-    * `optionsMediaOverlayEnabledTemp`
-    * `optionsReceiverSelectorCategoryName`
-    * `optionsReceiverSelectorCategoryDescription`
-    * `optionsReceiverSelectorType`
-    * `optionsReceiverSelectorTypeBrowser`
-    * `optionsReceiverSelectorTypeNative`
-    * `optionsReceiverSelectorWaitForConnection`
-    * `optionsReceiverSelectorWaitForConnectionDescription`
-    * `optionsReceiverSelectorCloseIfFocusLost`
-    * `optionsMirroringAppIdDescription`
-
