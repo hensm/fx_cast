@@ -12,6 +12,8 @@ import { getWindowCenteredProps, WindowCenteredProps } from "../../lib/utils";
 import { Message, Receiver } from "../../types";
 
 
+const POPUP_URL = browser.runtime.getURL("ui/popup/index.html");
+
 export default class PopupReceiverSelector
         extends TypedEventTarget<ReceiverSelectorEvents>
         implements ReceiverSelector {
@@ -46,6 +48,9 @@ export default class PopupReceiverSelector
          * window script.
          */
         browser.runtime.onConnect.addListener(port => {
+            // Don't polute history
+            browser.history.deleteUrl({ url: POPUP_URL });
+
             if (port.name !== "popup") {
                 return;
             }
@@ -116,8 +121,8 @@ export default class PopupReceiverSelector
         }
 
         const popup = await browser.windows.create({
-            url: "ui/popup/index.html"
-          , type: "popup"
+            url: POPUP_URL
+          , type: "detached_panel"
           , ...centeredProps
         });
 
