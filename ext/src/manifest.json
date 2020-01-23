@@ -11,6 +11,7 @@
         "gecko": {
             "id": "EXTENSION_ID"
           , "strict_min_version": "64.0"
+          , "update_url": "https://hensm.github.io/fx_cast/updates.json"
         }
     }
   , "browser_action": {
