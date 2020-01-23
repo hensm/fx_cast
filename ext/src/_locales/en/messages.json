@@ -201,6 +201,15 @@
       , "description": "Update now button title. Ellipsis indicates additional information as it triggers an update window popup."
     }
 
+  , "optionsBridgeBackupEnabled": {
+        "message": "Enable backup daemon connection"
+      , "description": "Backup daemon checkbox label."
+    }
+  , "optionsBridgeBackupEnabledDescription": {
+        "message": "If the regular bridge connection fails, attempt to connect to a bridge running in daemon mode."
+      , "description": "Backup daemon checkbox description."
+    }
+
   , "optionsMediaCategoryName": {
         "message": "Media casting"
       , "description": "Options page media casting category title."

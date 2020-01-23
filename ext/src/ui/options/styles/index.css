@@ -129,10 +129,14 @@
     white-space: nowrap;
 }
 
+.bridge__options {
+    margin-top: 30px;
+}
+
 .bridge__update-info {
     align-items: center;
     display: flex;
-    margin-top: 30px;
+    margin-top: 10px;
 }
 
 .bridge__update-label {

@@ -4,6 +4,8 @@
 import React, { Component } from "react";
 import semver from "semver";
 
+import options from "../../lib/options";
+
 import { BridgeInfo } from "../../lib/bridge";
 import { getNextEllipsis } from "../../lib/utils";
 
@@ -67,6 +69,7 @@ interface BridgeState {
     isUpdateAvailable: boolean;
     wasErrorCheckingUpdates: boolean;
     checkUpdatesEllipsis: string;
+    bridgeBackupEnabled?: boolean;
     updateStatus?: string;
 }
 
@@ -84,6 +87,11 @@ export default class Bridge extends Component<BridgeProps, BridgeState> {
           , checkUpdatesEllipsis: "..."
         };
 
+        options.get("bridgeBackupEnabled")
+            .then(bridgeBackupEnabled => {
+                this.setState({ bridgeBackupEnabled });
+            });
+
         this.onCheckUpdates = this.onCheckUpdates.bind(this);
         this.onCheckUpdatesResponse = this.onCheckUpdatesResponse.bind(this);
         this.onCheckUpdatesError = this.onCheckUpdatesError.bind(this);
@@ -99,6 +107,27 @@ export default class Bridge extends Component<BridgeProps, BridgeState> {
                             <progress></progress>
                         </div> )
                     : this.renderStatus() }
+
+                { !this.props.loading && this.state.bridgeBackupEnabled !== undefined &&
+                    <div className="bridge__options">
+                        <label className="option option--inline">
+                            <div className="option__control">
+                                <input name="bridgeBackupEnabled"
+                                       type="checkbox"
+                                       checked={ this.state.bridgeBackupEnabled }
+                                       onChange={ ev => {
+                                           options.set("bridgeBackupEnabled"
+                                                 , ev.target.checked);
+                                       }} />
+                            </div>
+                            <div className="option__label">
+                                { _("optionsBridgeBackupEnabled") }
+                            </div>
+                            <div className="option__description">
+                                { _("optionsBridgeBackupEnabledDescription") }
+                            </div>
+                        </label>
+                    </div> }
 
                 { !this.props.loading &&
                     <div className="bridge__update-info">

@@ -15,6 +15,7 @@ const storageArea = new TypedStorageArea<{
 
 export interface Options {
     bridgeApplicationName: string;
+    bridgeBackupEnabled: boolean;
     mediaEnabled: boolean;
     mediaOverlayEnabled: boolean;
     mediaSyncElement: boolean;
