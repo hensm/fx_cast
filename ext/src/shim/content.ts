@@ -4,7 +4,17 @@ import { CAST_LOADER_SCRIPT_URL
        , CAST_SCRIPT_URLS } from "../lib/endpoints";
 
 
-(window.wrappedJSObject as any).chrome = cloneInto({}, window);
+const _window = (window.wrappedJSObject as any);
+
+_window.chrome = cloneInto({}, window);
+
+/**
+ * YouTube won't load the cast SDK unless it thinks the
+ * presentation API exists.
+ */
+if (window.location.host === "www.youtube.com") {
+    _window.navigator.presentation = cloneInto({}, window);
+}
 
 
 /**
