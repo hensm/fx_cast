@@ -141,11 +141,6 @@ export default new class ShimManager {
     }
 
     private async handleContentMessage (shim: Shim, message: Message) {
-        if (shim.contentTabId === undefined
-         || shim.contentFrameId === undefined) {
-            throw logger.error("Shim associated with content sender missing tab/frame ID");
-        }
-        
         const [ destination ] = message.subject.split(":/");
         if (destination === "bridge") {
             shim.bridgePort.postMessage(message);
@@ -166,6 +161,11 @@ export default new class ShimManager {
             }
 
             case "main:/selectReceiverBegin": {
+                if (shim.contentTabId === undefined
+                 || shim.contentFrameId === undefined) {
+                    throw logger.error("Shim associated with content sender missing tab/frame ID");
+                }
+
                 const contentTab = await browser.tabs.get(shim.contentTabId);
 
                 try {
