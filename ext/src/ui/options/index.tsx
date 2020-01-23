@@ -19,6 +19,27 @@ import { ReceiverSelectorType } from "../../background/receiverSelector";
 
 const _ = browser.i18n.getMessage;
 
+const LICENSE =
+`Copyright (c) 2018 Matt Hensman <m@matt.tf>
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.`;
+
 // macOS styles
 browser.runtime.getPlatformInfo()
     .then(platformInfo => {
@@ -393,6 +414,48 @@ class OptionsApp extends Component<{}, OptionsAppState> {
                         </button>
                     </div>
                 </form>
+
+                <details className="about">
+                    <summary>
+                        <h2>ABOUT</h2>
+                    </summary>
+                    <div className="about__container">
+                        <h3>GitHub</h3>: <a href="https://github.com/hensm/fx_cast">@hensm/fx_cast</a>
+
+                        <hr />
+
+                        <div className="about__license">
+                            <h3>LICENSE</h3>
+                            <div className="about__license-text">
+                                { LICENSE.replace(/\S\n\S/g, "") }
+                            </div>
+                        </div>
+
+                        <hr />
+
+                        <div className="about__translators">
+                            <h3>TRANSLATORS</h3>
+                            <ul>
+                                <li className="translator">
+                                    <a>@RAVMN</a>
+                                    <div className="translator__tag">es</div>
+                                </li>
+                                <li className="translator">
+                                    <a>@rimrul</a>
+                                    <div className="translator__tag">de</div>
+                                </li>
+                                <li className="translator">
+                                    <a>@ThaDaVos</a>
+                                    <div className="translator__tag">nl</div>
+                                </li>
+                                <li className="translator">
+                                    <a>@Vistaus</a>
+                                    <div className="translator__tag">nl</div>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </details>
             </div>
         );
     }
