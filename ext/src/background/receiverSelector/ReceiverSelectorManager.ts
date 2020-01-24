@@ -89,10 +89,9 @@ async function getSelection (
             });
 
             availableMediaTypes = getMediaTypesForPageUrl(url);
-        } catch (err) {
-            logger.error("Failed to locate frame");
-            reject();
-            return;
+        } catch {
+            logger.error("Failed to locate frame, falling back to default available media types.");
+            availableMediaTypes = ReceiverSelectorMediaType.File;
         }
 
         // Enable app media type if initialized sender app is found
