@@ -13,6 +13,10 @@
         "message": "la aplicación de este sitio"
       , "description": "Receiver selector media type <option> text for current site's sender application."
     }
+  , "popupMediaTypeAppMedia": {
+        "message": "este medio"
+      , "description": "Receiver selector media type <option> text for media casting."
+    }
   , "popupMediaTypeTab": {
         "message": "Pestaña"
       , "description": "Receiver selector media type <option> text for current tab."
@@ -52,6 +56,10 @@
             }
         }
     }
+  , "popupStopButtonTitle": {
+        "message": "Detener"
+      , "description": "Alternate action button text displayed instead of popupCastButtonTitle."
+    }
 
 
   , "contextCast": {
@@ -80,6 +88,18 @@
             "matchPattern": {
                 "content": "$1"
               , "example": "*://*.example.com/*"
+            }
+        }
+    }
+
+
+  , "mediaOverlayTitle": {
+        "message": "Reproduciendo en $receiverName$"
+      , "description": "Main title for overlay displayed on media elements whilst casting."
+      , "placeholders": {
+            "receiverName": {
+                "content": "$1"
+              , "example": "Living Room TV"
             }
         }
     }
@@ -181,6 +201,15 @@
       , "description": "Update now button title. Ellipsis indicates additional information as it triggers an update window popup."
     }
 
+  , "optionsBridgeBackupEnabled": {
+        "message": "Activar conexión de demonio de respaldo"
+      , "description": "Backup daemon checkbox label."
+    }
+  , "optionsBridgeBackupEnabledDescription": {
+        "message": "Si la conexión de puente regular falla, intenta conectar a un puente ejecutándose en modo demonio."
+      , "description": "Backup daemon checkbox description."
+    }
+
   , "optionsMediaCategoryName": {
         "message": "Transmisión de contenidos"
       , "description": "Options page media casting category title."
@@ -192,6 +221,18 @@
   , "optionsMediaEnabled": {
         "message": "Activar transmisión de contenidos"
       , "description": "Media casting enabled checkbox label."
+    }
+  , "optionsMediaOverlayEnabled": {
+        "message": "Activar sobreposición en el elemento de medios"
+      , "description": "Media element overlay checkbox label."
+    }
+  , "optionsMediaOverlayEnabledTemp": {
+        "message": "Activar sobreposición en el elemento de medios (experimental)"
+      , "description": "Experimental-labelled version of above."
+    }
+  , "optionsMediaOverlayEnabledDescription": {
+        "message": "Sobreposición en elementos de medios mostrando información acerca de la sesión actual si está conectado."
+      , "description": "Media element overlay option description."
     }
   , "optionsMediaSyncElement": {
         "message": "Sincronizar estado del receptor con el contenido"
