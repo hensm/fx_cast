@@ -30,14 +30,3 @@ Missing strings:
     * `optionsMediaOverlayEnabledTemp`
     * `popupMediaTypeAppMedia`
     * `popupStopButtonTitle`
-
-* `es`
-    * `mediaOverlayTitle`
-    * `mediaOverlayTitle`
-    * `optionsBridgeBackupEnabled`
-    * `optionsBridgeBackupEnabledDescription`
-    * `optionsMediaOverlayEnabled`
-    * `optionsMediaOverlayEnabledDescription`
-    * `optionsMediaOverlayEnabledTemp`
-    * `popupMediaTypeAppMedia`
-    * `popupStopButtonTitle`
