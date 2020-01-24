@@ -4,7 +4,17 @@ import { CAST_LOADER_SCRIPT_URL
        , CAST_SCRIPT_URLS } from "../lib/endpoints";
 
 
-(window.wrappedJSObject as any).chrome = cloneInto({}, window);
+const _window = (window.wrappedJSObject as any);
+
+_window.chrome = cloneInto({}, window);
+
+/**
+ * YouTube won't load the cast SDK unless it thinks the
+ * presentation API exists.
+ */
+if (window.location.host === "www.youtube.com") {
+    _window.navigator.presentation = cloneInto({}, window);
+}
 
 
 /**
@@ -15,7 +25,7 @@ import { CAST_LOADER_SCRIPT_URL
  * URLs, replace it with the standard API URL, the request for
  * which is handled in the main script.
  */
-const { get, set } = Reflect.getOwnPropertyDescriptor(
+const desc = Reflect.getOwnPropertyDescriptor(
         HTMLScriptElement.prototype.wrappedJSObject, "src");
 
 Reflect.defineProperty(
@@ -23,13 +33,13 @@ Reflect.defineProperty(
 
     configurable: true
   , enumerable: true
-  , get
+  , get: desc?.get
 
-  , set: exportFunction(function (value) {
+  , set: exportFunction(function setFunc (this: HTMLScriptElement, value) {
         if (CAST_SCRIPT_URLS.includes(value)) {
-            return set.call(this, CAST_LOADER_SCRIPT_URL);
+            return desc?.set?.call(this, CAST_LOADER_SCRIPT_URL);
         }
 
-        return set.call(this, value);
+        return desc?.set?.call(this, value);
     }, window)
 });

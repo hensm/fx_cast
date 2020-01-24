@@ -5,7 +5,7 @@ import Image from "./Image";
 
 // https://developers.google.com/cast/docs/reference/chrome/chrome.cast.ReceiverDisplayStatus
 export default class ReceiverDisplayStatus {
-    public showStop: boolean = null;
+    public showStop: (boolean | null) = null;
 
     constructor (
             public statusText: string

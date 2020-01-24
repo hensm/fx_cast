@@ -4,6 +4,8 @@
 import React, { Component } from "react";
 import ReactDOM from "react-dom";
 
+import knownApps from "../../lib/knownApps";
+
 import { getNextEllipsis } from "../../lib/utils";
 import { Message, Receiver } from "../../types";
 
@@ -29,13 +31,15 @@ interface PopupAppState {
     mediaType: ReceiverSelectorMediaType;
     availableMediaTypes: ReceiverSelectorMediaType;
     isLoading: boolean;
-    filePath: string;
+
+    filePath?: string;
+    requestedAppId?: string;
 }
 
 class PopupApp extends Component<{}, PopupAppState> {
-    private port: browser.runtime.Port;
-    private win: browser.windows.Window;
-    private defaultMediaType: ReceiverSelectorMediaType;
+    private port?: browser.runtime.Port;
+    private win?: browser.windows.Window;
+    private defaultMediaType?: ReceiverSelectorMediaType;
 
     constructor (props: {}) {
         super(props);
@@ -45,7 +49,6 @@ class PopupApp extends Component<{}, PopupAppState> {
           , mediaType: ReceiverSelectorMediaType.App
           , availableMediaTypes: ReceiverSelectorMediaType.App
           , isLoading: false
-          , filePath: null
         };
 
         // Store window ref
@@ -55,6 +58,7 @@ class PopupApp extends Component<{}, PopupAppState> {
 
         this.onSelectChange = this.onSelectChange.bind(this);
         this.onCast = this.onCast.bind(this);
+        this.onStop = this.onStop.bind(this);
     }
 
     public componentDidMount () {
@@ -64,8 +68,21 @@ class PopupApp extends Component<{}, PopupAppState> {
 
         this.port.onMessage.addListener((message: Message) => {
             switch (message.subject) {
+                case "popup:/sendRequestedAppId": {
+                    this.setState({
+                        requestedAppId: message.data.requestedAppId
+                    });
+
+                    break;
+                }
+
                 case "popup:/populateReceiverList": {
-                    this.defaultMediaType = message.data.defaultMediaType;
+                    const { receivers, availableMediaTypes, defaultMediaType }
+                        : { receivers: Receiver[]
+                          , availableMediaTypes: ReceiverSelectorMediaType
+                          , defaultMediaType: ReceiverSelectorMediaType } = message.data;
+
+                    this.defaultMediaType = defaultMediaType;
 
                     this.setState({
                         receivers: message.data.receivers
@@ -86,6 +103,10 @@ class PopupApp extends Component<{}, PopupAppState> {
 
     public componentDidUpdate () {
         setTimeout(() => {
+            if (this.win?.id === undefined) {
+                return;
+            }
+
             // Fit window to content height
             const frameHeight = window.outerHeight - window.innerHeight;
             const windowHeight = document.body.clientHeight + frameHeight;
@@ -124,7 +145,9 @@ class PopupApp extends Component<{}, PopupAppState> {
                         <option value={ ReceiverSelectorMediaType.App }
                                 disabled={ !(this.state.availableMediaTypes
                                         & ReceiverSelectorMediaType.App) }>
-                            { _("popupMediaTypeApp") }
+                            { (this.state.requestedAppId
+                                    && knownApps[this.state.requestedAppId])
+                                        ?? _("popupMediaTypeApp") }
                         </option>
                         <option value={ ReceiverSelectorMediaType.Tab }
                                 disabled={ !(this.state.availableMediaTypes
@@ -143,7 +166,7 @@ class PopupApp extends Component<{}, PopupAppState> {
                                 disabled={ !(this.state.availableMediaTypes
                                         & ReceiverSelectorMediaType.File) }>
                             { this.state.filePath
-                                ? truncatedFileName
+                                ? truncatedFileName!
                                 : _("popupMediaTypeFile") }
                         </option>
                     </select>
@@ -156,6 +179,7 @@ class PopupApp extends Component<{}, PopupAppState> {
                         ? this.state.receivers.map((receiver, i) => (
                             <ReceiverEntry receiver={ receiver }
                                            onCast={ this.onCast }
+                                           onStop={ this.onStop }
                                            isLoading={ this.state.isLoading }
                                            canCast={ canCast }
                                            key={ i } /> ))
@@ -173,13 +197,20 @@ class PopupApp extends Component<{}, PopupAppState> {
             isLoading: true
         });
 
-        this.port.postMessage({
+        this.port?.postMessage({
             subject: "receiverSelector:/selected"
           , data: {
                 receiver
               , mediaType: this.state.mediaType
               , filePath: this.state.filePath
             }
+        });
+    }
+
+    private onStop (receiver: Receiver) {
+        this.port?.postMessage({
+            subject: "receiverSelector:/stop"
+          , data: { receiver }
         });
     }
 
@@ -198,9 +229,11 @@ class PopupApp extends Component<{}, PopupAppState> {
             }
 
             // Set media type to default if failed to set filePath
-            this.setState({
-                mediaType: this.defaultMediaType
-            });
+            if (this.defaultMediaType) {
+                this.setState({
+                    mediaType: this.defaultMediaType
+                });
+            }
         } else {
             this.setState({
                 mediaType
@@ -208,7 +241,7 @@ class PopupApp extends Component<{}, PopupAppState> {
         }
 
         this.setState({
-            filePath: null
+            filePath: undefined
         });
     }
 }
@@ -219,11 +252,13 @@ interface ReceiverEntryProps {
     isLoading: boolean;
     canCast: boolean;
     onCast (receiver: Receiver): void;
+    onStop (receiver: Receiver): void;
 }
 
 interface ReceiverEntryState {
     ellipsis: string;
     isLoading: boolean;
+    showAlternateAction: boolean;
 }
 
 class ReceiverEntry extends Component<ReceiverEntryProps, ReceiverEntryState> {
@@ -231,14 +266,34 @@ class ReceiverEntry extends Component<ReceiverEntryProps, ReceiverEntryState> {
         super(props);
 
         this.state = {
-            isLoading: false
-          , ellipsis: ""
+            ellipsis: ""
+          , isLoading: false
+          , showAlternateAction: false
         };
+
+        window.addEventListener("keydown", ev => {
+            if (ev.key === "Alt") {
+                this.setState({
+                    showAlternateAction: true
+                });
+            }
+        });
+        window.addEventListener("keyup", ev => {
+            if (ev.key === "Alt") {
+                this.setState({
+                    showAlternateAction: false
+                });
+            }
+        });
 
         this.handleCast = this.handleCast.bind(this);
     }
 
     public render () {
+        if (!this.props.receiver.status) {
+            return;
+        }
+
         const { application } = this.props.receiver.status;
 
         return (
@@ -247,38 +302,52 @@ class ReceiverEntry extends Component<ReceiverEntryProps, ReceiverEntryState> {
                     { this.props.receiver.friendlyName }
                 </div>
                 <div className="receiver__address"
-                     title={ !application.isIdleScreen && application.statusText }>
+                     title={ !application.isIdleScreen ? application.statusText : "" }>
                     { application.isIdleScreen
                         ? `${this.props.receiver.host}:${this.props.receiver.port}`
                         : application.statusText }
                 </div>
                 <button className="receiver__connect"
                         onClick={ this.handleCast }
-                        disabled={this.props.isLoading || !this.props.canCast}>
+                        disabled={ this.state.showAlternateAction
+                            ? application.isIdleScreen
+                            : (this.props.isLoading || !this.props.canCast) }>
                     { this.state.isLoading
                         ? _("popupCastingButtonTitle"
                               , (this.state.isLoading
                                     ? this.state.ellipsis
                                     : ""))
-                        : _("popupCastButtonTitle") }
+                        : this.state.showAlternateAction
+                            ? _("popupStopButtonTitle")
+                            : _("popupCastButtonTitle") }
                 </button>
             </li>
         );
     }
 
     private handleCast () {
-        this.props.onCast(this.props.receiver);
+        if (!this.props.receiver.status) {
+            return;
+        }
 
-        this.setState({
-            isLoading: true
-        });
+        const { application } = this.props.receiver.status;
 
-        setInterval(() => {
-            this.setState(state => ({
-                ellipsis: getNextEllipsis(state.ellipsis)
-            }));
+        if (!application.isIdleScreen && this.state.showAlternateAction) {
+            this.props.onStop(this.props.receiver);
+        } else {
+            this.props.onCast(this.props.receiver);
 
-        }, 500);
+            this.setState({
+                isLoading: true
+            });
+
+            setInterval(() => {
+                this.setState(state => ({
+                    ellipsis: getNextEllipsis(state.ellipsis)
+                }));
+
+            }, 500);
+        }
     }
 }
 

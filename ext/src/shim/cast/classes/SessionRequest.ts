@@ -6,7 +6,7 @@ import Timeout from "./Timeout";
 
 // https://developers.google.com/cast/docs/reference/chrome/chrome.cast.SessionRequest
 export default class SessionRequest {
-    public language: string = null;
+    public language: (string | null) = null;
     public dialRequest: any = null;
 
     constructor (

@@ -3,10 +3,10 @@
         "esModuleInterop": true
       , "module": "commonjs"
       , "noImplicitAny": true
-      , "noUnusedLocals": true
       , "noUnusedParameters": true
       , "removeComments": true
       , "resolveJsonModule": true
       , "target": "es6"
+      , "strict": true
     }
 }

@@ -1,6 +1,8 @@
 "use strict";
 
 import bridge from "../../lib/bridge";
+import knownApps from "../../lib/knownApps";
+import logger from "../../lib/logger";
 import options from "../../lib/options";
 
 import { TypedEventTarget } from "../../lib/typedEvents";
@@ -32,7 +34,7 @@ export default class NativeReceiverSelector
         extends TypedEventTarget<ReceiverSelectorEvents>
         implements ReceiverSelector {
 
-    private bridgePort: browser.runtime.Port;
+    private bridgePort: (browser.runtime.Port | null) = null;
     private wasReceiverSelected: boolean = false;
     private _isOpen: boolean = false;
 
@@ -43,7 +45,8 @@ export default class NativeReceiverSelector
     public async open (
             receivers: Receiver[]
           , defaultMediaType: ReceiverSelectorMediaType
-          , availableMediaTypes: ReceiverSelectorMediaType): Promise<void> {
+          , availableMediaTypes: ReceiverSelectorMediaType
+          , requestedAppId: string): Promise<void> {
 
         this.bridgePort = await bridge.connect();
 
@@ -61,6 +64,12 @@ export default class NativeReceiverSelector
                 }
                 case "main:/receiverSelector/close": {
                     this.onBridgePortMessageClose();
+                    break;
+                }
+                case "main:/receiverSelector/stop": {
+                    this.dispatchEvent(new CustomEvent("stop", {
+                        detail: message.data
+                    }));
                     break;
                 }
             }
@@ -94,7 +103,9 @@ export default class NativeReceiverSelector
 
               , i18n_extensionName: _("extensionName")
               , i18n_castButtonTitle: _("popupCastButtonTitle")
-              , i18n_mediaTypeApp: _("popupMediaTypeApp")
+              , i18n_stopButtonTitle: _("popupStopButtonTitle")
+              , i18n_mediaTypeApp:
+                        knownApps[requestedAppId] ?? _("popupMediaTypeApp")
               , i18n_mediaTypeTab: _("popupMediaTypeTab")
               , i18n_mediaTypeScreen: _("popupMediaTypeScreen")
               , i18n_mediaTypeFile: _("popupMediaTypeFile")
@@ -135,8 +146,7 @@ export default class NativeReceiverSelector
     private async onBridgePortMessageError (
             message: NativeReceiverSelectorErrorMessage) {
 
-        console.error("fx_cast (Debug): Native receiver selector error"
-              , message.data);
+        logger.error("Native receiver selector error", message.data);
 
         this.dispatchEvent(new CustomEvent("error"));
     }

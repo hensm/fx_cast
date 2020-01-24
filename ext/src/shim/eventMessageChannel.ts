@@ -25,12 +25,14 @@ export function onMessage (listener: ListenerFunc): ListenerObject {
         ev.stopPropagation();
     }
 
+    // @ts-ignore
     document.addEventListener(
             "__castMessage"
           , on__castMessage, true);
 
     return {
         disconnect () {
+            // @ts-ignore
             document.removeEventListener(
                     "__castMessage"
                   , on__castMessage, true);
@@ -52,12 +54,14 @@ export function onMessageResponse (listener: ListenerFunc): ListenerObject {
         listener(JSON.parse(ev.detail));
     }
 
+    // @ts-ignore
     document.addEventListener(
             "__castMessageResponse"
           , on__castMessageResponse, true);
 
     return {
         disconnect () {
+            // @ts-ignore
             document.removeEventListener(
                     "__castMessageResponse"
                   , on__castMessageResponse, true);

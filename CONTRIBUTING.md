@@ -20,23 +20,24 @@ Compatibility reports are always helpful. Use the "Compatibility Report" issue t
 
 Missing strings:
 
-* `nl`
-    * `popupMediaTypeApp`
-    * `popupMediaTypeTab`
-    * `popupMediaTypeScreen`
-    * `popupMediaTypeFile`
-    * `popupMediaSelectCastLabel`
-    * `popupMediaSelectToLabel`
-    * `contextAddToWhitelist`
-    * `contextAddToWhitelistRecommended`
-    * `contextAddToWhitelistAdvancedAdd`
-    * `optionsMediaSyncElementDescription`
-    * `optionsReceiverSelectorCategoryName`
-    * `optionsReceiverSelectorCategoryDescription`
-    * `optionsReceiverSelectorType`
-    * `optionsReceiverSelectorTypeBrowser`
-    * `optionsReceiverSelectorTypeNative`
-    * `optionsReceiverSelectorWaitForConnection`
-    * `optionsReceiverSelectorWaitForConnectionDescription`
-    * `optionsReceiverSelectorCloseIfFocusLost`
-    * `optionsMirroringAppIdDescription`
+
+* `de`
+    * `mediaOverlayTitle`
+    * `optionsBridgeBackupEnabled`
+    * `optionsBridgeBackupEnabledDescription`
+    * `optionsMediaOverlayEnabled`
+    * `optionsMediaOverlayEnabledDescription`
+    * `optionsMediaOverlayEnabledTemp`
+    * `popupMediaTypeAppMedia`
+    * `popupStopButtonTitle`
+
+* `es`
+    * `mediaOverlayTitle`
+    * `mediaOverlayTitle`
+    * `optionsBridgeBackupEnabled`
+    * `optionsBridgeBackupEnabledDescription`
+    * `optionsMediaOverlayEnabled`
+    * `optionsMediaOverlayEnabledDescription`
+    * `optionsMediaOverlayEnabledTemp`
+    * `popupMediaTypeAppMedia`
+    * `popupStopButtonTitle`

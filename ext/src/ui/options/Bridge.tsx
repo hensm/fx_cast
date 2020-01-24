@@ -4,6 +4,8 @@
 import React, { Component } from "react";
 import semver from "semver";
 
+import options from "../../lib/options";
+
 import { BridgeInfo } from "../../lib/bridge";
 import { getNextEllipsis } from "../../lib/utils";
 
@@ -58,8 +60,7 @@ const BridgeStats = (props: BridgeStatsProps) => (
 
 
 interface BridgeProps {
-    info: BridgeInfo;
-    platform: string;
+    info?: BridgeInfo;
     loading: boolean;
 }
 
@@ -68,12 +69,13 @@ interface BridgeState {
     isUpdateAvailable: boolean;
     wasErrorCheckingUpdates: boolean;
     checkUpdatesEllipsis: string;
-    updateStatus: string;
+    bridgeBackupEnabled?: boolean;
+    updateStatus?: string;
 }
 
 export default class Bridge extends Component<BridgeProps, BridgeState> {
     private updateData: any;
-    private updateStatusTimeout: number;
+    private updateStatusTimeout?: number;
 
     constructor (props: BridgeProps) {
         super(props);
@@ -83,8 +85,12 @@ export default class Bridge extends Component<BridgeProps, BridgeState> {
           , isUpdateAvailable: false
           , wasErrorCheckingUpdates: false
           , checkUpdatesEllipsis: "..."
-          , updateStatus: null
         };
+
+        options.get("bridgeBackupEnabled")
+            .then(bridgeBackupEnabled => {
+                this.setState({ bridgeBackupEnabled });
+            });
 
         this.onCheckUpdates = this.onCheckUpdates.bind(this);
         this.onCheckUpdatesResponse = this.onCheckUpdatesResponse.bind(this);
@@ -101,6 +107,27 @@ export default class Bridge extends Component<BridgeProps, BridgeState> {
                             <progress></progress>
                         </div> )
                     : this.renderStatus() }
+
+                { !this.props.loading && this.state.bridgeBackupEnabled !== undefined &&
+                    <div className="bridge__options">
+                        <label className="option option--inline">
+                            <div className="option__control">
+                                <input name="bridgeBackupEnabled"
+                                       type="checkbox"
+                                       checked={ this.state.bridgeBackupEnabled }
+                                       onChange={ ev => {
+                                           options.set("bridgeBackupEnabled"
+                                                 , ev.target.checked);
+                                       }} />
+                            </div>
+                            <div className="option__label">
+                                { _("optionsBridgeBackupEnabled") }
+                            </div>
+                            <div className="option__description">
+                                { _("optionsBridgeBackupEnabledDescription") }
+                            </div>
+                        </label>
+                    </div> }
 
                 { !this.props.loading &&
                     <div className="bridge__update-info">
@@ -142,7 +169,7 @@ export default class Bridge extends Component<BridgeProps, BridgeState> {
 
         let statusIcon: string;
         let statusTitle: string;
-        let statusText: string;
+        let statusText: (string | null);
 
         if (!this.props.info) {
             statusIcon = "assets/icons8-cancel-120.png";
@@ -156,6 +183,8 @@ export default class Bridge extends Component<BridgeProps, BridgeState> {
                 statusIcon = "assets/icons8-warn-120.png";
                 statusTitle = _("optionsBridgeIssueStatusTitle");
             }
+
+            statusText = null;
         }
 
         return (
@@ -213,10 +242,13 @@ export default class Bridge extends Component<BridgeProps, BridgeState> {
         this.setState({
             isCheckingUpdates: false
           , isUpdateAvailable
-          , updateStatus: !isUpdateAvailable
-                ? _("optionsBridgeUpdateStatusNoUpdates")
-                : null
         });
+
+        if (!isUpdateAvailable) {
+            this.setState({
+                updateStatus: _("optionsBridgeUpdateStatusNoUpdates")
+            });
+        }
 
         this.showUpdateStatus();
     }
@@ -237,7 +269,7 @@ export default class Bridge extends Component<BridgeProps, BridgeState> {
         }
         this.updateStatusTimeout = window.setTimeout(() => {
             this.setState({
-                updateStatus: null
+                updateStatus: undefined
             });
         }, 1500);
     }

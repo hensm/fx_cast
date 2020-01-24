@@ -22,6 +22,7 @@ export interface ReceiverSelectorEvents {
     "selected": ReceiverSelection;
     "error": string;
     "cancelled": void;
+    "stop": { receiver: Receiver };
 }
 
 export default interface ReceiverSelector
@@ -31,7 +32,8 @@ export default interface ReceiverSelector
 
     open (receivers: Receiver[]
         , defaultMediaType: ReceiverSelectorMediaType
-        , availableMediaTypes: ReceiverSelectorMediaType): void;
+        , availableMediaTypes: ReceiverSelectorMediaType
+        , requestedAppId: string): void;
 
     close (): void;
 }

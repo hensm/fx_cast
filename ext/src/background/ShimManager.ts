@@ -2,6 +2,7 @@
 
 import bridge from "../lib/bridge";
 import loadSender from "../lib/loadSender";
+import logger from "../lib/logger";
 import options from "../lib/options";
 
 import { Message } from "../types";
@@ -22,6 +23,7 @@ export interface Shim {
     contentPort: Port;
     contentTabId?: number;
     contentFrameId?: number;
+    requestedAppId?: string;
 }
 
 
@@ -31,6 +33,18 @@ export default new class ShimManager {
 
     public async init () {
         await this.initStatusListeners();
+    }
+
+    public getShim (tabId: number, frameId?: number) {
+        for (const activeShim of this.activeShims) {
+            if (activeShim.contentTabId === tabId) {
+                if (frameId && activeShim.contentFrameId !== frameId) {
+                    continue;
+                }
+
+                return activeShim;
+            }
+        }
     }
 
     public async createShim (port: Port) {
@@ -73,6 +87,11 @@ export default new class ShimManager {
 
     private async createShimFromContent (
             contentPort: browser.runtime.Port): Promise<Shim> {
+
+        if (contentPort.sender?.tab?.id === undefined
+         || contentPort.sender?.frameId === undefined) {
+            throw logger.error("Content shim created with an invalid port context.");
+        }
 
         /**
          * If there's already an active shim for the sender
@@ -129,6 +148,8 @@ export default new class ShimManager {
 
         switch (message.subject) {
             case "main:/shimInitialized": {
+                shim.requestedAppId = message.data.appId;
+
                 for (const receiver of StatusManager.getReceivers()) {
                     shim.contentPort.postMessage({
                         subject: "shim:/serviceUp"
@@ -140,15 +161,17 @@ export default new class ShimManager {
             }
 
             case "main:/selectReceiverBegin": {
+                if (shim.contentTabId === undefined
+                 || shim.contentFrameId === undefined) {
+                    throw logger.error("Shim associated with content sender missing tab/frame ID");
+                }
+
                 const contentTab = await browser.tabs.get(shim.contentTabId);
-                const availableMediaTypes = getMediaTypesForPageUrl(
-                        contentTab.url);
 
                 try {
-                    const selection = await ReceiverSelectorManager
-                            .getSelection(
-                                    ReceiverSelectorMediaType.App
-                                  , availableMediaTypes);
+                    const selection =
+                            await ReceiverSelectorManager.getSelection(
+                                    shim.contentTabId, shim.contentFrameId);
 
                     // Handle cancellation
                     if (!selection) {

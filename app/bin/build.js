@@ -32,7 +32,7 @@ const { executableName
 
 // Command line args
 const argv = minimist(process.argv.slice(2), {
-    boolean: [ "package" ]
+    boolean: [ "package", "skipNativeBuilds" ]
   , string: [ "platform", "arch", "packageType" ]
   , default: {
         platform: os.platform()
@@ -40,6 +40,7 @@ const argv = minimist(process.argv.slice(2), {
       , package: false
         // Linux package type (deb/rpm)
       , packageType: "deb"
+      , skipNativeBuilds: false
     }
 });
 
@@ -116,7 +117,14 @@ async function build () {
         spawnSync("mv", [ path.join(BUILD_PATH, "src/*"), BUILD_PATH ]
               , spawnOptions);
     } else {
-        fs.moveSync(path.join(BUILD_PATH, "src"), BUILD_PATH);
+        const buildSrcDir = path.join(BUILD_PATH, "src");
+
+        for (const fileName of fs.readdirSync(buildSrcDir)) {
+            fs.moveSync(path.join(buildSrcDir, fileName)
+                      , path.join(BUILD_PATH, fileName));
+        }
+
+        fs.removeSync(buildSrcDir);
     }
 
     // Copy other files
@@ -183,12 +191,12 @@ async function build () {
     // Run pkg to create a single executable
     await pkg.exec([
         BUILD_PATH
-      , "--target", `${pkgPlatform[argv.platform]}-${argv.arch}`
+      , "--target", `node12-${pkgPlatform[argv.platform]}-${argv.arch}`
       , "--output", path.join(BUILD_PATH, executableName[argv.platform])
     ]);
 
     // Build NativeMacReceiverSelector
-    if (isBuildingForMacOnMac) {
+    if (isBuildingForMacOnMac && !argv.skipNativeBuilds) {
         const selectorPath = path.join(__dirname, "../selector/mac/");
         const derivedDataPath = path.join(__dirname, "../selector/mac/build/");
 
@@ -234,7 +242,7 @@ async function build () {
               , path.join(DIST_PATH, executableName[argv.platform])
               , { overwrite: true });
 
-        if (isBuildingForMacOnMac) {
+        if (isBuildingForMacOnMac && !argv.skipNativeBuilds) {
             fs.moveSync(
                     path.join(BUILD_PATH, selectorExecutableName)
                   , path.join(DIST_PATH, selectorExecutableName)
@@ -326,9 +334,11 @@ function packageDarwin (
     fs.moveSync(path.join(BUILD_PATH, manifestName)
           , path.join(rootManifestPath, manifestName));
 
-    // Move selector executable alongside main executable
-    fs.moveSync(path.join(BUILD_PATH, selectorExecutableName)
-          , path.join(rootExecutablePath, selectorExecutableName));
+    if (isBuildingForMacOnMac && !argv.skipNativeBuilds) {
+        // Move selector executable alongside main executable
+        fs.moveSync(path.join(BUILD_PATH, selectorExecutableName)
+              , path.join(rootExecutablePath, selectorExecutableName));
+    }
 
 
     // Copy static files to be processed

@@ -1,9 +1,12 @@
 "use strict";
 
+import logger from "./logger";
 import { stringify } from "./utils";
 
 import { ReceiverSelection
        , ReceiverSelectorMediaType } from "../background/receiverSelector";
+
+import ShimManager from "../background/ShimManager";
 
 
 interface LoadSenderOptions {
@@ -23,6 +26,21 @@ export default async function loadSender (opts: LoadSenderOptions) {
     }
 
     switch (opts.selection.mediaType) {
+        case ReceiverSelectorMediaType.App: {
+            const shim = ShimManager.getShim(opts.tabId, opts.frameId);
+            if (!shim) {
+                throw logger.error(`Shim not found at tabId ${
+                        opts.tabId} / frameId ${opts.frameId}`)
+            }
+
+            shim.contentPort.postMessage({
+                subject: "shim:/launchApp"
+              , data: { receiver: opts.selection.receiver }
+            });
+
+            break;
+        }
+
         case ReceiverSelectorMediaType.Tab:
         case ReceiverSelectorMediaType.Screen: {
             await browser.tabs.executeScript(opts.tabId, {
@@ -34,7 +52,7 @@ export default async function loadSender (opts: LoadSenderOptions) {
             });
 
             await browser.tabs.executeScript(opts.tabId, {
-                file: "senders/mirroringCast.js"
+                file: "senders/mirroring.js"
               , frameId: opts.frameId
             });
 
@@ -43,7 +61,7 @@ export default async function loadSender (opts: LoadSenderOptions) {
 
         case ReceiverSelectorMediaType.File: {
             const fileUrl = new URL(`file://${opts.selection.filePath}`);
-            const { init } = await import("../senders/mediaCast");
+            const { init } = await import("../senders/media");
 
             init({
                 mediaUrl: fileUrl.href

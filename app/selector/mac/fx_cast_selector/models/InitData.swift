@@ -10,6 +10,7 @@ struct InitData : Decodable {
     
     let i18n_extensionName: String
     let i18n_castButtonTitle: String
+    let i18n_stopButtonTitle: String
     let i18n_mediaTypeApp: String
     let i18n_mediaTypeTab: String
     let i18n_mediaTypeScreen: String

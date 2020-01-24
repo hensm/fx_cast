@@ -4,29 +4,33 @@ import ReceiverSelector, {
         ReceiverSelectorEvents
       , ReceiverSelectorMediaType } from "./ReceiverSelector";
 
+import logger from "../../lib/logger";
 import options from "../../lib/options";
 
 import { TypedEventTarget } from "../../lib/typedEvents";
-import { getWindowCenteredProps } from "../../lib/utils";
+import { getWindowCenteredProps, WindowCenteredProps } from "../../lib/utils";
 import { Message, Receiver } from "../../types";
 
+
+const POPUP_URL = browser.runtime.getURL("ui/popup/index.html");
 
 export default class PopupReceiverSelector
         extends TypedEventTarget<ReceiverSelectorEvents>
         implements ReceiverSelector {
 
-    private windowId: number;
+    private windowId?: number;
 
-    private messagePort: browser.runtime.Port;
-    private messagePortDisconnected: boolean;
+    private messagePort?: browser.runtime.Port;
+    private messagePortDisconnected?: boolean;
 
-    private receivers: Receiver[];
-    private defaultMediaType: ReceiverSelectorMediaType;
-    private availableMediaTypes: ReceiverSelectorMediaType;
+    private receivers?: Receiver[];
+    private defaultMediaType?: ReceiverSelectorMediaType;
+    private availableMediaTypes?: ReceiverSelectorMediaType;
 
     private wasReceiverSelected: boolean = false;
 
     private _isOpen: boolean = false;
+    private requestedAppId?: string;
 
 
     constructor () {
@@ -44,6 +48,9 @@ export default class PopupReceiverSelector
          * window script.
          */
         browser.runtime.onConnect.addListener(port => {
+            // Don't pollute history
+            browser.history.deleteUrl({ url: POPUP_URL });
+
             if (port.name !== "popup") {
                 return;
             }
@@ -57,6 +64,11 @@ export default class PopupReceiverSelector
             this.messagePort.onMessage.addListener(this.onPopupMessage);
             this.messagePort.onDisconnect.addListener(() => {
                 this.messagePortDisconnected = true;
+            });
+
+            this.messagePort.postMessage({
+                subject: "popup:/sendRequestedAppId"
+              , data: { requestedAppId: this.requestedAppId }
             });
 
             this.messagePort.postMessage({
@@ -77,7 +89,10 @@ export default class PopupReceiverSelector
     public async open (
             receivers: Receiver[]
           , defaultMediaType: ReceiverSelectorMediaType
-          , availableMediaTypes: ReceiverSelectorMediaType): Promise<void> {
+          , availableMediaTypes: ReceiverSelectorMediaType
+          , requestedAppId: string): Promise<void> {
+
+        this.requestedAppId = requestedAppId;
 
         // If popup already exists, close it
         if (this.windowId) {
@@ -88,18 +103,34 @@ export default class PopupReceiverSelector
         this.defaultMediaType = defaultMediaType;
         this.availableMediaTypes = availableMediaTypes;
 
-        // Current window to base centered position on
-        const openerWindow = await browser.windows.getCurrent();
-        const centeredProps = getWindowCenteredProps(openerWindow, 350, 200);
+
+        let centeredProps: WindowCenteredProps = {
+            left: 100
+          , top: 100
+          , width: 350
+          , height: 200
+        };
+
+        try {
+            // Calculate centered size/position based on current window
+            centeredProps = getWindowCenteredProps(
+                    await browser.windows.getCurrent()
+                  , centeredProps.width, centeredProps.height);
+        } catch {
+            // Shouldn't ever hit this, but defaults are provided in case
+        }
 
         const popup = await browser.windows.create({
-            url: "ui/popup/index.html"
-          , type: "popup"
+            url: POPUP_URL
+          , type: "detached_panel"
           , ...centeredProps
         });
 
-        this._isOpen = true;
+        if (popup?.id === undefined) {
+            throw logger.error("Failed to create receiver selector popup.");
+        }
 
+        this._isOpen = true;
         this.windowId = popup.id;
 
         // Size/position not set correctly on creation (bug?)
@@ -124,6 +155,7 @@ export default class PopupReceiverSelector
         }
 
         this._isOpen = false;
+        this.requestedAppId = undefined;
 
         if (this.messagePort && !this.messagePortDisconnected) {
             this.messagePort.disconnect();
@@ -144,6 +176,14 @@ export default class PopupReceiverSelector
 
                 break;
             }
+
+            case "receiverSelector:/stop": {
+                this.dispatchEvent(new CustomEvent("stop", {
+                    detail: message.data
+                }));
+
+                break;
+            }
         }
     }
 
@@ -157,6 +197,7 @@ export default class PopupReceiverSelector
             return;
         }
 
+        browser.windows.onRemoved.removeListener(this.onWindowsRemoved);
         browser.windows.onFocusChanged.removeListener(
                 this.onWindowsFocusChanged);
 
@@ -165,10 +206,11 @@ export default class PopupReceiverSelector
         }
 
         // Cleanup
-        this.windowId = null;
-        this.messagePort = null;
-        this.receivers = null;
-        this.defaultMediaType = null;
+        this.windowId = undefined;
+        this.messagePort = undefined;
+        this.receivers = undefined;
+        this.defaultMediaType = undefined;
+        this.availableMediaTypes = undefined;
         this.wasReceiverSelected = false;
     }
 
@@ -185,7 +227,9 @@ export default class PopupReceiverSelector
             browser.windows.onFocusChanged.removeListener(
                     this.onWindowsFocusChanged);
 
-            browser.windows.remove(this.windowId);
+            if (this.windowId) {
+                browser.windows.remove(this.windowId);
+            }
         }
     }
 }

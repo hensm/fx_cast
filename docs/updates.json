@@ -1,0 +1,32 @@
+{
+    "addons": {
+        "fx_cast@matt.tf": {
+            "updates": [
+                {
+                    "version": "0.0.1"
+                  , "update_link": "https://github.com/hensm/fx_cast/releases/download/v0.0.1/fx_cast-0.0.1-fx.xpi"
+                  , "update_hash": "sha256:61c112547291d51b29e9d0d23a45a874e765f40e0e74df87f8edcfba944441cf"
+                }
+              , {
+                    "version": "0.0.2"
+                  , "update_link": "https://github.com/hensm/fx_cast/releases/download/v0.0.2/fx_cast-0.0.2-fx.xpi"
+                  , "update_hash": "sha256:aace10ce962977a3a8523edd2195053b31ba500f08453f675a67eed829d3e50e"
+                }
+              , {
+                    "version": "0.0.3"
+                  , "update_link": "https://github.com/hensm/fx_cast/releases/download/v0.0.3/fx_cast-0.0.3-fx.xpi"
+                  , "update_hash": "sha256:cbb1d296446b1b2673738336be84237ff431c2c83d20fe2abc03557c7f920052"
+                }
+              , {
+                    "version": "0.0.4"
+                  , "update_link": "https://github.com/hensm/fx_cast/releases/download/v0.0.4/fx_cast-0.0.4-fx.xpi"
+                  , "update_hash": "sha256:ce4cf8c0c2d392ca94e8cdadcb497ad94465b6180e41e35895cb149ff3f11218"
+                }
+              , {
+                    "version": "0.0.5"
+                  , "update_link": "https://github.com/hensm/fx_cast/releases/download/v0.0.5/fx_cast-0.0.5-fx.xpi"
+                }
+            ]
+        }
+    }
+}

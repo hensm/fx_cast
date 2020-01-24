@@ -6,7 +6,9 @@ import { Options } from "./lib/options";
 
 export default {
     bridgeApplicationName: APPLICATION_NAME
+  , bridgeBackupEnabled: false
   , mediaEnabled: true
+  , mediaOverlayEnabled: false
   , mediaSyncElement: false
   , mediaStopOnUnload: false
   , localMediaEnabled: true

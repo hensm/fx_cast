@@ -1,5 +1,9 @@
 "use strict";
 
+import logger from "./logger";
+import options from "./options";
+
+
 const WEBSOCKET_DAEMON_URL = "ws://localhost:9556";
 
 
@@ -94,7 +98,19 @@ function connectNative (application: string) {
     };
 
 
-    port.onDisconnect.addListener(() => {
+    port.onDisconnect.addListener(async () => {
+        if (!(await options.get("bridgeBackupEnabled"))) {
+            portObject.error = {
+                message: ""
+            };
+
+            for (const listener of onDisconnectListeners) {
+                listener(portObject);
+            }
+
+            throw logger.error("Bridge connection failed and backup not enabled.");
+        }
+
         if (port.error && !isNativeHostStatusKnown) {
             isNativeHostStatusKnown = true;
 
@@ -116,7 +132,7 @@ function connectNative (application: string) {
 
             socket.addEventListener("close", ev => {
                 if (ev.code !== 1000) {
-                    this.error = {
+                    portObject.error = {
                         // TODO: Set a proper error message
                         message: ""
                     };
@@ -150,7 +166,11 @@ async function sendNativeMessage (
 
     try {
         return await browser.runtime.sendNativeMessage(application, message);
-    } catch (err) {
+    } catch {
+        if (!(await options.get("bridgeBackupEnabled"))) {
+            throw logger.error("Bridge connection failed and backup not enabled.");
+        }
+
         return await new Promise((resolve, reject) => {
             const ws = new WebSocket(WEBSOCKET_DAEMON_URL);
 
@@ -164,7 +184,7 @@ async function sendNativeMessage (
             });
 
             ws.addEventListener("error", () => {
-                console.error("fx_cast (Debug): No bridge application found.");
+                logger.error("No bridge application found.");
                 reject();
             });
         });

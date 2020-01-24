@@ -3,9 +3,9 @@
 import { Channel, Client } from "castv2";
 import { EventEmitter } from "events";
 
-const NS_CONNECTION = "urn:x-cast:com.google.cast.tp.connection";
-const NS_HEARTBEAT = "urn:x-cast:com.google.cast.tp.heartbeat";
-const NS_RECEIVER = "urn:x-cast:com.google.cast.receiver";
+import { NS_CONNECTION
+       , NS_HEARTBEAT
+       , NS_RECEIVER } from "./Session";
 
 
 /**

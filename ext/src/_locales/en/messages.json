@@ -13,6 +13,10 @@
         "message": "this site's app"
       , "description": "Receiver selector media type <option> text for current site's sender application."
     }
+  , "popupMediaTypeAppMedia": {
+        "message": "this media"
+      , "description": "Receiver selector media type <option> text for media casting."
+    }
   , "popupMediaTypeTab": {
         "message": "Tab"
       , "description": "Receiver selector media type <option> text for current tab."
@@ -52,6 +56,10 @@
             }
         }
     }
+  , "popupStopButtonTitle": {
+        "message": "Stop"
+      , "description": "Alternate action button text displayed instead of popupCastButtonTitle."
+    }
 
 
   , "contextCast": {
@@ -80,6 +88,18 @@
             "matchPattern": {
                 "content": "$1"
               , "example": "*://*.example.com/*"
+            }
+        }
+    }
+
+
+  , "mediaOverlayTitle": {
+        "message": "Playing on $receiverName$"
+      , "description": "Main title for overlay displayed on media elements whilst casting."
+      , "placeholders": {
+            "receiverName": {
+                "content": "$1"
+              , "example": "Living Room TV"
             }
         }
     }
@@ -181,6 +201,15 @@
       , "description": "Update now button title. Ellipsis indicates additional information as it triggers an update window popup."
     }
 
+  , "optionsBridgeBackupEnabled": {
+        "message": "Enable backup daemon connection"
+      , "description": "Backup daemon checkbox label."
+    }
+  , "optionsBridgeBackupEnabledDescription": {
+        "message": "If the regular bridge connection fails, attempt to connect to a bridge running in daemon mode."
+      , "description": "Backup daemon checkbox description."
+    }
+
   , "optionsMediaCategoryName": {
         "message": "Media casting"
       , "description": "Options page media casting category title."
@@ -192,6 +221,18 @@
   , "optionsMediaEnabled": {
         "message": "Enable media casting"
       , "description": "Media casting enabled checkbox label."
+    }
+  , "optionsMediaOverlayEnabled": {
+        "message": "Enable media element overlay"
+      , "description": "Media element overlay checkbox label."
+    }
+  , "optionsMediaOverlayEnabledTemp": {
+        "message": "Enable media element overlay (experimental)"
+      , "description": "Experimental-labelled version of above."
+    }
+  , "optionsMediaOverlayEnabledDescription": {
+        "message": "Overlay on media elements displaying information about the current session if connected."
+      , "description": "Media element overlay option description."
     }
   , "optionsMediaSyncElement": {
         "message": "Sync receiver state with media element"

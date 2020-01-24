@@ -1,8 +1,14 @@
 "use strict";
 
 import options from "../../lib/options";
+import logger from "../../lib/logger";
 
+import ShimManager from "../ShimManager";
 import StatusManager from "../StatusManager";
+
+import { getMediaTypesForPageUrl } from "../../lib/utils";
+
+import { DEFAULT_MEDIA_RECEIVER_APP_ID } from "../../shim/cast/media/";
 
 import { ReceiverSelector
        , ReceiverSelectorType } from "./";
@@ -11,6 +17,8 @@ import { ReceiverSelection
 
 import NativeReceiverSelector from "./NativeReceiverSelector";
 import PopupReceiverSelector from "./PopupReceiverSelector";
+
+import { Receiver } from "../../types";
 
 
 async function createSelector () {
@@ -31,7 +39,11 @@ let sharedSelector: ReceiverSelector;
 
 async function getSelector () {
     if (!sharedSelector) {
-        sharedSelector = await createSelector();
+        try {
+            sharedSelector = await createSelector();
+        } catch (err) {
+            throw logger.error("Failed to create receiver selector.");
+        }
     }
 
     return sharedSelector;
@@ -49,43 +61,49 @@ async function getSelector () {
  *   - Rejects if the selection fails.
  */
 async function getSelection (
-        defaultMediaType =
-                ReceiverSelectorMediaType.Tab
-      , availableMediaTypes =
-                ReceiverSelectorMediaType.Tab
-              | ReceiverSelectorMediaType.Screen
-              | ReceiverSelectorMediaType.File)
-        : Promise<ReceiverSelection> {
+        contextTabId: number
+      , contextFrameId = 0
+      , withMediaSender = false)
+        : Promise<ReceiverSelection | null> {
 
     return new Promise(async (resolve, reject) => {
+        let currentShim = ShimManager.getShim(
+                contextTabId, contextFrameId);
 
-        // Close an existing open selector
-        if (sharedSelector && sharedSelector.isOpen) {
-            sharedSelector.close();
+        /**
+         * If the current context is running the mirroring app, pretend
+         * it doesn't exist because it shouldn't be launched like this.
+         */
+        if (currentShim?.requestedAppId ===
+                await options.get("mirroringAppId")) {
+            currentShim = undefined;
         }
 
-        // Get a new selector for each selection
-        sharedSelector = await createSelector();
+        let defaultMediaType = ReceiverSelectorMediaType.Tab;
+        let availableMediaTypes;
 
-        sharedSelector.addEventListener("selected", ev => {
-            console.info("fx_cast (Debug): Selected receiver", ev.detail);
-            resolve(ev.detail);
-        });
+        try {
+            const { url } = await browser.webNavigation.getFrame({
+                tabId: contextTabId
+              , frameId: contextFrameId
+            });
 
-        sharedSelector.addEventListener("cancelled", () => {
-            console.info("fx_cast (Debug): Cancelled receiver selection");
-            resolve(null);
-        });
-
-        sharedSelector.addEventListener("error", () => {
-            console.error("fx_cast (Debug): Failed to select receiver");
+            availableMediaTypes = getMediaTypesForPageUrl(url);
+        } catch (err) {
+            logger.error("Failed to locate frame");
             reject();
-        });
+            return;
+        }
 
+        // Enable app media type if initialized sender app is found
+        if (currentShim || withMediaSender) {
+            defaultMediaType = ReceiverSelectorMediaType.App;
+            availableMediaTypes |= ReceiverSelectorMediaType.App;
+        }
 
         const opts = await options.getAll();
 
-        // Remove mirroring media types if mirroring is not enabled.
+        // Remove mirroring media types if mirroring is not enabled
         if (!opts.mirroringEnabled) {
             availableMediaTypes &= ~(
                     ReceiverSelectorMediaType.Tab
@@ -97,14 +115,61 @@ async function getSelection (
             availableMediaTypes &= ~ReceiverSelectorMediaType.File;
         }
 
+        // Close an existing open selector
+        if (sharedSelector && sharedSelector.isOpen) {
+            sharedSelector.close();
+        }
+
+        // Get a new selector for each selection
+        sharedSelector = await createSelector();
+
+        sharedSelector.addEventListener("selected", onSelected);
+        sharedSelector.addEventListener("cancelled", onCancelled);
+        sharedSelector.addEventListener("error", onError);
+        sharedSelector.addEventListener("stop", onStop);
+
+        function removeListeners () {
+            sharedSelector.removeEventListener("selected", onSelected);
+            sharedSelector.removeEventListener("cancelled", onCancelled);
+            sharedSelector.removeEventListener("error", onError);
+            sharedSelector.removeEventListener("stop", onStop);
+        }
+
+        function onSelected (ev: any) {
+            logger.info("Selected receiver", ev.detail);
+            resolve(ev.detail);
+            removeListeners();
+        }
+
+        function onCancelled () {
+            logger.info("Cancelled receiver selection");
+            resolve(null);
+            removeListeners();
+        }
+
+        function onError () {
+            logger.error("Failed to select receiver");
+            reject();
+            removeListeners();
+        }
+
+        function onStop (ev: any) {
+            logger.info("Stopped receiver app", ev.detail);
+
+            StatusManager.init().then(() => {
+                StatusManager.stopReceiverApp(ev.detail.receiver);
+            });
+        }
+
 
         // Ensure status manager is initialized
         await StatusManager.init();
 
         sharedSelector.open(
-                StatusManager.getReceivers()
+                Array.from(StatusManager.getReceivers())
               , defaultMediaType
-              , availableMediaTypes);
+              , availableMediaTypes
+              , currentShim?.requestedAppId ?? DEFAULT_MEDIA_RECEIVER_APP_ID);
     });
 }
 

@@ -129,10 +129,14 @@
     white-space: nowrap;
 }
 
+.bridge__options {
+    margin-top: 30px;
+}
+
 .bridge__update-info {
     align-items: center;
     display: flex;
-    margin-top: 30px;
+    margin-top: 10px;
 }
 
 .bridge__update-label {
@@ -325,4 +329,65 @@
 
 .editable-list__add-button {
     margin-inline-end: auto;
+}
+
+
+.about {
+    border-radius: 5px;
+    margin-top: 30px;
+    overflow: hidden;
+}
+
+.about > summary {
+    padding: 0 10px;
+}
+
+.about,
+.about > summary {
+    background-color: rgba(0, 0, 0, 0.08);
+}
+
+.about__container {
+    padding: 10px;
+}
+
+.about h1,
+.about h2,
+.about h3,
+.about h4,
+.about h5,
+.about h6 {
+    display: inline-block;
+    font: inherit;
+    font-weight: bold;
+    margin: 5px 0;
+}
+
+.about hr {
+    border: initial;
+    border-top: 1px solid rgba(0, 0, 0, 0.25);
+    margin: 10px 0;
+}
+
+.about__license-text {
+    cursor: text;
+    font-family: monospace;
+    pointer-events: initial;
+    user-select: text;
+    white-space: pre-line;
+}
+
+.about__translators > ul {
+    margin: initial;
+    padding-left: 20px;
+}
+
+.translator__tag {
+    color: #0a84ff;
+    display: inline-block;
+    font-size: 80%;
+    font-weight: bold;
+    margin-inline-start: 2px;
+    text-transform: uppercase;
+    vertical-align: text-top;
 }

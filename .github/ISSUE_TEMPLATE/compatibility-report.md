@@ -13,7 +13,7 @@ assignees: ''
 
 
 **Issues:**
-Set the appropriate `status-` label and list any issues here.
+Set the appropriate `compat-` label and list any issues here.
 
 
 **Error log (if applicable):**

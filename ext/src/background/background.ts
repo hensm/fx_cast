@@ -2,6 +2,7 @@
 
 import defaultOptions from "../defaultOptions";
 import loadSender from "../lib/loadSender";
+import logger from "../lib/logger";
 import options from "../lib/options";
 
 import { getChromeUserAgent } from "../lib/userAgents";
@@ -44,6 +45,8 @@ browser.runtime.onInstalled.addListener(async details => {
 
 
 function initBrowserAction () {
+    logger.info("init (browser action)");
+
     /*browser.browserAction.disable();
 
     function onServiceChange () {
@@ -65,10 +68,11 @@ function initBrowserAction () {
      * top-level frame.
      */
     browser.browserAction.onClicked.addListener(async tab => {
-        const selection = await ReceiverSelectorManager.getSelection(
-                ReceiverSelectorMediaType.Tab
-              , getMediaTypesForPageUrl(tab.url)
-                      & ~ReceiverSelectorMediaType.App);
+        if (tab.id === undefined) {
+            throw logger.error("Tab ID not found in browser action handler.");
+        }
+
+        const selection = await ReceiverSelectorManager.getSelection(tab.id);
 
         if (selection) {
             loadSender({
@@ -82,7 +86,7 @@ function initBrowserAction () {
 
 
 async function initMenus () {
-    console.info("fx_cast (Debug): init (menus)");
+    logger.info("init (menus)");
 
     const URL_PATTERN_HTTP = "http://*/*";
     const URL_PATTERN_HTTPS = "https://*/*";
@@ -94,8 +98,8 @@ async function initMenus () {
 
     type MenuId = string | number;
 
+    let menuIdCast: MenuId;
     let menuIdMediaCast: MenuId;
-    let menuIdMirroringCast: MenuId;
     let menuIdWhitelist: MenuId;
     let menuIdWhitelistRecommended: MenuId;
 
@@ -103,6 +107,12 @@ async function initMenus () {
 
 
     const opts = await options.getAll();
+
+    // Global "Cast..." menu item
+    menuIdCast = await browser.menus.create({
+        contexts: [ "browser_action", "page", "tools_menu" ]
+      , title: _("contextCast")
+    });
 
     // <video>/<audio> "Cast..." context menu item
     menuIdMediaCast = await browser.menus.create({
@@ -112,16 +122,6 @@ async function initMenus () {
       , targetUrlPatterns: opts.localMediaEnabled
             ? URL_PATTERNS_ALL
             : URL_PATTERNS_REMOTE
-    });
-
-    // Screen/Tab mirroring "Cast..." context menu item
-    menuIdMirroringCast = await browser.menus.create({
-        contexts: [ "browser_action", "page", "tools_menu" ]
-      , title: _("contextCast")
-      , visible: opts.mirroringEnabled
-
-        // Mirroring doesn't work from file:// urls
-      , documentUrlPatterns: URL_PATTERNS_REMOTE
     });
 
 
@@ -145,6 +145,10 @@ async function initMenus () {
     browser.menus.onClicked.addListener(async (info, tab) => {
         if (info.parentMenuItemId === menuIdWhitelist) {
             const pattern = whitelistChildMenuPatterns.get(info.menuItemId);
+            if (!pattern) {
+                throw logger.error(`Whitelist pattern not found for menu item ID ${info.menuItemId}.`);
+            }
+
             const whitelist = await options.get("userAgentWhitelist");
 
             // Add to whitelist and update options
@@ -155,13 +159,41 @@ async function initMenus () {
         }
 
 
+        if (tab?.id === undefined) {
+            throw logger.error("Menu handler tab ID not found.");
+        }
+        if (info.frameId === undefined) {
+            throw logger.error("Menu handler frame ID not found.");
+        }
+        if (!info.pageUrl) {
+            throw logger.error("Menu handler page URL not found.");
+        }
+
+
         const availableMediaTypes = getMediaTypesForPageUrl(info.pageUrl);
 
         switch (info.menuItemId) {
+            case menuIdCast: {
+                const selection = await ReceiverSelectorManager.getSelection(
+                        tab.id, info.frameId);
+
+                // Selection cancelled
+                if (!selection) {
+                    break;
+                }
+
+                loadSender({
+                    tabId: tab.id
+                  , frameId: info.frameId
+                  , selection
+                });
+
+                break;
+            }
+
             case menuIdMediaCast: {
                 const selection = await ReceiverSelectorManager.getSelection(
-                        ReceiverSelectorMediaType.App
-                      , availableMediaTypes);
+                        tab.id, info.frameId, true);
 
                 // Selection cancelled
                 if (!selection) {
@@ -183,7 +215,7 @@ async function initMenus () {
                     });
 
                     await browser.tabs.executeScript(tab.id, {
-                        file: "senders/mediaCast.js"
+                        file: "senders/media/bundle.js"
                       , frameId: info.frameId
                     });
                 } else {
@@ -195,20 +227,6 @@ async function initMenus () {
                       , selection
                     });
                 }
-
-                break;
-            }
-
-            case menuIdMirroringCast: {
-                const selection = await ReceiverSelectorManager.getSelection(
-                        ReceiverSelectorMediaType.Tab
-                      , availableMediaTypes & ~ReceiverSelectorMediaType.App);
-
-                loadSender({
-                    tabId: tab.id
-                  , frameId: info.frameId
-                  , selection
-                });
 
                 break;
             }
@@ -377,12 +395,6 @@ async function initMenus () {
         const alteredOpts = ev.detail;
         const newOpts = await options.getAll();
 
-        if (alteredOpts.includes("mirroringEnabled")) {
-            browser.menus.update(menuIdMirroringCast, {
-                visible: newOpts.mirroringEnabled
-            });
-        }
-
         if (alteredOpts.includes("mediaEnabled")) {
             browser.menus.update(menuIdMediaCast, {
                 visible: newOpts.mediaEnabled
@@ -401,7 +413,7 @@ async function initMenus () {
 
 
 async function initRequestListener () {
-    console.info("fx_cast (Debug): init (request listener)");
+    logger.info("init (request listener)");
 
     type OnBeforeRequestDetails = Parameters<Parameters<
             typeof browser.webRequest.onBeforeRequest.addListener>[0]>[0];
@@ -445,7 +457,7 @@ async function initRequestListener () {
 
 
 function initWhitelist () {
-    console.info("fx_cast (Debug): init (whitelist)");
+    logger.info("init (whitelist)");
 
     type OnBeforeSendHeadersDetails = Parameters<Parameters<
             typeof browser.webRequest.onBeforeSendHeaders.addListener>[0]>[0];
@@ -460,6 +472,10 @@ function initWhitelist () {
         const { os } = await browser.runtime.getPlatformInfo();
         const chromeUserAgent = getChromeUserAgent(os);
 
+        if (!details.requestHeaders) {
+            throw logger.error("OnBeforeSendHeaders handler details missing requestHeaders.");
+        }
+
         const host = details.requestHeaders.find(
                 header => header.name === "Host");
 
@@ -470,7 +486,7 @@ function initWhitelist () {
                  * so pretend to be an old version of Chrome to get the old
                  * site.
                  */
-                if (host.value === "www.youtube.com") {
+                if (host?.value === "www.youtube.com") {
                     header.value = getChromeUserAgent(os, true);
                     break;
                 }
@@ -519,6 +535,46 @@ function initWhitelist () {
 }
 
 
+async function initMediaOverlay () {
+    logger.info("init (media overlay)");
+
+    let contentScript: browser.contentScripts.RegisteredContentScript;
+
+    async function registerMediaOverlayContentScript () {
+        if (!(await options.get("mediaOverlayEnabled"))) {
+            return;
+        }
+
+        try {
+            contentScript = await browser.contentScripts.register({
+                allFrames: true
+              , js: [{ file: "senders/media/overlay/overlayContentLoader.js" }]
+              , matches: [ "<all_urls>" ]
+              , runAt: "document_start"
+            });
+        } catch (err) {
+            logger.error("Failed to register media overlay")
+        }
+    }
+
+    async function unregisterMediaOverlayContentScript () {
+        await contentScript?.unregister();
+    }
+
+
+    registerMediaOverlayContentScript();
+
+    options.addEventListener("changed", async ev => {
+        const alteredOpts = ev.detail;
+
+        if (alteredOpts.includes("mediaOverlayEnabled")) {
+            await unregisterMediaOverlayContentScript();
+            await registerMediaOverlayContentScript();
+        }
+    })
+}
+
+
 let isInitialized = false;
 
 async function init () {
@@ -535,7 +591,7 @@ async function init () {
         return;
     }
 
-    console.info("fx_cast (Debug): init");
+    logger.info("init");
 
     isInitialized = true;
 
@@ -543,6 +599,7 @@ async function init () {
     await initMenus();
     await initRequestListener();
     await initWhitelist();
+    await initMediaOverlay();
 
     await StatusManager.init();
     await ShimManager.init();
