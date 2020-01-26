@@ -18,8 +18,10 @@ Compatibility reports are always helpful. Use the "Compatibility Report" issue t
 
 ## Localizations
 
-Missing strings:
+Either fork and edit the messages files manually or to easily add/edit localizations, use the web-ext-translator tool:
+https://lusito.github.io/web-ext-translator/?gh=https://github.com/hensm/fx_cast/
 
+Missing strings:
 
 * `de`
     * `mediaOverlayTitle`
