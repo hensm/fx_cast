@@ -4,6 +4,7 @@ import logger from "./logger";
 import { stringify } from "./utils";
 
 import { ReceiverSelection
+       , ReceiverSelectionActionType
        , ReceiverSelectorMediaType } from "../background/receiverSelector";
 
 import ShimManager from "../background/ShimManager";
@@ -22,6 +23,10 @@ interface LoadSenderOptions {
 export default async function loadSender (opts: LoadSenderOptions) {
     // Cancelled
     if (!opts.selection) {
+        return;
+    }
+
+    if (opts.selection.actionType !== ReceiverSelectionActionType.Cast) {
         return;
     }
 

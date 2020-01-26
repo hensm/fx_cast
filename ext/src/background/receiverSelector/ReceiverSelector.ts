@@ -11,18 +11,30 @@ export enum ReceiverSelectorMediaType {
   , File = 8
 }
 
-export interface ReceiverSelection {
+export enum ReceiverSelectionActionType {
+    Cast = 1
+  , Stop = 2
+}
+
+export interface ReceiverSelectionCast {
+    actionType: ReceiverSelectionActionType.Cast;
     receiver: Receiver;
     mediaType: ReceiverSelectorMediaType;
     filePath?: string;
 }
+export interface ReceiverSelectionStop {
+    actionType: ReceiverSelectionActionType.Stop;
+    receiver: Receiver;
+}
+
+export type ReceiverSelection = ReceiverSelectionCast | ReceiverSelectionStop;
 
 
 export interface ReceiverSelectorEvents {
-    "selected": ReceiverSelection;
+    "selected": ReceiverSelectionCast;
     "error": string;
     "cancelled": void;
-    "stop": { receiver: Receiver };
+    "stop": ReceiverSelectionStop;
 }
 
 export default interface ReceiverSelector

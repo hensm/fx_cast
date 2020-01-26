@@ -8,7 +8,8 @@ import options from "../lib/options";
 import { Message } from "../types";
 
 import { getMediaTypesForPageUrl } from "../lib/utils";
-import { ReceiverSelectorMediaType } from "./receiverSelector";
+import { ReceiverSelectionActionType
+       , ReceiverSelectorMediaType } from "./receiverSelector";
 
 import ReceiverSelectorManager
     from "./receiverSelector/ReceiverSelectorManager";
@@ -182,31 +183,46 @@ export default new class ShimManager {
                         break;
                     }
 
-                    /**
-                     * If the media type returned from the selector has been
-                     * changed, we need to cancel the current sender and switch
-                     * it out for the right one.
-                     */
-                    if (selection.mediaType !== ReceiverSelectorMediaType.App) {
-                        shim.contentPort.postMessage({
-                            subject: "shim:/selectReceiverCancelled"
-                        });
+                    switch (selection.actionType) {
+                        case ReceiverSelectionActionType.Cast: {
+                            /**
+                             * If the media type returned from the selector has
+                             * been changed, we need to cancel the current
+                             * sender and switch it out for the right one.
+                             */
+                            if (selection.mediaType !==
+                                    ReceiverSelectorMediaType.App) {
 
-                        loadSender({
-                            tabId: shim.contentTabId
-                          , frameId: shim.contentFrameId
-                          , selection
-                        });
+                                shim.contentPort.postMessage({
+                                    subject: "shim:/selectReceiverCancelled"
+                                });
 
-                        break;
+                                loadSender({
+                                    tabId: shim.contentTabId
+                                  , frameId: shim.contentFrameId
+                                  , selection
+                                });
+
+                                break;
+                            }
+
+                            shim.contentPort.postMessage({
+                                subject: "shim:/selectReceiverEnd"
+                              , data: selection
+                            });
+
+                            break;
+                        }
+
+                        case ReceiverSelectionActionType.Stop: {
+                            shim.contentPort.postMessage({
+                                subject: "shim:/selectReceiverStop"
+                              , data: selection
+                            });
+
+                            break;
+                        }
                     }
-
-                    // Pass selection back to shim
-                    shim.contentPort.postMessage({
-                        subject: "shim:/selectReceiverEnd"
-                      , data: selection
-                    });
-
                 } catch (err) {
                     // TODO: Report errors properly
                     shim.contentPort.postMessage({

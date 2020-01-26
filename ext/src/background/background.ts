@@ -11,7 +11,8 @@ import { getMediaTypesForPageUrl, stringify } from "../lib/utils";
 import { CAST_FRAMEWORK_LOADER_SCRIPT_URL
        , CAST_LOADER_SCRIPT_URL } from "../lib/endpoints";
 
-import { ReceiverSelectorMediaType } from "./receiverSelector";
+import { ReceiverSelectionActionType
+       , ReceiverSelectorMediaType } from "./receiverSelector";
 
 import ReceiverSelectorManager
         from "./receiverSelector/ReceiverSelectorManager";
@@ -200,32 +201,41 @@ async function initMenus () {
                     break;
                 }
 
-                /**
-                 * If the selected media type is App, that refers to the
-                 * media sender in this context, so load media sender.
-                 */
-                if (selection.mediaType === ReceiverSelectorMediaType.App) {
-                    await browser.tabs.executeScript(tab.id, {
-                        code: stringify`
-                            window.receiver = ${selection.receiver};
-                            window.mediaUrl = ${info.srcUrl};
-                            window.targetElementId = ${info.targetElementId};
-                        `
-                      , frameId: info.frameId
-                    });
+                switch (selection.actionType) {
+                    case ReceiverSelectionActionType.Cast: {
+                        /**
+                         * If the selected media type is App, that refers to the
+                         * media sender in this context, so load media sender.
+                         */
+                        if (selection.mediaType ===
+                                ReceiverSelectorMediaType.App) {
 
-                    await browser.tabs.executeScript(tab.id, {
-                        file: "senders/media/bundle.js"
-                      , frameId: info.frameId
-                    });
-                } else {
+                            await browser.tabs.executeScript(tab.id, {
+                                code: stringify`
+                                    window.receiver = ${selection.receiver};
+                                    window.mediaUrl = ${info.srcUrl};
+                                    window.targetElementId = ${
+                                            info.targetElementId};
+                                `
+                              , frameId: info.frameId
+                            });
 
-                    // Handle other responses
-                    loadSender({
-                        tabId: tab.id
-                      , frameId: info.frameId
-                      , selection
-                    });
+                            await browser.tabs.executeScript(tab.id, {
+                                file: "senders/media/bundle.js"
+                              , frameId: info.frameId
+                            });
+                        } else {
+
+                            // Handle other responses
+                            loadSender({
+                                tabId: tab.id
+                              , frameId: info.frameId
+                              , selection
+                            });
+                        }
+
+                        break;
+                    }
                 }
 
                 break;

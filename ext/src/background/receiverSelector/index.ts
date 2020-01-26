@@ -14,4 +14,5 @@ export enum ReceiverSelectorType {
 }
 
 export { ReceiverSelection
+       , ReceiverSelectionActionType
        , ReceiverSelectorMediaType } from "./ReceiverSelector";

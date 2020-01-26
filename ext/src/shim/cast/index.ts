@@ -41,12 +41,13 @@ type ErrorCallback = (err: Error_) => void;
 
 
 let apiConfig: ApiConfig;
-let receiverList: any[] = [];
+
+const receiverList: Receiver[] = [];
 const sessionList: Session[] = [];
+
+const receiverActionListeners = new Set<ReceiverActionListener>();
+
 let sessionRequestInProgress = false;
-
-const receiverListeners = new Set<ReceiverActionListener>();
-
 let sessionSuccessCallback: RequestSessionSuccessCallback;
 let sessionErrorCallback: ErrorCallback;
 
@@ -76,8 +77,7 @@ export const VERSION = [1, 2];
 export function addReceiverActionListener (
         listener: ReceiverActionListener): void {
 
-    console.info("fx_cast (Debug): cast.addReceiverActionListener");
-    receiverListeners.add(listener);
+    receiverActionListeners.add(listener);
 }
 
 export function initialize (
@@ -125,7 +125,7 @@ export function precache (_data: string): void {
 export function removeReceiverActionListener (
         listener: ReceiverActionListener): void {
 
-    receiverListeners.delete(listener);
+    receiverActionListeners.delete(listener);
 }
 
 export function requestSession (
@@ -306,8 +306,10 @@ onMessage(async message => {
          * and update availability state.
          */
         case "shim:/serviceDown": {
-            receiverList = receiverList.filter(
-                    receiver => receiver.id !== message.data.id);
+            const receiverIndex = receiverList.findIndex(
+                    receiver => receiver.id === message.data.id);
+
+            receiverList.splice(receiverIndex, 1);
 
             if (receiverList.length === 0) {
                 if (apiConfig) {
@@ -322,9 +324,18 @@ onMessage(async message => {
         case "shim:/selectReceiverEnd": {
             console.info("fx_cast (Debug): Selected receiver");
 
+            if (!sessionRequestInProgress) {
+                break;
+            }
+
             const selectedReceiver = new Receiver_(
                     message.data.receiver.id
                   , message.data.receiver.friendlyName);
+
+            for (const listener of receiverActionListeners) {
+                console.info("fx_cast (Debug): Calling receiver action listener (CAST)", message.data.receiver);
+                listener(selectedReceiver, ReceiverAction.CAST);
+            }
 
             (selectedReceiver as any)._address = message.data.receiver.host;
             (selectedReceiver as any)._port = message.data.receiver.port;
@@ -358,6 +369,23 @@ onMessage(async message => {
                 }
             } else {
                 createSession();
+            }
+
+            break;
+        }
+
+        case "shim:/selectReceiverStop": {
+            console.info("fx_cast (Debug): Stopped receiver");
+
+            if (sessionRequestInProgress) {
+                for (const listener of receiverActionListeners) {
+                    const castReceiver = new Receiver_(
+                            message.data.receiver.id
+                          , message.data.receiver.friendlyName);
+
+                    console.info("fx_cast (Debug): Calling receiver action listener (STOP)", message.data.receiver);
+                    listener(castReceiver, ReceiverAction.STOP);
+                }
             }
 
             break;

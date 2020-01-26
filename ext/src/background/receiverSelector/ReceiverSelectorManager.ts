@@ -13,6 +13,7 @@ import { DEFAULT_MEDIA_RECEIVER_APP_ID } from "../../shim/cast/media/";
 import { ReceiverSelector
        , ReceiverSelectorType } from "./";
 import { ReceiverSelection
+       , ReceiverSelectionActionType
        , ReceiverSelectorMediaType } from "./ReceiverSelector";
 
 import NativeReceiverSelector from "./NativeReceiverSelector";
@@ -122,10 +123,28 @@ async function getSelection (
         // Get a new selector for each selection
         sharedSelector = await createSelector();
 
-        sharedSelector.addEventListener("selected", onSelected);
-        sharedSelector.addEventListener("cancelled", onCancelled);
-        sharedSelector.addEventListener("error", onError);
-        sharedSelector.addEventListener("stop", onStop);
+
+        let onSelected: any;
+        let onCancelled: any;
+        let onError: any;
+        let onStop: any;
+
+        type EvParamsType =
+                Parameters<typeof sharedSelector.addEventListener>[0];
+
+        function storeListener<T> (type: EvParamsType, fn: T) {
+            if (type === "selected") {
+                onSelected = fn;
+            } else if (type === "cancelled") {
+                onCancelled = fn;
+            } else if (type === "error") {
+                onError = fn;
+            } else if (type === "stop") {
+                onStop = fn;
+            }
+
+            return fn;
+        }
 
         function removeListeners () {
             sharedSelector.removeEventListener("selected", onSelected);
@@ -134,31 +153,48 @@ async function getSelection (
             sharedSelector.removeEventListener("stop", onStop);
         }
 
-        function onSelected (ev: any) {
-            logger.info("Selected receiver", ev.detail);
-            resolve(ev.detail);
-            removeListeners();
-        }
+        sharedSelector.addEventListener("selected"
+              , storeListener("selected", ev => {
 
-        function onCancelled () {
+            logger.info("Selected receiver", ev.detail);
+            resolve({
+                actionType: ReceiverSelectionActionType.Cast
+              , receiver: ev.detail.receiver
+              , mediaType: ev.detail.mediaType
+              , filePath: ev.detail.filePath
+            });
+            removeListeners();
+        }));
+
+        sharedSelector.addEventListener("cancelled"
+              , storeListener("cancelled", () => {
+
             logger.info("Cancelled receiver selection");
             resolve(null);
             removeListeners();
-        }
+        }));
 
-        function onError () {
-            logger.error("Failed to select receiver");
+        sharedSelector.addEventListener("error"
+              , storeListener("error", () => {
             reject();
             removeListeners();
-        }
+        }));
 
-        function onStop (ev: any) {
+        sharedSelector.addEventListener("stop"
+              , storeListener("stop", ev => {
+
             logger.info("Stopped receiver app", ev.detail);
 
-            StatusManager.init().then(() => {
-                StatusManager.stopReceiverApp(ev.detail.receiver);
-            });
-        }
+            StatusManager.init()
+                .then(() => StatusManager.stopReceiverApp(ev.detail.receiver))
+                .then(() => {
+                    resolve({
+                        actionType: ReceiverSelectionActionType.Stop
+                      , receiver: ev.detail.receiver
+                    });
+                    removeListeners();
+                });
+        }));
 
 
         // Ensure status manager is initialized
