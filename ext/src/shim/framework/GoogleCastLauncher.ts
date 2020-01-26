@@ -1,5 +1,8 @@
 "use strict";
 
+import logger from "../../lib/logger";
+
+
 /**
  * Custom element for a cast button used by sites that injects
  * a cast icon and manages visibility state and event handling.
@@ -72,7 +75,7 @@ export default class GoogleCastLauncher extends HTMLElement {
 
 
         this.addEventListener("click", () => {
-            console.info("<google-cast-launcher> onClick");
+            logger.info("<google-cast-launcher> onClick");
         });
     }
 }

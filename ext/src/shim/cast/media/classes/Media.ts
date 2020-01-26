@@ -1,5 +1,7 @@
 "use strict";
 
+import logger from "../../../../lib/logger";
+
 import uuid from "uuid/v1";
 
 import EditTracksInfoRequest from "./EditTracksInfoRequest";
@@ -147,7 +149,7 @@ export default class Media {
           , _successCallback?: SuccessCallback
           , _errorCallback?: ErrorCallback): void {
 
-        console.info("STUB :: Media#editTracksInfo");
+        logger.info("STUB :: Media#editTracksInfo");
     }
 
     public getEstimatedTime (): number {
@@ -191,21 +193,21 @@ export default class Media {
             _item: QueueItem
           , _successCallback?: SuccessCallback
           , _errorCallback?: ErrorCallback): void {
-        console.info("STUB :: Media#queueAppendItem");
+        logger.info("STUB :: Media#queueAppendItem");
     }
 
     public queueInsertItems (
             _queueInsertItemsRequest: QueueInsertItemsRequest
           , _successCallback?: SuccessCallback
           , _errorCallback?: ErrorCallback): void {
-        console.info("STUB :: Media#queueInsertItems");
+        logger.info("STUB :: Media#queueInsertItems");
     }
 
     public queueJumpToItem (
             _itemId: number
           , _successCallback?: SuccessCallback
           , _errorCallback?: ErrorCallback): void {
-        console.info("STUB :: Media#queueJumpToItem");
+        logger.info("STUB :: Media#queueJumpToItem");
     }
 
     public queueMoveItemToNewIndex (
@@ -213,47 +215,47 @@ export default class Media {
           , _newIndex: number
           , _successCallback?: SuccessCallback
           , _errorCallback?: ErrorCallback): void {
-        console.info("STUB :: Media#queueMoveItemToNewIndex");
+        logger.info("STUB :: Media#queueMoveItemToNewIndex");
     }
 
     public queueNext (
             _successCallback?: SuccessCallback
           , _errorCallback?: ErrorCallback): void {
-        console.info("STUB :: Media#queueNext");
+        logger.info("STUB :: Media#queueNext");
     }
 
     public queuePrev (
             _successCallback?: SuccessCallback
           , _errorCallback?: ErrorCallback): void {
-        console.info("STUB :: Media#queuePrev");
+        logger.info("STUB :: Media#queuePrev");
     }
 
     public queueRemoveItem (
             _itemId: number
           , _successCallback?: SuccessCallback
           , _errorCallback?: ErrorCallback): void {
-        console.info("STUB :: Media#queueRemoveItem");
+        logger.info("STUB :: Media#queueRemoveItem");
     }
 
     public queueReorderItems (
             _queueReorderItemsRequest: QueueReorderItemsRequest
           , _successCallback?: SuccessCallback
           , _errorCallback?: ErrorCallback): void {
-        console.info("STUB :: Media#queueReorderItems");
+        logger.info("STUB :: Media#queueReorderItems");
     }
 
     public queueSetRepeatMode (
             _repeatMode: string
           , _successCallback?: SuccessCallback
           , _errorCallback?: ErrorCallback): void {
-        console.info("STUB :: Media#queueSetRepeatMode");
+        logger.info("STUB :: Media#queueSetRepeatMode");
     }
 
     public queueUpdateItems (
             _queueUpdateItemsRequest: QueueUpdateItemsRequest
           , _successCallback?: SuccessCallback
           , _errorCallback?: ErrorCallback): void {
-        console.info("STUB :: Media#queueUpdateItems");
+        logger.info("STUB :: Media#queueUpdateItems");
     }
 
     public removeUpdateListener (listener: UpdateListener) {
@@ -293,7 +295,7 @@ export default class Media {
     }
 
     public supportsCommand (_command: string): boolean {
-        console.info("STUB :: Media#supportsCommand");
+        logger.info("STUB :: Media#supportsCommand");
         return true;
     }
 

@@ -1,5 +1,7 @@
 "use strict";
 
+import logger from "../../lib/logger";
+
 import ApiConfig from "./classes/ApiConfig";
 import DialRequest from "./classes/DialRequest";
 import Error_ from "./classes/Error";
@@ -85,7 +87,7 @@ export function initialize (
       , successCallback?: SuccessCallback
       , errorCallback?: ErrorCallback): void {
 
-    console.info("fx_cast (Debug): cast.initialize");
+    logger.info("cast.initialize");
 
     // Already initialized
     if (apiConfig) {
@@ -119,7 +121,7 @@ export function logMessage (message: string): void {
 }
 
 export function precache (_data: string): void {
-    console.info("STUB :: cast.precache");
+    logger.info("STUB :: cast.precache");
 }
 
 export function removeReceiverActionListener (
@@ -133,7 +135,7 @@ export function requestSession (
       , errorCallback: ErrorCallback
       , _sessionRequest: SessionRequest = apiConfig.sessionRequest): void {
 
-    console.info("fx_cast (Debug): cast.requestSession");
+    logger.info("cast.requestSession");
 
     // Called before initialization
     if (!apiConfig) {
@@ -179,7 +181,7 @@ export function _requestSession (
       , successCallback: RequestSessionSuccessCallback
       , errorCallback: ErrorCallback): void {
 
-    console.info("fx_cast (Debug): cast._requestSession");
+    logger.info("cast._requestSession");
 
     if (!apiConfig) {
         if (errorCallback) {
@@ -249,7 +251,7 @@ export function _requestSession (
 }
 
 export function requestSessionById (_sessionId: string): void {
-    console.info("STUB :: cast.requestSessionById");
+    logger.info("STUB :: cast.requestSessionById");
 }
 
 export function setCustomReceivers (
@@ -257,15 +259,15 @@ export function setCustomReceivers (
       , _successCallback?: SuccessCallback
       , _errorCallback?: ErrorCallback): void {
 
-    console.info("STUB :: cast.setCustomReceivers");
+    logger.info("STUB :: cast.setCustomReceivers");
 }
 
 export function setPageContext (_win: Window): void {
-    console.info("STUB :: cast.setPageContext");
+    logger.info("STUB :: cast.setPageContext");
 }
 
 export function setReceiverDisplayStatus (_sessionId: string): void {
-    console.info("STUB :: cast.setReceiverDisplayStatus");
+    logger.info("STUB :: cast.setReceiverDisplayStatus");
 }
 
 export function unescape (escaped: string): string {
@@ -322,7 +324,7 @@ onMessage(async message => {
         }
 
         case "shim:/selectReceiverEnd": {
-            console.info("fx_cast (Debug): Selected receiver");
+            logger.info("Selected receiver");
 
             if (!sessionRequestInProgress) {
                 break;
@@ -333,7 +335,7 @@ onMessage(async message => {
                   , message.data.receiver.friendlyName);
 
             for (const listener of receiverActionListeners) {
-                console.info("fx_cast (Debug): Calling receiver action listener (CAST)", message.data.receiver);
+                logger.info("Calling receiver action listener (CAST)", message.data.receiver);
                 listener(selectedReceiver, ReceiverAction.CAST);
             }
 
@@ -375,7 +377,7 @@ onMessage(async message => {
         }
 
         case "shim:/selectReceiverStop": {
-            console.info("fx_cast (Debug): Stopped receiver");
+            logger.info("Stopped receiver");
 
             if (sessionRequestInProgress) {
                 for (const listener of receiverActionListeners) {
@@ -383,7 +385,7 @@ onMessage(async message => {
                             message.data.receiver.id
                           , message.data.receiver.friendlyName);
 
-                    console.info("fx_cast (Debug): Calling receiver action listener (STOP)", message.data.receiver);
+                    logger.info("Calling receiver action listener (STOP)", message.data.receiver);
                     listener(castReceiver, ReceiverAction.STOP);
                 }
             }

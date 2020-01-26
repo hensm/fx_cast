@@ -2,6 +2,8 @@
 
 import uuid from "uuid/v1";
 
+import logger from "../../../lib/logger";
+
 import _Error from "./Error";
 import Image from "./Image";
 import Receiver from "./Receiver";
@@ -268,7 +270,7 @@ export default class Session {
 
 
     public addMediaListener (_mediaListener: MediaListener) {
-        console.info("STUB :: Session#addMediaListener");
+        logger.info("STUB :: Session#addMediaListener");
     }
 
     public addMessageListener (
@@ -373,11 +375,11 @@ export default class Session {
           , _successCallback: LoadSuccessCallback
           , _errorCallback: ErrorCallback): void {
 
-        console.info("STUB :: Session#queueLoad");
+        logger.info("STUB :: Session#queueLoad");
     }
 
     public removeMediaListener (_mediaListener: MediaListener): void {
-        console.info("STUB :: Session#removeMediaListener");
+        logger.info("STUB :: Session#removeMediaListener");
     }
 
     public removeMessageListener (

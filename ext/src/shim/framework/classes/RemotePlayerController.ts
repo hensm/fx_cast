@@ -1,12 +1,14 @@
 "use strict";
 
+import logger from "../../../lib/logger";
+
 import RemotePlayer from "./RemotePlayer";
 
 
 export default class RemotePlayerController extends EventTarget {
     constructor (_player: RemotePlayer) {
         super();
-        console.info("STUB :: RemotePlayerController#constructor");
+        logger.info("STUB :: RemotePlayerController#constructor");
     }
 
     public getFormattedTime (timeInSec: number): string {
@@ -28,22 +30,22 @@ export default class RemotePlayerController extends EventTarget {
     }
 
     public muteOrUnmute (): void {
-        console.info("STUB :: RemotePlayerController#muteOrUnmute");
+        logger.info("STUB :: RemotePlayerController#muteOrUnmute");
     }
 
     public playOrPause (): void {
-        console.info("STUB :: RemotePlayerController#playOrPause");
+        logger.info("STUB :: RemotePlayerController#playOrPause");
     }
 
     public seek (): void {
-        console.info("STUB :: RemotePlayerController#seek");
+        logger.info("STUB :: RemotePlayerController#seek");
     }
 
     public setVolumeLevel (): void {
-        console.info("STUB :: RemotePlayerController#setVolumeLevel");
+        logger.info("STUB :: RemotePlayerController#setVolumeLevel");
     }
 
     public stop (): void {
-        console.info("STUB :: RemotePlayerController#stop");
+        logger.info("STUB :: RemotePlayerController#stop");
     }
 }

@@ -1,5 +1,6 @@
 "use strict";
 
+import logger from "../../lib/logger";
 
 import ActiveInputStateEventData from "./classes/ActiveInputStateEventData";
 import ApplicationMetadata from "./classes/ApplicationMetadata";
@@ -55,7 +56,7 @@ export default {
   , VERSION: "1.0.07"
 
   , setLoggerLevel (_level: number) {
-        console.info("STUB :: cast.framework.setLoggerLevel");
+        logger.info("STUB :: cast.framework.setLoggerLevel");
     }
 };
 
