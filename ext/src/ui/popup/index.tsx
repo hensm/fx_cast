@@ -146,7 +146,7 @@ class PopupApp extends Component<{}, PopupAppState> {
                                 disabled={ !(this.state.availableMediaTypes
                                         & ReceiverSelectorMediaType.App) }>
                             { (this.state.requestedAppId
-                                    && knownApps[this.state.requestedAppId])
+                                    && knownApps[this.state.requestedAppId].name)
                                         ?? _("popupMediaTypeApp") }
                         </option>
                         <option value={ ReceiverSelectorMediaType.Tab }

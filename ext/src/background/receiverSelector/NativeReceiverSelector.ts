@@ -105,7 +105,7 @@ export default class NativeReceiverSelector
               , i18n_castButtonTitle: _("popupCastButtonTitle")
               , i18n_stopButtonTitle: _("popupStopButtonTitle")
               , i18n_mediaTypeApp:
-                        knownApps[requestedAppId] ?? _("popupMediaTypeApp")
+                        knownApps[requestedAppId].name ?? _("popupMediaTypeApp")
               , i18n_mediaTypeTab: _("popupMediaTypeTab")
               , i18n_mediaTypeScreen: _("popupMediaTypeScreen")
               , i18n_mediaTypeFile: _("popupMediaTypeFile")

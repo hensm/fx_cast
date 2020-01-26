@@ -2,6 +2,11 @@
 
 const _ = browser.i18n.getMessage;
 
+interface KnownApp {
+    name: string;
+    matches?: string;
+}
+
 /**
  * TODO: Just keep a list of IDs and cache names from the Google API:
  * https://clients3.google.com/cast/chromecast/device/app?a=[appId]
@@ -9,17 +14,21 @@ const _ = browser.i18n.getMessage;
  * Also, localization since the API supports it.
  */
 export default {
-    "CA5E8412": "Netflix"
-  , "233637DE": "YouTube"
-  , "17608BC8": "Prime Video"
-  , "CC32E753": "Spotify"
-  , "5E81F6DB": "BBC iPlayer"
-  , "03977A48": "BBC Sounds"
-  , "AA666EDD": "Crunchyroll"
-  , "10AAD887": "All 4"
-  , "9AC194DC": "Plex"
-  , "CD7B9F59": "Global Player Live"
-  , "B3DCF968": "Twitch"
-  , "B88B034A": "Dailymotion"
-  , "CC1AD845": _("popupMediaTypeAppMedia")
-} as Record<string, string>;
+    // Web-supported
+    "CA5E8412": { name: "Netflix"     , matches: "https://www.netflix.com/*" }
+  , "233637DE": { name: "YouTube"     , matches: "https://www.youtube.com/*" }
+  , "CC32E753": { name: "Spotify"     , matches: "https://open.spotify.com/*" }
+  , "5E81F6DB": { name: "BBC iPlayer" , matches: "https://www.bbc.co.uk/iplayer/*" }
+  , "03977A48": { name: "BBC Sounds"  , matches: "https://www.bbc.co.uk/sounds/*" }
+  , "AA666EDD": { name: "Crunchyroll" , matches: "https://crunchyroll.com/*" }
+  , "10AAD887": { name: "All 4"       , matches: "https://www.channel4.com/*" }
+  , "B3DCF968": { name: "Twitch"      , matches: "https://www.twitch.tv/*" }
+  , "B88B034A": { name: "Dailymotion" , matches: "https://www.dailymotion.com/*" }
+
+    // Misc
+  , "17608BC8": { name: "Prime Video" }
+  , "9AC194DC": { name: "Plex" }
+  , "CD7B9F59": { name: "Global Player Live" }
+
+  , "CC1AD845": { name: _("popupMediaTypeAppMedia") }
+} as Record<string, KnownApp>;
