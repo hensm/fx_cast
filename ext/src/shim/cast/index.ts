@@ -335,7 +335,8 @@ onMessage(async message => {
                   , message.data.receiver.friendlyName);
 
             for (const listener of receiverActionListeners) {
-                logger.info("Calling receiver action listener (CAST)", message.data.receiver);
+                logger.info("Calling receiver action listener (CAST)"
+                      , message.data.receiver);
                 listener(selectedReceiver, ReceiverAction.CAST);
             }
 
@@ -385,7 +386,8 @@ onMessage(async message => {
                             message.data.receiver.id
                           , message.data.receiver.friendlyName);
 
-                    logger.info("Calling receiver action listener (STOP)", message.data.receiver);
+                    logger.info("Calling receiver action listener (STOP)"
+                          , message.data.receiver);
                     listener(castReceiver, ReceiverAction.STOP);
                 }
             }
