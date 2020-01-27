@@ -381,6 +381,8 @@ onMessage(async message => {
             logger.info("Stopped receiver");
 
             if (sessionRequestInProgress) {
+                sessionRequestInProgress = false;
+
                 for (const listener of receiverActionListeners) {
                     const castReceiver = new Receiver_(
                             message.data.receiver.id
