@@ -25,6 +25,7 @@
               , {
                     "version": "0.0.5"
                   , "update_link": "https://github.com/hensm/fx_cast/releases/download/v0.0.5/fx_cast-0.0.5-fx.xpi"
+                  , "update_hash": "sha256:bc3590e3f602264a95e44706924c4fe0a962129382c45bcd544c1448c6cc9aba"
                 }
             ]
         }
