@@ -12,7 +12,7 @@ import ShimManager from "../background/ShimManager";
 
 interface LoadSenderOptions {
     tabId: number;
-    frameId: number;
+    frameId?: number;
     selection: ReceiverSelection;
 }
 

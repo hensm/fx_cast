@@ -163,9 +163,6 @@ async function initMenus () {
         if (tab?.id === undefined) {
             throw logger.error("Menu handler tab ID not found.");
         }
-        if (info.frameId === undefined) {
-            throw logger.error("Menu handler frame ID not found.");
-        }
         if (!info.pageUrl) {
             throw logger.error("Menu handler page URL not found.");
         }
