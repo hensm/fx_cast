@@ -490,8 +490,7 @@ function initWhitelist () {
             if (header.name.toLowerCase() === "user-agent") {
                 /**
                  * New YouTube breaks without the default user agent string,
-                 * so pretend to be an old version of Chrome to get the old
-                 * site.
+                 * so use hybrid Firefox/Chrome version.
                  */
                 if (host?.value === "www.youtube.com") {
                     header.value = getChromeUserAgent(os, true);
