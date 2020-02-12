@@ -110,13 +110,13 @@ async function initMenus () {
     const opts = await options.getAll();
 
     // Global "Cast..." menu item
-    menuIdCast = await browser.menus.create({
+    menuIdCast = browser.menus.create({
         contexts: [ "browser_action", "page", "tools_menu" ]
       , title: _("contextCast")
     });
 
     // <video>/<audio> "Cast..." context menu item
-    menuIdMediaCast = await browser.menus.create({
+    menuIdMediaCast = browser.menus.create({
         contexts: [ "audio", "video" ]
       , title: _("contextCast")
       , visible: opts.mediaEnabled
@@ -126,18 +126,18 @@ async function initMenus () {
     });
 
 
-    menuIdWhitelist = await browser.menus.create({
+    menuIdWhitelist = browser.menus.create({
         contexts: [ "browser_action" ]
       , title: _("contextAddToWhitelist")
       , enabled: false
     });
 
-    menuIdWhitelistRecommended = await browser.menus.create({
+    menuIdWhitelistRecommended = browser.menus.create({
         title: _("contextAddToWhitelistRecommended")
       , parentId: menuIdWhitelist
     });
 
-    await browser.menus.create({
+    browser.menus.create({
         type: "separator"
       , parentId: menuIdWhitelist
     });
@@ -319,7 +319,7 @@ async function initMenus () {
 
 
         if (url.search) {
-            const whitelistSearchMenuId = await browser.menus.create({
+            const whitelistSearchMenuId = browser.menus.create({
                 title: _("contextAddToWhitelistAdvancedAdd", patternSearch)
               , parentId: menuIdWhitelist
             });
@@ -351,7 +351,7 @@ async function initMenus () {
 
                     const pattern = `${url.origin}/${partialPath}/*`;
 
-                    const partialPathMenuId = await browser.menus.create({
+                    const partialPathMenuId = browser.menus.create({
                         title: _("contextAddToWhitelistAdvancedAdd", pattern)
                       , parentId: menuIdWhitelist
                     });
@@ -363,7 +363,7 @@ async function initMenus () {
         }
 
 
-        const wildcardProtocolMenuId = await browser.menus.create({
+        const wildcardProtocolMenuId = browser.menus.create({
             title: _("contextAddToWhitelistAdvancedAdd"
                   , patternWildcardProtocol)
           , parentId: menuIdWhitelist
@@ -373,7 +373,7 @@ async function initMenus () {
                 wildcardProtocolMenuId, patternWildcardProtocol);
 
 
-        const wildcardSubdomainMenuId = await browser.menus.create({
+        const wildcardSubdomainMenuId = browser.menus.create({
             title: _("contextAddToWhitelistAdvancedAdd"
                   , patternWildcardSubdomain)
           , parentId: menuIdWhitelist
@@ -383,7 +383,7 @@ async function initMenus () {
                 wildcardSubdomainMenuId, patternWildcardSubdomain);
 
 
-        const wildcardProtocolAndSubdomainMenuId = await browser.menus.create({
+        const wildcardProtocolAndSubdomainMenuId = browser.menus.create({
             title: _("contextAddToWhitelistAdvancedAdd"
                   , patternWildcardProtocolAndSubdomain)
           , parentId: menuIdWhitelist
