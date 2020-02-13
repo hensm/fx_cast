@@ -4,7 +4,7 @@
       , "description": "Name of the extension and the native receiver selector window title."
     }
   , "extensionDescription": {
-        "message": ""
+        "message": "Enables Chromecast support for casting web apps (like Netflix or BBC iPlayer), HTML5 video and screen/tab sharing."
       , "description": "Description of the extension shown in the add-ons manager."
     }
 
