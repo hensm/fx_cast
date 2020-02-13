@@ -270,20 +270,24 @@ class ReceiverEntry extends Component<ReceiverEntryProps, ReceiverEntryState> {
           , showAlternateAction: false
         };
 
-        window.addEventListener("keydown", ev => {
-            if (ev.key === "Alt") {
+        const handleActionKeyEvents = (ev: KeyboardEvent) => {
+            if (ev.key === "Alt" || ev.key === "Shift") {
                 this.setState({
-                    showAlternateAction: true
+                    // Only enable on keydown, otherwise disable
+                    showAlternateAction: ev.type === "keydown"
                 });
             }
+        }
+
+        window.addEventListener("keydown", handleActionKeyEvents);
+        window.addEventListener("keyup", handleActionKeyEvents);
+
+        window.addEventListener("blur", () => {
+            this.setState({
+                showAlternateAction: false
+            });
         });
-        window.addEventListener("keyup", ev => {
-            if (ev.key === "Alt") {
-                this.setState({
-                    showAlternateAction: false
-                });
-            }
-        });
+
 
         this.handleCast = this.handleCast.bind(this);
     }
