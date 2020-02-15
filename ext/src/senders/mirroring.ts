@@ -35,7 +35,7 @@ function sendAppMessage (subject: string, data: any) {
     session.sendMessage(FX_CAST_RECEIVER_APP_NAMESPACE, {
         subject
       , data
-    }, () => {}, () => {});
+    });
 }
 
 
@@ -45,7 +45,6 @@ window.addEventListener("beforeunload", () => {
 
 
 async function onRequestSessionSuccess (newSession: cast.Session) {
-
     cast.logMessage("onRequestSessionSuccess");
 
     session = newSession;

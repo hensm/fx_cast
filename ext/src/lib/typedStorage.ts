@@ -16,7 +16,7 @@ export class TypedStorageArea<Schema extends { [key: string]: any }> {
     /**
      * Retrieves one or more items from the storage area.
      *
-     * @param keys - 
+     * @param keys -
      *  A string, array of strings or partial schema object
      *  (with default values) indicating which keys to retrieve
      *  from storage.
@@ -24,7 +24,7 @@ export class TypedStorageArea<Schema extends { [key: string]: any }> {
     public async get<SchemaKey extends keyof Schema
                    , SchemaPartial extends Partial<Schema>> (
             keys?: SchemaKey
-                 | Array<SchemaKey>
+                 | SchemaKey[]
                  | SchemaPartial
                  | null | undefined)
             : Promise<Pick<Schema, Extract<
@@ -37,12 +37,12 @@ export class TypedStorageArea<Schema extends { [key: string]: any }> {
      * Gets the amount of storage space — in bytes — used by one
      * or more items in the storage area.
      *
-     * @param keys - 
+     * @param keys -
      *  A string or array of strings indicating the keys of
      *  which to get the storage space.
      */
     public async getBytesInUse<SchemaKey extends keyof Schema> (
-            keys?: Schema | Array<SchemaKey>): Promise<number> {
+            keys?: Schema | SchemaKey[]): Promise<number> {
 
         return await this.storageArea.getBytesInUse(keys);
     }
@@ -61,12 +61,12 @@ export class TypedStorageArea<Schema extends { [key: string]: any }> {
     /**
      * Removes one or more items from the storage area.
      *
-     * @param keys - 
+     * @param keys -
      *  A string or array of strings indicating which keys to
      *  remove from storage.
      */
     public async remove<SchemaKey extends keyof Schema> (
-            keys: SchemaKey | Array<SchemaKey>): Promise<void> {
+            keys: SchemaKey | SchemaKey[]): Promise<void> {
 
         await this.storageArea.remove(keys);
     }

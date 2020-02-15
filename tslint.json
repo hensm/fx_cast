@@ -5,6 +5,7 @@
     ]
   , "jsRules": false
   , "rules": {
+        "array-type": [ true, "array-simple" ],
         "arrow-parens": false
       , "import-spacing": false
       , "interface-name": false

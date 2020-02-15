@@ -295,8 +295,8 @@ export default class Session {
     }
 
     public leave (
-            successCallback: SuccessCallback
-          , errorCallback: ErrorCallback): void {
+            successCallback?: SuccessCallback
+          , errorCallback?: ErrorCallback): void {
 
         const id = uuid();
 
@@ -314,8 +314,8 @@ export default class Session {
 
     public loadMedia (
             loadRequest: LoadRequest
-          , successCallback: LoadSuccessCallback
-          , errorCallback: ErrorCallback): void {
+          , successCallback?: LoadSuccessCallback
+          , errorCallback?: ErrorCallback): void {
 
         this._sendMediaMessage({
             type: "LOAD"
@@ -372,8 +372,8 @@ export default class Session {
 
     public queueLoad (
             _queueLoadRequest: QueueLoadRequest
-          , _successCallback: LoadSuccessCallback
-          , _errorCallback: ErrorCallback): void {
+          , _successCallback?: LoadSuccessCallback
+          , _errorCallback?: ErrorCallback): void {
 
         logger.info("STUB :: Session#queueLoad");
     }
@@ -399,8 +399,8 @@ export default class Session {
     public sendMessage (
             namespace: string
           , message: {} | string
-          , successCallback: SuccessCallback
-          , errorCallback: ErrorCallback): void {
+          , successCallback?: SuccessCallback
+          , errorCallback?: ErrorCallback): void {
 
         const messageId = uuid();
 
@@ -422,8 +422,8 @@ export default class Session {
 
     public setReceiverMuted (
             muted: boolean
-          , successCallback: SuccessCallback
-          , errorCallback: ErrorCallback) {
+          , successCallback?: SuccessCallback
+          , errorCallback?: ErrorCallback) {
 
         const volumeId = uuid();
 
@@ -441,8 +441,8 @@ export default class Session {
 
     public setReceiverVolumeLevel (
             newLevel: number
-          , successCallback: SuccessCallback
-          , errorCallback: ErrorCallback): void {
+          , successCallback?: SuccessCallback
+          , errorCallback?: ErrorCallback): void {
 
         const volumeId = uuid();
 
@@ -459,8 +459,8 @@ export default class Session {
     }
 
     public stop (
-            successCallback: SuccessCallback
-          , errorCallback: ErrorCallback): void {
+            successCallback?: SuccessCallback
+          , errorCallback?: ErrorCallback): void {
 
         const stopId = uuid();
 
@@ -478,9 +478,6 @@ export default class Session {
 
 
     private _sendMediaMessage (message: string | {}) {
-        this.sendMessage(
-                "urn:x-cast:com.google.cast.media"
-              , message
-              , () => {}, () => {});
+        this.sendMessage("urn:x-cast:com.google.cast.media", message);
     }
 }

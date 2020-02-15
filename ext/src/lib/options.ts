@@ -107,7 +107,7 @@ export default new class extends TypedEventTarget<EventMap> {
      * Returns storage promise.
      */
     public async setAll (options: Options): Promise<void> {
-        return storageArea.set({  options })
+        return storageArea.set({ options });
     }
 
     /**

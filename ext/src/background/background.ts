@@ -45,22 +45,8 @@ browser.runtime.onInstalled.addListener(async details => {
 });
 
 
-function initBrowserAction () {
+async function initBrowserAction () {
     logger.info("init (browser action)");
-
-    /*browser.browserAction.disable();
-
-    function onServiceChange () {
-        if (StatusManager.getReceivers().length) {
-            browser.browserAction.enable();
-        } else {
-            browser.browserAction.disable();
-        }
-    }
-
-    StatusManager.addEventListener("serviceUp", onServiceChange);
-    StatusManager.addEventListener("serviceDown", onServiceChange);*/
-
 
     /**
      * When the browser action is clicked, open a receiver
@@ -463,7 +449,7 @@ async function initRequestListener () {
 }
 
 
-function initWhitelist () {
+async function initWhitelist () {
     logger.info("init (whitelist)");
 
     type OnBeforeSendHeadersDetails = Parameters<Parameters<
@@ -476,9 +462,6 @@ function initWhitelist () {
      * to reflect this on whitelisted sites.
      */
     async function onBeforeSendHeaders (details: OnBeforeSendHeadersDetails) {
-        const { os } = await browser.runtime.getPlatformInfo();
-        const chromeUserAgent = getChromeUserAgent(os);
-
         if (!details.requestHeaders) {
             throw logger.error("OnBeforeSendHeaders handler details missing requestHeaders.");
         }
@@ -487,6 +470,8 @@ function initWhitelist () {
                 header => header.name === "Host");
 
         for (const header of details.requestHeaders) {
+            const { os } = await browser.runtime.getPlatformInfo();
+
             if (header.name.toLowerCase() === "user-agent") {
                 /**
                  * New YouTube breaks without the default user agent string,
@@ -497,7 +482,7 @@ function initWhitelist () {
                     break;
                 }
 
-                header.value = chromeUserAgent;
+                header.value = getChromeUserAgent(os);
                 break;
             }
         }
@@ -526,7 +511,7 @@ function initWhitelist () {
     }
 
     // Register on first run
-    registerUserAgentWhitelist();
+    await registerUserAgentWhitelist();
 
     // Re-register when options change
     options.addEventListener("changed", ev => {
@@ -559,7 +544,7 @@ async function initMediaOverlay () {
               , runAt: "document_start"
             });
         } catch (err) {
-            logger.error("Failed to register media overlay")
+            logger.error("Failed to register media overlay");
         }
     }
 
@@ -577,7 +562,7 @@ async function initMediaOverlay () {
             await unregisterMediaOverlayContentScript();
             await registerMediaOverlayContentScript();
         }
-    })
+    });
 }
 
 
@@ -601,16 +586,13 @@ async function init () {
 
     isInitialized = true;
 
+    await StatusManager.init();
+    await ShimManager.init();
 
     await initMenus();
     await initRequestListener();
     await initWhitelist();
     await initMediaOverlay();
-
-    await StatusManager.init();
-    await ShimManager.init();
-
-
     await initBrowserAction();
 
 

@@ -91,8 +91,9 @@ function getSession (opts: InitOptions): Promise<cast.Session> {
             }
         }
 
-        // TODO: Handle this
-        function sessionListener () {}
+        function sessionListener () {
+            // TODO: Handle this
+        }
 
         function onRequestSessionSuccess (session: cast.Session) {
             resolve(session);
@@ -136,7 +137,7 @@ function getMedia (opts: InitOptions): Promise<cast.media.Media> {
                         = await startMediaServer(mediaTitle, port);
 
                 const baseUrl = new URL(`http://${host}:${port}/`);
-                mediaUrl = new URL(mediaPath, baseUrl)
+                mediaUrl = new URL(mediaPath, baseUrl);
                 subtitleUrls = subtitlePaths.map(
                         path => new URL(path, baseUrl));
 
@@ -395,6 +396,7 @@ export async function init (opts: InitOptions) {
             });
 
             if (await options.get("mediaStopOnUnload")) {
+                // tslint:disable-next-line: no-empty
                 currentSession.stop(() => {}, () => {});
             }
         });

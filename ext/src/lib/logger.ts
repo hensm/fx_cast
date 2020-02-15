@@ -3,15 +3,17 @@
 export class Logger {
     constructor (private prefix: string) {}
 
-    log (message: string, data?: any) {
+    public log (message: string, data?: any) {
         const formattedMessage = `${this.prefix} (Log): ${message}`;
         if (data) {
+            // tslint:disable-next-line:no-console
             console.log(formattedMessage, data);
         } else {
+            // tslint:disable-next-line:no-console
             console.log(formattedMessage);
         }
     }
-    info (message: string, data?: any) {
+    public info (message: string, data?: any) {
         const formattedMessage = `${this.prefix} (Info): ${message}`;
         if (data) {
             console.info(formattedMessage, data);
@@ -19,7 +21,7 @@ export class Logger {
             console.info(formattedMessage);
         }
     }
-    error (message: string, data?: any) {
+    public error (message: string, data?: any) {
         const formattedMessage = `${this.prefix} (Error): ${message}`;
         if (data) {
             console.error(formattedMessage, data);

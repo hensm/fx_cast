@@ -30,6 +30,7 @@
         "minimist": "^1.2.0",
         "selenium-webdriver": "^4.0.0-alpha.5",
         "semver": "^6.3.0",
+        "tslint": "^6.0.0",
         "typescript": "^3.7.4",
         "uuid": "^3.3.3",
         "ws": "^7.2.1"

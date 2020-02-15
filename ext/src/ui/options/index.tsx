@@ -390,7 +390,7 @@ class OptionsApp extends Component<{}, OptionsAppState> {
                                 { _("optionsUserAgentWhitelistContent") }
                             </div>
                             <div className="option__control">
-                                { this.state.options?.userAgentWhitelist && 
+                                { this.state.options?.userAgentWhitelist &&
                                     <EditableList data={ this.state.options.userAgentWhitelist }
                                                   onChange={ this.handleWhitelistChange }
                                                   itemPattern={ REMOTE_MATCH_PATTERN_REGEX }

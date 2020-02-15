@@ -35,7 +35,7 @@ export default async function loadSender (opts: LoadSenderOptions) {
             const shim = ShimManager.getShim(opts.tabId, opts.frameId);
             if (!shim) {
                 throw logger.error(`Shim not found at tabId ${
-                        opts.tabId} / frameId ${opts.frameId}`)
+                        opts.tabId} / frameId ${opts.frameId}`);
             }
 
             shim.contentPort.postMessage({

@@ -56,7 +56,7 @@ export default new class StatusManager
         }
     }
 
-    public * getReceivers() {
+    public *getReceivers () {
         for (const [, receiver ] of this.receivers) {
             if (receiver.status && receiver.status.application
                                 && receiver.status.volume) {

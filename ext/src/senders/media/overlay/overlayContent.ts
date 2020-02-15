@@ -51,6 +51,7 @@ function deepQuerySelector (selector: string): Element | null {
           , XPathResult.ORDERED_NODE_ITERATOR_TYPE);
 
     let node: Node | null;
+    // tslint:disable-next-line: no-conditional-assignment
     while (node = result.iterateNext()) {
         const shadowRoot = getShadowRootFromNode(node);
         if (!shadowRoot) {
@@ -78,6 +79,7 @@ function deepQuerySelectorAll (selector: string): Node[] {
     const nodes: Node[] = [];
 
     let node: Node | null;
+    // tslint:disable-next-line: no-conditional-assignment
     while (node = result.iterateNext()) {
         const shadowRoot = getShadowRootFromNode(node);
         if (shadowRoot) {
@@ -361,7 +363,7 @@ document.addEventListener("DOMContentLoaded", () => {
         const mediaElements = document.querySelectorAll(mediaSelector);
         const deepMediaElements = deepQuerySelectorAll(mediaSelector);
 
-        for (const mediaElement of [...Array.from(mediaElements), ...deepMediaElements]) {
+        for (const mediaElement of [...mediaElements, ...deepMediaElements]) {
             wrapMediaElement(mediaElement as HTMLMediaElement);
         }
     });

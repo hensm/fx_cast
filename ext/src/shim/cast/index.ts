@@ -178,8 +178,8 @@ export function requestSession (
 
 export function _requestSession (
         _receiver: Receiver
-      , successCallback: RequestSessionSuccessCallback
-      , errorCallback: ErrorCallback): void {
+      , successCallback?: RequestSessionSuccessCallback
+      , errorCallback?: ErrorCallback): void {
 
     logger.info("cast._requestSession");
 
@@ -243,7 +243,7 @@ export function _requestSession (
         const lastSession = sessionList[sessionList.length - 1];
 
         if (lastSession.status !== SessionStatus.STOPPED) {
-            lastSession.stop(createSession, () => {});
+            lastSession.stop(createSession);
         }
     } else {
         createSession();
@@ -368,7 +368,7 @@ onMessage(async message => {
                 const lastSession = sessionList[sessionList.length - 1];
 
                 if (lastSession.status !== SessionStatus.STOPPED) {
-                    lastSession.stop(createSession, () => {});
+                    lastSession.stop(createSession);
                 }
             } else {
                 createSession();
@@ -417,8 +417,7 @@ onMessage(async message => {
             _requestSession(receiver
                   , session => {
                         apiConfig.sessionListener(session);
-                    }
-                  , () => {});
+                    });
 
             break;
         }

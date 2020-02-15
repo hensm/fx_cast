@@ -277,7 +277,7 @@ class ReceiverEntry extends Component<ReceiverEntryProps, ReceiverEntryState> {
                     showAlternateAction: ev.type === "keydown"
                 });
             }
-        }
+        };
 
         window.addEventListener("keydown", handleActionKeyEvents);
         window.addEventListener("keyup", handleActionKeyEvents);

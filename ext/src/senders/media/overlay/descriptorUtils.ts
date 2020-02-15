@@ -43,7 +43,7 @@ export function bindPropertyDescriptor (
  * element and collect them into a property descriptor map.
  */
 export function clonePropsDescriptor<T> (
-        target: T, props: Array<any/*keyof typeof T*/>)
+        target: T, props: any[])
       : PropertyDescriptorMap {
 
     return props.reduce<PropertyDescriptorMap>((descriptorMap, prop) => {
