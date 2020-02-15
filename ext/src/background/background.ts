@@ -226,6 +226,22 @@ async function initMenus () {
         }
     });
 
+    // Hide cast item on extension pages
+    browser.menus.onShown.addListener(info => {
+        if (info.pageUrl?.startsWith(browser.runtime.getURL(""))) {
+            browser.menus.update(menuIdCast, {
+                visible: false
+            });
+
+            browser.menus.refresh();
+        }
+    });
+    browser.menus.onHidden.addListener(() => {
+        browser.menus.update(menuIdCast, {
+            visible: true
+        });
+    });
+
     browser.menus.onShown.addListener(async info => {
         // Only rebuild menus if whitelist menu present
         // WebExt typings are broken again here, so ugly casting

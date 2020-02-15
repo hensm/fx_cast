@@ -361,3 +361,9 @@ window.addEventListener("load", () => {
         <PopupApp />
       , document.querySelector("#root"));
 });
+
+window.addEventListener("contextmenu", () => {
+    browser.menus.overrideContext({
+        showDefaults: false
+    });
+});

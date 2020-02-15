@@ -49,6 +49,7 @@
   , "permissions": [
         "history"
       , "menus"
+      , "menus.overrideContext"
       , "nativeMessaging"
       , "storage"
       , "tabs"
