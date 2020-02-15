@@ -2,7 +2,7 @@
     "extends": "../tsconfig"
   , "compilerOptions": {
         "jsx": "react"
-      , "lib": [ "esnext", "dom", "dom.iterable" ]
+      , "lib": [ "ESNext", "DOM", "DOM.Iterable" ]
       , "moduleResolution": "node"
       , "sourceMap": true
     }

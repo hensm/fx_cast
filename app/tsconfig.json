@@ -4,4 +4,7 @@
         "./src/**/*"
       , "./@types/**/*"
     ]
+  , "compilerOptions": {
+        "lib": [ "ES2020.String", "DOM" ]
+    }
 }
