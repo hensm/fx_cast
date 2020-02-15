@@ -198,7 +198,7 @@
 .category {
     border: initial;
     display: grid;
-    grid-template-columns: 150px 1fr;
+    grid-template-columns: 150px minmax(0, 1fr);
     grid-column-gap: 10px;
     grid-row-gap: 5px;
     margin: initial;
@@ -345,6 +345,9 @@
 
 .editable-list__title {
     flex: 1;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 
 .editable-list__title + button {
