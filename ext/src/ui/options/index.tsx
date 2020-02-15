@@ -429,7 +429,7 @@ class OptionsApp extends Component<{}, OptionsAppState> {
                                 <h3>LICENSE</h3>
                             </summary>
                             <div className="about__license-text">
-                                { LICENSE.replace(/\S\n\S/g, "") }
+                                { LICENSE.replace(/(\S)\n(\S)/g, "$1 $2") }
                             </div>
                         </details>
 
