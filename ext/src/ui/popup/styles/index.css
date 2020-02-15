@@ -5,6 +5,19 @@ body {
     font: message-box;
 }
 
+@media (prefers-color-scheme: dark) {
+    body {
+        background: var(--grey-70) !important;
+        color: white !important;
+    }
+    .media-select {
+        border-bottom-color: var(--grey-50) !important;
+    }
+    .receiver__address {
+        color: var(--grey-10-a60) !important;
+    }
+}
+
 .media-select {
     border-bottom: 1px solid rgba(0, 0, 0, 0.25);
     margin: 0 1em;

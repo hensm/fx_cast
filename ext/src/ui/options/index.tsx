@@ -424,12 +424,14 @@ class OptionsApp extends Component<{}, OptionsAppState> {
 
                         <hr />
 
-                        <div className="about__license">
-                            <h3>LICENSE</h3>
+                        <details className="about__license">
+                            <summary>
+                                <h3>LICENSE</h3>
+                            </summary>
                             <div className="about__license-text">
                                 { LICENSE.replace(/\S\n\S/g, "") }
                             </div>
-                        </div>
+                        </details>
 
                         <hr />
 
@@ -437,19 +439,19 @@ class OptionsApp extends Component<{}, OptionsAppState> {
                             <h3>TRANSLATORS</h3>
                             <ul>
                                 <li className="translator">
-                                    <a>@RAVMN</a>
+                                    @RAVMN
                                     <div className="translator__tag">es</div>
                                 </li>
                                 <li className="translator">
-                                    <a>@rimrul</a>
+                                    @rimrul
                                     <div className="translator__tag">de</div>
                                 </li>
                                 <li className="translator">
-                                    <a>@ThaDaVos</a>
+                                    @ThaDaVos
                                     <div className="translator__tag">nl</div>
                                 </li>
                                 <li className="translator">
-                                    <a>@Vistaus</a>
+                                    @Vistaus
                                     <div className="translator__tag">nl</div>
                                 </li>
                             </ul>

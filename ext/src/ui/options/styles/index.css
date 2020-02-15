@@ -3,8 +3,43 @@
     --secondary-color: rgb(125, 125, 125);
 }
 
+@media (prefers-color-scheme: dark) {
+    :root {
+        --border-color: var(--grey-50);
+        --secondary-color: var(--grey-10-a60);
+    }
+
+    a              { color: var(--blue-40); }
+    a:hover        { color: var(--blue-50); }
+    a:hover:active { color: var(--blue-60); }
+
+    body {
+        background: #202023 !important;
+        color: white !important;
+    }
+
+    .editable-list {
+        background-color: #202023 !important;
+        color: white !important;
+    }
+    .editable-list__item:nth-child(even) {
+        background-color: initial !important;
+    }
+    .editable-list__item:nth-child(odd) {
+        background-color: var(--grey-80) !important;
+    }
+
+    .about,
+    .about > summary {
+        background-color: rgba(255, 255, 255, 0.1) !important;
+    }
+    .about hr {
+        border-top: 1px solid rgba(255, 255, 255, 0.1) !important;
+    }
+}
+
 *:invalid {
-    box-shadow: 0 0 1.5px 1px red;
+    box-shadow: 0 0 1.5px 1px var(--red-50);
 }
 
 #root {
