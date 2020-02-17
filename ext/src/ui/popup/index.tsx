@@ -139,36 +139,38 @@ class PopupApp extends Component<{}, PopupAppState> {
                     <div className="media-select__label-cast">
                         { _("popupMediaSelectCastLabel") }
                     </div>
-                    <select value={ this.state.mediaType }
-                            onChange={ this.onSelectChange }
-                            className="media-select__dropdown">
-                        <option value={ ReceiverSelectorMediaType.App }
-                                disabled={ !(this.state.availableMediaTypes
-                                        & ReceiverSelectorMediaType.App) }>
-                            { (this.state.requestedAppId && knownApps[this.state.requestedAppId]?.name)
-                                        ?? _("popupMediaTypeApp") }
-                        </option>
-                        <option value={ ReceiverSelectorMediaType.Tab }
-                                disabled={ !(this.state.availableMediaTypes
-                                        & ReceiverSelectorMediaType.Tab) }>
-                            { _("popupMediaTypeTab") }
-                        </option>
-                        <option value={ ReceiverSelectorMediaType.Screen }
-                                disabled={ !(this.state.availableMediaTypes
-                                        & ReceiverSelectorMediaType.Screen) }>
-                            { _("popupMediaTypeScreen") }
-                        </option>
-                        <option disabled>
-                            ─────
-                        </option>
-                        <option value={ ReceiverSelectorMediaType.File }
-                                disabled={ !(this.state.availableMediaTypes
-                                        & ReceiverSelectorMediaType.File) }>
-                            { this.state.filePath
-                                ? truncatedFileName!
-                                : _("popupMediaTypeFile") }
-                        </option>
-                    </select>
+                    <div className="select-wrapper">
+                        <select value={ this.state.mediaType }
+                                onChange={ this.onSelectChange }
+                                className="media-select__dropdown">
+                            <option value={ ReceiverSelectorMediaType.App }
+                                    disabled={ !(this.state.availableMediaTypes
+                                            & ReceiverSelectorMediaType.App) }>
+                                { (this.state.requestedAppId && knownApps[this.state.requestedAppId]?.name)
+                                            ?? _("popupMediaTypeApp") }
+                            </option>
+                            <option value={ ReceiverSelectorMediaType.Tab }
+                                    disabled={ !(this.state.availableMediaTypes
+                                            & ReceiverSelectorMediaType.Tab) }>
+                                { _("popupMediaTypeTab") }
+                            </option>
+                            <option value={ ReceiverSelectorMediaType.Screen }
+                                    disabled={ !(this.state.availableMediaTypes
+                                            & ReceiverSelectorMediaType.Screen) }>
+                                { _("popupMediaTypeScreen") }
+                            </option>
+                            <option disabled>
+                                ─────
+                            </option>
+                            <option value={ ReceiverSelectorMediaType.File }
+                                    disabled={ !(this.state.availableMediaTypes
+                                            & ReceiverSelectorMediaType.File) }>
+                                { this.state.filePath
+                                    ? truncatedFileName!
+                                    : _("popupMediaTypeFile") }
+                            </option>
+                        </select>
+                    </div>
                     <div className="media-select__label-to">
                         { _("popupMediaSelectToLabel") }
                     </div>

@@ -1,0 +1,86 @@
+button,
+.select-wrapper,
+input {
+    background-color: var(--grey-60);
+    border: 1px solid rgba(255, 255, 255, 0.25);
+    border-radius: 3px;
+    color: white;
+}
+button:not(:disabled):hover,
+.select-wrapper:not(:disabled):hover,
+input[type="checkbox"]:not(:disabled):hover {
+    background-color: var(--grey-50);
+}
+button:not(:disabled):hover:active,
+.select-wrapper:not(:disabled):hover:active,
+input[type="checkbox"]:not(:disabled):hover:active {
+    background-color: rgb(94, 94, 99);
+}
+
+button:disabled,
+input:disabled {
+    opacity: 0.35;
+}
+
+input[type="text"],
+input[type="number"] {
+    padding: 2px;
+}
+
+input[type="checkbox"] {
+    -moz-appearance: none;
+}
+input[type="checkbox"]:checked {
+    background-color: var(--blue-60);
+    padding: 2px;
+    background-clip: content-box;
+}
+input[type="checkbox"]:not(:disabled):checked:hover {
+    background-color: var(--blue-50);
+}
+input[type="checkbox"]:not(:disabled):checked:hover:active {
+    background-color: var(--blue-70);
+}
+
+button:default {
+    background-color: var(--blue-60);
+    color: white !important;
+}
+
+button:default:hover {
+    background-color: var(--blue-50);
+}
+button:default:hover:active {
+    background-color: var(--blue-70);
+}
+
+.select-wrapper {
+    --arrow-width: 20px;
+    position: relative;
+    display: inline-block;
+}
+.select-wrapper::after {
+    align-items: center;
+    content: "▼";
+    display: flex;
+    height: 100%;
+    justify-content: center;
+    pointer-events: none;
+    position: absolute;
+    right: 0;
+    top: 0;
+    width: var(--arrow-width);
+}
+select {
+    -moz-appearance: none;
+    background: inherit;
+    border: initial;
+    color: inherit;
+    padding-right: var(--arrow-width);
+}
+option {
+    color: white !important;
+}
+option:disabled {
+    color: rgba(255, 255, 255, 0.25) !important;
+}

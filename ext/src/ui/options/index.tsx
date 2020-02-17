@@ -324,16 +324,18 @@ class OptionsApp extends Component<{}, OptionsAppState> {
                                     { _("optionsReceiverSelectorType") }
                                 </div>
                                 <div className="option__control">
-                                    <select name="receiverSelectorType"
-                                            value={ this.state.options?.receiverSelectorType }
-                                            onChange={ this.handleReceiverSelectorTypeChange }>
-                                        <option value={ ReceiverSelectorType.Popup }>
-                                            { _("optionsReceiverSelectorTypeBrowser") }
-                                        </option>
-                                        <option value={ ReceiverSelectorType.Native }>
-                                            { _("optionsReceiverSelectorTypeNative") }
-                                        </option>
-                                    </select>
+                                    <div className="select-wrapper">
+                                        <select name="receiverSelectorType"
+                                                value={ this.state.options?.receiverSelectorType }
+                                                onChange={ this.handleReceiverSelectorTypeChange }>
+                                            <option value={ ReceiverSelectorType.Popup }>
+                                                { _("optionsReceiverSelectorTypeBrowser") }
+                                            </option>
+                                            <option value={ ReceiverSelectorType.Native }>
+                                                { _("optionsReceiverSelectorTypeNative") }
+                                            </option>
+                                        </select>
+                                    </div>
                                 </div>
                             </label> }
 
