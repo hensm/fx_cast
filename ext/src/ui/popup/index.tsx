@@ -6,8 +6,9 @@ import ReactDOM from "react-dom";
 
 import knownApps from "../../lib/knownApps";
 
+import { Message } from "../../lib/messaging";
 import { getNextEllipsis } from "../../lib/utils";
-import { Message, Receiver } from "../../types";
+import { Receiver } from "../../types";
 
 import { ReceiverSelectorMediaType } from "../../background/receiverSelector";
 

@@ -29,6 +29,8 @@ export type Messages = [
           , availableMediaTypes: ReceiverSelectorMediaType
         }
     }
+  , { subject: "popup:/close" }
+
   , { subject: "receiverSelector:/selected", data: ReceiverSelection }
   , { subject: "receiverSelector:/stop", data: ReceiverSelection }
   , { subject: "main:/shimInitialized", data: { appId: string; }}
@@ -167,6 +169,16 @@ export type Messages = [
         }
       , _id: string;
     }
+  , {
+        subject: "bridge:/mediaServer/start"
+      , data: { filePath: string, port: number }
+    }
+  , {
+        subject: "mediaCast:/mediaServer/started"
+      , data: { mediaPath: string, subtitlePaths: string[] }
+    }
+  , { subject: "mediaCast:/mediaServer/stopped" }
+  , { subject: "mediaCast:/mediaServer/error" }
 
   , { subject: "main:/serviceUp", data: Receiver }
   , { subject: "main:/serviceDown", data: { id: string }}

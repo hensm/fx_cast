@@ -1,11 +1,5 @@
 "use strict";
 
-export interface Message {
-    subject: string;
-    data?: any;
-    _id?: string;
-}
-
 export interface Receiver {
     host: string;
     friendlyName: string;

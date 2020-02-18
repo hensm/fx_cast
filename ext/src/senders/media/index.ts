@@ -4,7 +4,8 @@ import logger from "../../lib/logger";
 import options from "../../lib/options";
 import cast, { ensureInit } from "../../shim/export";
 
-import { Message, Receiver } from "../../types";
+import { Message } from "../../lib/messaging";
+import { Receiver } from "../../types";
 
 
 function getLocalAddress () {
@@ -35,7 +36,7 @@ function startMediaServer (filePath: string, port: number)
                 filePath: decodeURI(filePath)
               , port
             }
-        });
+        } as Message);
 
         backgroundPort.addEventListener("message", function onMessage (ev) {
             const message = ev.data as Message;
