@@ -76,11 +76,12 @@ export default class Media {
               , mediaSessionId
               , _internalSessionId
             }
-          , _id: _id.get(this)
+          , _id: _id.get(this)!
         });
 
         onMessage(message => {
-            if (!message._id || message._id !== _id.get(this)) {
+            if ((message as any)._id
+             && (message as any)._id !== _id.get(this)) {
                 return;
             }
 
@@ -95,7 +96,7 @@ export default class Media {
                     this.playerState = status.playerState;
                     this.repeatMode = status.repeatMode;
 
-                    if (status.volume) {
+                    if (status._volumeLevel && status._volumeMuted) {
                         this.volume = new Volume(
                                 status._volumeLevel
                               , status._volumeMuted);
@@ -120,9 +121,7 @@ export default class Media {
                 }
 
                 case "shim:/media/sendMediaMessageResponse": {
-                    const { messageId, error }
-                        : { messageId: string, error: any } = message.data;
-
+                    const { messageId, error } = message.data;
                     const [ successCallback, errorCallback ]
                             = _sendMediaMessageCallbacks
                                 .get(this)?.get(messageId) ?? [];
@@ -323,7 +322,7 @@ export default class Media {
                 message
               , messageId
             }
-          , _id: _id.get(this)
+          , _id: _id.get(this)!
         });
     }
 }

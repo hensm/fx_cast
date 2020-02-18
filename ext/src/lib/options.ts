@@ -5,8 +5,8 @@ import defaultOptions from "../defaultOptions";
 import logger from "./logger";
 
 import { ReceiverSelectorType } from "../background/receiverSelector";
-import { TypedEventTarget } from "./typedEvents";
-import { TypedStorageArea } from "./typedStorage";
+import { TypedEventTarget } from "./TypedEventTarget";
+import { TypedStorageArea } from "./TypedStorageArea";
 
 
 const storageArea = new TypedStorageArea<{

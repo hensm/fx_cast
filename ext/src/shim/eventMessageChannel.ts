@@ -1,6 +1,6 @@
 "use strict";
 
-import { Message } from "../types";
+import { Message } from "../lib/messaging";
 
 
 type ListenerFunc = (message: Message) => void;

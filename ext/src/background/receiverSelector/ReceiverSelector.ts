@@ -1,6 +1,6 @@
 "use strict";
 
-import { TypedEventTarget } from "../../lib/typedEvents";
+import { TypedEventTarget } from "../../lib/TypedEventTarget";
 import { Receiver } from "../../types";
 
 

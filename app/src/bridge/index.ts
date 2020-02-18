@@ -16,7 +16,6 @@ import { DecodeTransform
        , EncodeTransform } from "../transforms";
 
 import { ReceiverStatus } from "./castTypes";
-
 import { Message, Receiver } from "./types";
 
 import { __applicationName
@@ -501,7 +500,7 @@ function initialize (options: InitializeOptions) {
 
     function onBrowserServiceUp (service: dnssd.Service) {
         sendMessage({
-            subject: "shim:/serviceUp"
+            subject: "main:/serviceUp"
           , data: {
                 host: service.addresses[0]
               , port: service.port
@@ -513,7 +512,7 @@ function initialize (options: InitializeOptions) {
 
     function onBrowserServiceDown (service: dnssd.Service) {
         sendMessage({
-            subject: "shim:/serviceDown"
+            subject: "main:/serviceDown"
           , data: {
                 id: service.txt.id
             }
@@ -533,7 +532,7 @@ function initialize (options: InitializeOptions) {
 
         listener.on("receiverStatus", (status: ReceiverStatus) => {
             const receiverStatusMessage: any = {
-                subject: "receiverStatus"
+                subject: "main:/receiverStatus"
               , data: {
                     id
                   , status: {

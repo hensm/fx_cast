@@ -3,11 +3,12 @@
 import bridge from "../../lib/bridge";
 import knownApps from "../../lib/knownApps";
 import logger from "../../lib/logger";
+import { Message, Port } from "../../lib/messaging";
 import options from "../../lib/options";
 
-import { TypedEventTarget } from "../../lib/typedEvents";
+import { TypedEventTarget } from "../../lib/TypedEventTarget";
 import { getWindowCenteredProps } from "../../lib/utils";
-import { Message, Receiver } from "../../types";
+import { Receiver } from "../../types";
 
 import ReceiverSelector, {
         ReceiverSelection
@@ -17,26 +18,19 @@ import ReceiverSelector, {
 
 const _ = browser.i18n.getMessage;
 
-
-interface NativeReceiverSelectorSelectedMessage extends Message {
-    subject: "main:/receiverSelector/selected";
-    data: ReceiverSelection;
-}
-
-interface NativeReceiverSelectorErrorMessage extends Message {
-    subject: "main:/receiverSelector/error";
-    data: string;
-}
-
-
 // TODO: Figure out lifetime properly
 export default class NativeReceiverSelector
         extends TypedEventTarget<ReceiverSelectorEvents>
         implements ReceiverSelector {
 
-    private bridgePort: (browser.runtime.Port | null) = null;
+    private bridgePort: (Port | null) = null;
     private wasReceiverSelected: boolean = false;
     private _isOpen: boolean = false;
+
+    constructor () {
+        super();
+        this.onBridgePortMessage = this.onBridgePortMessage.bind(this);
+    }
 
     get isOpen () {
         return this._isOpen;
@@ -50,31 +44,7 @@ export default class NativeReceiverSelector
 
         this.bridgePort = await bridge.connect();
 
-        this.bridgePort.onMessage.addListener((message: Message) => {
-            switch (message.subject) {
-                case "main:/receiverSelector/selected": {
-                    this.onBridgePortMessageSelected(
-                            message as NativeReceiverSelectorSelectedMessage);
-                    break;
-                }
-                case "main:/receiverSelector/error": {
-                    this.onBridgePortMessageError(
-                            message as NativeReceiverSelectorErrorMessage);
-                    break;
-                }
-                case "main:/receiverSelector/close": {
-                    this.onBridgePortMessageClose();
-                    break;
-                }
-                case "main:/receiverSelector/stop": {
-                    this.dispatchEvent(new CustomEvent("stop", {
-                        detail: message.data
-                    }));
-                    break;
-                }
-            }
-        });
-
+        this.bridgePort.onMessage.addListener(this.onBridgePortMessage);
         this.bridgePort.onDisconnect.addListener(() => {
             this.bridgePort = null;
             this.wasReceiverSelected = false;
@@ -128,40 +98,46 @@ export default class NativeReceiverSelector
         this._isOpen = false;
     }
 
+    private async onBridgePortMessage (message: Message) {
+        switch (message.subject) {
+            case "main:/receiverSelector/selected": {
+                this.wasReceiverSelected = true;
+                this.dispatchEvent(new CustomEvent("selected", {
+                    detail: message.data
+                }));
 
-    private async onBridgePortMessageSelected (
-            message: NativeReceiverSelectorSelectedMessage) {
+                if (!(await options.get("receiverSelectorWaitForConnection"))) {
+                    this.close();
+                }
 
-        this.wasReceiverSelected = true;
+                break;
+            }
+            case "main:/receiverSelector/error": {
+                logger.error("Native receiver selector error", message.data);
+                this.dispatchEvent(new CustomEvent("error"));
+                break;
+            }
+            case "main:/receiverSelector/close": {
+                if (!this.wasReceiverSelected) {
+                    this.dispatchEvent(new CustomEvent("cancelled"));
+                }
 
-        this.dispatchEvent(new CustomEvent("selected", {
-            detail: message.data
-        }));
+                if (this.bridgePort) {
+                    this.bridgePort.disconnect();
+                }
 
-        if (!(await options.get("receiverSelectorWaitForConnection"))) {
-            this.close();
+                this.bridgePort = null;
+                this.wasReceiverSelected = false;
+                this._isOpen = false;
+
+                break;
+            }
+            case "main:/receiverSelector/stop": {
+                this.dispatchEvent(new CustomEvent("stop", {
+                    detail: message.data
+                }));
+                break;
+            }
         }
-    }
-
-    private async onBridgePortMessageError (
-            message: NativeReceiverSelectorErrorMessage) {
-
-        logger.error("Native receiver selector error", message.data);
-
-        this.dispatchEvent(new CustomEvent("error"));
-    }
-
-    private async onBridgePortMessageClose () {
-        if (!this.wasReceiverSelected) {
-            this.dispatchEvent(new CustomEvent("cancelled"));
-        }
-
-        if (this.bridgePort) {
-            this.bridgePort.disconnect();
-        }
-
-        this.bridgePort = null;
-        this.wasReceiverSelected = false;
-        this._isOpen = false;
     }
 }

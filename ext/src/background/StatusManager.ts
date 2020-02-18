@@ -2,44 +2,23 @@
 
 import bridge from "../lib/bridge";
 import logger from "../lib/logger";
+import { Message, Port } from "../lib/messaging";
 
-import { TypedEventTarget } from "../lib/typedEvents";
-import { Message, Receiver, ReceiverStatus } from "../types";
-
-
-interface ReceiverStatusMessage extends Message {
-    subject: "receiverStatus";
-    data: {
-        id: string;
-        status: ReceiverStatus;
-    };
-}
-
-interface ServiceDownMessage extends Message {
-    subject: "shim:/serviceDown";
-    data: {
-        id: string;
-    };
-}
-
-interface ServiceUpMessage extends Message {
-    subject: "shim:/serviceUp";
-    data: Receiver;
-}
-
+import { TypedEventTarget } from "../lib/TypedEventTarget";
+import { Receiver, ReceiverStatus } from "../types";
 
 
 interface EventMap {
-    "serviceUp": ServiceUpMessage["data"];
-    "serviceDown": ServiceDownMessage["data"];
-    "statusUpdate": ReceiverStatusMessage["data"];
+    "serviceUp": Receiver;
+    "serviceDown": { id: string };
+    "statusUpdate": { id: string, status: ReceiverStatus };
 }
 
 // tslint:disable-next-line:new-parens
 export default new class StatusManager
         extends TypedEventTarget<EventMap> {
 
-    private bridgePort: (browser.runtime.Port | null) = null;
+    private bridgePort: (Port | null) = null;
     private receivers = new Map<string, Receiver>();
 
     constructor () {
@@ -97,8 +76,8 @@ export default new class StatusManager
      */
     private onBridgePortMessage (message: Message) {
         switch (message.subject) {
-            case "shim:/serviceUp": {
-                const { data: receiver } = (message as ServiceUpMessage);
+            case "main:/serviceUp": {
+                const { data: receiver } = message;
                 this.receivers.set(receiver.id, receiver);
 
                 const serviceUpEvent = new CustomEvent("serviceUp", {
@@ -110,8 +89,8 @@ export default new class StatusManager
                 break;
             }
 
-            case "shim:/serviceDown": {
-                const { data: { id }} = (message as ServiceDownMessage);
+            case "main:/serviceDown": {
+                const { data: { id }} = message;
 
                 if (this.receivers.has(id)) {
                     this.receivers.delete(id);
@@ -126,10 +105,8 @@ export default new class StatusManager
                 break;
             }
 
-            case "receiverStatus": {
-                const { data: { id, status }}
-                        = (message as ReceiverStatusMessage);
-
+            case "main:/receiverStatus": {
+                const { data: { id, status }} = message;
                 const receiver = this.receivers.get(id);
 
                 if (!receiver) {

@@ -1,6 +1,6 @@
 "use strict";
 
-export interface TypedEvents {
+interface TypedEvents {
     [key: string]: any;
 }
 

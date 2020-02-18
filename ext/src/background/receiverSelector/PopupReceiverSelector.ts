@@ -5,11 +5,12 @@ import ReceiverSelector, {
       , ReceiverSelectorMediaType } from "./ReceiverSelector";
 
 import logger from "../../lib/logger";
+import messaging, { Port, Message } from "../../lib/messaging";
 import options from "../../lib/options";
 
-import { TypedEventTarget } from "../../lib/typedEvents";
+import { TypedEventTarget } from "../../lib/TypedEventTarget";
 import { getWindowCenteredProps, WindowCenteredProps } from "../../lib/utils";
-import { Message, Receiver } from "../../types";
+import { Receiver } from "../../types";
 
 
 const POPUP_URL = browser.runtime.getURL("ui/popup/index.html");
@@ -20,7 +21,7 @@ export default class PopupReceiverSelector
 
     private windowId?: number;
 
-    private messagePort?: browser.runtime.Port;
+    private messagePort?: Port;
     private messagePortDisconnected?: boolean;
 
     private receivers?: Receiver[];
@@ -37,6 +38,7 @@ export default class PopupReceiverSelector
         super();
 
         // Bind methods to pass to addListener
+        this.onConnect = this.onConnect.bind(this);
         this.onPopupMessage = this.onPopupMessage.bind(this);
         this.onWindowsRemoved = this.onWindowsRemoved.bind(this);
         this.onWindowsFocusChanged = this.onWindowsFocusChanged.bind(this);
@@ -47,39 +49,7 @@ export default class PopupReceiverSelector
          * Handle incoming message channel connection from popup
          * window script.
          */
-        browser.runtime.onConnect.addListener(port => {
-            // Don't pollute history
-            browser.history.deleteUrl({ url: POPUP_URL });
-
-            if (port.name !== "popup") {
-                return;
-            }
-
-            // Disconnect existing port
-            if (this.messagePort) {
-                this.messagePort.disconnect();
-            }
-
-            this.messagePort = port;
-            this.messagePort.onMessage.addListener(this.onPopupMessage);
-            this.messagePort.onDisconnect.addListener(() => {
-                this.messagePortDisconnected = true;
-            });
-
-            this.messagePort.postMessage({
-                subject: "popup:/sendRequestedAppId"
-              , data: { requestedAppId: this.requestedAppId }
-            });
-
-            this.messagePort.postMessage({
-                subject: "popup:/populateReceiverList"
-              , data: {
-                    receivers: this.receivers
-                  , defaultMediaType: this.defaultMediaType
-                  , availableMediaTypes: this.availableMediaTypes
-                }
-            });
-        });
+        messaging.onConnect.addListener(this.onConnect);
     }
 
     get isOpen () {
@@ -162,6 +132,46 @@ export default class PopupReceiverSelector
         }
     }
 
+    private onConnect (port: Port) {
+        browser.history.deleteUrl({ url: POPUP_URL });
+
+        if (port.name !== "popup") {
+            return;
+        }
+
+        if (this.messagePort) {
+            this.messagePort.disconnect();
+        }
+
+        this.messagePort = port;
+        this.messagePort.onMessage.addListener(this.onPopupMessage);
+        this.messagePort.onDisconnect.addListener(() => {
+            this.messagePortDisconnected = true;
+        });
+
+        if (!this.requestedAppId
+         || !this.receivers
+         || !this.defaultMediaType
+         || !this.availableMediaTypes) {
+            throw logger.error("Popup receiver data not found.");
+        }
+
+        this.messagePort.postMessage({
+            subject: "popup:/sendRequestedAppId"
+          , data: { requestedAppId: this.requestedAppId }
+        });
+
+        this.messagePort.postMessage({
+            subject: "popup:/populateReceiverList"
+          , data: {
+                receivers: this.receivers
+              , defaultMediaType: this.defaultMediaType
+              , availableMediaTypes: this.availableMediaTypes
+            }
+        });
+
+        messaging.onConnect.removeListener(this.onConnect);
+    }
 
     /**
      * Handles popup messages.

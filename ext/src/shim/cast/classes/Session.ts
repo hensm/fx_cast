@@ -49,7 +49,7 @@ const _stopCallbacks = new WeakMap<Session, CallbacksMap>();
 
 export default class Session {
     public media: Media[];
-    public namespaces: Array<{ name: "string" }>;
+    public namespaces: Array<{ name: string }>;
     public senderApps: SenderApplication[];
     public status: SessionStatus;
     public statusText: string | null;
@@ -91,13 +91,14 @@ export default class Session {
                   , appId
                   , sessionId
                 }
-              , _id: _id.get(this)
+              , _id: _id.get(this)!
             });
         }
 
         const listenerObject = onMessage(message => {
             // Filter other session messages
-            if (message._id && message._id !== _id.get(this)) {
+            if ((message as any)._id
+             && (message as any)._id !== _id.get(this)) {
                 return;
             }
 
@@ -164,9 +165,7 @@ export default class Session {
 
 
                 case "shim:/session/impl_addMessageListener": {
-                    const { namespace, data }
-                        : { namespace: string, data: string } = message.data;
-
+                    const { namespace, data } = message.data;
                     const messageListeners = _messageListeners
                             .get(this)?.get(namespace);
 
@@ -180,9 +179,7 @@ export default class Session {
                 }
 
                 case "shim:/session/impl_sendMessage": {
-                    const { messageId, error }
-                        : { messageId: string, error: boolean } = message.data;
-
+                    const { messageId, error } = message.data;
                     const [ successCallback, errorCallback ] =
                             _sendMessageCallbacks
                                 .get(this)?.get(messageId) ?? [];
@@ -286,7 +283,7 @@ export default class Session {
         sendMessageResponse({
             subject: "bridge:/session/impl_addMessageListener"
           , data: { namespace }
-          , _id: _id.get(this)
+          , _id: _id.get(this)!
         });
     }
 
@@ -303,7 +300,7 @@ export default class Session {
         sendMessageResponse({
             subject: "bridge:/session/impl_leave"
           , data: { id }
-          , _id: _id.get(this)
+          , _id: _id.get(this)!
         });
 
         _leaveCallbacks.get(this)?.set(id, [
@@ -411,7 +408,7 @@ export default class Session {
               , message
               , messageId
             }
-          , _id: _id.get(this)
+          , _id: _id.get(this)!
         });
 
         _sendMessageCallbacks.get(this)?.set(messageId, [
@@ -430,7 +427,7 @@ export default class Session {
         sendMessageResponse({
             subject: "bridge:/session/impl_setReceiverMuted"
           , data: { muted, volumeId }
-          , _id: _id.get(this)
+          , _id: _id.get(this)!
         });
 
         _setReceiverMutedCallbacks.get(this)?.set(volumeId, [
@@ -449,7 +446,7 @@ export default class Session {
         sendMessageResponse({
             subject: "bridge:/session/impl_setReceiverVolumeLevel"
           , data: { newLevel, volumeId }
-          , _id: _id.get(this)
+          , _id: _id.get(this)!
         });
 
         _setReceiverVolumeLevelCallbacks.get(this)?.set(volumeId, [
@@ -467,7 +464,7 @@ export default class Session {
         sendMessageResponse({
             subject: "bridge:/session/impl_stop"
           , data: { stopId }
-          , _id: _id.get(this)
+          , _id: _id.get(this)!
         });
 
         _stopCallbacks.get(this)?.set(stopId, [

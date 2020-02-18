@@ -2,14 +2,22 @@
 
 import semver from "semver";
 
+import { TypedPort } from "./TypedPort";
+
 import logger from "./logger";
+import { Messages, Message, Port } from "./messaging";
 import nativeMessaging from "./nativeMessaging";
 import options from "./options";
 
+import { Receiver } from "../types";
+import { ReceiverSelectionCast
+       , ReceiverSelectionStop } from "../background/receiverSelector/ReceiverSelector";
 
-async function connect (): Promise<browser.runtime.Port> {
+
+async function connect (): Promise<Port> {
     const applicationName = await options.get("bridgeApplicationName");
-    const bridgePort = nativeMessaging.connectNative(applicationName);
+    const bridgePort = nativeMessaging.connectNative(applicationName) as
+            unknown as Port;
 
     bridgePort.onDisconnect.addListener(() => {
         if (bridgePort.error) {

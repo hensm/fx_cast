@@ -1,8 +1,9 @@
 "use strict";
 
 import { loadScript } from "../lib/utils";
-import { Message } from "../types";
 import { onMessageResponse, sendMessage } from "./eventMessageChannel";
+
+import messaging, { Message } from "../lib/messaging";
 
 
 const { isFramework }
@@ -18,7 +19,7 @@ if (isFramework) {
 
 
 // Message port to background script
-export const backgroundPort = browser.runtime.connect({ name: "shim" });
+export const backgroundPort = messaging.connect({ name: "shim" });
 
 const forwardToShim = (message: Message) => sendMessage(message);
 const forwardToMain = (message: Message) => backgroundPort.postMessage(message);

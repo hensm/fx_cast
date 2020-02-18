@@ -3,11 +3,9 @@
 import bridge from "../lib/bridge";
 import loadSender from "../lib/loadSender";
 import logger from "../lib/logger";
+import { Message, Port } from "../lib/messaging";
 import options from "../lib/options";
 
-import { Message } from "../types";
-
-import { getMediaTypesForPageUrl } from "../lib/utils";
 import { ReceiverSelectionActionType
        , ReceiverSelectorMediaType } from "./receiverSelector";
 
@@ -17,11 +15,11 @@ import ReceiverSelectorManager
 import StatusManager from "./StatusManager";
 
 
-type Port = browser.runtime.Port | MessagePort;
+type AnyPort = Port | MessagePort;
 
 export interface Shim {
-    bridgePort: browser.runtime.Port;
-    contentPort: Port;
+    bridgePort: Port;
+    contentPort: AnyPort;
     contentTabId?: number;
     contentFrameId?: number;
     requestedAppId?: string;
@@ -48,7 +46,7 @@ export default new class ShimManager {
         }
     }
 
-    public async createShim (port: Port) {
+    public async createShim (port: AnyPort) {
         const shim = await (port instanceof MessagePort
             ? this.createShimFromBackground(port)
             : this.createShimFromContent(port));
@@ -74,20 +72,19 @@ export default new class ShimManager {
             this.activeShims.delete(shim);
         });
 
-        shim.bridgePort.onMessage.addListener((message: Message) => {
+        shim.bridgePort.onMessage.addListener(message => {
             contentPort.postMessage(message);
         });
 
-        contentPort.onmessage = ev => {
-            const message = ev.data as Message;
-            this.handleContentMessage(shim, message);
-        };
+        contentPort.addEventListener("message", ev => {
+            this.handleContentMessage(shim, ev.data);
+        });
 
         return shim;
     }
 
     private async createShimFromContent (
-            contentPort: browser.runtime.Port): Promise<Shim> {
+            contentPort: Port): Promise<Shim> {
 
         if (contentPort.sender?.tab?.id === undefined
          || contentPort.sender?.frameId === undefined) {

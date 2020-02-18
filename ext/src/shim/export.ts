@@ -1,9 +1,9 @@
 "use strict";
 
 import * as cast from "./cast";
+import { Message } from "../lib/messaging";
 
 import { BridgeInfo } from "../lib/bridge";
-import { Message } from "../types";
 
 import { onMessage
        , onMessageResponse

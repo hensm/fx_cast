@@ -3,6 +3,7 @@
 import defaultOptions from "../defaultOptions";
 import loadSender from "../lib/loadSender";
 import logger from "../lib/logger";
+import messaging from "../lib/messaging";
 import options from "../lib/options";
 
 import { getChromeUserAgent } from "../lib/userAgents";
@@ -617,9 +618,9 @@ async function init () {
      * established, pass it to createShim to handle the setup
      * and maintenance.
      */
-    browser.runtime.onConnect.addListener(async port => {
+    messaging.onConnect.addListener(async port => {
         if (port.name === "shim") {
-            ShimManager.createShim(port);
+            ShimManager.createShim(port as any);
         }
     });
 }

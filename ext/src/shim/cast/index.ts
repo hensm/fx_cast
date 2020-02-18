@@ -44,7 +44,7 @@ type ErrorCallback = (err: Error_) => void;
 
 let apiConfig: ApiConfig;
 
-const receiverList: Receiver[] = [];
+const receiverList: Array<{ id: string }> = [];
 const sessionList: Session[] = [];
 
 const receiverActionListeners = new Set<ReceiverActionListener>();
