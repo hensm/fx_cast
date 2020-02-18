@@ -29,23 +29,60 @@ export type Messages = [
           , availableMediaTypes: ReceiverSelectorMediaType
         }
     }
-  , { subject: "popup:/close" }
+  , {
+        subject: "popup:/close"
+    }
 
-  , { subject: "receiverSelector:/selected", data: ReceiverSelection }
-  , { subject: "receiverSelector:/stop", data: ReceiverSelection }
-  , { subject: "main:/shimInitialized", data: { appId: string; }}
-  , { subject: "main:/selectReceiverBegin" }
-  , { subject: "shim:/selectReceiverEnd", data: ReceiverSelectionCast }
-  , { subject: "shim:/selectReceiverStop", data: ReceiverSelectionStop }
-  , { subject: "shim:/selectReceiverCancelled" }
-  , { subject: "main:/sessionCreated" }
-  , { subject: "shim:/serviceUp", data: { id: Receiver["id"] }}
-  , { subject: "shim:/serviceDown", data: { id: Receiver["id"] }}
-  , { subject: "shim:/initialized", data: BridgeInfo }
-  , { subject: "shim:/launchApp", data: { receiver: Receiver }}
+  , {
+        subject: "receiverSelector:/selected"
+      , data: ReceiverSelection
+    }
+  , {
+        subject: "receiverSelector:/stop"
+      , data: ReceiverSelection 
+    }
+  , {
+        subject: "main:/shimInitialized"
+      , data: { appId: string; }
+    }
+  , {
+        subject: "main:/selectReceiverBegin"
+    }
+  , {
+        subject: "shim:/selectReceiverEnd"
+      , data: ReceiverSelectionCast
+    }
+  , {
+        subject: "shim:/selectReceiverStop"
+      , data: ReceiverSelectionStop
+    }
+  , {
+        subject: "shim:/selectReceiverCancelled"
+    }
+  , {
+        subject: "main:/sessionCreated"
+    }
+  , {
+        subject: "shim:/serviceUp"
+      , data: { id: Receiver["id"] }
+    }
+  , {
+        subject: "shim:/serviceDown"
+      , data: { id: Receiver["id"] }
+    }
+  , {
+        subject: "shim:/initialized"
+      , data: BridgeInfo
+    }
+  , {
+        subject: "shim:/launchApp"
+      , data: { receiver: Receiver }
+    }
 
     // Session messages
-  , { subject: "shim:/session/stopped" }
+  , {
+        subject: "shim:/session/stopped"
+    }
   , {
         subject: "shim:/session/connected"
       , data: {
@@ -81,6 +118,16 @@ export type Messages = [
     }
 
     // Bridge session messages
+  , {
+        subject: "bridge:/session/initialize"
+      , data: {
+            address: string
+          , port: number
+          , appId: string
+          , sessionId: string
+        }
+      , _id: string;
+    }
   , {
         subject: "bridge:/session/impl_leave"
       , data: { id: string }
@@ -150,38 +197,59 @@ export type Messages = [
     }
 
     // Bridge messages
-  , { subject: "main:/receiverSelector/selected", data: ReceiverSelectionCast }
-  , { subject: "main:/receiverSelector/error", data: string }
-  , { subject: "main:/receiverSelector/close" }
-  , { subject: "main:/receiverSelector/stop", data: ReceiverSelectionStop }
-
-  , { subject: "bridge:/initialize", data: { shouldWatchStatus: boolean }}
-  , { subject: "bridge:/receiverSelector/open", data: any }
-  , { subject: "bridge:/receiverSelector/close" }
-  , { subject: "bridge:/stopReceiverApp", data: { receiver: Receiver }}
   , {
-        subject: "bridge:/session/initialize"
-      , data: {
-            address: string
-          , port: number
-          , appId: string
-          , sessionId: string
-        }
-      , _id: string;
+        subject: "main:/receiverSelector/selected"
+      , data: ReceiverSelectionCast
+    }
+  , {
+        subject: "main:/receiverSelector/error"
+      , data: string
+    }
+  , {
+        subject: "main:/receiverSelector/close"
+    }
+  , {
+        subject: "main:/receiverSelector/stop"
+      , data: ReceiverSelectionStop
+    }
+  , {
+        subject: "bridge:/initialize"
+      , data: { shouldWatchStatus: boolean }
+    }
+  , {
+        subject: "bridge:/receiverSelector/open"
+      , data: any }
+  , {
+        subject: "bridge:/receiverSelector/close"
+    }
+  , {
+        subject: "bridge:/stopReceiverApp"
+      , data: { receiver: Receiver }
     }
   , {
         subject: "bridge:/mediaServer/start"
       , data: { filePath: string, port: number }
     }
+
   , {
         subject: "mediaCast:/mediaServer/started"
       , data: { mediaPath: string, subtitlePaths: string[] }
     }
-  , { subject: "mediaCast:/mediaServer/stopped" }
-  , { subject: "mediaCast:/mediaServer/error" }
+  , {
+        subject: "mediaCast:/mediaServer/stopped"
+    }
+  , {
+        subject: "mediaCast:/mediaServer/error"
+    }
 
-  , { subject: "main:/serviceUp", data: Receiver }
-  , { subject: "main:/serviceDown", data: { id: string }}
+  , {
+        subject: "main:/serviceUp"
+      , data: Receiver
+    }
+  , {
+        subject: "main:/serviceDown"
+      , data: { id: string }
+    }
   , {
         subject: "main:/receiverStatus"
       , data: { id: string, status: ReceiverStatus }
