@@ -106,13 +106,13 @@ export function initialize (
       , data: { appId: apiConfig.sessionRequest.appId }
     });
 
-    apiConfig.receiverListener(receiverList.length
-        ? ReceiverAvailability.AVAILABLE
-        : ReceiverAvailability.UNAVAILABLE);
-
     if (successCallback) {
         successCallback();
     }
+
+    apiConfig.receiverListener(receiverList.length
+        ? ReceiverAvailability.AVAILABLE
+        : ReceiverAvailability.UNAVAILABLE);
 }
 
 export function logMessage (message: string): void {
