@@ -34,6 +34,7 @@ import { CallbacksMap
 
 
 const _id = new WeakMap<Media, string>();
+const _isActive = new WeakMap<Media, boolean>();
 
 const _updateListeners = new WeakMap<Media, Set<UpdateListener>>();
 const _sendMediaMessageCallbacks = new WeakMap<Media, CallbacksMap>();
@@ -64,6 +65,7 @@ export default class Media {
           , _internalSessionId: string) {
 
         _id.set(this, uuid());
+        _isActive.set(this, true);
 
         _updateListeners.set(this, new Set());
         _sendMediaMessageCallbacks.set(this, new Map());
@@ -288,9 +290,15 @@ export default class Media {
           , successCallback?: SuccessCallback
           , errorCallback?: ErrorCallback): void {
 
-        this._sendMediaMessage({
-            type: "STOP"
-        }, successCallback, errorCallback);
+        this._sendMediaMessage(
+                { type: "STOP" }
+              , () => {
+                    _isActive.set(this, false);
+                    if (successCallback) {
+                        successCallback();
+                    }
+                }
+              , errorCallback);
     }
 
     public supportsCommand (_command: string): boolean {
@@ -303,6 +311,20 @@ export default class Media {
             message: any
           , successCallback?: SuccessCallback
           , errorCallback?: ErrorCallback) {
+
+        // TODO: Handle this and other errors better
+        if (!_isActive.get(this)) {
+            if (errorCallback) {
+                errorCallback(new _Error(ErrorCode.SESSION_ERROR
+                    , "INVALID_MEDIA_SESSION_ID"
+                    , {
+                        type: "INVALID_REQUEST"
+                      , reason: "INVALID_MEDIA_SESSION_ID"
+                    }));
+            }
+
+            return;
+        }
 
         message.mediaSessionId = this.mediaSessionId;
         message.requestId = 0;
