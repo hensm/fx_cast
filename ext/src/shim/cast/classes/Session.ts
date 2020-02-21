@@ -23,7 +23,7 @@ import { ListenerObject
        , onMessage
        , sendMessageResponse } from "../../eventMessageChannel";
 
-import { CallbacksMap
+import { Callbacks
        , ErrorCallback
        , LoadSuccessCallback
        , MediaListener
@@ -32,22 +32,175 @@ import { CallbacksMap
        , UpdateListener } from "../../types";
 
 
-const _id = new WeakMap<Session, string>();
-const _listener = new WeakMap<Session, ListenerObject>();
-
-const _messageListeners = new WeakMap<
-        Session, Map<string, Set<MessageListener>>>();
-
-const _updateListeners = new WeakMap<Session, Set<UpdateListener>>();
-
-const _leaveCallbacks = new WeakMap<Session, CallbacksMap>();
-const _sendMessageCallbacks = new WeakMap<Session, CallbacksMap>();
-const _setReceiverMutedCallbacks = new WeakMap<Session, CallbacksMap>();
-const _setReceiverVolumeLevelCallbacks = new WeakMap<Session, CallbacksMap>();
-const _stopCallbacks = new WeakMap<Session, CallbacksMap>();
-
+type SessionSuccessCallback = (session: Session) => void;
 
 export default class Session {
+    #id = uuid();
+
+    #successCallback?: SessionSuccessCallback;
+
+    #messageListeners = new Map<string, Set<MessageListener>>();
+    #updateListeners = new Set<UpdateListener>();
+
+    #leaveCallbacks = new Map<string, Callbacks>();
+    #sendMessageCallbacks = new Map<string, Callbacks>();
+    #setReceiverMutedCallbacks = new Map<string, Callbacks>();
+    #setReceiverVolumeLevelCallbacks = new Map<string, Callbacks>();
+    #stopCallbacks = new Map<string, Callbacks>();
+
+    #listener = onMessage(message => {
+        // Filter other session messages
+        if ((message as any)._id !== this.#id) {
+            return;
+        }
+
+        switch (message.subject) {
+            case "shim:/session/stopped": {
+                // Disconnect from extension messages
+                this.#listener.disconnect();
+
+                this.status = SessionStatus.STOPPED;
+
+                for (const listener of this.#updateListeners) {
+                    listener(false);
+                }
+
+                break;
+            }
+
+            case "shim:/session/connected": {
+                this.status = SessionStatus.CONNECTED;
+                this.sessionId = message.data.sessionId;
+                this.transportId = message.data.sessionId;
+                this.namespaces = message.data.namespaces;
+                this.displayName = message.data.displayName;
+                this.statusText = message.data.statusText;
+
+                if (this.#successCallback) {
+                    this.#successCallback(this);
+                }
+
+                break;
+            }
+
+            case "shim:/session/updateStatus": {
+                const volume: Volume = message.data.volume;
+
+                if (volume) {
+                    if (!this.receiver.volume) {
+                        const receiverVolume = new Volume(
+                                volume.level
+                              , volume.muted);
+
+                        receiverVolume.controlType = volume.controlType;
+                        receiverVolume.stepInterval = volume.stepInterval;
+
+                        this.receiver.volume = receiverVolume;
+                    } else {
+                        this.receiver.volume.level = volume.level;
+                        this.receiver.volume.muted = volume.muted;
+                    }
+                }
+
+                for (const listener of this.#updateListeners) {
+                    listener(true);
+                }
+
+                break;
+            }
+
+
+            case "shim:/session/impl_addMessageListener": {
+                const { namespace, data } = message.data;
+                const messageListeners = this.#messageListeners.get(namespace);
+
+                if (messageListeners) {
+                    for (const listener of messageListeners) {
+                        listener(namespace, data);
+                    }
+                }
+
+                break;
+            }
+
+            case "shim:/session/impl_sendMessage": {
+                const { messageId, error } = message.data;
+                const [ successCallback, errorCallback ] =
+                        this.#sendMessageCallbacks.get(messageId) ?? [];
+
+                if (error && errorCallback) {
+                    errorCallback(new _Error(ErrorCode.SESSION_ERROR));
+                } else if (successCallback) {
+                    successCallback();
+                }
+
+                this.#sendMessageCallbacks.delete(messageId);
+
+                break;
+            }
+
+            case "shim:/session/impl_setReceiverMuted": {
+                const { volumeId, error } = message.data;
+                const [ successCallback, errorCallback ] =
+                        this.#setReceiverMutedCallbacks.get(volumeId) ?? [];
+
+                if (error && errorCallback) {
+                    errorCallback(new _Error(ErrorCode.SESSION_ERROR));
+                } else if (successCallback) {
+                    successCallback();
+                }
+
+                this.#setReceiverMutedCallbacks.delete(volumeId);
+
+                break;
+            }
+
+            case "shim:/session/impl_setReceiverVolumeLevel": {
+                const { volumeId, error } = message.data;
+                const [ successCallback, errorCallback ] =
+                        this.#setReceiverVolumeLevelCallbacks
+                            .get(volumeId) ?? [];
+
+                if (error && errorCallback) {
+                    errorCallback(new _Error(ErrorCode.SESSION_ERROR));
+                } else if (successCallback) {
+                    successCallback();
+                }
+
+                this.#setReceiverVolumeLevelCallbacks.delete(volumeId);
+
+                break;
+            }
+
+            case "shim:/session/impl_stop": {
+                const { stopId, error } = message.data;
+                const [ successCallback, errorCallback ]
+                        = this.#stopCallbacks.get(stopId) ?? [];
+
+                // Disconnect from extension messages
+                this.#listener.disconnect();
+
+                if (error && errorCallback) {
+                    errorCallback(new _Error(ErrorCode.SESSION_ERROR));
+                } else {
+                    this.status = SessionStatus.STOPPED;
+
+                    for (const listener of this.#updateListeners) {
+                        listener(false);
+                    }
+
+                    if (successCallback) {
+                        successCallback();
+                    }
+                }
+
+                this.#stopCallbacks.delete(stopId);
+
+                break;
+            }
+        }
+    })
+
     public media: Media[];
     public namespaces: Array<{ name: string }>;
     public senderApps: SenderApplication[];
@@ -61,19 +214,9 @@ export default class Session {
           , public displayName: string
           , public appImages: Image[]
           , public receiver: Receiver
-          , _successCallback: (session: Session) => void) {
+          , _successCallback: SessionSuccessCallback) {
 
-        _id.set(this, uuid());
-
-        _messageListeners.set(this, new Map());
-        _updateListeners.set(this, new Set());
-
-        _leaveCallbacks.set(this, new Map());
-        _sendMessageCallbacks.set(this, new Map());
-        _setReceiverMutedCallbacks.set(this, new Map());
-        _setReceiverVolumeLevelCallbacks.set(this, new Map());
-        _stopCallbacks.set(this, new Map());
-
+        this.#successCallback = _successCallback;
 
         this.media = [];
         this.namespaces = [];
@@ -91,178 +234,9 @@ export default class Session {
                   , appId
                   , sessionId
                 }
-              , _id: _id.get(this)!
+              , _id: this.#id
             });
         }
-
-        const listenerObject = onMessage(message => {
-            // Filter other session messages
-            if ((message as any)._id
-             && (message as any)._id !== _id.get(this)) {
-                return;
-            }
-
-            switch (message.subject) {
-                case "shim:/session/stopped": {
-                    // Disconnect from extension messages
-                    _listener.get(this)?.disconnect();
-
-                    this.status = SessionStatus.STOPPED;
-
-                    const updateListeners = _updateListeners.get(this);
-                    if (updateListeners) {
-                        for (const listener of updateListeners) {
-                            listener(false);
-                        }
-                    }
-
-                    break;
-                }
-
-                case "shim:/session/connected": {
-                    this.status = SessionStatus.CONNECTED;
-                    this.sessionId = message.data.sessionId;
-                    this.transportId = message.data.sessionId;
-                    this.namespaces = message.data.namespaces;
-                    this.displayName = message.data.displayName;
-                    this.statusText = message.data.statusText;
-
-                    if (_successCallback) {
-                        _successCallback(this);
-                    }
-
-                    break;
-                }
-
-                case "shim:/session/updateStatus": {
-                    const volume: Volume = message.data.volume;
-
-                    if (volume) {
-                        if (!this.receiver.volume) {
-                            const receiverVolume = new Volume(
-                                    volume.level
-                                  , volume.muted);
-
-                            receiverVolume.controlType = volume.controlType;
-                            receiverVolume.stepInterval = volume.stepInterval;
-
-                            this.receiver.volume = receiverVolume;
-                        } else {
-                            this.receiver.volume.level = volume.level;
-                            this.receiver.volume.muted = volume.muted;
-                        }
-                    }
-
-                    const updateListeners = _updateListeners.get(this);
-                    if (updateListeners) {
-                        for (const listener of updateListeners) {
-                            listener(true);
-                        }
-                    }
-
-                    break;
-                }
-
-
-                case "shim:/session/impl_addMessageListener": {
-                    const { namespace, data } = message.data;
-                    const messageListeners = _messageListeners
-                            .get(this)?.get(namespace);
-
-                    if (messageListeners) {
-                        for (const listener of messageListeners) {
-                            listener(namespace, data);
-                        }
-                    }
-
-                    break;
-                }
-
-                case "shim:/session/impl_sendMessage": {
-                    const { messageId, error } = message.data;
-                    const [ successCallback, errorCallback ] =
-                            _sendMessageCallbacks
-                                .get(this)?.get(messageId) ?? [];
-
-                    if (error && errorCallback) {
-                        errorCallback(new _Error(ErrorCode.SESSION_ERROR));
-                    } else if (successCallback) {
-                        successCallback();
-                    }
-
-                    _sendMessageCallbacks.get(this)?.delete(messageId);
-
-                    break;
-                }
-
-                case "shim:/session/impl_setReceiverMuted": {
-                    const { volumeId, error } = message.data;
-                    const [ successCallback, errorCallback ] =
-                            _setReceiverMutedCallbacks
-                                .get(this)?.get(volumeId) ?? [];
-
-                    if (error && errorCallback) {
-                        errorCallback(new _Error(ErrorCode.SESSION_ERROR));
-                    } else if (successCallback) {
-                        successCallback();
-                    }
-
-                    _setReceiverMutedCallbacks.get(this)?.delete(volumeId);
-
-                    break;
-                }
-
-                case "shim:/session/impl_setReceiverVolumeLevel": {
-                    const { volumeId, error } = message.data;
-                    const [ successCallback, errorCallback ] =
-                            _setReceiverVolumeLevelCallbacks
-                                .get(this)?.get(volumeId) ?? [];
-
-                    if (error && errorCallback) {
-                        errorCallback(new _Error(ErrorCode.SESSION_ERROR));
-                    } else if (successCallback) {
-                        successCallback();
-                    }
-
-                    _setReceiverVolumeLevelCallbacks
-                        .get(this)?.delete(volumeId);
-
-                    break;
-                }
-
-                case "shim:/session/impl_stop": {
-                    const { stopId, error } = message.data;
-                    const [ successCallback, errorCallback ]
-                            = _stopCallbacks.get(this)?.get(stopId) ?? [];
-
-                    // Disconnect from extension messages
-                    _listener.get(this)?.disconnect();
-
-                    if (error && errorCallback) {
-                        errorCallback(new _Error(ErrorCode.SESSION_ERROR));
-                    } else {
-                        this.status = SessionStatus.STOPPED;
-
-                        const updateListeners = _updateListeners.get(this);
-                        if (updateListeners) {
-                            for (const listener of updateListeners) {
-                                listener(false);
-                            }
-                        }
-
-                        if (successCallback) {
-                            successCallback();
-                        }
-                    }
-
-                    _stopCallbacks.get(this)?.delete(stopId);
-
-                    break;
-                }
-            }
-        });
-
-        _listener.set(this, listenerObject);
     }
 
 
@@ -274,21 +248,21 @@ export default class Session {
             namespace: string
           , listener: MessageListener) {
 
-        if (!_messageListeners.get(this)?.has(namespace)) {
-            _messageListeners.get(this)?.set(namespace, new Set());
+        if (!this.#messageListeners.has(namespace)) {
+            this.#messageListeners.set(namespace, new Set());
         }
 
-        _messageListeners.get(this)?.get(namespace)?.add(listener);
+        this.#messageListeners.get(namespace)?.add(listener);
 
         sendMessageResponse({
             subject: "bridge:/session/impl_addMessageListener"
           , data: { namespace }
-          , _id: _id.get(this)!
+          , _id: this.#id
         });
     }
 
     public addUpdateListener (listener: UpdateListener) {
-        _updateListeners.get(this)?.add(listener);
+        this.#updateListeners.add(listener);
     }
 
     public leave (
@@ -300,10 +274,10 @@ export default class Session {
         sendMessageResponse({
             subject: "bridge:/session/impl_leave"
           , data: { id }
-          , _id: _id.get(this)!
+          , _id: this.#id
         });
 
-        _leaveCallbacks.get(this)?.set(id, [
+        this.#leaveCallbacks.set(id, [
             successCallback
           , errorCallback
         ]);
@@ -339,7 +313,7 @@ export default class Session {
             const message = JSON.parse(data);
 
             if (message.status && message.status.length > 0) {
-                const sessionId = _id.get(this);
+                const sessionId = this.#id;
                 if (!sessionId) {
                     return;
                 }
@@ -383,14 +357,14 @@ export default class Session {
             namespace: string
           , listener: MessageListener): void {
 
-        _messageListeners.get(this)?.get(namespace)?.delete(listener);
+        this.#messageListeners.get(namespace)?.delete(listener);
     }
 
     public removeUpdateListener (
             _namespace: string
           , listener: UpdateListener): void {
 
-        _updateListeners.get(this)?.delete(listener);
+        this.#updateListeners.delete(listener);
     }
 
     public sendMessage (
@@ -408,10 +382,10 @@ export default class Session {
               , message
               , messageId
             }
-          , _id: _id.get(this)!
+          , _id: this.#id
         });
 
-        _sendMessageCallbacks.get(this)?.set(messageId, [
+        this.#sendMessageCallbacks.set(messageId, [
             successCallback
           , errorCallback
         ]);
@@ -427,10 +401,10 @@ export default class Session {
         sendMessageResponse({
             subject: "bridge:/session/impl_setReceiverMuted"
           , data: { muted, volumeId }
-          , _id: _id.get(this)!
+          , _id: this.#id
         });
 
-        _setReceiverMutedCallbacks.get(this)?.set(volumeId, [
+        this.#setReceiverMutedCallbacks.set(volumeId, [
             successCallback
           , errorCallback
         ]);
@@ -446,10 +420,10 @@ export default class Session {
         sendMessageResponse({
             subject: "bridge:/session/impl_setReceiverVolumeLevel"
           , data: { newLevel, volumeId }
-          , _id: _id.get(this)!
+          , _id: this.#id
         });
 
-        _setReceiverVolumeLevelCallbacks.get(this)?.set(volumeId, [
+        this.#setReceiverVolumeLevelCallbacks.set(volumeId, [
             successCallback
           , errorCallback
         ]);
@@ -464,10 +438,10 @@ export default class Session {
         sendMessageResponse({
             subject: "bridge:/session/impl_stop"
           , data: { stopId }
-          , _id: _id.get(this)!
+          , _id: this.#id
         });
 
-        _stopCallbacks.get(this)?.set(stopId, [
+        this.#stopCallbacks.set(stopId, [
             successCallback
           , errorCallback
         ]);

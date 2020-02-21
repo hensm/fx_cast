@@ -27,22 +27,19 @@ import { ErrorCode } from "../../enums";
 
 import { onMessage, sendMessageResponse } from "../../../eventMessageChannel";
 
-import { CallbacksMap
+import { Callbacks
        , ErrorCallback
        , SuccessCallback
        , UpdateListener } from "../../../types";
 
 
-const _id = new WeakMap<Media, string>();
-const _isActive = new WeakMap<Media, boolean>();
-
-const _updateListeners = new WeakMap<Media, Set<UpdateListener>>();
-const _sendMediaMessageCallbacks = new WeakMap<Media, CallbacksMap>();
-
-const _lastCurrentTime = new WeakMap<Media, number>();
-
-
 export default class Media {
+    #id = uuid();
+    #isActive = true;
+    #updateListeners = new Set<UpdateListener>();
+    #sendMediaMessageCallbacks = new Map<string, Callbacks>();
+    #lastCurrentTime?: number;
+
     public activeTrackIds: (number[] | null) = null;
     public currentItemId: (number | null) = null;
     public customData: any = null;
@@ -64,13 +61,6 @@ export default class Media {
           , public mediaSessionId: number
           , _internalSessionId: string) {
 
-        _id.set(this, uuid());
-        _isActive.set(this, true);
-
-        _updateListeners.set(this, new Set());
-        _sendMediaMessageCallbacks.set(this, new Map());
-
-
         sendMessageResponse({
             subject: "bridge:/media/initialize"
           , data: {
@@ -78,12 +68,11 @@ export default class Media {
               , mediaSessionId
               , _internalSessionId
             }
-          , _id: _id.get(this)!
+          , _id: this.#id
         });
 
         onMessage(message => {
-            if ((message as any)._id
-             && (message as any)._id !== _id.get(this)) {
+            if ((message as any)._id !== this.#id) {
                 return;
             }
 
@@ -92,7 +81,7 @@ export default class Media {
                     const status = message.data;
 
                     this.currentTime = status.currentTime;
-                    _lastCurrentTime.set(this, status._lastCurrentTime);
+                    this.#lastCurrentTime = status._lastCurrentTime;
                     this.customData = status.customData;
                     this.playbackRate = status.playbackRate;
                     this.playerState = status.playerState;
@@ -112,11 +101,8 @@ export default class Media {
                     }
 
                     // Call update listeners
-                    const updateListeners = _updateListeners.get(this);
-                    if (updateListeners) {
-                        for (const listener of updateListeners) {
-                            listener(true);
-                        }
+                    for (const listener of this.#updateListeners) {
+                        listener(true);
                     }
 
                     break;
@@ -125,8 +111,8 @@ export default class Media {
                 case "shim:/media/sendMediaMessageResponse": {
                     const { messageId, error } = message.data;
                     const [ successCallback, errorCallback ]
-                            = _sendMediaMessageCallbacks
-                                .get(this)?.get(messageId) ?? [];
+                            = this.#sendMediaMessageCallbacks
+                                  .get(messageId) ?? [];
 
                     if (error && errorCallback) {
                         errorCallback(new _Error(ErrorCode.SESSION_ERROR));
@@ -142,7 +128,7 @@ export default class Media {
     }
 
     public addUpdateListener (listener: UpdateListener): void {
-        _updateListeners.get(this)?.add(listener);
+        this.#updateListeners.add(listener);
     }
 
     public editTracksInfo (
@@ -154,13 +140,12 @@ export default class Media {
     }
 
     public getEstimatedTime (): number {
-        const lastTime = _lastCurrentTime.get(this);
-
-        if (this.currentTime === undefined || lastTime === undefined) {
+        if (this.currentTime === undefined
+         || this.#lastCurrentTime === undefined) {
             return 0;
         }
 
-        return this.currentTime + ((Date.now() / 1000) - lastTime);
+        return this.currentTime + ((Date.now() / 1000) - this.#lastCurrentTime);
     }
 
     public getStatus (
@@ -260,7 +245,7 @@ export default class Media {
     }
 
     public removeUpdateListener (listener: UpdateListener) {
-        _updateListeners.get(this)?.delete(listener);
+        this.#updateListeners.delete(listener);
     }
 
     public seek (
@@ -293,7 +278,7 @@ export default class Media {
         this._sendMediaMessage(
                 { type: "STOP" }
               , () => {
-                    _isActive.set(this, false);
+                    this.#isActive = false;
                     if (successCallback) {
                         successCallback();
                     }
@@ -313,7 +298,7 @@ export default class Media {
           , errorCallback?: ErrorCallback) {
 
         // TODO: Handle this and other errors better
-        if (!_isActive.get(this)) {
+        if (!this.#isActive) {
             if (errorCallback) {
                 errorCallback(new _Error(ErrorCode.SESSION_ERROR
                     , "INVALID_MEDIA_SESSION_ID"
@@ -333,7 +318,7 @@ export default class Media {
 
         const messageId = uuid();
 
-        _sendMediaMessageCallbacks.get(this)?.set(messageId, [
+        this.#sendMediaMessageCallbacks.set(messageId, [
             successCallback
           , errorCallback
         ]);
@@ -344,7 +329,7 @@ export default class Media {
                 message
               , messageId
             }
-          , _id: _id.get(this)!
+          , _id: this.#id
         });
     }
 }
