@@ -40,6 +40,61 @@ export default class Media {
     #sendMediaMessageCallbacks = new Map<string, Callbacks>();
     #lastCurrentTime?: number;
 
+    #listener = onMessage(message => {
+        if ((message as any)._id !== this.#id) {
+            return;
+        }
+
+        switch (message.subject) {
+            case "shim:/media/update": {
+                const status = message.data;
+
+                this.currentTime = status.currentTime;
+                this.#lastCurrentTime = status._lastCurrentTime;
+                this.customData = status.customData;
+                this.playbackRate = status.playbackRate;
+                this.playerState = status.playerState;
+                this.repeatMode = status.repeatMode;
+
+                if (status._volumeLevel && status._volumeMuted) {
+                    this.volume = new Volume(
+                            status._volumeLevel
+                          , status._volumeMuted);
+                }
+
+                if (status.media) {
+                    this.media = status.media;
+                }
+                if (status.mediaSessionId) {
+                    this.mediaSessionId = status.mediaSessionId;
+                }
+
+                // Call update listeners
+                for (const listener of this.#updateListeners) {
+                    listener(true);
+                }
+
+                break;
+            }
+
+            case "shim:/media/sendMediaMessageResponse": {
+                const { messageId, error } = message.data;
+                const [ successCallback, errorCallback ]
+                        = this.#sendMediaMessageCallbacks
+                              .get(messageId) ?? [];
+
+                if (error && errorCallback) {
+                    errorCallback(new _Error(ErrorCode.SESSION_ERROR));
+                } else if (successCallback) {
+                    successCallback();
+                }
+
+                break;
+            }
+
+        }
+    });
+
     public activeTrackIds: (number[] | null) = null;
     public currentItemId: (number | null) = null;
     public customData: any = null;
@@ -69,61 +124,6 @@ export default class Media {
               , _internalSessionId
             }
           , _id: this.#id
-        });
-
-        onMessage(message => {
-            if ((message as any)._id !== this.#id) {
-                return;
-            }
-
-            switch (message.subject) {
-                case "shim:/media/update": {
-                    const status = message.data;
-
-                    this.currentTime = status.currentTime;
-                    this.#lastCurrentTime = status._lastCurrentTime;
-                    this.customData = status.customData;
-                    this.playbackRate = status.playbackRate;
-                    this.playerState = status.playerState;
-                    this.repeatMode = status.repeatMode;
-
-                    if (status._volumeLevel && status._volumeMuted) {
-                        this.volume = new Volume(
-                                status._volumeLevel
-                              , status._volumeMuted);
-                    }
-
-                    if (status.media) {
-                        this.media = status.media;
-                    }
-                    if (status.mediaSessionId) {
-                        this.mediaSessionId = status.mediaSessionId;
-                    }
-
-                    // Call update listeners
-                    for (const listener of this.#updateListeners) {
-                        listener(true);
-                    }
-
-                    break;
-                }
-
-                case "shim:/media/sendMediaMessageResponse": {
-                    const { messageId, error } = message.data;
-                    const [ successCallback, errorCallback ]
-                            = this.#sendMediaMessageCallbacks
-                                  .get(messageId) ?? [];
-
-                    if (error && errorCallback) {
-                        errorCallback(new _Error(ErrorCode.SESSION_ERROR));
-                    } else if (successCallback) {
-                        successCallback();
-                    }
-
-                    break;
-                }
-
-            }
         });
     }
 
@@ -279,6 +279,8 @@ export default class Media {
                 { type: "STOP" }
               , () => {
                     this.#isActive = false;
+                    this.#listener.disconnect();
+
                     if (successCallback) {
                         successCallback();
                     }
