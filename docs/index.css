@@ -395,9 +395,29 @@ body {
         margin: initial;
     }
 
+    .faqs {
+        align-self: stretch;
+    }
+
+    .faqs__list-item:not(:first-child) {
+        border-top: 2px solid var(--grey-60);
+        padding-top: 1rem;
+    }
+
+    .faq {
+        background: initial !important;
+        border: initial !important;
+        box-shadow: initial !important;
+    }
+
+    .faq__summary {
+        padding: 0.5rem;
+    }
+
     .faq__content {
         display: flex;
         flex-direction: column;
+        padding: .5rem;
     }
 
     .faq__content p {
@@ -410,6 +430,10 @@ body {
         float: none !important;
         margin: 0 auto;
         order: 1;
+    }
+
+    hr {
+        width: 100%;
     }
 
     .footer {
