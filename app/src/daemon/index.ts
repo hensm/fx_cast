@@ -12,6 +12,14 @@ import { DecodeTransform
 const wss = new WebSocket.Server({ port: 9556 });
 
 wss.on("connection", socket => {
+    // Stream for incoming WebSocket messages
+    const messageStream = new Readable({ objectMode: true });
+    messageStream._read = () => {};
+
+    socket.on("message", (message: string) => {
+        messageStream.push(JSON.parse(message));
+    });
+
 
     /**
      * Daemon and bridge are the same binary, so spawn a new
@@ -19,32 +27,12 @@ wss.on("connection", socket => {
      */
     const bridge = spawn(process.execPath, [ process.argv[1] ]);
 
-    // Stream for incoming WebSocket messages
-    const messageStream = new Readable({
-        objectMode: true
-    });
-
-    // tslint:disable-next-line:no-empty
-    messageStream._read = () => {};
-
-    /**
-     * Incoming JSON messages from the extension over the
-     * WebSocket connection are parsed and re-encoded to be sent
-     * to bridge stdin.
-     */
-    socket.on("message", (message: string) => {
-        messageStream.push(JSON.parse(message));
-    });
-
+    // socket -> bridge.stdin
     messageStream
         .pipe(new EncodeTransform())
         .pipe(bridge.stdin);
 
-    /**
-     * Incoming messages from the bridge are decoded and
-     * stringified and sent to the extension over the WebSocket
-     * connection.
-     */
+    // bridge.stdout -> socket
     bridge.stdout
         .pipe(new DecodeTransform())
         .on("data", data => {
