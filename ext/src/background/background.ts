@@ -493,6 +493,8 @@ async function initWhitelist () {
                 /**
                  * New YouTube breaks without the default user agent string,
                  * so use hybrid Firefox/Chrome version.
+                 *
+                 * TODO: Test this on other sites
                  */
                 if (host?.value === "www.youtube.com") {
                     header.value = getChromeUserAgent(os, true);
