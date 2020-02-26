@@ -472,6 +472,10 @@ async function initWhitelist () {
     type OnBeforeSendHeadersDetails = Parameters<Parameters<
             typeof browser.webRequest.onBeforeSendHeaders.addListener>[0]>[0];
 
+    const originUrlCache: string[] = [];
+    const chromeUserAgent = getChromeUserAgent(
+            (await browser.runtime.getPlatformInfo()).os, true);
+
     /**
      * Web apps usually only load the sender library and
      * provide cast functionality if the browser is detected
@@ -483,25 +487,18 @@ async function initWhitelist () {
             throw logger.error("OnBeforeSendHeaders handler details missing requestHeaders.");
         }
 
+        if (details.originUrl && !originUrlCache.includes(details.originUrl)) {
+            originUrlCache.push(details.originUrl);
+        }
+
         const host = details.requestHeaders.find(
                 header => header.name === "Host");
 
         for (const header of details.requestHeaders) {
             const { os } = await browser.runtime.getPlatformInfo();
 
-            if (header.name.toLowerCase() === "user-agent") {
-                /**
-                 * New YouTube breaks without the default user agent string,
-                 * so use hybrid Firefox/Chrome version.
-                 *
-                 * TODO: Test this on other sites
-                 */
-                if (host?.value === "www.youtube.com") {
-                    header.value = getChromeUserAgent(os, true);
-                    break;
-                }
-
-                header.value = getChromeUserAgent(os);
+            if (header.name === "User-Agent") {
+                header.value = chromeUserAgent;
                 break;
             }
         }
@@ -511,6 +508,27 @@ async function initWhitelist () {
         };
     }
 
+    function handleResourceRequests (details: OnBeforeSendHeadersDetails) {
+        if (!details.requestHeaders) {
+            return;
+        }
+
+        for (const ancestor of details.frameAncestors) {
+            if (originUrlCache.includes(ancestor.url)) {
+                console.log(details);
+                for (const header of details.requestHeaders) {
+                    if (header.name === "User-Agent") {
+                        header.value = chromeUserAgent;
+                    }
+                }
+
+                return {
+                    requestHeaders: details.requestHeaders
+                };
+            }
+        }
+    }
+
     async function registerUserAgentWhitelist () {
         const { userAgentWhitelist
               , userAgentWhitelistEnabled } = await options.getAll();
@@ -518,6 +536,12 @@ async function initWhitelist () {
         if (!userAgentWhitelistEnabled) {
             return;
         }
+
+        browser.webRequest.onBeforeSendHeaders.addListener(
+                handleResourceRequests
+              , { urls: [ "<all_urls>" ] }
+              , [ "blocking", "requestHeaders" ]);
+
         browser.webRequest.onBeforeSendHeaders.addListener(
                 onBeforeSendHeaders
               , { urls: userAgentWhitelist }
@@ -525,8 +549,12 @@ async function initWhitelist () {
     }
 
     function unregisterUserAgentWhitelist () {
-        browser.webRequest.onBeforeSendHeaders.removeListener(
-              onBeforeSendHeaders);
+        originUrlCache.length = 0;
+
+        browser.webRequest.onBeforeSendHeaders
+                .removeListener(handleResourceRequests);
+        browser.webRequest.onBeforeSendHeaders
+                .removeListener(onBeforeSendHeaders);
     }
 
     // Register on first run
