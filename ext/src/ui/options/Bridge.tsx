@@ -143,12 +143,14 @@ export default class Bridge extends Component<BridgeProps, BridgeState> {
                                     </p>
                                     <div className="bridge__update-options">
                                         <button className="bridge__update-start"
+                                                type="button"
                                                 onClick={ this.onUpdate }>
                                             { _("optionsBridgeUpdate") }
                                         </button>
                                     </div>
                                 </div> )
                             : ( <button className="bridge__update-check"
+                                        type="button"
                                         disabled={ this.state.isCheckingUpdates }
                                         onClick={ this.onCheckUpdates }>
 
