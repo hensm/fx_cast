@@ -4,7 +4,7 @@ import logger from "./logger";
 import options from "./options";
 
 
-const WEBSOCKET_DAEMON_URL = "ws://localhost:9556";
+const WEBSOCKET_DAEMON_URL_PREFIX = "ws://localhost:";
 
 
 type DisconnectListener = (port: browser.runtime.Port) => void;
@@ -114,7 +114,8 @@ function connectNative (application: string) {
         if (port.error && !isNativeHostStatusKnown) {
             isNativeHostStatusKnown = true;
 
-            socket = new WebSocket(WEBSOCKET_DAEMON_URL);
+            const port = await options.get("bridgeBackupPort");
+            socket = new WebSocket(`${WEBSOCKET_DAEMON_URL_PREFIX}${port}`);
 
             socket.addEventListener("open", () => {
                 // Send all messages in queue
@@ -171,8 +172,10 @@ async function sendNativeMessage (
             throw logger.error("Bridge connection failed and backup not enabled.");
         }
 
+        const port = await options.get("bridgeBackupPort");
+
         return await new Promise((resolve, reject) => {
-            const ws = new WebSocket(WEBSOCKET_DAEMON_URL);
+            const ws = new WebSocket(`${WEBSOCKET_DAEMON_URL_PREFIX}${port}`);
 
             ws.addEventListener("open", () => {
                 ws.send(JSON.stringify(message));

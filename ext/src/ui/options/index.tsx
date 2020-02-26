@@ -171,9 +171,6 @@ class OptionsApp extends Component<{}, OptionsAppState> {
 
         return (
             <div>
-                <Bridge info={ this.state.bridgeInfo }
-                        loading={ this.state.bridgeLoading } />
-
                 <form id="form" ref={ form => { this.form = form; }}
                         onSubmit={ this.handleFormSubmit }
                         onChange={ this.handleFormChange }>
@@ -415,6 +412,12 @@ class OptionsApp extends Component<{}, OptionsAppState> {
                             { _("optionsSave") }
                         </button>
                     </div>
+
+                    { // Workaround for form default button }
+                    <Bridge info={ this.state.bridgeInfo }
+                            loading={ this.state.bridgeLoading }
+                            options={ this.state.options }
+                            onChange={ this.handleInputChange } /> }
                 </form>
 
                 <details className="about">

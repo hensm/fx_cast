@@ -69,6 +69,7 @@
 .bridge {
     border-bottom: 1px solid var(--border-color);
     margin-bottom: 10px;
+    order: -1;
     padding-bottom: 20px;
 }
 
@@ -192,6 +193,12 @@
 
 .bridge--update-status {
     margin-left: 10px;
+}
+
+.bridge__backup-port {
+    width: 75px;
+    margin-left: 0.5em;
+    margin-right: 0.5em;
 }
 
 

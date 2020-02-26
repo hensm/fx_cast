@@ -3,13 +3,27 @@
 import { spawn } from "child_process";
 import { Readable } from "stream";
 
+import minimist from "minimist";
 import WebSocket from "ws";
 
 import { DecodeTransform
        , EncodeTransform } from "../transforms";
 
 
-const wss = new WebSocket.Server({ port: 9556 });
+const argv = minimist(process.argv.slice(2), {
+    string: [ "port" ]
+  , default: {
+        port: "9556"
+    }
+});
+
+const port = parseInt(argv.port);
+if (!port || port < 1025 || port > 65535) {
+    console.error("Invalid port specified!");
+    process.exit(1);
+}
+
+const wss = new WebSocket.Server({ port });
 
 wss.on("connection", socket => {
     // Stream for incoming WebSocket messages

@@ -202,8 +202,13 @@
     }
 
   , "optionsBridgeBackupEnabled": {
-        "message": "Enable backup daemon connection"
-      , "description": "Backup daemon checkbox label."
+        "message": "Enable backup daemon connection on port $numberInput$"
+      , "description": "Backup daemon checkbox label. An HTML number input is inserted inline at the numberInput substitution."
+      , "placeholders": {
+            "numberInput": {
+                "content": "$1"
+            }
+        }
     }
   , "optionsBridgeBackupEnabledDescription": {
         "message": "If the regular bridge connection fails, attempt to connect to a bridge running in daemon mode."
