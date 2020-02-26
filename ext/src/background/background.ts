@@ -515,7 +515,6 @@ async function initWhitelist () {
 
         for (const ancestor of details.frameAncestors) {
             if (originUrlCache.includes(ancestor.url)) {
-                console.log(details);
                 for (const header of details.requestHeaders) {
                     if (header.name === "User-Agent") {
                         header.value = chromeUserAgent;
