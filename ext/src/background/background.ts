@@ -513,6 +513,8 @@ async function initWhitelist () {
             return;
         }
 
+        // @ts-ignore
+        // Another issue with @types/firefox-webext-browser
         for (const ancestor of details.frameAncestors) {
             if (originUrlCache.includes(ancestor.url)) {
                 for (const header of details.requestHeaders) {
