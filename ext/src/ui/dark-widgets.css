@@ -5,8 +5,8 @@ textarea,
     background-color: #474749;
     border: initial;
     border-radius: 2px;
-    overflow: hidden;
     color: white;
+    overflow: hidden;
 }
 button:not(:disabled):hover,
 .select-wrapper:not(:disabled):hover {
@@ -22,9 +22,17 @@ input:disabled {
     opacity: 0.35;
 }
 
+button,
 input,
-textarea {
-    padding: 2px 4px;
+textarea,
+select {
+    padding: 4px 8px;
+}
+
+button,
+select {
+    /* Override mac.css height */
+    height: initial !important;
 }
 
 button:default {
@@ -48,6 +56,7 @@ button:default:hover:active {
     content: "▼";
     display: flex;
     height: 100%;
+    margin-right: 4px;
     justify-content: center;
     pointer-events: none;
     position: absolute;
@@ -60,7 +69,7 @@ select {
     background: inherit;
     border: initial;
     color: inherit;
-    padding-right: var(--arrow-width);
+    padding-right: calc(8px + var(--arrow-width));
 }
 option {
     color: white !important;
