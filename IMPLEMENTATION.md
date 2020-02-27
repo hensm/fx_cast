@@ -1,13 +1,14 @@
 # Extension Lifetime
 
-A bridge application instance is created via the StatusManager (`background/StatusManager.ts`) to keep track of receivers’ statuses. The StatusManager emits events `serviceUp`, `serviceDown` and `statusUpdate` containing relevant data.
+## StatusManager
 
-This is expected to exist throughout the lifetime of the extension and will automatically reconnect with a 10-second interval if unexpectedly disconnected.
+The StatusManager (`background/StatusManager.ts`) keeps a bridge instance active throughout the lifetime of the extension. It listens for `main:/serviceUp`, `main:/serviceDown` and `main:/receiverStatus` messages to keep track of and update a list of receiver devices that can be provided to other extension components. It also emits `serviceUp`, `serviceDown` and `statusUpdate` events containing relevant data.
 
-
-The `shim/content.ts` content script is registered for all pages. It creates an empty `window.chrome` object in the page context since some sites may expect it to exist. It also intercepts any `src` attribute changes on `<script>` elements where the cast API may be loaded directly from a `chrome-extension://` URL, then sets them to the regular cast API script URL.
+If the StatusManager unexpectedly loses its bridge connection, it will automatically reconnect with a 10-second interval.
 
 ## Shim Initialization
+
+The `shim/content.ts` content script is registered for all pages. It creates an empty `window.chrome` object in the page context since some sites may expect it to exist. It also intercepts any `src` attribute changes on `<script>` elements where the cast API may be loaded directly from a `chrome-extension://` URL, then sets them to the regular cast API script URL.
 
 The background script registers a `webRequest.onBeforeRequest` listener that intercepts requests to Google’s Cast API library.
 
@@ -23,7 +24,7 @@ The `shim:/initialized` message is sent to the shim and the `window.__onGCastApi
 
 The cast API is now available to the web app.
 
-The web app calls `chrome.cast.initialize` with an `ApiConfig` object containing the Chromecast receiver app ID to use. The shim sends a `main:/shimInitialized` message to the background script. The bridge sends `shim:/serviceUp` messages for any discovered devices with device info (address, port, label, etc…).
+The web app calls `chrome.cast.initialize` with an `ApiConfig` object containing the Chromecast receiver app ID to use. The shim sends a `main:/shimInitialized` message to the background script. The bridge sends `main:/serviceUp` messages for any discovered devices with device info (address, port, label, etc…).
 
 ### ShimManager
 
@@ -99,7 +100,7 @@ Cast SDK API calls are translated into Chromecast protocol messages and sent via
 `Session` and `Media` objects have a counterpart object within the bridge. Some messages are routed directly to these objects. For `Session`, these are in the format `bridge:/session/impl_<methodName>`.
 
 
-# Message Table (OUTDATED)
+# Message Table (VERY OUTDATED)
 
 <!--<img src="diagram.png" width="866">-->
 
