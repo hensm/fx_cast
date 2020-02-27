@@ -144,15 +144,14 @@ class OptionsApp extends Component<{}, OptionsAppState> {
         this.setState({
             hasLoaded: true
           , options: await options.getAll()
+          , platform: (await browser.runtime.getPlatformInfo()).os
         });
 
         try {
             const bridgeInfo = await bridge.getInfo();
-            const { os } = await browser.runtime.getPlatformInfo();
 
             this.setState({
                 bridgeInfo
-              , platform: os
               , bridgeLoading: false
             });
         } catch {
