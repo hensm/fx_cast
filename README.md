@@ -5,31 +5,16 @@
 
 # fx_cast
 
-Firefox extension that implements the [Chrome sender API](https://developers.google.com/cast/docs/reference/chrome/) and exposes it to web apps to enable cast support.
+Firefox extension that implements the [Chrome sender API](https://developers.google.com/cast/docs/reference/chrome/) and exposes it to web apps to enable cast support. Communication with receiver devices is handled by a native application (bridge). Check the [implementation notes](IMPLEMENTATION.md) for more info.
 
-Communication with receiver devices is handled by a native application (bridge). Check the [implementation notes](IMPLEMENTATION.md) for more info.
+_**Note**: No full public release yet! Pre-release beta version is incomplete and likely buggy._
 
-**No full public release yet! Pre-release beta version is incomplete and likely buggy.**
 
 ## Installing
 
-### Supported platforms
+_**Note**: Currently supported on macOS, Windows and Linux._
 
-* Linux
-* macOS
-* Windows
-
-Install the Firefox extension and companion bridge application. These are separate downloads that can be found on the [website](https://hensm.github.io/fx_cast/) or in the [GitHub releases](https://github.com/hensm/fx_cast/releases) section.
-
-macOS/Windows version has an installer, Linux packages can be installed via the command line:
-
-````sh
-# Debian/Ubuntu
-sudo dpkg -i fx_cast_bridge-<version>-<arch>.deb
-
-# Fedora
-sudo dnf install fx_cast_bridge-<version>-<arch>.rpm
-````
+Install the Firefox extension (from within Firefox) and companion bridge application via the installer packages. These are two separate downloads that can be found on the [website](https://hensm.github.io/fx_cast/) or in the [GitHub releases](https://github.com/hensm/fx_cast/releases) section.
 
 ### Package managers
 * #### Arch Linux (AUR) - https://aur.archlinux.org/packages/fx_cast/
@@ -37,44 +22,23 @@ sudo dnf install fx_cast_bridge-<version>-<arch>.rpm
   yay -S fx_cast
   ````
 
+
+## Usage
+
+Most websites won't load the cast API unless the browser presents itself as Chrome. The extension includes a whitelist for sites that should be given a Chrome-compatible user agent string. Whitelist entries are specified as [match patterns](https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/Match_patterns). To whitelist all sites, add `<all_urls>` to the whitelist, though this is not recommended and could cause breakage on random sites.
+
+Whitelisted sites should then display a cast button as in Chrome, provided they're compatible with the extension/Firefox.
+
+The `Cast...` menu item is visible in the page, toolbar button and tools menus, and provides access to the receiver selector at any time to stop an existing session or start screen mirroring or file casting.
+
+HTML5 media elements also have a different `Cast...` context menu item that triggers the media sender, though this won't work for media using EME/MSE.
+
+
 ## Building
 
 ### Requirements
 
-* dpkg (for building deb packages)
-* rpm (for building rpm packages)
-* macOS (for building macOS installer packages)
-
-#### Installing dependencies
-macOS:
-
-````sh
-brew install dpkg rpm makensis
-````
-
-Debian/Ubuntu:
-
-````sh
-sudo apt install dpkg rpm nsis
-````
-
-Fedora:
-
-````sh
-sudo dnf install dpkg rpm-build mingw-nsis
-````
-
-Archlinux:
-
-
-```sh
-sudo pacman -S nvm dpkg
-yay -S rpm-org nsis
-
-# Downgrade to node10
-echo 'source /usr/share/nvm/init-nvm.sh' >> ~/.bashrc
-nvm install 10.12.0
-```
+* Node.js <= 13.x
 
 ### Instructions
 
@@ -89,7 +53,7 @@ npm run install-manifest
 This will build the ext and app, outputting to `dist/`:
 
 * #### `dist/app/`  
-   ... contains the bridge binary and manifest with the path pointing that binary. `install-manifest` copies this manifest to the proper location (or adds its current location to the registry).
+   ... contains the bridge executable and manifest with the path pointing that executable. The `install-manifest` script copies this manifest to the proper location (or adds its current location to the registry on Windows).
 * #### `dist/ext/`  
     ... contains the unpacked extension.
 
@@ -99,42 +63,86 @@ Watching ext changes:
 npm run watch --prefix ./ext
 ````
 
-Launch Firefox and auto-reload on rebuild (run in separate terminal):
+Launch Firefox watch for file changes (run in separate terminal):
 
 ````sh
 npm run start --prefix ./ext
 ````
 
+#### Extension build script arguments
+
+* `--package`  
+    Should package with web-ext.
+* `--watch`  
+    Should run webpack in watch mode.
+* `--packageType` `"<appID>"`  
+    Provide an alternative default mirroring receiver app ID.
+* `--mode` `"production"`, `"development"`  
+    Run webpack in a different mode. Defaults to `"development"` unless combined with `--package`.
+
 ### Packaging
 
-macOS packages can only be created on macOS, Linux .deb/.rpm packages can be built on any platform with `dpkg-deb` and `rpmbuild` binaries, and Windows installers can be created on any platform with the `makensis` binary.
+#### Requirements
+* `dpkg-deb` (if building .deb packages)
+* `rpmbuild` (if building .rpm packages)
+* `makensis` (if building Windows installer packages)
+* macOS (if building macOS installer packages)
+    * Xcode (optional if not building native receiver selector)
 
-* #### `dist/app/`  
-    ... contains the installer package: `fx_cast_bridge-<version>-<arch>.(pkg|deb|rpm|exe)`
-* #### `dist/ext/`  
-    ... contains the built extension in the format `fx_cast-<version>.zip`.
+_**Note**: macOS packages can only be build on macOS._
 
-Build and package app and extension for current platform:
+#### Installing dependencies
+
+##### macOS:
+````sh
+brew install dpkg rpm makensis
+````
+
+##### Debian / Ubuntu:
+````sh
+sudo apt install dpkg rpm nsis
+````
+
+##### Fedora:
+````sh
+sudo dnf install dpkg rpm-build mingw-nsis
+````
+
+##### Arch Linux:
+```sh
+sudo pacman -S dpkg
+yay -S rpm-org nsis
+```
+
+Build and package extension and bridge application for current platform:
 
 ````sh
 npm run package
 ````
 
+* #### `dist/app/`  
+    ... contains the installer package: `fx_cast_bridge-<version>-<arch>.(pkg|deb|rpm|exe)`
+* #### `dist/ext/`  
+    ... contains the built extension archive: `fx_cast-<version>.xpi`.
+
 Packaging examples:
 
 ````sh
+npm run package:ext # Packaging extension
+npm run package:app # Packaging bridge application
+
 # Linux platforms
-npm run package --prefix ./app -- --platform=linux --packageType=deb
-npm run package --prefix ./app -- --platform=linux --packageType=rpm
+npm run package:app -- -- --platform=linux --packageType=deb
+npm run package:app -- -- --platform=linux --packageType=rpm
 
 # Windows
-npm run package --prefix ./app -- --platform=win32
+npm run package:app -- -- --platform=win32
 
 # macOS
-npm run package --prefix ./app -- --platform=darwin
+npm run package:app -- -- --platform=darwin
 ````
 
-##### Package script arguments
+#### Bridge package script arguments
 
 * `--platform` `"win32"`,`"darwin"`,`"linux"`  
     Select the platform to build for. Defaults to current platform.
@@ -142,12 +150,17 @@ npm run package --prefix ./app -- --platform=darwin
     Select platform arch to build for. Defaults to current platform arch.
 * `--packageType` `"deb"`,`"rpm"`  
     Select the package type. Defaults to `deb`. Only relevant when building for Linux.
+* `--skipNativeBuilds`  
+    macOS only. Skips native receiver selector build.
+
 
 ### Testing
 
 Testing requires geckodriver (or chromedriver for Chrome parity testing). See [selenium-webdriver](https://www.npmjs.com/package/selenium-webdriver#installation) installation instructions (ignore `npm install`).
 
-Test results will be displayed within the opened browser tab.
+The test script expects a compatible installed bridge version and an extension archive at `dist/ext/`.
+
+Test results will be displayed in the terminal and within the opened browser tab. Chrome may take some time to initialize the media router component before the cast API is available for testing.
 
 ````sh
 npm run build --prefix ./app
@@ -156,15 +169,6 @@ npm run package --prefix ./ext
 npm test
 SELENIUM_BROWSER=chrome npm test
 ````
-
-
-## Usage
-
-Most sites won't load the cast API unless the browser presents itself as Chrome. The extension includes a method of spoofing the user agent string, sites can be whitelisted via the options page. Whitelist entries are specified as [match patterns](https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/Match_patterns). To whitelist all sites, add `<all_urls>` to the whitelist, though this could cause breakage on random sites.
-
-HTML5 media elements have a "Cast..." context menu item that triggers a sender application. Only works on remote (non-local) media that isn't DRM-encumbered.
-
-Cast-enabled websites will load the sender API shim and display a cast button as in Chrome, provided there are no bugs/incompatibilities with the shim.
 
 
 ## Video Demos
@@ -181,8 +185,8 @@ _**Note**: Since it seems to be causing confusion, this project does not use ele
 
 * [electron-chromecast](https://github.com/GPMDP/electron-chromecast)
 * [node-castv2](https://github.com/thibauts/node-castv2)
-* [chrome-native-messaging](https://github.com/jdiamond/chrome-native-messaging)
 * [icons8](https://icons8.com/)
+
 
 ## Donation
 
