@@ -202,10 +202,10 @@
     }
 
   , "optionsBridgeBackupEnabled": {
-        "message": "Enable backup daemon connection on port $numberInput$"
-      , "description": "Backup daemon checkbox label. An HTML number input is inserted inline at the numberInput substitution."
+        "message": "Enable backup daemon connection on $hostPort$"
+      , "description": "Backup daemon checkbox label. Host/port inputs are inserted inline at the hostPort substitution."
       , "placeholders": {
-            "numberInput": {
+            "hostPort": {
                 "content": "$1"
             }
         }

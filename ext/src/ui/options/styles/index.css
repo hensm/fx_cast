@@ -195,10 +195,18 @@
     margin-left: 10px;
 }
 
+.bridge__backup-host,
 .bridge__backup-port {
-    width: 75px;
     margin-left: 0.5em;
     margin-right: 0.5em;
+}
+
+.bridge__backup-host {
+    width: 125px;
+}
+
+.bridge__backup-port {
+    width: 75px;
 }
 
 

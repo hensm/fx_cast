@@ -4,8 +4,6 @@ import logger from "./logger";
 import options from "./options";
 
 
-const WEBSOCKET_DAEMON_URL_PREFIX = "ws://localhost:";
-
 
 type DisconnectListener = (port: browser.runtime.Port) => void;
 type MessageListener = (message: any) => void;
@@ -99,7 +97,11 @@ function connectNative (application: string) {
 
 
     port.onDisconnect.addListener(async () => {
-        if (!(await options.get("bridgeBackupEnabled"))) {
+        const { bridgeBackupEnabled
+              , bridgeBackupHost
+              , bridgeBackupPort } = await options.getAll();
+
+        if (!bridgeBackupEnabled) {
             portObject.error = {
                 message: ""
             };
@@ -114,8 +116,8 @@ function connectNative (application: string) {
         if (port.error && !isNativeHostStatusKnown) {
             isNativeHostStatusKnown = true;
 
-            const port = await options.get("bridgeBackupPort");
-            socket = new WebSocket(`${WEBSOCKET_DAEMON_URL_PREFIX}${port}`);
+            socket = new WebSocket(
+                    `ws://${bridgeBackupHost}:${bridgeBackupPort}`);
 
             socket.addEventListener("open", () => {
                 // Send all messages in queue
@@ -168,14 +170,19 @@ async function sendNativeMessage (
     try {
         return await browser.runtime.sendNativeMessage(application, message);
     } catch {
-        if (!(await options.get("bridgeBackupEnabled"))) {
+        const { bridgeBackupEnabled
+              , bridgeBackupHost
+              , bridgeBackupPort } = await options.getAll();
+
+        if (!bridgeBackupEnabled) {
             throw logger.error("Bridge connection failed and backup not enabled.");
         }
 
         const port = await options.get("bridgeBackupPort");
 
         return await new Promise((resolve, reject) => {
-            const ws = new WebSocket(`${WEBSOCKET_DAEMON_URL_PREFIX}${port}`);
+            const ws = new WebSocket(
+                    `ws://${bridgeBackupHost}:${bridgeBackupPort}`);
 
             ws.addEventListener("open", () => {
                 ws.send(JSON.stringify(message));

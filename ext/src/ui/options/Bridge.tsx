@@ -118,6 +118,13 @@ export default class Bridge extends Component<BridgeProps, BridgeState> {
                             </div>
                             <div className="option__label">
                                 { backupMessageStart }
+                                <input className="bridge__backup-host"
+                                       name="bridgeBackupHost"
+                                       type="text"
+                                       required
+                                       value={ this.props.options.bridgeBackupHost }
+                                       onChange={ this.props.onChange } />
+                                :
                                 <input className="bridge__backup-port"
                                        name="bridgeBackupPort"
                                        type="number"

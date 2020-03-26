@@ -7,6 +7,7 @@ import { Options } from "./lib/options";
 export default {
     bridgeApplicationName: APPLICATION_NAME
   , bridgeBackupEnabled: false
+  , bridgeBackupHost: "localhost"
   , bridgeBackupPort: 9556
   , mediaEnabled: true
   , mediaOverlayEnabled: false
