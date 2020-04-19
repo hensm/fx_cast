@@ -31,15 +31,17 @@ ul {
 }
 
 :root {
-    background-color: var(--page-color);
     color: var(--text-color-primary);
     font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
     font-size: 10px;
 }
 
 body {
+    background-color: var(--page-color);
     display: flex;
     margin: initial;
+    position: relative;
+    z-index: -1;
 }
 
 .container {
