@@ -89,7 +89,7 @@ npm run start --prefix ./ext
 * macOS (if building macOS installer packages)
     * Xcode (optional if not building native receiver selector)
 
-_**Note**: macOS packages can only be build on macOS._
+_**Note**: macOS packages can only be built on macOS._
 
 #### Installing dependencies
 
