@@ -51,6 +51,7 @@
       , "menus"
       , "menus.overrideContext"
       , "nativeMessaging"
+      , "notifications"
       , "storage"
       , "tabs"
       , "webNavigation"

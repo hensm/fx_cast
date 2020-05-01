@@ -5,6 +5,7 @@ import loadSender from "../lib/loadSender";
 import logger from "../lib/logger";
 import messaging from "../lib/messaging";
 import options from "../lib/options";
+import bridge from "../lib/bridge";
 
 import { getChromeUserAgent } from "../lib/userAgents";
 import { getMediaTypesForPageUrl, stringify } from "../lib/utils";
@@ -614,6 +615,39 @@ async function initMediaOverlay () {
 }
 
 
+async function checkBridgeCompat () {
+    logger.info("checking for bridge...");
+
+    const info = await bridge.getInfo();
+
+    if (info.isVersionCompatible) {
+        logger.info("... bridge compatible!");
+    } else {
+        logger.info("... bridge incompatible!");
+
+        const updateNotificationId = await browser.notifications.create({
+            type: "basic"
+          , title: `${
+                  _("extensionName")} — ${_("optionsBridgeIssueStatusTitle")}`
+          , message: info.isVersionOlder
+                ? _("optionsBridgeOlderAction")
+                : _("optionsBridgeNewerAction")
+        });
+
+        browser.notifications.onClicked.addListener(notificationId => {
+            if (notificationId !== updateNotificationId) {
+                return;
+            }
+
+            browser.tabs.create({
+                url: `https://github.com/hensm/fx_cast/releases/tag/v${
+                        info.expectedVersion}`
+            });
+        });
+    }
+}
+
+
 let isInitialized = false;
 
 async function init () {
@@ -631,8 +665,9 @@ async function init () {
     }
 
     logger.info("init");
-
     isInitialized = true;
+
+    await checkBridgeCompat();
 
     await StatusManager.init();
     await ShimManager.init();
