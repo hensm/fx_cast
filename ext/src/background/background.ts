@@ -471,7 +471,10 @@ async function initWhitelist () {
     logger.info("init (whitelist)");
 
     type OnBeforeSendHeadersDetails = Parameters<Parameters<
-            typeof browser.webRequest.onBeforeSendHeaders.addListener>[0]>[0];
+            typeof browser.webRequest.onBeforeSendHeaders.addListener>[0]>[0] & {
+        // Missing on @types/firefox-webext-browser
+        frameAncestors?: Array<{ url: string, frameId: number }>
+    };
 
     const originUrlCache: string[] = [];
     const chromeUserAgent = getChromeUserAgent(
@@ -510,12 +513,10 @@ async function initWhitelist () {
     }
 
     function handleResourceRequests (details: OnBeforeSendHeadersDetails) {
-        if (!details.requestHeaders) {
+        if (!details.requestHeaders || !details.frameAncestors) {
             return;
         }
 
-        // @ts-ignore
-        // Another issue with @types/firefox-webext-browser
         for (const ancestor of details.frameAncestors) {
             if (originUrlCache.includes(ancestor.url)) {
                 for (const header of details.requestHeaders) {
