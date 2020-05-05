@@ -1,4 +1,4 @@
-import dnssd from "dnssd";
+import mdns from "mdns";
 
 import child_process from "child_process";
 import events from "events";
@@ -74,7 +74,7 @@ let receiverSelectorAppClosed = true;
 // Local media server
 let mediaServer: http.Server;
 
-let browser: dnssd.Browser;
+let browser: mdns.Browser;
 
 
 // Existing counterpart Media/Session objects
@@ -483,8 +483,8 @@ async function handleMediaServerMessage (message: Message) {
 
 
 function initialize (options: InitializeOptions) {
-    browser = new dnssd.Browser(dnssd.tcp("googlecast"));
-    browser.on("error", err => {
+    browser = new mdns.Browser(mdns.tcp("googlecast"))
+    browser.on("error", (err: any) => {
         console.error("Discovery failed", err);
     });
 
@@ -498,23 +498,23 @@ function initialize (options: InitializeOptions) {
     browser.start();
 
 
-    function onBrowserServiceUp (service: dnssd.Service) {
+    function onBrowserServiceUp (service: mdns.Service) {
         sendMessage({
             subject: "main:/serviceUp"
           , data: {
                 host: service.addresses[0]
               , port: service.port
-              , id: service.txt.id
-              , friendlyName: service.txt.fn
+              , id: service.txtRecord.id
+              , friendlyName: service.txtRecord.fn
             }
         });
     }
 
-    function onBrowserServiceDown (service: dnssd.Service) {
+    function onBrowserServiceDown (service: mdns.Service) {
         sendMessage({
             subject: "main:/serviceDown"
           , data: {
-                id: service.txt.id
+                id: service.txtRecord.id
             }
         });
     }
@@ -523,8 +523,8 @@ function initialize (options: InitializeOptions) {
     // Receiver status listeners for status mode
     const statusListeners = new Map<string, StatusListener>();
 
-    function onStatusBrowserServiceUp (service: dnssd.Service) {
-        const { id } = service.txt;
+    function onStatusBrowserServiceUp (service: mdns.Service) {
+        const { id } = service.txtRecord;
 
         const listener = new StatusListener(
                 service.addresses[0]
@@ -561,8 +561,8 @@ function initialize (options: InitializeOptions) {
         statusListeners.set(id, listener);
     }
 
-    function onStatusBrowserServiceDown (service: dnssd.Service) {
-        const { id } = service.txt;
+    function onStatusBrowserServiceDown (service: mdns.Service) {
+        const { id } = service.txtRecord;
 
         if (statusListeners.has(id)) {
             statusListeners.get(id)!.deregister();

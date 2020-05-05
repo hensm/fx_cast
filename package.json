@@ -8,7 +8,7 @@
         "postinstall:ext": "cd ext && npm install",
         "build": "npm run build:app && npm run build:ext",
         "build:app": "cd app && npm run build",
-        "build:ext": "cd ext &&npm run build",
+        "build:ext": "cd ext && npm run build",
         "package": "npm run package:app && npm run package:ext",
         "package:app": "cd app && npm run package",
         "package:ext": "cd ext && npm run package",

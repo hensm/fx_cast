@@ -44,6 +44,7 @@ Section
 
     # Main executable
     File "{{executableName}}"
+    File "{{bindingName}}"
     File "{{manifestName}}"
 
     # Native manifest key

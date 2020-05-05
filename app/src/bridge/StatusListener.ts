@@ -26,6 +26,10 @@ export default class StatusListener extends EventEmitter {
         this.client.on("close", () => {
             clearInterval(this.clientHeartbeatIntervalId!);
         });
+
+        this.client.on("error", () => {
+            clearInterval(this.clientHeartbeatIntervalId!);
+        });
     }
 
     /**

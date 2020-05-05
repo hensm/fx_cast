@@ -37,8 +37,33 @@ HTML5 media elements also have a different `Cast...` context menu item that trig
 ## Building
 
 ### Requirements
+* Node.js v12.x.x
+* Native build tools (see [here](https://github.com/nodejs/node-gyp#installation))
+* Bonjour/Avahi (on Windows/Linux respectively)
 
-* Node.js <= 13.x
+Cross-compiling native depedencies may be possible, but isn't tested or supported. Build script options are provided for building/packaging on other platforms, but assume they won't work. Packaging on Linux for other Linux package formats should work fine.
+
+### Installing dependencies
+
+#### Windows:
+* [Bonjour SDK for Windows](https://developer.apple.com/download/more/?=Bonjour%20SDK%20for%20Windows)
+* [NSIS](https://nsis.sourceforge.io/Download)
+
+#### Debian / Ubuntu:
+````sh
+sudo apt install libavahi-compat-libdnssd-dev dpkg rpm
+````
+
+#### Fedora:
+````sh
+sudo dnf install avahi-compat-libdns_sd-devel dpkg rpm-build
+````
+
+#### Arch Linux:
+````sh
+sudo pacman -S avahi dpkg
+yay -S rpm-org
+````
 
 ### Instructions
 
@@ -47,7 +72,12 @@ git clone https://github.com/hensm/fx_cast.git
 cd fx_cast
 npm install
 npm run build
+
+# Install manifest for dist/ build. Installs to
+# user-specific location and overrides a system-wide
+# install. Call `remove-manifest` to restore previous state.
 npm run install-manifest
+npm run remove-manifest
 ````
 
 This will build the ext and app, outputting to `dist/`:
@@ -81,38 +111,6 @@ npm run start --prefix ./ext
     Run webpack in a different mode. Defaults to `"development"` unless combined with `--package`.
 
 ### Packaging
-
-#### Requirements
-* `dpkg-deb` (if building .deb packages)
-* `rpmbuild` (if building .rpm packages)
-* `makensis` (if building Windows installer packages)
-* macOS (if building macOS installer packages)
-    * Xcode (optional if not building native receiver selector)
-
-_**Note**: macOS packages can only be built on macOS._
-
-#### Installing dependencies
-
-##### macOS:
-````sh
-brew install dpkg rpm makensis
-````
-
-##### Debian / Ubuntu:
-````sh
-sudo apt install dpkg rpm nsis
-````
-
-##### Fedora:
-````sh
-sudo dnf install dpkg rpm-build mingw-nsis
-````
-
-##### Arch Linux:
-```sh
-sudo pacman -S dpkg
-yay -S rpm-org nsis
-```
 
 Build and package extension and bridge application for current platform:
 

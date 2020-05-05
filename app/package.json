@@ -14,14 +14,14 @@
         "bplist-creator": "0.0.8",
         "bplist-parser": "^0.2.0",
         "castv2": "^0.1.10",
-        "dnssd": "^0.4.1",
         "fast-srp-hap": "^1.0.1",
+        "mdns": "^2.5.1",
         "mime-types": "^2.1.26",
         "node-fetch": "^2.6.0",
         "tweetnacl": "^1.0.1"
     },
     "devDependencies": {
-        "@types/dnssd": "^0.4.1",
+        "@types/mdns": "0.0.33",
         "@types/mime-types": "^2.1.0",
         "@types/node": "^12.12.24",
         "@types/node-fetch": "^2.5.4",

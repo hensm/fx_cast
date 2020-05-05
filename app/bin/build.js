@@ -93,6 +93,10 @@ fs.ensureDirSync(BUILD_PATH);
 fs.ensureDirSync(DIST_PATH, { recursive: true });
 
 
+const MDNS_BINDING_PATH = path.join(
+        __dirname, "../node_modules/mdns/build/Release/");
+const MDNS_BINDING_NAME = "dns_sd_bindings.node";
+
 async function build () {
     /**
      * Because the native receiver selector can only be built on
@@ -195,6 +199,9 @@ async function build () {
       , "--output", path.join(BUILD_PATH, executableName[argv.platform])
     ]);
 
+    fs.copySync(path.join(MDNS_BINDING_PATH, MDNS_BINDING_NAME)
+          , path.join(BUILD_PATH, MDNS_BINDING_NAME));
+
     // Build NativeMacReceiverSelector
     if (isBuildingForMacOnMac && !argv.skipNativeBuilds) {
         const selectorPath = path.join(__dirname, "../selector/mac/");
@@ -241,6 +248,10 @@ async function build () {
                 path.join(BUILD_PATH, executableName[argv.platform])
               , path.join(DIST_PATH, executableName[argv.platform])
               , { overwrite: true });
+        fs.moveSync(
+                path.join(BUILD_PATH, MDNS_BINDING_NAME)
+              , path.join(DIST_PATH, MDNS_BINDING_NAME)
+              , { overwrite: true });
 
         if (isBuildingForMacOnMac && !argv.skipNativeBuilds) {
             fs.moveSync(
@@ -251,7 +262,7 @@ async function build () {
     }
 
     // Remove build directory
-    fs.removeSync(BUILD_PATH);
+    //fs.removeSync(BUILD_PATH);
 }
 
 /**
@@ -331,6 +342,8 @@ function packageDarwin (
     // Move files to root
     fs.moveSync(path.join(BUILD_PATH, platformExecutableName)
           , path.join(rootExecutablePath, platformExecutableName));
+    fs.moveSync(path.join(BUILD_PATH, MDNS_BINDING_NAME)
+          , path.join(rootExecutablePath, MDNS_BINDING_NAME));
     fs.moveSync(path.join(BUILD_PATH, manifestName)
           , path.join(rootManifestPath, manifestName));
 
@@ -418,9 +431,11 @@ function packageLinuxDeb (
             path.join(BUILD_PATH, platformExecutableName)
           , path.join(rootExecutablePath, platformExecutableName));
     fs.moveSync(
+            path.join(BUILD_PATH, MDNS_BINDING_NAME)
+          , path.join(rootExecutablePath, MDNS_BINDING_NAME));
+    fs.moveSync(
             path.join(BUILD_PATH, manifestName)
           , path.join(rootManifestPath, manifestName));
-
 
     const controlDir = path.join(__dirname, "../packaging/linux/deb/DEBIAN/");
     const controlOutputDir = path.join(rootPath, path.basename(controlDir));
@@ -480,6 +495,7 @@ function packageLinuxRpm (
       , manifestPath: platformManifestPath
       , executableName: platformExecutableName
       , manifestName
+      , bindingName: MDNS_BINDING_NAME
     };
 
     fs.writeFileSync(specOutputPath
@@ -528,6 +544,7 @@ function packageWin32 (
       , executableName: platformExecutableName
       , executablePath: platformExecutablePath
       , manifestName
+      , bindingName: MDNS_BINDING_NAME
       , winRegistryKey: WIN_REGISTRY_KEY
       , outputName
       , licensePath: LICENSE_PATH
