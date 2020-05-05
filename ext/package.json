@@ -12,13 +12,13 @@
     },
     "devDependencies": {
         "@types/firefox-webext-browser": "^70.0.1",
-        "@types/react": "^16.9.17",
-        "@types/react-dom": "^16.9.4",
+        "@types/react": "^16.9.34",
+        "@types/react-dom": "^16.9.7",
         "copy-webpack-plugin": "^5.1.1",
-        "preact": "^8.5.3",
+        "preact": "^10.4.1",
         "preact-compat": "^3.19.0",
-        "ts-loader": "^6.2.1",
-        "web-ext": "^3.2.1",
-        "webpack": "^4.41.5"
+        "ts-loader": "^7.0.2",
+        "web-ext": "^4.2.0",
+        "webpack": "^4.43.0"
     }
 }

@@ -84,8 +84,8 @@ module.exports = (env) => ({
     }
   , resolve: {
         alias: {
-            "react": "preact-compat"
-          , "react-dom": "preact-compat"
+            "react": "preact/compat"
+          , "react-dom": "preact/compat"
         }
     }
 });
