@@ -22,6 +22,9 @@
         background-color: #202023 !important;
         color: white !important;
     }
+    .editable-list__item:not(.editable-list__item--selected) .editable-list__title {
+        padding: 0 8px !important;
+    }
     .editable-list__item:nth-child(even) {
         background-color: initial !important;
     }
@@ -114,7 +117,7 @@
 
 .bridge__status-title {
     margin: initial;
-    font-weight: 500;
+    font-weight: 600;
     font-size: 1.5em;
     white-space: nowrap;
 }
@@ -158,7 +161,7 @@
 }
 
 .bridge__stats th {
-    font-weight: 500;
+    font-weight: 600;
     padding-inline-end: 10px;
     text-align: end;
     vertical-align: top;
@@ -242,7 +245,7 @@
 
 .category__name > h2 {
     font-size: 1.15em;
-    font-weight: 500;
+    font-weight: 600;
     margin: initial;
 }
 
@@ -342,7 +345,7 @@
 .editable-list__item {
     align-items: center;
     display: flex;
-    height: 2em;
+    height: 30px;
     padding: 0 5px;
 }
 
@@ -365,13 +368,18 @@
     white-space: nowrap;
 }
 
+.editable-list__item:not(.editable-list__item--selected) > .editable-list__title {
+    padding: 0 5px;
+}
+
 .editable-list__title + button {
     margin-inline-end: 5px;
 }
 
 .editable-list__edit-field {
-    width: -moz-available;
+    font: inherit;
     margin-inline-end: 1em;
+    width: -moz-available;
 }
 
 .editable-list__raw-view {

@@ -97,6 +97,7 @@ export default class EditableListItem extends Component<
           , editValue: this.props.text
         }, () => {
             this.input?.focus();
+            this.input?.select();
         });
     }
 
