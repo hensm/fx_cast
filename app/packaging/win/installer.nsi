@@ -47,6 +47,17 @@ Section
     File "{{bindingName}}"
     File "{{manifestName}}"
 
+    # Install Bonjour
+    IfFileExists "$SYSDIR\dnssd.dll" endInstallBonjour beginInstallBonjour
+    Goto endInstallBonjour
+    beginInstallBonjour:
+    MessageBox MB_YESNO "Install Bonjour dependency?" /SD IDYES IDNO endInstallBonjour
+        File /oname=Bonjour64.msi "C:\Program Files\Bonjour SDK\Installer\Bonjour64.msi"
+        ExecWait '"msiexec" /i "$INSTDIR\Bonjour64.msi"'
+    endInstallBonjour:
+    Delete "$INSTDIR\Bonjour64.msi"
+
+
     # Native manifest key
     WriteRegStr HKLM "${KEY_MANIFEST}" "" "$INSTDIR\{{manifestName}}"
 
@@ -73,6 +84,7 @@ Section "uninstall"
     # Remove manifest and executable dir
     DeleteRegKey HKLM ${KEY_MANIFEST}
     Delete "$INSTDIR\{{executableName}}"
+    Delete "$INSTDIR\{{bindingName}}"
     Delete "$INSTDIR\{{manifestName}}"
     RMDir $INSTDIR
 SectionEnd

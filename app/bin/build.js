@@ -262,7 +262,7 @@ async function build () {
     }
 
     // Remove build directory
-    //fs.removeSync(BUILD_PATH);
+    fs.removeSync(BUILD_PATH);
 }
 
 /**
