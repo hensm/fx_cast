@@ -19,4 +19,5 @@ cp %{_distdir}/{{{manifestName}}} $RPM_BUILD_ROOT/{{{manifestPath}}}
 
 %files
 {{{executablePath}}}/{{{executableName}}}
+{{{executablePath}}}/{{{bindingName}}}
 {{{manifestPath}}}/{{{manifestName}}}
