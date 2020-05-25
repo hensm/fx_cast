@@ -32,7 +32,8 @@ ul {
 
 :root {
     color: var(--text-color-primary);
-    font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+    --system-font: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+    font-family: var(--system-font);
     font-size: 10px;
 }
 
@@ -67,7 +68,7 @@ body {
     align-items: flex-end;
     display: flex;
     flex-direction: column;
-    font-family: "SF Mono";
+    font-family: "SF Mono", var(--system-font);
     grid-area: header;
     justify-content: flex-end;
     margin-top: 5rem;
@@ -243,10 +244,10 @@ body {
     margin-top: 1rem;
 }
 
-.preview--fg[src="images/preview-fg_macOS_dark.png"],
-.preview--fg[src="images/preview-fg_macOS_dark@2x.png"],
-.preview--fg[src="images/preview-fg_macOS_light.png"],
-.preview--fg[src="images/preview-fg_macOS_light@2x.png"] {
+.preview--fg[src="images/preview-fg_dark.png"],
+.preview--fg[src="images/preview-fg_dark@2x.png"],
+.preview--fg[src="images/preview-fg_light.png"],
+.preview--fg[src="images/preview-fg_light@2x.png"] {
     transform: translate(-55px, -36px);
 }
 
@@ -266,7 +267,6 @@ body {
 
 .faq {
     box-sizing: content-box;
-    overflow-x: auto;
     
 }
 
@@ -277,6 +277,7 @@ body {
 .faq__summary {
     cursor: pointer;
     font-size: 1.1em;
+    font-weight: 600;
     padding: 1rem;
     -moz-user-select: none;
     -webkit-user-select: none;
@@ -284,7 +285,8 @@ body {
 }
 
 .faq__content {
-    max-width: 70rem;
+    max-width: 80rem;
+    overflow-x: auto;
     padding: 2rem;
     padding-top: 1rem;
 }
@@ -302,8 +304,7 @@ body {
 .faq__content code {
     background-color: var(--grey-90-a10);
     border-radius: 3px;
-    vertical-align: top;
-    word-break: break-all;
+    white-space: pre;
 }
 
 

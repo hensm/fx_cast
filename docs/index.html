@@ -66,14 +66,25 @@
                                 <summary class="faq__summary">How do I cast something?</summary>
                                 <div class="faq__content">
                                     <picture style="float: right">
-                                        <source alt="Media context menu"
+                                        <source type="image/webp"
+                                                srcset="images/webp/menu_light.webp,
+                                                        images/webp/menu_light@2x.webp 2x"
+                                                media="(prefers-color-scheme: light)">
+                                        <source type="image/webp"
+                                                srcset="images/webp/menu_dark.webp,
+                                                        images/webp/menu_dark@2x.webp 2x"
+                                                media="(prefers-color-scheme: dark)">
+                                        <source type="image/png"
                                                 srcset="images/menu_light.png,
                                                         images/menu_light@2x.png 2x"
                                                 media="(prefers-color-scheme: light)">
-                                        <img alt="Media context menu"
-                                             src="images/menu_dark.png"
-                                             srcset="images/menu_dark.png,
-                                                     images/menu_dark@2x.png 2x">
+                                        <source type="image/png"
+                                                srcset="images/menu_dark.png,
+                                                        images/menu_dark@2x.png 2x"
+                                                media="(prefers-color-scheme: dark)">
+
+                                        <img alt="Screenshot, media context menu."
+                                             src="images/menu_dark.png">
                                     </picture>
                                     <p>
                                         For sites with built-in cast support, click the cast button in the page and select the destination in the receiver selector popup. You may have to add the site to the whitelist to get the cast button to appear.
@@ -256,23 +267,41 @@
                 </section>
             </main>
 
-            <img class="preview preview--bg"
-                 alt="Screenshot preview, background"
-                 src="images/preview-bg.png"
-                 srcset="images/preview-bg.png,
-                         images/preview-bg@2x.png 2x">
+            <picture style="display: contents">
+                <source type="image/webp"
+                        srcset="images/webp/preview-bg.webp,
+                                images/webp/preview-bg@2x.webp 2x">
+                <source type="image/png"
+                        srcset="images/preview-bg.png,
+                                images/preview-bg@2x.png 2x">
+
+                <img class="preview preview--bg"
+                     alt="Screenshot preview (background), browser window."
+                     src="images/preview-bg.png">
+            </picture>
 
             <picture style="display: contents">
-                <source alt="Media context menu"
-                        srcset="images/preview-fg_macOS_light.png,
-                                images/preview-fg_macOS_light@2x.png 2x"
+                <source type="image/webp"
+                        srcset="images/webp/preview-fg_light.webp,
+                                images/webp/preview-fg_light@2x.webp 2x"
                         media="(prefers-color-scheme: light)">
+                <source type="image/webp"
+                        srcset="images/webp/preview-fg_dark.webp,
+                                images/webp/preview-fg_dark@2x.webp 2x"
+                        media="(prefers-color-scheme: dark)">
+                <source type="image/png"
+                        srcset="images/preview-fg_light.png,
+                                images/preview-fg_light@2x.png 2x"
+                        media="(prefers-color-scheme: light)">
+                <source type="image/png"
+                        srcset="images/preview-fg_dark.png,
+                                images/preview-fg_dark@2x.png 2x"
+                        media="(prefers-color-scheme: dark)">
+
                 <img class="preview preview--fg"
-                     alt="Media context menu"
+                     alt="Screenshot preview (foreground), receiver selector popup."
                      width="462" height="275"
-                     src="images/preview-fg_macOS_dark.png"
-                     srcset="images/preview-fg_macOS_dark.png,
-                             images/preview-fg_macOS_dark@2x.png 2x">
+                     src="images/preview-fg_dark.png">
             </picture>
 
             <footer class="footer">
