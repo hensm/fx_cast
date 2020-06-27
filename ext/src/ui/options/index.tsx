@@ -380,6 +380,9 @@ class OptionsApp extends Component<{}, OptionsAppState> {
                             </div>
                             <div className="option__label">
                                 { _("optionsUserAgentWhitelistEnabled") }
+                                <span className="option__recommended">
+                                    { _("optionsOptionRecommended") }
+                                </span>
                             </div>
                         </label>
 

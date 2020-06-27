@@ -374,6 +374,11 @@
       , "description": "Mirroring app ID option description."
     }
 
+  , "optionsOptionRecommended": {
+        "message": "recommended"
+      , "description": "Badge next to option label indicating boolean option is recommended enabled."
+    }
+
   , "optionsReset": {
         "message": "Restore Defaults"
       , "description": "Restore default options button label."

@@ -294,6 +294,15 @@
     display: inline-block;
 }
 
+.option__recommended {
+    background-color: var(--blue-60);
+    border-radius: 2px;
+    color: white;
+    font-size: smaller;
+    margin-inline-start: 5px;
+    padding: 0 5px;
+}
+
 .option__description {
     color: var(--secondary-color);
     font-size: smaller;
