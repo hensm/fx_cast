@@ -28,13 +28,16 @@ Missing/outdated strings:
     * `optionsBridgeBackupEnabled`
     * `optionsUserAgentWhitelistRestrictedEnabled`
     * `optionsUserAgentWhitelistRestrictedEnabledDescription`
+    * `optionsOptionRecommended`
 
 * `es`
     * `optionsBridgeBackupEnabled`
     * `optionsUserAgentWhitelistRestrictedEnabled`
     * `optionsUserAgentWhitelistRestrictedEnabledDescription`
+    * `optionsOptionRecommended`
 
 * `nl`
     * `optionsBridgeBackupEnabled`
     * `optionsUserAgentWhitelistRestrictedEnabled`
     * `optionsUserAgentWhitelistRestrictedEnabledDescription`
+    * `optionsOptionRecommended`
