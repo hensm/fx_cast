@@ -29,6 +29,11 @@ select {
     padding: 4px 8px;
 }
 
+/* No inset for spinbox control */
+input[type="number"] {
+    padding-inline-end: initial;
+}
+
 button,
 select {
     /* Override mac.css height */
