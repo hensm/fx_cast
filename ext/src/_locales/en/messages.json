@@ -314,6 +314,14 @@
         "message": "Enable site whitelist"
       , "description": "Whitelist enabled checkbox label."
     }
+  , "optionsUserAgentWhitelistRestrictedEnabled": {
+        "message": "Enable restricted mode"
+      , "description": "Whitelist restricted mode enabled checkbox label."
+    }
+  , "optionsUserAgentWhitelistRestrictedEnabledDescription": {
+        "message": "Also apply whitelist restrictions to sites attempting to load cast functionality regardless of the current user agent."
+      , "description": "Whitelist restricted mode enabled description."
+    }
   , "optionsUserAgentWhitelistContent": {
         "message": "Match patterns (newline-separated):"
       , "description": "Match patterns editor widget label."

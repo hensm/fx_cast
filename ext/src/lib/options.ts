@@ -30,6 +30,7 @@ export interface Options {
     receiverSelectorCloseIfFocusLost: boolean;
     receiverSelectorWaitForConnection: boolean;
     userAgentWhitelistEnabled: boolean;
+    userAgentWhitelistRestrictedEnabled: boolean;
     userAgentWhitelist: string[];
 
     [key: string]: Options[keyof Options];

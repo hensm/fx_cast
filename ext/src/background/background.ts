@@ -423,13 +423,119 @@ async function initMenus () {
 }
 
 
-async function initRequestListener () {
-    logger.info("init (request listener)");
+async function initWhitelist () {
+    logger.info("init (whitelist)");
 
+    // Missing on @types/firefox-webext-browser
+    type OnBeforeSendHeadersDetails = Parameters<Parameters<
+            typeof browser.webRequest.onBeforeSendHeaders.addListener>[0]>[0] & {
+        frameAncestors?: Array<{ url: string, frameId: number }>
+    };
     type OnBeforeRequestDetails = Parameters<Parameters<
-            typeof browser.webRequest.onBeforeRequest.addListener>[0]>[0];
+            typeof browser.webRequest.onBeforeRequest.addListener>[0]>[0] & {
+        frameAncestors?: Array<{ url: string, frameId: number }>
+    };
 
-    async function onBeforeRequest (details: OnBeforeRequestDetails) {
+
+    const originUrlCache: string[] = [];
+    const chromeUserAgent = getChromeUserAgent(
+            (await browser.runtime.getPlatformInfo()).os, true);
+
+    /**
+     * Web apps usually only load the sender library and
+     * provide cast functionality if the browser is detected
+     * as Chrome, so we should rewrite the User-Agent header
+     * to reflect this on whitelisted sites.
+     */
+    async function onWhitelistedBeforeSendHeaders (
+            details: OnBeforeSendHeadersDetails) {
+
+        if (!details.requestHeaders) {
+            throw logger.error("OnBeforeSendHeaders handler details missing requestHeaders.");
+        }
+
+        if (details.originUrl && !originUrlCache.includes(details.originUrl)) {
+            originUrlCache.push(details.originUrl);
+        }
+
+        const host = details.requestHeaders.find(
+                header => header.name === "Host");
+
+        for (const header of details.requestHeaders) {
+            if (header.name === "User-Agent") {
+                header.value = chromeUserAgent;
+                break;
+            }
+        }
+
+        return {
+            requestHeaders: details.requestHeaders
+        };
+    }
+
+    /**
+     * Requests from within child frames should also adopt
+     * the modified User-Agent header to support embedded
+     * players on other origins (like CDN domains) when the
+     * main site is whitelisted.
+     */
+    function onWhitelistedChildBeforeSendHeaders (
+            details: OnBeforeSendHeadersDetails) {
+
+        if (!details.requestHeaders || !details.frameAncestors) {
+            return;
+        }
+
+        for (const ancestor of details.frameAncestors) {
+            if (originUrlCache.includes(ancestor.url)) {
+                for (const header of details.requestHeaders) {
+                    if (header.name === "User-Agent") {
+                        header.value = chromeUserAgent;
+                        break;
+                    }
+                }
+
+                return {
+                    requestHeaders: details.requestHeaders
+                };
+            }
+        }
+    }
+
+
+    /**
+     * Sender applications load a cast_sender.js script that
+     * functions as a loader for the internal chrome-extension:
+     * hosted script.
+     *
+     * We can redirect this and inject our own script to setup
+     * the API shim.
+     */
+    async function onBeforeCastSDKRequest (details: OnBeforeRequestDetails) {
+        if (!details.originUrl) {
+            return;
+        }
+
+        // Check against whitelist if restricted mode is enabled
+        if (await options.get("userAgentWhitelistRestrictedEnabled")) {
+            if (!details?.frameAncestors?.length) {
+                if (!originUrlCache.includes(details.originUrl)) {
+                    return;
+                }
+            } else {
+                let hasMatchingAncestor = false;
+                for (const ancestor of details.frameAncestors) {
+                    if (originUrlCache.includes(ancestor.url)) {
+                        hasMatchingAncestor = true;
+                    }
+                }
+
+                if (!hasMatchingAncestor) {
+                    return;
+                }
+            }
+        }
+
         await browser.tabs.executeScript(details.tabId, {
             code: `
                 window.isFramework = ${
@@ -450,114 +556,42 @@ async function initRequestListener () {
         };
     }
 
-    /**
-     * Sender applications load a cast_sender.js script that
-     * functions as a loader for the internal chrome-extension:
-     * hosted script.
-     *
-     * We can redirect this and inject our own script to setup
-     * the API shim.
-     */
-    browser.webRequest.onBeforeRequest.addListener(
-            onBeforeRequest
-          , { urls: [
-                CAST_LOADER_SCRIPT_URL
-              , CAST_FRAMEWORK_LOADER_SCRIPT_URL ]}
-          , [ "blocking" ]);
-}
-
-
-async function initWhitelist () {
-    logger.info("init (whitelist)");
-
-    type OnBeforeSendHeadersDetails = Parameters<Parameters<
-            typeof browser.webRequest.onBeforeSendHeaders.addListener>[0]>[0] & {
-        // Missing on @types/firefox-webext-browser
-        frameAncestors?: Array<{ url: string, frameId: number }>
-    };
-
-    const originUrlCache: string[] = [];
-    const chromeUserAgent = getChromeUserAgent(
-            (await browser.runtime.getPlatformInfo()).os, true);
-
-    /**
-     * Web apps usually only load the sender library and
-     * provide cast functionality if the browser is detected
-     * as Chrome, so we should rewrite the User-Agent header
-     * to reflect this on whitelisted sites.
-     */
-    async function onBeforeSendHeaders (details: OnBeforeSendHeadersDetails) {
-        if (!details.requestHeaders) {
-            throw logger.error("OnBeforeSendHeaders handler details missing requestHeaders.");
-        }
-
-        if (details.originUrl && !originUrlCache.includes(details.originUrl)) {
-            originUrlCache.push(details.originUrl);
-        }
-
-        const host = details.requestHeaders.find(
-                header => header.name === "Host");
-
-        for (const header of details.requestHeaders) {
-            const { os } = await browser.runtime.getPlatformInfo();
-
-            if (header.name === "User-Agent") {
-                header.value = chromeUserAgent;
-                break;
-            }
-        }
-
-        return {
-            requestHeaders: details.requestHeaders
-        };
-    }
-
-    function handleResourceRequests (details: OnBeforeSendHeadersDetails) {
-        if (!details.requestHeaders || !details.frameAncestors) {
-            return;
-        }
-
-        for (const ancestor of details.frameAncestors) {
-            if (originUrlCache.includes(ancestor.url)) {
-                for (const header of details.requestHeaders) {
-                    if (header.name === "User-Agent") {
-                        header.value = chromeUserAgent;
-                    }
-                }
-
-                return {
-                    requestHeaders: details.requestHeaders
-                };
-            }
-        }
-    }
 
     async function registerUserAgentWhitelist () {
         const { userAgentWhitelist
               , userAgentWhitelistEnabled } = await options.getAll();
 
-        if (!userAgentWhitelistEnabled) {
+        browser.webRequest.onBeforeRequest.addListener(
+                onBeforeCastSDKRequest
+              , { urls: [
+                    CAST_LOADER_SCRIPT_URL
+                  , CAST_FRAMEWORK_LOADER_SCRIPT_URL ]}
+              , [ "blocking" ]);
+
+        if (!userAgentWhitelistEnabled || !userAgentWhitelist.length) {
             return;
         }
 
         browser.webRequest.onBeforeSendHeaders.addListener(
-                handleResourceRequests
-              , { urls: [ "<all_urls>" ] }
-              , [ "blocking", "requestHeaders" ]);
-
-        browser.webRequest.onBeforeSendHeaders.addListener(
-                onBeforeSendHeaders
+                onWhitelistedBeforeSendHeaders
               , { urls: userAgentWhitelist }
               , [  "blocking", "requestHeaders" ]);
+
+        browser.webRequest.onBeforeSendHeaders.addListener(
+                onWhitelistedChildBeforeSendHeaders
+              , { urls: [ "<all_urls>" ] }
+              , [ "blocking", "requestHeaders" ]);
     }
 
     function unregisterUserAgentWhitelist () {
         originUrlCache.length = 0;
 
         browser.webRequest.onBeforeSendHeaders
-                .removeListener(handleResourceRequests);
+                .removeListener(onWhitelistedBeforeSendHeaders);
         browser.webRequest.onBeforeSendHeaders
-                .removeListener(onBeforeSendHeaders);
+                .removeListener(onWhitelistedChildBeforeSendHeaders);
+        browser.webRequest.onBeforeRequest
+                .removeListener(onBeforeCastSDKRequest);
     }
 
     // Register on first run
@@ -674,7 +708,6 @@ async function init () {
     await ShimManager.init();
 
     await initMenus();
-    await initRequestListener();
     await initWhitelist();
     await initMediaOverlay();
     await initBrowserAction();

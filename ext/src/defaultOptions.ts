@@ -21,6 +21,7 @@ export default {
   , receiverSelectorCloseIfFocusLost: true
   , receiverSelectorWaitForConnection: true
   , userAgentWhitelistEnabled: true
+  , userAgentWhitelistRestrictedEnabled: true
   , userAgentWhitelist: [
         "https://www.netflix.com/*"
     ]

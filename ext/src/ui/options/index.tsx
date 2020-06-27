@@ -386,6 +386,24 @@ class OptionsApp extends Component<{}, OptionsAppState> {
                             </div>
                         </label>
 
+                        <label className="option option--inline">
+                            <div className="option__control">
+                                <input name="userAgentWhitelistRestrictedEnabled"
+                                       type="checkbox"
+                                       checked={ this.state.options?.userAgentWhitelistRestrictedEnabled }
+                                       onChange={ this.handleInputChange } />
+                            </div>
+                            <div className="option__label">
+                                { _("optionsUserAgentWhitelistRestrictedEnabled") }
+                                <span className="option__recommended">
+                                    { _("optionsOptionRecommended") }
+                                </span>
+                            </div>
+                            <div className="option__description">
+                                { _("optionsUserAgentWhitelistRestrictedEnabledDescription") }
+                            </div>
+                        </label>
+
                         <div className="option">
                             <div className="option__label">
                                 { _("optionsUserAgentWhitelistContent") }
