@@ -513,14 +513,14 @@ async function initWhitelist () {
      */
     async function onBeforeCastSDKRequest (details: OnBeforeRequestDetails) {
         if (!details.originUrl) {
-            return;
+            return {};
         }
 
         // Check against whitelist if restricted mode is enabled
         if (await options.get("userAgentWhitelistRestrictedEnabled")) {
             if (!details?.frameAncestors?.length) {
                 if (!originUrlCache.includes(details.originUrl)) {
-                    return;
+                    return {};
                 }
             } else {
                 let hasMatchingAncestor = false;
@@ -531,7 +531,7 @@ async function initWhitelist () {
                 }
 
                 if (!hasMatchingAncestor) {
-                    return;
+                    return {};
                 }
             }
         }
