@@ -309,7 +309,7 @@
       , "description": "Whitelist enabled checkbox label."
     }
   , "optionsUserAgentWhitelistContent": {
-        "message": "Patrones de coincidencia (uno por línea):"
+        "message": "Patrones de coincidencia:"
       , "description": "Match patterns editor widget label."
     }
   , "optionsUserAgentWhitelistBasicView": {

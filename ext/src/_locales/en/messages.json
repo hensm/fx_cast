@@ -323,7 +323,7 @@
       , "description": "Whitelist restricted mode enabled description."
     }
   , "optionsUserAgentWhitelistContent": {
-        "message": "Match patterns (newline-separated):"
+        "message": "Match patterns:"
       , "description": "Match patterns editor widget label."
     }
   , "optionsUserAgentWhitelistBasicView": {

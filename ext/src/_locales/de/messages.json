@@ -309,7 +309,7 @@
       , "description": "Whitelist enabled checkbox label."
     }
   , "optionsUserAgentWhitelistContent": {
-        "message": "Suchmuster (Eins pro Zeile):"
+        "message": "Suchmuster:"
       , "description": "Match patterns editor widget label."
     }
   , "optionsUserAgentWhitelistBasicView": {

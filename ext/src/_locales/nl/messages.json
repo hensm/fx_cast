@@ -294,7 +294,7 @@
         "description": "Whitelist enabled checkbox label."
     },
     "optionsUserAgentWhitelistContent": {
-        "message": "Patronen (gescheiden door een nieuwe regel):",
+        "message": "Patronen:",
         "description": "Match patterns editor widget label."
     },
     "optionsUserAgentWhitelistBasicView": {
