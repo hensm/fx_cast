@@ -38,6 +38,8 @@ body {
 }
 
 .media-select__dropdown {
+    padding-top: 0;
+    padding-bottom: 0;
     display: inline-block;
 }
 

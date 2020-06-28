@@ -160,16 +160,6 @@ class PopupApp extends Component<{}, PopupAppState> {
                                             & ReceiverSelectorMediaType.Screen) }>
                                 { _("popupMediaTypeScreen") }
                             </option>
-                            <option disabled>
-                                ─────
-                            </option>
-                            <option value={ ReceiverSelectorMediaType.File }
-                                    disabled={ !(this.state.availableMediaTypes
-                                            & ReceiverSelectorMediaType.File) }>
-                                { this.state.filePath
-                                    ? truncatedFileName!
-                                    : _("popupMediaTypeFile") }
-                            </option>
                         </select>
                     </div>
                     <div className="media-select__label-to">
