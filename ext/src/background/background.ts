@@ -139,10 +139,11 @@ async function initMenus () {
             }
 
             const whitelist = await options.get("userAgentWhitelist");
-
-            // Add to whitelist and update options
-            whitelist.push(pattern);
-            await options.set("userAgentWhitelist", whitelist);
+            if (!whitelist.includes(pattern)) {
+                // Add to whitelist and update options
+                whitelist.push(pattern);
+                await options.set("userAgentWhitelist", whitelist);
+            }
 
             return;
         }
