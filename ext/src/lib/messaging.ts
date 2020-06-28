@@ -18,7 +18,7 @@ export type Messages = [
     {
         subject: "popup:/sendRequestedAppId"
       , data: {
-            requestedAppId: string;
+            requestedAppId?: string;
         }
     }
   , {

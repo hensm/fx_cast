@@ -56,7 +56,7 @@ export default class PopupReceiverSelector extends ReceiverSelector {
             receivers: Receiver[]
           , defaultMediaType: ReceiverSelectorMediaType
           , availableMediaTypes: ReceiverSelectorMediaType
-          , requestedAppId: string): Promise<void> {
+          , requestedAppId?: string): Promise<void> {
 
         this.requestedAppId = requestedAppId;
 
@@ -145,8 +145,7 @@ export default class PopupReceiverSelector extends ReceiverSelector {
             this.messagePortDisconnected = true;
         });
 
-        if (!this.requestedAppId
-         || !this.receivers
+        if (!this.receivers
          || !this.defaultMediaType
          || !this.availableMediaTypes) {
             throw logger.error("Popup receiver data not found.");

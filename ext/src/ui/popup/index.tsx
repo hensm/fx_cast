@@ -78,10 +78,9 @@ class PopupApp extends Component<{}, PopupAppState> {
                 }
 
                 case "popup:/populateReceiverList": {
-                    const { receivers, availableMediaTypes, defaultMediaType }
-                        : { receivers: Receiver[]
-                          , availableMediaTypes: ReceiverSelectorMediaType
-                          , defaultMediaType: ReceiverSelectorMediaType } = message.data;
+                    const { receivers
+                          , availableMediaTypes
+                          , defaultMediaType } = message.data;
 
                     this.defaultMediaType = defaultMediaType;
 

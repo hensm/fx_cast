@@ -204,7 +204,7 @@ async function getSelection (
                 Array.from(StatusManager.getReceivers())
               , defaultMediaType
               , availableMediaTypes
-              , currentShim?.requestedAppId ?? DEFAULT_MEDIA_RECEIVER_APP_ID);
+              , currentShim?.requestedAppId);
     });
 }
 

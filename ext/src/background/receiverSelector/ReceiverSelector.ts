@@ -45,7 +45,7 @@ export default abstract class ReceiverSelector
     abstract open (receivers: Receiver[]
         , defaultMediaType: ReceiverSelectorMediaType
         , availableMediaTypes: ReceiverSelectorMediaType
-        , requestedAppId: string): void;
+        , requestedAppId?: string): void;
 
     abstract close (): void;
 }
