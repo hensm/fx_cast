@@ -1,8 +1,7 @@
 "use strict";
 
 import ReceiverSelector, {
-        ReceiverSelectorEvents
-      , ReceiverSelectorMediaType } from "./ReceiverSelector";
+        ReceiverSelectorMediaType } from "./ReceiverSelector";
 
 import logger from "../../lib/logger";
 import messaging, { Port, Message } from "../../lib/messaging";
@@ -15,10 +14,7 @@ import { Receiver } from "../../types";
 
 const POPUP_URL = browser.runtime.getURL("ui/popup/index.html");
 
-export default class PopupReceiverSelector
-        extends TypedEventTarget<ReceiverSelectorEvents>
-        implements ReceiverSelector {
-
+export default class PopupReceiverSelector extends ReceiverSelector {
     private windowId?: number;
 
     private messagePort?: Port;

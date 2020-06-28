@@ -30,22 +30,22 @@ export interface ReceiverSelectionStop {
 export type ReceiverSelection = ReceiverSelectionCast | ReceiverSelectionStop;
 
 
-export interface ReceiverSelectorEvents {
+interface ReceiverSelectorEvents {
     "selected": ReceiverSelectionCast;
     "error": string;
     "cancelled": void;
     "stop": ReceiverSelectionStop;
 }
 
-export default interface ReceiverSelector
+export default abstract class ReceiverSelector
         extends TypedEventTarget<ReceiverSelectorEvents> {
 
-    readonly isOpen: boolean;
+    abstract readonly isOpen: boolean;
 
-    open (receivers: Receiver[]
+    abstract open (receivers: Receiver[]
         , defaultMediaType: ReceiverSelectorMediaType
         , availableMediaTypes: ReceiverSelectorMediaType
         , requestedAppId: string): void;
 
-    close (): void;
+    abstract close (): void;
 }

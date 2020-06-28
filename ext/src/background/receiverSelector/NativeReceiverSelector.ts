@@ -12,17 +12,13 @@ import { Receiver } from "../../types";
 
 import ReceiverSelector, {
         ReceiverSelection
-      , ReceiverSelectorEvents
       , ReceiverSelectorMediaType } from "./ReceiverSelector";
 
 
 const _ = browser.i18n.getMessage;
 
 // TODO: Figure out lifetime properly
-export default class NativeReceiverSelector
-        extends TypedEventTarget<ReceiverSelectorEvents>
-        implements ReceiverSelector {
-
+export default class NativeReceiverSelector extends ReceiverSelector {
     private bridgePort: (Port | null) = null;
     private wasReceiverSelected: boolean = false;
     private _isOpen: boolean = false;
