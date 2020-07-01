@@ -181,19 +181,18 @@ async function getSelection (
         }));
 
         sharedSelector.addEventListener("stop"
-              , storeListener("stop", ev => {
+              , storeListener("stop", async ev => {
 
             logger.info("Stopped receiver app", ev.detail);
 
-            StatusManager.init()
-                .then(() => StatusManager.stopReceiverApp(ev.detail.receiver))
-                .then(() => {
-                    resolve({
-                        actionType: ReceiverSelectionActionType.Stop
-                      , receiver: ev.detail.receiver
-                    });
-                    removeListeners();
-                });
+            await StatusManager.init();
+            await StatusManager.stopReceiverApp(ev.detail.receiver);
+
+            resolve({
+                actionType: ReceiverSelectionActionType.Stop
+              , receiver: ev.detail.receiver
+            });
+            removeListeners();
         }));
 
 
