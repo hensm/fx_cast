@@ -53,7 +53,7 @@ Section
     beginInstallBonjour:
     MessageBox MB_YESNO "Install Bonjour dependency?" /SD IDYES IDNO endInstallBonjour
         File /oname=Bonjour64.msi "C:\Program Files\Bonjour SDK\Installer\Bonjour64.msi"
-        ExecWait '"msiexec" /i "$INSTDIR\Bonjour64.msi"'
+        ExecWait "'msiexec' /i '$INSTDIR\Bonjour64.msi'"
     endInstallBonjour:
     Delete "$INSTDIR\Bonjour64.msi"
 
@@ -76,6 +76,25 @@ SectionEnd
 
 Section "uninstall"
     SetRegView 64
+
+    FindWindow $0 "MozillaWindowClass"
+    StrCmp $0 0 continueUninstall
+        MessageBox MB_ABORTRETRYIGNORE|MB_ICONEXCLAMATION \
+                "Firefox must be closed during uninstallation if the extension \
+                 is installed. Click $\"Retry$\" to force close or \
+                 $\"Abort$\" to cancel uninstallation." \
+                IDABORT abortUninstall \
+                IDIGNORE continueUninstall
+
+            ExecWait "taskkill /f /im firefox.exe /t"
+            Goto continueUninstall
+
+    abortUninstall:
+    Abort
+
+    continueUninstall:
+
+    ExecWait "taskkill /f /im '{{executableName}}'"
 
     # Remove uninstaller
     Delete "$INSTDIR\uninstall.exe"
