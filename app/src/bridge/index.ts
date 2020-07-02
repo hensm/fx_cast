@@ -483,7 +483,17 @@ async function handleMediaServerMessage (message: Message) {
 
 
 function initialize (options: InitializeOptions) {
-    browser = new mdns.Browser(mdns.tcp("googlecast"))
+    browser = mdns.createBrowser(mdns.tcp("googlecast"), {
+        resolverSequence: [
+            mdns.rst.DNSServiceResolve()
+          , "DNSServiceGetAddrInfo" in mdns.dns_sd
+                ? mdns.rst.DNSServiceGetAddrInfo()
+                  // Some issues on Linux with IPv6, so restrict to IPv4
+                : mdns.rst.getaddrinfo({ families: [ 4 ] })
+          , mdns.rst.makeAddressesUnique()
+        ]
+    });
+
     browser.on("error", (err: any) => {
         console.error("Discovery failed", err);
     });
