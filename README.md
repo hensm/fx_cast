@@ -52,11 +52,13 @@ Cross-compiling native depedencies may be possible, but isn't tested or supporte
 #### Debian / Ubuntu:
 ````sh
 sudo apt install libavahi-compat-libdnssd-dev dpkg rpm
+# Runtime: avahi-daemon
 ````
 
 #### Fedora:
 ````sh
 sudo dnf install avahi-compat-libdns_sd-devel dpkg rpm-build
+# Runtime: avahi nss-mdns
 ````
 
 #### Arch Linux:
