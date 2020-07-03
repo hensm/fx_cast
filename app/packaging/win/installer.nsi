@@ -1,7 +1,17 @@
 Unicode True
 SetCompressor /SOLID LZMA
 
+# Registry keys
+!define KEY_MANIFEST "Software\Mozilla\NativeMessagingHosts\{{applicationName}}"
+!define KEY_UNINSTALL "Software\Microsoft\Windows\CurrentVersion\Uninstall\{{winRegistryKey}}"
+
+
 !include MUI2.nsh
+
+# Save installer language for uninstallation
+!define MUI_LANGDLL_REGISTRY_ROOT HKLM
+!define MUI_LANGDLL_REGISTRY_KEY "${KEY_MANIFEST}"
+!define MUI_LANGDLL_REGISTRY_VALUENAME "Installer Language"
 
 # MUI general
 !define MUI_ABORTWARNING
@@ -17,12 +27,18 @@ SetCompressor /SOLID LZMA
 !insertmacro MUI_UNPAGE_INSTFILES
 !insertmacro MUI_UNPAGE_FINISH
 
+
+# Translator note: see CONTRIBUTING for more info on how to
+# translate NSIS installer strings.
 !insertmacro MUI_LANGUAGE "English"
 
-
-# Registry keys
-!define KEY_MANIFEST "Software\Mozilla\NativeMessagingHosts\{{applicationName}}"
-!define KEY_UNINSTALL "Software\Microsoft\Windows\CurrentVersion\Uninstall\{{winRegistryKey}}"
+LangString MSG__INSTALL_BONJOUR ${LANG_ENGLISH} \
+        "Install Bonjour dependency?"
+LangString MSG__FIREFOX_OPEN ${LANG_ENGLISH} \
+        "Firefox must be closed during uninstallation if the extension \
+         is installed. Close Firefox and click $\"Retry$\", click \
+         $\"Ignore$\" to force close or $\"Abort$\" to cancel \
+         uninstallation."
 
 
 # Application name
@@ -52,12 +68,12 @@ Section
 
     # Install Bonjour
     IfFileExists "$SYSDIR\dnssd.dll" skipInstallBonjour
-    MessageBox MB_YESNO \
-            "Install Bonjour dependency?" \
-            IDNO skipInstallBonjour
+        MessageBox MB_YESNO \
+                $(MSG__INSTALL_BONJOUR) \
+                IDNO skipInstallBonjour
 
-        File /oname=Bonjour64.msi "C:\Program Files\Bonjour SDK\Installer\Bonjour64.msi"
-        ExecWait "msiexec /i $\"$INSTDIR\Bonjour64.msi$\""
+            File /oname=Bonjour64.msi "C:\Program Files\Bonjour SDK\Installer\Bonjour64.msi"
+            ExecWait "msiexec /i $\"$INSTDIR\Bonjour64.msi$\""
 
     skipInstallBonjour:
     Delete "$INSTDIR\Bonjour64.msi"
@@ -85,10 +101,7 @@ Section "uninstall"
     FindWindow $0 "MozillaWindowClass"
     StrCmp $0 0 continueUninstall
         MessageBox MB_ABORTRETRYIGNORE|MB_ICONEXCLAMATION \
-                "Firefox must be closed during uninstallation if the extension \
-                 is installed. Close Firefox and click $\"Retry$\", click \
-                 $\"Ignore$\" to force close or $\"Abort$\" to cancel \
-                 uninstallation." \
+                $(MSG__FIREFOX_OPEN) \
                 IDABORT abortUninstall \
                 IDRETRY retryUninstall
 

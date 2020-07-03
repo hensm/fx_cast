@@ -41,3 +41,21 @@ Missing/outdated strings:
     * `optionsUserAgentWhitelistRestrictedEnabled`
     * `optionsUserAgentWhitelistRestrictedEnabledDescription`
     * `optionsOptionRecommended`
+
+
+### NSIS Installer Localization
+
+If you're comfortable editing and compiling NSIS installer scripts, use the following guide, otherwise just provide translated strings in an issue or PR comment.
+
+To localize Windows installer strings, first add the relevant `MUI_LANGUAGE` macro to the end of the existing list (list of language names can be found [here](https://sourceforge.net/p/nsis/code/HEAD/tree/NSIS/trunk/Contrib/Language%20files/)):
+````nsi
+!insertmacro MUI_LANGUAGE "German"
+````
+Then, provide each version of the existing `LangString` commands with that language grouped under the existing strings:
+````nsi
+LangString MSG__EXAMPLE_STRING1 ${LANG_GERMAN} "Hallo"
+LangString MSG__EXAMPLE_STRING2 ${LANG_GERMAN} "Welt"
+````
+
+Try to keep the line length under 80 characters by splitting lines within the string with a backslash at the end of the line and a double indent on the next line. To escape characters (like other double quotes), prepend with a `$\`.
+
