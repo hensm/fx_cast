@@ -30,12 +30,6 @@ Missing/outdated strings:
     * `optionsUserAgentWhitelistRestrictedEnabledDescription`
     * `optionsOptionRecommended`
 
-* `es`
-    * `optionsBridgeBackupEnabled`
-    * `optionsUserAgentWhitelistRestrictedEnabled`
-    * `optionsUserAgentWhitelistRestrictedEnabledDescription`
-    * `optionsOptionRecommended`
-
 * `nl`
     * `optionsBridgeBackupEnabled`
     * `optionsUserAgentWhitelistRestrictedEnabled`
