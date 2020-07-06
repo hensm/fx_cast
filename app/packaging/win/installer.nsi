@@ -1,4 +1,4 @@
-Unicode True
+﻿Unicode True
 SetCompressor /SOLID LZMA
 
 # Registry keys
@@ -31,14 +31,24 @@ SetCompressor /SOLID LZMA
 # Translator note: see CONTRIBUTING for more info on how to
 # translate NSIS installer strings.
 !insertmacro MUI_LANGUAGE "English"
+!insertmacro MUI_LANGUAGE "Spanish"
 
+# lang:en
 LangString MSG__INSTALL_BONJOUR ${LANG_ENGLISH} \
         "Install Bonjour dependency?"
 LangString MSG__FIREFOX_OPEN ${LANG_ENGLISH} \
-        "Firefox must be closed during uninstallation if the extension \
-         is installed. Close Firefox and click $\"Retry$\", click \
-         $\"Ignore$\" to force close or $\"Abort$\" to cancel \
-         uninstallation."
+        "Firefox must be closed during uninstallation if the extension is \
+        installed. Close Firefox and click $\"Retry$\", click $\"Ignore$\" \
+        to force close or $\"Abort$\" to cancel uninstallation."
+
+# lang:es
+LangString MSG__INSTALL_BONJOUR ${LANG_SPANISH} \
+        "¿Instalar dependencia Bonjour?"
+LangString MSG__FIREFOX_OPEN ${LANG_SPANISH} \
+        "Firefox debe estar cerrado durante la desinstalación si la extensión \
+        está instalada. Cierra Firefox y aprieta $\"Reintentar$\", aprieta \
+        $\"Ignorar$\" para forzar el cierre o $\"Abortar$\" para cancelar la \
+        desinstalación."
 
 
 # Application name
