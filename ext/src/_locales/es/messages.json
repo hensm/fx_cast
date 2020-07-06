@@ -202,7 +202,7 @@
     }
 
   , "optionsBridgeBackupEnabled": {
-        "message": "Activar conexión de demonio de respaldo"
+        "message": "Activar conexión de demonio de respaldo en $hostPort$"
       , "description": "Backup daemon checkbox label."
     }
   , "optionsBridgeBackupEnabledDescription": {
@@ -308,6 +308,14 @@
         "message": "Activar lista blanca de sitios"
       , "description": "Whitelist enabled checkbox label."
     }
+  , "optionsUserAgentWhitelistRestrictedEnabled": {
+        "message": "Activar modo restringido",
+        "description": "Whitelist restricted mode enabled checkbox label.",
+    }
+  ,  "optionsUserAgentWhitelistRestrictedEnabledDescription": {
+        "message": "También aplica restricciones de la lista blanca a sitios intentando cargar la funcionalidad de transmisión sin importar el agente de usuario actual.",
+        "description": "Whitelist restricted mode enabled description.",
+    }
   , "optionsUserAgentWhitelistContent": {
         "message": "Patrones de coincidencia:"
       , "description": "Match patterns editor widget label."
@@ -367,7 +375,11 @@
         "message": "ID de aplicación para una aplicación receptora de Chromecast registrada. Solo para uso avanzado. Debe ser compatible con la app predeterminada (véase el repositorio de GitHub)."
       , "description": "Mirroring app ID option description."
     }
-
+  , "optionsOptionRecommended": {
+        "message": "recomendado",
+        "description": "Badge next to option label indicating boolean option is recommended enabled.",
+        "hash": "cb7a5f6614a279d34d8bb57dae48bdbd"
+    }
   , "optionsReset": {
         "message": "Restaurar predeterminados"
       , "description": "Restore default options button label."
