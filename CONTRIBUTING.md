@@ -59,3 +59,4 @@ LangString MSG__EXAMPLE_STRING2 ${LANG_GERMAN} "Welt"
 
 Try to keep the line length under 80 characters by splitting lines within the string with a backslash at the end of the line and a double indent on the next line. To escape characters (like other double quotes), prepend with a `$\`.
 
+Ensure the installer script file is saved as UTF-8 with BOM.
