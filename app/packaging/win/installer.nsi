@@ -47,7 +47,7 @@ LangString MSG__INSTALL_BONJOUR ${LANG_SPANISH} \
 LangString MSG__FIREFOX_OPEN ${LANG_SPANISH} \
         "Firefox debe estar cerrado durante la desinstalación si la extensión \
         está instalada. Cierra Firefox y aprieta $\"Reintentar$\", aprieta \
-        $\"Ignorar$\" para forzar el cierre o $\"Abortar$\" para cancelar la \
+        $\"Omitir$\" para forzar el cierre o $\"Anular$\" para cancelar la \
         desinstalación."
 
 
