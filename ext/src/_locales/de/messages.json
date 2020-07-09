@@ -201,8 +201,14 @@
     }
 
   , "optionsBridgeBackupEnabled": {
-        "message": "Aktiviere Ausweich-Daemon-Verbindung"
-      , "description": "Backup daemon checkbox label."
+        "message": "Aktiviere Ausweich-Daemon-Verbindung auf $hostPort$"
+      , "description": "Backup daemon checkbox label. Host/port inputs are inserted inline at the hostPort substitution."
+      , "placeholders": {
+            "hostPort": {
+                "content": "$1"
+            }
+        }
+    }
     }
   , "optionsBridgeBackupEnabledDescription": {
         "message": "Versuchen zur Bridge im Daemon-Modus zu verbinden, wenn die reguläre Bridge-Verbindung fehlschlägt."
@@ -301,12 +307,20 @@
       , "description": "Options page whitelist category title."
     }
   , "optionsUserAgentWhitelistCategoryDescription": {
-        "message": "Seiten auf denen der Useragent aus kompatibilitätsgründen mit einer Chrome-Version ersetzt wird. Suchmuster müssen gültig sein."
+        "message": "Seiten auf denen der Useragent aus Kompatibilitätsgründen mit einer Chrome-Version ersetzt wird. Suchmuster müssen gültig sein."
       , "description": "Options page whitelist category description."
     }
   , "optionsUserAgentWhitelistEnabled": {
         "message": "Webseiten-Whitelist aktivieren"
       , "description": "Whitelist enabled checkbox label."
+    }
+  , "optionsUserAgentWhitelistRestrictedEnabled": {
+        "message": "Eingeschränkten Modus aktivieren"
+      , "description": "Whitelist restricted mode enabled checkbox label."
+    }
+  , "optionsUserAgentWhitelistRestrictedEnabledDescription": {
+        "message": "Whitelist-Einschränkungen auch auf Seiten anwenden, die unabhängig vom aktuellen Useragent versuchen Stream-Funktionen zu laden."
+      , "description": "Whitelist restricted mode enabled description."
     }
   , "optionsUserAgentWhitelistContent": {
         "message": "Suchmuster:"
@@ -366,6 +380,11 @@
   , "optionsMirroringAppIdDescription": {
         "message": "App-ID einer registrierten Chromecast-Empfängeranwendung. Nur für fortgeschrittene Anwender. Muss mit der Standard-App kompatibel sein (siehe GitHub-Repository)."
       , "description": "Mirroring app ID option description."
+    }
+
+  , "optionsOptionRecommended": {
+        "message": "Empfohlen"
+      , "description": "Badge next to option label indicating boolean option is recommended enabled."
     }
 
   , "optionsReset": {

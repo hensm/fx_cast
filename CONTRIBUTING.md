@@ -24,12 +24,6 @@ https://lusito.github.io/web-ext-translator/?gh=https://github.com/hensm/fx_cast
 
 Missing/outdated strings:
 
-* `de`
-    * `optionsBridgeBackupEnabled`
-    * `optionsUserAgentWhitelistRestrictedEnabled`
-    * `optionsUserAgentWhitelistRestrictedEnabledDescription`
-    * `optionsOptionRecommended`
-
 * `nl`
     * `optionsBridgeBackupEnabled`
     * `optionsUserAgentWhitelistRestrictedEnabled`
