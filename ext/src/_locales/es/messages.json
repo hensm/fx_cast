@@ -309,12 +309,12 @@
       , "description": "Whitelist enabled checkbox label."
     }
   , "optionsUserAgentWhitelistRestrictedEnabled": {
-        "message": "Activar modo restringido",
-        "description": "Whitelist restricted mode enabled checkbox label.",
+        "message": "Activar modo restringido"
+      , "description": "Whitelist restricted mode enabled checkbox label."
     }
   ,  "optionsUserAgentWhitelistRestrictedEnabledDescription": {
-        "message": "También aplica restricciones de la lista blanca a sitios intentando cargar la funcionalidad de transmisión sin importar el agente de usuario actual.",
-        "description": "Whitelist restricted mode enabled description.",
+        "message": "También aplica restricciones de la lista blanca a sitios intentando cargar la funcionalidad de transmisión sin importar el agente de usuario actual."
+      , "description": "Whitelist restricted mode enabled description."
     }
   , "optionsUserAgentWhitelistContent": {
         "message": "Patrones de coincidencia:"
