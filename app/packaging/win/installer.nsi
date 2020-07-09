@@ -32,6 +32,7 @@ SetCompressor /SOLID LZMA
 # translate NSIS installer strings.
 !insertmacro MUI_LANGUAGE "English"
 !insertmacro MUI_LANGUAGE "Spanish"
+!insertmacro MUI_LANGUAGE "German"
 
 # lang:en
 LangString MSG__INSTALL_BONJOUR ${LANG_ENGLISH} \
@@ -49,6 +50,15 @@ LangString MSG__FIREFOX_OPEN ${LANG_SPANISH} \
         está instalada. Cierra Firefox y aprieta $\"Reintentar$\", aprieta \
         $\"Omitir$\" para forzar el cierre o $\"Anular$\" para cancelar la \
         desinstalación."
+
+# lang:de
+LangString MSG__INSTALL_BONJOUR ${LANG_GERMAN} \
+        "Bonjour installieren?"
+LangString MSG__FIREFOX_OPEN ${LANG_GERMAN} \
+        "Firefox muss während der Deinstallation geschlossen werden, wenn die \
+        Erweiterung installiert ist. Schließen Sie Firefox und klicken Sie auf \
+        $\"Wiederholen$\", klicken Sie auf $\"Ignorieren$\". um das Schließen \
+        zu erzwingen oder $\"Abbrechen$\", um die Deinstallation abzubrechen."
 
 
 # Application name
