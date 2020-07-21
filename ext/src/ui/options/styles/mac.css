@@ -30,3 +30,7 @@ input[type="radio"] {
     margin-top: 1px;
     width: 16px;
 }
+
+input[type="number"] {
+  padding-inline-end: 4px;
+}
