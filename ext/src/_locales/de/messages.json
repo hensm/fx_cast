@@ -209,7 +209,6 @@
             }
         }
     }
-    }
   , "optionsBridgeBackupEnabledDescription": {
         "message": "Versuchen zur Bridge im Daemon-Modus zu verbinden, wenn die reguläre Bridge-Verbindung fehlschlägt."
       , "description": "Backup daemon checkbox description."
