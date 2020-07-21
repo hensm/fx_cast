@@ -207,14 +207,13 @@ async function build () {
         const selectorPath = path.join(__dirname, "../selector/mac/");
         const derivedDataPath = path.join(__dirname, "../selector/mac/build/");
 
-        let buildCommand = `
+        spawnSync(`
             xcodebuild -project ${selectorPath}/fx_cast_selector.xcodeproj \
                        -configuration Release \
                        -scheme fx_cast_selector \
                        -derivedDataPath ${derivedDataPath} \
-                       build`;
-
-        spawnSync(buildCommand, spawnOptions);
+                       build`
+          , spawnOptions);
 
         const selectorBundlePath = path.join(derivedDataPath
               , "Build/Products/Release/", selectorExecutableName);
@@ -380,23 +379,23 @@ function packageDarwin (
 
 
     // Build component package
-    spawnSync(
-        `pkgbuild --root ${rootPath} `
-               + `--identifier "tf.matt.${applicationName}" `
-               + `--version "${applicationVersion}" `
-               + `--scripts ${path.join(packagingOutputDir, "scripts")} `
-               + `${path.join(BUILD_PATH, componentName)}`
-      , { shell: true });
+    spawnSync(`
+        pkgbuild --root ${rootPath} \
+                 --identifier "tf.matt.${applicationName}" \
+                 --version "${applicationVersion}" \
+                 --scripts ${path.join(packagingOutputDir, "scripts")} \
+                 ${path.join(BUILD_PATH, componentName)}`
+          , spawnOptions);
 
     // Distribution XML file
     const distFilePath = path.join(packagingOutputDir, "distribution.xml");
 
     // Build installer package
-    spawnSync(
-        `productbuild --distribution ${distFilePath} `
-                   + `--package-path ${BUILD_PATH} `
-                   + `${path.join(BUILD_PATH, outputName)}`
-      , { shell: true });
+    spawnSync(`
+        productbuild --distribution ${distFilePath} \
+                     --package-path ${BUILD_PATH} \
+                     ${path.join(BUILD_PATH, outputName)}`
+          , spawnOptions);
 
     return outputName;
 }
@@ -459,10 +458,10 @@ function packageLinuxDeb (
               , view));
 
     // Build .deb package
-    spawnSync(
-        `dpkg-deb --build ${rootPath} `
-                       + `${path.join(BUILD_PATH, outputName)}`
-      , {  shell: true});
+    spawnSync(`
+        dpkg-deb --build ${rootPath} \
+                         ${path.join(BUILD_PATH, outputName)}`
+          , spawnOptions);
 
     return outputName;
 }
@@ -509,13 +508,13 @@ function packageLinuxRpm (
     };
 
     // TODO: Use argv.arch
-    spawnSync(
-        `rpmbuild -bb ${specOutputPath} `
-               + `--define "_distdir ${BUILD_PATH}" `
-               + `--define "_rpmdir ${BUILD_PATH}" `
-               + `--define "_rpmfilename ${outputName}" `
-               + `--target=${archMap[arch]}-linux`
-      , { shell: true });
+    spawnSync(`
+        rpmbuild -bb ${specOutputPath} \
+                 --define "_distdir ${BUILD_PATH}" \
+                 --define "_rpmdir ${BUILD_PATH}" \
+                 --define "_rpmfilename ${outputName}" \
+                 --target=${archMap[arch]}-linux`
+          , spawnOptions);
 
     return outputName;
 }
