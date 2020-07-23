@@ -23,6 +23,11 @@ select {
     height: 22px;
 }
 
+button.ghost {
+    width: 22px !important;
+    height: 22px !important;
+}
+
 input[type="checkbox"],
 input[type="radio"] {
     height: 16px;

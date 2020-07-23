@@ -49,6 +49,21 @@
     padding: 20px 10px;
 }
 
+button.ghost {
+    width: 24px !important;
+    height: 24px !important;
+    padding: initial;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+button.ghost:not(:hover) {
+    background-color: initial;
+    border: initial;
+}
+
+
 #form {
     display: flex;
     flex-direction: column;

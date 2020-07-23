@@ -58,13 +58,17 @@ export default class EditableListItem extends Component<
                                  onKeyPress={ this.handleInputKeyPress }/>
                         : this.props.text }
                 </div>
-                <button onClick={ this.handleEditBegin }
+                <button className="editable-list__edit-button ghost"
+                        title={ _("optionsUserAgentWhitelistEditItem") }
+                        onClick={ this.handleEditBegin }
                         type="button">
-                    { _("optionsUserAgentWhitelistEditItem") }
+                    <img src="assets/photon_edit.svg" alt="icon, edit" />
                 </button>
-                <button onClick={ this.handleRemove }
+                <button className="editable-list__remove-button ghost"
+                        title={ _("optionsUserAgentWhitelistRemoveItem") }
+                        onClick={ this.handleRemove }
                         type="button">
-                    { _("optionsUserAgentWhitelistRemoveItem") }
+                    <img src="assets/photon_delete.svg" alt="icon, remove" />
                 </button>
             </li>
         );

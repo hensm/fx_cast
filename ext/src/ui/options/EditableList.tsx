@@ -79,10 +79,11 @@ export default class EditableList extends Component<
                 <hr />
                 <div className="editable-list__view-actions">
                     { !this.state.rawView &&
-                        <button className="editable-list__add-button"
+                        <button className="editable-list__add-button ghost"
+                                title={ _("optionsUserAgentWhitelistAddItem") }
                                 onClick={ this.handleAddItem }
                                 type="button">
-                            { _("optionsUserAgentWhitelistAddItem") }
+                            <img src="assets/photon_new.svg" alt="icon, add" />
                         </button> }
                     { this.state.rawView &&
                         <button className="editable-list__save-raw-button"
