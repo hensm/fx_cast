@@ -17,6 +17,16 @@ button:not(:disabled):hover:active,
     background-color: #5c5c5e;
 }
 
+:-moz-any(button, input, textarea, select):focus {
+    box-shadow: 0 0 0 1px #0a84ff inset,
+                0 0 0 1px #0a84ff,
+                0 0 0 4px rgba(10, 132, 255, 0.3);
+}
+
+:-moz-any(button, input, textarea, select)::-moz-focus-inner {
+    all: initial;
+}
+
 button:disabled,
 input:disabled {
     opacity: 0.35;
