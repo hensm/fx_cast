@@ -409,6 +409,7 @@ button.ghost:not(:hover) {
 
 .editable-list__raw-view {
     max-height: 300px;
+    overflow-y: auto;
     resize: vertical;
     width: 100%;
 }
