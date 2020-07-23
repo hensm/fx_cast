@@ -174,6 +174,11 @@ class OptionsApp extends Component<{}, OptionsAppState> {
                         onSubmit={ this.handleFormSubmit }
                         onChange={ this.handleFormChange }>
 
+                    <Bridge info={ this.state.bridgeInfo }
+                            loading={ this.state.bridgeLoading }
+                            options={ this.state.options }
+                            onChange={ this.handleInputChange } />
+
                     <fieldset className="category">
                         <legend className="category__name">
                             <h2>{ _("optionsMediaCategoryName") }</h2>
@@ -432,12 +437,6 @@ class OptionsApp extends Component<{}, OptionsAppState> {
                             { _("optionsSave") }
                         </button>
                     </div>
-
-                    { // Workaround for form default button }
-                    <Bridge info={ this.state.bridgeInfo }
-                            loading={ this.state.bridgeLoading }
-                            options={ this.state.options }
-                            onChange={ this.handleInputChange } /> }
                 </form>
 
                 <details className="about">

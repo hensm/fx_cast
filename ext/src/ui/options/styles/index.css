@@ -242,8 +242,8 @@ button.ghost:not(:hover) {
     color: var(--secondary-color);
 }
 
-#form > .category:not(:first-child) {
-    border-top: 1px solid var(--border-color);
+#form > .category {
+    border-bottom: 1px solid var(--border-color);
 }
 
 
