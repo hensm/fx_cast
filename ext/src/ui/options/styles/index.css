@@ -387,6 +387,7 @@ button.ghost:not(:hover) {
 
 .editable-list__title {
     flex: 1;
+    font-family: monospace;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
