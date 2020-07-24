@@ -20,9 +20,14 @@ body {
     width: 100%;
 }
 
-h1, h2, h3, h4, h5, h6, p {
+h1, h2, h3, h4, h5, h6 {
     margin: initial;
-    font-weight: unset;
+    font-size: inherit;
+    font-weight: 600;
+}
+
+p {
+    margin: initial;
 }
 
 ul {
@@ -63,6 +68,14 @@ body {
     padding: 2rem;
 }
 
+.container h1 { font-size: 2.2rem ;}
+.container h2 { font-size: 2.0rem ;}
+.container h3 { font-size: 1.8rem ;}
+.container h4 { font-size: 1.6rem ;}
+.container h5,
+.container h6 { font-size: 1.5rem ;}
+
+
 .site-header {
     align-self: flex-end;
     align-items: flex-end;
@@ -75,7 +88,7 @@ body {
     height: 105px;
 }
 
-.site-header__title {
+h1.site-header__title {
     font-size: 5rem;
     font-weight: 500;
     margin-bottom: 0.5rem;
@@ -83,9 +96,10 @@ body {
 .site-header__subtitle {
     background-color: var(--text-color-secondary);
     color: var(--page-color);
-    font-size: 2.5rem;
-    padding: 0.25rem 1rem;
+    font-size: 2.2rem;
     margin-right: -1rem;
+    padding: 0.25rem 1rem;
+    text-transform: lowercase;
 }
 
 .site-content {
@@ -95,9 +109,9 @@ body {
 .description {
     font-size: 1.75rem;
     grid-area: description;
+    max-width: 45rem;
     padding-right: 4rem;
     text-align: right;
-    max-width: 45rem;
 }
 .description__disclaimer {
     color: var(--text-color-secondary);
@@ -145,6 +159,11 @@ body {
     cursor: pointer;
     text-align: right;
     margin-bottom: 0.5rem;
+}
+
+.download__app-other > summary > h3 {
+    display: inline;
+    font: inherit;
 }
 
 
@@ -257,6 +276,7 @@ body {
     position: relative;
     z-index: 1;
 }
+
 .faqs__list {
     list-style: none;
 }
@@ -277,11 +297,14 @@ body {
 .faq__summary {
     cursor: pointer;
     font-size: 1.1em;
-    font-weight: 600;
     padding: 1rem;
     -moz-user-select: none;
     -webkit-user-select: none;
     user-select: none;
+}
+
+.faq__summary > h3 {
+    display: inline;
 }
 
 .faq__content {
@@ -296,9 +319,6 @@ body {
 }
 .faq__content ul {
     padding-left: 2rem;
-}
-.faq__content h3, h4 {
-    font-weight: 500;
 }
 
 .faq__content code {

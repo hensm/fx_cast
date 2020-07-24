@@ -1,14 +1,20 @@
 <!DOCTYPE html>
-<html class="theme-dark">
+<html lang="en" class="theme-dark">
     <head>
         <meta charset="utf-8">
+        <meta name="description" content="A browser extension that enables Chromecast support for casting web apps (like YouTube, Netflix or BBC iPlayer).">
         <meta name="viewport" content="width=device-width, initial-scale=1">
-        <title>fx_cast</title>
+
+        <title>fx_cast: Chromecast for Firefox</title>
 
         <link rel="stylesheet" href="fonts/stylesheet.css">
         <link rel="stylesheet" href="photon-colors.css">
         <link rel="stylesheet" href="photon.css">
         <link rel="stylesheet" href="index.css">
+
+        <link rel="icon" type="image/svg+xml" href="favicon.svg" sizes="any">
+        <link rel="icon" type="image/png" href="favicon-16.png" sizes="16x16">
+        <link rel="icon" type="image/png" href="favicon-32.png" sizes="32x32">
 
         <script src="index.js" defer></script>
     </head>
@@ -16,12 +22,13 @@
         <div class="container">
             <header class="site-header">
                 <h1 class="site-header__title">fx_cast</h1>
-                <p class="site-header__subtitle">chromecast <nobr>for firefox</nobr></p>
+                <p class="site-header__subtitle">Chromecast <nobr>for Firefox</nobr></p>
             </header>
             <main class="site-content">
                 <section class="description">
+                    <h2 hidden>Description</h2>
                     <p>
-                        Enables Chromecast support for casting web apps (like Netflix or BBC iPlayer), HTML5 video and screen/tab sharing.
+                        A browser extension that enables Chromecast support for casting web apps (like YouTube, Netflix or BBC iPlayer), HTML5 media and <nobr>screen/tab sharing</nobr>.
                     </p>
                     <p class="description__disclaimer">
                         Requires a native bridge app to connect with receiver devices. Currently supported on Windows, macOS and Linux.
@@ -31,26 +38,44 @@
                     </p>
                 </section>
                 <section class="download">
-                    <a class="download__ext button button--puffy button--primary" disabled title="No available download found">
-                        <img class="button__icon" src="icons/extension_light.svg" alt="">
+                    <h2 hidden>Downloads</h2>
+                    <a class="download__ext button button--puffy button--primary"
+                      title="No available download found"
+                      disabled>
+                        <img class="button__icon"
+                             src="icons/extension_light.svg"
+                             alt="Extension symbol (puzzle) icon">
                         Firefox Extension
                     </a>
-                    <a class="download__app button button--puffy" disabled title="No available download found"></a>
+                    <a class="download__app button button--puffy" 
+                       title="No available download found"
+                       disabled>
+                    </a>
                     <details class="download__app-other">
-                        <summary>Other bridge downloads</summary>
+                        <summary>
+                            <h3>Other bridge downloads</h3>
+                        </summary>
                         <div class="app-list">
-                            <a class="app-list__app app-list__win" disabled title="No available download found">
+                            <a class="app-list__app app-list__win"
+                               title="No available download found"
+                               disabled>
                                 Windows
                             </a>
-                            <a class="app-list__app app-list__mac" disabled title="No available download found">
+                            <a class="app-list__app app-list__mac"
+                               title="No available download found"
+                               disabled>
                                 macOS
                             </a>
                             <div class="app-list__platform">
-                                <a class="app-list__app app-list__deb" disabled title="No available download found">
+                                <a class="app-list__app app-list__deb"
+                                   title="No available download found"
+                                   disabled>
                                     Linux
                                     <span class="app-list__app-label">DEB</span>
                                 </a>
-                                <a class="app-list__app app-list__rpm" disabled title="No available download found">
+                                <a class="app-list__app app-list__rpm"
+                                   title="No available download found"
+                                   disabled>
                                     Linux
                                     <span class="app-list__app-label">RPM</span>
                                 </a>
@@ -59,11 +84,13 @@
                     </details>
                 </section>
                 <section class="faqs">
-                    <h1>FAQs</h1>
+                    <h2>FAQs</h2>
                     <ul class="faqs__list">
                         <li class="faqs__list-item">
                             <details class="faq card" open>
-                                <summary class="faq__summary">How do I cast something?</summary>
+                                <summary class="faq__summary">
+                                    <h3>How do I cast something?</h3>
+                                </summary>
                                 <div class="faq__content">
                                     <picture style="float: right">
                                         <source type="image/webp"
@@ -104,7 +131,9 @@
                         </li>
                         <li class="faqs__list-item">
                             <details class="faq card">
-                                <summary class="faq__summary">Why do I need the bridge?</summary>
+                                <summary class="faq__summary">
+                                    <h3>Why do I need the bridge?</h3>
+                                </summary>
                                 <div class="faq__content">
                                     <p>
                                         Access to TCP/UDP sockets.
@@ -128,11 +157,13 @@
                         </li>
                         <li class="faqs__list-item">
                             <details class="faq card">
-                                <summary class="faq__summary">How do I completely remove the bridge?</summary>
+                                <summary class="faq__summary">
+                                    <h3>How do I completely remove the bridge?</h3>
+                                </summary>
                                 <div class="faq__content">
                                     <ul>
                                         <li>
-                                            <h3>Windows</h3>
+                                            <h4>Windows</h4>
                                             <p>
                                                 Removing the bridge on Windows should be as easy as running the uninstaller (<code>C:\Program Files\fx_cast\uninstaller.exe</code>) found in the control panel or settings application.
                                             </p>
@@ -153,7 +184,7 @@
                                             </ul>
                                         </li>
                                         <li>
-                                            <h3>macOS</h3>
+                                            <h4>macOS</h4>
                                             <p>
                                                 Remove the following files/folders:
                                             </p>
@@ -167,7 +198,7 @@
                                             </ul>
                                         </li>
                                         <li>
-                                            <h3>Linux</h3>
+                                            <h4>Linux</h4>
                                             <p>
                                                 On Debian-based systems, remove the <code>fx-cast-bridge</code> package, otherwise remove the <code>fx_cast_bridge</code> package.
                                             </p>
@@ -192,7 +223,9 @@
                         </li>
                         <li class="faqs__list-item">
                             <details class="faq card">
-                                <summary class="faq__summary">Why is there no sound when casting a screen or tab?</summary>
+                                <summary class="faq__summary">
+                                    <h3>Why is there no sound when casting a screen or tab?</h3>
+                                </summary>
                                 <div class="faq__content">
                                     <p>
                                         API limitations. There's no method of obtaining the audio streams. Merging of audio streams from remote media is also not possible due to cross-origin issues.
@@ -210,7 +243,9 @@
                         </li>
                         <li class="faqs__list-item">
                             <details class="faq card">
-                                <summary class="faq__summary">Why doesn't 𝑥 site work?</summary>
+                                <summary class="faq__summary">
+                                    <h3>Why doesn't 𝑥 site work?</h3>
+                                </summary>
                                 <div class="faq__content">
                                     <p>
                                         Compatibility with Chrome is far from perfect. Most sites will only enable their cast support if the browser reports itself as Chrome. Ensure that you've added the site to the whitelist. Some sites may not test their Chrome-specific code with Firefox, so it's possible that they're using incompatible/non-standard APIs.
@@ -226,7 +261,9 @@
                         </li>
                         <li class="faqs__list-item">
                             <details class="faq card">
-                                <summary class="faq__summary">Why can't I cast DRM-encumbered media?</summary>
+                                <summary class="faq__summary">
+                                    <h3>Why can't I cast DRM-encumbered media?</h3>
+                                </summary>
                                 <div class="faq__content">
                                     <p>
                                         Unforunately, for DRM-encumbered media, there's no network-accessible URL to provide to the Chromecast and no means of accessing the media streams. The only way to cast on sites like this is via built-in Chromecast support (look for a cast button), which may not always be available.
@@ -236,7 +273,9 @@
                         </li>
                         <li class="faqs__list-item">
                             <details class="faq card">
-                                <summary class="faq__summary">Why is it taking so long for a full release?</summary>
+                                <summary class="faq__summary">
+                                    <h3>Why is it taking so long for a full release?</h3>
+                                </summary>
                                 <div class="faq__content">
                                     <p>
                                         Though I do enjoy working on this, it's (obviously) not a full-time thing. It's just a hobby project. You can help speed up development by contributing (see below).
@@ -246,7 +285,9 @@
                         </li>
                         <li class="faqs__list-item">
                             <details class="faq card">
-                                <summary class="faq__summary">How can I support development?</summary>
+                                <summary class="faq__summary">
+                                    <h3>How can I support development?</h3>
+                                </summary>
                                 <div class="faq__content">
                                     <p>
                                         Contributing code, translations, compatibility reports, or even reporting bugs is very helpful. See the <a href="https://github.com/hensm/fx_cast/blob/master/CONTRIBUTING.md">contributing guide</a> for more information.
@@ -257,7 +298,7 @@
                                     </p>
                                     <p>
                                         <a href="https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=3Z2FTMSG976WN&source=url">
-                                            <img src="https://camo.githubusercontent.com/fb9813996f164bbcc88900197f61c0d22935ce24/68747470733a2f2f7777772e70617970616c2e636f6d2f656e5f55532f692f62746e2f62746e5f646f6e61746543435f4c472e676966" alt="Donate with PayPal button">
+                                            <img src="images/paypal.png" alt="Donate with PayPal button">
                                         </a>
                                     </p>
                                 </div>
@@ -306,11 +347,14 @@
 
             <footer class="footer">
                 <div class="links">
-                    <a class="links__link links__link-github" href="https://github.com/hensm/fx_cast">
+                    <a class="links__link links__link-github"
+                       href="https://github.com/hensm/fx_cast"
+                       title="Visit GitHub repository">
                         <img src="icons/GitHub-Mark-32px.png"
                              srcset="icons/GitHub-Mark-32px.png,
                                      icons/GitHub-Mark-64px.png 2x,
-                                     icons/GitHub-Mark-120px-plus.png 3x">
+                                     icons/GitHub-Mark-120px-plus.png 3x"
+                             alt="GitHub logo">
                     </a>
                 </div>
             </footer>
