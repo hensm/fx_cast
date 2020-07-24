@@ -41,6 +41,12 @@
 
   , "content_security_policy": "CONTENT_SECURITY_POLICY"
   , "default_locale": "en"
+
+  , "icons": {
+        "48": "icons/icon.svg"
+      , "96": "icons/icon.svg"
+    }
+
   , "manifest_version": 2
 
   , "options_ui": {
