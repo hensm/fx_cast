@@ -303,13 +303,15 @@ async function initMenus () {
 
 
         // If there is more than one subdomain, get the base domain
-        const baseDomain = (url.host.match(/\./g) || []).length > 1
-            ? url.host.substring(url.host.indexOf(".") + 1)
-            : url.host;
+        const baseDomain = (url.hostname.match(/\./g) || []).length > 1
+            ? url.hostname.substring(url.hostname.indexOf(".") + 1)
+            : url.hostname;
 
-        const patternRecommended = `${url.origin}/*`;
-        const patternSearch = `${url.origin}${url.pathname}${url.search}`;
-        const patternWildcardProtocol = `*://${url.host}/*`;
+        const portlessOrigin = `${url.protocol}://${url.hostname}`;
+
+        const patternRecommended = `${portlessOrigin}/*`;
+        const patternSearch = `${portlessOrigin}${url.pathname}${url.search}`;
+        const patternWildcardProtocol = `*://${url.hostname}/*`;
         const patternWildcardSubdomain = `${url.protocol}//*.${baseDomain}/*`;
         const patternWildcardProtocolAndSubdomain = `*://*.${baseDomain}/*`;
 
@@ -354,7 +356,7 @@ async function initMenus () {
                             .reverse()
                             .join("/");
 
-                    const pattern = `${url.origin}/${partialPath}/*`;
+                    const pattern = `${portlessOrigin}/${partialPath}/*`;
 
                     const partialPathMenuId = browser.menus.create({
                         title: _("contextAddToWhitelistAdvancedAdd", pattern)
