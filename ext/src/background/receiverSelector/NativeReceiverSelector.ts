@@ -85,6 +85,8 @@ export default class NativeReceiverSelector extends ReceiverSelector {
         this._isOpen = true;
     }
 
+    public update (): void {}
+
     public close (): void {
         if (this.bridgePort) {
             this.bridgePort.postMessage({

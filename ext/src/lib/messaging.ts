@@ -25,8 +25,8 @@ export type Messages = [
         subject: "popup:/populateReceiverList"
       , data: {
             receivers: Receiver[]
-          , defaultMediaType: ReceiverSelectorMediaType
-          , availableMediaTypes: ReceiverSelectorMediaType
+          , defaultMediaType?: ReceiverSelectorMediaType
+          , availableMediaTypes?: ReceiverSelectorMediaType
         }
     }
   , {

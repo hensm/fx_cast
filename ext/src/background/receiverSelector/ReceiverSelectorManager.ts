@@ -124,6 +124,15 @@ async function getSelection (
         sharedSelector = await createSelector();
 
 
+        function onReceiverChange () {
+            sharedSelector.update(Array.from(StatusManager.getReceivers()));
+        }
+
+        StatusManager.addEventListener("serviceUp", onReceiverChange);
+        StatusManager.addEventListener("serviceDown", onReceiverChange);
+        StatusManager.addEventListener("statusUpdate", onReceiverChange);
+
+
         let onSelected: any;
         let onCancelled: any;
         let onError: any;
@@ -151,6 +160,10 @@ async function getSelection (
             sharedSelector.removeEventListener("cancelled", onCancelled);
             sharedSelector.removeEventListener("error", onError);
             sharedSelector.removeEventListener("stop", onStop);
+
+            StatusManager.removeEventListener("serviceUp", onReceiverChange);
+            StatusManager.removeEventListener("serviceDown", onReceiverChange);
+            StatusManager.removeEventListener("statusUpdate", onReceiverChange);
         }
 
         sharedSelector.addEventListener("selected"

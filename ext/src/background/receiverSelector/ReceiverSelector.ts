@@ -42,10 +42,13 @@ export default abstract class ReceiverSelector
 
     abstract readonly isOpen: boolean;
 
-    abstract open (receivers: Receiver[]
-        , defaultMediaType: ReceiverSelectorMediaType
-        , availableMediaTypes: ReceiverSelectorMediaType
-        , requestedAppId?: string): void;
+    abstract open (
+            receivers: Receiver[]
+          , defaultMediaType: ReceiverSelectorMediaType
+          , availableMediaTypes: ReceiverSelectorMediaType
+          , requestedAppId?: string): void;
+
+    abstract update (receivers: Receiver[]): void;
 
     abstract close (): void;
 }

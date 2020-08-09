@@ -115,6 +115,16 @@ export default class PopupReceiverSelector extends ReceiverSelector {
         }
     }
 
+    public update (receivers: Receiver[]) {
+        this.receivers = receivers;
+        this.messagePort?.postMessage({
+            subject: "popup:/populateReceiverList"
+          , data: {
+                receivers: this.receivers
+            }
+        });
+    }
+
     public async close (): Promise<void> {
         if (this.windowId) {
             await browser.windows.remove(this.windowId);

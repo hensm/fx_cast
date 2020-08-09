@@ -84,11 +84,14 @@ class PopupApp extends Component<{}, PopupAppState> {
 
                     this.defaultMediaType = defaultMediaType;
 
-                    this.setState({
-                        receivers: message.data.receivers
-                      , mediaType: this.defaultMediaType
-                      , availableMediaTypes: message.data.availableMediaTypes
-                    });
+                    this.setState({ receivers });
+
+                    if (availableMediaTypes && defaultMediaType) {
+                        this.setState({
+                            availableMediaTypes: availableMediaTypes
+                          , mediaType: defaultMediaType
+                        });
+                    }
 
                     break;
                 }

@@ -80,11 +80,9 @@ export default new class StatusManager
                 const { data: receiver } = message;
                 this.receivers.set(receiver.id, receiver);
 
-                const serviceUpEvent = new CustomEvent("serviceUp", {
+                this.dispatchEvent(new CustomEvent("serviceUp", {
                     detail: receiver
-                });
-
-                this.dispatchEvent(serviceUpEvent);
+                }));
 
                 break;
             }
@@ -96,11 +94,9 @@ export default new class StatusManager
                     this.receivers.delete(id);
                 }
 
-                const serviceDownEvent = new CustomEvent("serviceDown", {
+                this.dispatchEvent(new CustomEvent("serviceDown", {
                     detail: { id }
-                });
-
-                this.dispatchEvent(serviceDownEvent);
+                }));
 
                 break;
             }
@@ -121,6 +117,10 @@ export default new class StatusManager
                       , ...status
                     }
                 });
+
+                this.dispatchEvent(new CustomEvent("statusUpdate", {
+                    detail: { id, status }
+                }));
             }
         }
     }
