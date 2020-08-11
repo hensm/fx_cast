@@ -14,6 +14,7 @@
         "bplist-creator": "0.0.8",
         "bplist-parser": "^0.2.0",
         "castv2": "^0.1.10",
+        "dedent": "^0.7.0",
         "fast-srp-hap": "^2.0.2",
         "mdns": "^2.5.1",
         "mime-types": "^2.1.27",
@@ -21,6 +22,7 @@
         "tweetnacl": "^1.0.3"
     },
     "devDependencies": {
+        "@types/dedent": "^0.7.0",
         "@types/mdns": "0.0.33",
         "@types/mime-types": "^2.1.0",
         "@types/node": "^13.13.5",
