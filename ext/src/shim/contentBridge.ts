@@ -3,7 +3,7 @@
 import { loadScript } from "../lib/utils";
 import { onMessageResponse, sendMessage } from "./eventMessageChannel";
 
-import messaging, { Message } from "../lib/messaging";
+import messaging, { Message } from "../messaging";
 
 
 const { isFramework }

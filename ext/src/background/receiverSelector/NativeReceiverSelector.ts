@@ -3,7 +3,7 @@
 import bridge from "../../lib/bridge";
 import knownApps from "../../lib/knownApps";
 import logger from "../../lib/logger";
-import { Message, Port } from "../../lib/messaging";
+import { Message, Port } from "../../messaging";
 import options from "../../lib/options";
 
 import { TypedEventTarget } from "../../lib/TypedEventTarget";

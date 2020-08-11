@@ -1,16 +1,17 @@
 "use strict";
 
-import { TypedPort } from "./TypedPort";
+import Messenger from "./lib/Messenger";
+import { TypedPort } from "./lib/TypedPort";
 
-import { BridgeInfo } from "./bridge";
-import { Receiver, ReceiverStatus } from "../types";
-import { ReceiverSelectorMediaType } from "../background/receiverSelector";
+import { BridgeInfo } from "./lib/bridge";
+import { Receiver, ReceiverStatus } from "./types";
+import { ReceiverSelectorMediaType } from "./background/receiverSelector";
 import { ReceiverSelection
        , ReceiverSelectionCast
-       , ReceiverSelectionStop } from "../background/receiverSelector/ReceiverSelector";
+       , ReceiverSelectionStop } from "./background/receiverSelector/ReceiverSelector";
 
-import Volume from "../shim/cast/classes/Volume";
-import { MediaInfo } from "../shim/cast/media";
+import Volume from "./shim/cast/classes/Volume";
+import { MediaInfo } from "./shim/cast/media";
 
 
 // TODO: Document messages properly
@@ -259,35 +260,4 @@ export type Messages = [
 export type Port = TypedPort<Messages>;
 export type Message = Messages[number];
 
-
-interface RuntimeConnectInfo {
-    name: string;
-}
-interface TabConnectInfo {
-    name: string;
-    frameId: number;
-}
-
-export default {
-    connect (connectInfo: RuntimeConnectInfo) {
-        return browser.runtime.connect(connectInfo) as
-                unknown as TypedPort<Messages>;
-    }
-
-  , connectTab (tabId: number, connectInfo: TabConnectInfo) {
-        return browser.tabs.connect(tabId, connectInfo) as
-                unknown as TypedPort<Messages>;
-    }
-
-  , onConnect: {
-        addListener (cb: (port: TypedPort<Messages>) => void) {
-            browser.runtime.onConnect.addListener(cb as any);
-        }
-      , removeListener (cb: (port: TypedPort<Messages>) => void) {
-            browser.runtime.onConnect.removeListener(cb as any);
-        }
-      , hasListener (cb: (port: TypedPort<Messages>) => void) {
-            return browser.runtime.onConnect.hasListener(cb as any);
-        }
-    }
-};
+export default new Messenger<Messages>();

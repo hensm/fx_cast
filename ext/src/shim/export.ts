@@ -1,7 +1,7 @@
 "use strict";
 
 import * as cast from "./cast";
-import { Message } from "../lib/messaging";
+import { Message } from "../messaging";
 
 import { BridgeInfo } from "../lib/bridge";
 

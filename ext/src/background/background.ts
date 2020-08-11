@@ -3,7 +3,7 @@
 import defaultOptions from "../defaultOptions";
 import loadSender from "../lib/loadSender";
 import logger from "../lib/logger";
-import messaging from "../lib/messaging";
+import messaging from "../messaging";
 import options from "../lib/options";
 import bridge from "../lib/bridge";
 

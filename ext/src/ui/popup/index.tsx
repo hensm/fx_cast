@@ -6,7 +6,7 @@ import ReactDOM from "react-dom";
 
 import knownApps from "../../lib/knownApps";
 
-import { Message } from "../../lib/messaging";
+import { Message } from "../../messaging";
 import { getNextEllipsis } from "../../lib/utils";
 import { Receiver } from "../../types";
 

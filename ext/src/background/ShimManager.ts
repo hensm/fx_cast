@@ -3,7 +3,7 @@
 import bridge from "../lib/bridge";
 import loadSender from "../lib/loadSender";
 import logger from "../lib/logger";
-import { Message, Port } from "../lib/messaging";
+import { Message, Port } from "../messaging";
 import options from "../lib/options";
 
 import { ReceiverSelectionActionType

@@ -4,7 +4,7 @@ import logger from "../../lib/logger";
 import options from "../../lib/options";
 import cast, { ensureInit } from "../../shim/export";
 
-import { Message } from "../../lib/messaging";
+import { Message } from "../../messaging";
 import { Receiver } from "../../types";
 
 

@@ -2,7 +2,7 @@
 
 import bridge from "../lib/bridge";
 import logger from "../lib/logger";
-import { Message, Port } from "../lib/messaging";
+import { Message, Port } from "../messaging";
 
 import { TypedEventTarget } from "../lib/TypedEventTarget";
 import { Receiver, ReceiverStatus } from "../types";
