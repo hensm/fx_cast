@@ -7,7 +7,7 @@ const portMap = new WeakMap<any, browser.runtime.Port>();
  */
 export class TypedPort<T extends any[]> {
     public name: string;
-    public error: { message: string };
+    public error?: { message: string };
     public sender?: browser.runtime.MessageSender;
 
     constructor (port: browser.runtime.Port) {
@@ -33,9 +33,6 @@ export class TypedPort<T extends any[]> {
             return portMap.get(this)?.onDisconnect.hasListener(cb as any)
                     ?? false;
         }
-      , hasListeners: () => {
-            return portMap.get(this)?.onMessage.hasListeners() ?? false;
-        }
     };
 
     public onMessage = {
@@ -47,9 +44,6 @@ export class TypedPort<T extends any[]> {
         }
       , hasListener: (cb: (message: T[number]) => void) => {
             return portMap.get(this)?.onMessage.hasListener(cb as any) ?? false;
-        }
-      , hasListeners: () => {
-          return portMap.get(this)?.onMessage.hasListeners() ?? false;
         }
     };
 

@@ -82,7 +82,7 @@ declare namespace browser.events {
 
 declare namespace browser.runtime {
     interface Port {
-        error: { message: string };
+        error?: { message: string };
 
         /**
          * https://git.io/fjmzb
