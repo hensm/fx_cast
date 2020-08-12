@@ -159,7 +159,7 @@ async function build () {
 `@echo off
 setlocal
     set NODE_PATH=${modulesDir}
-    node .\\src\\main.js %*
+    node %~dp0src\\main.js %*
 endlocal
 `);
                 break;
@@ -170,7 +170,7 @@ endlocal
                 launcherPath += ".sh";
                 fs.writeFileSync(launcherPath, 
 `#!/usr/bin/env sh
-NODE_PATH="${modulesDir}" node ./src/main.js "$@"
+NODE_PATH="${modulesDir}" node $(dirname $0)/src/main.js "$@"
 `);
                 break;
             }
