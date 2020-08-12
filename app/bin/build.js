@@ -32,7 +32,7 @@ const { executableName
 
 // Command line args
 const argv = minimist(process.argv.slice(2), {
-    boolean: [ "package", "skipNativeBuilds" ]
+    boolean: [ "usePkg", "package", "skipNativeBuilds" ]
   , string: [ "arch", "packageType" ]
   , default: {
         arch: os.arch()
@@ -114,7 +114,7 @@ async function build () {
      * If packaging, add the installed executable path, otherwise
      * add the path to the built executable in the dist folder.
      */
-    if (argv.package) {
+    if (argv.package || argv.usePkg) {
         // Need a minimal package.json for pkg.
         const pkgManifest = {
             bin: "main.js"
@@ -143,10 +143,10 @@ async function build () {
 
         fs.removeSync(path.join(BUILD_PATH, "src"));
 
-        
-        manifest.path = path.join(executablePath[process.platform]
-                                , executableName[process.platform]);
-
+        manifest.path = argv.usePkg
+            ? path.join(DIST_PATH, executableName[process.platform])
+            : path.join(executablePath[process.platform]
+                      , executableName[process.platform]);
     } else {
         let launcherPath = path.join(BUILD_PATH
               , meta.__applicationExecutableName);
