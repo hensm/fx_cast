@@ -3,6 +3,7 @@
 const fs = require("fs-extra");
 const os = require("os");
 const path = require("path");
+
 const minimist = require("minimist");
 const glob = require("glob");
 const mustache = require("mustache");
@@ -11,8 +12,7 @@ const pkg = require("pkg");
 
 const { spawnSync } = require("child_process");
 
-const { __applicationName: applicationName
-      , __applicationVersion: applicationVersion } = require("../package.json");
+const meta = require("../package.json");
 
 const { author
       , homepage } = require("../../package.json");
@@ -33,10 +33,9 @@ const { executableName
 // Command line args
 const argv = minimist(process.argv.slice(2), {
     boolean: [ "package", "skipNativeBuilds" ]
-  , string: [ "platform", "arch", "packageType" ]
+  , string: [ "arch", "packageType" ]
   , default: {
-        platform: os.platform()
-      , arch: os.arch()
+        arch: os.arch()
       , package: false
         // Linux package type (deb/rpm)
       , packageType: "deb"
@@ -61,7 +60,7 @@ for (const target of supportedTargets) {
     supportedArchs.push(arch);
 }
 
-if (!supportedPlatforms.includes(pkgPlatform[argv.platform])) {
+if (!supportedPlatforms.includes(pkgPlatform[process.platform])) {
     console.error("Unsupported target platform");
     process.exit(1);
 }
@@ -80,9 +79,6 @@ const spawnOptions = {
   , stdio: [ process.stdin, process.stdout, process.stderr ]
 };
 
-const isBuildingForMac = argv.platform === "darwin";
-const isBuildingForMacOnMac = isBuildingForMac && process.platform === "darwin";
-
 /**
  * Shouldn't exist, but cleanup and re-create any existing
  * build directories, just in case.
@@ -98,54 +94,17 @@ const MDNS_BINDING_PATH = path.join(
 const MDNS_BINDING_NAME = "dns_sd_bindings.node";
 
 async function build () {
-    /**
-     * Because the native receiver selector can only be built on
-     * systems with the capacity to link to the native AppKit
-     * libraries, and the pkg installer can only be built on
-     * platforms with the requisite pkgbuild/productbuild binaries,
-     * there's no point in trying to build from other platforms.
-     */
-    if (isBuildingForMac && !isBuildingForMacOnMac) {
-        console.error("macOS version must be built on macOS");
-        process.exit(1);
-    }
-
     // Run tsc
     spawnSync(`tsc --project ${ROOT_PATH} \
                    --outDir ${BUILD_PATH}`
           , spawnOptions);
-
-    // Move tsc output to build dir
-    if (process.platform === "linux") {
-        // Quick workaround for issue on linux
-        spawnSync("mv", [ path.join(BUILD_PATH, "src/*"), BUILD_PATH ]
-              , spawnOptions);
-    } else {
-        const buildSrcDir = path.join(BUILD_PATH, "src");
-
-        for (const fileName of fs.readdirSync(buildSrcDir)) {
-            fs.moveSync(path.join(buildSrcDir, fileName)
-                      , path.join(BUILD_PATH, fileName));
-        }
-
-        fs.removeSync(buildSrcDir);
-    }
-
-    // Copy other files
-    fs.copySync(SRC_PATH, BUILD_PATH, {
-        overwrite: true
-      , filter (src, dest) {
-            return !/.(js|ts)$/.test(src);
-        }
-    });
-
 
     /**
      * Native app manifest
      * https://mdn.io/Native_manifests#Native_messaging_manifests
      */
     const manifest = {
-        "name": applicationName
+        "name": meta.__applicationName
       , "description": ""
       , "type": "stdio"
       , "allowed_extensions": [ extensionId ]
@@ -156,12 +115,68 @@ async function build () {
      * add the path to the built executable in the dist folder.
      */
     if (argv.package) {
-        // If packaging for windows, use win32 path helpers.
-        manifest.path = (argv.platform === "win32" ? path.win32 : path)
-            .join(executablePath[argv.platform]
-                , executableName[argv.platform]);
+        // Need a minimal package.json for pkg.
+        const pkgManifest = {
+            bin: "main.js"
+          , pkg: {
+                /**
+                 * Workaround for pkg asset detection
+                 * https://github.com/thibauts/node-castv2/issues/46
+                 */
+                "assets": "../../node_modules/castv2/lib/cast_channel.proto"
+            }
+        };
+
+        // Write pkg manifest
+        fs.writeFileSync(path.join(BUILD_PATH, "src/package.json")
+              , JSON.stringify(pkgManifest))
+
+        // Run pkg to create a single executable
+        await pkg.exec([
+            path.join(BUILD_PATH, "src")
+          , "--target", `node12-${pkgPlatform[process.platform]}-${argv.arch}`
+          , "--output", path.join(BUILD_PATH, executableName[process.platform])
+        ]);
+
+        fs.copySync(path.join(MDNS_BINDING_PATH, MDNS_BINDING_NAME)
+              , path.join(BUILD_PATH, MDNS_BINDING_NAME));
+
+        fs.removeSync(path.join(BUILD_PATH, "src"));
+
+        
+        manifest.path = path.join(executablePath[process.platform]
+                                , executableName[process.platform]);
+
     } else {
-        manifest.path = path.join(DIST_PATH, executableName[argv.platform]);
+        let launcherPath = path.join(BUILD_PATH
+              , meta.__applicationExecutableName);
+        const modulesDir = path.join(ROOT_PATH, "node_modules");
+
+        switch (process.platform) {
+            case "win32": {
+                launcherPath += ".bat";
+                fs.writeFileSync(launcherPath, 
+`@echo off
+setlocal
+    set NODE_PATH=${modulesDir}
+    node .\\src\\main.js %*
+endlocal
+`);
+                break;
+            }
+
+            case "linux":
+            case "darwin": {
+                launcherPath += ".sh";
+                fs.writeFileSync(launcherPath, 
+`#!/usr/bin/env sh
+NODE_PATH="${modulesDir}" node ./src/main.js "$@"
+`);
+                break;
+            }
+        }
+
+        manifest.path = path.join(DIST_PATH, path.basename(launcherPath));
     }
 
 
@@ -176,34 +191,8 @@ async function build () {
     }
 
 
-    // Need a minimal package.json for pkg.
-    const pkgManifest = {
-        bin: "main.js"
-      , pkg: {
-            /**
-             * Workaround for pkg asset detection
-             * https://github.com/thibauts/node-castv2/issues/46
-             */
-            "assets": "../node_modules/castv2/lib/cast_channel.proto"
-        }
-    };
-
-    // Write pkg manifest
-    fs.writeFileSync(path.join(BUILD_PATH, "package.json")
-          , JSON.stringify(pkgManifest))
-
-    // Run pkg to create a single executable
-    await pkg.exec([
-        BUILD_PATH
-      , "--target", `node12-${pkgPlatform[argv.platform]}-${argv.arch}`
-      , "--output", path.join(BUILD_PATH, executableName[argv.platform])
-    ]);
-
-    fs.copySync(path.join(MDNS_BINDING_PATH, MDNS_BINDING_NAME)
-          , path.join(BUILD_PATH, MDNS_BINDING_NAME));
-
     // Build NativeMacReceiverSelector
-    if (isBuildingForMacOnMac && !argv.skipNativeBuilds) {
+    if (process.platform === "darwin" && !argv.skipNativeBuilds) {
         const selectorPath = path.join(__dirname, "../selector/mac/");
         const derivedDataPath = path.join(__dirname, "../selector/mac/build/");
 
@@ -218,7 +207,8 @@ async function build () {
         const selectorBundlePath = path.join(derivedDataPath
               , "Build/Products/Release/", selectorExecutableName);
 
-        fs.moveSync(selectorBundlePath, path.join(BUILD_PATH, selectorExecutableName));
+        fs.moveSync(selectorBundlePath
+              , path.join(BUILD_PATH, selectorExecutableName));
         fs.removeSync(derivedDataPath);
     }
 
@@ -229,7 +219,7 @@ async function build () {
      * to dist.
      */
     if (argv.package) {
-        const installerName = await packageApp(argv.platform, argv.arch);
+        const installerName = await packageApp(process.platform, argv.arch);
         if (installerName) {
             // Move installer to dist
             fs.moveSync(
@@ -238,37 +228,25 @@ async function build () {
                   , { overwrite: true });
         }
     } else {
-        // Move executable and app manifest to dist
-        fs.moveSync(
-                path.join(BUILD_PATH, manifestName)
-              , path.join(DIST_PATH, manifestName)
-              , { overwrite: true });
-        fs.moveSync(
-                path.join(BUILD_PATH, executableName[argv.platform])
-              , path.join(DIST_PATH, executableName[argv.platform])
-              , { overwrite: true });
-        fs.moveSync(
-                path.join(BUILD_PATH, MDNS_BINDING_NAME)
-              , path.join(DIST_PATH, MDNS_BINDING_NAME)
-              , { overwrite: true });
-
-        if (isBuildingForMacOnMac && !argv.skipNativeBuilds) {
-            fs.moveSync(
-                    path.join(BUILD_PATH, selectorExecutableName)
-                  , path.join(DIST_PATH, selectorExecutableName)
-                  , { overwrite: true });
-        }
+        // Move tsc output and launcher to dist
+        fs.moveSync(BUILD_PATH, DIST_PATH, { overwrite: true });
+        /*
+        spawnSync("npm install --production", {
+            ...spawnOptions
+          , cwd: DIST_PATH
+        });
+        */
     }
 
     // Remove build directory
-    fs.removeSync(BUILD_PATH);
+    //fs.removeSync(BUILD_PATH);
 }
 
 /**
  * Takes a platform and returns the path of the created
  * installer package.
  */
-function packageApp (platform, arch) {
+async function packageApp (platform, arch) {
     const packageFunctionArgs = [
         arch
       , executableName[platform] // platformExecutableName
@@ -323,8 +301,9 @@ function packageDarwin (
       , platformExecutablePath
       , platformManifestPath) {
 
-    const outputName = `${applicationName}-${applicationVersion}-${arch}.pkg`;
-    const componentName = `${applicationName}_component.pkg`;
+    const outputName = `${meta.__applicationName}-${
+                          meta.__applicationVersion}-${arch}.pkg`;
+    const componentName = `${meta.__applicationName}_component.pkg`;
 
     const packagingDir = path.join(__dirname, "../packaging/mac/");
     const packagingOutputDir = path.join(BUILD_PATH, "packaging");
@@ -346,7 +325,7 @@ function packageDarwin (
     fs.moveSync(path.join(BUILD_PATH, manifestName)
           , path.join(rootManifestPath, manifestName));
 
-    if (isBuildingForMacOnMac && !argv.skipNativeBuilds) {
+    if (process.platform === "darwin" && !argv.skipNativeBuilds) {
         // Move selector executable alongside main executable
         fs.moveSync(path.join(BUILD_PATH, selectorExecutableName)
               , path.join(rootExecutablePath, selectorExecutableName));
@@ -357,10 +336,10 @@ function packageDarwin (
     fs.copySync(packagingDir, packagingOutputDir);
 
     const view = {
-        applicationName
+        applicationName: meta.__applicationName
       , manifestName
       , componentName
-      , packageId: `tf.matt.${applicationName}`
+      , packageId: `tf.matt.${meta.__applicationName}`
       , executablePath: platformExecutablePath
       , manifestPath: platformManifestPath
     };
@@ -381,8 +360,8 @@ function packageDarwin (
     // Build component package
     spawnSync(`
         pkgbuild --root ${rootPath} \
-                 --identifier "tf.matt.${applicationName}" \
-                 --version "${applicationVersion}" \
+                 --identifier "tf.matt.${meta.__applicationName}" \
+                 --version "${meta.__applicationVersion}" \
                  --scripts ${path.join(packagingOutputDir, "scripts")} \
                  ${path.join(BUILD_PATH, componentName)}`
           , spawnOptions);
@@ -415,7 +394,8 @@ function packageLinuxDeb (
       , platformExecutablePath
       , platformManifestPath) {
 
-    const outputName = `${applicationName}-${applicationVersion}-${arch}.deb`;
+    const outputName = `${meta.__applicationName}-${
+                          meta.__applicationVersion}-${arch}.deb`;
 
     // Create root
     const rootPath = path.join(BUILD_PATH, "root");
@@ -445,9 +425,9 @@ function packageLinuxDeb (
 
     const view = {
         // Debian package names can't contain underscores
-        packageName: applicationName.replace(/_/g, "-")
-      , applicationName
-      , applicationVersion
+        packageName: meta.__applicationName.replace(/_/g, "-")
+      , applicationName: meta.__applicationName
+      , applicationVersion: meta.__applicationVersion
       , author
     };
 
@@ -479,7 +459,8 @@ function packageLinuxRpm (
       , platformExecutablePath
       , platformManifestPath) {
 
-    const outputName = `${applicationName}-${applicationVersion}-${arch}.rpm`;
+    const outputName = `${meta.__applicationName}-${
+                          meta.__applicationVersion}-${arch}.rpm`;
 
     const specPath = path.join(__dirname
           , "../packaging/linux/rpm/package.spec");
@@ -487,9 +468,9 @@ function packageLinuxRpm (
     const specOutputPath = path.join(BUILD_PATH, path.basename(specPath));
 
     const view = {
-        packageName: applicationName
-      , applicationName
-      , applicationVersion
+        packageName: meta.__applicationName
+      , applicationName: meta.__applicationName
+      , applicationVersion: meta.__applicationVersion
       , executablePath: platformExecutablePath
       , manifestPath: platformManifestPath
       , executableName: platformExecutableName
@@ -532,14 +513,15 @@ function packageWin32 (
       , platformExecutablePath
       , platformManifestPath) {
 
-    const outputName = `${applicationName}-${applicationVersion}-${arch}.exe`;
+    const outputName = `${meta.__applicationName}-${
+                          meta.__applicationVersion}-${arch}.exe`;
 
     const scriptPath = path.join(__dirname, "../packaging/win/installer.nsi");
     const scriptOutputPath = path.join(BUILD_PATH, path.basename(scriptPath));
 
     const view = {
-        applicationName
-      , applicationVersion
+        applicationName: meta.__applicationName
+      , applicationVersion: meta.__applicationVersion
       , executableName: platformExecutableName
       , executablePath: platformExecutablePath
       , manifestName
