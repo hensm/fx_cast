@@ -85,7 +85,7 @@ npm run remove-manifest
 This will build the ext and app, outputting to `dist/`:
 
 * #### `dist/app/`  
-   ... contains the built bridge with launcher and manifest with the path pointing that launcher. The `install-manifest` script copies this manifest to the proper location (or adds its current location to the registry on Windows).
+   ... contains the built bridge with launcher script and manifest with the path pointing that script. The `install-manifest` script copies this manifest to the proper location (or adds its current location to the registry on Windows).
 * #### `dist/ext/`  
     ... contains the unpacked extension.
 
@@ -95,7 +95,7 @@ Watching ext changes:
 npm run watch --prefix ./ext
 ````
 
-Launch Firefox watch for file changes (run in separate terminal):
+Launch Firefox with built extension (run in separate terminal):
 
 ````sh
 npm run start --prefix ./ext
@@ -111,6 +111,17 @@ npm run start --prefix ./ext
     Provide an alternative default mirroring receiver app ID.
 * `--mode` `"production"`, `"development"`  
     Run webpack in a different mode. Defaults to `"development"` unless combined with `--package`.
+
+#### Bridge build script arguments
+
+* `--usePkg`  
+    Creates a single executable instead of a launcher script.
+* `--package`  
+    Builds and creates installer packages for distribution.
+* `--arch` `"x64"`,`"x86"`  
+    Select platform arch to build for. Defaults to current platform arch.
+* `--skipNativeBuilds`  
+    macOS only. Skips native receiver selector build.
 
 ### Packaging
 
@@ -138,12 +149,10 @@ npm run package:app -- -- --packageType=rpm
 
 #### Bridge package script arguments
 
-* `--arch` `"x64"`,`"x86"`  
-    Select platform arch to build for. Defaults to current platform arch.
+_**Note**: Includes the build script arguments._
+
 * `--packageType` `"deb"`,`"rpm"`  
     Select the package type. Defaults to `deb`. Only relevant when building for Linux.
-* `--skipNativeBuilds`  
-    macOS only. Skips native receiver selector build.
 
 
 ### Testing
