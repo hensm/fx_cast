@@ -85,7 +85,7 @@ npm run remove-manifest
 This will build the ext and app, outputting to `dist/`:
 
 * #### `dist/app/`  
-   ... contains the bridge executable and manifest with the path pointing that executable. The `install-manifest` script copies this manifest to the proper location (or adds its current location to the registry on Windows).
+   ... contains the built bridge with launcher and manifest with the path pointing that launcher. The `install-manifest` script copies this manifest to the proper location (or adds its current location to the registry on Windows).
 * #### `dist/ext/`  
     ... contains the unpacked extension.
 
@@ -107,7 +107,7 @@ npm run start --prefix ./ext
     Should package with web-ext.
 * `--watch`  
     Should run webpack in watch mode.
-* `--packageType` `"<appID>"`  
+* `--mirroringAppId` `"<appID>"`  
     Provide an alternative default mirroring receiver app ID.
 * `--mode` `"production"`, `"development"`  
     Run webpack in a different mode. Defaults to `"development"` unless combined with `--package`.
@@ -132,20 +132,12 @@ npm run package:ext # Packaging extension
 npm run package:app # Packaging bridge application
 
 # Linux platforms
-npm run package:app -- -- --platform=linux --packageType=deb
-npm run package:app -- -- --platform=linux --packageType=rpm
-
-# Windows
-npm run package:app -- -- --platform=win32
-
-# macOS
-npm run package:app -- -- --platform=darwin
+npm run package:app -- -- --packageType=deb
+npm run package:app -- -- --packageType=rpm
 ````
 
 #### Bridge package script arguments
 
-* `--platform` `"win32"`,`"darwin"`,`"linux"`  
-    Select the platform to build for. Defaults to current platform.
 * `--arch` `"x64"`,`"x86"`  
     Select platform arch to build for. Defaults to current platform arch.
 * `--packageType` `"deb"`,`"rpm"`  

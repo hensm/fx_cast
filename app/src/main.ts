@@ -1,11 +1,7 @@
 "use strict";
 
-import meta from "../package.json";
-
-import dedent from "dedent";
+import path from "path";
 import minimist from "minimist";
-
-import * as daemon from "./daemon";
 
 
 const argv = minimist(process.argv.slice(2), {
@@ -25,21 +21,22 @@ const argv = minimist(process.argv.slice(2), {
 
 
 if (argv.version) {
-    console.log(meta.__applicationVersion);
+    // TODO: Replace this automatically
+    console.log(`v0.0.7`);
 } else if (argv.help) {
-    console.log(dedent`
-        Usage: ${meta.__applicationExecutableName} [options]
+    console.log(
+`Usage: ${path.basename(process.argv[0])} [options]
 
-        Options:
-          -h, --help       Print usage info
-          -v, --version    Print version info
-          -d, --daemon     Launch in daemon mode. This starts a WebSocket server that
-                           the extension can be configured to connect to under bridge
-                           options.
-          -p, --port       Set port number for WebSocket server. This must match the
-                           port set in the extension options.
+Options:
+  -h, --help       Print usage info
+  -v, --version    Print version info
+  -d, --daemon     Launch in daemon mode. This starts a WebSocket server that
+                   the extension can be configured to connect to under bridge
+                   options.
+  -p, --port       Set port number for WebSocket server. This must match the
+                   port set in the extension options.
+`);
 
-    `);
 } else if (argv.daemon) {
     const port = parseInt(argv.port);
     if (!port || port < 1025 || port > 65535) {
@@ -47,7 +44,10 @@ if (argv.version) {
         process.exit(1);
     }
 
-    daemon.init(port);
+    import("./daemon")
+        .then(daemon => {
+            daemon.init(port);
+        });
 } else {
     import("./bridge");
 }
