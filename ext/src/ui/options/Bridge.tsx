@@ -62,6 +62,7 @@ const BridgeStats = (props: BridgeStatsProps) => (
 interface BridgeProps {
     info?: BridgeInfo;
     loading: boolean;
+    loadingTimedOut: boolean;
     options?: Options;
     onChange: (ev: React.ChangeEvent<HTMLInputElement>) => void;
 }
@@ -177,15 +178,20 @@ export default class Bridge extends Component<BridgeProps, BridgeState> {
     }
 
     private renderStatus () {
-        const infoClasses = `bridge__info ${this.props.info
-            ? "bridge__info--found"
-            : "bridge__info--not-found"}`;
+        const infoClasses = `bridge__info ${!this.props.info
+            ? this.props.loadingTimedOut
+                ? "bridge__info--timed-out"
+                : "bridge__info--not-found"
+            : "bridge__info--found"}`;
 
         let statusIcon: string;
         let statusTitle: string;
-        let statusText: (string | null);
+        let statusText: (string | null) = null;
 
-        if (!this.props.info) {
+        if (this.props.loadingTimedOut) {
+            statusIcon = "assets/icons8-warn-120.png";
+            statusTitle = _("optionsBridgeIssueStatusTitle");
+        } else if (!this.props.info) {
             statusIcon = "assets/icons8-cancel-120.png";
             statusTitle = _("optionsBridgeNotFoundStatusTitle");
             statusText = _("optionsBridgeNotFoundStatusText");
@@ -197,8 +203,6 @@ export default class Bridge extends Component<BridgeProps, BridgeState> {
                 statusIcon = "assets/icons8-warn-120.png";
                 statusTitle = _("optionsBridgeIssueStatusTitle");
             }
-
-            statusText = null;
         }
 
         return (

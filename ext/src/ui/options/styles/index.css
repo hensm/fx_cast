@@ -130,6 +130,12 @@ button.ghost:not(:hover) {
     padding-inline-end: 25px;
 }
 
+.bridge__info--timed-out .bridge__status {
+    display: flex;
+    flex-direction: row;
+    gap: 20px;
+}
+
 .bridge__status-title {
     margin: initial;
     font-weight: 600;
@@ -141,7 +147,6 @@ button.ghost:not(:hover) {
     margin: initial;
     margin-top: 5px;
     font-size: 1.15em;
-    font-weight: 300;
     text-align: center;
 }
 
@@ -162,7 +167,6 @@ button.ghost:not(:hover) {
 }
 .bridge__info--not-found .bridge__status-title {
     grid-area: status-title;
-    font-weight: normal;
     white-space: normal;
 }
 .bridge__info--not-found .bridge__status-text {

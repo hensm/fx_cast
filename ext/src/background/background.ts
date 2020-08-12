@@ -5,7 +5,7 @@ import loadSender from "../lib/loadSender";
 import logger from "../lib/logger";
 import messaging from "../messaging";
 import options from "../lib/options";
-import bridge from "../lib/bridge";
+import bridge, { BridgeInfo } from "../lib/bridge";
 
 import { getChromeUserAgent } from "../lib/userAgents";
 import { getMediaTypesForPageUrl, stringify } from "../lib/utils";
@@ -656,7 +656,13 @@ async function initMediaOverlay () {
 async function checkBridgeCompat () {
     logger.info("checking for bridge...");
 
-    const info = await bridge.getInfo();
+    let info: BridgeInfo;
+    try {
+        info = await bridge.getInfo();
+    } catch (err) {
+        logger.info("... bridge issue!");
+        return;
+    }
 
     if (info.isVersionCompatible) {
         logger.info("... bridge compatible!");

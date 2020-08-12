@@ -106,6 +106,7 @@ function getInputValue (input: HTMLInputElement) {
 interface OptionsAppState {
     hasLoaded: boolean;
     bridgeLoading: boolean;
+    bridgeLoadingTimedOut: boolean;
     isFormValid: boolean;
     hasSaved: boolean;
 
@@ -123,6 +124,7 @@ class OptionsApp extends Component<{}, OptionsAppState> {
         this.state = {
             hasLoaded: false
           , bridgeLoading: true
+          , bridgeLoadingTimedOut: false
           , isFormValid: true
           , hasSaved: false
         };
@@ -147,6 +149,13 @@ class OptionsApp extends Component<{}, OptionsAppState> {
           , platform: (await browser.runtime.getPlatformInfo()).os
         });
 
+        const bridgeTimeoutId = setTimeout(() => {
+            this.setState({
+                bridgeLoading: false
+              , bridgeLoadingTimedOut: true
+            });
+        }, 500);
+
         try {
             const bridgeInfo = await bridge.getInfo();
 
@@ -161,6 +170,8 @@ class OptionsApp extends Component<{}, OptionsAppState> {
                 bridgeLoading: false
             });
         }
+
+        clearTimeout(bridgeTimeoutId);
     }
 
     public render () {
@@ -176,6 +187,7 @@ class OptionsApp extends Component<{}, OptionsAppState> {
 
                     <Bridge info={ this.state.bridgeInfo }
                             loading={ this.state.bridgeLoading }
+                            loadingTimedOut={ this.state.bridgeLoadingTimedOut }
                             options={ this.state.options }
                             onChange={ this.handleInputChange } />
 
