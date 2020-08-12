@@ -6,7 +6,7 @@ import minimist from "minimist";
 
 const argv = minimist(process.argv.slice(2), {
     boolean: [ "daemon", "help", "version" ]
-  , string: [ "port" ]
+  , string: [ "__name", "port" ]
   , alias: {
         d: "daemon"
       , h: "help"
@@ -14,7 +14,8 @@ const argv = minimist(process.argv.slice(2), {
       , p: "port"
     }
   , default: {
-        daemon: false
+        __name: path.basename(process.argv[0])
+      , daemon: false
       , port: "9556"
     }
 });
@@ -25,7 +26,7 @@ if (argv.version) {
     console.log(`v0.0.7`);
 } else if (argv.help) {
     console.log(
-`Usage: ${path.basename(process.argv[0])} [options]
+`Usage: ${argv.__name} [options]
 
 Options:
   -h, --help       Print usage info
