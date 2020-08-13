@@ -39,6 +39,10 @@
     .about hr {
         border-top: 1px solid rgba(255, 255, 255, 0.1) !important;
     }
+
+    .about__link > img {
+        filter: invert(1);
+    }
 }
 
 *:invalid {
@@ -427,8 +431,8 @@ button.ghost:not(:hover) {
 
 
 .about {
-    border-radius: 5px;
-    margin-top: 30px;
+    border-radius: 2px;
+    margin-bottom: 40px;
     overflow: hidden;
 }
 
@@ -455,6 +459,7 @@ button.ghost:not(:hover) {
     font: inherit;
     font-weight: bold;
     margin: 5px 0;
+    text-transform: uppercase;
 }
 
 .about hr {
@@ -463,12 +468,26 @@ button.ghost:not(:hover) {
     margin: 10px 0;
 }
 
-.about__license-text {
-    cursor: text;
-    font-family: monospace;
-    pointer-events: initial;
-    user-select: text;
-    white-space: pre-line;
+.about__links {
+    margin: initial;
+    padding: initial;
+    list-style: none;
+}
+.about__link {
+    align-items: center;
+    display: inline-flex;
+    font-size: 1.2em;
+    gap: 5px;
+}
+.about__link > img {
+    vertical-align: middle;
+}
+
+.about__license > textarea {
+    height: 200px;
+    resize: vertical;
+    overflow-y: auto;
+    width: 100%;
 }
 
 .about__translators > ul {

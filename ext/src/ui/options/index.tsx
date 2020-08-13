@@ -179,6 +179,82 @@ class OptionsApp extends Component<{}, OptionsAppState> {
 
         return (
             <div>
+                <details className="about">
+                    <summary>
+                        <h2>About</h2>
+                    </summary>
+                    <div className="about__container">
+                        <ul className="about__links">
+                            <li>
+                                <a className="about__link"
+                                   href="https://github.com/hensm/fx_cast">
+                                    <img src="assets/icons8-github-24.png"
+                                         srcSet="assets/icons8-github-48.png 2x"
+                                         width="24"
+                                         alt="GitHub icon" />
+                                    @hensm/fx_cast
+                                </a>
+                            </li>
+                            <li>
+                                <a className="about__link"
+                                    href="https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=3Z2FTMSG976WN&source=url">
+                                    <img src="assets/icons8-paypal-24.png"
+                                         srcSet="assets/icons8-paypal-48.png 2x"
+                                         width="24"
+                                         alt="PayPal icon" />
+                                    Donate via PayPal
+                                </a>
+                            </li>
+                            <li>
+                                <a className="about__link"
+                                    href="https://icons8.com">
+                                    <img src="assets/icons8-icons8-24.png"
+                                         srcSet="assets/icons8-icons8-48.png 2x"
+                                         width="24"
+                                         alt="icons8 icon" />
+                                    Icons by icons8
+                                </a>
+                            </li>
+                        </ul>
+
+                        <hr />
+
+                        <details className="about__license">
+                            <summary>
+                                <h3>License</h3>
+                            </summary>
+                            <textarea>
+                                { LICENSE.replace(/(\S)\n(\S)/g, "$1 $2") }
+                            </textarea>
+                        </details>
+
+                        <hr />
+
+                        <details className="about__translators">
+                            <summary>
+                                <h3>Translators</h3>
+                            </summary>
+                            <ul>
+                                <li className="translator">
+                                    @RAVMN
+                                    <div className="translator__tag">es</div>
+                                </li>
+                                <li className="translator">
+                                    @rimrul
+                                    <div className="translator__tag">de</div>
+                                </li>
+                                <li className="translator">
+                                    @ThaDaVos
+                                    <div className="translator__tag">nl</div>
+                                </li>
+                                <li className="translator">
+                                    @Vistaus
+                                    <div className="translator__tag">nl</div>
+                                </li>
+                            </ul>
+                        </details>
+                    </div>
+                </details>
                 <form id="form" ref={ form => { this.form = form; }}
                         onSubmit={ this.handleFormSubmit }
                         onChange={ this.handleFormChange }>
@@ -448,50 +524,6 @@ class OptionsApp extends Component<{}, OptionsAppState> {
                         </button>
                     </div>
                 </form>
-
-                <details className="about">
-                    <summary>
-                        <h2>ABOUT</h2>
-                    </summary>
-                    <div className="about__container">
-                        <h3>GitHub</h3>: <a href="https://github.com/hensm/fx_cast">@hensm/fx_cast</a>
-
-                        <hr />
-
-                        <details className="about__license">
-                            <summary>
-                                <h3>LICENSE</h3>
-                            </summary>
-                            <div className="about__license-text">
-                                { LICENSE.replace(/(\S)\n(\S)/g, "$1 $2") }
-                            </div>
-                        </details>
-
-                        <hr />
-
-                        <div className="about__translators">
-                            <h3>TRANSLATORS</h3>
-                            <ul>
-                                <li className="translator">
-                                    @RAVMN
-                                    <div className="translator__tag">es</div>
-                                </li>
-                                <li className="translator">
-                                    @rimrul
-                                    <div className="translator__tag">de</div>
-                                </li>
-                                <li className="translator">
-                                    @ThaDaVos
-                                    <div className="translator__tag">nl</div>
-                                </li>
-                                <li className="translator">
-                                    @Vistaus
-                                    <div className="translator__tag">nl</div>
-                                </li>
-                            </ul>
-                        </div>
-                    </div>
-                </details>
             </div>
         );
     }
