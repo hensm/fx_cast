@@ -135,6 +135,9 @@ button.ghost:not(:hover) {
     flex-direction: row;
     gap: 20px;
 }
+.bridge__info--timed-out .bridge__status-title {
+    font-size: 1.75em;
+}
 
 .bridge__status-title {
     margin: initial;

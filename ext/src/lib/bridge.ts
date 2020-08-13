@@ -14,6 +14,8 @@ import { ReceiverSelectionCast
        , ReceiverSelectionStop } from "../background/receiverSelector/ReceiverSelector";
 
 
+export const BRIDGE_TIMEOUT = 500;
+
 async function connect (): Promise<Port> {
     const applicationName = await options.get("bridgeApplicationName");
     const bridgePort = nativeMessaging.connectNative(applicationName) as
@@ -42,14 +44,22 @@ export interface BridgeInfo {
     isVersionNewer: boolean;
 }
 
-async function getInfo (): Promise<BridgeInfo> {
+export class BridgeConnectionError extends Error {}
+export class BridgeTimedOutError extends Error {}
+
+const getInfo = () => new Promise<BridgeInfo>(async (resolve, reject) => {
     const applicationName = await options.get("bridgeApplicationName");
     if (!applicationName) {
-        throw logger.error("Bridge application name not found.");
+        reject(logger.error("Bridge application name not found."));
+        return;
     }
 
-    let applicationVersion: string;
+    const bridgeTimeoutId = setTimeout(() => {
+        logger.error("Bridge timed out.");
+        reject(new BridgeTimedOutError());
+    }, BRIDGE_TIMEOUT);
 
+    let applicationVersion: string;
     try {
         const { version } = browser.runtime.getManifest();
 
@@ -58,8 +68,14 @@ async function getInfo (): Promise<BridgeInfo> {
               , { subject: "bridge:/getInfo"
                 , data: version });
     } catch (err) {
-        throw logger.error("Failed to connect to bridge application");
+        logger.error("Bridge connection failed.");
+        reject(new BridgeConnectionError());
+        clearTimeout(bridgeTimeoutId);
+
+        return;
     }
+
+    clearTimeout(bridgeTimeoutId);
 
     /**
      * If the target version is above 0.x.x range, API is stable
@@ -83,7 +99,7 @@ async function getInfo (): Promise<BridgeInfo> {
                     : "Try updating the extension to the latest version"}`);
     }
 
-    return {
+    resolve({
         name: applicationName
       , version: applicationVersion
       , expectedVersion: APPLICATION_VERSION
@@ -93,9 +109,8 @@ async function getInfo (): Promise<BridgeInfo> {
       , isVersionCompatible
       , isVersionOlder
       , isVersionNewer
-    };
-}
-
+    });
+});
 
 export default {
     connect

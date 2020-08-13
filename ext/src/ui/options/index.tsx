@@ -9,7 +9,7 @@ import defaultOptions from "../../defaultOptions";
 import Bridge from "./Bridge";
 import EditableList from "./EditableList";
 
-import bridge, { BridgeInfo } from "../../lib/bridge";
+import bridge, { BridgeInfo, BridgeTimedOutError } from "../../lib/bridge";
 import logger from "../../lib/logger";
 import options, { Options } from "../../lib/options";
 import { REMOTE_MATCH_PATTERN_REGEX } from "../../lib/utils";
@@ -149,13 +149,6 @@ class OptionsApp extends Component<{}, OptionsAppState> {
           , platform: (await browser.runtime.getPlatformInfo()).os
         });
 
-        const bridgeTimeoutId = setTimeout(() => {
-            this.setState({
-                bridgeLoading: false
-              , bridgeLoadingTimedOut: true
-            });
-        }, 500);
-
         try {
             const bridgeInfo = await bridge.getInfo();
 
@@ -163,15 +156,20 @@ class OptionsApp extends Component<{}, OptionsAppState> {
                 bridgeInfo
               , bridgeLoading: false
             });
-        } catch {
+        } catch (err) {
             logger.error("Failed to fetch bridge/platform info.");
 
-            this.setState({
-                bridgeLoading: false
-            });
+            if (err instanceof BridgeTimedOutError) {
+                this.setState({
+                    bridgeLoading: false
+                  , bridgeLoadingTimedOut: true
+                });
+            } else {
+                this.setState({
+                    bridgeLoading: false
+                });
+            }
         }
-
-        clearTimeout(bridgeTimeoutId);
     }
 
     public render () {
