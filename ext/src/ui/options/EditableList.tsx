@@ -282,13 +282,15 @@ class EditableListItem extends Component<
     }
 
     private handleEditBegin () {
-        this.setState({
-            editing: true
-          , editValue: this.props.text
-        }, () => {
-            this.input?.focus();
-            this.input?.select();
-        });
+        if (!this.state.editing) {
+            this.setState({
+                editing: true
+              , editValue: this.props.text
+            }, () => {
+                this.input?.focus();
+                this.input?.select();
+            });
+        }
     }
 
     private handleEditEnd (ev: React.FocusEvent<HTMLInputElement>) {
