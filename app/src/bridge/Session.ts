@@ -206,12 +206,17 @@ export default class Session {
 
     private _impl_sendMessage (
             namespace: string
-          , message: object
+          , message: {} | string
           , messageId: string) {
 
         let error = false;
 
         try {
+            // Decode string messages
+            if (typeof message === "string") {
+                message = JSON.parse(message);
+            }
+
             this.createChannel(namespace);
             this.channelMap.get(namespace)!.send(message);
         } catch (err) {
