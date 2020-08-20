@@ -307,7 +307,7 @@ async function initMenus () {
             ? url.hostname.substring(url.hostname.indexOf(".") + 1)
             : url.hostname;
 
-        const portlessOrigin = `${url.protocol}://${url.hostname}`;
+        const portlessOrigin = `${url.protocol}//${url.hostname}`;
 
         const patternRecommended = `${portlessOrigin}/*`;
         const patternSearch = `${portlessOrigin}${url.pathname}${url.search}`;
