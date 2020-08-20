@@ -4,7 +4,7 @@ import child_process from "child_process";
 import path from "path";
 
 import { Message, Messages } from "./types";
-import { sendMessage } from "./nativeMessaging";
+import { sendMessage } from "./lib/nativeMessaging";
 
 
 function fatal (message: string) {

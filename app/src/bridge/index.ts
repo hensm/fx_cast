@@ -7,7 +7,7 @@ import { Message } from "./types";
 
 import { decodeTransform
        , encodeTransform
-       , sendMessage } from "./nativeMessaging";
+       , sendMessage } from "./lib/nativeMessaging";
 
 import Session from "./Session";
 import Media from "./Media";
