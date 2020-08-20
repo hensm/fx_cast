@@ -90,6 +90,7 @@ export default class Media {
 
     private sendMessage (subject: string, data: any = {}) {
         this.sendMessageCallback({
+            // @ts-ignore
             subject
           , data
           , _id: this.referenceId

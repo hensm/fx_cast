@@ -7,7 +7,7 @@ import minimist from "minimist";
 import WebSocket from "ws";
 
 import { DecodeTransform
-       , EncodeTransform } from "../transforms";
+       , EncodeTransform } from "./transforms";
 
 
 export function init (port: number) {
