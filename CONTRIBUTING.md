@@ -24,11 +24,27 @@ https://lusito.github.io/web-ext-translator/?gh=https://github.com/hensm/fx_cast
 
 Missing/outdated strings:
 
+* `de`
+    * `optionsMirroringCategoryName`
+    * `optionsMirroringCategoryDescription`
+    * `optionsMirroringEnabled`
+    * `optionsMirroringAppId`
+
+* `es`
+    * `optionsMirroringCategoryName`
+    * `optionsMirroringCategoryDescription`
+    * `optionsMirroringEnabled`
+    * `optionsMirroringAppId`
+
 * `nl`
     * `optionsBridgeBackupEnabled`
     * `optionsUserAgentWhitelistRestrictedEnabled`
     * `optionsUserAgentWhitelistRestrictedEnabledDescription`
     * `optionsOptionRecommended`
+    * `optionsMirroringCategoryName`
+    * `optionsMirroringCategoryDescription`
+    * `optionsMirroringEnabled`
+    * `optionsMirroringAppId`
 
 
 ### NSIS Installer Localization

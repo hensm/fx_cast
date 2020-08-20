@@ -362,19 +362,19 @@
     }
 
   , "optionsMirroringCategoryName": {
-        "message": "Screen mirroring"
+        "message": "Screen/tab casting"
       , "description": "Options page mirroring category name."
     }
   , "optionsMirroringCategoryDescription": {
-        "message": "Screen/Tab mirroring to a Chromecast receiver app."
+        "message": "Mirroring to a Chromecast receiver app."
       , "description": "Options page mirroring category description."
     }
   , "optionsMirroringEnabled": {
-        "message": "Enable screen mirroring (experimental)"
+        "message": "Enable screen/tab casting (experimental)"
       , "description": "Mirroring enabled checkbox label."
     }
   , "optionsMirroringAppId": {
-        "message": "Receiver app ID:"
+        "message": "Mirroring app ID:"
       , "description": "Mirroring app ID input label."
     }
   , "optionsMirroringAppIdDescription": {
