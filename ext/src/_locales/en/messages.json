@@ -370,7 +370,7 @@
       , "description": "Options page mirroring category description."
     }
   , "optionsMirroringEnabled": {
-        "message": "Enable screen mirroring"
+        "message": "Enable screen mirroring (experimental)"
       , "description": "Mirroring enabled checkbox label."
     }
   , "optionsMirroringAppId": {
