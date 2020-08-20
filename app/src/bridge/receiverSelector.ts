@@ -16,7 +16,7 @@ function fatal (message: string) {
 let selectorApp: child_process.ChildProcess;
 let selectorAppOpen = false;
 
-export function handleMessage (message: Message) {
+export function handleReceiverSelectorMessage (message: Message) {
     switch (message.subject) {
         case "bridge:/receiverSelector/open": {
             if (process.platform !== "darwin") {
@@ -88,6 +88,6 @@ export function handleMessage (message: Message) {
     }
 }
 
-export function close () {
+export function closeReceiverSelector () {
     selectorApp.kill();
 }

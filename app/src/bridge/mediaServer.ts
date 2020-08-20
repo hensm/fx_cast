@@ -16,12 +16,12 @@ import { convertSrtToVtt } from "./lib/subtitles";
 
 export let mediaServer: http.Server;
 
-export async function handleMessage (message: Message) {
+export async function handleMediaServerMessage (message: Message) {
     switch (message.subject) {
         case "bridge:/mediaServer/start": {
             const { filePath, port } = message.data;
 
-            close();
+            closeMediaServer();
 
             let fileDir: string;
             let fileName: string;
@@ -156,13 +156,13 @@ export async function handleMessage (message: Message) {
         }
 
         case "bridge:/mediaServer/stop": {
-            close();
+            closeMediaServer();
             break;
         }
     }
 }
 
-export function close () {
+export function closeMediaServer () {
     if (mediaServer && mediaServer.listening) {
         mediaServer.close();
     }

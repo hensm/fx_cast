@@ -13,8 +13,10 @@ import Session from "./Session";
 import Media from "./Media";
 import StatusListener from "./StatusListener";
 
-import * as receiverSelector from "./receiverSelector";
-import * as mediaServer from "./mediaServer";
+import { handleReceiverSelectorMessage
+       , closeReceiverSelector } from "./receiverSelector";
+import { handleMediaServerMessage
+       , closeMediaServer } from "./mediaServer";
 
 import { __applicationName
        , __applicationVersion} from "../../package.json";
@@ -22,8 +24,9 @@ import { __applicationName
 
 process.on("SIGTERM", () => {
     browser.stop();
-    mediaServer.close();
-    receiverSelector.close();
+
+    closeMediaServer();
+    closeReceiverSelector();
 });
 
 
@@ -211,13 +214,12 @@ decodeTransform.on("data", (message: Message) => {
         handleMediaMessage(message);
         return;
     }
-
     if (message.subject.startsWith("bridge:/receiverSelector/")) {
-        receiverSelector.handleMessage(message);
+        handleReceiverSelectorMessage(message);
         return;
     }
     if (message.subject.startsWith("bridge:/mediaServer/")) {
-        mediaServer.handleMessage(message);
+        handleMediaServerMessage(message);
         return;
     }
     
