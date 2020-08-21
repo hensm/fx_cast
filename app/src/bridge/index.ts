@@ -7,16 +7,16 @@ import { Message } from "./types";
 
 import { decodeTransform
        , encodeTransform
-       , sendMessage } from "./lib/nativeMessaging";
+       , sendMessage } from "./messaging";
 
 import Session from "./Session";
 import Media from "./Media";
 import StatusListener from "./StatusListener";
 
-import { handleReceiverSelectorMessage
-       , closeReceiverSelector } from "./receiverSelector";
-import { handleMediaServerMessage
-       , closeMediaServer } from "./mediaServer";
+import { startReceiverSelector
+       , stopReceiverSelector } from "./components/receiverSelector";
+import { startMediaServer
+       , stopMediaServer } from "./components/mediaServer";
 
 import { __applicationName
        , __applicationVersion} from "../../package.json";
@@ -25,8 +25,8 @@ import { __applicationName
 process.on("SIGTERM", () => {
     browser.stop();
 
-    closeMediaServer();
-    closeReceiverSelector();
+    stopMediaServer();
+    stopReceiverSelector();
 });
 
 
@@ -214,12 +214,42 @@ decodeTransform.on("data", (message: Message) => {
         handleMediaMessage(message);
         return;
     }
+
     if (message.subject.startsWith("bridge:/receiverSelector/")) {
-        handleReceiverSelectorMessage(message);
+        switch (message.subject) {
+            case "bridge:/receiverSelector/open": {
+                const selector = startReceiverSelector(message.data);
+                selector.on("selected", data => sendMessage(
+                        { subject: "main:/receiverSelector/selected", data }));
+                selector.on("stop", data => sendMessage(
+                        { subject: "main:/receiverSelector/stop", data }));
+                selector.on("error", data => sendMessage(
+                        { subject: "main:/receiverSelector/error" , data }));
+                selector.on("close", () => sendMessage(
+                        { subject: "main:/receiverSelector/close" }));
+
+                break;
+            };
+            case "bridge:/receiverSelector/close": {
+                stopReceiverSelector();
+                break;
+            };
+        }
         return;
     }
+
     if (message.subject.startsWith("bridge:/mediaServer/")) {
-        handleMediaServerMessage(message);
+        switch (message.subject) {
+            case "bridge:/mediaServer/start": {
+                startMediaServer(message.data.filePath, message.data.port);
+                break;
+            };
+            case "bridge:/mediaServer/stop": {
+                stopMediaServer();
+                break;
+            };
+        }
+
         return;
     }
     

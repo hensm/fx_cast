@@ -1,5 +1,8 @@
 "use strict";
 
+import fs from "fs";
+
+
 /**
  * Reads a SubRip file and outputs text content as WebVTT.
  */
