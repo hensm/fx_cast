@@ -2,9 +2,9 @@
 
 import mdns from "mdns";
 
-import StatusListener from "./StatusListener";
-import { ReceiverStatus } from "../../castTypes";
-import { sendMessage } from "../../messaging";
+import StatusListener from "./chromecast/StatusListener";
+import { ReceiverStatus } from "../castTypes";
+import { sendMessage } from "../messaging";
 
 
 const browser = mdns.createBrowser(mdns.tcp("googlecast"), {

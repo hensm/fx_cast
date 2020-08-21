@@ -5,7 +5,7 @@ import { EventEmitter } from "events";
 
 import { NS_CONNECTION
        , NS_HEARTBEAT
-       , NS_RECEIVER } from "../../Session";
+       , NS_RECEIVER } from "./Session";
 
 
 /**

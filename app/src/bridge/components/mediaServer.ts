@@ -149,7 +149,7 @@ export async function startMediaServer (filePath: string, port: number) {
     mediaServer.listen(port);
 }
 
-export async function stopMediaServer () {
+export function stopMediaServer () {
     if (mediaServer?.listening) {
         mediaServer.close();
         mediaServer = undefined;

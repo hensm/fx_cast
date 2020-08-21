@@ -2,8 +2,8 @@
 
 import { Channel, Client } from "castv2";
 
-import { Message
-       , SendMessageCallback } from "./types";
+import { Message } from "../../types";
+import { sendMessage } from "../../messaging";
 
 
 export const NS_CONNECTION = "urn:x-cast:com.google.cast.tp.connection";
@@ -16,8 +16,7 @@ export default class Session {
     public host: string;
     public port: number;
 
-    private sendMessageCallback: SendMessageCallback;
-    private sessionId: number;
+    private sessionId: string;
     private referenceId: string;
 
     private client: Client;
@@ -37,16 +36,14 @@ export default class Session {
             host: string
           , port: number
           , appId: string
-          , sessionId: number
-          , referenceId: string
-          , sendMessageCallback: SendMessageCallback) {
+          , sessionId: string
+          , referenceId: string) {
 
         this.host = host;
         this.port = port;
 
         this.sessionId = sessionId;
-        this.referenceId = referenceId;
-        this.sendMessageCallback = sendMessageCallback;
+        this.referenceId = referenceId;;
 
         this.client = new Client();
 
@@ -187,7 +184,7 @@ export default class Session {
     }
 
     private sendMessage (subject: string, data: any = {}) {
-        this.sendMessageCallback({
+        sendMessage({
             // @ts-ignore
             subject
           , data
