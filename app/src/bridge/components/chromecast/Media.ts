@@ -1,14 +1,14 @@
 "use strict";
 
-import { Channel } from "castv2";
+import castv2 from "castv2";
 
 import Session from "./Session";
 
-import { Message
-       , SendMessageCallback } from "./types";
+import { Message } from "../../types";
+import { sendMessage } from "../../lib/messaging"
 
 
-const MEDIA_NAMESPACE = "urn:x-cast:com.google.cast.media";
+const NS_MEDIA = "urn:x-cast:com.google.cast.media";
 
 export interface UpdateMessageData {
     _volumeLevel?: number;
@@ -25,15 +25,14 @@ export interface UpdateMessageData {
 
 
 export default class Media {
-    private channel: Channel;
+    private channel: castv2.Channel;
 
     constructor (
             private referenceId: string
-          , private session: Session
-          , private sendMessageCallback: SendMessageCallback) {
+          , private session: Session) {
 
-        this.session.createChannel(MEDIA_NAMESPACE);
-        this.channel = this.session.channelMap.get(MEDIA_NAMESPACE)!;
+        this.session.createChannel(NS_MEDIA);
+        this.channel = this.session.channelMap.get(NS_MEDIA)!;
 
         this.channel.on("message", (data: any) => {
             if (data && data.type === "MEDIA_STATUS"
@@ -88,8 +87,8 @@ export default class Media {
         }
     }
 
-    private sendMessage (subject: string, data: any = {}) {
-        this.sendMessageCallback({
+    private sendMessage (subject: string, data: any) {
+        (sendMessage as any)({
             subject
           , data
           , _id: this.referenceId

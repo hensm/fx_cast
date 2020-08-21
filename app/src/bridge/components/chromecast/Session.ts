@@ -2,8 +2,8 @@
 
 import { Channel, Client } from "castv2";
 
-import { Message
-       , SendMessageCallback } from "./types";
+import { Message } from "../../types";
+import { sendMessage } from "../../lib/messaging";
 
 
 export const NS_CONNECTION = "urn:x-cast:com.google.cast.tp.connection";
@@ -12,13 +12,6 @@ export const NS_RECEIVER = "urn:x-cast:com.google.cast.receiver";
 
 export default class Session {
     public channelMap = new Map<string, Channel>();
-
-    public host: string;
-    public port: number;
-
-    private sendMessageCallback: SendMessageCallback;
-    private sessionId: number;
-    private referenceId: string;
 
     private client: Client;
     private clientConnection?: Channel;
@@ -34,92 +27,82 @@ export default class Session {
     private app: any;
 
     constructor (
-            host: string
-          , port: number
-          , appId: string
-          , sessionId: number
-          , referenceId: string
-          , sendMessageCallback: SendMessageCallback) {
-
-        this.host = host;
-        this.port = port;
-
-        this.sessionId = sessionId;
-        this.referenceId = referenceId;
-        this.sendMessageCallback = sendMessageCallback;
+            public host: string
+          , public port: number
+          , private appId: string
+          , private sessionId: string
+          , private referenceId: string) {
 
         this.client = new Client();
+        this.client.connect({ host, port }, this.onConnect.bind(this));
+    }
 
-        this.client.connect({ host, port }, () => {
-            let transportHeartbeat: Channel;
+    private onConnect () {
+        let transportHeartbeat: Channel;
 
-            const sourceId = "sender-0";
-            const destinationId = "receiver-0";
+        const sourceId = "sender-0";
+        const destinationId = "receiver-0";
 
-            this.clientConnection = this.client.createChannel(
+        this.clientConnection = this.client.createChannel(
                 sourceId, destinationId, NS_CONNECTION, "JSON");
-            this.clientHeartbeat = this.client.createChannel(
+        this.clientHeartbeat = this.client.createChannel(
                 sourceId, destinationId, NS_HEARTBEAT, "JSON");
-            this.clientReceiver = this.client.createChannel(
+        this.clientReceiver = this.client.createChannel(
                 sourceId, destinationId, NS_RECEIVER, "JSON");
 
-            this.clientConnection.send({ type: "CONNECT" });
-            this.clientHeartbeat.send({ type: "PING" });
+        this.clientConnection.send({ type: "CONNECT" });
+        this.clientHeartbeat.send({ type: "PING" });
 
-            this.clientHeartbeatIntervalId = setInterval(() => {
-                if (transportHeartbeat) {
-                    transportHeartbeat.send({ type: "PING" });
-                }
+        this.clientHeartbeatIntervalId = setInterval(() => {
+            if (transportHeartbeat) {
+                transportHeartbeat.send({ type: "PING" });
+            }
 
-                this.clientHeartbeat!.send({ type: "PING" });
-            }, 5000);
+            this.clientHeartbeat!.send({ type: "PING" });
+        }, 5000);
 
-            this.clientReceiver.send({
-                type: "LAUNCH"
-              , appId
-              , requestId: 1
-            });
+        this.clientReceiver.send({
+            type: "LAUNCH"
+          , appId: this.appId
+          , requestId: 1
+        });
 
-            this.clientReceiver.on("message", (message: any) => {
-                if (message.type === "RECEIVER_STATUS") {
-                    this.sendMessage("shim:/session/updateStatus"
-                          , message.status);
+        this.clientReceiver.on("message", (message: any) => {
+            if (message.type === "RECEIVER_STATUS") {
+                this.sendMessage("shim:/session/updateStatus", message.status);
 
-                    if (!message.status.applications) {
-                        return;
-                    }
-
+                if (message.status.applications) {
                     const receiverApp = message.status.applications[0];
                     const receiverAppId = receiverApp.appId;
-
+        
                     this.app = receiverApp;
-
-                    if (receiverAppId !== appId) {
+        
+                    if (receiverAppId !== this.appId) {
                         // Close session
                         this.sendMessage("shim:/session/stopped");
                         this.client.close();
                         clearInterval(this.clientHeartbeatIntervalId!);
                         return;
                     }
-
+        
                     if (!this.isSessionCreated) {
                         this.isSessionCreated = true;
-
+        
                         this.transportId = this.app.transportId;
                         this.clientId =
                             `client-${Math.floor(Math.random() * 10e5)}`;
-
+        
                         this.transportConnection = this.client.createChannel(
                                 this.clientId, this.transportId!
                               , NS_CONNECTION, "JSON");
                         transportHeartbeat = this.client.createChannel(
                                 this.clientId, this.transportId!
                               , NS_HEARTBEAT, "JSON");
-
+        
                         this.transportConnection.send({ type: "CONNECT" });
-
+        
                         this.sessionId = this.app.sessionId;
-
+        
                         this.sendMessage("shim:/session/connected", {
                             sessionId: this.app.sessionId
                           , namespaces: this.app.namespaces
@@ -128,7 +111,7 @@ export default class Session {
                         });
                     }
                 }
-            });
+            }
         });
     }
 
@@ -169,25 +152,24 @@ export default class Session {
 
     public createChannel (namespace: string) {
         if (!this.channelMap.has(namespace)) {
-            this.channelMap.set(namespace
-                , this.client.createChannel(
-                        this.clientId!, this.transportId!, namespace, "JSON"));
+            this.channelMap.set(namespace, this.client.createChannel(
+                    this.clientId!, this.transportId!
+                  , namespace, "JSON"));
         }
     }
 
     public close () {
-        this.clientConnection!.send({ type: "CLOSE" });
-        if (this.transportConnection) {
-            this.transportConnection.send({ type: "CLOSE" });
-        }
+        this.clientConnection?.send({ type: "CLOSE" });
+        this.transportConnection?.send({ type: "CLOSE" });
     }
 
     public stop () {
-        this.clientConnection!.send({ type: "STOP" });
+        this.clientConnection?.send({ type: "STOP" });
     }
 
     private sendMessage (subject: string, data: any = {}) {
-        this.sendMessageCallback({
+        sendMessage({
+            // @ts-ignore
             subject
           , data
           , _id: this.referenceId
@@ -196,7 +178,7 @@ export default class Session {
 
     private _impl_addMessageListener (namespace: string) {
         this.createChannel(namespace);
-        this.channelMap.get(namespace)!.on("message", (data: any) => {
+        this.channelMap.get(namespace)?.on("message", (data: any) => {
             this.sendMessage("shim:/session/impl_addMessageListener", {
                 namespace
               , data: JSON.stringify(data)
