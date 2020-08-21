@@ -3,7 +3,7 @@
 import { Channel, Client } from "castv2";
 
 import { Message } from "../../types";
-import { sendMessage } from "../../messaging";
+import { sendMessage } from "../../lib/messaging";
 
 
 export const NS_CONNECTION = "urn:x-cast:com.google.cast.tp.connection";

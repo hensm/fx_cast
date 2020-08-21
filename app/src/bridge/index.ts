@@ -1,6 +1,6 @@
 "use strict";
 
-import { decodeTransform, encodeTransform } from "./messaging";
+import { decodeTransform, encodeTransform } from "./lib/messaging";
 import { Message } from "./types";
 
 import { handleSessionMessage, handleMediaMessage }

@@ -5,7 +5,7 @@ import castv2 from "castv2";
 import Session from "./Session";
 
 import { Message } from "../../types";
-import { sendMessage } from "../../messaging"
+import { sendMessage } from "../../lib/messaging"
 
 
 const NS_MEDIA = "urn:x-cast:com.google.cast.media";
