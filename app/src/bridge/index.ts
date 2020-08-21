@@ -2,137 +2,25 @@
 
 import mdns from "mdns";
 
-import { ReceiverStatus } from "./castTypes";
-import { Message } from "./types";
-
-import { decodeTransform
-       , encodeTransform
-       , sendMessage } from "./messaging";
-
 import Session from "./Session";
 import Media from "./Media";
-import StatusListener from "./StatusListener";
 
-import { startReceiverSelector
-       , stopReceiverSelector } from "./components/receiverSelector";
-import { startMediaServer
-       , stopMediaServer } from "./components/mediaServer";
+import { decodeTransform, encodeTransform, sendMessage } from "./messaging";
+import { Message } from "./types";
 
-import { __applicationName
-       , __applicationVersion} from "../../package.json";
+import { startDiscovery, stopDiscovery } from "./components/discovery";
+import { startMediaServer, stopMediaServer } from "./components/mediaServer";
+import { startReceiverSelector, stopReceiverSelector }
+        from "./components/receiverSelector";
+
+import { __applicationName, __applicationVersion} from "../../package.json";
 
 
 process.on("SIGTERM", () => {
-    browser.stop();
-
+    stopDiscovery();
     stopMediaServer();
     stopReceiverSelector();
 });
-
-
-const browser = mdns.createBrowser(mdns.tcp("googlecast"), {
-    resolverSequence: [
-        mdns.rst.DNSServiceResolve()
-      , "DNSServiceGetAddrInfo" in mdns.dns_sd
-            ? mdns.rst.DNSServiceGetAddrInfo()
-              // Some issues on Linux with IPv6, so restrict to IPv4
-            : mdns.rst.getaddrinfo({ families: [ 4 ] })
-      , mdns.rst.makeAddressesUnique()
-    ]
-});
-
-function onBrowserServiceUp (service: mdns.Service) {
-    sendMessage({
-        subject: "main:/serviceUp"
-      , data: {
-            host: service.addresses[0]
-          , port: service.port
-          , id: service.txtRecord.id
-          , friendlyName: service.txtRecord.fn
-        }
-    });
-}
-
-function onBrowserServiceDown (service: mdns.Service) {
-    sendMessage({
-        subject: "main:/serviceDown"
-      , data: {
-            id: service.txtRecord.id
-        }
-    });
-}
-
-browser.on("serviceUp", onBrowserServiceUp);
-browser.on("servicedown", onBrowserServiceDown);
-
-browser.on("error", (err: any) => {
-    console.error("Discovery failed", err);
-});
-
-
-interface InitializeOptions {
-    shouldWatchStatus?: boolean;
-}
-
-function initialize (options: InitializeOptions) {
-    if (options.shouldWatchStatus) {
-        browser.on("serviceUp", onStatusBrowserServiceUp);
-        browser.on("serviceDown", onStatusBrowserServiceDown);
-    }
-
-    browser.start();
-
-
-    // Receiver status listeners for status mode
-    const statusListeners = new Map<string, StatusListener>();
-
-    function onStatusBrowserServiceUp (service: mdns.Service) {
-        const { id } = service.txtRecord;
-
-        const listener = new StatusListener(
-                service.addresses[0]
-              , service.port);
-
-        listener.on("receiverStatus", (status: ReceiverStatus) => {
-            const receiverStatusMessage: any = {
-                subject: "main:/receiverStatus"
-              , data: {
-                    id
-                  , status: {
-                        volume: {
-                            level: status.volume.level
-                          , muted: status.volume.muted
-                        }
-                    }
-                }
-            };
-
-            if (status.applications && status.applications.length) {
-                const application = status.applications[0];
-
-                receiverStatusMessage.data.status.application = {
-                    appId: application.appId
-                  , displayName: application.displayName
-                  , isIdleScreen: application.isIdleScreen
-                  , statusText: application.statusText
-                };
-            }
-
-            sendMessage(receiverStatusMessage);
-        });
-
-        statusListeners.set(id, listener);
-    }
-
-    function onStatusBrowserServiceDown (service: mdns.Service) {
-        const { id } = service.txtRecord;
-
-        if (statusListeners.has(id)) {
-            statusListeners.get(id)!.deregister();
-            statusListeners.delete(id);
-        }
-    }
-}
 
 
 // Existing counterpart Media/Session objects
@@ -215,44 +103,6 @@ decodeTransform.on("data", (message: Message) => {
         return;
     }
 
-    if (message.subject.startsWith("bridge:/receiverSelector/")) {
-        switch (message.subject) {
-            case "bridge:/receiverSelector/open": {
-                const selector = startReceiverSelector(message.data);
-                selector.on("selected", data => sendMessage(
-                        { subject: "main:/receiverSelector/selected", data }));
-                selector.on("stop", data => sendMessage(
-                        { subject: "main:/receiverSelector/stop", data }));
-                selector.on("error", data => sendMessage(
-                        { subject: "main:/receiverSelector/error" , data }));
-                selector.on("close", () => sendMessage(
-                        { subject: "main:/receiverSelector/close" }));
-
-                break;
-            };
-            case "bridge:/receiverSelector/close": {
-                stopReceiverSelector();
-                break;
-            };
-        }
-        return;
-    }
-
-    if (message.subject.startsWith("bridge:/mediaServer/")) {
-        switch (message.subject) {
-            case "bridge:/mediaServer/start": {
-                startMediaServer(message.data.filePath, message.data.port);
-                break;
-            };
-            case "bridge:/mediaServer/stop": {
-                stopMediaServer();
-                break;
-            };
-        }
-
-        return;
-    }
-    
 
     switch (message.subject) {
         case "bridge:/getInfo": {
@@ -261,7 +111,25 @@ decodeTransform.on("data", (message: Message) => {
         }
 
         case "bridge:/initialize": {
-            initialize(message.data);
+            startDiscovery(message.data);
+            break;
+        }
+
+        // Receiver selector
+        case "bridge:/receiverSelector/open": {
+            startReceiverSelector(message.data); break;
+        }
+        case "bridge:/receiverSelector/close": {
+            stopReceiverSelector(); break;
+        }
+
+        // Media server
+        case "bridge:/mediaServer/start": {
+            startMediaServer(message.data.filePath, message.data.port);
+            break;
+        }
+        case "bridge:/mediaServer/stop": {
+            stopMediaServer();
             break;
         }
     }

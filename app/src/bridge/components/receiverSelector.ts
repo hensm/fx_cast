@@ -3,7 +3,7 @@
 import child_process from "child_process";
 import path from "path";
 
-import { EventEmitter } from "events";
+import { sendMessage } from "../messaging";
 
 
 function fatal (message: string) {
@@ -15,49 +15,7 @@ function fatal (message: string) {
 let selectorApp: child_process.ChildProcess | undefined;
 let selectorAppOpen = false;
 
-declare interface ReceiverSelectorEventEmitter {
-    on(ev: "selected", listener: (data: any) => void): this;
-    on(ev: "stop", listener: (data: any) => void): this;
-    on(ev: "close", listener: () => void): this;
-    on(ev: "error", listener: (err: string) => void): this;
-    on(ev: string, listener: (...args: any[]) => void): this;
-}
-
-class ReceiverSelectorEventEmitter extends EventEmitter {
-    constructor (selectorProcess: child_process.ChildProcess) {
-        super();
-
-        if (selectorProcess.stdout) {
-            selectorProcess.stdout.setEncoding("utf-8");    
-            selectorProcess.stdout.on("data", data => {
-                const jsonData = JSON.parse(data);
-
-                if (!jsonData.mediaType) {
-                    this.emit("stop", jsonData);
-                    return;
-                }
-
-                this.emit("selected", jsonData);
-            });
-        }
-
-        selectorProcess.on("error", err => {
-            this.emit("error", err.message);
-        });
-
-        selectorProcess.on("close", () => {
-            if (selectorAppOpen) {
-                selectorAppOpen = false;
-
-                this.emit("close");
-            }
-        });
-    }
-}
-
-export function startReceiverSelector (
-        data: string): ReceiverSelectorEventEmitter {
-
+export function startReceiverSelector (data: string) {
     if (process.platform !== "darwin") {
         fatal("Invalid platform for native receiver selector.");
     }
@@ -83,7 +41,43 @@ export function startReceiverSelector (
     selectorApp = child_process.spawn(selectorPath, [ data ]);
     selectorAppOpen = true;
 
-    return new ReceiverSelectorEventEmitter(selectorApp);
+    if (selectorApp.stdout) {
+        selectorApp.stdout.setEncoding("utf-8");    
+        selectorApp.stdout.on("data", data => {
+            const jsonData = JSON.parse(data);
+
+            if (!jsonData.mediaType) {
+                sendMessage({
+                    subject: "main:/receiverSelector/stop"
+                  , data: jsonData
+                });
+
+                return;
+            }
+
+            sendMessage({
+                subject: "main:/receiverSelector/selected"
+              , data: jsonData
+            });
+        });
+    }
+
+    selectorApp.on("error", err => {
+        sendMessage({
+            subject: "main:/receiverSelector/error"
+          , data: err.message
+        });
+    });
+
+    selectorApp.on("close", () => {
+        if (selectorAppOpen) {
+            selectorAppOpen = false;
+
+            sendMessage({
+                subject: "main:/receiverSelector/close"
+            });
+        }
+    });
 }
 
 export function stopReceiverSelector () {
