@@ -3,7 +3,7 @@
 import { decodeTransform, encodeTransform } from "./lib/messaging";
 import { Message } from "./types";
 
-import { handleSessionMessage, handleMediaMessage }
+import { handleSessionMessage, handleMediaMessage, stopReceiverApp }
         from "./components/chromecast";
 import { startDiscovery, stopDiscovery } from "./components/discovery";
 import { startMediaServer, stopMediaServer } from "./components/mediaServer";
@@ -46,6 +46,12 @@ decodeTransform.on("data", (message: Message) => {
 
         case "bridge:/initialize": {
             startDiscovery(message.data);
+            break;
+        }
+
+        case "bridge:/stopReceiverApp": {
+            stopReceiverApp(message.data.receiver.host
+                          , message.data.receiver.port);
             break;
         }
 

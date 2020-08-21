@@ -3,7 +3,7 @@
 import mdns from "mdns";
 
 import StatusListener from "./chromecast/StatusListener";
-import { ReceiverStatus } from "../castTypes";
+import { ReceiverStatus } from "../types";
 import { sendMessage } from "../lib/messaging";
 
 
