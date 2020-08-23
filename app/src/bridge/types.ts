@@ -264,7 +264,11 @@ export type Messages = [
 
   , {
         subject: "mediaCast:/mediaServer/started"
-      , data: { mediaPath: string, subtitlePaths: string[] }
+      , data: {
+            mediaPath: string
+          , subtitlePaths: string[]
+          , localAddress: string
+        }
     }
   , {
         subject: "mediaCast:/mediaServer/stopped"

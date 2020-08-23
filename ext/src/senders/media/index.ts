@@ -8,26 +8,10 @@ import { Message } from "../../messaging";
 import { Receiver } from "../../types";
 
 
-function getLocalAddress () {
-    const pc = new RTCPeerConnection();
-    pc.createDataChannel("");
-    pc.createOffer().then(pc.setLocalDescription.bind(pc));
-
-    return new Promise((resolve, reject) => {
-        pc.addEventListener("icecandidate", ev => {
-            if (ev.candidate) {
-                resolve(ev.candidate.candidate.split(" ")[4]);
-            }
-        });
-        pc.addEventListener("error", () => {
-            reject();
-        });
-    });
-}
-
 function startMediaServer (filePath: string, port: number)
         : Promise<{ mediaPath: string
-                  , subtitlePaths: string[] }> {
+                  , subtitlePaths: string[]
+                  , localAddress: string }> {
 
     return new Promise((resolve, reject) => {
         backgroundPort.postMessage({
@@ -122,22 +106,21 @@ function getMedia (opts: InitOptions): Promise<cast.media.Media> {
         let mediaUrl = new URL(opts.mediaUrl);
         let subtitleUrls: URL[] = [];
 
-        const mediaTitle = mediaUrl.pathname;
+        const mediaTitle = mediaUrl.pathname.slice(1);
 
         /**
          * If the media is a local file, start an HTTP media server
          * and change the media URL to point to it.
          */
         if (opts.mediaUrl.startsWith("file://")) {
-            const host = await getLocalAddress();
             const port = await options.get("localMediaServerPort");
 
             try {
                 // Wait until media server is listening
-                const { mediaPath, subtitlePaths }
+                const { localAddress, mediaPath, subtitlePaths }
                         = await startMediaServer(mediaTitle, port);
 
-                const baseUrl = new URL(`http://${host}:${port}/`);
+                const baseUrl = new URL(`http://${localAddress}:${port}/`);
                 mediaUrl = new URL(mediaPath, baseUrl);
                 subtitleUrls = subtitlePaths.map(
                         path => new URL(path, baseUrl));

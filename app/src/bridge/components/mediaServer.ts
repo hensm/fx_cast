@@ -2,6 +2,7 @@
 
 import fs from "fs";
 import http from "http";
+import os from "os";
 import path from "path";
 import stream from "stream";
 
@@ -131,13 +132,35 @@ export async function startMediaServer (filePath: string, port: number) {
         }
     });
 
-    mediaServer.on("listening", () => sendMessage({
-        subject: "mediaCast:/mediaServer/started"
-      , data: {
-            mediaPath: fileName
-          , subtitlePaths: Array.from(subtitles.keys())
+    mediaServer.on("listening", () => {
+        let localAddress = "";
+        const ifaces = Object.values(os.networkInterfaces());
+        for (const iface of ifaces) {
+            const matchingIface = iface?.find(
+                    details => details.family === "IPv4" && !details.internal);
+            if (matchingIface) {
+                localAddress = matchingIface.address;
+            }
         }
-    }));
+
+        if (!localAddress) {
+            console.error("Failed to get local address.");
+            sendMessage({
+                subject: "mediaCast:/mediaServer/error"
+            });
+            stopMediaServer();
+            return;
+        }
+
+        sendMessage({
+            subject: "mediaCast:/mediaServer/started"
+          , data: {
+                mediaPath: fileName
+              , subtitlePaths: Array.from(subtitles.keys())
+              , localAddress
+            }
+        });
+    });
 
     mediaServer.on("close", () => sendMessage({
         subject: "mediaCast:/mediaServer/stopped"
