@@ -123,6 +123,18 @@ npm run start --prefix ./ext
 * `--skipNativeBuilds`  
     macOS only. Skips native receiver selector build.
 
+
+#### 32-bit on Windows
+
+Building a 32-bit version is only supported for Windows. If you're building from a 64-bit system, you'll also need to rebuild any native dependencies as 32-bit.
+
+````sh
+npm clean-install --prefix ./app --arch=ia32  # If on a 64-bit system
+
+npm run build:app -- -- --arch=x86 --usePkg   # If building without packaging
+npm run package:app -- -- --arch=x86          # ... else if packaging
+````
+
 ### Packaging
 
 Build and package extension and bridge application for current platform:

@@ -3,10 +3,7 @@ const os = require("os");
 const path = require("path");
 const minimist = require("minimist");
 
-const { manifestName
-      , manifestPath
-      , DIST_PATH
-      , WIN_REGISTRY_KEY } = require("./lib/paths");
+const paths = require("./lib/paths");
 
 
 const argv = minimist(process.argv.slice(2), {
@@ -17,7 +14,7 @@ const argv = minimist(process.argv.slice(2), {
 });
 
 
-const CURRENT_MANIFEST_PATH = path.join(DIST_PATH, manifestName);
+const CURRENT_MANIFEST_PATH = path.join(paths.DIST_PATH, paths.MANIFEST_NAME);
 
 
 if (!fs.existsSync(CURRENT_MANIFEST_PATH) && !argv.remove) {
@@ -27,6 +24,7 @@ if (!fs.existsSync(CURRENT_MANIFEST_PATH) && !argv.remove) {
 
 
 const platform = os.platform();
+const arch = os.arch();
 
 switch (platform) {
     case "darwin":
@@ -34,24 +32,24 @@ switch (platform) {
         // Manifest location within home directory
         const destination = path.join(os.homedir(), platform === "linux"
             ? ".mozilla/native-messaging-hosts/"
-            : manifestPath[platform]);
+            : paths.getManifestPath(platform, arch));
 
         if (argv.remove) {
-            fs.remove(path.join(destination, manifestName));
+            fs.remove(path.join(destination, paths.MANIFEST_NAME));
             break;
         }
 
         // Install manifest
         fs.ensureDirSync(destination);
         fs.copyFileSync(CURRENT_MANIFEST_PATH
-              , path.join(destination, manifestName));
+              , path.join(destination, paths.MANIFEST_NAME));
 
         break;
     };
 
     case "win32": {
         const { Registry } = require("rage-edit");
-        const REGISTRY_PATH = `HKCU\\SOFTWARE\\Mozilla\\NativeMessagingHosts\\${WIN_REGISTRY_KEY}`;
+        const REGISTRY_PATH = `HKCU\\SOFTWARE\\Mozilla\\NativeMessagingHosts\\${paths.REGISTRY_KEY}`;
 
         if (argv.remove) {
             Registry.delete(REGISTRY_PATH);

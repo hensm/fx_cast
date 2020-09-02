@@ -13,21 +13,12 @@ const pkg = require("pkg");
 const { spawnSync } = require("child_process");
 
 const meta = require("../package.json");
+const paths = require("./lib/paths");
 
 const { author
       , homepage } = require("../../package.json");
 
 const { __extensionId: extensionId } = require("../../ext/package.json");
-
-const { executableName
-      , executablePath
-      , manifestName
-      , manifestPath
-      , selectorExecutableName
-      , pkgPlatform
-      , DIST_PATH
-      , LICENSE_PATH
-      , WIN_REGISTRY_KEY } = require("./lib/paths");
 
 
 // Command line args
@@ -46,6 +37,7 @@ const argv = minimist(process.argv.slice(2), {
 
 const supportedTargets = [
     "win-x64"
+  , "win-x86"
   , "macos-x64"
   , "linux-x64"
 ];
@@ -60,7 +52,7 @@ for (const target of supportedTargets) {
     supportedArchs.push(arch);
 }
 
-if (!supportedPlatforms.includes(pkgPlatform[process.platform])) {
+if (!supportedPlatforms.includes(paths.pkgPlatformMap[process.platform])) {
     console.error("Unsupported target platform");
     process.exit(1);
 }
@@ -84,9 +76,9 @@ const spawnOptions = {
  * build directories, just in case.
  */
 fs.removeSync(BUILD_PATH);
-fs.removeSync(DIST_PATH);
+fs.removeSync(paths.DIST_PATH);
 fs.ensureDirSync(BUILD_PATH);
-fs.ensureDirSync(DIST_PATH, { recursive: true });
+fs.ensureDirSync(paths.DIST_PATH, { recursive: true });
 
 
 const MDNS_BINDING_PATH = path.join(
@@ -127,6 +119,9 @@ async function build () {
             }
         };
 
+        const executableName = paths.getExecutableName(process.platform);
+        const executablePath = paths.getExecutablePath(process.platform, argv.arch);
+
         // Write pkg manifest
         fs.writeFileSync(path.join(BUILD_PATH, "src/package.json")
               , JSON.stringify(pkgManifest))
@@ -134,8 +129,8 @@ async function build () {
         // Run pkg to create a single executable
         await pkg.exec([
             path.join(BUILD_PATH, "src")
-          , "--target", `node12-${pkgPlatform[process.platform]}-${argv.arch}`
-          , "--output", path.join(BUILD_PATH, executableName[process.platform])
+          , "--target", `node12-${paths.pkgPlatformMap[process.platform]}-${argv.arch}`
+          , "--output", path.join(BUILD_PATH, executableName)
         ]);
 
         fs.copySync(path.join(MDNS_BINDING_PATH, MDNS_BINDING_NAME)
@@ -143,10 +138,9 @@ async function build () {
 
         fs.removeSync(path.join(BUILD_PATH, "src"));
 
-        manifest.path = argv.usePkg
-            ? path.join(DIST_PATH, executableName[process.platform])
-            : path.join(executablePath[process.platform]
-                      , executableName[process.platform]);
+        manifest.path = !argv.package && argv.usePkg
+            ? path.join(paths.DIST_PATH, executableName)
+            : path.join(executablePath, executableName);
     } else {
         let launcherPath = path.join(BUILD_PATH
               , meta.__applicationExecutableName);
@@ -176,12 +170,12 @@ NODE_PATH="${modulesDir}" node $(dirname $0)/src/main.js --__name $(basename $0)
             }
         }
 
-        manifest.path = path.join(DIST_PATH, path.basename(launcherPath));
+        manifest.path = path.join(paths.DIST_PATH, path.basename(launcherPath));
     }
 
 
     // Write app manifest
-    fs.writeFileSync(path.join(BUILD_PATH, manifestName)
+    fs.writeFileSync(path.join(BUILD_PATH, paths.MANIFEST_NAME)
           , JSON.stringify(manifest, null, 4));
 
 
@@ -205,10 +199,10 @@ NODE_PATH="${modulesDir}" node $(dirname $0)/src/main.js --__name $(basename $0)
           , spawnOptions);
 
         const selectorBundlePath = path.join(derivedDataPath
-              , "Build/Products/Release/", selectorExecutableName);
+              , "Build/Products/Release/", paths.SELECTOR_EXECUTABLE_NAME);
 
         fs.moveSync(selectorBundlePath
-              , path.join(BUILD_PATH, selectorExecutableName));
+              , path.join(BUILD_PATH, paths.SELECTOR_EXECUTABLE_NAME));
         fs.removeSync(derivedDataPath);
     }
 
@@ -224,16 +218,16 @@ NODE_PATH="${modulesDir}" node $(dirname $0)/src/main.js --__name $(basename $0)
             // Move installer to dist
             fs.moveSync(
                     path.join(BUILD_PATH, installerName)
-                  , path.join(DIST_PATH, path.basename(installerName))
+                  , path.join(paths.DIST_PATH, path.basename(installerName))
                   , { overwrite: true });
         }
     } else {
         // Move tsc output and launcher to dist
-        fs.moveSync(BUILD_PATH, DIST_PATH, { overwrite: true });
+        fs.moveSync(BUILD_PATH, paths.DIST_PATH, { overwrite: true });
         /*
         spawnSync("npm install --production", {
             ...spawnOptions
-          , cwd: DIST_PATH
+          , cwd: paths.DIST_PATH
         });
         */
     }
@@ -249,9 +243,12 @@ NODE_PATH="${modulesDir}" node $(dirname $0)/src/main.js --__name $(basename $0)
 async function packageApp (platform, arch) {
     const packageFunctionArgs = [
         arch
-      , executableName[platform] // platformExecutableName
-      , executablePath[platform] // platformExecutablePath
-      , manifestPath[platform]   // platformManifestPath
+        // platformExecutableName
+      , paths.getExecutableName(platform, arch)
+        // platformExecutablePath
+      , paths.getExecutablePath(platform, arch)
+        // platformManifestPath
+      , paths.getManifestPath(platform, arch, argv.packageType)
     ];
 
     switch (platform) {
@@ -322,13 +319,13 @@ function packageDarwin (
           , path.join(rootExecutablePath, platformExecutableName));
     fs.moveSync(path.join(BUILD_PATH, MDNS_BINDING_NAME)
           , path.join(rootExecutablePath, MDNS_BINDING_NAME));
-    fs.moveSync(path.join(BUILD_PATH, manifestName)
-          , path.join(rootManifestPath, manifestName));
+    fs.moveSync(path.join(BUILD_PATH, paths.MANIFEST_NAME)
+          , path.join(rootManifestPath, paths.MANIFEST_NAME));
 
     if (process.platform === "darwin" && !argv.skipNativeBuilds) {
         // Move selector executable alongside main executable
-        fs.moveSync(path.join(BUILD_PATH, selectorExecutableName)
-              , path.join(rootExecutablePath, selectorExecutableName));
+        fs.moveSync(path.join(BUILD_PATH, paths.SELECTOR_EXECUTABLE_NAME)
+              , path.join(rootExecutablePath, paths.SELECTOR_EXECUTABLE_NAME));
     }
 
 
@@ -337,7 +334,7 @@ function packageDarwin (
 
     const view = {
         applicationName: meta.__applicationName
-      , manifestName
+      , manifestName: paths.MANIFEST_NAME
       , componentName
       , packageId: `tf.matt.${meta.__applicationName}`
       , executablePath: platformExecutablePath
@@ -406,15 +403,12 @@ function packageLinuxDeb (
     fs.ensureDirSync(rootManifestPath, { recursive: true });
 
     // Move files to root
-    fs.moveSync(
-            path.join(BUILD_PATH, platformExecutableName)
+    fs.moveSync(path.join(BUILD_PATH, platformExecutableName)
           , path.join(rootExecutablePath, platformExecutableName));
-    fs.moveSync(
-            path.join(BUILD_PATH, MDNS_BINDING_NAME)
+    fs.moveSync(path.join(BUILD_PATH, MDNS_BINDING_NAME)
           , path.join(rootExecutablePath, MDNS_BINDING_NAME));
-    fs.moveSync(
-            path.join(BUILD_PATH, manifestName)
-          , path.join(rootManifestPath, manifestName));
+    fs.moveSync(path.join(BUILD_PATH, paths.MANIFEST_NAME)
+          , path.join(rootManifestPath, paths.MANIFEST_NAME));
 
     const controlDir = path.join(__dirname, "../packaging/linux/deb/DEBIAN/");
     const controlOutputDir = path.join(rootPath, path.basename(controlDir));
@@ -474,7 +468,7 @@ function packageLinuxRpm (
       , executablePath: platformExecutablePath
       , manifestPath: platformManifestPath
       , executableName: platformExecutableName
-      , manifestName
+      , manifestName: paths.MANIFEST_NAME
       , bindingName: MDNS_BINDING_NAME
     };
 
@@ -483,18 +477,17 @@ function packageLinuxRpm (
                 fs.readFileSync(specPath).toString()
               , view));
 
-    const archMap = {
+    const rpmArchMap = {
         "x86": "i386"
       , "x64": "x86_64"
     };
 
-    // TODO: Use argv.arch
     spawnSync(`
         rpmbuild -bb ${specOutputPath} \
                  --define "_distdir ${BUILD_PATH}" \
                  --define "_rpmdir ${BUILD_PATH}" \
                  --define "_rpmfilename ${outputName}" \
-                 --target=${archMap[arch]}-linux`
+                 --target=${rpmArchMap[arch]}-linux`
           , spawnOptions);
 
     return outputName;
@@ -524,11 +517,11 @@ function packageWin32 (
       , applicationVersion: meta.__applicationVersion
       , executableName: platformExecutableName
       , executablePath: platformExecutablePath
-      , manifestName
+      , manifestName: paths.MANIFEST_NAME
       , bindingName: MDNS_BINDING_NAME
-      , winRegistryKey: WIN_REGISTRY_KEY
+      , winRegistryKey: paths.REGISTRY_KEY
       , outputName
-      , licensePath: LICENSE_PATH
+      , licensePath: paths.LICENSE_PATH
 
         // Uninstaller keys
       , registryPublisher: author
@@ -541,14 +534,8 @@ function packageWin32 (
                 fs.readFileSync(scriptPath).toString()
               , view));
 
-
-    const output = makensis.compileSync(scriptOutputPath);
-
-    if (output.status === 0) {
-        console.log(output.stdout);
-    } else {
-        console.error(output.stderr);
-    }
+    spawnSync(`makensis /DARCH=${arch} ${scriptOutputPath}`
+          , spawnOptions);
 
     return outputName;
 }

@@ -92,11 +92,16 @@ Section
                 $(MSG__INSTALL_BONJOUR) \
                 IDNO skipInstallBonjour
 
-            File /oname=Bonjour64.msi "C:\Program Files\Bonjour SDK\Installer\Bonjour64.msi"
-            ExecWait "msiexec /i $\"$INSTDIR\Bonjour64.msi$\""
+            ${If} ${ARCH} == "x86"
+                File /oname=Bonjour.msi "C:\Program Files\Bonjour SDK\Installer\Bonjour.msi"
+            ${ElseIf} ${ARCH} == "x64"
+                File /oname=Bonjour.msi "C:\Program Files\Bonjour SDK\Installer\Bonjour64.msi"
+            ${EndIf}
+
+            ExecWait "msiexec /i $\"$INSTDIR\Bonjour.msi$\""
 
     skipInstallBonjour:
-    Delete "$INSTDIR\Bonjour64.msi"
+    Delete "$INSTDIR\Bonjour.msi"
 
     # Native manifest key
     WriteRegStr HKLM "${KEY_MANIFEST}" "" "$INSTDIR\{{manifestName}}"
