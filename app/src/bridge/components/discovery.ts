@@ -40,7 +40,7 @@ function onBrowserServiceDown (service: mdns.Service) {
 }
 
 browser.on("serviceUp", onBrowserServiceUp);
-browser.on("servicedown", onBrowserServiceDown);
+browser.on("serviceDown", onBrowserServiceDown);
 
 
 interface InitializeOptions {
