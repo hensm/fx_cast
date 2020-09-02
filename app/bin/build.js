@@ -5,9 +5,7 @@ const os = require("os");
 const path = require("path");
 
 const minimist = require("minimist");
-const glob = require("glob");
 const mustache = require("mustache");
-const makensis = require("makensis");
 const pkg = require("pkg");
 
 const { spawnSync } = require("child_process");
