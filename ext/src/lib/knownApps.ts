@@ -24,6 +24,7 @@ export default {
   , "10AAD887": { name: "All 4"       , matches: "https://www.channel4.com/*" }
   , "B3DCF968": { name: "Twitch"      , matches: "https://www.twitch.tv/*" }
   , "B88B034A": { name: "Dailymotion" , matches: "https://www.dailymotion.com/*" }
+  , "C3DE6BC2": { name: "Disney+"     , matches: "https://www.disneyplus.com/*" }
 
     // Misc
   , "17608BC8": { name: "Prime Video" }
