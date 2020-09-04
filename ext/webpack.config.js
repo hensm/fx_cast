@@ -83,6 +83,17 @@ module.exports = (env) => ({
           , chunks: [ "ui/options/bundle" ]
         })
     ]
+  , optimization: {
+        splitChunks: {
+            cacheGroups: {
+                vendor: {
+                    test: /[\\/]node_modules[\\/](preact|preact\/compat)[\\/]/
+                  , name: "vendor"
+                  , chunks: "initial"
+                }
+            }
+        }
+    }
   , module: {
         rules: [
             {
