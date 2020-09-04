@@ -1,8 +1,10 @@
 "use strict";
 
 const path = require("path");
+
 const webpack = require("webpack");
 const CopyWebpackPlugin = require("copy-webpack-plugin");
+const HtmlWebpackPlugin = require("html-webpack-plugin");
 
 
 const sourceFileExtensions = [
@@ -67,6 +69,19 @@ module.exports = (env) => ({
               , to: path.join(env.outputPath, "vendor")
             }
         ])
+
+      , new HtmlWebpackPlugin({
+            inject: true
+          , template: `${env.includePath}/ui/template.html`
+          , filename: `${env.outputPath}/ui/popup/index.html`
+          , chunks: [ "ui/popup/bundle" ]
+        })
+      , new HtmlWebpackPlugin({
+            inject: true
+          , template: `${env.includePath}/ui/template.html`
+          , filename: `${env.outputPath}/ui/options/index.html`
+          , chunks: [ "ui/options/bundle" ]
+        })
     ]
   , module: {
         rules: [
