@@ -29,12 +29,14 @@ Missing/outdated strings:
     * `optionsMirroringCategoryDescription`
     * `optionsMirroringEnabled`
     * `optionsMirroringAppId`
+    * `popupMediaTypeAppNotFound`
 
 * `es`
     * `optionsMirroringCategoryName`
     * `optionsMirroringCategoryDescription`
     * `optionsMirroringEnabled`
     * `optionsMirroringAppId`
+    & `popupMediaTypeAppNotFound`
 
 * `nl`
     * `optionsBridgeBackupEnabled`
@@ -45,6 +47,7 @@ Missing/outdated strings:
     * `optionsMirroringCategoryDescription`
     * `optionsMirroringEnabled`
     * `optionsMirroringAppId`
+    * `popupMediaTypeAppNotFound`
 
 
 ### NSIS Installer Localization

@@ -149,6 +149,8 @@ class PopupApp extends Component<{}, PopupAppState> {
 
         const isSelectedMediaTypeAvailable =
                 !!(this.state.availableMediaTypes & this.state.mediaType)
+        const isAppMediaTypeAvailable = !!(this.state.availableMediaTypes
+                & ReceiverSelectorMediaType.App);
 
         return (
             <div>
@@ -163,10 +165,11 @@ class PopupApp extends Component<{}, PopupAppState> {
 
                             <option value={ ReceiverSelectorMediaType.App }
                                     selected={ isAppMediaTypeSelected }
-                                    disabled={ !(this.state.availableMediaTypes
-                                            & ReceiverSelectorMediaType.App) }>
+                                    disabled={ !isAppMediaTypeAvailable }>
                                 { (this.state.requestedAppId && knownApps[this.state.requestedAppId]?.name)
-                                            ?? _("popupMediaTypeApp") }
+                                            ?? isAppMediaTypeAvailable
+                                                ? _("popupMediaTypeApp")
+                                                : _("popupMediaTypeAppNotFound") }
                             </option>
 
                             { this.state.mirroringEnabled &&

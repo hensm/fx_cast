@@ -13,6 +13,10 @@
         "message": "this site's app"
       , "description": "Receiver selector media type <option> text for current site's sender application."
     }
+  , "popupMediaTypeAppNotFound": {
+        "message": "this site's app (not found)"
+      , "description": "Receiver selector media type <option> text for current site's sender application if none found."
+    }
   , "popupMediaTypeAppMedia": {
         "message": "this media"
       , "description": "Receiver selector media type <option> text for media casting."
