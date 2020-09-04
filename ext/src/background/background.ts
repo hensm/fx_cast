@@ -441,8 +441,10 @@ async function initWhitelist () {
 
 
     const originUrlCache: string[] = [];
-    const chromeUserAgent = getChromeUserAgent(
-            (await browser.runtime.getPlatformInfo()).os, true);
+
+    // TODO: Allow hybrid UA to be configurable
+    const platform = (await browser.runtime.getPlatformInfo()).os;
+    const chromeUserAgent = getChromeUserAgent(platform);
 
     /**
      * Web apps usually only load the sender library and
@@ -466,7 +468,9 @@ async function initWhitelist () {
 
         for (const header of details.requestHeaders) {
             if (header.name === "User-Agent") {
-                header.value = chromeUserAgent;
+                header.value = host?.value === "www.youtube.com"
+                    ? getChromeUserAgent(platform, true)
+                    : chromeUserAgent;
                 break;
             }
         }
@@ -491,9 +495,14 @@ async function initWhitelist () {
 
         for (const ancestor of details.frameAncestors) {
             if (originUrlCache.includes(ancestor.url)) {
+                const host = details.requestHeaders.find(
+                        header => header.name === "Host");
+
                 for (const header of details.requestHeaders) {
                     if (header.name === "User-Agent") {
-                        header.value = chromeUserAgent;
+                        header.value = host?.value === "www.youtube.com"
+                            ? getChromeUserAgent(platform, true)
+                            : chromeUserAgent;
                         break;
                     }
                 }
