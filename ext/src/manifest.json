@@ -67,7 +67,6 @@
     ]
   , "web_accessible_resources": [
         "shim/bundle.js"
-      , "vendor/webcomponents-lite.js"
       , "senders/media/overlay/overlayContent.js"
       , "senders/media/overlay/AirPlay_Audio.svg"
       , "senders/media/overlay/AirPlay_Video.svg"

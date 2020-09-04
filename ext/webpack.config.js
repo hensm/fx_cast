@@ -63,11 +63,6 @@ module.exports = (env) => ({
                     return content;
                 }
             }
-          , {
-                // Copy vendor dir
-                from: path.join(env.includePath, "vendor")
-              , to: path.join(env.outputPath, "vendor")
-            }
         ])
 
       , new HtmlWebpackPlugin({
