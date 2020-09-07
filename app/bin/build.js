@@ -74,7 +74,7 @@ const spawnOptions = {
  * build directories, just in case.
  */
 fs.removeSync(BUILD_PATH);
-fs.removeSync(paths.DIST_PATH);
+fs.removeSync(paths.DIST_PATH, { recursive: true });
 fs.ensureDirSync(BUILD_PATH);
 fs.ensureDirSync(paths.DIST_PATH, { recursive: true });
 
@@ -231,7 +231,7 @@ NODE_PATH="${modulesDir}" node $(dirname $0)/src/main.js --__name $(basename $0)
     }
 
     // Remove build directory
-    //fs.removeSync(BUILD_PATH);
+    fs.removeSync(BUILD_PATH);
 }
 
 /**
