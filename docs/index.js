@@ -97,7 +97,10 @@ function onResponse (res) {
     for (const asset of res.assets) {
         const formattedSize = formatSize(asset.size);
 
-        switch (asset.name.match(/.*\.(.*)$/).pop()) {
+        const REGEX_EXT = /.*\.(.*)$/;
+        const REGEX_ARCH = /.*(x(?:86|64))\..*$/;
+
+        switch (asset.name.match(REGEX_EXT).pop()) {
             case "xpi":
                 downloadExtBtn.href = asset.browser_download_url;
                 downloadExtBtn.dataset.version = res.tag_name;
@@ -107,6 +110,11 @@ function onResponse (res) {
 
 
             case "exe":
+                const arch = asset.name.match(REGEX_ARCH).pop();
+                if (arch !== "x64") {
+                    break;
+                }
+
                 populateAppListApp(
                         appListWinBtn, asset.browser_download_url
                       , asset.name, formattedSize);
