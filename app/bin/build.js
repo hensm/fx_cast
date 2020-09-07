@@ -254,13 +254,6 @@ async function packageApp (platform, arch) {
         case "darwin": return packageDarwin(...packageFunctionArgs);
 
         case "linux": {
-            /**
-             * Get manifest path from package type sub key for Linux
-             * platforms.
-             */
-            packageFunctionArgs.push(
-                    packageFunctionArgs.pop()[argv.packageType]);
-
             switch (argv.packageType) {
                 case "deb": return packageLinuxDeb(...packageFunctionArgs);
                 case "rpm": return packageLinuxRpm(...packageFunctionArgs);
