@@ -39,7 +39,8 @@ const downloadExtBtn = document.querySelector(".download__ext");
 
 // App download buttons
 const appList = document.querySelector(".app-list");
-const appListWinBtn = document.querySelector(".app-list__win");
+const appListWin64Btn = document.querySelector(".app-list__win64");
+const appListWin32Btn = document.querySelector(".app-list__win32");
 const appListMacBtn = document.querySelector(".app-list__mac");
 const appListDebBtn = document.querySelector(".app-list__deb");
 const appListRpmBtn = document.querySelector(".app-list__rpm");
@@ -52,7 +53,7 @@ switch (navigator.platform) {
     case "Win64":
         platform = "win";
         downloadAppBtn.textContent = "Windows Bridge";
-        appListWinBtn.hidden = true;
+        appListWin64Btn.hidden = true;
         break;
 
     case "MacIntel":
@@ -71,7 +72,8 @@ switch (navigator.platform) {
         downloadAppOtherSummary.hidden = true;
 
         appList.classList.add("app-list--buttons");
-        appListWinBtn.classList.add("button", "button--puffy");
+        appListWin32Btn.classList.add("button", "button--puffy");
+        appListWin64Btn.classList.add("button", "button--puffy");
         appListMacBtn.classList.add("button", "button--puffy");
         appListDebBtn.classList.add("button", "button--puffy");
         appListRpmBtn.classList.add("button", "button--puffy");
@@ -110,14 +112,19 @@ function onResponse (res) {
 
 
             case "exe":
-                const arch = asset.name.match(REGEX_ARCH).pop();
-                if (arch !== "x64") {
-                    break;
+                switch (asset.name.match(REGEX_ARCH).pop()) {
+                    case "x86":
+                        populateAppListApp(
+                                appListWin32Btn, asset.browser_download_url
+                              , asset.name, formattedSize);
+                        break;
+                    case "x64":
+                        populateAppListApp(
+                                appListWin64Btn, asset.browser_download_url
+                              , asset.name, formattedSize);
+                        break;
                 }
 
-                populateAppListApp(
-                        appListWinBtn, asset.browser_download_url
-                      , asset.name, formattedSize);
                 break;
 
             case "pkg":
@@ -143,8 +150,8 @@ function onResponse (res) {
     if (platform) {
         switch (platform) {
             case "win":
-                downloadAppBtn.href = appListWinBtn.href;
-                downloadAppBtn.title = appListWinBtn.title;
+                downloadAppBtn.href = appListWin64Btn.href;
+                downloadAppBtn.title = appListWin64Btn.title;
                 downloadAppBtn.dataset.version = res.tag_name;
                 break;
             case "mac":
