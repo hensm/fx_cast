@@ -2,7 +2,7 @@
 
 import path from "path";
 import minimist from "minimist";
-
+import { __applicationVersion } from "../package.json";
 
 const argv = minimist(process.argv.slice(2), {
     boolean: [ "daemon", "help", "version" ]
@@ -22,8 +22,7 @@ const argv = minimist(process.argv.slice(2), {
 
 
 if (argv.version) {
-    // TODO: Replace this automatically
-    console.log(`v0.0.7`);
+    console.log(`v${__applicationVersion}`);
 } else if (argv.help) {
     console.log(
 `Usage: ${argv.__name} [options]
