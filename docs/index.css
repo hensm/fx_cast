@@ -221,6 +221,7 @@ h1.site-header__title {
 
 .app-list--buttons .app-list__app {
     cursor: pointer;
+    min-width: initial !important;
 }
 
 .app-list--buttons > .app-list__platform > .app-list__app + .app-list__app {

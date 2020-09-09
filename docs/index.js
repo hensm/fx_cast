@@ -72,11 +72,11 @@ switch (navigator.platform) {
         downloadAppOtherSummary.hidden = true;
 
         appList.classList.add("app-list--buttons");
-        appListWin32Btn.classList.add("button", "button--puffy");
-        appListWin64Btn.classList.add("button", "button--puffy");
-        appListMacBtn.classList.add("button", "button--puffy");
-        appListDebBtn.classList.add("button", "button--puffy");
-        appListRpmBtn.classList.add("button", "button--puffy");
+        appListWin32Btn.classList.add("button");
+        appListWin64Btn.classList.add("button");
+        appListMacBtn.classList.add("button");
+        appListDebBtn.classList.add("button");
+        appListRpmBtn.classList.add("button");
 }
 
 
