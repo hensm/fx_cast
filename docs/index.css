@@ -140,6 +140,7 @@ h1.site-header__title {
 .download__ext,
 .download__app {
     font-size: 1.75rem;
+    font-weight: 600;
     margin-bottom: 0.5em;
 }
 
