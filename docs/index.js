@@ -83,7 +83,7 @@ switch (navigator.platform) {
 function populateAppListApp (element, fileUrl, fileName, fileSize) {
     element.href = fileUrl;
     element.title = `${fileName} (${fileSize})`;
-    element.dataset.appSize = fileSize;
+    element.dataset.fileSize = fileSize;
     element.removeAttribute("disabled");
 }
 
@@ -105,9 +105,9 @@ function onResponse (res) {
         switch (asset.name.match(REGEX_EXT).pop()) {
             case "xpi":
                 downloadExtBtn.href = asset.browser_download_url;
+                downloadExtBtn.title = `${asset.name} (${formattedSize})`;
                 downloadExtBtn.dataset.version = res.tag_name;
                 downloadExtBtn.removeAttribute("disabled");
-                downloadExtBtn.removeAttribute("title");
                 break;
 
 
