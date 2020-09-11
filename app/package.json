@@ -17,7 +17,7 @@
         "fast-srp-hap": "^2.0.2",
         "mdns": "^2.5.1",
         "mime-types": "^2.1.27",
-        "node-fetch": "^2.6.0",
+        "node-fetch": "^2.6.1",
         "tweetnacl": "^1.0.3"
     },
     "devDependencies": {
