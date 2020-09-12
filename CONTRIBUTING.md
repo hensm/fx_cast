@@ -11,6 +11,15 @@ issues if you're going to work on something to avoid duplication of effort.
 Submit an issue for new features before submitting a PR.
 
 
+## Bug Reports
+
+Follow the bug report issue template and provide as much info as possible. Logs can be found in various locations depending on the component at fault:
+
+* https://developer.mozilla.org/en-US/docs/Tools/Web_Console
+* https://developer.mozilla.org/en-US/docs/Tools/Browser_Console
+* https://extensionworkshop.com/documentation/develop/debugging/
+
+
 ## Compatibility Reports
 
 Compatibility reports are always helpful. Use the "Compatibility Report" issue template. Ensure you have a working environment and that the site is in the whitelist (check options page).
