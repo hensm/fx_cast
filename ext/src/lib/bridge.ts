@@ -14,7 +14,7 @@ import { ReceiverSelectionCast
        , ReceiverSelectionStop } from "../background/receiverSelector/ReceiverSelector";
 
 
-export const BRIDGE_TIMEOUT = 500;
+export const BRIDGE_TIMEOUT = 5000;
 
 async function connect (): Promise<Port> {
     const applicationName = await options.get("bridgeApplicationName");
