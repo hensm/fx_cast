@@ -240,7 +240,7 @@ export default class Bridge extends Component<BridgeProps, BridgeState> {
             }));
         }, 500);
 
-        fetch("https://api.github.com/repos/hensm/fx_cast/releases/latest")
+        fetch("https://api.github.com/repos/hensm/fx_cast/releases")
             .then(res => {
                 window.clearTimeout(timeout);
                 return res.json();
@@ -250,11 +250,30 @@ export default class Bridge extends Component<BridgeProps, BridgeState> {
     }
 
     private async onCheckUpdatesResponse (res: any) {
-        const isUpdateAvailable = !this.props.info ||
-                semver.lt(this.props.info.version, res.tag_name);
+        let latestBridgeRelease;
+        for (const release of res) {
+            if (release.assets.find((asset: any) =>
+                    asset.content_type !== "application/x-xpinstall")) {
+                latestBridgeRelease = release;
+                break;
+            }
+        }
+
+        if (!latestBridgeRelease) {
+            this.setState({
+                isCheckingUpdates: false
+              , wasErrorCheckingUpdates: true
+              , updateStatus: _("optionsBridgeUpdateStatusError")
+            });
+
+            return;
+        }
+
+        const isUpdateAvailable = !this.props.info || semver.lt(
+                this.props.info.version, latestBridgeRelease.tag_name);
 
         if (isUpdateAvailable) {
-            this.updateData = res;
+            this.updateData = latestBridgeRelease;
         }
 
         this.setState({

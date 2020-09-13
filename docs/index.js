@@ -80,15 +80,16 @@ switch (navigator.platform) {
 }
 
 
-function populateAppListApp (element, fileUrl, fileName, fileSize) {
+function populateAppListApp (element, fileUrl, fileName, fileSize, version) {
     element.href = fileUrl;
     element.title = `${fileName} (${fileSize})`;
     element.dataset.fileSize = fileSize;
+    element.dataset.version = version;
     element.removeAttribute("disabled");
 }
 
 
-const ENDPOINT_URL = "https://api.github.com/repos/hensm/fx_cast/releases/latest";
+const ENDPOINT_URL = "https://api.github.com/repos/hensm/fx_cast/releases";
 
 fetch(ENDPOINT_URL)
     .then(res => res.json())
@@ -96,54 +97,57 @@ fetch(ENDPOINT_URL)
     .catch(onError);
 
 function onResponse (res) {
-    for (const asset of res.assets) {
-        const formattedSize = formatSize(asset.size);
-
-        const REGEX_EXT = /.*\.(.*)$/;
-        const REGEX_ARCH = /.*(x(?:86|64))\..*$/;
-
-        switch (asset.name.match(REGEX_EXT).pop()) {
-            case "xpi":
-                downloadExtBtn.href = asset.browser_download_url;
-                downloadExtBtn.title = `${asset.name} (${formattedSize})`;
-                downloadExtBtn.dataset.version = res.tag_name;
-                downloadExtBtn.removeAttribute("disabled");
-                break;
-
-
-            case "exe":
-                switch (asset.name.match(REGEX_ARCH).pop()) {
-                    case "x86":
-                        populateAppListApp(
-                                appListWin32Btn, asset.browser_download_url
-                              , asset.name, formattedSize);
-                        break;
-                    case "x64":
-                        populateAppListApp(
-                                appListWin64Btn, asset.browser_download_url
-                              , asset.name, formattedSize);
-                        break;
-                }
-
-                break;
-
-            case "pkg":
-                populateAppListApp(
-                        appListMacBtn, asset.browser_download_url
-                      , asset.name, formattedSize);
-                break;
-
-            case "deb":
-                populateAppListApp(
-                        appListDebBtn, asset.browser_download_url
-                      , asset.name, formattedSize);
-                break;
-
-            case "rpm":
-                populateAppListApp(
-                        appListRpmBtn, asset.browser_download_url
-                      , asset.name, formattedSize);
-                break;
+    for (const release of res.reverse()) {
+        for (const asset of release.assets) {
+            const formattedSize = formatSize(asset.size);
+            const { tag_name } = release;
+    
+            const REGEX_EXT = /.*\.(.*)$/;
+            const REGEX_ARCH = /.*(x(?:86|64))\..*$/;
+    
+            switch (asset.name.match(REGEX_EXT).pop()) {
+                case "xpi":
+                    downloadExtBtn.href = asset.browser_download_url;
+                    downloadExtBtn.title = `${asset.name} (${formattedSize})`;
+                    downloadExtBtn.dataset.version = tag_name;
+                    downloadExtBtn.removeAttribute("disabled");
+                    break;
+    
+    
+                case "exe":
+                    switch (asset.name.match(REGEX_ARCH).pop()) {
+                        case "x86":
+                            populateAppListApp(
+                                    appListWin32Btn, asset.browser_download_url
+                                  , asset.name, formattedSize, tag_name);
+                            break;
+                        case "x64":
+                            populateAppListApp(
+                                    appListWin64Btn, asset.browser_download_url
+                                  , asset.name, formattedSize, tag_name);
+                            break;
+                    }
+    
+                    break;
+    
+                case "pkg":
+                    populateAppListApp(
+                            appListMacBtn, asset.browser_download_url
+                          , asset.name, formattedSize, tag_name);
+                    break;
+    
+                case "deb":
+                    populateAppListApp(
+                            appListDebBtn, asset.browser_download_url
+                          , asset.name, formattedSize, tag_name);
+                    break;
+    
+                case "rpm":
+                    populateAppListApp(
+                            appListRpmBtn, asset.browser_download_url
+                          , asset.name, formattedSize, tag_name);
+                    break;
+            }
         }
     }
 
@@ -152,12 +156,12 @@ function onResponse (res) {
             case "win":
                 downloadAppBtn.href = appListWin64Btn.href;
                 downloadAppBtn.title = appListWin64Btn.title;
-                downloadAppBtn.dataset.version = res.tag_name;
+                downloadAppBtn.dataset.version = appListWin64Btn.dataset.version;
                 break;
             case "mac":
                 downloadAppBtn.href = appListMacBtn.href;
                 downloadAppBtn.title = appListMacBtn.title;
-                downloadAppBtn.dataset.version = res.tag_name;
+                downloadAppBtn.dataset.version = appListMacBtn.dataset.version;
                 break;
 
             default: {
@@ -170,7 +174,7 @@ function onResponse (res) {
 }
 
 function onError (err) {
-    console.error("Failed to fetch download links");
+    console.error("Failed to fetch download links", err);
 }
 
 
