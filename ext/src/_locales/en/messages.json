@@ -151,15 +151,15 @@
       , "description": "Bridge stats recommended action row title."
     }
   , "optionsBridgeCompatible": {
-        "message": "COMPATIBLE"
+        "message": "Compatible"
       , "description": "Compatibility status is definitely compatible."
     }
   , "optionsBridgeLikelyCompatible": {
-        "message": "LIKELY COMPATIBLE"
+        "message": "Likely compatible"
       , "description": "Compatibility status is probably compatible."
     }
   , "optionsBridgeIncompatible": {
-        "message": "INCOMPATIBLE"
+        "message": "Incompatible"
       , "description": "Compatibility status is definitely incompatible."
     }
   , "optionsBridgeOlderAction": {

@@ -44,14 +44,14 @@ const BridgeStats = (props: BridgeStatsProps) => (
         <tr>
             <th>{ _("optionsBridgeStatsRecommendedAction") }</th>
             <td>
-                {    // If older
-                    props.info.isVersionOlder
-                        ? _("optionsBridgeOlderAction")
-                    // else if newer
-                  : props.info.isVersionNewer
-                        ? _("optionsBridgeNewerAction")
-                    // else
-                        : _("optionsBridgeNoAction")
+                {   
+                    props.info.isVersionCompatible
+                        ? _("optionsBridgeNoAction")
+                        : props.info.isVersionOlder
+                            ? _("optionsBridgeOlderAction")
+                            : props.info.isVersionNewer
+                                ? _("optionsBridgeNewerAction")
+                                : _("optionsBridgeNoAction")
                 }
             </td>
         </tr>

@@ -77,19 +77,24 @@ const getInfo = () => new Promise<BridgeInfo>(async (resolve, reject) => {
 
     clearTimeout(bridgeTimeoutId);
 
+    const extensionVersion = browser.runtime.getManifest().version;
+    const extensionVersionMajor = semver.major(extensionVersion);
+
+    const versionDiff = semver.diff(applicationVersion, extensionVersion);
+
     /**
      * If the target version is above 0.x.x range, API is stable
      * and versions with minor or patch level changes should be
      * compatible.
      */
     const isVersionCompatible =
-            semver.eq(applicationVersion, APPLICATION_VERSION)
-         || semver.diff(applicationVersion, APPLICATION_VERSION) !== "major"
-         && semver.major(APPLICATION_VERSION) !== 0;
+            semver.eq(applicationVersion, extensionVersion)
+         || (versionDiff !== "major" && extensionVersionMajor !== 0)
+         || (versionDiff === "patch" && extensionVersionMajor === 0);
 
-    const isVersionExact = semver.eq(applicationVersion, APPLICATION_VERSION);
-    const isVersionOlder = semver.lt(applicationVersion, APPLICATION_VERSION);
-    const isVersionNewer = semver.gt(applicationVersion, APPLICATION_VERSION);
+    const isVersionExact = semver.eq(applicationVersion, extensionVersion);
+    const isVersionOlder = semver.lt(applicationVersion, extensionVersion);
+    const isVersionNewer = semver.gt(applicationVersion, extensionVersion);
 
     // Print compatibility info to console
     if (!isVersionCompatible) {

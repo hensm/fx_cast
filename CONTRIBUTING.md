@@ -39,13 +39,19 @@ Missing/outdated strings:
     * `optionsMirroringEnabled`
     * `optionsMirroringAppId`
     * `popupMediaTypeAppNotFound`
+    * `optionsBridgeCompatible`
+    * `optionsBridgeLikelyCompatible`
+    * `optionsBridgeIncompatible`
 
 * `es`
     * `optionsMirroringCategoryName`
     * `optionsMirroringCategoryDescription`
     * `optionsMirroringEnabled`
     * `optionsMirroringAppId`
-    & `popupMediaTypeAppNotFound`
+    * `popupMediaTypeAppNotFound`
+    * `optionsBridgeCompatible`
+    * `optionsBridgeLikelyCompatible`
+    * `optionsBridgeIncompatible`
 
 * `nl`
     * `optionsBridgeBackupEnabled`
@@ -57,6 +63,9 @@ Missing/outdated strings:
     * `optionsMirroringEnabled`
     * `optionsMirroringAppId`
     * `popupMediaTypeAppNotFound`
+    * `optionsBridgeCompatible`
+    * `optionsBridgeLikelyCompatible`
+    * `optionsBridgeIncompatible`
 
 
 ### NSIS Installer Localization
