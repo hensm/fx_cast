@@ -42,6 +42,11 @@
                   , "update_link": "https://github.com/hensm/fx_cast/releases/download/v0.1.0/fx_cast-0.1.0-fx.xpi"
                   , "update_hash": "sha256:8e2bb60bf3f6f8f48cb4f1d78e49bc2cc75e9b030676b2d4a70826bf00754157"
                 }
+              , {
+                    "version": "0.1.2"
+                  , "update_link": "https://github.com/hensm/fx_cast/releases/download/v0.1.2/fx_cast-0.1.2-fx.xpi"
+                  , "update_hash": "sha256:2eb45aa59e8bd1f2988ba4c0f5daf0c39787b48c5368b789b9042d63427d71c5"
+                }
             ]
         }
     }
