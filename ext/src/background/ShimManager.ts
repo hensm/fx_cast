@@ -175,6 +175,7 @@ export default new class ShimManager {
                     if (!selection) {
                         shim.contentPort.postMessage({
                             subject: "shim:/selectReceiverCancelled"
+                          , data: {}
                         });
 
                         break;
@@ -192,6 +193,7 @@ export default new class ShimManager {
 
                                 shim.contentPort.postMessage({
                                     subject: "shim:/selectReceiverCancelled"
+                                  , data: {}
                                 });
 
                                 loadSender({
@@ -224,6 +226,7 @@ export default new class ShimManager {
                     // TODO: Report errors properly
                     shim.contentPort.postMessage({
                         subject: "shim:/selectReceiverCancelled"
+                      , data: {}
                     });
                 }
 

@@ -122,8 +122,8 @@ export default class Media {
                 sessionId
               , mediaSessionId
               , _internalSessionId
+              , internalMediaSessionId: this.#id
             }
-          , _id: this.#id
         });
     }
 
@@ -330,8 +330,8 @@ export default class Media {
           , data: {
                 message
               , messageId
+              , internalMediaSessionId: this.#id
             }
-          , _id: this.#id
         });
     }
 }

@@ -233,8 +233,8 @@ export default class Session {
                   , port: (receiver as any)._port
                   , appId
                   , sessionId
+                  , internalSessionId: this.#id
                 }
-              , _id: this.#id
             });
         }
     }
@@ -256,8 +256,7 @@ export default class Session {
 
         sendMessageResponse({
             subject: "bridge:/session/impl_addMessageListener"
-          , data: { namespace }
-          , _id: this.#id
+          , data: { namespace, internalSessionId: this.#id }
         });
     }
 
@@ -273,8 +272,7 @@ export default class Session {
 
         sendMessageResponse({
             subject: "bridge:/session/impl_leave"
-          , data: { id }
-          , _id: this.#id
+          , data: { id, internalSessionId: this.#id }
         });
 
         this.#leaveCallbacks.set(id, [
@@ -381,8 +379,8 @@ export default class Session {
                 namespace
               , message
               , messageId
+              , internalSessionId: this.#id
             }
-          , _id: this.#id
         });
 
         this.#sendMessageCallbacks.set(messageId, [
@@ -400,8 +398,7 @@ export default class Session {
 
         sendMessageResponse({
             subject: "bridge:/session/impl_setReceiverMuted"
-          , data: { muted, volumeId }
-          , _id: this.#id
+          , data: { muted, volumeId, internalSessionId: this.#id }
         });
 
         this.#setReceiverMutedCallbacks.set(volumeId, [
@@ -419,8 +416,7 @@ export default class Session {
 
         sendMessageResponse({
             subject: "bridge:/session/impl_setReceiverVolumeLevel"
-          , data: { newLevel, volumeId }
-          , _id: this.#id
+          , data: { newLevel, volumeId, internalSessionId: this.#id }
         });
 
         this.#setReceiverVolumeLevelCallbacks.set(volumeId, [
@@ -437,8 +433,7 @@ export default class Session {
 
         sendMessageResponse({
             subject: "bridge:/session/impl_stop"
-          , data: { stopId }
-          , _id: this.#id
+          , data: { stopId, internalSessionId: this.#id }
         });
 
         this.#stopCallbacks.set(stopId, [

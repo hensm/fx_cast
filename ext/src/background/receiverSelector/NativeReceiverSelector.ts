@@ -93,6 +93,7 @@ export default class NativeReceiverSelector extends ReceiverSelector {
         if (this.bridgePort) {
             this.bridgePort.postMessage({
                 subject: "bridge:/receiverSelector/close"
+              , data: {}
             });
         }
 

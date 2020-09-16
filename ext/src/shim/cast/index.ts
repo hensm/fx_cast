@@ -172,7 +172,8 @@ export function requestSession (
 
     // Open destination chooser
     sendMessageResponse({
-        subject: "main:/selectReceiverBegin"
+        subject: "main:/selectReceiverBegin",
+        data: {}
     });
 }
 
@@ -228,6 +229,7 @@ export function _requestSession (
               , (session: Session) => {
                     sendMessageResponse({
                         subject: "main:/sessionCreated"
+                      , data: {}
                     });
 
                     sessionRequestInProgress = false;
@@ -353,6 +355,7 @@ onMessage(async message => {
                       , (session: Session) => {
                             sendMessageResponse({
                                 subject: "main:/sessionCreated"
+                              , data: {}
                             });
 
                             sessionRequestInProgress = false;

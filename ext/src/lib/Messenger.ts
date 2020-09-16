@@ -1,6 +1,6 @@
 "use strict";
 
-import { TypedPort } from "./TypedPort";
+import { TypedPort, TypedPortMessagesSchema } from "./TypedPort";
 
 
 interface RuntimeConnectInfo {
@@ -11,7 +11,7 @@ interface TabConnectInfo {
     frameId: number;
 }
 
-export default class Messenger<T extends any[]> {
+export default class Messenger<T extends TypedPortMessagesSchema> {
     connect (connectInfo: RuntimeConnectInfo) {
         return browser.runtime.connect(connectInfo) as
                 unknown as TypedPort<T>;
