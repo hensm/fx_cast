@@ -32,37 +32,6 @@ browser.runtime.getPlatformInfo()
                 link.href = "styles/mac.css";
                 break;
             }
-
-            // Fix issue with input[type="number"] height
-            case "linux": {
-                link.href = "styles/linux.css";
-
-                const input = document.createElement("input");
-                const inputWrapper = document.createElement("div");
-
-                inputWrapper.append(input);
-                document.documentElement.append(inputWrapper);
-
-                input.type = "text";
-                const textInputHeight = window.getComputedStyle(input).height;
-                input.type = "number";
-                const numberInputHeight = window.getComputedStyle(input).height;
-
-                inputWrapper.remove();
-
-                if (numberInputHeight !== textInputHeight) {
-                    const style = document.createElement("style");
-                    style.textContent = `
-                        input[type="number"] {
-                            height: ${textInputHeight};
-                        }
-                    `;
-
-                    document.body.append(style);
-                }
-
-                break;
-            }
         }
 
         if (link.href) {

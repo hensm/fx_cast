@@ -1,0 +1,162 @@
+:root {
+    --shadow-10: 0 1px 4px rgba(12, 12, 13, 0.1);
+    --shadow-20: 0 2px 8px rgba(12, 12, 13, 0.1);
+    --shadow-30: 0 4px 16px rgba(12, 12, 13, 0.1);
+
+    --box-background: var(--white-100);
+    --box-color: var(--grey-90);
+
+    --focus-box-shadow:
+        0 0 0 1px var(--blue-50)
+      , 0 0 0 4px var(--blue-50-a30);
+
+    --button-background: var(--grey-90-a10);
+    --button-background-hover: var(--grey-90-a20);
+    --button-background-active: var(--grey-90-a30);
+    --button-background-primary: var(--blue-60);
+    --button-background-primary-hover: var(--blue-70);
+    --button-background-primary-active: var(--blue-80);
+    --button-color: var(--grey-90);
+    --button-color-primary: var(--white-100);
+
+    --field-background: var(--box-background);
+    --field-color: var(--box-color);
+    --field-placeholder-color: var(--grey-50);
+    --field-border-color: var(--grey-90-a20);
+    --field-border-color-hover: var(--grey-90-a30);
+
+    --field-box-shadow-warning:
+        0 0 0 1px var(--yellow-60)
+      , 0 0 0 4px var(--yellow-60-a30);
+    --field-box-shadow-error:
+        0 0 0 1px var(--red-60)
+      , 0 0 0 4px var(--red-60-a30);
+}
+
+@media (prefers-color-scheme: dark) {
+    :root {
+        --box-background: #202023;
+        --box-color: var(--white-100);
+
+        --button-background: #474749;
+        --button-background-hover: #505054;
+        --button-background-active: #5c5c5e;
+        --button-color: var(--white-100);
+
+        --field-placeholder-color: var(--grey-30);
+        --field-border-color: var(--grey-10-a20);
+        --field-border-color-hover: var(--grey-10-a30);
+    }
+}
+
+
+button,
+input,
+textarea,
+.select-wrapper {
+    border: 1px solid transparent;
+    border-radius: 2px;
+    overflow: hidden;
+}
+
+button,
+.select-wrapper {
+    background-color: var(--button-background);
+    color: var(--button-color);
+}
+button:not(:disabled):hover,
+.select-wrapper:not(:disabled):hover {
+    background-color: var(--button-background-hover);
+}
+button:not(:disabled):active,
+.select-wrapper:not(:disabled):hover:active {
+    background-color: var(--button-background-active);
+}
+
+input,
+textarea {
+    background-color: var(--field-background);
+    border: 1px solid var(--field-border-color);
+    color: var(--field-color);
+}
+
+input:hover,
+textarea:hover {
+    border-color: var(--field-border-color-hover);
+}
+
+:-moz-any(button, input, textarea, select):focus {
+    border-color: var(--blue-50);
+    box-shadow: var(--focus-box-shadow);
+    outline: initial;
+}
+
+:-moz-any(button, input, textarea, select):focus::-moz-focus-inner {
+    border: initial;
+}
+
+input:invalid,
+textarea:invalid {
+    box-shadow: var(--field-box-shadow-error) !important;
+    border-color: var(--red-60) !important;
+}
+
+button:disabled,
+input:disabled {
+    opacity: 0.35;
+}
+
+button,
+input,
+textarea,
+select {
+    padding: 4px 8px;
+}
+
+/* No inset for spinbox control */
+input[type="number"] {
+    padding-inline-end: 2px;
+}
+
+button:default {
+    background-color: var(--button-background-primary);
+    color: white !important;
+}
+button:default:hover {
+    background-color: var(--button-background-primary-hover);
+}
+button:default:hover:active {
+    background-color: var(--button-background-primary-active);
+}
+
+.select-wrapper {
+    --arrow-width: 20px;
+    position: relative;
+    display: inline-block;
+}
+.select-wrapper::after {
+    align-items: center;
+    content: "▼";
+    display: flex;
+    height: 100%;
+    margin-right: 4px;
+    justify-content: center;
+    pointer-events: none;
+    position: absolute;
+    right: 0;
+    top: 0;
+    width: var(--arrow-width);
+}
+select {
+    -moz-appearance: none;
+    background: inherit;
+    border: initial;
+    color: inherit;
+    padding-right: calc(8px + var(--arrow-width));
+}
+option {
+    color: white !important;
+}
+option:disabled {
+    color: rgba(255, 255, 255, 0.25) !important;
+}

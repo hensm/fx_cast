@@ -8,26 +8,6 @@ input {
     font: inherit;
 }
 
-button:not([disabled]):hover:active {
-  color: -moz-mac-buttonactivetext;
-}
-button[default]:not([disabled]):not(:-moz-window-inactive) {
-  color: -moz-mac-defaultbuttontext;
-}
-button[default]:not(:hover):active {
-  color: ButtonText;
-}
-
-button,
-select {
-    height: 22px;
-}
-
-button.ghost {
-    width: 22px !important;
-    height: 22px !important;
-}
-
 input[type="checkbox"],
 input[type="radio"] {
     height: 16px;

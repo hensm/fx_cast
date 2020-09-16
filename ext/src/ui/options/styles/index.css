@@ -8,50 +8,21 @@
         --border-color: var(--grey-50);
         --secondary-color: var(--grey-10-a60);
     }
-
-    a              { color: var(--blue-40); }
-    a:hover        { color: var(--blue-50); }
-    a:hover:active { color: var(--blue-60); }
-
-    body {
-        background: #202023 !important;
-        color: white !important;
-    }
-
-    .editable-list {
-        background-color: #202023 !important;
-        color: white !important;
-    }
-    .editable-list__item:not(.editable-list__item--selected) .editable-list__title {
-        padding: 0 8px !important;
-    }
-    .editable-list__item:nth-child(even) {
-        background-color: initial !important;
-    }
-    .editable-list__item:nth-child(odd) {
-        background-color: var(--grey-80) !important;
-    }
-
-    .about,
-    .about > summary {
-        background-color: rgba(255, 255, 255, 0.1) !important;
-    }
-    .about hr {
-        border-top: 1px solid rgba(255, 255, 255, 0.1) !important;
-    }
-
-    .about__link > img {
-        filter: invert(1);
-    }
-}
-
-*:invalid {
-    box-shadow: 0 0 1.5px 1px var(--red-50);
 }
 
 #root {
     padding: 20px 10px;
 }
+
+body {
+    background: var(--box-background) !important;
+    color: var(--box-color) !important;
+}
+
+a              { color: var(--blue-40); }
+a:hover        { color: var(--blue-50); }
+a:hover:active { color: var(--blue-60); }
+
 
 button.ghost {
     width: 24px !important;
@@ -64,7 +35,6 @@ button.ghost {
 
 button.ghost:not(:hover) {
     background-color: initial;
-    border: initial;
 }
 
 
@@ -346,9 +316,9 @@ button.ghost:not(:hover) {
 
 
 .editable-list {
-    background-color: -moz-field;
+    background-color: var(--box-background);
     border: 1px solid var(--border-color);
-    color: -moz-fieldtext;
+    color: var(--box-color);
     justify-content: end;
     padding: 5px;
 }
@@ -380,32 +350,29 @@ button.ghost:not(:hover) {
 .editable-list__item {
     align-items: center;
     display: flex;
-    height: 30px;
+    height: 34px;
     padding: 0 5px;
 }
 
-.editable-list__item:nth-child(even) {
-    background-color: -moz-eventreerow;
-}
 .editable-list__item:nth-child(odd) {
-    background-color: -moz-oddtreerow;
+    background-color: var(--grey-20);
 }
 
 .editable-list__item--selected {
-    background-color: -moz-cellhighlight !important;
-    color: -moz-cellhighlighttext !important;
+    background-color: var(--blue-50-a30) !important;
 }
 
 .editable-list__title {
     flex: 1;
     font-family: monospace;
     overflow: hidden;
+    padding: 4px;
     text-overflow: ellipsis;
     white-space: nowrap;
 }
 
 .editable-list__item:not(.editable-list__item--selected) > .editable-list__title {
-    padding: 0 5px;
+    padding: 0 8px;
 }
 
 .editable-list__title + button {
@@ -433,7 +400,6 @@ button.ghost:not(:hover) {
 .about {
     border-radius: 2px;
     margin-bottom: 40px;
-    overflow: hidden;
 }
 
 .about > summary {
@@ -503,4 +469,23 @@ button.ghost:not(:hover) {
     margin-inline-start: 2px;
     text-transform: uppercase;
     vertical-align: text-top;
+}
+
+
+@media (prefers-color-scheme: dark) {
+    .editable-list__item:nth-child(odd) {
+        background-color: var(--grey-80);
+    }
+
+    .about,
+    .about > summary {
+        background-color: rgba(255, 255, 255, 0.1) !important;
+    }
+    .about hr {
+        border-top: 1px solid rgba(255, 255, 255, 0.1) !important;
+    }
+
+    .about__link > img {
+        filter: invert(1);
+    }
 }
