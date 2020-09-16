@@ -1,6 +1,6 @@
 body {
-    background: -moz-dialog;
-    color: -moz-dialogtext;
+    background: var(--grey-10);
+    color: var(--grey-90);
     margin: initial;
     font: message-box;
 }
@@ -38,11 +38,9 @@ body {
 }
 
 .media-select__dropdown {
-    padding-top: 0;
-    padding-bottom: 0;
-    display: inline-block;
+    padding-top: 2px;
+    padding-bottom: 2px;
 }
-
 
 .receivers {
     list-style: none;

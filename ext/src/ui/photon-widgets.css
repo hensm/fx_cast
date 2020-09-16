@@ -49,27 +49,26 @@
     }
 }
 
-
 button,
 input,
 textarea,
+select,
 .select-wrapper {
     border: 1px solid transparent;
     border-radius: 2px;
-    overflow: hidden;
 }
 
 button,
-.select-wrapper {
+select {
     background-color: var(--button-background);
     color: var(--button-color);
 }
 button:not(:disabled):hover,
-.select-wrapper:not(:disabled):hover {
+select:not(:disabled):hover {
     background-color: var(--button-background-hover);
 }
 button:not(:disabled):active,
-.select-wrapper:not(:disabled):hover:active {
+select:not(:disabled):hover:active {
     background-color: var(--button-background-active);
 }
 
@@ -86,7 +85,7 @@ textarea:hover {
 }
 
 :-moz-any(button, input, textarea, select):focus {
-    border-color: var(--blue-50);
+    border-color: var(--blue-50) !important;
     box-shadow: var(--focus-box-shadow);
     outline: initial;
 }
@@ -149,14 +148,9 @@ button:default:hover:active {
 }
 select {
     -moz-appearance: none;
-    background: inherit;
-    border: initial;
-    color: inherit;
     padding-right: calc(8px + var(--arrow-width));
 }
-option {
-    color: white !important;
-}
+
 option:disabled {
-    color: rgba(255, 255, 255, 0.25) !important;
+    opacity: 0.35;
 }
