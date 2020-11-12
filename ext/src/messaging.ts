@@ -140,7 +140,25 @@ type MessagesBase = {
     "bridge:/initialize": {
         shouldWatchStatus: boolean;
     }
-    "bridge:/receiverSelector/open": any
+    "bridge:/receiverSelector/open": {
+        receivers: Receiver[]
+      , defaultMediaType: ReceiverSelectorMediaType
+      , availableMediaTypes: ReceiverSelectorMediaType
+      , closeIfFocusLost: boolean
+      , windowPositionX: number
+      , windowPositionY: number
+
+      , i18n_extensionName: string
+      , i18n_castButtonTitle: string
+      , i18n_stopButtonTitle: string
+      , i18n_mediaTypeApp:  string
+      , i18n_mediaTypeTab: string
+      , i18n_mediaTypeScreen: string
+      , i18n_mediaTypeFile: string
+      , i18n_mediaSelectCastLabel: string
+      , i18n_mediaSelectToLabel: string
+      , i18n_noReceiversFound: string
+    }
     "bridge:/receiverSelector/close": {}
     "bridge:/stopReceiverApp": {
         receiver: Receiver
