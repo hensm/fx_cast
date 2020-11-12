@@ -85,210 +85,157 @@ export interface Receiver {
     status?: ReceiverStatus;
 }
 
+/**
+ * Message types.
+ * Keep in sync with types at /ext/src/messaging.ts.
+ */
+type MessagesBase = {
+    "main:/serviceUp": Receiver
+  , "main:/serviceDown": { id: string }
+  , "main:/receiverStatus": { id: string, status: ReceiverStatus }
 
-export type Messages = [
-    {
-        subject: "shim:/serviceUp"
-      , data: { id: Receiver["id"] }
-    }
-  , {
-        subject: "shim:/serviceDown"
-      , data: { id: Receiver["id"] }
-    }
-  , {
-        subject: "shim:/launchApp"
-      , data: { receiver: Receiver }
-    }
+  , "shim:/serviceUp": { id: Receiver["id"] }
+  , "shim:/serviceDown": { id: Receiver["id"] }
+  , "shim:/launchApp": { receiver: Receiver }
 
-    // Session messages
-  , {
-        subject: "shim:/session/stopped"
+  , "shim:/session/stopped": {}
+  , "shim:/session/connected": {
+        sessionId: string;
+        namespaces: Array<{ name: string }>;
+        displayName: string;
+        statusText: string;
     }
-  , {
-        subject: "shim:/session/connected"
-      , data: {
-            sessionId: string;
-            namespaces: Array<{ name: string }>;
-            displayName: string;
-            statusText: string;
-        }
+  , "shim:/session/updateStatus": any
+
+  , "shim:/session/impl_addMessageListener": {
+        namespace: string
+      , data: string
     }
-  , {
-        subject: "shim:/session/updateStatus"
-      , data: any
+  , "shim:/session/impl_sendMessage": {
+        messageId: string
+      , error: boolean
     }
-  , {
-        subject: "shim:/session/impl_addMessageListener"
-      , data: { namespace: string, data: string }
+  , "shim:/session/impl_setReceiverMuted": {
+        volumeId: string
+      , error: boolean
     }
-  , {
-        subject: "shim:/session/impl_sendMessage"
-      , data: { messageId: string, error: boolean }
+  , "shim:/session/impl_setReceiverVolumeLevel": {
+        volumeId: string
+      , error: boolean
     }
-  , {
-        subject: "shim:/session/impl_setReceiverMuted"
-      , data: { volumeId: string, error: boolean }
-    }
-  , {
-        subject: "shim:/session/impl_setReceiverVolumeLevel"
-      , data: { volumeId: string, error: boolean }
-    }
-  , {
-        subject: "shim:/session/impl_stop"
-      , data: { stopId: string, error: boolean }
+  , "shim:/session/impl_stop": {
+        stopId: string
+      , error: boolean
     }
 
     // Bridge session messages
-  , {
-        subject: "bridge:/session/initialize"
-      , data: {
-            address: string
-          , port: number
-          , appId: string
-          , sessionId: string
-        }
-      , _id: string;
+  , "bridge:/session/initialize": {
+        address: string
+      , port: number
+      , appId: string
+      , sessionId: string
+      , internalSessionId: string;
     }
-  , {
-        subject: "bridge:/session/close"
-      , _id: string;
+  , "bridge:/session/close": {
+        internalSessionId: string
     }
-  , {
-        subject: "bridge:/session/impl_leave"
-      , data: { id: string }
-      , _id: string
+  , "bridge:/session/impl_leave": {
+        internalSessionId: string
+      , id: string
     }
-  , {
-        subject: "bridge:/session/impl_sendMessage"
-      , data: { namespace: string, message: any, messageId: string }
-      , _id: string
+  , "bridge:/session/impl_sendMessage": {
+        internalSessionId: string
+      , namespace: string
+      , message: any
+      , messageId: string
     }
-  , {
-        subject: "bridge:/session/impl_setReceiverMuted"
-      , data: { muted: boolean, volumeId: string }
-      , _id: string
+  , "bridge:/session/impl_setReceiverMuted": {
+        internalSessionId: string
+      , muted: boolean
+      , volumeId: string
     }
-  , {
-        subject: "bridge:/session/impl_setReceiverVolumeLevel"
-      , data: { newLevel: number, volumeId: string }
-      , _id: string
+  , "bridge:/session/impl_setReceiverVolumeLevel": {
+        internalSessionId: string
+      , newLevel: number
+      , volumeId: string
     }
-  , {
-        subject: "bridge:/session/impl_stop"
-      , data: { stopId: string }
-      , _id: string
+  , "bridge:/session/impl_stop": {
+        internalSessionId: string
+      , stopId: string
     }
-  , {
-        subject: "bridge:/session/impl_addMessageListener"
-      , data: { namespace: string }
-      , _id: string
+  , "bridge:/session/impl_addMessageListener": {
+        internalSessionId: string
+      , namespace: string
     }
 
     // Media messages
-  , {
-        subject: "shim:/media/update"
-      , data: {
-            currentTime: number
-          , _lastCurrentTime: number
-          , customData: any
-          , playbackRate: number
-          , playerState: string
-          , repeatMode: string
-          , _volumeLevel: number
-          , _volumeMuted: boolean
-          , media: any
-          , mediaSessionId: number
-        }
+  , "shim:/media/update": {
+        currentTime: number
+      , _lastCurrentTime: number
+      , customData: any
+      , playbackRate: number
+      , playerState: string
+      , repeatMode: string
+      , _volumeLevel: number
+      , _volumeMuted: boolean
+      , media: any
+      , mediaSessionId: number
     }
-  , {
-        subject: "shim:/media/sendMediaMessageResponse"
-      , data: { messageId: string, error: boolean }
+  , "shim:/media/sendMediaMessageResponse": {
+        messageId: string
+      , error: boolean
     }
 
     // Bridge media messages
-  , {
-        subject: "bridge:/media/initialize"
-      , data: {
-            sessionId: string
-          , mediaSessionId: number
-          , _internalSessionId: string
-        }
-      , _id: string;
+  , "bridge:/media/initialize": {
+        sessionId: string
+      , mediaSessionId: number
+      , internalMediaSessionId: string
+      , _internalSessionId: string
     }
-  , {
-        subject: "bridge:/media/sendMediaMessage"
-      , data: { message: any, messageId: string }
-      , _id: string;
+  , "bridge:/media/sendMediaMessage": {
+        internalMediaSessionId: string
+      , message: any
+      , messageId: string
     }
 
     // Bridge messages
-  , {
-        subject: "main:/receiverSelector/selected"
-      , data: ReceiverSelectionCast
-    }
-  , {
-        subject: "main:/receiverSelector/error"
-      , data: string
-    }
-  , {
-        subject: "main:/receiverSelector/close"
-    }
-  , {
-        subject: "main:/receiverSelector/stop"
-      , data: ReceiverSelectionStop
-    }
-  , {
-        subject: "bridge:/getInfo"
-    }
-  , {
-        subject: "bridge:/initialize"
-      , data: { shouldWatchStatus: boolean }
-    }
-  , {
-        subject: "bridge:/receiverSelector/open"
-      , data: any }
-  , {
-        subject: "bridge:/receiverSelector/close"
-    }
-  , {
-        subject: "bridge:/stopReceiverApp"
-      , data: { receiver: Receiver }
-    }
-  , {
-        subject: "bridge:/mediaServer/start"
-      , data: { filePath: string, port: number }
-    }
-    , {
-        subject: "bridge:/mediaServer/stop"
-    }
+  , "main:/receiverSelector/selected": ReceiverSelectionCast
+  , "main:/receiverSelector/error": string
+  , "main:/receiverSelector/close": {}
+  , "main:/receiverSelector/stop": ReceiverSelectionStop
 
-  , {
-        subject: "mediaCast:/mediaServer/started"
-      , data: {
-            mediaPath: string
-          , subtitlePaths: string[]
-          , localAddress: string
-        }
+  , "bridge:/getInfo": {}
+  , "bridge:/initialize": {
+        shouldWatchStatus: boolean
     }
-  , {
-        subject: "mediaCast:/mediaServer/stopped"
+  , "bridge:/receiverSelector/open": any
+  , "bridge:/receiverSelector/close": {}
+  , "bridge:/stopReceiverApp": {
+        receiver: Receiver
     }
-  , {
-        subject: "mediaCast:/mediaServer/error"
+  , "bridge:/mediaServer/start": {
+        filePath: string
+      , port: number
     }
+  , "bridge:/mediaServer/stop": {}
 
-  , {
-        subject: "main:/serviceUp"
-      , data: Receiver
+  , "mediaCast:/mediaServer/started": {
+        mediaPath: string
+      , subtitlePaths: string[]
+      , localAddress: string
     }
-  , {
-        subject: "main:/serviceDown"
-      , data: { id: string }
-    }
-  , {
-        subject: "main:/receiverStatus"
-      , data: { id: string, status: ReceiverStatus }
-    }
-];
+  , "mediaCast:/mediaServer/stopped": {}
+  , "mediaCast:/mediaServer/error": {}
+}
 
-export type Message = Messages[number];
+interface MessageBase<K extends keyof MessagesBase> {
+    subject: K;
+    data: MessagesBase[K];
+}
+
+type Messages = {
+    [K in keyof MessagesBase]: MessageBase<K>
+}
+
+export type Message = Messages[keyof Messages];

@@ -167,9 +167,9 @@ type MessagesBase = {
 
 
 interface MessageBase<K extends keyof MessagesBase> {
-    subject: K
-    data: MessagesBase[K]
-};
+    subject: K;
+    data: MessagesBase[K];
+}
 
 type Messages = {
     [K in keyof MessagesBase]: MessageBase<K>

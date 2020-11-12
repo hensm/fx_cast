@@ -34,6 +34,7 @@ export async function startMediaServer (filePath: string, port: number) {
             console.error("Error: Media path is not a file.");
             sendMessage({
                 subject: "mediaCast:/mediaServer/error"
+              , data: {}
             });
 
             return;
@@ -42,6 +43,7 @@ export async function startMediaServer (filePath: string, port: number) {
         console.error("Error: Failed to find media path.");
         sendMessage({
             subject:  "mediaCast:/mediaServer/error"
+          , data: {}
         });
 
         return;
@@ -52,6 +54,7 @@ export async function startMediaServer (filePath: string, port: number) {
         console.error("Error: Failed to find media type.");
         sendMessage({
             subject: "mediaCast:/mediaServer/error"
+          , data: {}
         });
 
         return;
@@ -147,6 +150,7 @@ export async function startMediaServer (filePath: string, port: number) {
             console.error("Failed to get local address.");
             sendMessage({
                 subject: "mediaCast:/mediaServer/error"
+              , data: {}
             });
             stopMediaServer();
             return;
@@ -164,9 +168,11 @@ export async function startMediaServer (filePath: string, port: number) {
 
     mediaServer.on("close", () => sendMessage({
         subject: "mediaCast:/mediaServer/stopped"
+      , data: {}
     }));
     mediaServer.on("error", () => sendMessage({
         subject: "mediaCast:/mediaServer/error"
+      , data: {}
     }));
 
     mediaServer.listen(port);

@@ -75,6 +75,7 @@ export function startReceiverSelector (data: string) {
 
             sendMessage({
                 subject: "main:/receiverSelector/close"
+              , data: {}
             });
         }
     });
