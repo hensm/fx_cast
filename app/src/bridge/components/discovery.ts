@@ -1,69 +1,77 @@
 "use strict";
 
-import mdns from "mdns";
+import { MDNSServiceDiscovery } from "tinkerhub-mdns";
 
 import StatusListener from "./chromecast/StatusListener";
 import { ReceiverStatus } from "../types";
 import { sendMessage } from "../lib/messaging";
 
 
-const browser = mdns.createBrowser(mdns.tcp("googlecast"), {
-    resolverSequence: [
-        mdns.rst.DNSServiceResolve()
-      , "DNSServiceGetAddrInfo" in mdns.dns_sd
-            ? mdns.rst.DNSServiceGetAddrInfo()
-              // Some issues on Linux with IPv6, so restrict to IPv4
-            : mdns.rst.getaddrinfo({ families: [ 4 ] })
-      , mdns.rst.makeAddressesUnique()
-    ]
-});
+let browser : MDNSServiceDiscovery | null = null;
 
-function onBrowserServiceUp (service: mdns.Service) {
+function onBrowserServiceUp (service: any) {
     sendMessage({
         subject: "main:/serviceUp"
       , data: {
-            host: service.addresses[0]
-          , port: service.port
-          , id: service.txtRecord.id
-          , friendlyName: service.txtRecord.fn
+            host: service.addresses[0].host
+          , port: service.addresses[0].port
+          , id: service.id
+          , friendlyName: new TextDecoder().decode(
+              service.binaryData.filter(
+                  (arr: Array<number>) =>
+                      arr[0]==0x66 && arr[1]==0x6e)[0].slice(3)
+            )
         }
     });
 }
 
-function onBrowserServiceDown (service: mdns.Service) {
+function onBrowserServiceDown (service: any) {
     sendMessage({
         subject: "main:/serviceDown"
       , data: {
-            id: service.txtRecord.id
+            id: service.id
         }
     });
 }
 
-browser.on("serviceUp", onBrowserServiceUp);
-browser.on("serviceDown", onBrowserServiceDown);
+function onBrowserServiceUpdate (service: any) {
+    onBrowserServiceDown(service);
+    onBrowserServiceUp(service);
+}
 
+function startBrowser () {
+    if (browser) {
+        browser.destroy();
+    }
+    browser = new MDNSServiceDiscovery({ type: 'googlecast' });
+
+    browser.onAvailable(onBrowserServiceUp);
+    browser.onUnavailable(onBrowserServiceDown);
+    browser.onUpdate(onBrowserServiceUpdate);
+}
 
 interface InitializeOptions {
     shouldWatchStatus?: boolean;
 }
 
 export function startDiscovery (options: InitializeOptions) {
-    if (options.shouldWatchStatus) {
-        browser.on("serviceUp", onStatusBrowserServiceUp);
-        browser.on("serviceDown", onStatusBrowserServiceDown);
-    }
+    startBrowser();
 
-    browser.start();
+    if (browser && options.shouldWatchStatus) {
+        browser.onAvailable(onStatusBrowserServiceUp);
+        browser.onUnavailable(onStatusBrowserServiceDown);
+        browser.onUpdate(onStatusBrowserServiceUpdate);
+    }
 
     // Receiver status listeners for status mode
     const statusListeners = new Map<string, StatusListener>();
 
-    function onStatusBrowserServiceUp (service: mdns.Service) {
-        const { id } = service.txtRecord;
+    function onStatusBrowserServiceUp (service: any) {
+        const id = service.id;
 
         const listener = new StatusListener(
-                service.addresses[0]
-              , service.port);
+                service.addresses[0].host
+              , service.addresses[0].port);
 
         listener.on("receiverStatus", (status: ReceiverStatus) => {
             const receiverStatusMessage: any = {
@@ -96,16 +104,24 @@ export function startDiscovery (options: InitializeOptions) {
         statusListeners.set(id, listener);
     }
 
-    function onStatusBrowserServiceDown (service: mdns.Service) {
-        const { id } = service.txtRecord;
+    function onStatusBrowserServiceDown (service: any) {
+        const id = service.id;
 
         if (statusListeners.has(id)) {
             statusListeners.get(id)!.deregister();
             statusListeners.delete(id);
         }
     }
+
+    function onStatusBrowserServiceUpdate (service: any) {
+        onStatusBrowserServiceDown(service);
+        onStatusBrowserServiceUp(service);
+    }
 }
 
 export function stopDiscovery () {
-    browser.stop();
+    if (browser) {
+        browser.destroy();
+        browser = null;
+    }
 }

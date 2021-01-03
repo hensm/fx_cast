@@ -15,13 +15,13 @@
         "bplist-parser": "^0.2.0",
         "castv2": "^0.1.10",
         "fast-srp-hap": "^2.0.2",
-        "mdns": "^2.5.1",
         "mime-types": "^2.1.27",
         "node-fetch": "^2.6.0",
+        "tinkerhub-mdns": "^0.5.1",
         "tweetnacl": "^1.0.3"
     },
     "devDependencies": {
-        "@types/mdns": "0.0.33",
+        "@types/debug": "^4.1.5",
         "@types/mime-types": "^2.1.0",
         "@types/node": "^13.13.15",
         "@types/node-fetch": "^2.5.7",
