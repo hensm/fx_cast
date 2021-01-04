@@ -13,6 +13,10 @@
         "message": "la aplicación de este sitio"
       , "description": "Receiver selector media type <option> text for current site's sender application."
     }
+  , "popupMediaTypeAppNotFound": {
+        "description": "Receiver selector media type <option> text for current site's sender application if none found."
+      , "message": "la aplicaciòn de este sitio no fue encontrada"
+    }
   , "popupMediaTypeAppMedia": {
         "message": "este medio"
       , "description": "Receiver selector media type <option> text for media casting."
@@ -175,7 +179,7 @@
       , "description": "Update check button title."
     }
   , "optionsBridgeUpdateChecking": {
-        "message": "Buscando actualizaciones para Updates$ellipsis$"
+        "message": "Buscando actualizaciones para $ellipsis$"
       , "description": "Update check button title while in progress. Ellipsis cycles (. → .. → ...) as loading indicator."
       , "placeholders": {
             "ellipsis": {
@@ -203,10 +207,15 @@
 
   , "optionsBridgeBackupEnabled": {
         "message": "Activar conexión de demonio de respaldo en $hostPort$"
-      , "description": "Backup daemon checkbox label."
+      , "description": "Backup daemon checkbox label. Host/port inputs are inserted inline at the hostPort substitution."
+      , "placeholders": {
+            "hostPort": {
+                "content": "$1"
+            }
+        }
     }
   , "optionsBridgeBackupEnabledDescription": {
-        "message": "Si la conexión de puente regular falla, intenta conectar a un puente ejecutándose en modo demonio."
+        "message": "Si la conexión de puente regular falla, intente conectar a un puente ejecutándose en modo demonio."
       , "description": "Backup daemon checkbox description."
     }
 
@@ -356,15 +365,15 @@
     }
 
   , "optionsMirroringCategoryName": {
-        "message": "Enviar pantalla"
+        "message": "Enviar pantalla/pestaña"
       , "description": "Options page mirroring category name."
     }
   , "optionsMirroringCategoryDescription": {
-        "message": "Envío de pantalla/pestaña a la aplicación receptora de Chromecast."
+        "message": "Enviando a la aplicación receptora de Chromecast."
       , "description": "Options page mirroring category description."
     }
   , "optionsMirroringEnabled": {
-        "message": "Activar envío de pantalla"
+        "message": "Activar envío de pantalla/pestaña (experimental)"
       , "description": "Mirroring enabled checkbox label."
     }
   , "optionsMirroringAppId": {

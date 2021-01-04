@@ -44,11 +44,6 @@ Missing/outdated strings:
     * `optionsBridgeIncompatible`
 
 * `es`
-    * `optionsMirroringCategoryName`
-    * `optionsMirroringCategoryDescription`
-    * `optionsMirroringEnabled`
-    * `optionsMirroringAppId`
-    * `popupMediaTypeAppNotFound`
     * `optionsBridgeCompatible`
     * `optionsBridgeLikelyCompatible`
     * `optionsBridgeIncompatible`
