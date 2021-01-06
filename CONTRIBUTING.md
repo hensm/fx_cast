@@ -43,11 +43,6 @@ Missing/outdated strings:
     * `optionsBridgeLikelyCompatible`
     * `optionsBridgeIncompatible`
 
-* `es`
-    * `optionsBridgeCompatible`
-    * `optionsBridgeLikelyCompatible`
-    * `optionsBridgeIncompatible`
-
 * `nl`
     * `optionsBridgeBackupEnabled`
     * `optionsUserAgentWhitelistRestrictedEnabled`

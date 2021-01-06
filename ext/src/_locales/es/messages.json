@@ -15,7 +15,7 @@
     }
   , "popupMediaTypeAppNotFound": {
         "description": "Receiver selector media type <option> text for current site's sender application if none found."
-      , "message": "la aplicaciòn de este sitio no fue encontrada"
+      , "message": "la aplicación de este sitio (no encontrada)"
     }
   , "popupMediaTypeAppMedia": {
         "message": "este medio"
@@ -151,15 +151,15 @@
       , "description": "Bridge stats recommended action row title."
     }
   , "optionsBridgeCompatible": {
-        "message": "COMPATIBLE"
+        "message": "Compatible"
       , "description": "Compatibility status is definitely compatible."
     }
   , "optionsBridgeLikelyCompatible": {
-        "message": "PROBABLEMENTE COMPATIBLE"
+        "message": "Probablemente compatible"
       , "description": "Compatibility status is probably compatible."
     }
   , "optionsBridgeIncompatible": {
-        "message": "INCOMPATIBLE"
+        "message": "Incompatible"
       , "description": "Compatibility status is definitely incompatible."
     }
   , "optionsBridgeOlderAction": {
@@ -369,7 +369,7 @@
       , "description": "Options page mirroring category name."
     }
   , "optionsMirroringCategoryDescription": {
-        "message": "Enviando a la aplicación receptora de Chromecast."
+        "message": "Enviar pantalla a la aplicación receptora de Chromecast."
       , "description": "Options page mirroring category description."
     }
   , "optionsMirroringEnabled": {
