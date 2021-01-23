@@ -16,6 +16,8 @@ _**Note**: Currently supported on macOS, Windows and Linux._
 
 Install the Firefox extension (from within Firefox) and companion bridge application via the installer packages. These are two separate downloads that can be found on the [website](https://hensm.github.io/fx_cast/) or in the [GitHub releases](https://github.com/hensm/fx_cast/releases) section.
 
+On Linux platforms, it may be necessary to [configure local hostname resolution](https://wiki.archlinux.org/index.php/avahi#Hostname_resolution).
+
 ### Package managers
 * #### Arch Linux (AUR) - https://aur.archlinux.org/packages/fx_cast/
   ````sh
