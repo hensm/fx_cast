@@ -3,6 +3,7 @@
 import logger from "../../lib/logger";
 
 import ApiConfig from "./classes/ApiConfig";
+import CredentialsData from "./classes/CredentialsData";
 import DialRequest from "./classes/DialRequest";
 import Error_ from "./classes/Error";
 import Image_ from "./classes/Image";
@@ -56,14 +57,13 @@ let sessionErrorCallback: ErrorCallback;
 
 export {
     // Enums
-    AutoJoinPolicy, Capability, DefaultActionPolicy, DialAppState
-  , ErrorCode, ReceiverAction, ReceiverAvailability, ReceiverType
-  , SenderPlatform, SessionStatus, VolumeControlType
+    AutoJoinPolicy, Capability, DefaultActionPolicy, DialAppState, ErrorCode
+  , ReceiverAction, ReceiverAvailability, ReceiverType, SenderPlatform
+  , SessionStatus, VolumeControlType
 
     // Classes
-  , ApiConfig, DialRequest, ReceiverDisplayStatus
-  , SenderApplication, Session, SessionRequest, Timeout
-  , Volume
+  , ApiConfig, CredentialsData, DialRequest, ReceiverDisplayStatus
+  , SenderApplication, Session, SessionRequest, Timeout, Volume
 
   , Error_ as Error
   , Image_ as Image

@@ -5,6 +5,8 @@ import MediaInfo from "./MediaInfo";
 
 export default class LoadRequest {
     public activeTrackIds: (number[] | null) = null;
+    public atvCredentials?: string;
+    public atvCredentialsType?: string;
     public autoplay: (boolean | null) = true;
     public currentTime: (number | null) = null;
     public customData: any = null;

@@ -1,16 +1,25 @@
 "use strict";
 
+import AudiobookChapterMediaMetadata from "./classes/AudiobookChapterMediaMetadata";
+import AudiobookContainerMetadata from "./classes/AudiobookContainerMetadata";
+import Break from "./classes/Break";
+import BreakClip from "./classes/BreakClip";
+import BreakStatus from "./classes/BreakStatus";
+import ContainerMetadata from "./classes/ContainerMetadata";
 import EditTracksInfoRequest from "./classes/EditTracksInfoRequest";
 import GenericMediaMetadata from "./classes/GenericMediaMetadata";
 import GetStatusRequest from "./classes/GetStatusRequest";
+import LiveSeekableRange from "./classes/LiveSeekableRange";
 import LoadRequest from "./classes/LoadRequest";
 import Media from "./classes/Media";
 import MediaInfo from "./classes/MediaInfo";
+import MediaMetadata from "./classes/MediaMetadata";
 import MovieMediaMetadata from "./classes/MovieMediaMetadata";
 import MusicTrackMediaMetadata from "./classes/MusicTrackMediaMetadata";
 import PauseRequest from "./classes/PauseRequest";
 import PhotoMediaMetadata from "./classes/PhotoMediaMetadata";
 import PlayRequest from "./classes/PlayRequest";
+import QueueData from "./classes/QueueData";
 import QueueInsertItemsRequest from "./classes/QueueInsertItemsRequest";
 import QueueItem from "./classes/QueueItem";
 import QueueLoadRequest from "./classes/QueueLoadRequest";
@@ -23,12 +32,20 @@ import StopRequest from "./classes/StopRequest";
 import TextTrackStyle from "./classes/TextTrackStyle";
 import Track from "./classes/Track";
 import TvShowMediaMetadata from "./classes/TvShowMediaMetadata";
+import UserActionState from "./classes/QueueItem";
+import VastAdsRequest from "./classes/VastAdsRequest";
+import VideoInformation from "./classes/VideoInformation";
 import VolumeRequest from "./classes/VolumeRequest";
 
-import { IdleReason
+import { ContainerType
+       , HdrType
+       , HlsSegmentFormat
+       , HlsVideoSegmentFormat
+       , IdleReason
        , MediaCommand
        , MetadataType
        , PlayerState
+       , QueueType
        , RepeatMode
        , ResumeState
        , StreamType
@@ -37,24 +54,28 @@ import { IdleReason
        , TextTrackFontStyle
        , TextTrackType
        , TextTrackWindowType
-       , TrackType } from "./enums";
+       , TrackType
+       , UserAction } from "./enums";
 
 
 export {
     // Enums
-    IdleReason, MediaCommand, MetadataType, PlayerState
-  , RepeatMode, ResumeState, StreamType, TextTrackEdgeType
-  , TextTrackFontGenericFamily, TextTrackFontStyle, TextTrackType
-  , TextTrackWindowType, TrackType
+    ContainerType, HdrType, HlsSegmentFormat, HlsVideoSegmentFormat, IdleReason
+  , MediaCommand, MetadataType, PlayerState, QueueType, RepeatMode, ResumeState
+  , StreamType, TextTrackEdgeType, TextTrackFontGenericFamily
+  , TextTrackFontStyle, TextTrackType, TextTrackWindowType, TrackType
+  , UserAction
 
     // Classes
-  , EditTracksInfoRequest, GenericMediaMetadata, GetStatusRequest, LoadRequest
-  , Media, MediaInfo, MovieMediaMetadata, MusicTrackMediaMetadata
-  , PauseRequest, PhotoMediaMetadata, PlayRequest, QueueInsertItemsRequest
+  , AudiobookChapterMediaMetadata, AudiobookContainerMetadata, Break, BreakClip
+  , BreakStatus, ContainerMetadata, EditTracksInfoRequest, GenericMediaMetadata
+  , GetStatusRequest, LiveSeekableRange, LoadRequest, Media, MediaInfo
+  , MediaMetadata, MovieMediaMetadata, MusicTrackMediaMetadata, PauseRequest
+  , PhotoMediaMetadata, PlayRequest, QueueInsertItemsRequest, QueueData
   , QueueItem, QueueLoadRequest, QueueRemoveItemsRequest
   , QueueReorderItemsRequest, QueueSetPropertiesRequest, QueueUpdateItemsRequest
-  , SeekRequest, StopRequest, TextTrackStyle, Track
-  , TvShowMediaMetadata, VolumeRequest
+  , SeekRequest, StopRequest, TextTrackStyle, Track, TvShowMediaMetadata
+  , UserActionState, VastAdsRequest, VideoInformation, VolumeRequest
 };
 
 export const timeout = {

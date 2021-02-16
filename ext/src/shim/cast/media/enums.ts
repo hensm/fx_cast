@@ -1,5 +1,31 @@
 "use strict";
 
+export enum ContainerType {
+    GENERIC_CONTAINER
+  , AUDIOBOOK_CONTAINER
+}
+
+export enum HdrType {
+    SDR = "sdr"
+  , HDR = "hdr"
+  , DV = "dv"
+}
+
+export enum HlsSegmentFormat {
+    AAC = "aac"
+  , AC3 = "ac3"
+  , MP3 = "mp3"
+  , TS = "ts"
+  , TS_AAC = "ts_aac"
+  , E_AC3 = "e_ac3"
+  , FMP4 = "fmp4"
+}
+
+export enum HlsVideoSegmentFormat {
+    MPEG2_TS = "mpeg2_ts"
+  , FMP4 = "fmp4"
+}
+
 export enum IdleReason {
     CANCELLED = "CANCELLED"
   , INTERRUPTED = "INTERRUPTED"
@@ -20,6 +46,7 @@ export enum MetadataType {
   , TV_SHOW
   , MUSIC_TRACK
   , PHOTO
+  , AUDIOBOOK_CHAPTER
 }
 
 export enum PlayerState {
@@ -27,6 +54,18 @@ export enum PlayerState {
   , PLAYING = "PLAYING"
   , PAUSED = "PAUSED"
   , BUFFERING = "BUFFERING"
+}
+
+export enum QueueType {
+    ALBUM = "ALBUM"
+  , PLAYLIST = "PLAYLIST"
+  , AUDIOBOOK = "AUDIOBOOK"
+  , RADIO_STATION = "RADIO_STATION"
+  , PODCAST_SERIES = "PODCAST_SERIES"
+  , TV_SERIES = "TV_SERIES"
+  , VIDEO_PLAYLIST = "VIDEO_PLAYLIST"
+  , LIVE_TV = "LIVETV"
+  , MOVIE = "MOVIE"
 }
 
 export enum RepeatMode {
@@ -90,4 +129,11 @@ export enum TrackType {
     TEXT = "TEXT"
   , AUDIO = "AUDIO"
   , VIDEO = "VIDEO"
+}
+
+export enum UserAction {
+    LIKE = "LIKE"
+  , DISLIKE = "DISLIKE"
+  , FOLLOW = "FOLLOW"
+  , UNFOLLOW = "UNFOLLOW"
 }

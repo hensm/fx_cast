@@ -8,10 +8,6 @@ import { AutoJoinPolicy
 
 
 export default class ApiConfig {
-    public additionalSessionRequests: any[] = [];
-    public customDialLaunchCallback: any = null;
-    public invisibleSender = false;
-
     constructor (
             public sessionRequest: SessionRequest
           , public sessionListener: (session: Session) => void

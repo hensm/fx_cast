@@ -4,17 +4,21 @@ import logger from "../../../../lib/logger";
 
 import uuid from "uuid/v1";
 
+import BreakStatus from "./BreakStatus";
 import EditTracksInfoRequest from "./EditTracksInfoRequest";
 import GetStatusRequest from "./GetStatusRequest";
+import LiveSeekableRange from "./LiveSeekableRange";
 import MediaInfo from "./MediaInfo";
 import PauseRequest from "./PauseRequest";
 import PlayRequest from "./PlayRequest";
+import QueueData from "./QueueData";
 import QueueInsertItemsRequest from "./QueueInsertItemsRequest";
 import QueueItem from "./QueueItem";
 import QueueReorderItemsRequest from "./QueueReorderItemsRequest";
 import QueueUpdateItemsRequest from "./QueueUpdateItemsRequest";
 import SeekRequest from "./SeekRequest";
 import StopRequest from "./StopRequest";
+import VideoInformation from "./VideoInformation";
 import VolumeRequest from "./VolumeRequest";
 
 import Volume from "../../classes/Volume";
@@ -96,18 +100,22 @@ export default class Media {
     });
 
     public activeTrackIds: (number[] | null) = null;
+    public breakStatus?: BreakStatus;
     public currentItemId: (number | null) = null;
     public customData: any = null;
     public currentTime: number = 0;
     public idleReason: (string | null) = null;
     public items: (QueueItem[] | null) = null;
+    public liveSeekableRange?: LiveSeekableRange;
     public loadingItemId: (number | null) = null;
     public media: (MediaInfo | null) = null;
     public playbackRate: number = 1;
     public playerState: string = PlayerState.IDLE;
     public preloadedItemId: (number | null) = null;
+    public queueData?: QueueData;
     public repeatMode: string = RepeatMode.OFF;
     public supportedMediaCommands: string[] = [];
+    public videoInfo?: VideoInformation;
     public volume: Volume = new Volume();
 
 
@@ -137,6 +145,16 @@ export default class Media {
           , _errorCallback?: ErrorCallback): void {
 
         logger.info("STUB :: Media#editTracksInfo");
+    }
+
+    public getEstimatedBreakClipTime () {
+        logger.info("STUB :: Media#getEstimatedBreakClipTime");
+    }
+    public getEstimatedBreakTime () {
+        logger.info("STUB :: Media#getEstimatedBreakTime");
+    }
+    public getEstimatedLiveSeekableRange () {
+        logger.info("STUB :: Media#getEstimatedLiveSeekableRange");
     }
 
     public getEstimatedTime (): number {
