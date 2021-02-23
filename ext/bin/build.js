@@ -4,7 +4,7 @@ const fs = require("fs-extra");
 const path = require("path");
 const minimist = require("minimist");
 const webpack = require("webpack");
-const webExt = require("web-ext").default;
+const webExt = require("web-ext");
 
 const { ROOT
       , INCLUDE_PATH
@@ -68,9 +68,9 @@ const webpackConfig = require(`${ROOT}/webpack.config.js`)({
 
 // Add mode to config
 webpackConfig.mode = argv.mode;
-webpackConfig.devtool = argv.mode === "production"
-    ? "none"
-    : "source-map";
+if (argv.mode !== "production") {
+    webpackConfig.devtool = "source-map";
+}
 
 
 // Clean
