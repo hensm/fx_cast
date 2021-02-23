@@ -43,27 +43,31 @@ module.exports = (env) => ({
         })
 
         // Copy static assets
-      , new CopyWebpackPlugin([
-            {
-                from: env.includePath
-              , to: env.outputPath
-              , ignore: sourceFileExtensions.map(ext => `*${ext}`)
-              , transform (content, path) {
-                    // Access to variables in static files
-                    if (path.endsWith(".json")) {
-                        return Buffer.from(content.toString()
-                            .replace("EXTENSION_NAME", env.extensionName)
-                            .replace("EXTENSION_ID", env.extensionId)
-                            .replace("EXTENSION_VERSION", env.extensionVersion)
-                            .replace("CONTENT_SECURITY_POLICY", env.contentSecurityPolicy)
-                            .replace("AUTHOR", env.author)
-                            .replace("AUTHOR_HOMEPAGE", env.authorHomepage));
+      , new CopyWebpackPlugin({
+            patterns: [
+                {
+                    from: env.includePath
+                , to: env.outputPath
+                , globOptions: {
+                        ignore: sourceFileExtensions.map(ext => `**${ext}`)
                     }
+                , transform (content, path) {
+                        // Access to variables in static files
+                        if (path.endsWith(".json")) {
+                            return Buffer.from(content.toString()
+                                .replace("EXTENSION_NAME", env.extensionName)
+                                .replace("EXTENSION_ID", env.extensionId)
+                                .replace("EXTENSION_VERSION", env.extensionVersion)
+                                .replace("CONTENT_SECURITY_POLICY", env.contentSecurityPolicy)
+                                .replace("AUTHOR", env.author)
+                                .replace("AUTHOR_HOMEPAGE", env.authorHomepage));
+                        }
 
-                    return content;
+                        return content;
+                    }
                 }
-            }
-        ])
+            ]
+        })
 
       , new HtmlWebpackPlugin({
             inject: true

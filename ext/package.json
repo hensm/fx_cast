@@ -11,15 +11,15 @@
         "lint": "node bin/lint.js"
     },
     "devDependencies": {
-        "@types/firefox-webext-browser": "^70.0.1",
-        "@types/react": "^16.9.46",
-        "@types/react-dom": "^16.9.8",
-        "copy-webpack-plugin": "^5.1.1",
-        "html-webpack-plugin": "^4.4.1",
-        "preact": "^10.4.7",
+        "@types/firefox-webext-browser": "^82.0.0",
+        "@types/react": "^17.0.2",
+        "@types/react-dom": "^17.0.1",
+        "copy-webpack-plugin": "^7.0.0",
+        "html-webpack-plugin": "^5.2.0",
+        "preact": "^10.5.12",
         "preact-compat": "^3.19.0",
-        "ts-loader": "^7.0.5",
-        "web-ext": "^4.3.0",
-        "webpack": "^4.44.1"
+        "ts-loader": "^8.0.17",
+        "web-ext": "^5.5.0",
+        "webpack": "^5.24.0"
     }
 }

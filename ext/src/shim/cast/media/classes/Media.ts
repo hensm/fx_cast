@@ -2,7 +2,7 @@
 
 import logger from "../../../../lib/logger";
 
-import uuid from "uuid/v1";
+import { v1 as uuid } from "uuid";
 
 import BreakStatus from "./BreakStatus";
 import EditTracksInfoRequest from "./EditTracksInfoRequest";
