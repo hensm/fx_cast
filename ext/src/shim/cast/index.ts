@@ -172,7 +172,7 @@ export function requestSession (
 
     // Open destination chooser
     sendMessageResponse({
-        subject: "main:/selectReceiverBegin"
+        subject: "main:selectReceiver"
     });
 }
 
@@ -323,7 +323,7 @@ onMessage(async message => {
             break;
         }
 
-        case "shim:/selectReceiverEnd": {
+        case "shim:selectReceiver/selected": {
             logger.info("Selected receiver");
 
             if (!sessionRequestInProgress) {
@@ -377,7 +377,7 @@ onMessage(async message => {
             break;
         }
 
-        case "shim:/selectReceiverStop": {
+        case "shim:selectReceiver/stopped": {
             logger.info("Stopped receiver");
 
             if (sessionRequestInProgress) {
@@ -400,7 +400,7 @@ onMessage(async message => {
         /**
          * Popup closed before session established.
          */
-        case "shim:/selectReceiverCancelled": {
+        case "shim:selectReceiver/cancelled": {
             if (sessionRequestInProgress) {
                 sessionRequestInProgress = false;
 
