@@ -88,10 +88,10 @@ export default class Media {
     }
 
     private sendMessage (subject: string, data: any) {
+        data._id = this.referenceId;
         (sendMessage as any)({
             subject
           , data
-          , _id: this.referenceId
         });
     }
 }

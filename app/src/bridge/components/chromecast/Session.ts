@@ -168,11 +168,11 @@ export default class Session {
     }
 
     private sendMessage (subject: string, data: any = {}) {
+        data._id = this.referenceId;
         sendMessage({
             // @ts-ignore
             subject
           , data
-          , _id: this.referenceId
         });
     }
 

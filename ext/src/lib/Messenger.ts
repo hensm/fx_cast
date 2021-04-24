@@ -11,7 +11,7 @@ interface TabConnectInfo {
     frameId: number;
 }
 
-export default class Messenger<T extends any[]> {
+export default class Messenger<T> {
     connect (connectInfo: RuntimeConnectInfo) {
         return browser.runtime.connect(connectInfo) as
                 unknown as TypedPort<T>;

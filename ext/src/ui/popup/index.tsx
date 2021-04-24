@@ -75,7 +75,7 @@ class PopupApp extends Component<{}, PopupAppState> {
             switch (message.subject) {
                 case "popup:/sendRequestedAppId": {
                     this.setState({
-                        requestedAppId: message.data.requestedAppId
+                        requestedAppId: message.data?.requestedAppId
                     });
 
                     break;
