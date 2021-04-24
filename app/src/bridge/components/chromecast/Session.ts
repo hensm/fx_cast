@@ -33,8 +33,17 @@ export default class Session {
           , private sessionId: string
           , private referenceId: string) {
 
-        this.client = new Client();
-        this.client.connect({ host, port }, this.onConnect.bind(this));
+        const client = new Client();
+        
+        client.on("error", err => {
+            console.error(`castv2 error: ${err}`);
+        });
+        client.on("close", () => {
+            // TODO: Don't send new data
+        });
+
+        client.connect({ host, port }, this.onConnect.bind(this));
+        this.client = client;
     }
 
     private onConnect () {
