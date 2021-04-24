@@ -102,7 +102,7 @@ export function initialize (
     apiConfig = newApiConfig;
 
     sendMessageResponse({
-        subject: "main:/shimReady"
+        subject: "main:shimReady"
       , data: { appId: apiConfig.sessionRequest.appId }
     });
 
@@ -227,7 +227,7 @@ export function _requestSession (
               , selectedReceiver               // receiver
               , (session: Session) => {
                     sendMessageResponse({
-                        subject: "main:/sessionCreated"
+                        subject: "main:sessionCreated"
                     });
 
                     sessionRequestInProgress = false;
@@ -277,7 +277,7 @@ export function unescape (escaped: string): string {
 
 onMessage(async message => {
     switch (message.subject) {
-        case "shim:/initialized": {
+        case "shim:initialized": {
             isAvailable = true;
             break;
         }
@@ -286,7 +286,7 @@ onMessage(async message => {
          * Cast destination found (serviceUp). Set the API availability
          * property and call the page event function (__onGCastApiAvailable).
          */
-        case "shim:/serviceUp": {
+        case "shim:serviceUp": {
             const receiver = message.data;
 
             if (receiverList.find(r => r.id === receiver.id)) {
@@ -307,7 +307,7 @@ onMessage(async message => {
          * Cast destination lost (serviceDown). Remove from the receiver list
          * and update availability state.
          */
-        case "shim:/serviceDown": {
+        case "shim:serviceDown": {
             const receiverIndex = receiverList.findIndex(
                     receiver => receiver.id === message.data.id);
 
@@ -352,7 +352,7 @@ onMessage(async message => {
                       , selectedReceiver               // receiver
                       , (session: Session) => {
                             sendMessageResponse({
-                                subject: "main:/sessionCreated"
+                                subject: "main:sessionCreated"
                             });
 
                             sessionRequestInProgress = false;
@@ -412,7 +412,7 @@ onMessage(async message => {
             break;
         }
 
-        case "shim:/launchApp": {
+        case "shim:launchApp": {
             const receiver: Receiver = message.data.receiver;
             _requestSession(receiver
                   , session => {

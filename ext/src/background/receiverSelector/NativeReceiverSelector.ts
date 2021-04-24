@@ -57,7 +57,7 @@ export default class NativeReceiverSelector extends ReceiverSelector {
                 "receiverSelectorCloseIfFocusLost");
 
         this.bridgePort.postMessage({
-            subject: "bridge:/receiverSelector/open"
+            subject: "bridge:receiverSelector/open"
           , data: JSON.stringify({
                 receivers
               , defaultMediaType
@@ -93,7 +93,7 @@ export default class NativeReceiverSelector extends ReceiverSelector {
     public close (): void {
         if (this.bridgePort) {
             this.bridgePort.postMessage({
-                subject: "bridge:/receiverSelector/close"
+                subject: "bridge:receiverSelector/close"
             });
         }
 
@@ -102,7 +102,7 @@ export default class NativeReceiverSelector extends ReceiverSelector {
 
     private async onBridgePortMessage (message: Message) {
         switch (message.subject) {
-            case "main:/receiverSelector/selected": {
+            case "main:receiverSelector/selected": {
                 this.wasReceiverSelected = true;
                 this.dispatchEvent(new CustomEvent("selected", {
                     detail: message.data
@@ -114,12 +114,12 @@ export default class NativeReceiverSelector extends ReceiverSelector {
 
                 break;
             }
-            case "main:/receiverSelector/error": {
+            case "main:receiverSelector/error": {
                 logger.error("Native receiver selector error", message.data);
                 this.dispatchEvent(new CustomEvent("error"));
                 break;
             }
-            case "main:/receiverSelector/close": {
+            case "main:receiverSelector/close": {
                 if (!this.wasReceiverSelected) {
                     this.dispatchEvent(new CustomEvent("cancelled"));
                 }
@@ -134,7 +134,7 @@ export default class NativeReceiverSelector extends ReceiverSelector {
 
                 break;
             }
-            case "main:/receiverSelector/stop": {
+            case "main:receiverSelector/stop": {
                 this.dispatchEvent(new CustomEvent("stop", {
                     detail: message.data
                 }));

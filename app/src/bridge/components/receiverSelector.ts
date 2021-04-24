@@ -48,7 +48,7 @@ export function startReceiverSelector (data: string) {
 
             if (!jsonData.mediaType) {
                 sendMessage({
-                    subject: "main:/receiverSelector/stop"
+                    subject: "main:receiverSelector/stop"
                   , data: jsonData
                 });
 
@@ -56,7 +56,7 @@ export function startReceiverSelector (data: string) {
             }
 
             sendMessage({
-                subject: "main:/receiverSelector/selected"
+                subject: "main:receiverSelector/selected"
               , data: jsonData
             });
         });
@@ -64,7 +64,7 @@ export function startReceiverSelector (data: string) {
 
     selectorApp.on("error", err => {
         sendMessage({
-            subject: "main:/receiverSelector/error"
+            subject: "main:receiverSelector/error"
           , data: err.message
         });
     });
@@ -74,7 +74,7 @@ export function startReceiverSelector (data: string) {
             selectorAppOpen = false;
 
             sendMessage({
-                subject: "main:/receiverSelector/close"
+                subject: "main:receiverSelector/close"
             });
         }
     });

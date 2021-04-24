@@ -28,47 +28,47 @@ process.on("SIGTERM", () => {
  * for managing existing ones.
  */
 decodeTransform.on("data", (message: Message) => {
-    if (message.subject.startsWith("bridge:/session/")) {
+    if (message.subject.startsWith("bridge:session/")) {
         handleSessionMessage(message);
         return;
     }
-    if (message.subject.startsWith("bridge:/media/")) {
+    if (message.subject.startsWith("bridge:media/")) {
         handleMediaMessage(message);
         return;
     }
 
 
     switch (message.subject) {
-        case "bridge:/getInfo": {
+        case "bridge:getInfo": {
             encodeTransform.write(__applicationVersion);
             break;
         }
 
-        case "bridge:/initialize": {
+        case "bridge:initialize": {
             startDiscovery(message.data);
             break;
         }
 
-        case "bridge:/stopReceiverApp": {
+        case "bridge:stopReceiverApp": {
             stopReceiverApp(message.data.receiver.host
                           , message.data.receiver.port);
             break;
         }
 
         // Receiver selector
-        case "bridge:/receiverSelector/open": {
+        case "bridge:receiverSelector/open": {
             startReceiverSelector(message.data); break;
         }
-        case "bridge:/receiverSelector/close": {
+        case "bridge:receiverSelector/close": {
             stopReceiverSelector(); break;
         }
 
         // Media server
-        case "bridge:/mediaServer/start": {
+        case "bridge:mediaServer/start": {
             startMediaServer(message.data.filePath, message.data.port);
             break;
         }
-        case "bridge:/mediaServer/stop": {
+        case "bridge:mediaServer/stop": {
             stopMediaServer();
             break;
         }

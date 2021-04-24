@@ -33,7 +33,7 @@ export async function startMediaServer (filePath: string, port: number) {
         } else {
             console.error("Error: Media path is not a file.");
             sendMessage({
-                subject: "mediaCast:/mediaServer/error"
+                subject: "mediaCast:mediaServer/error"
             });
 
             return;
@@ -41,7 +41,7 @@ export async function startMediaServer (filePath: string, port: number) {
     } catch (err) {
         console.error("Error: Failed to find media path.");
         sendMessage({
-            subject:  "mediaCast:/mediaServer/error"
+            subject:  "mediaCast:mediaServer/error"
         });
 
         return;
@@ -51,7 +51,7 @@ export async function startMediaServer (filePath: string, port: number) {
     if (!contentType) {
         console.error("Error: Failed to find media type.");
         sendMessage({
-            subject: "mediaCast:/mediaServer/error"
+            subject: "mediaCast:mediaServer/error"
         });
 
         return;
@@ -146,14 +146,14 @@ export async function startMediaServer (filePath: string, port: number) {
         if (!localAddress) {
             console.error("Failed to get local address.");
             sendMessage({
-                subject: "mediaCast:/mediaServer/error"
+                subject: "mediaCast:mediaServer/error"
             });
             stopMediaServer();
             return;
         }
 
         sendMessage({
-            subject: "mediaCast:/mediaServer/started"
+            subject: "mediaCast:mediaServer/started"
           , data: {
                 mediaPath: fileName
               , subtitlePaths: Array.from(subtitles.keys())
@@ -163,10 +163,10 @@ export async function startMediaServer (filePath: string, port: number) {
     });
 
     mediaServer.on("close", () => sendMessage({
-        subject: "mediaCast:/mediaServer/stopped"
+        subject: "mediaCast:mediaServer/stopped"
     }));
     mediaServer.on("error", () => sendMessage({
-        subject: "mediaCast:/mediaServer/error"
+        subject: "mediaCast:mediaServer/error"
     }));
 
     mediaServer.listen(port);

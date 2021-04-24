@@ -118,7 +118,7 @@ export default class PopupReceiverSelector extends ReceiverSelector {
     public update (receivers: Receiver[]) {
         this.receivers = receivers;
         this.messagePort?.postMessage({
-            subject: "popup:/update"
+            subject: "popup:update"
           , data: {
                 receivers: this.receivers
             }
@@ -162,12 +162,12 @@ export default class PopupReceiverSelector extends ReceiverSelector {
         }
 
         this.messagePort.postMessage({
-            subject: "popup:/init"
+            subject: "popup:init"
           , data: { appId: this.appId }
         });
 
         this.messagePort.postMessage({
-            subject: "popup:/update"
+            subject: "popup:update"
           , data: {
                 receivers: this.receivers
               , defaultMediaType: this.defaultMediaType
@@ -183,7 +183,7 @@ export default class PopupReceiverSelector extends ReceiverSelector {
      */
     private onPopupMessage (message: Message) {
         switch (message.subject) {
-            case "receiverSelector:/selected": {
+            case "receiverSelector:selected": {
                 this.wasReceiverSelected = true;
                 this.dispatchEvent(new CustomEvent("selected", {
                     detail: message.data
@@ -192,7 +192,7 @@ export default class PopupReceiverSelector extends ReceiverSelector {
                 break;
             }
 
-            case "receiverSelector:/stop": {
+            case "receiverSelector:stop": {
                 this.dispatchEvent(new CustomEvent("stop", {
                     detail: message.data
                 }));
