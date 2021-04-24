@@ -52,7 +52,7 @@ function getInputValue (input: HTMLInputElement) {
     }
 }
 
-
+interface OptionsAppProps {}
 interface OptionsAppState {
     hasLoaded: boolean;
     bridgeLoading: boolean;
@@ -65,19 +65,21 @@ interface OptionsAppState {
     platform?: string;
 }
 
-class OptionsApp extends Component<{}, OptionsAppState> {
+class OptionsApp extends Component<
+        OptionsAppProps, OptionsAppState> {
+
     private form: (HTMLFormElement | null) = null;
 
-    constructor (props: {}) {
-        super(props);
+    state: OptionsAppState = {
+        hasLoaded: false
+      , bridgeLoading: true
+      , bridgeLoadingTimedOut: false
+      , isFormValid: true
+      , hasSaved: false
+    };
 
-        this.state = {
-            hasLoaded: false
-          , bridgeLoading: true
-          , bridgeLoadingTimedOut: false
-          , isFormValid: true
-          , hasSaved: false
-        };
+    constructor (props: OptionsAppProps) {
+        super(props);
 
         this.handleReset = this.handleReset.bind(this);
         this.handleFormSubmit = this.handleFormSubmit.bind(this);
@@ -97,6 +99,13 @@ class OptionsApp extends Component<{}, OptionsAppState> {
             hasLoaded: true
           , options: await options.getAll()
           , platform: (await browser.runtime.getPlatformInfo()).os
+        });
+        
+        // Update options data if changed whilst page is open
+        options.addEventListener("changed", async () => {
+            this.setState({
+                options: await options.getAll()
+            });
         });
 
         try {
