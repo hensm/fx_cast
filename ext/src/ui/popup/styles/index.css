@@ -3,6 +3,7 @@ body {
     color: var(--grey-90);
     margin: initial;
     font: message-box;
+    font-size: 13px;
 }
 
 @media (prefers-color-scheme: dark) {

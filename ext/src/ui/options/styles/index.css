@@ -17,6 +17,7 @@
 body {
     background: var(--box-background) !important;
     color: var(--box-color) !important;
+    font-size: 13px;
 }
 
 a              { color: var(--blue-40); }
