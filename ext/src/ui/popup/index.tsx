@@ -73,15 +73,15 @@ class PopupApp extends Component<{}, PopupAppState> {
 
         this.port.onMessage.addListener((message: Message) => {
             switch (message.subject) {
-                case "popup:/sendRequestedAppId": {
+                case "popup:/init": {
                     this.setState({
-                        requestedAppId: message.data?.requestedAppId
+                        requestedAppId: message.data?.appId
                     });
 
                     break;
                 }
 
-                case "popup:/populateReceiverList": {
+                case "popup:/update": {
                     const { receivers
                           , availableMediaTypes
                           , defaultMediaType } = message.data;

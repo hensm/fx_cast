@@ -25,7 +25,8 @@ export default class PopupReceiverSelector extends ReceiverSelector {
     private availableMediaTypes?: ReceiverSelectorMediaType;
 
     private wasReceiverSelected: boolean = false;
-    private requestedAppId?: string;
+
+    private appId?: string;
 
     #isOpen = false;
 
@@ -55,9 +56,9 @@ export default class PopupReceiverSelector extends ReceiverSelector {
             receivers: Receiver[]
           , defaultMediaType: ReceiverSelectorMediaType
           , availableMediaTypes: ReceiverSelectorMediaType
-          , requestedAppId?: string): Promise<void> {
+          , appId?: string): Promise<void> {
 
-        this.requestedAppId = requestedAppId;
+        this.appId = appId;
 
         // If popup already exists, close it
         if (this.windowId) {
@@ -117,7 +118,7 @@ export default class PopupReceiverSelector extends ReceiverSelector {
     public update (receivers: Receiver[]) {
         this.receivers = receivers;
         this.messagePort?.postMessage({
-            subject: "popup:/populateReceiverList"
+            subject: "popup:/update"
           , data: {
                 receivers: this.receivers
             }
@@ -130,7 +131,7 @@ export default class PopupReceiverSelector extends ReceiverSelector {
         }
 
         this.#isOpen = false;
-        this.requestedAppId = undefined;
+        this.appId = undefined;
 
         if (this.messagePort && !this.messagePortDisconnected) {
             this.messagePort.disconnect();
@@ -161,12 +162,12 @@ export default class PopupReceiverSelector extends ReceiverSelector {
         }
 
         this.messagePort.postMessage({
-            subject: "popup:/sendRequestedAppId"
-          , data: { requestedAppId: this.requestedAppId }
+            subject: "popup:/init"
+          , data: { appId: this.appId }
         });
 
         this.messagePort.postMessage({
-            subject: "popup:/populateReceiverList"
+            subject: "popup:/update"
           , data: {
                 receivers: this.receivers
               , defaultMediaType: this.defaultMediaType
