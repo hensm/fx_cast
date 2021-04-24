@@ -39,7 +39,8 @@ decodeTransform.on("data", (message: Message) => {
 
 
     switch (message.subject) {
-        case "bridge:getInfo": {
+        case "bridge:getInfo":
+        case "bridge:/getInfo": {
             encodeTransform.write(__applicationVersion);
             break;
         }
