@@ -102,7 +102,7 @@ export function initialize (
     apiConfig = newApiConfig;
 
     sendMessageResponse({
-        subject: "main:/shimInitialized"
+        subject: "main:/shimReady"
       , data: { appId: apiConfig.sessionRequest.appId }
     });
 
