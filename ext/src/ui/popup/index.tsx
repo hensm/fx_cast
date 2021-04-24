@@ -73,7 +73,7 @@ class PopupApp extends Component<{}, PopupAppState> {
 
         this.port.onMessage.addListener((message: Message) => {
             switch (message.subject) {
-                case "popup:/init": {
+                case "popup:init": {
                     this.setState({
                         requestedAppId: message.data?.appId
                     });
@@ -81,7 +81,7 @@ class PopupApp extends Component<{}, PopupAppState> {
                     break;
                 }
 
-                case "popup:/update": {
+                case "popup:update": {
                     const { receivers
                           , availableMediaTypes
                           , defaultMediaType } = message.data;
@@ -100,7 +100,7 @@ class PopupApp extends Component<{}, PopupAppState> {
                     break;
                 }
 
-                case "popup:/close": {
+                case "popup:close": {
                     window.close();
                     break;
                 }
@@ -217,7 +217,7 @@ class PopupApp extends Component<{}, PopupAppState> {
         });
 
         this.port?.postMessage({
-            subject: "receiverSelector:/selected"
+            subject: "receiverSelector:selected"
           , data: {
                 receiver
               , mediaType: this.state.mediaType
@@ -228,7 +228,7 @@ class PopupApp extends Component<{}, PopupAppState> {
 
     private onStop (receiver: Receiver) {
         this.port?.postMessage({
-            subject: "receiverSelector:/stop"
+            subject: "receiverSelector:stop"
           , data: { receiver }
         });
     }

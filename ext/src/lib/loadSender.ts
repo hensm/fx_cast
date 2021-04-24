@@ -39,7 +39,7 @@ export default async function loadSender (opts: LoadSenderOptions) {
             }
 
             shim.contentPort.postMessage({
-                subject: "shim:/launchApp"
+                subject: "shim:launchApp"
               , data: { receiver: opts.selection.receiver }
             });
 

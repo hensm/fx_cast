@@ -62,14 +62,14 @@ export default class Media {
                     messageData.mediaSessionId = status.mediaSessionId;
                 }
 
-                this.sendMessage("shim:/media/update", messageData);
+                this.sendMessage("shim:media/update", messageData);
             }
         });
     }
 
     public messageHandler (message: Message) {
         switch (message.subject) {
-            case "bridge:/media/sendMediaMessage": {
+            case "bridge:media/sendMediaMessage": {
                 let error = false;
                 try {
                     this.channel.send(message.data.message);
@@ -77,7 +77,7 @@ export default class Media {
                     error = true;
                 }
 
-                this.sendMessage("shim:/media/sendMediaMessageResponse", {
+                this.sendMessage("shim:media/sendMediaMessageResponse", {
                     messageId: message.data.messageId
                   , error
                 });

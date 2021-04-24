@@ -55,7 +55,7 @@ export default class Session {
         }
 
         switch (message.subject) {
-            case "shim:/session/stopped": {
+            case "shim:session/stopped": {
                 // Disconnect from extension messages
                 this.#listener.disconnect();
 
@@ -68,7 +68,7 @@ export default class Session {
                 break;
             }
 
-            case "shim:/session/connected": {
+            case "shim:session/connected": {
                 this.status = SessionStatus.CONNECTED;
                 this.sessionId = message.data.sessionId;
                 this.transportId = message.data.sessionId;
@@ -83,7 +83,7 @@ export default class Session {
                 break;
             }
 
-            case "shim:/session/updateStatus": {
+            case "shim:session/updateStatus": {
                 const volume: Volume = message.data.volume;
 
                 if (volume) {
@@ -110,7 +110,7 @@ export default class Session {
             }
 
 
-            case "shim:/session/impl_addMessageListener": {
+            case "shim:session/impl_addMessageListener": {
                 const { namespace, data } = message.data;
                 const messageListeners = this.#messageListeners.get(namespace);
 
@@ -123,7 +123,7 @@ export default class Session {
                 break;
             }
 
-            case "shim:/session/impl_sendMessage": {
+            case "shim:session/impl_sendMessage": {
                 const { messageId, error } = message.data;
                 const [ successCallback, errorCallback ] =
                         this.#sendMessageCallbacks.get(messageId) ?? [];
@@ -139,7 +139,7 @@ export default class Session {
                 break;
             }
 
-            case "shim:/session/impl_setReceiverMuted": {
+            case "shim:session/impl_setReceiverMuted": {
                 const { volumeId, error } = message.data;
                 const [ successCallback, errorCallback ] =
                         this.#setReceiverMutedCallbacks.get(volumeId) ?? [];
@@ -155,7 +155,7 @@ export default class Session {
                 break;
             }
 
-            case "shim:/session/impl_setReceiverVolumeLevel": {
+            case "shim:session/impl_setReceiverVolumeLevel": {
                 const { volumeId, error } = message.data;
                 const [ successCallback, errorCallback ] =
                         this.#setReceiverVolumeLevelCallbacks
@@ -172,7 +172,7 @@ export default class Session {
                 break;
             }
 
-            case "shim:/session/impl_stop": {
+            case "shim:session/impl_stop": {
                 const { stopId, error } = message.data;
                 const [ successCallback, errorCallback ]
                         = this.#stopCallbacks.get(stopId) ?? [];
@@ -227,7 +227,7 @@ export default class Session {
 
         if (receiver) {
             sendMessageResponse({
-                subject: "bridge:/session/initialize"
+                subject: "bridge:session/initialize"
               , data: {
                     address: (receiver as any)._address
                   , port: (receiver as any)._port
@@ -255,7 +255,7 @@ export default class Session {
         this.#messageListeners.get(namespace)?.add(listener);
 
         sendMessageResponse({
-            subject: "bridge:/session/impl_addMessageListener"
+            subject: "bridge:session/impl_addMessageListener"
           , data: {
                 namespace
               , _id: this.#id
@@ -274,7 +274,7 @@ export default class Session {
         const id = uuid();
 
         sendMessageResponse({
-            subject: "bridge:/session/impl_leave"
+            subject: "bridge:session/impl_leave"
           , data: {
                 id
               , _id: this.#id
@@ -380,7 +380,7 @@ export default class Session {
         const messageId = uuid();
 
         sendMessageResponse({
-            subject: "bridge:/session/impl_sendMessage"
+            subject: "bridge:session/impl_sendMessage"
           , data: {
                 namespace
               , message
@@ -403,7 +403,7 @@ export default class Session {
         const volumeId = uuid();
 
         sendMessageResponse({
-            subject: "bridge:/session/impl_setReceiverMuted"
+            subject: "bridge:session/impl_setReceiverMuted"
           , data: {
                 muted
               , volumeId
@@ -425,7 +425,7 @@ export default class Session {
         const volumeId = uuid();
 
         sendMessageResponse({
-            subject: "bridge:/session/impl_setReceiverVolumeLevel"
+            subject: "bridge:session/impl_setReceiverVolumeLevel"
           , data: {
                 newLevel
               , volumeId
@@ -446,7 +446,7 @@ export default class Session {
         const stopId = uuid();
 
         sendMessageResponse({
-            subject: "bridge:/session/impl_stop"
+            subject: "bridge:session/impl_stop"
           , data: {
                 stopId
               , _id: this.#id

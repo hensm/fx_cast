@@ -3,10 +3,12 @@
 import logger from "./logger";
 import options from "./options";
 
+import { Message } from "../messaging";
+
 
 
 type DisconnectListener = (port: browser.runtime.Port) => void;
-type MessageListener = (message: any) => void;
+type MessageListener = (message: Message) => void;
 
 function connectNative (application: string) {
     /**
@@ -165,7 +167,7 @@ function connectNative (application: string) {
 
 async function sendNativeMessage (
         application: string
-      , message: any) {
+      , message: Message) {
 
     try {
         return await browser.runtime.sendNativeMessage(application, message);

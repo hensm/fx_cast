@@ -50,7 +50,7 @@ export default new class StatusManager
         }
 
         this.bridgePort.postMessage({
-            subject: "bridge:/stopReceiverApp"
+            subject: "bridge:stopReceiverApp"
           , data: { receiver }
         });
     }
@@ -61,7 +61,7 @@ export default new class StatusManager
         bridgePort.onDisconnect.addListener(this.onBridgePortDisconnect);
 
         bridgePort.postMessage({
-            subject: "bridge:/initialize"
+            subject: "bridge:initialize"
           , data: {
                 shouldWatchStatus: true
             }
@@ -76,7 +76,7 @@ export default new class StatusManager
      */
     private onBridgePortMessage (message: Message) {
         switch (message.subject) {
-            case "main:/serviceUp": {
+            case "main:serviceUp": {
                 const { data: receiver } = message;
                 this.receivers.set(receiver.id, receiver);
 
@@ -87,7 +87,7 @@ export default new class StatusManager
                 break;
             }
 
-            case "main:/serviceDown": {
+            case "main:serviceDown": {
                 const { data: { id }} = message;
 
                 if (this.receivers.has(id)) {
@@ -101,7 +101,7 @@ export default new class StatusManager
                 break;
             }
 
-            case "main:/receiverStatus": {
+            case "main:receiverStatus": {
                 const { data: { id, status }} = message;
                 const receiver = this.receivers.get(id);
 

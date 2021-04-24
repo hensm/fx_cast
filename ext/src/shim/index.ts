@@ -67,7 +67,7 @@ if (document.currentScript) {
 
 onMessage(message => {
     switch (message.subject) {
-        case "shim:/initialized": {
+        case "shim:initialized": {
             bridgeInfo = message.data;
 
             if (!isFramework) {

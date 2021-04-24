@@ -23,7 +23,7 @@ export function handleSessionMessage (message: any) {
         // Forward message to instance message handler
         existingSessions.get(sessionId)?.messageHandler(message);
     } else {
-        if (message.subject === "bridge:/session/initialize") {
+        if (message.subject === "bridge:session/initialize") {
             existingSessions.set(sessionId, new Session(
                     message.data.address
                   , message.data.port
@@ -46,7 +46,7 @@ export function handleMediaMessage (message: any) {
         // Forward message to instance message handler
         existingMedia.get(mediaId)!.messageHandler(message);
     } else {
-        if (message.subject === "bridge:/media/initialize") {
+        if (message.subject === "bridge:media/initialize") {
             // Get Session object media belongs to
             const parentSession = existingSessions.get(
                     message.data._internalSessionId);

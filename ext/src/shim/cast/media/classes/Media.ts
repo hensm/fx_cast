@@ -50,7 +50,7 @@ export default class Media {
         }
 
         switch (message.subject) {
-            case "shim:/media/update": {
+            case "shim:media/update": {
                 const status = message.data;
 
                 this.currentTime = status.currentTime;
@@ -81,7 +81,7 @@ export default class Media {
                 break;
             }
 
-            case "shim:/media/sendMediaMessageResponse": {
+            case "shim:media/sendMediaMessageResponse": {
                 const { messageId, error } = message.data;
                 const [ successCallback, errorCallback ]
                         = this.#sendMediaMessageCallbacks
@@ -125,7 +125,7 @@ export default class Media {
           , _internalSessionId: string) {
 
         sendMessageResponse({
-            subject: "bridge:/media/initialize"
+            subject: "bridge:media/initialize"
           , data: {
                 sessionId
               , mediaSessionId
@@ -344,7 +344,7 @@ export default class Media {
         ]);
 
         sendMessageResponse({
-            subject: "bridge:/media/sendMediaMessage"
+            subject: "bridge:media/sendMediaMessage"
           , data: {
                 message
               , messageId

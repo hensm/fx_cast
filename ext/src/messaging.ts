@@ -13,102 +13,114 @@ import Volume from "./shim/cast/classes/Volume";
 import { MediaInfo } from "./shim/cast/media";
 
 
+/**
+ * Messages are JSON objects with a `subject` string key and a
+ * generic `data` key.
+ * 
+ * Message subjects may include an optional destination and response
+ * name formatted like this:
+ *   ^(destination:)?messageName(\/responseName)?$
+ * 
+ * Message formats are specified with subject as a key and data as the
+ * value in the message table.
+ */
+
 type MessagesBase = {
-    "popup:/init": { appId?: string }
-  , "popup:/update": {
+    "popup:init": { appId?: string }
+  , "popup:update": {
         receivers: Receiver[]
       , defaultMediaType?: ReceiverSelectorMediaType
       , availableMediaTypes?: ReceiverSelectorMediaType
     }
-  , "popup:/close": {}
+  , "popup:close": {}
 
-  , "receiverSelector:/selected": ReceiverSelection
-  , "receiverSelector:/stop": ReceiverSelection
+  , "receiverSelector:selected": ReceiverSelection
+  , "receiverSelector:stop": ReceiverSelection
 
-  , "main:/shimReady": { appId: string }
+  , "main:shimReady": { appId: string }
 
   , "main:selectReceiver": {}
   , "shim:selectReceiver/selected": ReceiverSelectionCast
   , "shim:selectReceiver/stopped": ReceiverSelectionStop
   , "shim:selectReceiver/cancelled": {}
 
-  , "main:/sessionCreated": {}
+  , "main:sessionCreated": {}
 
-  , "shim:/serviceUp": { id: Receiver["id"] }
-  , "shim:/serviceDown": { id: Receiver["id"] }
+  , "shim:serviceUp": { id: Receiver["id"] }
+  , "shim:serviceDown": { id: Receiver["id"] }
 
-  , "shim:/initialized": BridgeInfo
-  , "shim:/launchApp": { receiver: Receiver }
+  , "shim:initialized": BridgeInfo
+  , "shim:launchApp": { receiver: Receiver }
 
     // Session messages
-  , "shim:/session/stopped": {}
-  , "shim:/session/connected": {
+  , "shim:session/stopped": {}
+  , "shim:session/connected": {
         sessionId: string
       , namespaces: Array<{ name: string }>
       , displayName: string
       , statusText: string
     }
-  , "shim:/session/updateStatus": { volume: Volume }
-  , "shim:/session/impl_addMessageListener": {
+  , "shim:session/updateStatus": { volume: Volume }
+  , "shim:session/impl_addMessageListener": {
         namespace: string
       , data: string
     }
-  , "shim:/session/impl_sendMessage": {
+  , "shim:session/impl_sendMessage": {
         messageId: string
       , error: boolean
     }
-  , "shim:/session/impl_setReceiverMuted": {
+  , "shim:session/impl_setReceiverMuted": {
         volumeId: string
       , error: boolean
     }
-  , "shim:/session/impl_setReceiverVolumeLevel": {
+  , "shim:session/impl_setReceiverVolumeLevel": {
         volumeId: string
       , error: boolean
     }
-  , "shim:/session/impl_stop": {
+  , "shim:session/impl_stop": {
         stopId: string
       , error: boolean
     }
 
     // Bridge session messages
-  , "bridge:/session/initialize": {
+  , "bridge:session/initialize": {
         address: string
       , port: number
       , appId: string
       , sessionId: string
       , _id: string
     }
-  , "bridge:/session/impl_leave": {
+  , "bridge:session/impl_leave": {
         id: string
       , _id: string
     }
-  , "bridge:/session/impl_sendMessage": {
+  , "bridge:session/impl_sendMessage": {
         namespace: string
       , message: any
       , messageId: string
       , _id: string
     }
-  , "bridge:/session/impl_setReceiverMuted": {
+  , "bridge:session/impl_setReceiverMuted": {
         muted: boolean
       , volumeId: string
       , _id: string
     }
-  , "bridge:/session/impl_setReceiverVolumeLevel": {
+  , "bridge:session/impl_setReceiverVolumeLevel": {
         newLevel: number
       , volumeId: string
       , _id: string
     }
-  , "bridge:/session/impl_stop": {
+  , "bridge:session/impl_stop": {
         stopId: string;
         _id: string;
     }
-  , "bridge:/session/impl_addMessageListener": {
+  , "bridge:session/impl_addMessageListener": {
         namespace: string;
         _id: string;
     }
 
     // Media messages
-  , "shim:/media/update": {
+  , "shim:media/update": {
         currentTime: number
       , _lastCurrentTime: number
       , customData: any
@@ -120,53 +132,54 @@ type MessagesBase = {
       , media: MediaInfo
       , mediaSessionId: number
     }
-  , "shim:/media/sendMediaMessageResponse": {
+  , "shim:media/sendMediaMessageResponse": {
         messageId: string
       , error: boolean
     }
 
     // Bridge media messages
-  , "bridge:/media/initialize": {
+  , "bridge:media/initialize": {
         sessionId: string
       , mediaSessionId: number
       , _internalSessionId: string
       , _id: string
     }
-  , "bridge:/media/sendMediaMessage": {
+  , "bridge:media/sendMediaMessage": {
         message: any
       , messageId: string
       , _id: string
     }
 
     // Bridge messages
-  , "main:/receiverSelector/selected": ReceiverSelectionCast
-  , "main:/receiverSelector/error": string
-  , "main:/receiverSelector/close": {}
-  , "main:/receiverSelector/stop": ReceiverSelectionStop
+  , "main:receiverSelector/selected": ReceiverSelectionCast
+  , "main:receiverSelector/error": string
+  , "main:receiverSelector/close": {}
+  , "main:receiverSelector/stop": ReceiverSelectionStop
 
-  , "bridge:/initialize": { shouldWatchStatus: boolean }
+  , "bridge:getInfo": string
+  , "bridge:initialize": { shouldWatchStatus: boolean }
 
-  , "bridge:/receiverSelector/open": any
-  , "bridge:/receiverSelector/close": {}
+  , "bridge:receiverSelector/open": any
+  , "bridge:receiverSelector/close": {}
 
-  , "bridge:/stopReceiverApp": { receiver: Receiver }
+  , "bridge:stopReceiverApp": { receiver: Receiver }
 
-  , "bridge:/mediaServer/start": {
+  , "bridge:mediaServer/start": {
         filePath: string
       , port: number
     }
-  , "mediaCast:/mediaServer/started": {
+  , "mediaCast:mediaServer/started": {
         mediaPath: string
       , subtitlePaths: string[]
       , localAddress: string
     }
-  , "mediaCast:/mediaServer/stopped": {}
-  , "mediaCast:/mediaServer/error": {}
+  , "mediaCast:mediaServer/stopped": {}
+  , "mediaCast:mediaServer/error": {}
 
-  , "main:/serviceUp": Receiver
-  , "main:/serviceDown": { id: string }
+  , "main:serviceUp": Receiver
+  , "main:serviceDown": { id: string }
 
-  , "main:/receiverStatus": {
+  , "main:receiverStatus": {
         id: string
       , status: ReceiverStatus
     }

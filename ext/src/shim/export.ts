@@ -89,7 +89,7 @@ export function ensureInit (): Promise<MessagePort> {
 
         function handleIncomingMessageToShim (message: Message) {
             switch (message.subject) {
-                case "shim:/initialized": {
+                case "shim:initialized": {
                     initializedBridgeInfo = message.data;
 
                     if (initializedBridgeInfo.isVersionCompatible) {

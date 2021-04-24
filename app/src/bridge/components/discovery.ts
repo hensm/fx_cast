@@ -20,7 +20,7 @@ const browser = mdns.createBrowser(mdns.tcp("googlecast"), {
 
 function onBrowserServiceUp (service: mdns.Service) {
     sendMessage({
-        subject: "main:/serviceUp"
+        subject: "main:serviceUp"
       , data: {
             host: service.addresses[0]
           , port: service.port
@@ -32,7 +32,7 @@ function onBrowserServiceUp (service: mdns.Service) {
 
 function onBrowserServiceDown (service: mdns.Service) {
     sendMessage({
-        subject: "main:/serviceDown"
+        subject: "main:serviceDown"
       , data: {
             id: service.txtRecord.id
         }
@@ -67,7 +67,7 @@ export function startDiscovery (options: InitializeOptions) {
 
         listener.on("receiverStatus", (status: ReceiverStatus) => {
             const receiverStatusMessage: any = {
-                subject: "main:/receiverStatus"
+                subject: "main:receiverStatus"
               , data: {
                     id
                   , status: {

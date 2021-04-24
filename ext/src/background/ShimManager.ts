@@ -52,7 +52,7 @@ export default new class ShimManager {
             : this.createShimFromContent(port));
 
         shim.contentPort.postMessage({
-            subject: "shim:/initialized"
+            subject: "shim:initialized"
           , data: await bridge.getInfo()
         });
 
@@ -139,18 +139,18 @@ export default new class ShimManager {
     }
 
     private async handleContentMessage (shim: Shim, message: Message) {
-        const [ destination ] = message.subject.split(":/");
+        const [ destination ] = message.subject.split(":");
         if (destination === "bridge") {
             shim.bridgePort.postMessage(message);
         }
 
         switch (message.subject) {
-            case "main:/shimReady": {
+            case "main:shimReady": {
                 shim.requestedAppId = message.data.appId;
 
                 for (const receiver of StatusManager.getReceivers()) {
                     shim.contentPort.postMessage({
-                        subject: "shim:/serviceUp"
+                        subject: "shim:serviceUp"
                       , data: { id: receiver.id }
                     });
                 }
@@ -234,7 +234,7 @@ export default new class ShimManager {
              * TODO: If we're closing a selector, make sure it's the
              * same one that caused the session creation.
              */
-            case "main:/sessionCreated": {
+            case "main:sessionCreated": {
                 const selector = await ReceiverSelectorManager.getSelector();
                 const shouldClose = await options.get(
                         "receiverSelectorWaitForConnection");
@@ -252,7 +252,7 @@ export default new class ShimManager {
         StatusManager.addEventListener("serviceUp", ev => {
             for (const shim of this.activeShims) {
                 shim.contentPort.postMessage({
-                    subject: "shim:/serviceUp"
+                    subject: "shim:serviceUp"
                   , data: { id: ev.detail.id }
                 });
             }
@@ -261,7 +261,7 @@ export default new class ShimManager {
         StatusManager.addEventListener("serviceDown", ev => {
             for (const shim of this.activeShims) {
                 shim.contentPort.postMessage({
-                    subject: "shim:/serviceDown"
+                    subject: "shim:serviceDown"
                   , data: { id: ev.detail.id }
                 });
             }
