@@ -12,12 +12,12 @@ const existingSessions: Map<string, Session> = new Map();
 const existingMedia: Map<string, Media> = new Map();
 
 export function handleSessionMessage (message: any) {
-    if (!message._id) {
+    if (!message.data._id) {
         console.error("Session message missing _id");
         return;
     }
 
-    const sessionId = message._id;
+    const sessionId = message.data._id;
 
     if (existingSessions.has(sessionId)) {
         // Forward message to instance message handler
@@ -35,12 +35,12 @@ export function handleSessionMessage (message: any) {
 }
 
 export function handleMediaMessage (message: any) {
-    if (!message._id) {
+    if (!message.data._id) {
         console.error("Media message missing _id");
         return;
     }
 
-    const mediaId = message._id;
+    const mediaId = message.data._id;
 
     if (existingMedia.has(mediaId)) {
         // Forward message to instance message handler

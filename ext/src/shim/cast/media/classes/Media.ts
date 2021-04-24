@@ -45,7 +45,7 @@ export default class Media {
     #lastCurrentTime?: number;
 
     #listener = onMessage(message => {
-        if ((message as any)._id !== this.#id) {
+        if ((message as any).data._id !== this.#id) {
             return;
         }
 
@@ -130,8 +130,8 @@ export default class Media {
                 sessionId
               , mediaSessionId
               , _internalSessionId
+              , _id: this.#id
             }
-          , _id: this.#id
         });
     }
 
@@ -348,8 +348,8 @@ export default class Media {
           , data: {
                 message
               , messageId
+              , _id: this.#id
             }
-          , _id: this.#id
         });
     }
 }

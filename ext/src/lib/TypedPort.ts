@@ -1,11 +1,11 @@
 "use strict";
 
-const portMap = new WeakMap<any, browser.runtime.Port>();
+const portMap = new WeakMap<TypedPort<any>, browser.runtime.Port>();
 
 /**
  * Allows typed access to a runtime.Port object.
  */
-export class TypedPort<T extends any[]> {
+export class TypedPort<T> {
     public name: string;
     public error?: { message: string };
     public sender?: browser.runtime.MessageSender;
@@ -36,18 +36,18 @@ export class TypedPort<T extends any[]> {
     };
 
     public onMessage = {
-        addListener: (cb: (message: T[number]) => void) => {
-            portMap.get(this)?.onMessage.addListener(cb);
+        addListener: (cb: (message: T) => void) => {
+            portMap.get(this)?.onMessage.addListener(cb as any);
         }
-      , removeListener: (cb: (message: T[number]) => void) => {
-            portMap.get(this)?.onMessage.removeListener(cb);
+      , removeListener: (cb: (message: T) => void) => {
+            portMap.get(this)?.onMessage.removeListener(cb as any);
         }
-      , hasListener: (cb: (message: T[number]) => void) => {
+      , hasListener: (cb: (message: T) => void) => {
             return portMap.get(this)?.onMessage.hasListener(cb as any) ?? false;
         }
     };
 
-    public postMessage (message: T[number]) {
-        portMap.get(this)?.postMessage(message);
+    public postMessage (message: T) {
+        portMap.get(this)?.postMessage(message as any);
     }
 }

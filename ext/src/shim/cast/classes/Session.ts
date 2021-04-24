@@ -50,7 +50,7 @@ export default class Session {
 
     #listener = onMessage(message => {
         // Filter other session messages
-        if ((message as any)._id !== this.#id) {
+        if ((message as any).data._id !== this.#id) {
             return;
         }
 
@@ -233,8 +233,8 @@ export default class Session {
                   , port: (receiver as any)._port
                   , appId
                   , sessionId
+                  , _id: this.#id
                 }
-              , _id: this.#id
             });
         }
     }
@@ -256,8 +256,10 @@ export default class Session {
 
         sendMessageResponse({
             subject: "bridge:/session/impl_addMessageListener"
-          , data: { namespace }
-          , _id: this.#id
+          , data: {
+                namespace
+              , _id: this.#id
+            }
         });
     }
 
@@ -273,8 +275,10 @@ export default class Session {
 
         sendMessageResponse({
             subject: "bridge:/session/impl_leave"
-          , data: { id }
-          , _id: this.#id
+          , data: {
+                id
+              , _id: this.#id
+            }
         });
 
         this.#leaveCallbacks.set(id, [
@@ -381,8 +385,8 @@ export default class Session {
                 namespace
               , message
               , messageId
+              , _id: this.#id
             }
-          , _id: this.#id
         });
 
         this.#sendMessageCallbacks.set(messageId, [
@@ -400,8 +404,11 @@ export default class Session {
 
         sendMessageResponse({
             subject: "bridge:/session/impl_setReceiverMuted"
-          , data: { muted, volumeId }
-          , _id: this.#id
+          , data: {
+                muted
+              , volumeId
+              , _id: this.#id
+            }
         });
 
         this.#setReceiverMutedCallbacks.set(volumeId, [
@@ -419,8 +426,11 @@ export default class Session {
 
         sendMessageResponse({
             subject: "bridge:/session/impl_setReceiverVolumeLevel"
-          , data: { newLevel, volumeId }
-          , _id: this.#id
+          , data: {
+                newLevel
+              , volumeId
+              , _id: this.#id
+            }
         });
 
         this.#setReceiverVolumeLevelCallbacks.set(volumeId, [
@@ -437,8 +447,10 @@ export default class Session {
 
         sendMessageResponse({
             subject: "bridge:/session/impl_stop"
-          , data: { stopId }
-          , _id: this.#id
+          , data: {
+                stopId
+              , _id: this.#id
+            }
         });
 
         this.#stopCallbacks.set(stopId, [

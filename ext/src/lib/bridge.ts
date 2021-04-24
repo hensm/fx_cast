@@ -5,7 +5,7 @@ import semver from "semver";
 import { TypedPort } from "./TypedPort";
 
 import logger from "./logger";
-import { Messages, Message, Port } from "../messaging";
+import { Message, Port } from "../messaging";
 import nativeMessaging from "./nativeMessaging";
 import options from "./options";
 
