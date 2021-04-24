@@ -65,7 +65,7 @@ const getInfo = () => new Promise<BridgeInfo>(async (resolve, reject) => {
 
         applicationVersion = await nativeMessaging.sendNativeMessage(
                 applicationName
-              , { subject: "bridge:getInfo"
+              , { subject: "bridge:/getInfo"
                 , data: version });
     } catch (err) {
         logger.error("Bridge connection failed.");

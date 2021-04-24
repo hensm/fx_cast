@@ -171,7 +171,13 @@ type AppMessageDefinitions = {
   , "main:receiverSelector/close": {}
   , "main:receiverSelector/stop": ReceiverSelectionStop
 
+    /**
+     * getInfo uses the old :/ form for compat with old bridge
+     * versions.
+     */
   , "bridge:getInfo": string
+  , "bridge:/getInfo": string
+
   , "bridge:initialize": { shouldWatchStatus: boolean }
 
   , "bridge:receiverSelector/open": any
