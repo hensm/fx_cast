@@ -25,7 +25,7 @@ type MessagesBase = {
   , "receiverSelector:/selected": ReceiverSelection
   , "receiverSelector:/stop": ReceiverSelection
 
-  , "main:/shimInitialized": { appId: string }
+  , "main:/shimReady": { appId: string }
 
   , "main:/selectReceiverBegin": {}
   , "shim:/selectReceiverEnd": ReceiverSelectionCast

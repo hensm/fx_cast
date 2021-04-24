@@ -145,7 +145,7 @@ export default new class ShimManager {
         }
 
         switch (message.subject) {
-            case "main:/shimInitialized": {
+            case "main:/shimReady": {
                 shim.requestedAppId = message.data.appId;
 
                 for (const receiver of StatusManager.getReceivers()) {
