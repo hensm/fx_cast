@@ -76,4 +76,8 @@ export function stopReceiverApp (host: string, port: number) {
         clientConnection.send({ type: "CONNECT" });
         clientReceiver.send({ type: "STOP", requestId: 1 });
     });
+
+    client.on("error", err => {
+        console.error(`castv2 error (stopReceiverApp): ${err}`);
+    });
 }

@@ -7,6 +7,13 @@ import { ReceiverStatus } from "../types";
 import { sendMessage } from "../lib/messaging";
 
 
+interface CastTxtRecord {
+    id: string; cd: string; rm: string;
+    ve: string; md: string; ic: string;
+    fn: string; ca: string; st: string;
+    bs: string; nf: string; rs: string;
+}
+
 const browser = mdns.createBrowser(mdns.tcp("googlecast"), {
     resolverSequence: [
         mdns.rst.DNSServiceResolve()
@@ -19,24 +26,26 @@ const browser = mdns.createBrowser(mdns.tcp("googlecast"), {
 });
 
 function onBrowserServiceUp (service: mdns.Service) {
+    // Ignore without txt record
+    if (!service.txtRecord) {
+        return;
+    }
+
+    const txtRecord = service.txtRecord as CastTxtRecord;
+
     sendMessage({
         subject: "main:serviceUp"
       , data: {
             host: service.addresses[0]
           , port: service.port
-          , id: service.txtRecord.id
-          , friendlyName: service.txtRecord.fn
+          , id: txtRecord.id
+          , friendlyName: txtRecord.fn
         }
     });
 }
 
 function onBrowserServiceDown (service: mdns.Service) {
-    sendMessage({
-        subject: "main:serviceDown"
-      , data: {
-            id: service.txtRecord.id
-        }
-    });
+    // TODO: Fix service down detection
 }
 
 browser.on("serviceUp", onBrowserServiceUp);
@@ -59,6 +68,10 @@ export function startDiscovery (options: InitializeOptions) {
     const statusListeners = new Map<string, StatusListener>();
 
     function onStatusBrowserServiceUp (service: mdns.Service) {
+        if (!service.txtRecord) {
+            return;
+        }
+
         const { id } = service.txtRecord;
 
         const listener = new StatusListener(
@@ -97,12 +110,7 @@ export function startDiscovery (options: InitializeOptions) {
     }
 
     function onStatusBrowserServiceDown (service: mdns.Service) {
-        const { id } = service.txtRecord;
-
-        if (statusListeners.has(id)) {
-            statusListeners.get(id)!.deregister();
-            statusListeners.delete(id);
-        }
+        // TODO: Fix service down detection
     }
 }
 
