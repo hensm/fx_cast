@@ -14,10 +14,8 @@ import { MediaInfo } from "./shim/cast/media";
 
 
 type MessagesBase = {
-    "popup:/sendRequestedAppId": {
-        requestedAppId?: string
-    }
- , "popup:/populateReceiverList": {
+    "popup:/init": { appId?: string }
+  , "popup:/update": {
         receivers: Receiver[]
       , defaultMediaType?: ReceiverSelectorMediaType
       , availableMediaTypes?: ReceiverSelectorMediaType
