@@ -8,7 +8,7 @@ import stream from "stream";
 
 import mime from "mime-types";
 
-import { sendMessage } from "../lib/messaging";
+import { sendMessage } from "../lib/nativeMessaging";
 import { convertSrtToVtt } from "../lib/subtitles";
 
 

@@ -3,7 +3,7 @@
 import child_process from "child_process";
 import path from "path";
 
-import { sendMessage } from "../lib/messaging";
+import { sendMessage } from "../lib/nativeMessaging";
 
 
 function fatal (message: string) {

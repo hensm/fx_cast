@@ -1,7 +1,7 @@
 "use strict";
 
-import { decodeTransform, encodeTransform } from "./lib/messaging";
-import { Message } from "./types";
+import { decodeTransform, encodeTransform } from "./lib/nativeMessaging";
+import { Message } from "./messaging";
 
 import { handleSessionMessage, handleMediaMessage, stopReceiverApp }
         from "./components/chromecast";

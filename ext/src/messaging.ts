@@ -15,17 +15,23 @@ import { MediaInfo } from "./shim/cast/media";
 
 /**
  * Messages are JSON objects with a `subject` string key and a
- * generic `data` key.
+ * generic `data` key:
+ *   { subject: "...", data: ... }
  * 
- * Message subjects may include an optional destination and response
- * name formatted like this:
+ * Message subjects may include an optional destination and
+ * response name formatted like this:
  *   ^(destination:)?messageName(\/responseName)?$
  * 
- * Message formats are specified with subject as a key and data as the
- * value in the message table.
+ * Message formats are specified with subject as a key and data
+ * as the value in the message tables.
  */
 
-type MessagesBase = {
+
+/**
+ * Messages exclusively used internally between extension
+ * components.
+ */
+type ExtMessageDefinitions = {
     "popup:init": { appId?: string }
   , "popup:update": {
         receivers: Receiver[]
@@ -46,10 +52,18 @@ type MessagesBase = {
 
   , "main:sessionCreated": {}
 
-  , "shim:serviceUp": { id: Receiver["id"] }
+  , "shim:initialized": BridgeInfo
+}
+
+/**
+ * Messages that cross the native messaging channel. MUST keep
+ * in-sync with the bridge's version at:
+ *   app/bridge/messaging.ts > MessagesBase
+ */
+type AppMessageDefinitions = {
+    "shim:serviceUp": { id: Receiver["id"] }
   , "shim:serviceDown": { id: Receiver["id"] }
 
-  , "shim:initialized": BridgeInfo
   , "shim:launchApp": { receiver: Receiver }
 
     // Session messages
@@ -90,6 +104,7 @@ type MessagesBase = {
       , sessionId: string
       , _id: string
     }
+  , "bridge:session/close": {}
   , "bridge:session/impl_leave": {
         id: string
       , _id: string
@@ -168,6 +183,7 @@ type MessagesBase = {
         filePath: string
       , port: number
     }
+  , "bridge:mediaServer/stop": {}
   , "mediaCast:mediaServer/started": {
         mediaPath: string
       , subtitlePaths: string[]
@@ -185,20 +201,25 @@ type MessagesBase = {
     }
 }
 
-interface MessageBase<K extends keyof MessagesBase> {
+type MessageDefinitions =
+        ExtMessageDefinitions
+      & AppMessageDefinitions;
+
+
+interface MessageBase<K extends keyof MessageDefinitions> {
     subject: K;
-    data: MessagesBase[K];
+    data: MessageDefinitions[K];
 }
 
 type Messages = {
-    [K in keyof MessagesBase]: MessageBase<K>;
+    [K in keyof MessageDefinitions]: MessageBase<K>;
 }
 
 /**
  * For better call semantics, make message data key optional if
  * specified as blank or with all-optional keys.
  */
-type NarrowedMessage<L extends MessageBase<keyof MessagesBase>> =
+type NarrowedMessage<L extends MessageBase<keyof MessageDefinitions>> =
     L extends any
         ? {} extends L["data"]
             ? Omit<L, "data"> & Partial<L>
