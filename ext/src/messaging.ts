@@ -27,10 +27,10 @@ type MessagesBase = {
 
   , "main:/shimReady": { appId: string }
 
-  , "main:/selectReceiverBegin": {}
-  , "shim:/selectReceiverEnd": ReceiverSelectionCast
-  , "shim:/selectReceiverStop": ReceiverSelectionStop
-  , "shim:/selectReceiverCancelled": {}
+  , "main:selectReceiver": {}
+  , "shim:selectReceiver/selected": ReceiverSelectionCast
+  , "shim:selectReceiver/stopped": ReceiverSelectionStop
+  , "shim:selectReceiver/cancelled": {}
 
   , "main:/sessionCreated": {}
 

@@ -158,7 +158,7 @@ export default new class ShimManager {
                 break;
             }
 
-            case "main:/selectReceiverBegin": {
+            case "main:selectReceiver": {
                 if (shim.contentTabId === undefined
                  || shim.contentFrameId === undefined) {
                     throw logger.error("Shim associated with content sender missing tab/frame ID");
@@ -174,7 +174,7 @@ export default new class ShimManager {
                     // Handle cancellation
                     if (!selection) {
                         shim.contentPort.postMessage({
-                            subject: "shim:/selectReceiverCancelled"
+                            subject: "shim:selectReceiver/cancelled"
                         });
 
                         break;
@@ -191,7 +191,7 @@ export default new class ShimManager {
                                     ReceiverSelectorMediaType.App) {
 
                                 shim.contentPort.postMessage({
-                                    subject: "shim:/selectReceiverCancelled"
+                                    subject: "shim:selectReceiver/cancelled"
                                 });
 
                                 loadSender({
@@ -204,7 +204,7 @@ export default new class ShimManager {
                             }
 
                             shim.contentPort.postMessage({
-                                subject: "shim:/selectReceiverEnd"
+                                subject: "shim:selectReceiver/selected"
                               , data: selection
                             });
 
@@ -213,7 +213,7 @@ export default new class ShimManager {
 
                         case ReceiverSelectionActionType.Stop: {
                             shim.contentPort.postMessage({
-                                subject: "shim:/selectReceiverStop"
+                                subject: "shim:selectReceiver/stopped"
                               , data: selection
                             });
 
@@ -223,7 +223,7 @@ export default new class ShimManager {
                 } catch (err) {
                     // TODO: Report errors properly
                     shim.contentPort.postMessage({
-                        subject: "shim:/selectReceiverCancelled"
+                        subject: "shim:selectReceiver/cancelled"
                     });
                 }
 
