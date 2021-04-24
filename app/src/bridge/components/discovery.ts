@@ -4,7 +4,7 @@ import mdns from "mdns";
 
 import StatusListener from "./chromecast/StatusListener";
 import { ReceiverStatus } from "../types";
-import { sendMessage } from "../lib/messaging";
+import { sendMessage } from "../lib/nativeMessaging";
 
 
 interface CastTxtRecord {
@@ -44,7 +44,7 @@ function onBrowserServiceUp (service: mdns.Service) {
     });
 }
 
-function onBrowserServiceDown (service: mdns.Service) {
+function onBrowserServiceDown (_service: mdns.Service) {
     // TODO: Fix service down detection
 }
 
@@ -109,7 +109,7 @@ export function startDiscovery (options: InitializeOptions) {
         statusListeners.set(id, listener);
     }
 
-    function onStatusBrowserServiceDown (service: mdns.Service) {
+    function onStatusBrowserServiceDown (_service: mdns.Service) {
         // TODO: Fix service down detection
     }
 }

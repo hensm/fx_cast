@@ -1,7 +1,7 @@
 "use strict";
 
 import { DecodeTransform, EncodeTransform } from "../../transforms";
-import { Message } from "../types";
+import { Message } from "../messaging";
 
 
 export const decodeTransform = new DecodeTransform();
