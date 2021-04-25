@@ -58,7 +58,6 @@ export default new class extends TypedEventTarget<EventMap> {
             changes: { [key: string]: browser.storage.StorageChange }
           , areaName: string) {
 
-
         if (areaName !== "sync") {
             return;
         }
@@ -66,9 +65,6 @@ export default new class extends TypedEventTarget<EventMap> {
         if ("options" in changes) {
             const { oldValue, newValue } = changes.options;
             const changedKeys = [];
-
-
-
 
             for (const key of Object.keys(newValue)) {
                 if (oldValue) {
@@ -80,17 +76,9 @@ export default new class extends TypedEventTarget<EventMap> {
                     const oldKeyValue = oldValue[key];
                     const newKeyValue = newValue[key];
 
-
-
                     // Equality comparison
                     if (oldKeyValue === newKeyValue) {
                         continue;
-
-
-
-
-
-
                     }
 
                     // Array comparison
@@ -105,8 +93,6 @@ export default new class extends TypedEventTarget<EventMap> {
                 }
 
                 changedKeys.push(key);
-
-
             }
 
             this.dispatchEvent(new CustomEvent("changed", {
