@@ -36,7 +36,7 @@ interface PopupAppState {
     isLoading: boolean;
 
     filePath?: string;
-    requestedAppId?: string;
+    appId?: string;
 
     mirroringEnabled: boolean;
 }
@@ -74,7 +74,7 @@ class PopupApp extends Component<{}, PopupAppState> {
             switch (message.subject) {
                 case "popup:init": {
                     this.setState({
-                        requestedAppId: message.data?.appId
+                        appId: message.data?.appId
                     });
 
                     break;
@@ -164,10 +164,10 @@ class PopupApp extends Component<{}, PopupAppState> {
                         <option value={ ReceiverSelectorMediaType.App }
                                 selected={ isAppMediaTypeSelected }
                                 disabled={ !isAppMediaTypeAvailable }>
-                            { (this.state.requestedAppId && knownApps[this.state.requestedAppId]?.name)
-                                        ?? isAppMediaTypeAvailable
+                            { (this.state.appId && knownApps[this.state.appId]?.name)
+                                        ?? (isAppMediaTypeAvailable
                                             ? _("popupMediaTypeApp")
-                                            : _("popupMediaTypeAppNotFound") }
+                                            : _("popupMediaTypeAppNotFound")) }
                         </option>
 
                         { this.state.mirroringEnabled &&

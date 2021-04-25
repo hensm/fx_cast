@@ -70,7 +70,7 @@ async function getSelection (
          * If the current context is running the mirroring app, pretend
          * it doesn't exist because it shouldn't be launched like this.
          */
-        if (currentShim?.requestedAppId ===
+        if (currentShim?.appId ===
                 await options.get("mirroringAppId")) {
             currentShim = undefined;
         }
@@ -211,7 +211,7 @@ async function getSelection (
                 Array.from(StatusManager.getReceivers())
               , defaultMediaType
               , availableMediaTypes
-              , currentShim?.requestedAppId);
+              , currentShim?.appId);
     });
 }
 

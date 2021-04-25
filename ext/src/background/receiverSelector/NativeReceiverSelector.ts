@@ -37,7 +37,7 @@ export default class NativeReceiverSelector extends ReceiverSelector {
             receivers: Receiver[]
           , defaultMediaType: ReceiverSelectorMediaType
           , availableMediaTypes: ReceiverSelectorMediaType
-          , requestedAppId?: string): Promise<void> {
+          , appId?: string): Promise<void> {
 
         this.bridgePort = await bridge.connect();
 
@@ -72,7 +72,7 @@ export default class NativeReceiverSelector extends ReceiverSelector {
               , i18n_castButtonTitle: _("popupCastButtonTitle")
               , i18n_stopButtonTitle: _("popupStopButtonTitle")
               , i18n_mediaTypeApp:
-                        (requestedAppId && knownApps[requestedAppId]?.name)
+                        (appId && knownApps[appId]?.name)
                             ?? _("popupMediaTypeApp")
               , i18n_mediaTypeTab: _("popupMediaTypeTab")
               , i18n_mediaTypeScreen: _("popupMediaTypeScreen")

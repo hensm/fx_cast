@@ -22,7 +22,7 @@ export interface Shim {
     contentPort: AnyPort;
     contentTabId?: number;
     contentFrameId?: number;
-    requestedAppId?: string;
+    appId?: string;
 }
 
 
@@ -146,7 +146,7 @@ export default new class ShimManager {
 
         switch (message.subject) {
             case "main:shimReady": {
-                shim.requestedAppId = message.data.appId;
+                shim.appId = message.data.appId;
 
                 for (const receiver of StatusManager.getReceivers()) {
                     shim.contentPort.postMessage({

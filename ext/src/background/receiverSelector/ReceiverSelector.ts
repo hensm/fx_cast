@@ -46,7 +46,7 @@ export default abstract class ReceiverSelector
             receivers: Receiver[]
           , defaultMediaType: ReceiverSelectorMediaType
           , availableMediaTypes: ReceiverSelectorMediaType
-          , requestedAppId?: string): void;
+          , appId?: string): void;
 
     abstract update (receivers: Receiver[]): void;
 
