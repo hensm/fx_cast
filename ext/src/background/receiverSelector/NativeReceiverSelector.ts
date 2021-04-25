@@ -114,12 +114,7 @@ export default class NativeReceiverSelector extends ReceiverSelector {
 
                 break;
             }
-            case "main:receiverSelector/error": {
-                logger.error("Native receiver selector error", message.data);
-                this.dispatchEvent(new CustomEvent("error"));
-                break;
-            }
-            case "main:receiverSelector/close": {
+            case "main:receiverSelector/cancelled": {
                 if (!this.wasReceiverSelected) {
                     this.dispatchEvent(new CustomEvent("cancelled"));
                 }
@@ -134,10 +129,15 @@ export default class NativeReceiverSelector extends ReceiverSelector {
 
                 break;
             }
-            case "main:receiverSelector/stop": {
+            case "main:receiverSelector/stopped": {
                 this.dispatchEvent(new CustomEvent("stop", {
                     detail: message.data
                 }));
+                break;
+            }
+            case "main:receiverSelector/error": {
+                logger.error("Native receiver selector error", message.data);
+                this.dispatchEvent(new CustomEvent("error"));
                 break;
             }
         }
