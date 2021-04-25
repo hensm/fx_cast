@@ -88,7 +88,7 @@ export default class PopupReceiverSelector extends ReceiverSelector {
 
         const popup = await browser.windows.create({
             url: POPUP_URL
-          , type: "detached_panel"
+          , type: "popup"
           , ...centeredProps
         });
 

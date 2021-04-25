@@ -7,11 +7,12 @@ import ReactDOM from "react-dom";
 import knownApps from "../../lib/knownApps";
 import options from "../../lib/options";
 
-import { Message } from "../../messaging";
+import messaging, { Message, Port } from "../../messaging";
 import { getNextEllipsis } from "../../lib/utils";
 import { Receiver } from "../../types";
 
-import { ReceiverSelectorMediaType } from "../../background/receiverSelector";
+import { ReceiverSelectionActionType
+       , ReceiverSelectorMediaType } from "../../background/receiverSelector";
 
 
 const _ = browser.i18n.getMessage;
@@ -41,7 +42,7 @@ interface PopupAppState {
 }
 
 class PopupApp extends Component<{}, PopupAppState> {
-    private port?: browser.runtime.Port;
+    private port?: Port;
     private win?: browser.windows.Window;
     private defaultMediaType?: ReceiverSelectorMediaType;
 
@@ -67,9 +68,7 @@ class PopupApp extends Component<{}, PopupAppState> {
     }
 
     public async componentDidMount () {
-        this.port = browser.runtime.connect({
-            name: "popup"
-        });
+        this.port = messaging.connect({ name: "popup" });
 
         this.port.onMessage.addListener((message: Message) => {
             switch (message.subject) {
@@ -152,63 +151,61 @@ class PopupApp extends Component<{}, PopupAppState> {
         const isAppMediaTypeAvailable = !!(this.state.availableMediaTypes
                 & ReceiverSelectorMediaType.App);
 
-        return (
-            <div>
-                <div className="media-select">
-                    <div className="media-select__label-cast">
-                        { _("popupMediaSelectCastLabel") }
-                    </div>
-                    <div className="select-wrapper">
-                        <select onChange={ this.onSelectChange }
-                                className="media-select__dropdown"
-                                disabled={ this.state.availableMediaTypes === 0 }>
-
-                            <option value={ ReceiverSelectorMediaType.App }
-                                    selected={ isAppMediaTypeSelected }
-                                    disabled={ !isAppMediaTypeAvailable }>
-                                { (this.state.requestedAppId && knownApps[this.state.requestedAppId]?.name)
-                                            ?? isAppMediaTypeAvailable
-                                                ? _("popupMediaTypeApp")
-                                                : _("popupMediaTypeAppNotFound") }
-                            </option>
-
-                            { this.state.mirroringEnabled &&
-                                <>
-                                    <option value={ ReceiverSelectorMediaType.Tab }
-                                            selected={ isTabMediaTypeSelected }
-                                            disabled={ !(this.state.availableMediaTypes
-                                                    & ReceiverSelectorMediaType.Tab) }>
-                                        { _("popupMediaTypeTab") }
-                                    </option>
-                                    <option value={ ReceiverSelectorMediaType.Screen }
-                                            selected={ isScreenMediaTypeSelected }
-                                            disabled={ !(this.state.availableMediaTypes
-                                                    & ReceiverSelectorMediaType.Screen) }>
-                                        { _("popupMediaTypeScreen") }
-                                    </option>
-                                </> }
-                        </select>
-                    </div>
-                    <div className="media-select__label-to">
-                        { _("popupMediaSelectToLabel") }
-                    </div>
+        return <>
+            <div className="media-select">
+                <div className="media-select__label-cast">
+                    { _("popupMediaSelectCastLabel") }
                 </div>
-                <ul className="receivers">
-                    { this.state.receivers && this.state.receivers.length
-                        ? this.state.receivers.map((receiver, i) => (
-                            <ReceiverEntry receiver={ receiver }
-                                           onCast={ this.onCast }
-                                           onStop={ this.onStop }
-                                           isLoading={ this.state.isLoading }
-                                           canCast={ isSelectedMediaTypeAvailable }
-                                           key={ i } /> ))
-                        : (
-                            <div className="receivers__not-found">
-                                { _("popupNoReceiversFound") }
-                            </div> )}
-                </ul>
+                <div className="select-wrapper">
+                    <select onChange={ this.onSelectChange }
+                            className="media-select__dropdown"
+                            disabled={ this.state.availableMediaTypes === 0 }>
+
+                        <option value={ ReceiverSelectorMediaType.App }
+                                selected={ isAppMediaTypeSelected }
+                                disabled={ !isAppMediaTypeAvailable }>
+                            { (this.state.requestedAppId && knownApps[this.state.requestedAppId]?.name)
+                                        ?? isAppMediaTypeAvailable
+                                            ? _("popupMediaTypeApp")
+                                            : _("popupMediaTypeAppNotFound") }
+                        </option>
+
+                        { this.state.mirroringEnabled &&
+                            <>
+                                <option value={ ReceiverSelectorMediaType.Tab }
+                                        selected={ isTabMediaTypeSelected }
+                                        disabled={ !(this.state.availableMediaTypes
+                                                & ReceiverSelectorMediaType.Tab) }>
+                                    { _("popupMediaTypeTab") }
+                                </option>
+                                <option value={ ReceiverSelectorMediaType.Screen }
+                                        selected={ isScreenMediaTypeSelected }
+                                        disabled={ !(this.state.availableMediaTypes
+                                                & ReceiverSelectorMediaType.Screen) }>
+                                    { _("popupMediaTypeScreen") }
+                                </option>
+                            </> }
+                    </select>
+                </div>
+                <div className="media-select__label-to">
+                    { _("popupMediaSelectToLabel") }
+                </div>
             </div>
-        );
+            <ul className="receivers">
+                { this.state.receivers && this.state.receivers.length
+                    ? this.state.receivers.map((receiver, i) => (
+                        <ReceiverEntry receiver={ receiver }
+                                       onCast={ this.onCast }
+                                       onStop={ this.onStop }
+                                       isLoading={ this.state.isLoading }
+                                       canCast={ isSelectedMediaTypeAvailable }
+                                       key={ i } /> ))
+                    : (
+                        <div className="receivers__not-found">
+                            { _("popupNoReceiversFound") }
+                        </div> )}
+            </ul>
+        </>;
     }
 
     private onCast (receiver: Receiver) {
@@ -219,7 +216,8 @@ class PopupApp extends Component<{}, PopupAppState> {
         this.port?.postMessage({
             subject: "receiverSelector:selected"
           , data: {
-                receiver
+                actionType: ReceiverSelectionActionType.Cast
+              , receiver
               , mediaType: this.state.mediaType
               , filePath: this.state.filePath
             }
@@ -229,7 +227,10 @@ class PopupApp extends Component<{}, PopupAppState> {
     private onStop (receiver: Receiver) {
         this.port?.postMessage({
             subject: "receiverSelector:stop"
-          , data: { receiver }
+          , data: {
+                actionType: ReceiverSelectionActionType.Stop
+              , receiver
+            }
         });
     }
 
