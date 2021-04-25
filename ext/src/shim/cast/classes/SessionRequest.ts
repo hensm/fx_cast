@@ -14,7 +14,7 @@ export default class SessionRequest {
             public appId: string
           , public capabilities = [ Capability.VIDEO_OUT
                                   , Capability.AUDIO_OUT ]
-          , public timeout: number = (new Timeout()).requestSession
+          , public requestSessionTimeout: number = (new Timeout()).requestSession
           , public androidReceiverCompatible = false
           , public credentialsData: (CredentialsData | null) = null) {}
 }
