@@ -21,7 +21,8 @@ const _ = browser.i18n.getMessage;
 export default class NativeReceiverSelector extends ReceiverSelector {
     private bridgePort: (Port | null) = null;
     private wasReceiverSelected: boolean = false;
-    private _isOpen: boolean = false;
+    
+    #isOpen = false;
 
     constructor () {
         super();
@@ -29,7 +30,7 @@ export default class NativeReceiverSelector extends ReceiverSelector {
     }
 
     get isOpen () {
-        return this._isOpen;
+        return this.#isOpen;
     }
 
     public async open (
@@ -44,7 +45,7 @@ export default class NativeReceiverSelector extends ReceiverSelector {
         this.bridgePort.onDisconnect.addListener(() => {
             this.bridgePort = null;
             this.wasReceiverSelected = false;
-            this._isOpen = false;
+            this.#isOpen = false;
         });
 
 
@@ -82,7 +83,7 @@ export default class NativeReceiverSelector extends ReceiverSelector {
             })
         });
 
-        this._isOpen = true;
+        this.#isOpen = true;
     }
 
     public update (): void {
@@ -96,7 +97,7 @@ export default class NativeReceiverSelector extends ReceiverSelector {
             });
         }
 
-        this._isOpen = false;
+        this.#isOpen = false;
     }
 
     private async onBridgePortMessage (message: Message) {
@@ -129,7 +130,7 @@ export default class NativeReceiverSelector extends ReceiverSelector {
 
                 this.bridgePort = null;
                 this.wasReceiverSelected = false;
-                this._isOpen = false;
+                this.#isOpen = false;
 
                 break;
             }

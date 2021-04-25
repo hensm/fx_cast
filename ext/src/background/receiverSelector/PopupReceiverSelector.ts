@@ -25,10 +25,9 @@ export default class PopupReceiverSelector extends ReceiverSelector {
     private availableMediaTypes?: ReceiverSelectorMediaType;
 
     private wasReceiverSelected: boolean = false;
-
-    private _isOpen: boolean = false;
     private requestedAppId?: string;
 
+    #isOpen = false;
 
     constructor () {
         super();
@@ -49,7 +48,7 @@ export default class PopupReceiverSelector extends ReceiverSelector {
     }
 
     get isOpen () {
-        return this._isOpen;
+        return this.#isOpen;
     }
 
     public async open (
@@ -96,7 +95,7 @@ export default class PopupReceiverSelector extends ReceiverSelector {
             throw logger.error("Failed to create receiver selector popup.");
         }
 
-        this._isOpen = true;
+        this.#isOpen = true;
         this.windowId = popup.id;
 
         // Size/position not set correctly on creation (bug?)
@@ -130,7 +129,7 @@ export default class PopupReceiverSelector extends ReceiverSelector {
             await browser.windows.remove(this.windowId);
         }
 
-        this._isOpen = false;
+        this.#isOpen = false;
         this.requestedAppId = undefined;
 
         if (this.messagePort && !this.messagePortDisconnected) {
