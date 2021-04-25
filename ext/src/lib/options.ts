@@ -45,55 +45,74 @@ interface EventMap {
 export default new class extends TypedEventTarget<EventMap> {
     constructor () {
         super();
+        this.onStorageChanged = this.onStorageChanged.bind(this);
+        browser.storage.onChanged.addListener(this.onStorageChanged);
 
-        browser.storage.onChanged.addListener((changes, areaName) => {
-            if (areaName !== "sync") {
-                return;
-            }
+        // Supresses sendRemoveListener closed conduit error
+        window.addEventListener("unload", () => {
+            browser.storage.onChanged.removeListener(this.onStorageChanged);
+        });
+    }
 
-            // Types issue
-            const _changes = changes as {
-                [key: string]: browser.storage.StorageChange
-            };
+    private onStorageChanged(
+            changes: { [key: string]: browser.storage.StorageChange }
+          , areaName: string) {
 
-            if ("options" in _changes) {
-                const { oldValue, newValue } = _changes.options;
-                const changedKeys = [];
 
-                for (const key of Object.keys(newValue)) {
-                    if (oldValue) {
-                        // Don't track added keys
-                        if (!(key in oldValue)) {
-                            continue;
-                        }
+        if (areaName !== "sync") {
+            return;
+        }
 
-                        const oldKeyValue = oldValue[key];
-                        const newKeyValue = newValue[key];
+        if ("options" in changes) {
+            const { oldValue, newValue } = changes.options;
+            const changedKeys = [];
 
-                        // Equality comparison
-                        if (oldKeyValue === newKeyValue) {
-                            continue;
-                        }
 
-                        // Array comparison
-                        if (oldKeyValue instanceof Array
-                         && newKeyValue instanceof Array) {
-                            if (oldKeyValue.length === newKeyValue.length
-                                  && oldKeyValue.every((value, index) =>
-                                             value === newKeyValue[index])) {
-                                continue;
-                            }
-                        }
+
+
+            for (const key of Object.keys(newValue)) {
+                if (oldValue) {
+                    // Don't track added keys
+                    if (!(key in oldValue)) {
+                        continue;
                     }
 
-                    changedKeys.push(key);
+                    const oldKeyValue = oldValue[key];
+                    const newKeyValue = newValue[key];
+
+
+
+                    // Equality comparison
+                    if (oldKeyValue === newKeyValue) {
+                        continue;
+
+
+
+
+
+
+                    }
+
+                    // Array comparison
+                    if (oldKeyValue instanceof Array
+                        && newKeyValue instanceof Array) {
+                        if (oldKeyValue.length === newKeyValue.length
+                            && oldKeyValue.every((value, index) =>
+                                value === newKeyValue[index])) {
+                            continue;
+                        }
+                    }
                 }
 
-                this.dispatchEvent(new CustomEvent("changed", {
-                    detail: changedKeys as Array<keyof Options>
-                }));
+                changedKeys.push(key);
+
+
             }
-        });
+
+            this.dispatchEvent(new CustomEvent("changed", {
+                detail: changedKeys as Array<keyof Options>
+            }));
+        }
     }
 
     /**
