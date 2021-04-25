@@ -22,7 +22,7 @@ Follow the bug report issue template and provide as much info as possible. Logs 
 
 ## Compatibility Reports
 
-Compatibility reports are always helpful. Use the "Compatibility Report" issue template. Ensure you have a working environment and that the site is in the whitelist (check options page).
+Compatibility reports are always helpful. They're tracked in a separate repository, so go to [@hensm/fx_cast-compat](https://github.com/hensm/fx_cast-compat) and use the "Compatibility Report" issue template. Ensure you have a working environment and that the site is in the whitelist (check options page).
 
 
 ## Localizations
