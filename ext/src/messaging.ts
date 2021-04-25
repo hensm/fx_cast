@@ -53,6 +53,10 @@ type ExtMessageDefinitions = {
   , "main:sessionCreated": {}
 
   , "shim:initialized": BridgeInfo
+  , "shim:serviceUp": { id: Receiver["id"] }
+  , "shim:serviceDown": { id: Receiver["id"] }
+
+  , "shim:launchApp": { receiver: Receiver }
 }
 
 /**
@@ -61,13 +65,8 @@ type ExtMessageDefinitions = {
  *   app/bridge/messaging.ts > MessagesBase
  */
 type AppMessageDefinitions = {
-    "shim:serviceUp": { id: Receiver["id"] }
-  , "shim:serviceDown": { id: Receiver["id"] }
-
-  , "shim:launchApp": { receiver: Receiver }
-
     // Session messages
-  , "shim:session/stopped": {}
+    "shim:session/stopped": {}
   , "shim:session/connected": {
         sessionId: string
       , namespaces: Array<{ name: string }>
@@ -167,9 +166,9 @@ type AppMessageDefinitions = {
 
     // Bridge messages
   , "main:receiverSelector/selected": ReceiverSelectionCast
+  , "main:receiverSelector/stopped": ReceiverSelectionStop
+  , "main:receiverSelector/cancelled": {}
   , "main:receiverSelector/error": string
-  , "main:receiverSelector/close": {}
-  , "main:receiverSelector/stop": ReceiverSelectionStop
 
     /**
      * getInfo uses the old :/ form for compat with old bridge
@@ -178,7 +177,9 @@ type AppMessageDefinitions = {
   , "bridge:getInfo": string
   , "bridge:/getInfo": string
 
-  , "bridge:initialize": { shouldWatchStatus: boolean }
+  , "bridge:initialize": {
+        shouldWatchStatus: boolean
+    }
 
   , "bridge:receiverSelector/open": any
   , "bridge:receiverSelector/close": {}

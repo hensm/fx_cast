@@ -51,8 +51,8 @@ decodeTransform.on("data", (message: Message) => {
         }
 
         case "bridge:stopReceiverApp": {
-            stopReceiverApp(message.data.receiver.host
-                          , message.data.receiver.port);
+            const { host, port } = message.data.receiver;
+            stopReceiverApp(host, port);
             break;
         }
 
@@ -66,7 +66,8 @@ decodeTransform.on("data", (message: Message) => {
 
         // Media server
         case "bridge:mediaServer/start": {
-            startMediaServer(message.data.filePath, message.data.port);
+            const { filePath, port } = message.data;
+            startMediaServer(filePath, port);
             break;
         }
         case "bridge:mediaServer/stop": {

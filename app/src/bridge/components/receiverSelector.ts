@@ -48,7 +48,7 @@ export function startReceiverSelector (data: string) {
 
             if (!jsonData.mediaType) {
                 sendMessage({
-                    subject: "main:receiverSelector/stop"
+                    subject: "main:receiverSelector/stopped"
                   , data: jsonData
                 });
 
@@ -74,7 +74,7 @@ export function startReceiverSelector (data: string) {
             selectorAppOpen = false;
 
             sendMessage({
-                subject: "main:receiverSelector/close"
+                subject: "main:receiverSelector/cancelled"
             });
         }
     });
