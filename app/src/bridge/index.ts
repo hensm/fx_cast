@@ -57,20 +57,20 @@ decodeTransform.on("data", (message: Message) => {
         }
 
         // Receiver selector
-        case "bridge:receiverSelector/open": {
+        case "bridge:openReceiverSelector": {
             startReceiverSelector(message.data); break;
         }
-        case "bridge:receiverSelector/close": {
+        case "bridge:closeReceiverSelector": {
             stopReceiverSelector(); break;
         }
 
         // Media server
-        case "bridge:mediaServer/start": {
+        case "bridge:startMediaServer": {
             const { filePath, port } = message.data;
             startMediaServer(filePath, port);
             break;
         }
-        case "bridge:mediaServer/stop": {
+        case "bridge:stopMediaServer": {
             stopMediaServer();
             break;
         }

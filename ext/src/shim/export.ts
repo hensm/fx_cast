@@ -4,6 +4,7 @@ import * as cast from "./cast";
 import { Message } from "../messaging";
 
 import { BridgeInfo } from "../lib/bridge";
+import { TypedMessagePort } from "../lib/TypedMessagePort";
 
 import { onMessage
        , onMessageResponse
@@ -20,7 +21,7 @@ let initializedBackgroundPort: MessagePort;
  * for and emits these messages, and changing that behavior
  * is too messy.
  */
-export function ensureInit (): Promise<MessagePort> {
+export function ensureInit (): Promise<TypedMessagePort<Message>> {
     return new Promise(async (resolve, reject) => {
 
         // If already initialized, just return existing bridge info

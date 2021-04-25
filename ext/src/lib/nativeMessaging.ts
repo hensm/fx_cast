@@ -3,14 +3,14 @@
 import logger from "./logger";
 import options from "./options";
 
-import { Message } from "../messaging";
+import { Message, Port } from "../messaging";
 
 
 
-type DisconnectListener = (port: browser.runtime.Port) => void;
+type DisconnectListener = (port: Port) => void;
 type MessageListener = (message: Message) => void;
 
-function connectNative (application: string) {
+function connectNative (application: string): Port {
     /**
      * In order to preserve the synchronous API, messages are
      * queued before either the native messaging host or the
@@ -34,7 +34,7 @@ function connectNative (application: string) {
     const onMessageListeners = new Set<MessageListener>();
 
     // Port proxy API
-    const portObject: browser.runtime.Port = {
+    const portObject: Port = {
         error: null as any
       , name: ""
 
@@ -48,6 +48,9 @@ function connectNative (application: string) {
           , hasListener (cb: DisconnectListener) {
                 return onDisconnectListeners.has(cb);
             }
+          , hasListeners () {
+                return onDisconnectListeners.size > 0;  
+            }
         }
       , onMessage: {
             addListener (cb: MessageListener) {
@@ -59,9 +62,9 @@ function connectNative (application: string) {
           , hasListener (cb: MessageListener) {
                 return onMessageListeners.has(cb);
             }
-
-            // Workaround for modified types
-          , hasListeners () { return false; }
+          , hasListeners () {
+                return onMessageListeners.size > 0;  
+            }
         }
 
       , disconnect () {

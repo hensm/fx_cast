@@ -57,7 +57,7 @@ export default class NativeReceiverSelector extends ReceiverSelector {
                 "receiverSelectorCloseIfFocusLost");
 
         this.bridgePort.postMessage({
-            subject: "bridge:receiverSelector/open"
+            subject: "bridge:openReceiverSelector"
           , data: JSON.stringify({
                 receivers
               , defaultMediaType
@@ -93,7 +93,7 @@ export default class NativeReceiverSelector extends ReceiverSelector {
     public close (): void {
         if (this.bridgePort) {
             this.bridgePort.postMessage({
-                subject: "bridge:receiverSelector/close"
+                subject: "bridge:closeReceiverSelector"
             });
         }
 

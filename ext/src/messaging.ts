@@ -181,23 +181,26 @@ type AppMessageDefinitions = {
         shouldWatchStatus: boolean
     }
 
-  , "bridge:receiverSelector/open": any
-  , "bridge:receiverSelector/close": {}
+  , "bridge:openReceiverSelector": string
+  , "bridge:closeReceiverSelector": {}
 
   , "bridge:stopReceiverApp": { receiver: Receiver }
 
-  , "bridge:mediaServer/start": {
+
+  , "bridge:startMediaServer": {
         filePath: string
       , port: number
     }
-  , "bridge:mediaServer/stop": {}
-  , "mediaCast:mediaServer/started": {
+  , "bridge:stopMediaServer": {}
+
+  , "mediaCast:mediaServerStarted": {
         mediaPath: string
       , subtitlePaths: string[]
       , localAddress: string
     }
-  , "mediaCast:mediaServer/stopped": {}
-  , "mediaCast:mediaServer/error": {}
+  , "mediaCast:mediaServerStopped": {}
+  , "mediaCast:mediaServerError": {}
+
 
   , "main:serviceUp": Receiver
   , "main:serviceDown": { id: string }

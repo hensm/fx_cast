@@ -1,53 +1,27 @@
 "use strict";
 
-const portMap = new WeakMap<TypedPort<any>, browser.runtime.Port>();
-
 /**
  * Allows typed access to a runtime.Port object.
  */
-export class TypedPort<T> {
-    public name: string;
-    public error?: { message: string };
-    public sender?: browser.runtime.MessageSender;
+export interface TypedPort<T>
+        extends Omit<browser.runtime.Port
+              , "onDisconnect"
+              | "onMessage"
+              | "postMessage"> {
 
-    constructor (port: browser.runtime.Port) {
-        portMap.set(this, port);
-        this.name = port.name;
-
-        // @ts-ignore
-        this.error = null;
+    onDisconnect: {
+        addListener (cb: (port: TypedPort<T>) => void): void | Promise<void>
+      , removeListener (cb: (port: TypedPort<T>) => void): void | Promise<void>
+      , hasListener (cb: (port: TypedPort<T>) => void): boolean
+      , hasListeners (): boolean
     }
 
-    public disconnect () {
-        portMap.get(this)?.disconnect();
+  , onMessage: {
+        addListener (cb: (message: T) => void): void | Promise<void>
+      , removeListener (cb: (message: T) => void): void | Promise<void>
+      , hasListener (cb: (message: T) => void): boolean
+      , hasListeners (): boolean
     }
 
-    public onDisconnect = {
-        addListener: (cb: (port: TypedPort<T>) => void) => {
-            portMap.get(this)?.onDisconnect.addListener(cb as any);
-        }
-      , removeListener: (cb: (port: TypedPort<T>) => void) => {
-            portMap.get(this)?.onDisconnect.addListener(cb as any);
-        }
-      , hasListener: (cb: (port: TypedPort<T>) => void) => {
-            return portMap.get(this)?.onDisconnect.hasListener(cb as any)
-                    ?? false;
-        }
-    };
-
-    public onMessage = {
-        addListener: (cb: (message: T) => void) => {
-            portMap.get(this)?.onMessage.addListener(cb as any);
-        }
-      , removeListener: (cb: (message: T) => void) => {
-            portMap.get(this)?.onMessage.removeListener(cb as any);
-        }
-      , hasListener: (cb: (message: T) => void) => {
-            return portMap.get(this)?.onMessage.hasListener(cb as any) ?? false;
-        }
-    };
-
-    public postMessage (message: T) {
-        portMap.get(this)?.postMessage(message as any);
-    }
+  , postMessage (message: T): void
 }
