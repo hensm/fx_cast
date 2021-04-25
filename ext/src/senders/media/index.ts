@@ -15,7 +15,7 @@ function startMediaServer (filePath: string, port: number)
 
     return new Promise((resolve, reject) => {
         backgroundPort.postMessage({
-            subject: "bridge:mediaServer/start"
+            subject: "bridge:startMediaServer"
           , data: {
                 filePath: decodeURI(filePath)
               , port
@@ -25,16 +25,16 @@ function startMediaServer (filePath: string, port: number)
         backgroundPort.addEventListener("message", function onMessage (ev) {
             const message = ev.data as Message;
 
-            if (message.subject.startsWith("mediaCast:mediaServer/")) {
+            if (message.subject.startsWith("mediaCast:mediaServer")) {
                 backgroundPort.removeEventListener("message", onMessage);
             }
 
             switch (message.subject) {
-                case "mediaCast:mediaServer/started": {
+                case "mediaCast:mediaServerStarted": {
                     resolve(message.data);
                     break;
                 }
-                case "mediaCast:mediaServer/error": {
+                case "mediaCast:mediaServerError": {
                     reject();
                     break;
                 }
