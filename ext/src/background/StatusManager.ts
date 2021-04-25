@@ -101,7 +101,7 @@ export default new class StatusManager
                 break;
             }
 
-            case "main:receiverStatus": {
+            case "main:updateReceiverStatus": {
                 const { data: { id, status }} = message;
                 const receiver = this.receivers.get(id);
 

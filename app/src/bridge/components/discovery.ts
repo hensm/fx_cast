@@ -80,7 +80,7 @@ export function startDiscovery (options: InitializeOptions) {
 
         listener.on("receiverStatus", (status: ReceiverStatus) => {
             const receiverStatusMessage: any = {
-                subject: "main:receiverStatus"
+                subject: "main:updateReceiverStatus"
               , data: {
                     id
                   , status: {
