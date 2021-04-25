@@ -8,8 +8,6 @@ import StatusManager from "../StatusManager";
 
 import { getMediaTypesForPageUrl } from "../../lib/utils";
 
-import { DEFAULT_MEDIA_RECEIVER_APP_ID } from "../../shim/cast/media/";
-
 import { ReceiverSelector
        , ReceiverSelectorType } from "./";
 import { ReceiverSelection
@@ -19,20 +17,17 @@ import { ReceiverSelection
 import NativeReceiverSelector from "./NativeReceiverSelector";
 import PopupReceiverSelector from "./PopupReceiverSelector";
 
-import { Receiver } from "../../types";
-
 
 async function createSelector () {
     const type = await options.get("receiverSelectorType");
+    const platformInfo = await browser.runtime.getPlatformInfo();
 
-    switch (type) {
-        case ReceiverSelectorType.Native: {
-            return new NativeReceiverSelector();
-        }
-        case ReceiverSelectorType.Popup: {
-            return new PopupReceiverSelector();
-        }
+    if (platformInfo.os === "mac"
+            && type === ReceiverSelectorType.Native) {
+        return new NativeReceiverSelector();
     }
+
+    return new PopupReceiverSelector();
 }
 
 
