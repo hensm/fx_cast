@@ -148,7 +148,7 @@ type MessageDefinitions = {
   , "main:serviceUp": Receiver
   , "main:serviceDown": { id: string }
   
-  , "main:receiverStatus": {
+  , "main:updateReceiverStatus": {
         id: string
       , status: ReceiverStatus
     }
