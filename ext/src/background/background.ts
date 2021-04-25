@@ -20,20 +20,24 @@ import { initWhitelist } from "./whitelist";
 const _ = browser.i18n.getMessage;
 
 
+/**
+ * On install, set the default options before initializing the
+ * extension. On update, handle any unset values and set to
+ * the new defaults.
+ */
 browser.runtime.onInstalled.addListener(async details => {
     switch (details.reason) {
-        // Set default options
         case "install": {
+            // Set defaults
             await options.setAll(defaultOptions);
 
-            // Call after default options have been set
+            // Extension initialization
             init();
-
             break;
         }
-
-        // Set newly added options
+    
         case "update": {
+            // Set new defaults
             await options.update(defaultOptions);
             break;
         }
@@ -41,33 +45,10 @@ browser.runtime.onInstalled.addListener(async details => {
 });
 
 
-async function initBrowserAction () {
-    logger.info("init (browser action)");
-
-    /**
-     * When the browser action is clicked, open a receiver
-     * selector and load a sender for the response. The
-     * mirroring sender is loaded into the current tab at the
-     * top-level frame.
-     */
-    browser.browserAction.onClicked.addListener(async tab => {
-        if (tab.id === undefined) {
-            throw logger.error("Tab ID not found in browser action handler.");
-        }
-
-        const selection = await ReceiverSelectorManager.getSelection(tab.id);
-
-        if (selection) {
-            loadSender({
-                tabId: tab.id
-              , frameId: 0
-              , selection
-            });
-        }
-    });
-}
-
-
+/**
+ * Sets up media overlay content script and handles toggling
+ * on options change.
+ */
 async function initMediaOverlay () {
     logger.info("init (media overlay)");
 
@@ -97,6 +78,7 @@ async function initMediaOverlay () {
 
     registerMediaOverlayContentScript();
 
+    // Update if toggled
     options.addEventListener("changed", async ev => {
         const alteredOpts = ev.detail;
 
@@ -108,7 +90,12 @@ async function initMediaOverlay () {
 }
 
 
-async function checkBridgeCompat () {
+/**
+ * Checks whether the bridge can be reached and is compatible
+ * with the current version of the extension. If not, triggers
+ * a notification with the appropriate info.
+ */
+async function notifyBridgeCompat () {
     logger.info("checking for bridge...");
 
     let info: BridgeInfo;
@@ -166,7 +153,7 @@ async function init () {
     logger.info("init");
     isInitialized = true;
 
-    await checkBridgeCompat();
+    await notifyBridgeCompat();
 
     await StatusManager.init();
     await ShimManager.init();
@@ -174,7 +161,29 @@ async function init () {
     await initMenus();
     await initWhitelist();
     await initMediaOverlay();
-    await initBrowserAction();
+
+
+    /**
+     * When the browser action is clicked, open a receiver
+     * selector and load a sender for the response. The
+     * mirroring sender is loaded into the current tab at the
+     * top-level frame.
+     */
+     browser.browserAction.onClicked.addListener(async tab => {
+        if (tab.id === undefined) {
+            throw logger.error("Tab ID not found in browser action handler.");
+        }
+
+        const selection = await ReceiverSelectorManager.getSelection(tab.id);
+
+        if (selection) {
+            loadSender({
+                tabId: tab.id
+              , frameId: 0
+              , selection
+            });
+        }
+    });
 
 
     /**
