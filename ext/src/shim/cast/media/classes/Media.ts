@@ -83,8 +83,8 @@ export default class Media {
 
             case "shim:media/sendMediaMessageResponse": {
                 const { messageId, error } = message.data;
-                const [ successCallback, errorCallback ]
-                        = this.#sendMediaMessageCallbacks
+                const [ successCallback, errorCallback ] =
+                        this.#sendMediaMessageCallbacks
                               .get(messageId) ?? [];
 
                 if (error && errorCallback) {

@@ -174,8 +174,8 @@ export default class Session {
 
             case "shim:session/impl_stop": {
                 const { stopId, error } = message.data;
-                const [ successCallback, errorCallback ]
-                        = this.#stopCallbacks.get(stopId) ?? [];
+                const [ successCallback, errorCallback ] =
+                        this.#stopCallbacks.get(stopId) ?? [];
 
                 // Disconnect from extension messages
                 this.#listener.disconnect();

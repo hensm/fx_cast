@@ -23,13 +23,23 @@
       , "no-prototype-builtins": "off"
       , "no-async-promise-executor": "off"
       , "semi": [ "error", "always"]
-      , "comma-dangle": [ "error", "never"]
-      , "comma-style": [ "error", "first"]
+      , "comma-dangle": [ "error", "never" ]
+      , "comma-style": [ "error", "first" ]
       , "no-multiple-empty-lines": [ "error", { "max": 2 }]
       , "no-console": [ "error", {
             "allow": [ "info", "error" ]
         }]
-
+      , "operator-linebreak": [ "error", "after", {
+            "overrides": {
+                "?": "before"
+              , ":": "before"
+              , "&": "before"
+              , "|": "before"
+              , "??": "ignore"
+              , "&&": "ignore"
+              , "||": "ignore"
+            }
+        }]
       , "object-curly-spacing": [ "error", "always", {
             "arraysInObjects": false
           , "objectsInObjects": false

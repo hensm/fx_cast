@@ -96,8 +96,8 @@ export default class Bridge extends Component<BridgeProps, BridgeState> {
     }
 
     public render() {
-        const [ backupMessageStart, backupMessageEnd ]
-                = _("optionsBridgeBackupEnabled", "\0").split("\0");
+        const [ backupMessageStart, backupMessageEnd ] =
+                _("optionsBridgeBackupEnabled", "\0").split("\0");
 
         return (
             <div className="bridge">

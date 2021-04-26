@@ -117,8 +117,8 @@ function getMedia(opts: InitOptions): Promise<cast.media.Media> {
 
             try {
                 // Wait until media server is listening
-                const { localAddress, mediaPath, subtitlePaths }
-                        = await startMediaServer(mediaTitle, port);
+                const { localAddress, mediaPath, subtitlePaths } =
+                        await startMediaServer(mediaTitle, port);
 
                 const baseUrl = new URL(`http://${localAddress}:${port}/`);
                 mediaUrl = new URL(mediaPath, baseUrl);
