@@ -348,13 +348,13 @@ options.addEventListener("changed", async ev => {
     const alteredOpts = ev.detail;
     const newOpts = await options.getAll();
 
-    if (alteredOpts.includes("mediaEnabled")) {
+    if (menuIdMediaCast && alteredOpts.includes("mediaEnabled")) {
         browser.menus.update(menuIdMediaCast, {
             visible: newOpts.mediaEnabled
         });
     }
 
-    if (alteredOpts.includes("localMediaEnabled")) {
+    if (menuIdMediaCast && alteredOpts.includes("localMediaEnabled")) {
         browser.menus.update(menuIdMediaCast, {
             targetUrlPatterns: newOpts.localMediaEnabled
                 ? URL_PATTERNS_ALL
