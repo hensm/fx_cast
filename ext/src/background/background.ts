@@ -175,25 +175,12 @@ async function init() {
         }
 
         const selection = await ReceiverSelectorManager.getSelection(tab.id);
-
         if (selection) {
             loadSender({
                 tabId: tab.id
               , frameId: 0
               , selection
             });
-        }
-    });
-
-
-    /**
-     * When a message port connection with the name "shim" is
-     * established, pass it to createShim to handle the setup
-     * and maintenance.
-     */
-    messaging.onConnect.addListener(async port => {
-        if (port.name === "shim") {
-            ShimManager.createShim(port);
         }
     });
 }

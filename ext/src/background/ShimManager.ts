@@ -3,7 +3,7 @@
 import bridge from "../lib/bridge";
 import loadSender from "../lib/loadSender";
 import logger from "../lib/logger";
-import { Message, Port } from "../messaging";
+import messaging, { Message, Port } from "../messaging";
 import options from "../lib/options";
 
 import { ReceiverSelectionActionType
@@ -30,7 +30,30 @@ export default new class ShimManager {
     private activeShims = new Set<Shim>();
 
     public async init() {
-        await this.initStatusListeners();
+        // Wait for "shim" ports
+        messaging.onConnect.addListener(async port => {
+            if (port.name === "shim") {
+                this.createShim(port);
+            }
+        });
+
+        StatusManager.addEventListener("serviceUp", ev => {
+            for (const shim of this.activeShims) {
+                shim.contentPort.postMessage({
+                    subject: "shim:serviceUp"
+                  , data: { id: ev.detail.id }
+                });
+            }
+        });
+
+        StatusManager.addEventListener("serviceDown", ev => {
+            for (const shim of this.activeShims) {
+                shim.contentPort.postMessage({
+                    subject: "shim:serviceDown"
+                  , data: { id: ev.detail.id }
+                });
+            }
+        });
     }
 
     public getShim(tabId: number, frameId?: number) {
@@ -243,25 +266,5 @@ export default new class ShimManager {
                 break;
             }
         }
-    }
-
-    private async initStatusListeners() {
-        StatusManager.addEventListener("serviceUp", ev => {
-            for (const shim of this.activeShims) {
-                shim.contentPort.postMessage({
-                    subject: "shim:serviceUp"
-                  , data: { id: ev.detail.id }
-                });
-            }
-        });
-
-        StatusManager.addEventListener("serviceDown", ev => {
-            for (const shim of this.activeShims) {
-                shim.contentPort.postMessage({
-                    subject: "shim:serviceDown"
-                  , data: { id: ev.detail.id }
-                });
-            }
-        });
     }
 };
