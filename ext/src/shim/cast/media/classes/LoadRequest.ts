@@ -11,11 +11,11 @@ export default class LoadRequest {
     public currentTime: (number | null) = null;
     public customData: any = null;
     public media: MediaInfo;
-    public requestId: number = 0;
+    public requestId = 0;
     public sessionId: (string | null) = null;
-    public type: string = "LOAD";
+    public type = "LOAD";
 
-    constructor (mediaInfo: MediaInfo) {
+    constructor(mediaInfo: MediaInfo) {
         this.media = mediaInfo;
     }
 }

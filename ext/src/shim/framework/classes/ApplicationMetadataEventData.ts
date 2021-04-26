@@ -7,7 +7,7 @@ import { SessionEventType } from "../enums";
 
 
 export default class ApplicationMetadataEventData extends EventData {
-    constructor (
+    constructor(
             public metadata: ApplicationMetadata) {
 
         super(SessionEventType.APPLICATION_METADATA_CHANGED);

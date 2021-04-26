@@ -48,14 +48,14 @@ export default {
   , CastContext: {
         ...CastContext
 
-      , getInstance () {
+      , getInstance() {
             return instance;
         }
     }
 
   , VERSION: "1.0.07"
 
-  , setLoggerLevel (_level: number) {
+  , setLoggerLevel(_level: number) {
         logger.info("STUB :: cast.framework.setLoggerLevel");
     }
 };

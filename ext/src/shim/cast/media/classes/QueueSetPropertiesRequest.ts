@@ -5,5 +5,5 @@ export default class QueueSetPropertiesRequest {
     public repeatMode: (string | null) = null;
     public requestId: (number | null) = null;
     public sessionId: (string | null) = null;
-    public type: string = "QUEUE_UPDATE";
+    public type = "QUEUE_UPDATE";
 }

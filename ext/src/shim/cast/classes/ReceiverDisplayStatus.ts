@@ -7,7 +7,7 @@ import Image from "./Image";
 export default class ReceiverDisplayStatus {
     public showStop: (boolean | null) = null;
 
-    constructor (
+    constructor(
             public statusText: string
           , public appImages: Image[]) {}
 }

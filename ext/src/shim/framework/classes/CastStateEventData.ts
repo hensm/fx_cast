@@ -6,7 +6,7 @@ import { CastContextEventType } from "../enums";
 
 
 export default class CastStateEventData extends EventData {
-    constructor (
+    constructor(
             public castState: string) {
 
         super(CastContextEventType.CAST_STATE_CHANGED);

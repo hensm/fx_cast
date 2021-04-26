@@ -8,8 +8,8 @@ export default class QueueInsertItemsRequest {
     public insertBefore: (number | null) = null;
     public requestId: (number | null) = null;
     public sessionId: (string | null) = null;
-    public type: string = "QUEUE_INSERT";
+    public type = "QUEUE_INSERT";
 
-    constructor (
+    constructor(
             public items: QueueItem[]) {}
 }

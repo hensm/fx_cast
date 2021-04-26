@@ -6,7 +6,7 @@ import path from "path";
 import { sendMessage } from "../lib/nativeMessaging";
 
 
-function fatal (message: string) {
+function fatal(message: string) {
     console.error(message);
     process.exit(1);
 }
@@ -15,7 +15,7 @@ function fatal (message: string) {
 let selectorApp: child_process.ChildProcess | undefined;
 let selectorAppOpen = false;
 
-export function startReceiverSelector (data: string) {
+export function startReceiverSelector(data: string) {
     if (process.platform !== "darwin") {
         fatal("Invalid platform for native receiver selector.");
     }
@@ -80,7 +80,7 @@ export function startReceiverSelector (data: string) {
     });
 }
 
-export function stopReceiverSelector () {
+export function stopReceiverSelector() {
     if (!selectorApp?.killed) {
         selectorApp?.kill();
         selectorAppOpen = false;

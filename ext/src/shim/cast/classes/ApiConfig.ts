@@ -8,7 +8,7 @@ import { AutoJoinPolicy
 
 
 export default class ApiConfig {
-    constructor (
+    constructor(
             public sessionRequest: SessionRequest
           , public sessionListener: (session: Session) => void
           , public receiverListener: (availability: string) => void

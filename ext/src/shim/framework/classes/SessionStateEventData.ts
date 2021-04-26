@@ -7,7 +7,7 @@ import { SessionEventType } from "../enums";
 
 
 export default class SessionStateEventData extends EventData {
-    constructor (
+    constructor(
             public session: CastSession
           , public sessionState: string
           , public errorCode: (string | null) = null) {

@@ -6,7 +6,7 @@ import { SessionEventType } from "../enums";
 export default class VolumeEventData {
     public type = SessionEventType.VOLUME_CHANGED;
 
-    constructor (
+    constructor(
             public volume: number
           , public isMute: boolean) {}
 }

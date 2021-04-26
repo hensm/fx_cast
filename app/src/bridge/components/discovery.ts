@@ -25,7 +25,7 @@ const browser = mdns.createBrowser(mdns.tcp("googlecast"), {
     ]
 });
 
-function onBrowserServiceUp (service: mdns.Service) {
+function onBrowserServiceUp(service: mdns.Service) {
     // Ignore without txt record
     if (!service.txtRecord) {
         return;
@@ -44,7 +44,7 @@ function onBrowserServiceUp (service: mdns.Service) {
     });
 }
 
-function onBrowserServiceDown (_service: mdns.Service) {
+function onBrowserServiceDown(_service: mdns.Service) {
     // TODO: Fix service down detection
 }
 
@@ -56,7 +56,7 @@ interface InitializeOptions {
     shouldWatchStatus?: boolean;
 }
 
-export function startDiscovery (options: InitializeOptions) {
+export function startDiscovery(options: InitializeOptions) {
     if (options.shouldWatchStatus) {
         browser.on("serviceUp", onStatusBrowserServiceUp);
         browser.on("serviceDown", onStatusBrowserServiceDown);
@@ -67,7 +67,7 @@ export function startDiscovery (options: InitializeOptions) {
     // Receiver status listeners for status mode
     const statusListeners = new Map<string, StatusListener>();
 
-    function onStatusBrowserServiceUp (service: mdns.Service) {
+    function onStatusBrowserServiceUp(service: mdns.Service) {
         if (!service.txtRecord) {
             return;
         }
@@ -109,11 +109,11 @@ export function startDiscovery (options: InitializeOptions) {
         statusListeners.set(id, listener);
     }
 
-    function onStatusBrowserServiceDown (_service: mdns.Service) {
+    function onStatusBrowserServiceDown(_service: mdns.Service) {
         // TODO: Fix service down detection
     }
 }
 
-export function stopDiscovery () {
+export function stopDiscovery() {
     browser.stop();
 }

@@ -26,15 +26,14 @@ export interface Shim {
 }
 
 
-// tslint:disable-next-line:new-parens
 export default new class ShimManager {
     private activeShims = new Set<Shim>();
 
-    public async init () {
+    public async init() {
         await this.initStatusListeners();
     }
 
-    public getShim (tabId: number, frameId?: number) {
+    public getShim(tabId: number, frameId?: number) {
         for (const activeShim of this.activeShims) {
             if (activeShim.contentTabId === tabId) {
                 if (frameId && activeShim.contentFrameId !== frameId) {
@@ -46,7 +45,7 @@ export default new class ShimManager {
         }
     }
 
-    public async createShim (port: AnyPort) {
+    public async createShim(port: AnyPort) {
         const shim = await (port instanceof MessagePort
             ? this.createShimFromBackground(port)
             : this.createShimFromContent(port));
@@ -59,7 +58,7 @@ export default new class ShimManager {
         this.activeShims.add(shim);
     }
 
-    private async createShimFromBackground (
+    private async createShimFromBackground(
             contentPort: MessagePort): Promise<Shim> {
 
         const shim: Shim = {
@@ -83,7 +82,7 @@ export default new class ShimManager {
         return shim;
     }
 
-    private async createShimFromContent (
+    private async createShimFromContent(
             contentPort: Port): Promise<Shim> {
 
         if (contentPort.sender?.tab?.id === undefined
@@ -138,7 +137,7 @@ export default new class ShimManager {
         return shim;
     }
 
-    private async handleContentMessage (shim: Shim, message: Message) {
+    private async handleContentMessage(shim: Shim, message: Message) {
         const [ destination ] = message.subject.split(":");
         if (destination === "bridge") {
             shim.bridgePort.postMessage(message);
@@ -163,8 +162,6 @@ export default new class ShimManager {
                  || shim.contentFrameId === undefined) {
                     throw logger.error("Shim associated with content sender missing tab/frame ID");
                 }
-
-                const contentTab = await browser.tabs.get(shim.contentTabId);
 
                 try {
                     const selection =
@@ -231,8 +228,8 @@ export default new class ShimManager {
             }
 
             /**
-             * TODO: If we're closing a selector, make sure it's the
-             * same one that caused the session creation.
+             * TODO: If we're closing a selector, make sure it's the same
+             * one that caused the session creation.
              */
             case "main:sessionCreated": {
                 const selector = await ReceiverSelectorManager.getSelector();
@@ -248,7 +245,7 @@ export default new class ShimManager {
         }
     }
 
-    private async initStatusListeners () {
+    private async initStatusListeners() {
         StatusManager.addEventListener("serviceUp", ev => {
             for (const shim of this.activeShims) {
                 shim.contentPort.postMessage({

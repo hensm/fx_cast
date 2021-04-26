@@ -6,12 +6,12 @@ import RemotePlayer from "./RemotePlayer";
 
 
 export default class RemotePlayerController extends EventTarget {
-    constructor (_player: RemotePlayer) {
+    constructor(_player: RemotePlayer) {
         super();
         logger.info("STUB :: RemotePlayerController#constructor");
     }
 
-    public getFormattedTime (timeInSec: number): string {
+    public getFormattedTime(timeInSec: number): string {
         const hours = Math.floor(timeInSec / 3600) % 24;
         const minutes = Math.floor(timeInSec / 60) % 60;
         const seconds = timeInSec % 60;
@@ -21,31 +21,31 @@ export default class RemotePlayerController extends EventTarget {
             .join(":");
     }
 
-    public getSeekPosition (currentTime: number, duration: number) {
+    public getSeekPosition(currentTime: number, duration: number) {
         return (currentTime / duration) * 100;
     }
 
-    public getSeekTime (currentPosition: number, duration: number) {
+    public getSeekTime(currentPosition: number, duration: number) {
         return (duration / 100) * currentPosition;
     }
 
-    public muteOrUnmute (): void {
+    public muteOrUnmute(): void {
         logger.info("STUB :: RemotePlayerController#muteOrUnmute");
     }
 
-    public playOrPause (): void {
+    public playOrPause(): void {
         logger.info("STUB :: RemotePlayerController#playOrPause");
     }
 
-    public seek (): void {
+    public seek(): void {
         logger.info("STUB :: RemotePlayerController#seek");
     }
 
-    public setVolumeLevel (): void {
+    public setVolumeLevel(): void {
         logger.info("STUB :: RemotePlayerController#setVolumeLevel");
     }
 
-    public stop (): void {
+    public stop(): void {
         logger.info("STUB :: RemotePlayerController#stop");
     }
 }

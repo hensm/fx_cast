@@ -208,7 +208,7 @@ export default class Session {
     public statusText: string | null;
     public transportId: string;
 
-    constructor (
+    constructor(
             public sessionId: string
           , public appId: string
           , public displayName: string
@@ -240,11 +240,11 @@ export default class Session {
     }
 
 
-    public addMediaListener (_mediaListener: MediaListener) {
+    public addMediaListener(_mediaListener: MediaListener) {
         logger.info("STUB :: Session#addMediaListener");
     }
 
-    public addMessageListener (
+    public addMessageListener(
             namespace: string
           , listener: MessageListener) {
 
@@ -263,11 +263,11 @@ export default class Session {
         });
     }
 
-    public addUpdateListener (listener: UpdateListener) {
+    public addUpdateListener(listener: UpdateListener) {
         this.#updateListeners.add(listener);
     }
 
-    public leave (
+    public leave(
             successCallback?: SuccessCallback
           , errorCallback?: ErrorCallback): void {
 
@@ -287,7 +287,7 @@ export default class Session {
         ]);
     }
 
-    public loadMedia (
+    public loadMedia(
             loadRequest: LoadRequest
           , successCallback?: LoadSuccessCallback
           , errorCallback?: ErrorCallback): void {
@@ -345,7 +345,7 @@ export default class Session {
         });
     }
 
-    public queueLoad (
+    public queueLoad(
             _queueLoadRequest: QueueLoadRequest
           , _successCallback?: LoadSuccessCallback
           , _errorCallback?: ErrorCallback): void {
@@ -353,25 +353,25 @@ export default class Session {
         logger.info("STUB :: Session#queueLoad");
     }
 
-    public removeMediaListener (_mediaListener: MediaListener): void {
+    public removeMediaListener(_mediaListener: MediaListener): void {
         logger.info("STUB :: Session#removeMediaListener");
     }
 
-    public removeMessageListener (
+    public removeMessageListener(
             namespace: string
           , listener: MessageListener): void {
 
         this.#messageListeners.get(namespace)?.delete(listener);
     }
 
-    public removeUpdateListener (
+    public removeUpdateListener(
             _namespace: string
           , listener: UpdateListener): void {
 
         this.#updateListeners.delete(listener);
     }
 
-    public sendMessage (
+    public sendMessage(
             namespace: string
           , message: {} | string
           , successCallback?: SuccessCallback
@@ -395,7 +395,7 @@ export default class Session {
         ]);
     }
 
-    public setReceiverMuted (
+    public setReceiverMuted(
             muted: boolean
           , successCallback?: SuccessCallback
           , errorCallback?: ErrorCallback) {
@@ -417,7 +417,7 @@ export default class Session {
         ]);
     }
 
-    public setReceiverVolumeLevel (
+    public setReceiverVolumeLevel(
             newLevel: number
           , successCallback?: SuccessCallback
           , errorCallback?: ErrorCallback): void {
@@ -439,7 +439,7 @@ export default class Session {
         ]);
     }
 
-    public stop (
+    public stop(
             successCallback?: SuccessCallback
           , errorCallback?: ErrorCallback): void {
 
@@ -460,7 +460,7 @@ export default class Session {
     }
 
 
-    private _sendMediaMessage (message: string | {}) {
+    private _sendMediaMessage(message: string | {}) {
         this.sendMessage("urn:x-cast:com.google.cast.media", message);
     }
 }

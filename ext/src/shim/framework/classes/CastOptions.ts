@@ -7,9 +7,9 @@ export default class CastOptions {
     public autoJoinPolicy: string = cast.AutoJoinPolicy.TAB_AND_ORIGIN_SCOPED;
     public language: (string | null) = null;
     public receiverApplicationId: (string | null) = null;
-    public resumeSavedSession: boolean = true;
+    public resumeSavedSession = true;
 
-    constructor (options: CastOptions = ({} as CastOptions)) {
+    constructor(options: CastOptions = ({} as CastOptions)) {
         if (options.autoJoinPolicy) {
             this.autoJoinPolicy = options.autoJoinPolicy;
         }

@@ -2,7 +2,7 @@
 
 // https://developers.google.com/cast/docs/reference/chrome/chrome.cast.Error
 export default class Error {
-    constructor (
+    constructor(
             public code: string
           , public description: (string | null) = null
           , public details: any = null) {

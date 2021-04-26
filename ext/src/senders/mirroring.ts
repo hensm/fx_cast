@@ -27,7 +27,7 @@ let peerConnection: RTCPeerConnection;
  * Sends a message to the fx_cast app running on the
  * receiver device.
  */
-function sendAppMessage (subject: string, data: any) {
+function sendAppMessage(subject: string, data: any) {
     if (!session) {
         return;
     }
@@ -44,7 +44,7 @@ window.addEventListener("beforeunload", () => {
 });
 
 
-async function onRequestSessionSuccess (newSession: cast.Session) {
+async function onRequestSessionSuccess(newSession: cast.Session) {
     cast.logMessage("onRequestSessionSuccess");
 
     session = newSession;
@@ -102,7 +102,7 @@ async function onRequestSessionSuccess (newSession: cast.Session) {
 
             let lastFrame: DOMHighResTimeStamp;
             window.requestAnimationFrame(
-                    function draw (now: DOMHighResTimeStamp) {
+                    function draw(now: DOMHighResTimeStamp) {
 
                 if (!lastFrame) {
                     lastFrame = now;
@@ -153,7 +153,7 @@ async function onRequestSessionSuccess (newSession: cast.Session) {
 }
 
 
-function receiverListener (availability: string) {
+function receiverListener(availability: string) {
     cast.logMessage("receiverListener");
 
     if (wasSessionRequested) {
@@ -170,16 +170,16 @@ function receiverListener (availability: string) {
 }
 
 
-function onRequestSessionError () {
+function onRequestSessionError() {
     cast.logMessage("onRequestSessionError");
 }
-function sessionListener () {
+function sessionListener() {
     cast.logMessage("sessionListener");
 }
-function onInitializeSuccess () {
+function onInitializeSuccess() {
     cast.logMessage("onInitializeSuccess");
 }
-function onInitializeError () {
+function onInitializeError() {
     cast.logMessage("onInitializeError");
 }
 

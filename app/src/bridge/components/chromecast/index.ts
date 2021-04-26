@@ -11,7 +11,7 @@ import { Receiver } from "../../types";
 const existingSessions: Map<string, Session> = new Map();
 const existingMedia: Map<string, Media> = new Map();
 
-export function handleSessionMessage (message: any) {
+export function handleSessionMessage(message: any) {
     if (!message.data._id) {
         console.error("Session message missing _id");
         return;
@@ -34,7 +34,7 @@ export function handleSessionMessage (message: any) {
     }
 }
 
-export function handleMediaMessage (message: any) {
+export function handleMediaMessage(message: any) {
     if (!message.data._id) {
         console.error("Media message missing _id");
         return;
@@ -44,7 +44,7 @@ export function handleMediaMessage (message: any) {
 
     if (existingMedia.has(mediaId)) {
         // Forward message to instance message handler
-        existingMedia.get(mediaId)!.messageHandler(message);
+        existingMedia.get(mediaId)?.messageHandler(message);
     } else {
         if (message.subject === "bridge:media/initialize") {
             // Get Session object media belongs to
@@ -61,7 +61,7 @@ export function handleMediaMessage (message: any) {
     }
 }
 
-export function stopReceiverApp (host: string, port: number) {
+export function stopReceiverApp(host: string, port: number) {
     const client = new castv2.Client();
 
     client.connect({ host, port }, () => {

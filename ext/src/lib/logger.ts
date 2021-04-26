@@ -1,19 +1,19 @@
 "use strict";
 
 export class Logger {
-    constructor (private prefix: string) {}
+    constructor(private prefix: string) {}
 
-    public log (message: string, data?: any) {
+    public log(message: string, data?: any) {
         const formattedMessage = `${this.prefix} (Log): ${message}`;
         if (data) {
-            // tslint:disable-next-line:no-console
+            // eslint-disable-next-line no-console
             console.log(formattedMessage, data);
         } else {
-            // tslint:disable-next-line:no-console
+            // eslint-disable-next-line no-console
             console.log(formattedMessage);
         }
     }
-    public info (message: string, data?: any) {
+    public info(message: string, data?: any) {
         const formattedMessage = `${this.prefix} (Info): ${message}`;
         if (data) {
             console.info(formattedMessage, data);
@@ -21,7 +21,7 @@ export class Logger {
             console.info(formattedMessage);
         }
     }
-    public error (message: string, data?: any) {
+    public error(message: string, data?: any) {
         const formattedMessage = `${this.prefix} (Error): ${message}`;
         if (data) {
             console.error(formattedMessage, data);

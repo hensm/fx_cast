@@ -25,7 +25,7 @@ let bridgeInfo: any;
 let isFramework = false;
 
 // Call page's API loaded function if defined
-function callPageReadyFunction () {
+function callPageReadyFunction() {
     const readyFunction = _window.__onGCastApiAvailable;
     if (readyFunction && typeof readyFunction === "function") {
         readyFunction(bridgeInfo && bridgeInfo.isVersionCompatible);

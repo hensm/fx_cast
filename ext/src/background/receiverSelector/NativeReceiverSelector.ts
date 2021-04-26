@@ -20,20 +20,20 @@ const _ = browser.i18n.getMessage;
 // TODO: Figure out lifetime properly
 export default class NativeReceiverSelector extends ReceiverSelector {
     private bridgePort: (Port | null) = null;
-    private wasReceiverSelected: boolean = false;
+    private wasReceiverSelected = false;
     
     #isOpen = false;
 
-    constructor () {
+    constructor() {
         super();
         this.onBridgePortMessage = this.onBridgePortMessage.bind(this);
     }
 
-    get isOpen () {
+    get isOpen() {
         return this.#isOpen;
     }
 
-    public async open (
+    public async open(
             receivers: Receiver[]
           , defaultMediaType: ReceiverSelectorMediaType
           , availableMediaTypes: ReceiverSelectorMediaType
@@ -86,11 +86,11 @@ export default class NativeReceiverSelector extends ReceiverSelector {
         this.#isOpen = true;
     }
 
-    public update (): void {
+    public update(): void {
         // TODO: Implement this
     }
 
-    public close (): void {
+    public close(): void {
         if (this.bridgePort) {
             this.bridgePort.postMessage({
                 subject: "bridge:closeReceiverSelector"
@@ -100,7 +100,7 @@ export default class NativeReceiverSelector extends ReceiverSelector {
         this.#isOpen = false;
     }
 
-    private async onBridgePortMessage (message: Message) {
+    private async onBridgePortMessage(message: Message) {
         switch (message.subject) {
             case "main:receiverSelector/selected": {
                 this.wasReceiverSelected = true;

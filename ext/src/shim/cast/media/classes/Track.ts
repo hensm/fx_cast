@@ -8,7 +8,7 @@ export default class Track {
     public trackContentId: (string | null) = null;
     public trackContentType: (string | null) = null;
 
-    constructor (
+    constructor(
             public trackId: number
           , public type: string) {}
 }

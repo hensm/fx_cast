@@ -8,7 +8,7 @@ export default class Volume {
     public controlType?: VolumeControlType;
     public stepInterval?: number;
 
-    constructor (
+    constructor(
             public level: (number | null) = null
           , public muted: (boolean | null) = null) {
     }

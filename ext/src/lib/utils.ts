@@ -5,13 +5,11 @@ import logger from "./logger";
 import { ReceiverSelectorMediaType } from "../background/receiverSelector";
 
 
-export function getNextEllipsis (ellipsis: string): string {
-    /* tslint:disable:curly */
+export function getNextEllipsis(ellipsis: string): string {
     if (ellipsis === "") return ".";
     if (ellipsis === ".") return "..";
     if (ellipsis === "..") return "...";
     if (ellipsis === "...") return "";
-    /* tslint:enable:curly */
 
     return "";
 }
@@ -19,7 +17,7 @@ export function getNextEllipsis (ellipsis: string): string {
 /**
  * Template literal tag function, JSON-encodes substitutions.
  */
-export function stringify (
+export function stringify(
         templateStrings: TemplateStringsArray
       , ...substitutions: any[]) {
 
@@ -36,7 +34,7 @@ export function stringify (
     return formattedString;
 }
 
-export function getMediaTypesForPageUrl (
+export function getMediaTypesForPageUrl(
         pageUrl: string): ReceiverSelectorMediaType {
 
     const url = new URL(pageUrl);
@@ -90,7 +88,7 @@ export interface WindowCenteredProps {
     top: number;
 }
 
-export function getWindowCenteredProps (
+export function getWindowCenteredProps(
         refWin: browser.windows.Window
       , width: number
       , height: number): WindowCenteredProps {
@@ -111,11 +109,10 @@ export function getWindowCenteredProps (
 }
 
 
-// tslint:disable-next-line:max-line-length
 export const REMOTE_MATCH_PATTERN_REGEX = /^(?:(?:(\*|https?|ftp):\/\/(\*|(?:\*\.(?:[^\/\*:]\.?)+(?:[^\.])|[^\/\*:]*))?)(\/.*)|<all_urls>)$/;
 
 
-export function loadScript (
+export function loadScript(
         scriptUrl: string
       , doc: Document = document): HTMLScriptElement {
 

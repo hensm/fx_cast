@@ -42,7 +42,7 @@ export default class MediaInfo {
     public userActionStates?: UserActionState[];
     public vmapAdsRequest?: VastAdsRequest;
 
-    constructor (
+    constructor(
             public contentId: string
           , public contentType: string) {}
 }

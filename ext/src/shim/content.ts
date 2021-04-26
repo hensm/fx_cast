@@ -35,7 +35,7 @@ Reflect.defineProperty(
   , enumerable: true
   , get: desc?.get
 
-  , set: exportFunction(function setFunc (this: HTMLScriptElement, value) {
+  , set: exportFunction(function setFunc(this: HTMLScriptElement, value) {
         if (CAST_SCRIPT_URLS.includes(value)) {
             return desc?.set?.call(this, CAST_LOADER_SCRIPT_URL);
         }

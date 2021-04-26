@@ -1,4 +1,4 @@
-/* tslint:disable:max-line-length */
+/* eslint-disable max-len */
 "use strict";
 
 import React, { Component } from "react";
@@ -40,7 +40,7 @@ browser.runtime.getPlatformInfo()
     });
 
 
-function getInputValue (input: HTMLInputElement) {
+function getInputValue(input: HTMLInputElement) {
     switch (input.type) {
         case "checkbox":
             return input.checked;
@@ -78,7 +78,7 @@ class OptionsApp extends Component<
       , hasSaved: false
     };
 
-    constructor (props: OptionsAppProps) {
+    constructor(props: OptionsAppProps) {
         super(props);
 
         this.handleReset = this.handleReset.bind(this);
@@ -94,7 +94,7 @@ class OptionsApp extends Component<
                 this.getWhitelistItemPatternError.bind(this);
     }
 
-    public async componentDidMount () {
+    public async componentDidMount() {
         this.setState({
             hasLoaded: true
           , options: await options.getAll()
@@ -131,7 +131,7 @@ class OptionsApp extends Component<
         }
     }
 
-    public render () {
+    public render() {
         if (!this.state.hasLoaded) {
             return;
         }
@@ -402,6 +402,7 @@ class OptionsApp extends Component<
                             { _("optionsReset") }
                         </button>
                         <button type="submit"
+                                // @ts-ignore
                                 default
                                 disabled={ !this.state.isFormValid }>
                             { _("optionsSave") }
@@ -413,13 +414,13 @@ class OptionsApp extends Component<
     }
 
 
-    private handleReset () {
+    private handleReset() {
         this.setState({
             options: { ...defaultOptions }
         });
     }
 
-    private async handleFormSubmit (ev: React.FormEvent<HTMLFormElement>) {
+    private async handleFormSubmit(ev: React.FormEvent<HTMLFormElement>) {
         ev.preventDefault();
 
         this.form?.reportValidity();
@@ -443,7 +444,7 @@ class OptionsApp extends Component<
         }
     }
 
-    private handleFormChange (ev: React.FormEvent<HTMLFormElement>) {
+    private handleFormChange(ev: React.FormEvent<HTMLFormElement>) {
         ev.preventDefault();
 
         const isFormValid = this.form?.checkValidity();
@@ -454,7 +455,7 @@ class OptionsApp extends Component<
         }
     }
 
-    private handleInputChange (ev: React.ChangeEvent<HTMLInputElement>) {
+    private handleInputChange(ev: React.ChangeEvent<HTMLInputElement>) {
         this.setState(currentState => {
             if (currentState.options) {
                 currentState.options[ev.target.name] = getInputValue(ev.target);
@@ -464,19 +465,20 @@ class OptionsApp extends Component<
         });
     }
 
-    private handleReceiverSelectorTypeChange (
+    private handleReceiverSelectorTypeChange(
             ev: React.ChangeEvent<HTMLSelectElement>) {
 
         this.setState(currentState => {
             if (currentState.options) {
-                currentState.options[ev.target.name] = parseInt(ev.target.value);
+                currentState.options[ev.target.name] =
+                        parseInt(ev.target.value);
             }
 
             return currentState;
         });
     }
 
-    private handleWhitelistChange (whitelist: string[]) {
+    private handleWhitelistChange(whitelist: string[]) {
         this.setState(currentState => {
             if (currentState.options) {
                 currentState.options.userAgentWhitelist = whitelist;
@@ -486,7 +488,7 @@ class OptionsApp extends Component<
         });
     }
 
-    private getWhitelistItemPatternError (info: string): string {
+    private getWhitelistItemPatternError(info: string): string {
         return _("optionsUserAgentWhitelistInvalidMatchPattern", info);
     }
 }

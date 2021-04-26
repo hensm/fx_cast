@@ -26,7 +26,7 @@ let platform: string;
 let chromeUserAgent: string | undefined;
 let chromeUserAgentHybrid: string | undefined;
 
-export async function initWhitelist () {
+export async function initWhitelist() {
     logger.info("init (whitelist)");
 
     if (!platform) {
@@ -66,7 +66,7 @@ export async function initWhitelist () {
  * as Chrome, so we should rewrite the User-Agent header
  * to reflect this on whitelisted sites.
  */
- async function onWhitelistedBeforeSendHeaders (
+ async function onWhitelistedBeforeSendHeaders(
         details: OnBeforeSendHeadersDetails) {
 
     if (!details.requestHeaders) {
@@ -100,7 +100,7 @@ export async function initWhitelist () {
  * players on other origins (like CDN domains) when the
  * main site is whitelisted.
  */
-function onWhitelistedChildBeforeSendHeaders (
+function onWhitelistedChildBeforeSendHeaders(
         details: OnBeforeSendHeadersDetails) {
 
     if (!details.requestHeaders || !details.frameAncestors) {
@@ -137,7 +137,7 @@ function onWhitelistedChildBeforeSendHeaders (
  * We can redirect this and inject our own script to setup
  * the API shim.
  */
-async function onBeforeCastSDKRequest (details: OnBeforeRequestDetails) {
+async function onBeforeCastSDKRequest(details: OnBeforeRequestDetails) {
     if (!details.originUrl) {
         return {};
     }
@@ -183,7 +183,7 @@ async function onBeforeCastSDKRequest (details: OnBeforeRequestDetails) {
 }
 
 
-async function registerUserAgentWhitelist () {
+async function registerUserAgentWhitelist() {
     const { userAgentWhitelist
           , userAgentWhitelistEnabled } = await options.getAll();
 
@@ -209,7 +209,7 @@ async function registerUserAgentWhitelist () {
           , [ "blocking", "requestHeaders" ]);
 }
 
-function unregisterUserAgentWhitelist () {
+function unregisterUserAgentWhitelist() {
     originUrlCache.length = 0;
 
     browser.webRequest.onBeforeSendHeaders

@@ -3,7 +3,7 @@
 export default class EditTracksInfoRequest {
     public requestId = 0;
 
-    constructor (
+    constructor(
             public activeTrackIds: (number[] | null) = null
           , public textTrackStyle: (string | null) = null) {
     }

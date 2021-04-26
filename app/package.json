@@ -8,7 +8,7 @@
         "package": "node bin/build.js --package",
         "install-manifest": "node bin/install-manifest.js",
         "remove-manifest": "node bin/install-manifest.js --remove",
-        "lint": "tslint -c tslint.json -p ."
+        "lint": "eslint src --ext .ts,.tsx"
     },
     "dependencies": {
         "bplist-creator": "0.0.8",

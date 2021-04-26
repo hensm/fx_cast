@@ -17,7 +17,7 @@ export default class StatusListener extends EventEmitter {
     private clientReceiver?: Channel;
     private clientHeartbeatIntervalId?: NodeJS.Timeout;
 
-    constructor (host: string, port: number) {
+    constructor(host: string, port: number) {
         super();
 
         this.client = new Client();
@@ -35,7 +35,7 @@ export default class StatusListener extends EventEmitter {
     /**
      * Closes status listener connection.
      */
-    public deregister (): void {
+    public deregister(): void {
         if (this.clientReceiver) {
             this.clientReceiver.send({ type: "CLOSE" });
         }
@@ -44,7 +44,7 @@ export default class StatusListener extends EventEmitter {
     }
 
 
-    private onConnect (): void {
+    private onConnect(): void {
         const sourceId = "sender-0";
         const destinationId = "receiver-0";
 

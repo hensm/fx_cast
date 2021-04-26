@@ -24,13 +24,13 @@ export default class PopupReceiverSelector extends ReceiverSelector {
     private defaultMediaType?: ReceiverSelectorMediaType;
     private availableMediaTypes?: ReceiverSelectorMediaType;
 
-    private wasReceiverSelected: boolean = false;
+    private wasReceiverSelected = false;
 
     private appId?: string;
 
     #isOpen = false;
 
-    constructor () {
+    constructor() {
         super();
 
         // Bind methods to pass to addListener
@@ -48,11 +48,11 @@ export default class PopupReceiverSelector extends ReceiverSelector {
         messaging.onConnect.addListener(this.onConnect);
     }
 
-    get isOpen () {
+    get isOpen() {
         return this.#isOpen;
     }
 
-    public async open (
+    public async open(
             receivers: Receiver[]
           , defaultMediaType: ReceiverSelectorMediaType
           , availableMediaTypes: ReceiverSelectorMediaType
@@ -115,7 +115,7 @@ export default class PopupReceiverSelector extends ReceiverSelector {
         }
     }
 
-    public update (receivers: Receiver[]) {
+    public update(receivers: Receiver[]) {
         this.receivers = receivers;
         this.messagePort?.postMessage({
             subject: "popup:update"
@@ -125,7 +125,7 @@ export default class PopupReceiverSelector extends ReceiverSelector {
         });
     }
 
-    public async close (): Promise<void> {
+    public async close(): Promise<void> {
         if (this.windowId) {
             await browser.windows.remove(this.windowId);
         }
@@ -138,7 +138,7 @@ export default class PopupReceiverSelector extends ReceiverSelector {
         }
     }
 
-    private onConnect (port: Port) {
+    private onConnect(port: Port) {
         browser.history.deleteUrl({ url: POPUP_URL });
 
         if (port.name !== "popup") {
@@ -181,7 +181,7 @@ export default class PopupReceiverSelector extends ReceiverSelector {
     /**
      * Handles popup messages.
      */
-    private onPopupMessage (message: Message) {
+    private onPopupMessage(message: Message) {
         switch (message.subject) {
             case "receiverSelector:selected": {
                 this.wasReceiverSelected = true;
@@ -206,7 +206,7 @@ export default class PopupReceiverSelector extends ReceiverSelector {
      * Handles cancellation state where the popup window is closed
      * before a receiver is selected.
      */
-    private onWindowsRemoved (windowId: number) {
+    private onWindowsRemoved(windowId: number) {
         // Only care about popup window
         if (windowId !== this.windowId) {
             return;
@@ -234,7 +234,7 @@ export default class PopupReceiverSelector extends ReceiverSelector {
      * into focus. Doesn't apply if no window is focused
      * `WINDOW_ID_NONE` or if the popup window is re-focused.
      */
-    private onWindowsFocusChanged (windowId: number) {
+    private onWindowsFocusChanged(windowId: number) {
         if (windowId !== browser.windows.WINDOW_ID_NONE
                 && windowId !== this.windowId) {
 

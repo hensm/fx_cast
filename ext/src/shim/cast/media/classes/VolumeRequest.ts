@@ -6,6 +6,6 @@ import Volume from "../../classes/Volume";
 export default class VolumeRequest {
     public customData: any = null;
 
-    constructor (
+    constructor(
             public volume: Volume) {}
 }

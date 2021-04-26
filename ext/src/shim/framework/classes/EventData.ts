@@ -1,6 +1,6 @@
 "use strict";
 
 export default class EventData {
-    constructor (
+    constructor(
             public type: string) {}
 }

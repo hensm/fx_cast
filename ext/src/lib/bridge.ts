@@ -16,7 +16,7 @@ import { ReceiverSelectionCast
 
 export const BRIDGE_TIMEOUT = 5000;
 
-async function connect (): Promise<Port> {
+async function connect(): Promise<Port> {
     const applicationName = await options.get("bridgeApplicationName");
     const bridgePort = nativeMessaging.connectNative(applicationName) as
             unknown as Port;

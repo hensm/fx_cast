@@ -2,7 +2,7 @@
 
 // https://developers.google.com/cast/docs/reference/chrome/chrome.cast.CredentialsData
 export default class DialRequest {
-    constructor (
+    constructor(
             public credentials: string
           , public credentialsData: string) {
     }

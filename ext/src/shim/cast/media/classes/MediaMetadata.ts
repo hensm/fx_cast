@@ -12,7 +12,7 @@ export default class MediaMetadata {
     public type: MetadataType;
     public metadataType: MetadataType;
 
-    constructor (type: MetadataType) {
+    constructor(type: MetadataType) {
         this.type = type;
         this.metadataType = type;
     }

@@ -6,7 +6,7 @@ import { SessionEventType } from "../enums";
 
 
 export default class ActiveInputStateEventData extends EventData {
-    constructor (
+    constructor(
             public activeInputState: number) {
 
         super(SessionEventType.ACTIVE_INPUT_STATE_CHANGED);

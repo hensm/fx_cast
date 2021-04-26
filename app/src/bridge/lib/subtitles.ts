@@ -6,7 +6,7 @@ import fs from "fs";
 /**
  * Reads a SubRip file and outputs text content as WebVTT.
  */
-export async function convertSrtToVtt (srtFilePath: string) {
+export async function convertSrtToVtt(srtFilePath: string) {
     const fileStream = fs.createReadStream(
             srtFilePath, { encoding: "utf-8" });
 

@@ -12,6 +12,6 @@ export default class ContainerMetadata {
     public sections?: MediaMetadata[];
     public title?: string;
 
-    constructor (public containerType: ContainerType
+    constructor(public containerType: ContainerType
                         = ContainerType.GENERIC_CONTAINER) {}
 }

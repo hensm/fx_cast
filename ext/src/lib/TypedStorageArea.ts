@@ -9,12 +9,12 @@
 export class TypedStorageArea<Schema extends { [key: string]: any }> {
     private storageArea: any;
 
-    constructor (storageArea: browser.storage.StorageArea) {
+    constructor(storageArea: browser.storage.StorageArea) {
         this.storageArea = storageArea;
     }
 
     public async get<SchemaKey extends keyof Schema
-                   , SchemaPartial extends Partial<Schema>> (
+                   , SchemaPartial extends Partial<Schema>>(
             keys?: SchemaKey
                  | SchemaKey[]
                  | SchemaPartial
@@ -25,23 +25,23 @@ export class TypedStorageArea<Schema extends { [key: string]: any }> {
         return await this.storageArea.get(keys);
     }
 
-    public async getBytesInUse<SchemaKey extends keyof Schema> (
+    public async getBytesInUse<SchemaKey extends keyof Schema>(
             keys?: Schema | SchemaKey[]): Promise<number> {
 
         return await this.storageArea.getBytesInUse(keys);
     }
 
-    public async set (keys: Partial<Schema>): Promise<void> {
+    public async set(keys: Partial<Schema>): Promise<void> {
         await this.storageArea.set(keys);
     }
 
-    public async remove<SchemaKey extends keyof Schema> (
+    public async remove<SchemaKey extends keyof Schema>(
             keys: SchemaKey | SchemaKey[]): Promise<void> {
 
         await this.storageArea.remove(keys);
     }
 
-    public async clear (): Promise<void> {
+    public async clear(): Promise<void> {
         await this.storageArea.clear();
     }
 }

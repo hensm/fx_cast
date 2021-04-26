@@ -6,11 +6,10 @@ import options from "./options";
 import { Message, Port } from "../messaging";
 
 
-
 type DisconnectListener = (port: Port) => void;
 type MessageListener = (message: Message) => void;
 
-function connectNative (application: string): Port {
+function connectNative(application: string): Port {
     /**
      * In order to preserve the synchronous API, messages are
      * queued before either the native messaging host or the
@@ -39,35 +38,35 @@ function connectNative (application: string): Port {
       , name: ""
 
       , onDisconnect: {
-            addListener (cb: DisconnectListener) {
+            addListener(cb: DisconnectListener) {
                 onDisconnectListeners.add(cb);
             }
-          , removeListener (cb: DisconnectListener) {
+          , removeListener(cb: DisconnectListener) {
                 onDisconnectListeners.delete(cb);
             }
-          , hasListener (cb: DisconnectListener) {
+          , hasListener(cb: DisconnectListener) {
                 return onDisconnectListeners.has(cb);
             }
-          , hasListeners () {
+          , hasListeners() {
                 return onDisconnectListeners.size > 0;  
             }
         }
       , onMessage: {
-            addListener (cb: MessageListener) {
+            addListener(cb: MessageListener) {
                 onMessageListeners.add(cb);
             }
-          , removeListener (cb: MessageListener) {
+          , removeListener(cb: MessageListener) {
                 onMessageListeners.delete(cb);
             }
-          , hasListener (cb: MessageListener) {
+          , hasListener(cb: MessageListener) {
                 return onMessageListeners.has(cb);
             }
-          , hasListeners () {
+          , hasListeners() {
                 return onMessageListeners.size > 0;  
             }
         }
 
-      , disconnect () {
+      , disconnect() {
             if (socket) {
                 socket.close();
             } else {
@@ -75,7 +74,7 @@ function connectNative (application: string): Port {
             }
         }
 
-      , postMessage (message) {
+      , postMessage(message) {
             if (socket) {
                 switch (socket.readyState) {
                     case WebSocket.CONNECTING: {
@@ -168,7 +167,7 @@ function connectNative (application: string): Port {
     return portObject;
 }
 
-async function sendNativeMessage (
+async function sendNativeMessage(
         application: string
       , message: Message) {
 

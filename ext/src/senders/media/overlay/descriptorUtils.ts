@@ -4,7 +4,7 @@
  * Walk up the prototype chain until the specified property
  * descriptor is found, otherwise return undefined.
  */
-export function getPropertyDescriptor (
+export function getPropertyDescriptor(
         target: any, prop: string | number | symbol)
       : PropertyDescriptor | undefined {
 
@@ -23,7 +23,7 @@ export function getPropertyDescriptor (
  * Bind either the getter/setter functions or the value function
  * to a target object.
  */
-export function bindPropertyDescriptor (
+export function bindPropertyDescriptor(
         desc: PropertyDescriptor, target: any)
       : PropertyDescriptor {
 
@@ -42,7 +42,7 @@ export function bindPropertyDescriptor (
  * be further up in the prototype chain), re-bind it to the target
  * element and collect them into a property descriptor map.
  */
-export function clonePropsDescriptor<T> (
+export function clonePropsDescriptor<T>(
         target: T, props: any[])
       : PropertyDescriptorMap {
 
@@ -57,15 +57,15 @@ export function clonePropsDescriptor<T> (
     }, {});
 }
 
-export function makeGetterDescriptor (val: any): PropertyDescriptor {
+export function makeGetterDescriptor(val: any): PropertyDescriptor {
     return {
         enumerable: true
       , configurable: true
-      , get () { return val; }
+      , get() { return val; }
     };
 }
 
-export function makeValueDescriptor (val: any): PropertyDescriptor {
+export function makeValueDescriptor(val: any): PropertyDescriptor {
     return {
         enumerable: true
       , configurable: true

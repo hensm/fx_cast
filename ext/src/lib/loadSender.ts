@@ -20,7 +20,7 @@ interface LoadSenderOptions {
  * Loads the appropriate sender for a given receiver
  * selector response.
  */
-export default async function loadSender (opts: LoadSenderOptions) {
+export default async function loadSender(opts: LoadSenderOptions) {
     // Cancelled
     if (!opts.selection) {
         return;

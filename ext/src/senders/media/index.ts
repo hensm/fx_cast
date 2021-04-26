@@ -8,7 +8,7 @@ import { Message } from "../../messaging";
 import { Receiver } from "../../types";
 
 
-function startMediaServer (filePath: string, port: number)
+function startMediaServer(filePath: string, port: number)
         : Promise<{ mediaPath: string
                   , subtitlePaths: string[]
                   , localAddress: string }> {
@@ -22,7 +22,7 @@ function startMediaServer (filePath: string, port: number)
             }
         } as Message);
 
-        backgroundPort.addEventListener("message", function onMessage (ev) {
+        backgroundPort.addEventListener("message", function onMessage(ev) {
             const message = ev.data as Message;
 
             if (message.subject.startsWith("mediaCast:mediaServer")) {
@@ -54,14 +54,14 @@ let currentMedia: cast.media.Media;
 let mediaElement: HTMLMediaElement;
 
 
-function getSession (opts: InitOptions): Promise<cast.Session> {
+function getSession(opts: InitOptions): Promise<cast.Session> {
     return new Promise(async (resolve, reject) => {
         /**
          * If a receiver is available, call requestSession. If a
          * specific receiver was specified, bypass receiver selector
          * and create session directly.
          */
-        function receiverListener (availability: string) {
+        function receiverListener(availability: string) {
             if (availability === cast.ReceiverAvailability.AVAILABLE) {
                 if (opts.receiver) {
                     cast._requestSession(
@@ -76,14 +76,14 @@ function getSession (opts: InitOptions): Promise<cast.Session> {
             }
         }
 
-        function sessionListener () {
+        function sessionListener() {
             // TODO: Handle this
         }
 
-        function onRequestSessionSuccess (session: cast.Session) {
+        function onRequestSessionSuccess(session: cast.Session) {
             resolve(session);
         }
-        function onRequestSessionError (err: cast.Error) {
+        function onRequestSessionError(err: cast.Error) {
             reject(err.description);
         }
 
@@ -101,7 +101,7 @@ function getSession (opts: InitOptions): Promise<cast.Session> {
     });
 }
 
-function getMedia (opts: InitOptions): Promise<cast.media.Media> {
+function getMedia(opts: InitOptions): Promise<cast.media.Media> {
     return new Promise(async (resolve, reject) => {
         let mediaUrl = new URL(opts.mediaUrl);
         let subtitleUrls: URL[] = [];
@@ -233,16 +233,15 @@ function getMedia (opts: InitOptions): Promise<cast.media.Media> {
 
 let ignoreMediaEvents = false;
 
-async function registerMediaElementListeners () {
-    if (await options.get("mediaSyncElement")) {
-
-        function checkIgnore (ev: Event) {
-            if (ignoreMediaEvents) {
-                ignoreMediaEvents = false;
-                ev.stopImmediatePropagation();
-            }
+async function registerMediaElementListeners() {
+    function checkIgnore(ev: Event) {
+        if (ignoreMediaEvents) {
+            ignoreMediaEvents = false;
+            ev.stopImmediatePropagation();
         }
+    }
 
+    if (await options.get("mediaSyncElement")) {
         mediaElement.addEventListener("play", checkIgnore, true);
         mediaElement.addEventListener("pause", checkIgnore, true);
         mediaElement.addEventListener("suspend", checkIgnore, true);
@@ -348,7 +347,7 @@ interface InitOptions {
     targetElementId?: number;
 }
 
-export async function init (opts: InitOptions) {
+export async function init(opts: InitOptions) {
     backgroundPort = await ensureInit();
 
     const isLocalMedia = opts.mediaUrl.startsWith("file://");
@@ -380,8 +379,7 @@ export async function init (opts: InitOptions) {
             });
 
             if (await options.get("mediaStopOnUnload")) {
-                // tslint:disable-next-line: no-empty
-                currentSession.stop(() => {}, () => {});
+                currentSession.stop();
             }
         });
     }

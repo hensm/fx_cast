@@ -10,9 +10,9 @@ export default class QueueLoadRequest {
     public repeatMode: string = RepeatMode.OFF;
     public requestId: (number | null) = null;
     public sessionId: (string | null) = null;
-    public startIndex: number = 0;
-    public type: string = "QUEUE_LOAD";
+    public startIndex = 0;
+    public type = "QUEUE_LOAD";
 
-    constructor (
+    constructor(
             public items: QueueItem[]) {}
 }

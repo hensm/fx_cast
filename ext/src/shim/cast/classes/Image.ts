@@ -5,5 +5,5 @@ export default class Image {
     public width: (number | null) = null;
     public height: (number | null) = null;
 
-    constructor (public url: string) {}
+    constructor(public url: string) {}
 }

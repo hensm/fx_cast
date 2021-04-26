@@ -41,9 +41,8 @@ interface EventMap {
     "changed": Array<keyof Options>;
 }
 
-// tslint:disable-next-line:new-parens
 export default new class extends TypedEventTarget<EventMap> {
-    constructor () {
+    constructor() {
         super();
         this.onStorageChanged = this.onStorageChanged.bind(this);
         browser.storage.onChanged.addListener(this.onStorageChanged);
@@ -105,7 +104,7 @@ export default new class extends TypedEventTarget<EventMap> {
      * Fetches `options` key from storage and returns it as
      * Options interface type.
      */
-    public async getAll (): Promise<Options> {
+    public async getAll(): Promise<Options> {
         const { options } = await storageArea.get("options");
         return options;
     }
@@ -114,7 +113,7 @@ export default new class extends TypedEventTarget<EventMap> {
      * Takes Options object and sets to `options` storage key.
      * Returns storage promise.
      */
-    public async setAll (options: Options): Promise<void> {
+    public async setAll(options: Options): Promise<void> {
         return storageArea.set({ options });
     }
 
@@ -122,7 +121,7 @@ export default new class extends TypedEventTarget<EventMap> {
      * Gets specific option from storage and returns it as its
      * type from Options interface type.
      */
-    public async get<T extends keyof Options> (name: T): Promise<Options[T]> {
+    public async get<T extends keyof Options>(name: T): Promise<Options[T]> {
         const options = await this.getAll();
 
         if (options.hasOwnProperty(name)) {
@@ -136,7 +135,7 @@ export default new class extends TypedEventTarget<EventMap> {
      * Sets specific option to storage. Returns storage
      * promise.
      */
-    public async set<T extends keyof Options> (
+    public async set<T extends keyof Options>(
             name: T
           , value: Options[T]): Promise<void> {
 
@@ -151,7 +150,7 @@ export default new class extends TypedEventTarget<EventMap> {
      * against defaults. Any options in defaults and not in
      * storage are set. Does not override any existing options.
      */
-    public async update (defaults = defaultOptions): Promise<void> {
+    public async update(defaults = defaultOptions): Promise<void> {
         const newOpts = await this.getAll();
 
         // Find options not already in storage

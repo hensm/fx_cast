@@ -5,5 +5,5 @@ export default class SenderApplication {
     public packageId: (string | null) = null;
     public url: (string | null) = null;
 
-    constructor (public platform: string) {}
+    constructor(public platform: string) {}
 }

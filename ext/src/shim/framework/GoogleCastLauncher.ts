@@ -8,7 +8,7 @@ import logger from "../../lib/logger";
  * a cast icon and manages visibility state and event handling.
  */
 export default class GoogleCastLauncher extends HTMLElement {
-    constructor () {
+    constructor() {
         super();
 
         this.style.display = "none";
@@ -25,8 +25,6 @@ export default class GoogleCastLauncher extends HTMLElement {
                 opacity: 0;
             }
         `;
-
-        // tslint:disable:max-line-length
 
         const SVG_NAMESPACE = "http://www.w3.org/2000/svg";
 
@@ -66,9 +64,6 @@ export default class GoogleCastLauncher extends HTMLElement {
 
         // Add icon paths to SVG
         icon.append(iconArch0, iconArch1, iconArch2, iconBox, iconBoxFill);
-
-        // tslint:enable:max-line-length
-
 
         const shadow = this.attachShadow({ mode: "open" });
         shadow.append(icon, style);

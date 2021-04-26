@@ -22,8 +22,10 @@ const argv = minimist(process.argv.slice(2), {
 
 
 if (argv.version) {
+    // eslint-disable-next-line no-console
     console.log(`v${__applicationVersion}`);
 } else if (argv.help) {
+    // eslint-disable-next-line no-console
     console.log(
 `Usage: ${argv.__name} [options]
 

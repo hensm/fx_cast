@@ -14,9 +14,9 @@ import { convertSrtToVtt } from "../lib/subtitles";
 
 export let mediaServer: http.Server | undefined;
 
-export async function startMediaServer (filePath: string, port: number) {
+export async function startMediaServer(filePath: string, port: number) {
     if (mediaServer?.listening) {
-        await stopMediaServer();
+        stopMediaServer();
     }
 
     let fileDir: string;
@@ -74,7 +74,9 @@ export async function startMediaServer (filePath: string, port: number) {
                         path.join(fileDir, dirEntry.name)));
             }
         }
-    } catch (err) {}
+    } catch (err) {
+        // TODO: Handle?
+    }
 
     mediaServer = http.createServer(async (req, res) => {
         if (!req.url) {
@@ -172,7 +174,7 @@ export async function startMediaServer (filePath: string, port: number) {
     mediaServer.listen(port);
 }
 
-export function stopMediaServer () {
+export function stopMediaServer() {
     if (mediaServer?.listening) {
         mediaServer.close();
         mediaServer = undefined;

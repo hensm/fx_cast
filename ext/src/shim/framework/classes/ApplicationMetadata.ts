@@ -9,7 +9,7 @@ export default class ApplicationMetadata {
     public name: string;
     public namespaces: string[];
 
-    constructor (sessionObj: cast.Session) {
+    constructor(sessionObj: cast.Session) {
         this.applicationId = sessionObj.appId;
         this.images = sessionObj.appImages;
         this.name = sessionObj.displayName;

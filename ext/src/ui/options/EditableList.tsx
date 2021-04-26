@@ -1,4 +1,4 @@
-/* tslint:disable:max-line-length */
+/* eslint-disable max-len */
 "use strict";
 
 import React, { Component } from "react";
@@ -24,7 +24,7 @@ export default class EditableList extends Component<
 
     private rawViewTextArea: (HTMLTextAreaElement | null) = null;
 
-    constructor (props: EditableListProps) {
+    constructor(props: EditableListProps) {
         super(props);
 
         this.state = {
@@ -43,7 +43,7 @@ export default class EditableList extends Component<
         this.handleNewItemEdit = this.handleNewItemEdit.bind(this);
     }
 
-    public render () {
+    public render() {
         return (
             <div className="editable-list">
                 { this.state.rawView
@@ -102,21 +102,21 @@ export default class EditableList extends Component<
         );
     }
 
-    private handleItemRemove (item: string) {
+    private handleItemRemove(item: string) {
         const newItems = new Set(this.props.data);
         newItems.delete(item);
 
         this.props.onChange([...newItems]);
     }
 
-    private handleItemEdit (item: string, newValue: string) {
+    private handleItemEdit(item: string, newValue: string) {
         this.props.onChange(this.props.data.map(
                 currentItem => currentItem === item
                     ? newValue
                     : currentItem));
     }
 
-    private handleSwitchView () {
+    private handleSwitchView() {
         this.setState(currentState => {
             if (currentState.rawView) {
                 return {
@@ -132,7 +132,7 @@ export default class EditableList extends Component<
         });
     }
 
-    private handleSaveRaw () {
+    private handleSaveRaw() {
         this.setState(currentState => {
             const newItems = currentState.rawViewValue.split("\n")
                 .filter(item => item !== "");
@@ -153,7 +153,7 @@ export default class EditableList extends Component<
         });
     }
 
-    private handleRawViewTextAreaChange (ev: React.ChangeEvent<HTMLTextAreaElement>) {
+    private handleRawViewTextAreaChange(ev: React.ChangeEvent<HTMLTextAreaElement>) {
         if (!this.rawViewTextArea) {
             return;
         }
@@ -167,19 +167,19 @@ export default class EditableList extends Component<
         });
     }
 
-    private handleAddItem () {
+    private handleAddItem() {
         this.setState({
             addingNewItem: true
         });
     }
 
-    private handleNewItemRemove () {
+    private handleNewItemRemove() {
         this.setState({
             addingNewItem: false
         });
     }
 
-    private handleNewItemEdit (_item: string, newItem: string) {
+    private handleNewItemEdit(_item: string, newItem: string) {
         this.setState({
             addingNewItem: false
         }, () => {
@@ -208,7 +208,7 @@ class EditableListItem extends Component<
 
     private input: (HTMLInputElement | null) = null;
 
-    constructor (props: EditableListItemProps) {
+    constructor(props: EditableListItemProps) {
         super(props);
 
         this.state = {
@@ -223,7 +223,7 @@ class EditableListItem extends Component<
         this.handleInputKeyPress = this.handleInputKeyPress.bind(this);
     }
 
-    public render () {
+    public render() {
         const selected = this.state.editing
             ? "editable-list__item--selected" : "";
 
@@ -260,7 +260,7 @@ class EditableListItem extends Component<
         );
     }
 
-    private stopEditing (input: HTMLInputElement) {
+    private stopEditing(input: HTMLInputElement) {
         if (this.props.editing
                 && !this.props.itemPattern.test(this.state.editValue)) {
             input.setCustomValidity(this.props.itemPatternError());
@@ -277,11 +277,11 @@ class EditableListItem extends Component<
         });
     }
 
-    private handleRemove () {
+    private handleRemove() {
         this.props.onRemove(this.props.text);
     }
 
-    private handleEditBegin () {
+    private handleEditBegin() {
         if (!this.state.editing) {
             this.setState({
                 editing: true
@@ -293,11 +293,11 @@ class EditableListItem extends Component<
         }
     }
 
-    private handleEditEnd (ev: React.FocusEvent<HTMLInputElement>) {
+    private handleEditEnd(ev: React.FocusEvent<HTMLInputElement>) {
         this.stopEditing(ev.target);
     }
 
-    private handleInputChange (ev: React.ChangeEvent<HTMLInputElement>) {
+    private handleInputChange(ev: React.ChangeEvent<HTMLInputElement>) {
         this.setState({
             editValue: ev.target.value
         });
@@ -308,7 +308,7 @@ class EditableListItem extends Component<
             : "");
     }
 
-    private handleInputKeyPress (ev: React.KeyboardEvent<HTMLInputElement>) {
+    private handleInputKeyPress(ev: React.KeyboardEvent<HTMLInputElement>) {
         if (ev.key === "Enter") {
             this.stopEditing(ev.target as HTMLInputElement);
         }

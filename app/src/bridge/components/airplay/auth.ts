@@ -26,7 +26,7 @@ export class AirPlayAuthCredentials {
     public clientSk: Uint8Array;
     public clientPk: Uint8Array;
 
-    constructor (
+    constructor(
             clientId?: string
           , clientSk?: Uint8Array
           , clientPk?: Uint8Array) {
@@ -53,7 +53,7 @@ export class AirPlayAuth {
     private credentials: AirPlayAuthCredentials;
     private baseUrl: URL;
 
-    constructor (address: string, credentials: AirPlayAuthCredentials) {
+    constructor(address: string, credentials: AirPlayAuthCredentials) {
         this.address = address;
         this.credentials = credentials;
 
@@ -63,7 +63,7 @@ export class AirPlayAuth {
     /**
      * Begins pairing process.
      */
-    public async beginPairing () {
+    public async beginPairing() {
         return this.sendPostRequest("/pair-pin-start");
     }
 
@@ -72,7 +72,7 @@ export class AirPlayAuth {
      * beginPairing(). Coordinates the three pairing stages and
      * manages request responses.
      */
-    public async finishPairing (pin: string) {
+    public async finishPairing(pin: string) {
         // Stage 1 response
         const { pk: serverPk
               , salt: serverSalt } = await this.pairSetupPin1();
@@ -107,7 +107,7 @@ export class AirPlayAuth {
      * Triggering the receiver passcode display and receiving
      * its public key / salt.
      */
-    public async pairSetupPin1 (): Promise<any> {
+    public async pairSetupPin1(): Promise<any> {
         const [ response ] = await this.sendPostRequestBplist(
                 "/pair-setup-pin"
               , {
@@ -125,7 +125,7 @@ export class AirPlayAuth {
      * public keys, sending them to the receiver and receiving its
      * proof.
      */
-    public async pairSetupPin2 (
+    public async pairSetupPin2(
             pk: Buffer
           , proof: Buffer): Promise<any> {
 
@@ -143,7 +143,7 @@ export class AirPlayAuth {
      * secret hash and sending it to the receiver. Receiver then
      * responds confirming the pairing is complete.
      */
-    public async pairSetupPin3 (
+    public async pairSetupPin3(
             sharedSecretHash: crypto.BinaryLike): Promise<any> {
 
         // Create AES key
@@ -182,7 +182,7 @@ export class AirPlayAuth {
      * Sends a POST request to receiver and returns the
      * response.
      */
-    public async sendPostRequest (
+    public async sendPostRequest(
             path: string
           , contentType?: string
           , data?: Buffer | string): Promise<any> {
@@ -216,7 +216,7 @@ export class AirPlayAuth {
      * Encodes binary plist data, sends a POST request to
      * receiver, then decodes and returns the response.
      */
-    public async sendPostRequestBplist (
+    public async sendPostRequestBplist(
             path: string
           , data?: object): Promise<any> {
 

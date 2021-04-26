@@ -10,11 +10,11 @@ import { Capability } from "../enums";
 export default class SessionRequest {
     public language: (string | null) = null;
 
-    constructor (
+    constructor(
             public appId: string
           , public capabilities = [ Capability.VIDEO_OUT
                                   , Capability.AUDIO_OUT ]
-          , public requestSessionTimeout: number = (new Timeout()).requestSession
+          , public requestSessionTimeout = (new Timeout()).requestSession
           , public androidReceiverCompatible = false
           , public credentialsData: (CredentialsData | null) = null) {}
 }

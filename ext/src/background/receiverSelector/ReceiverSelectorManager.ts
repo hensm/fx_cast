@@ -18,7 +18,7 @@ import NativeReceiverSelector from "./NativeReceiverSelector";
 import PopupReceiverSelector from "./PopupReceiverSelector";
 
 
-async function createSelector () {
+async function createSelector() {
     const type = await options.get("receiverSelectorType");
     const platformInfo = await browser.runtime.getPlatformInfo();
 
@@ -33,7 +33,7 @@ async function createSelector () {
 
 let sharedSelector: ReceiverSelector;
 
-async function getSelector () {
+async function getSelector() {
     if (!sharedSelector) {
         try {
             sharedSelector = await createSelector();
@@ -56,7 +56,7 @@ async function getSelector () {
  *   - Resolves to null if the selection is cancelled.
  *   - Rejects if the selection fails.
  */
-async function getSelection (
+async function getSelection(
         contextTabId: number
       , contextFrameId = 0
       , withMediaSender = false)
@@ -119,7 +119,7 @@ async function getSelection (
         sharedSelector = await createSelector();
 
 
-        function onReceiverChange () {
+        function onReceiverChange() {
             sharedSelector.update(Array.from(StatusManager.getReceivers()));
         }
 
@@ -136,7 +136,7 @@ async function getSelection (
         type EvParamsType =
                 Parameters<typeof sharedSelector.addEventListener>[0];
 
-        function storeListener<T> (type: EvParamsType, fn: T) {
+        function storeListener<T>(type: EvParamsType, fn: T) {
             if (type === "selected") {
                 onSelected = fn;
             } else if (type === "cancelled") {
@@ -150,7 +150,7 @@ async function getSelection (
             return fn;
         }
 
-        function removeListeners () {
+        function removeListeners() {
             sharedSelector.removeEventListener("selected", onSelected);
             sharedSelector.removeEventListener("cancelled", onCancelled);
             sharedSelector.removeEventListener("error", onError);

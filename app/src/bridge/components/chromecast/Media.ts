@@ -5,7 +5,7 @@ import castv2 from "castv2";
 import Session from "./Session";
 
 import { Message } from "../../messaging";
-import { sendMessage } from "../../lib/nativeMessaging"
+import { sendMessage } from "../../lib/nativeMessaging";
 
 
 const NS_MEDIA = "urn:x-cast:com.google.cast.media";
@@ -27,7 +27,7 @@ export interface UpdateMessageData {
 export default class Media {
     private channel: castv2.Channel;
 
-    constructor (
+    constructor(
             private referenceId: string
           , private session: Session) {
 
@@ -67,7 +67,7 @@ export default class Media {
         });
     }
 
-    public messageHandler (message: Message) {
+    public messageHandler(message: Message) {
         switch (message.subject) {
             case "bridge:media/sendMediaMessage": {
                 let error = false;
@@ -87,7 +87,7 @@ export default class Media {
         }
     }
 
-    private sendMessage (subject: string, data: any) {
+    private sendMessage(subject: string, data: any) {
         data._id = this.referenceId;
         (sendMessage as any)({
             subject

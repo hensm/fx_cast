@@ -10,6 +10,6 @@ export const encodeTransform = new EncodeTransform();
 process.stdin.pipe(decodeTransform);
 encodeTransform.pipe(process.stdout);
 
-export function sendMessage (message: Message) {
+export function sendMessage(message: Message) {
     encodeTransform.write(message);
 }

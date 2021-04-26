@@ -26,7 +26,7 @@ export default class Session {
     private transportConnection?: Channel;
     private app: any;
 
-    constructor (
+    constructor(
             public host: string
           , public port: number
           , private appId: string
@@ -46,7 +46,7 @@ export default class Session {
         this.client = client;
     }
 
-    private onConnect () {
+    private onConnect() {
         let transportHeartbeat: Channel;
 
         const sourceId = "sender-0";
@@ -67,7 +67,7 @@ export default class Session {
                 transportHeartbeat.send({ type: "PING" });
             }
 
-            this.clientHeartbeat!.send({ type: "PING" });
+            this.clientHeartbeat?.send({ type: "PING" });
         }, 5000);
 
         this.clientReceiver.send({
@@ -124,7 +124,7 @@ export default class Session {
         });
     }
 
-    public messageHandler (message: Message) {
+    public messageHandler(message: Message) {
         switch (message.subject) {
             case "bridge:session/close":
                 this.close();
@@ -159,7 +159,7 @@ export default class Session {
         }
     }
 
-    public createChannel (namespace: string) {
+    public createChannel(namespace: string) {
         if (!this.channelMap.has(namespace)) {
             this.channelMap.set(namespace, this.client.createChannel(
                     this.clientId!, this.transportId!
@@ -167,16 +167,16 @@ export default class Session {
         }
     }
 
-    public close () {
+    public close() {
         this.clientConnection?.send({ type: "CLOSE" });
         this.transportConnection?.send({ type: "CLOSE" });
     }
 
-    public stop () {
+    public stop() {
         this.clientConnection?.send({ type: "STOP" });
     }
 
-    private sendMessage (subject: string, data: any = {}) {
+    private sendMessage(subject: string, data: any = {}) {
         data._id = this.referenceId;
         sendMessage({
             // @ts-ignore
@@ -185,7 +185,7 @@ export default class Session {
         });
     }
 
-    private _impl_addMessageListener (namespace: string) {
+    private _impl_addMessageListener(namespace: string) {
         this.createChannel(namespace);
         this.channelMap.get(namespace)?.on("message", (data: any) => {
             this.sendMessage("shim:session/impl_addMessageListener", {
@@ -195,7 +195,7 @@ export default class Session {
         });
     }
 
-    private _impl_sendMessage (
+    private _impl_sendMessage(
             namespace: string
           , message: {} | string
           , messageId: string) {
@@ -220,7 +220,7 @@ export default class Session {
         });
     }
 
-    private _impl_setReceiverMuted (muted: boolean, volumeId: string) {
+    private _impl_setReceiverMuted(muted: boolean, volumeId: string) {
 
         let error = false;
 
@@ -240,7 +240,7 @@ export default class Session {
         });
     }
 
-    private _impl_setReceiverVolumeLevel (newLevel: number, volumeId: string) {
+    private _impl_setReceiverVolumeLevel(newLevel: number, volumeId: string) {
 
         let error = false;
 
@@ -260,7 +260,7 @@ export default class Session {
         });
     }
 
-    private _impl_stop (stopId: string) {
+    private _impl_stop(stopId: string) {
         let error = false;
 
         try {

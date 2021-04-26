@@ -5,7 +5,7 @@ declare const APPLICATION_VERSION: string;
 
 
 declare interface Object {
-    // tslint:disable-next-line:ban-types
+    // eslint-disable-next-line @typescript-eslint/ban-types
     wrappedJSObject: Object;
 }
 
@@ -67,7 +67,6 @@ declare function exportFunction (
       , options?: ExportFunctionOptions): ExportFunctionFunc;
 
 
-
 // Fix issues with @types/firefox-webext-browser
 declare namespace browser.events {
     /**
@@ -91,23 +90,8 @@ declare namespace browser.runtime {
         onMessage: browser.events.Event;
     }
 
-    function connect (connectInfo: {
+    function connect(connectInfo: {
             name?: string
           , includeTlsChannelId?: boolean
         }): browser.runtime.Port;
-}
-
-
-// Allow default attribute on <button>
-declare namespace React {
-    interface ButtonHTMLAttributes<T> {
-        default?: boolean;
-    }
-}
-
-declare namespace JSX {
-    interface IntrinsicElements {
-        button: React.DetailedHTMLProps<
-            React.ButtonHTMLAttributes<HTMLButtonElement>, HTMLButtonElement>;
-    }
 }

@@ -21,7 +21,7 @@ let initializedBackgroundPort: MessagePort;
  * for and emits these messages, and changing that behavior
  * is too messy.
  */
-export function ensureInit (): Promise<TypedMessagePort<Message>> {
+export function ensureInit(): Promise<TypedMessagePort<Message>> {
     return new Promise(async (resolve, reject) => {
 
         // If already initialized, just return existing bridge info
@@ -88,7 +88,7 @@ export function ensureInit (): Promise<TypedMessagePort<Message>> {
             onMessage(handleIncomingMessageToShim);
         }
 
-        function handleIncomingMessageToShim (message: Message) {
+        function handleIncomingMessageToShim(message: Message) {
             switch (message.subject) {
                 case "shim:initialized": {
                     initializedBridgeInfo = message.data;

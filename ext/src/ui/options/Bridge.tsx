@@ -1,4 +1,4 @@
-/* tslint:disable:max-line-length */
+/* eslint-disable max-len */
 "use strict";
 
 import React, { Component } from "react";
@@ -79,7 +79,7 @@ export default class Bridge extends Component<BridgeProps, BridgeState> {
     private updateData: any;
     private updateStatusTimeout?: number;
 
-    constructor (props: BridgeProps) {
+    constructor(props: BridgeProps) {
         super(props);
 
         this.state = {
@@ -95,7 +95,7 @@ export default class Bridge extends Component<BridgeProps, BridgeState> {
         this.onUpdate = this.onUpdate.bind(this);
     }
 
-    public render () {
+    public render() {
         const [ backupMessageStart, backupMessageEnd ]
                 = _("optionsBridgeBackupEnabled", "\0").split("\0");
 
@@ -177,7 +177,7 @@ export default class Bridge extends Component<BridgeProps, BridgeState> {
         );
     }
 
-    private renderStatus () {
+    private renderStatus() {
         const infoClasses = `bridge__info ${!this.props.info
             ? this.props.loadingTimedOut
                 ? "bridge__info--timed-out"
@@ -228,7 +228,7 @@ export default class Bridge extends Component<BridgeProps, BridgeState> {
         );
     }
 
-    private onCheckUpdates () {
+    private onCheckUpdates() {
         this.setState({
             isCheckingUpdates: true
         });
@@ -249,7 +249,7 @@ export default class Bridge extends Component<BridgeProps, BridgeState> {
             .catch(this.onCheckUpdatesError);
     }
 
-    private async onCheckUpdatesResponse (res: any) {
+    private async onCheckUpdatesResponse(res: any) {
         let latestBridgeRelease;
         for (const release of res) {
             if (release.assets.find((asset: any) =>
@@ -290,7 +290,7 @@ export default class Bridge extends Component<BridgeProps, BridgeState> {
         this.showUpdateStatus();
     }
 
-    private onCheckUpdatesError () {
+    private onCheckUpdatesError() {
         this.setState({
             isCheckingUpdates: false
           , wasErrorCheckingUpdates: true
@@ -300,7 +300,7 @@ export default class Bridge extends Component<BridgeProps, BridgeState> {
         this.showUpdateStatus();
     }
 
-    private showUpdateStatus () {
+    private showUpdateStatus() {
         if (this.updateStatusTimeout) {
             window.clearTimeout(this.updateStatusTimeout);
         }
@@ -311,7 +311,7 @@ export default class Bridge extends Component<BridgeProps, BridgeState> {
         }, 1500);
     }
 
-    private async onUpdate () {
+    private async onUpdate() {
         // Open downloads page
         if (this.updateData.html_url) {
             browser.tabs.create({

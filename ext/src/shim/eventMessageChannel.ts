@@ -10,8 +10,8 @@ export interface ListenerObject {
 }
 
 
-export function onMessage (listener: ListenerFunc): ListenerObject {
-    function on__castMessage (ev: CustomEvent) {
+export function onMessage(listener: ListenerFunc): ListenerObject {
+    function on__castMessage(ev: CustomEvent) {
         listener(JSON.parse(ev.detail));
 
         /**
@@ -31,7 +31,7 @@ export function onMessage (listener: ListenerFunc): ListenerObject {
           , on__castMessage, true);
 
     return {
-        disconnect () {
+        disconnect() {
             // @ts-ignore
             document.removeEventListener(
                     "__castMessage"
@@ -40,7 +40,7 @@ export function onMessage (listener: ListenerFunc): ListenerObject {
     };
 }
 
-export function sendMessageResponse (message: Message) {
+export function sendMessageResponse(message: Message) {
     const event = new CustomEvent("__castMessageResponse", {
         detail: JSON.stringify(message)
     });
@@ -49,8 +49,8 @@ export function sendMessageResponse (message: Message) {
 }
 
 
-export function onMessageResponse (listener: ListenerFunc): ListenerObject {
-    function on__castMessageResponse (ev: CustomEvent) {
+export function onMessageResponse(listener: ListenerFunc): ListenerObject {
+    function on__castMessageResponse(ev: CustomEvent) {
         listener(JSON.parse(ev.detail));
     }
 
@@ -60,7 +60,7 @@ export function onMessageResponse (listener: ListenerFunc): ListenerObject {
           , on__castMessageResponse, true);
 
     return {
-        disconnect () {
+        disconnect() {
             // @ts-ignore
             document.removeEventListener(
                     "__castMessageResponse"
@@ -69,7 +69,7 @@ export function onMessageResponse (listener: ListenerFunc): ListenerObject {
     };
 }
 
-export function sendMessage (message: Message) {
+export function sendMessage(message: Message) {
     const event = new CustomEvent("__castMessage", {
         detail: JSON.stringify(message)
     });

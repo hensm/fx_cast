@@ -103,13 +103,13 @@ export default class Media {
     public breakStatus?: BreakStatus;
     public currentItemId: (number | null) = null;
     public customData: any = null;
-    public currentTime: number = 0;
+    public currentTime = 0;
     public idleReason: (string | null) = null;
     public items: (QueueItem[] | null) = null;
     public liveSeekableRange?: LiveSeekableRange;
     public loadingItemId: (number | null) = null;
     public media: (MediaInfo | null) = null;
-    public playbackRate: number = 1;
+    public playbackRate = 1;
     public playerState: string = PlayerState.IDLE;
     public preloadedItemId: (number | null) = null;
     public queueData?: QueueData;
@@ -119,7 +119,7 @@ export default class Media {
     public volume: Volume = new Volume();
 
 
-    constructor (
+    constructor(
             public sessionId: string
           , public mediaSessionId: number
           , _internalSessionId: string) {
@@ -135,11 +135,11 @@ export default class Media {
         });
     }
 
-    public addUpdateListener (listener: UpdateListener): void {
+    public addUpdateListener(listener: UpdateListener): void {
         this.#updateListeners.add(listener);
     }
 
-    public editTracksInfo (
+    public editTracksInfo(
             _editTracksInfoRequest: EditTracksInfoRequest
           , _successCallback?: SuccessCallback
           , _errorCallback?: ErrorCallback): void {
@@ -147,17 +147,17 @@ export default class Media {
         logger.info("STUB :: Media#editTracksInfo");
     }
 
-    public getEstimatedBreakClipTime () {
+    public getEstimatedBreakClipTime() {
         logger.info("STUB :: Media#getEstimatedBreakClipTime");
     }
-    public getEstimatedBreakTime () {
+    public getEstimatedBreakTime() {
         logger.info("STUB :: Media#getEstimatedBreakTime");
     }
-    public getEstimatedLiveSeekableRange () {
+    public getEstimatedLiveSeekableRange() {
         logger.info("STUB :: Media#getEstimatedLiveSeekableRange");
     }
 
-    public getEstimatedTime (): number {
+    public getEstimatedTime(): number {
         if (this.currentTime === undefined
          || this.#lastCurrentTime === undefined) {
             return 0;
@@ -166,7 +166,7 @@ export default class Media {
         return this.currentTime + ((Date.now() / 1000) - this.#lastCurrentTime);
     }
 
-    public getStatus (
+    public getStatus(
             _getStatusRequest?: GetStatusRequest
           , successCallback?: SuccessCallback
           , errorCallback?: ErrorCallback): void {
@@ -175,7 +175,7 @@ export default class Media {
               , successCallback, errorCallback);
     }
 
-    public pause (
+    public pause(
             _pauseRequest?: PauseRequest
           , successCallback?: SuccessCallback
           , errorCallback?: ErrorCallback): void {
@@ -184,7 +184,7 @@ export default class Media {
               , successCallback, errorCallback);
     }
 
-    public play (
+    public play(
             _playRequest?: PlayRequest
           , successCallback?: SuccessCallback
           , errorCallback?: ErrorCallback): void {
@@ -193,28 +193,28 @@ export default class Media {
               , successCallback, errorCallback);
     }
 
-    public queueAppendItem (
+    public queueAppendItem(
             _item: QueueItem
           , _successCallback?: SuccessCallback
           , _errorCallback?: ErrorCallback): void {
         logger.info("STUB :: Media#queueAppendItem");
     }
 
-    public queueInsertItems (
+    public queueInsertItems(
             _queueInsertItemsRequest: QueueInsertItemsRequest
           , _successCallback?: SuccessCallback
           , _errorCallback?: ErrorCallback): void {
         logger.info("STUB :: Media#queueInsertItems");
     }
 
-    public queueJumpToItem (
+    public queueJumpToItem(
             _itemId: number
           , _successCallback?: SuccessCallback
           , _errorCallback?: ErrorCallback): void {
         logger.info("STUB :: Media#queueJumpToItem");
     }
 
-    public queueMoveItemToNewIndex (
+    public queueMoveItemToNewIndex(
             _itemId: number
           , _newIndex: number
           , _successCallback?: SuccessCallback
@@ -222,51 +222,51 @@ export default class Media {
         logger.info("STUB :: Media#queueMoveItemToNewIndex");
     }
 
-    public queueNext (
+    public queueNext(
             _successCallback?: SuccessCallback
           , _errorCallback?: ErrorCallback): void {
         logger.info("STUB :: Media#queueNext");
     }
 
-    public queuePrev (
+    public queuePrev(
             _successCallback?: SuccessCallback
           , _errorCallback?: ErrorCallback): void {
         logger.info("STUB :: Media#queuePrev");
     }
 
-    public queueRemoveItem (
+    public queueRemoveItem(
             _itemId: number
           , _successCallback?: SuccessCallback
           , _errorCallback?: ErrorCallback): void {
         logger.info("STUB :: Media#queueRemoveItem");
     }
 
-    public queueReorderItems (
+    public queueReorderItems(
             _queueReorderItemsRequest: QueueReorderItemsRequest
           , _successCallback?: SuccessCallback
           , _errorCallback?: ErrorCallback): void {
         logger.info("STUB :: Media#queueReorderItems");
     }
 
-    public queueSetRepeatMode (
+    public queueSetRepeatMode(
             _repeatMode: string
           , _successCallback?: SuccessCallback
           , _errorCallback?: ErrorCallback): void {
         logger.info("STUB :: Media#queueSetRepeatMode");
     }
 
-    public queueUpdateItems (
+    public queueUpdateItems(
             _queueUpdateItemsRequest: QueueUpdateItemsRequest
           , _successCallback?: SuccessCallback
           , _errorCallback?: ErrorCallback): void {
         logger.info("STUB :: Media#queueUpdateItems");
     }
 
-    public removeUpdateListener (listener: UpdateListener) {
+    public removeUpdateListener(listener: UpdateListener) {
         this.#updateListeners.delete(listener);
     }
 
-    public seek (
+    public seek(
             seekRequest: SeekRequest
           , successCallback?: SuccessCallback
           , errorCallback?: ErrorCallback): void {
@@ -277,7 +277,7 @@ export default class Media {
         }, successCallback, errorCallback);
     }
 
-    public setVolume (
+    public setVolume(
             volumeRequest: VolumeRequest
           , successCallback?: SuccessCallback
           , errorCallback?: ErrorCallback): void {
@@ -288,7 +288,7 @@ export default class Media {
         }, successCallback, errorCallback);
     }
 
-    public stop (
+    public stop(
             _stopRequest: StopRequest
           , successCallback?: SuccessCallback
           , errorCallback?: ErrorCallback): void {
@@ -306,13 +306,13 @@ export default class Media {
               , errorCallback);
     }
 
-    public supportsCommand (_command: string): boolean {
+    public supportsCommand(_command: string): boolean {
         logger.info("STUB :: Media#supportsCommand");
         return true;
     }
 
 
-    public _sendMediaMessage (
+    public _sendMediaMessage(
             message: any
           , successCallback?: SuccessCallback
           , errorCallback?: ErrorCallback) {

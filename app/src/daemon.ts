@@ -10,14 +10,16 @@ import { DecodeTransform
        , EncodeTransform } from "./transforms";
 
 
-export function init (port: number) {
+export function init(port: number) {
     process.stdout.write("Starting WebSocket server... ");
 
     const wss = new WebSocket.Server({ port }, () => {
+        // eslint-disable-next-line no-console
         console.log("Done!");
     });
 
     wss.on("error", (err) => {
+        // eslint-disable-next-line no-console
         console.log("Failed!");
         console.error(err);
     });
@@ -26,6 +28,7 @@ export function init (port: number) {
     wss.on("connection", socket => {
         // Stream for incoming WebSocket messages
         const messageStream = new Readable({ objectMode: true });
+        // eslint-disable-next-line @typescript-eslint/no-empty-function
         messageStream._read = () => {};
 
         socket.on("message", (message: string) => {

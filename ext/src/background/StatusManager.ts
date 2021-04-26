@@ -14,14 +14,13 @@ interface EventMap {
     "statusUpdate": { id: string, status: ReceiverStatus };
 }
 
-// tslint:disable-next-line:new-parens
 export default new class StatusManager
         extends TypedEventTarget<EventMap> {
 
     private bridgePort: (Port | null) = null;
     private receivers = new Map<string, Receiver>();
 
-    constructor () {
+    constructor() {
         super();
 
         // Bind listeners
@@ -29,13 +28,13 @@ export default new class StatusManager
         this.onBridgePortDisconnect = this.onBridgePortDisconnect.bind(this);
     }
 
-    public async init () {
+    public async init() {
         if (!this.bridgePort) {
             this.bridgePort = await this.createBridgePort();
         }
     }
 
-    public *getReceivers () {
+    public *getReceivers() {
         for (const [, receiver ] of this.receivers) {
             if (receiver.status && receiver.status.application
                                 && receiver.status.volume) {
@@ -44,7 +43,7 @@ export default new class StatusManager
         }
     }
 
-    public async stopReceiverApp (receiver: Receiver) {
+    public async stopReceiverApp(receiver: Receiver) {
         if (!this.bridgePort) {
             return;
         }
@@ -55,7 +54,7 @@ export default new class StatusManager
         });
     }
 
-    private async createBridgePort () {
+    private async createBridgePort() {
         const bridgePort = await bridge.connect();
         bridgePort.onMessage.addListener(this.onBridgePortMessage);
         bridgePort.onDisconnect.addListener(this.onBridgePortDisconnect);
@@ -74,7 +73,7 @@ export default new class StatusManager
      * Handles incoming bridge status messages, manages the
      * receiver list, and dispatches events.
      */
-    private onBridgePortMessage (message: Message) {
+    private onBridgePortMessage(message: Message) {
         switch (message.subject) {
             case "main:serviceUp": {
                 const { data: receiver } = message;
@@ -136,7 +135,7 @@ export default new class StatusManager
      * triggered again and the timer is reset for another 10
      * seconds.
      */
-    private onBridgePortDisconnect () {
+    private onBridgePortDisconnect() {
         for (const [, receiver] of this.receivers) {
             const serviceDownEvent = new CustomEvent("serviceDown", {
                 detail: { id: receiver.id }

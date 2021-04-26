@@ -76,13 +76,13 @@ export let isAvailable = false;
 export const timeout = new Timeout();
 export const VERSION = [1, 2];
 
-export function addReceiverActionListener (
+export function addReceiverActionListener(
         listener: ReceiverActionListener): void {
 
     receiverActionListeners.add(listener);
 }
 
-export function initialize (
+export function initialize(
         newApiConfig: ApiConfig
       , successCallback?: SuccessCallback
       , errorCallback?: ErrorCallback): void {
@@ -115,22 +115,22 @@ export function initialize (
         : ReceiverAvailability.UNAVAILABLE);
 }
 
-export function logMessage (message: string): void {
-    /* tslint:disable-next-line:no-console */
+export function logMessage(message: string): void {
+    // eslint-disable-next-line no-console
     console.log("CAST MSG:", message);
 }
 
-export function precache (_data: string): void {
+export function precache(_data: string): void {
     logger.info("STUB :: cast.precache");
 }
 
-export function removeReceiverActionListener (
+export function removeReceiverActionListener(
         listener: ReceiverActionListener): void {
 
     receiverActionListeners.delete(listener);
 }
 
-export function requestSession (
+export function requestSession(
         successCallback: RequestSessionSuccessCallback
       , errorCallback: ErrorCallback
       , _sessionRequest: SessionRequest = apiConfig.sessionRequest): void {
@@ -176,7 +176,7 @@ export function requestSession (
     });
 }
 
-export function _requestSession (
+export function _requestSession(
         _receiver: Receiver
       , successCallback?: RequestSessionSuccessCallback
       , errorCallback?: ErrorCallback): void {
@@ -218,7 +218,7 @@ export function _requestSession (
     (selectedReceiver as any)._address = _receiver.host;
     (selectedReceiver as any)._port = _receiver.port;
 
-    function createSession () {
+    function createSession() {
         sessionList.push(new Session(
                 sessionList.length.toString()  // sessionId
               , apiConfig.sessionRequest.appId // appId
@@ -250,11 +250,11 @@ export function _requestSession (
     }
 }
 
-export function requestSessionById (_sessionId: string): void {
+export function requestSessionById(_sessionId: string): void {
     logger.info("STUB :: cast.requestSessionById");
 }
 
-export function setCustomReceivers (
+export function setCustomReceivers(
         _receivers: Receiver_[]
       , _successCallback?: SuccessCallback
       , _errorCallback?: ErrorCallback): void {
@@ -262,15 +262,15 @@ export function setCustomReceivers (
     logger.info("STUB :: cast.setCustomReceivers");
 }
 
-export function setPageContext (_win: Window): void {
+export function setPageContext(_win: Window): void {
     logger.info("STUB :: cast.setPageContext");
 }
 
-export function setReceiverDisplayStatus (_sessionId: string): void {
+export function setReceiverDisplayStatus(_sessionId: string): void {
     logger.info("STUB :: cast.setReceiverDisplayStatus");
 }
 
-export function unescape (escaped: string): string {
+export function unescape(escaped: string): string {
     return decodeURI(escaped);
 }
 
@@ -343,7 +343,8 @@ onMessage(async message => {
             (selectedReceiver as any)._address = message.data.receiver.host;
             (selectedReceiver as any)._port = message.data.receiver.port;
 
-            function createSession () {
+            // eslint-disable-next-line no-inner-declarations
+            function createSession() {
                 sessionList.push(new Session(
                         sessionList.length.toString()  // sessionId
                       , apiConfig.sessionRequest.appId // appId

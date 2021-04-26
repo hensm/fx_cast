@@ -4,7 +4,7 @@ import loadSender from "../lib/loadSender";
 import logger from "../lib/logger";
 import options from "../lib/options";
 
-import { getMediaTypesForPageUrl, stringify } from "../lib/utils";
+import { stringify } from "../lib/utils";
 
 import { ReceiverSelectionActionType
        , ReceiverSelectorMediaType } from "./receiverSelector";
@@ -33,7 +33,7 @@ let menuIdWhitelistRecommended: MenuId;
 const whitelistChildMenuPatterns = new Map<MenuId, string>();
 
 
-export async function initMenus () {
+export async function initMenus() {
     logger.info("init (menus)");
 
     const opts = await options.getAll();
@@ -97,9 +97,6 @@ browser.menus.onClicked.addListener(async (info, tab) => {
     if (!info.pageUrl) {
         throw logger.error("Menu handler page URL not found.");
     }
-
-
-    const availableMediaTypes = getMediaTypesForPageUrl(info.pageUrl);
 
     switch (info.menuItemId) {
         case menuIdCast: {

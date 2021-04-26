@@ -49,12 +49,12 @@ browser.runtime.onInstalled.addListener(async details => {
  * Sets up media overlay content script and handles toggling
  * on options change.
  */
-async function initMediaOverlay () {
+async function initMediaOverlay() {
     logger.info("init (media overlay)");
 
     let contentScript: browser.contentScripts.RegisteredContentScript;
 
-    async function registerMediaOverlayContentScript () {
+    async function registerMediaOverlayContentScript() {
         if (!(await options.get("mediaOverlayEnabled"))) {
             return;
         }
@@ -71,7 +71,7 @@ async function initMediaOverlay () {
         }
     }
 
-    async function unregisterMediaOverlayContentScript () {
+    async function unregisterMediaOverlayContentScript() {
         await contentScript?.unregister();
     }
 
@@ -95,7 +95,7 @@ async function initMediaOverlay () {
  * with the current version of the extension. If not, triggers
  * a notification with the appropriate info.
  */
-async function notifyBridgeCompat () {
+async function notifyBridgeCompat() {
     logger.info("checking for bridge...");
 
     let info: BridgeInfo;
@@ -136,7 +136,7 @@ async function notifyBridgeCompat () {
 
 let isInitialized = false;
 
-async function init () {
+async function init() {
     if (isInitialized) {
         return;
     }
@@ -193,7 +193,7 @@ async function init () {
      */
     messaging.onConnect.addListener(async port => {
         if (port.name === "shim") {
-            ShimManager.createShim(port as any);
+            ShimManager.createShim(port);
         }
     });
 }

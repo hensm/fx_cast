@@ -11,14 +11,14 @@ type ResponseHandlerFunction = (message: Message) => Promise<any>;
  * and calls the transform callback.
  */
 export class ResponseTransform extends Transform {
-    constructor (private _handler: ResponseHandlerFunction) {
+    constructor(private _handler: ResponseHandlerFunction) {
         super({
             readableObjectMode: true
           , writableObjectMode: true
         });
     }
 
-    public _transform (
+    public _transform(
             chunk: Message
           , _encoding: string
             // tslint:disable-next-line:ban-types
@@ -45,13 +45,13 @@ export class DecodeTransform extends Transform {
     private _messageBuffer = Buffer.alloc(0);
     private _messageLength?: number;
 
-    constructor () {
+    constructor() {
         super({
             readableObjectMode: true
         });
     }
 
-    public _transform (
+    public _transform(
             chunk: any
           , _encoding: string
             // tslint:disable-next-line:ban-types
@@ -105,13 +105,13 @@ export class DecodeTransform extends Transform {
  * outputs the encoded result.
  */
 export class EncodeTransform extends Transform {
-    constructor () {
+    constructor() {
         super({
             writableObjectMode: true
         });
     }
 
-    public _transform (
+    public _transform(
             chunk: any
           , _encoding: string
             // tslint:disable-next-line:ban-types

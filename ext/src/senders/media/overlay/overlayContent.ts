@@ -28,8 +28,7 @@ Element.prototype.attachShadow = function (init) {
 };
 
 
-
-function getShadowRootFromNode (node: Node): ShadowRoot | undefined {
+function getShadowRootFromNode(node: Node): ShadowRoot | undefined {
     // Don't touch our custom element
     if (node instanceof PlayerElement) {
         return;
@@ -45,13 +44,13 @@ const DQS_XPATH_EXPRESSION = `//*[contains(name(), "-")]`;
  * Return the first matching querySelector result on any ShadowRoot
  * nodes present in the document.
  */
-function deepQuerySelector (selector: string): Element | null {
+function deepQuerySelector(selector: string): Element | null {
     const result = document.evaluate(
             DQS_XPATH_EXPRESSION, document, null
           , XPathResult.ORDERED_NODE_ITERATOR_TYPE);
 
     let node: Node | null;
-    // tslint:disable-next-line: no-conditional-assignment
+    // eslint-disable-next-line no-cond-assign
     while (node = result.iterateNext()) {
         const shadowRoot = getShadowRootFromNode(node);
         if (!shadowRoot) {
@@ -71,7 +70,7 @@ function deepQuerySelector (selector: string): Element | null {
  * Collect and return the results of querySelectorAll on any
  * ShadowRoot nodes present in the document.
  */
-function deepQuerySelectorAll (selector: string): Node[] {
+function deepQuerySelectorAll(selector: string): Node[] {
     const result = document.evaluate(
             DQS_XPATH_EXPRESSION, document, null
           , XPathResult.ORDERED_NODE_ITERATOR_TYPE);
@@ -79,7 +78,7 @@ function deepQuerySelectorAll (selector: string): Node[] {
     const nodes: Node[] = [];
 
     let node: Node | null;
-    // tslint:disable-next-line: no-conditional-assignment
+    // eslint-disable-next-line no-cond-assign
     while (node = result.iterateNext()) {
         const shadowRoot = getShadowRootFromNode(node);
         if (shadowRoot) {
@@ -116,7 +115,7 @@ const mediaElementAttributes = mediaElementTypes
  * functions are proxied to the internal media element.
  */
 class PlayerElement extends HTMLElement {
-    constructor () {
+    constructor() {
         super();
 
         const shadowRoot = this.attachShadow({ mode: "closed" });
@@ -204,11 +203,11 @@ class PlayerElement extends HTMLElement {
 
 class AudioPlayerElement extends PlayerElement {}
 class VideoPlayerElement extends PlayerElement {
-    set overlayHidden (val: boolean) {
+    set overlayHidden(val: boolean) {
         const shadowRoot = internalShadowRoots.get(this);
         (shadowRoot?.querySelector(".overlay") as HTMLDivElement).hidden = val;
     }
-    get overlayHidden () {
+    get overlayHidden() {
         const shadowRoot = internalShadowRoots.get(this);
         return (shadowRoot?.querySelector(".overlay") as HTMLDivElement).hidden;
     }
@@ -234,7 +233,7 @@ const _createElementNS = document.createElementNS;
  * custom element version that imitates the original. Otherwise, returns
  * the result of the original.
  */
-function createElement (
+function createElement(
         tagName: string
       , options?: ElementCreationOptions) {
 
@@ -264,7 +263,7 @@ function createElement (
  * patched `createElement` function, otherwise return the result of the
  * original.
  */
-function createElementNS (
+function createElementNS(
         namespaceURI: string
       , qualifiedName: string
       , options?: ElementCreationOptions) {
@@ -298,7 +297,7 @@ Object.defineProperties(document, {
  * `createElement` function, fetches the shadow root and copies any
  * attributes before swapping with the original element in-place.
  */
-function wrapMediaElement (mediaElement: HTMLMediaElement) {
+function wrapMediaElement(mediaElement: HTMLMediaElement) {
     const wrappedMedia = document.createElement(mediaElement.tagName);
     const shadowRoot = internalShadowRoots.get(wrappedMedia);
 

@@ -12,7 +12,7 @@ export default class Receiver {
     public isActiveInput: (boolean | null) = null;
     public receiverType: string = ReceiverType.CAST;
 
-    constructor (
+    constructor(
             public label: string
           , public friendlyName: string
           , public capabilities: Capability[] = []

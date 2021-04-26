@@ -1,4 +1,4 @@
-/* tslint:disable:max-line-length */
+/* eslint-disable max-len */
 "use strict";
 
 import React, { Component } from "react";
@@ -29,6 +29,7 @@ browser.runtime.getPlatformInfo()
     });
 
 
+interface PopupAppProps {}
 interface PopupAppState {
     receivers: Receiver[];
     mediaType: ReceiverSelectorMediaType;
@@ -41,12 +42,12 @@ interface PopupAppState {
     mirroringEnabled: boolean;
 }
 
-class PopupApp extends Component<{}, PopupAppState> {
+class PopupApp extends Component<PopupAppProps, PopupAppState> {
     private port?: Port;
     private win?: browser.windows.Window;
     private defaultMediaType?: ReceiverSelectorMediaType;
 
-    constructor (props: {}) {
+    constructor(props: PopupAppProps) {
         super(props);
 
         this.state = {
@@ -67,7 +68,7 @@ class PopupApp extends Component<{}, PopupAppState> {
         this.onStop = this.onStop.bind(this);
     }
 
-    public async componentDidMount () {
+    public async componentDidMount() {
         this.port = messaging.connect({ name: "popup" });
 
         this.port.onMessage.addListener((message: Message) => {
@@ -111,7 +112,7 @@ class PopupApp extends Component<{}, PopupAppState> {
         });
     }
 
-    public componentDidUpdate () {
+    public componentDidUpdate() {
         setTimeout(() => {
             if (this.win?.id === undefined) {
                 return;
@@ -127,7 +128,11 @@ class PopupApp extends Component<{}, PopupAppState> {
         }, 1);
     }
 
-    public render () {
+    public render() {
+        /*
+
+        // TODO: Add file support back to popup
+
         let truncatedFileName: string;
 
         if (this.state.filePath) {
@@ -138,6 +143,7 @@ class PopupApp extends Component<{}, PopupAppState> {
                 ? `${fileName.substring(0, 12)}...`
                 : fileName;
         }
+        */
 
         const isAppMediaTypeSelected =
                 this.state.mediaType === ReceiverSelectorMediaType.App;
@@ -147,7 +153,7 @@ class PopupApp extends Component<{}, PopupAppState> {
                 this.state.mediaType === ReceiverSelectorMediaType.Screen;
 
         const isSelectedMediaTypeAvailable =
-                !!(this.state.availableMediaTypes & this.state.mediaType)
+                !!(this.state.availableMediaTypes & this.state.mediaType);
         const isAppMediaTypeAvailable = !!(this.state.availableMediaTypes
                 & ReceiverSelectorMediaType.App);
 
@@ -208,7 +214,7 @@ class PopupApp extends Component<{}, PopupAppState> {
         </>;
     }
 
-    private onCast (receiver: Receiver) {
+    private onCast(receiver: Receiver) {
         this.setState({
             isLoading: true
         });
@@ -224,7 +230,7 @@ class PopupApp extends Component<{}, PopupAppState> {
         });
     }
 
-    private onStop (receiver: Receiver) {
+    private onStop(receiver: Receiver) {
         this.port?.postMessage({
             subject: "receiverSelector:stop"
           , data: {
@@ -234,7 +240,7 @@ class PopupApp extends Component<{}, PopupAppState> {
         });
     }
 
-    private onSelectChange (ev: React.ChangeEvent<HTMLSelectElement>) {
+    private onSelectChange(ev: React.ChangeEvent<HTMLSelectElement>) {
         const mediaType = parseInt(ev.target.value);
 
         if (mediaType === ReceiverSelectorMediaType.File) {
@@ -282,7 +288,7 @@ interface ReceiverEntryState {
 }
 
 class ReceiverEntry extends Component<ReceiverEntryProps, ReceiverEntryState> {
-    constructor (props: ReceiverEntryProps) {
+    constructor(props: ReceiverEntryProps) {
         super(props);
 
         this.state = {
@@ -313,7 +319,7 @@ class ReceiverEntry extends Component<ReceiverEntryProps, ReceiverEntryState> {
         this.handleCast = this.handleCast.bind(this);
     }
 
-    public render () {
+    public render() {
         if (!this.props.receiver.status) {
             return;
         }
@@ -349,7 +355,7 @@ class ReceiverEntry extends Component<ReceiverEntryProps, ReceiverEntryState> {
         );
     }
 
-    private handleCast () {
+    private handleCast() {
         if (!this.props.receiver.status) {
             return;
         }
