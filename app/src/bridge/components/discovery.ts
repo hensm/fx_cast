@@ -20,7 +20,7 @@ const browser = mdns.createBrowser(mdns.tcp("googlecast"), {
       , "DNSServiceGetAddrInfo" in mdns.dns_sd
             ? mdns.rst.DNSServiceGetAddrInfo()
               // Some issues on Linux with IPv6, so restrict to IPv4
-            : mdns.rst.getaddrinfo({ families: [ 4 ] })
+            : mdns.rst.getaddrinfo({ families: [ 4 ]})
       , mdns.rst.makeAddressesUnique()
     ]
 });

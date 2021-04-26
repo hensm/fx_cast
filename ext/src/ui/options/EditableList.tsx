@@ -106,7 +106,7 @@ export default class EditableList extends Component<
         const newItems = new Set(this.props.data);
         newItems.delete(item);
 
-        this.props.onChange([...newItems]);
+        this.props.onChange([ ...newItems ]);
     }
 
     private handleItemEdit(item: string, newValue: string) {

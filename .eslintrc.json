@@ -1,7 +1,7 @@
 {
     "root": true
   , "parser": "@typescript-eslint/parser"
-  , "plugins": ["@typescript-eslint"]
+  , "plugins": [ "@typescript-eslint" ]
   , "extends": [
         "eslint:recommended"
       , "plugin:@typescript-eslint/recommended"
@@ -28,6 +28,15 @@
       , "no-multiple-empty-lines": [ "error", { "max": 2 }]
       , "no-console": [ "error", {
             "allow": [ "info", "error" ]
+        }]
+
+      , "object-curly-spacing": [ "error", "always", {
+            "arraysInObjects": false
+          , "objectsInObjects": false
+        }]
+      , "array-bracket-spacing": [ "error", "always", {
+            "objectsInArrays": false
+          , "arraysInArrays": false
         }]
 
       , "@typescript-eslint/no-empty-interface": "off"

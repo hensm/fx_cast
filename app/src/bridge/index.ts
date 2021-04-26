@@ -10,7 +10,7 @@ import { startMediaServer, stopMediaServer } from "./components/mediaServer";
 import { startReceiverSelector, stopReceiverSelector }
         from "./components/receiverSelector";
 
-import { __applicationName, __applicationVersion} from "../../package.json";
+import { __applicationName, __applicationVersion } from "../../package.json";
 
 
 process.on("SIGTERM", () => {

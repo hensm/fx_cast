@@ -74,7 +74,7 @@ export {
 
 export let isAvailable = false;
 export const timeout = new Timeout();
-export const VERSION = [1, 2];
+export const VERSION = [ 1, 2 ];
 
 export function addReceiverActionListener(
         listener: ReceiverActionListener): void {

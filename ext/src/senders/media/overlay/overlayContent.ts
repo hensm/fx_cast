@@ -281,9 +281,9 @@ function createElementNS(
  * toString/toSource values of the native function.
  */
 Object.defineProperties(createElement, clonePropsDescriptor(
-        _createElement, ["toString", "toSource"]));
+        _createElement, [ "toString", "toSource" ]));
 Object.defineProperties(createElementNS, clonePropsDescriptor(
-        _createElementNS, ["toString", "toSource"]));
+        _createElementNS, [ "toString", "toSource" ]));
 
 // Re-define element creation functions
 Object.defineProperties(document, {
@@ -362,7 +362,7 @@ document.addEventListener("DOMContentLoaded", () => {
         const mediaElements = document.querySelectorAll(mediaSelector);
         const deepMediaElements = deepQuerySelectorAll(mediaSelector);
 
-        for (const mediaElement of [...mediaElements, ...deepMediaElements]) {
+        for (const mediaElement of [ ...mediaElements, ...deepMediaElements ]) {
             wrapMediaElement(mediaElement as HTMLMediaElement);
         }
     });

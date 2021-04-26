@@ -35,7 +35,7 @@ export default new class StatusManager
     }
 
     public *getReceivers() {
-        for (const [, receiver ] of this.receivers) {
+        for (const [ , receiver ] of this.receivers) {
             if (receiver.status && receiver.status.application
                                 && receiver.status.volume) {
                 yield receiver;
@@ -136,7 +136,7 @@ export default new class StatusManager
      * seconds.
      */
     private onBridgePortDisconnect() {
-        for (const [, receiver] of this.receivers) {
+        for (const [ , receiver ] of this.receivers) {
             const serviceDownEvent = new CustomEvent("serviceDown", {
                 detail: { id: receiver.id }
             });

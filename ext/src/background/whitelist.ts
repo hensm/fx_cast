@@ -205,7 +205,7 @@ async function registerUserAgentWhitelist() {
 
     browser.webRequest.onBeforeSendHeaders.addListener(
             onWhitelistedChildBeforeSendHeaders
-          , { urls: [ "<all_urls>" ] }
+          , { urls: [ "<all_urls>" ]}
           , [ "blocking", "requestHeaders" ]);
 }
 
