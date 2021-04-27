@@ -75,7 +75,7 @@ export default class Media {
     #isActive = true;
     #updateListeners = new Set<UpdateListener>();
     #sendMediaMessageCallbacks = new Map<string, Callbacks>();
-    #lastCurrentTime?: number;
+    #lastCurrentTime = 0;
 
     #listener = onMessage(message => {
         if ((message as any).data._id !== this.#id) {
@@ -194,12 +194,21 @@ export default class Media {
     }
 
     public getEstimatedTime(): number {
-        if (this.currentTime === undefined
-         || this.#lastCurrentTime === undefined) {
-            return 0;
+        if (this.playerState === PlayerState.PLAYING) {
+            let estimatedTime = this.currentTime + (this.playbackRate * (
+                    Date.now() - this.#lastCurrentTime) / 1000);
+
+            // Enforce valid range
+            if (this.media?.duration && estimatedTime > this.media.duration) {
+                estimatedTime = this.media.duration;
+            } else if (estimatedTime < 0) {
+                estimatedTime = 0;
+            }
+
+            return estimatedTime;
         }
 
-        return this.currentTime + ((Date.now() / 1000) - this.#lastCurrentTime);
+        return this.currentTime;
     }
 
     public getStatus(
