@@ -2,26 +2,11 @@
 
 import { v4 as uuid } from "uuid";
 
-import logger from "../../../lib/logger";
-
-import _Error from "./Error";
-import Image from "./Image";
-import Receiver from "./Receiver";
-import SenderApplication from "./SenderApplication";
-import Volume from "./Volume";
-
-import LoadRequest from "../media/classes/LoadRequest";
-import Media from "../media/classes/Media";
-import QueueLoadRequest from "../media/classes/QueueLoadRequest";
-
-import { ErrorCode
-       , SessionStatus } from "../enums";
-
-import { RepeatMode } from "../media/enums";
+import logger from "../../lib/logger";
 
 import { ListenerObject
        , onMessage
-       , sendMessageResponse } from "../../eventMessageChannel";
+       , sendMessageResponse } from "../eventMessageChannel";
 
 import { Callbacks
        , ErrorCallback
@@ -29,7 +14,18 @@ import { Callbacks
        , MediaListener
        , MessageListener
        , SuccessCallback
-       , UpdateListener } from "../../types";
+       , UpdateListener } from "../types";
+
+import { Error as _Error
+       , Image, Receiver
+       , SenderApplication, Volume } from "./dataClasses";
+import { ErrorCode, SessionStatus } from "./enums";
+
+import { Media
+       , LoadRequest
+       , QueueLoadRequest
+         // Enums
+       , RepeatMode } from "./media";
 
 
 type SessionSuccessCallback = (session: Session) => void;

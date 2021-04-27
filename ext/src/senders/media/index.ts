@@ -270,9 +270,10 @@ async function registerMediaElementListeners() {
         });
 
         mediaElement.addEventListener("ratechange", () => {
+            // TODO: Fix types
             currentMedia._sendMediaMessage("SET_PLAYBACK_RATE", {
                 playbackRate: mediaElement.playbackRate
-            });
+            } as any);
         });
 
         mediaElement.addEventListener("volumechange", () => {

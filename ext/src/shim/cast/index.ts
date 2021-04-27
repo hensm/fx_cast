@@ -2,18 +2,22 @@
 
 import logger from "../../lib/logger";
 
-import ApiConfig from "./classes/ApiConfig";
-import CredentialsData from "./classes/CredentialsData";
-import DialRequest from "./classes/DialRequest";
-import Error_ from "./classes/Error";
-import Image_ from "./classes/Image";
-import Receiver_ from "./classes/Receiver";
-import ReceiverDisplayStatus from "./classes/ReceiverDisplayStatus";
-import SenderApplication from "./classes/SenderApplication";
-import Session from "./classes/Session";
-import SessionRequest from "./classes/SessionRequest";
-import Timeout from "./classes/Timeout";
-import Volume from "./classes/Volume";
+import { Receiver } from "../../types";
+import { onMessage, sendMessageResponse } from "../eventMessageChannel";
+
+import Session from "./Session";
+
+import { ApiConfig
+       , CredentialsData
+       , DialRequest
+       , Error as Error_
+       , Image as Image_
+       , Receiver as Receiver_
+       , ReceiverDisplayStatus
+       , SenderApplication
+       , SessionRequest
+       , Timeout
+       , Volume } from "./dataClasses";
 
 import { AutoJoinPolicy
        , Capability
@@ -27,10 +31,27 @@ import { AutoJoinPolicy
        , SessionStatus
        , VolumeControlType } from "./enums";
 
-import * as media from "./media";
 
-import { Receiver } from "../../types";
-import { onMessage, sendMessageResponse } from "../eventMessageChannel";
+export * as media from "./media";
+
+export {
+    // Enums
+    AutoJoinPolicy, Capability, DefaultActionPolicy, DialAppState, ErrorCode
+  , ReceiverAction, ReceiverAvailability, ReceiverType, SenderPlatform
+  , SessionStatus, VolumeControlType
+
+    // Classes
+  , ApiConfig, CredentialsData, DialRequest, ReceiverDisplayStatus
+  , SenderApplication, Session, SessionRequest, Timeout, Volume
+
+  , Error_ as Error
+  , Image_ as Image
+  , Receiver_ as Receiver
+};
+
+export let isAvailable = false;
+export const timeout = new Timeout();
+export const VERSION = [ 1, 2 ];
 
 
 type ReceiverActionListener = (
@@ -54,27 +75,6 @@ let sessionRequestInProgress = false;
 let sessionSuccessCallback: RequestSessionSuccessCallback;
 let sessionErrorCallback: ErrorCallback;
 
-
-export {
-    // Enums
-    AutoJoinPolicy, Capability, DefaultActionPolicy, DialAppState, ErrorCode
-  , ReceiverAction, ReceiverAvailability, ReceiverType, SenderPlatform
-  , SessionStatus, VolumeControlType
-
-    // Classes
-  , ApiConfig, CredentialsData, DialRequest, ReceiverDisplayStatus
-  , SenderApplication, Session, SessionRequest, Timeout, Volume
-
-  , Error_ as Error
-  , Image_ as Image
-  , Receiver_ as Receiver
-
-  , media
-};
-
-export let isAvailable = false;
-export const timeout = new Timeout();
-export const VERSION = [ 1, 2 ];
 
 export function addReceiverActionListener(
         listener: ReceiverActionListener): void {

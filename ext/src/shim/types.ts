@@ -1,10 +1,11 @@
 "use strict";
 
-import _Error from "./cast/classes/Error";
-import Media from "./cast/media/classes/Media";
+import { Error as Error_ } from "./cast/dataClasses";
+import { Media } from "./cast/media";
+
 
 export type SuccessCallback = () => void;
-export type ErrorCallback = (err: _Error) => void;
+export type ErrorCallback = (err: Error_) => void;
 
 export type MediaListener = (media: Media) => void;
 export type MessageListener = (namespace: string, message: string) => void;

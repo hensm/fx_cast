@@ -9,7 +9,7 @@ import { ReceiverSelectorMediaType } from "./background/receiverSelector";
 import { ReceiverSelection, ReceiverSelectionCast, ReceiverSelectionStop }
     from "./background/receiverSelector/ReceiverSelector";
 
-import Volume from "./shim/cast/classes/Volume";
+import { Volume } from "./shim/cast/dataClasses";
 import { MediaInfo } from "./shim/cast/media";
 
 

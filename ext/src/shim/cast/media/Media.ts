@@ -1,43 +1,42 @@
 "use strict";
 
-import logger from "../../../../lib/logger";
+import logger from "../../../lib/logger";
 
 import { v1 as uuid } from "uuid";
 
-import BreakStatus from "./BreakStatus";
-import EditTracksInfoRequest from "./EditTracksInfoRequest";
-import GetStatusRequest from "./GetStatusRequest";
-import LiveSeekableRange from "./LiveSeekableRange";
-import MediaInfo from "./MediaInfo";
-import PauseRequest from "./PauseRequest";
-import PlayRequest from "./PlayRequest";
-import QueueData from "./QueueData";
-import QueueJumpRequest from "./QueueJumpRequest";
-import QueueInsertItemsRequest from "./QueueInsertItemsRequest";
-import QueueItem from "./QueueItem";
-import QueueSetPropertiesRequest from "./QueueSetPropertiesRequest";
-import QueueRemoveItemsRequest from "./QueueRemoveItemsRequest";
-import QueueReorderItemsRequest from "./QueueReorderItemsRequest";
-import QueueUpdateItemsRequest from "./QueueUpdateItemsRequest";
-import SeekRequest from "./SeekRequest";
-import StopRequest from "./StopRequest";
-import VideoInformation from "./VideoInformation";
-import VolumeRequest from "./VolumeRequest";
+import { BreakStatus
+       , EditTracksInfoRequest
+       , GetStatusRequest
+       , LiveSeekableRange
+       , MediaInfo
+       , PauseRequest
+       , PlayRequest
+       , QueueData
+       , QueueJumpRequest
+       , QueueInsertItemsRequest
+       , QueueItem
+       , QueueSetPropertiesRequest
+       , QueueRemoveItemsRequest
+       , QueueReorderItemsRequest
+       , QueueUpdateItemsRequest
+       , SeekRequest
+       , StopRequest
+       , VideoInformation
+       , VolumeRequest } from "./dataClasses";
 
-import Volume from "../../classes/Volume";
+import { Volume, Error as _Error } from "../dataClasses";
 
 import { PlayerState
-       , RepeatMode } from "../enums";
+       , RepeatMode } from "./enums";
 
-import _Error from "../../classes/Error";
-import { ErrorCode } from "../../enums";
+import { ErrorCode } from "../enums";
 
-import { onMessage, sendMessageResponse } from "../../../eventMessageChannel";
+import { onMessage, sendMessageResponse } from "../../eventMessageChannel";
 
 import { Callbacks
        , ErrorCallback
        , SuccessCallback
-       , UpdateListener } from "../../../types";
+       , UpdateListener } from "../../types";
 
 
 type MediaRequest =
@@ -54,13 +53,12 @@ type MediaRequest =
       | StopRequest
       | VolumeRequest;
 
-
 enum MediaMessageType {
     Play = "PLAY"
   , Load = "LOAD"
   , Pause = "PAUSE"
   , Seek = "SEEK"
-  , StopMedia = "STOP_MEDIA"
+  , Stop = "STOP"
   , MediaSetVolume = "MEDIA_SET_VOLUME"
   , MediaGetStatus = "MEDIA_GET_STATUS"
   , EditTracksInfo = "EDIT_TRACKS_INFO"
@@ -444,12 +442,16 @@ export default class Media {
     }
 
     public stop(
-            stopRequest: StopRequest
+            stopRequest?: StopRequest
           , successCallback?: SuccessCallback
           , errorCallback?: ErrorCallback): void {
 
+        if (!stopRequest) {
+            stopRequest = new StopRequest();
+        }
+
         this._sendMediaMessage(
-                MediaMessageType.StopMedia
+                MediaMessageType.Stop
               , stopRequest
               , () => {
                     this.#isActive = false;
