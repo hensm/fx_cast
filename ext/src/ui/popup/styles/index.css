@@ -11,7 +11,8 @@ body {
         background: var(--grey-80) !important;
         color: white !important;
     }
-    .media-select {
+    .media-select,
+    .receiver:not(:last-child) {
         border-bottom-color: var(--grey-50) !important;
     }
     .receiver__address {

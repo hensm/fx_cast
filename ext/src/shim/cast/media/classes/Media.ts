@@ -12,8 +12,11 @@ import MediaInfo from "./MediaInfo";
 import PauseRequest from "./PauseRequest";
 import PlayRequest from "./PlayRequest";
 import QueueData from "./QueueData";
+import QueueJumpRequest from "./QueueJumpRequest";
 import QueueInsertItemsRequest from "./QueueInsertItemsRequest";
 import QueueItem from "./QueueItem";
+import QueueSetPropertiesRequest from "./QueueSetPropertiesRequest";
+import QueueRemoveItemsRequest from "./QueueRemoveItemsRequest";
 import QueueReorderItemsRequest from "./QueueReorderItemsRequest";
 import QueueUpdateItemsRequest from "./QueueUpdateItemsRequest";
 import SeekRequest from "./SeekRequest";
@@ -35,6 +38,38 @@ import { Callbacks
        , ErrorCallback
        , SuccessCallback
        , UpdateListener } from "../../../types";
+
+
+type MediaRequest =
+        EditTracksInfoRequest
+      | GetStatusRequest
+      | PauseRequest
+      | PlayRequest
+      | QueueInsertItemsRequest
+      | QueueJumpRequest
+      | QueueRemoveItemsRequest
+      | QueueReorderItemsRequest
+      | QueueUpdateItemsRequest
+      | SeekRequest
+      | StopRequest
+      | VolumeRequest;
+
+
+enum MediaMessageType {
+    Play = "PLAY"
+  , Load = "LOAD"
+  , Pause = "PAUSE"
+  , Seek = "SEEK"
+  , StopMedia = "STOP_MEDIA"
+  , MediaSetVolume = "MEDIA_SET_VOLUME"
+  , MediaGetStatus = "MEDIA_GET_STATUS"
+  , EditTracksInfo = "EDIT_TRACKS_INFO"
+  , QueueLoad = "QUEUE_LOAD"
+  , QueueInsert = "QUEUE_INSERT"
+  , QueueUpdate = "QUEUE_UPDATE"
+  , QueueRemove = "QUEUE_REMOVE"
+  , QueueReorder = "QUEUE_REORDER"
+}
 
 
 export default class Media {
@@ -140,11 +175,14 @@ export default class Media {
     }
 
     public editTracksInfo(
-            _editTracksInfoRequest: EditTracksInfoRequest
-          , _successCallback?: SuccessCallback
-          , _errorCallback?: ErrorCallback): void {
+            editTracksInfoRequest: EditTracksInfoRequest
+          , successCallback?: SuccessCallback
+          , errorCallback?: ErrorCallback): void {
 
-        logger.info("STUB :: Media#editTracksInfo");
+        this._sendMediaMessage(
+                MediaMessageType.EditTracksInfo
+              , editTracksInfoRequest
+              , successCallback, errorCallback);
     }
 
     public getEstimatedBreakClipTime() {
@@ -167,99 +205,214 @@ export default class Media {
     }
 
     public getStatus(
-            _getStatusRequest?: GetStatusRequest
+            getStatusRequest?: GetStatusRequest
           , successCallback?: SuccessCallback
           , errorCallback?: ErrorCallback): void {
-
-        this._sendMediaMessage({ type: "MEDIA_GET_STATUS" }
+        
+        if (!getStatusRequest) {
+            getStatusRequest = new GetStatusRequest();
+        }
+        
+        this._sendMediaMessage(
+                MediaMessageType.MediaGetStatus
+              , getStatusRequest
               , successCallback, errorCallback);
     }
 
     public pause(
-            _pauseRequest?: PauseRequest
+            pauseRequest?: PauseRequest
           , successCallback?: SuccessCallback
           , errorCallback?: ErrorCallback): void {
 
-        this._sendMediaMessage({ type: "PAUSE" }
+        if (!pauseRequest) {
+            pauseRequest = new PauseRequest();
+        }
+
+        this._sendMediaMessage(
+                MediaMessageType.Pause
+              , pauseRequest
               , successCallback, errorCallback);
     }
 
     public play(
-            _playRequest?: PlayRequest
+            playRequest?: PlayRequest
           , successCallback?: SuccessCallback
           , errorCallback?: ErrorCallback): void {
 
-        this._sendMediaMessage({ type: "PLAY" }
+        if (!playRequest) {
+            playRequest = new PlayRequest();
+        }
+
+        this._sendMediaMessage(
+                MediaMessageType.Play
+              , playRequest
               , successCallback, errorCallback);
     }
 
     public queueAppendItem(
-            _item: QueueItem
-          , _successCallback?: SuccessCallback
-          , _errorCallback?: ErrorCallback): void {
-        logger.info("STUB :: Media#queueAppendItem");
+            item: QueueItem
+          , successCallback?: SuccessCallback
+          , errorCallback?: ErrorCallback): void {
+        
+        this._sendMediaMessage(
+                MediaMessageType.QueueInsert
+              , new QueueInsertItemsRequest([ item ])
+              , successCallback, errorCallback);
     }
 
     public queueInsertItems(
-            _queueInsertItemsRequest: QueueInsertItemsRequest
-          , _successCallback?: SuccessCallback
-          , _errorCallback?: ErrorCallback): void {
-        logger.info("STUB :: Media#queueInsertItems");
+            queueInsertItemsRequest: QueueInsertItemsRequest
+          , successCallback?: SuccessCallback
+          , errorCallback?: ErrorCallback): void {
+
+        this._sendMediaMessage(
+                MediaMessageType.QueueInsert
+              , queueInsertItemsRequest
+              , successCallback, errorCallback);
     }
 
     public queueJumpToItem(
-            _itemId: number
-          , _successCallback?: SuccessCallback
-          , _errorCallback?: ErrorCallback): void {
-        logger.info("STUB :: Media#queueJumpToItem");
+            itemId: number
+          , successCallback?: SuccessCallback
+          , errorCallback?: ErrorCallback): void {
+
+        if (this.items?.find(item => item.itemId === itemId)) {
+            const jumpRequest = new QueueJumpRequest();
+            jumpRequest.currentItemId = itemId;
+
+            this._sendMediaMessage(
+                    MediaMessageType.QueueUpdate
+                  , jumpRequest
+                  , successCallback, errorCallback);
+        }
     }
 
     public queueMoveItemToNewIndex(
-            _itemId: number
-          , _newIndex: number
-          , _successCallback?: SuccessCallback
-          , _errorCallback?: ErrorCallback): void {
-        logger.info("STUB :: Media#queueMoveItemToNewIndex");
+            itemId: number
+          , newIndex: number
+          , successCallback?: SuccessCallback
+          , errorCallback?: ErrorCallback): void {
+
+        if (!this.items) {
+            return;
+        }
+
+        const itemIndex = this.items.findIndex(item => item.itemId === itemId);
+
+        if (itemIndex !== -1) {
+            // New index must not be negative
+            if (newIndex < 0) {
+                if (errorCallback) {
+                    errorCallback(new _Error(ErrorCode.INVALID_PARAMETER));
+                }
+            } else if (newIndex == itemIndex) {
+                if (successCallback) { successCallback(); }
+            }
+        } else {
+            if (newIndex > itemIndex) {
+                newIndex++;
+            }
+
+            const reorderItemsRequest =
+                    new QueueReorderItemsRequest([ itemId ]);
+            if (newIndex < this.items.length) {
+                const existingItem = this.items[newIndex];
+                reorderItemsRequest.insertBefore = existingItem.itemId;
+            }
+
+            this._sendMediaMessage(
+                    MediaMessageType.QueueReorder
+                  , reorderItemsRequest
+                  , successCallback, errorCallback);
+        }
     }
 
     public queueNext(
-            _successCallback?: SuccessCallback
-          , _errorCallback?: ErrorCallback): void {
-        logger.info("STUB :: Media#queueNext");
+            successCallback?: SuccessCallback
+          , errorCallback?: ErrorCallback): void {
+
+        const jumpRequest = new QueueJumpRequest();
+        jumpRequest.jump = 1;
+
+        this._sendMediaMessage(
+                MediaMessageType.QueueUpdate
+              , jumpRequest
+              , successCallback, errorCallback);
     }
 
     public queuePrev(
-            _successCallback?: SuccessCallback
-          , _errorCallback?: ErrorCallback): void {
-        logger.info("STUB :: Media#queuePrev");
+            successCallback?: SuccessCallback
+          , errorCallback?: ErrorCallback): void {
+
+        const jumpRequest = new QueueJumpRequest();
+        jumpRequest.jump = -1;
+
+        this._sendMediaMessage(
+                MediaMessageType.QueueUpdate
+              , jumpRequest
+              , successCallback, errorCallback);
     }
 
     public queueRemoveItem(
-            _itemId: number
-          , _successCallback?: SuccessCallback
-          , _errorCallback?: ErrorCallback): void {
-        logger.info("STUB :: Media#queueRemoveItem");
+            itemId: number
+          , successCallback?: SuccessCallback
+          , errorCallback?: ErrorCallback): void {
+        
+        const item = this.items?.find(item => item.itemId === itemId);
+        if (item) {
+            const removeItemsRequest = new QueueRemoveItemsRequest([ itemId ]);
+            this._sendMediaMessage(
+                    MediaMessageType.QueueRemove
+                  , removeItemsRequest
+                  , successCallback, errorCallback);
+        }
+    }
+
+    public queueRemoveItems(
+            queueRemoveItemsRequest: QueueRemoveItemsRequest
+          , successCallback?: SuccessCallback
+          , errorCallback?: ErrorCallback): void {
+        
+        this._sendMediaMessage(
+                MediaMessageType.QueueRemove
+              , queueRemoveItemsRequest
+              , successCallback, errorCallback);
     }
 
     public queueReorderItems(
-            _queueReorderItemsRequest: QueueReorderItemsRequest
-          , _successCallback?: SuccessCallback
-          , _errorCallback?: ErrorCallback): void {
-        logger.info("STUB :: Media#queueReorderItems");
+            queueReorderItemsRequest: QueueReorderItemsRequest
+          , successCallback?: SuccessCallback
+          , errorCallback?: ErrorCallback): void {
+
+        this._sendMediaMessage(
+                MediaMessageType.QueueReorder
+              , queueReorderItemsRequest
+              , successCallback, errorCallback);
     }
 
     public queueSetRepeatMode(
-            _repeatMode: string
-          , _successCallback?: SuccessCallback
-          , _errorCallback?: ErrorCallback): void {
-        logger.info("STUB :: Media#queueSetRepeatMode");
+            repeatMode: string
+          , successCallback?: SuccessCallback
+          , errorCallback?: ErrorCallback): void {
+        
+        const setPropertiesRequest = new QueueSetPropertiesRequest();
+        setPropertiesRequest.repeatMode = repeatMode;
+
+        this._sendMediaMessage(
+                MediaMessageType.QueueUpdate
+              , setPropertiesRequest
+              , successCallback, errorCallback);
     }
 
     public queueUpdateItems(
-            _queueUpdateItemsRequest: QueueUpdateItemsRequest
-          , _successCallback?: SuccessCallback
-          , _errorCallback?: ErrorCallback): void {
-        logger.info("STUB :: Media#queueUpdateItems");
+            queueUpdateItemsRequest: QueueUpdateItemsRequest
+          , successCallback?: SuccessCallback
+          , errorCallback?: ErrorCallback): void {
+
+        this._sendMediaMessage(
+                MediaMessageType.QueueUpdate
+              , queueUpdateItemsRequest
+              , successCallback, errorCallback);
     }
 
     public removeUpdateListener(listener: UpdateListener) {
@@ -271,30 +424,33 @@ export default class Media {
           , successCallback?: SuccessCallback
           , errorCallback?: ErrorCallback): void {
 
-        this._sendMediaMessage({
-            type: "SEEK"
-          , currentTime: seekRequest.currentTime
-        }, successCallback, errorCallback);
+        
+        this._sendMediaMessage(
+                MediaMessageType.Seek
+              , seekRequest
+              , successCallback, errorCallback);
     }
 
     public setVolume(
             volumeRequest: VolumeRequest
           , successCallback?: SuccessCallback
           , errorCallback?: ErrorCallback): void {
-
-        this._sendMediaMessage({
-            type: "SET_VOLUME"
-          , volume: volumeRequest.volume
-        }, successCallback, errorCallback);
+        
+        
+        this._sendMediaMessage(
+                MediaMessageType.MediaSetVolume
+              , volumeRequest
+              , successCallback, errorCallback);
     }
 
     public stop(
-            _stopRequest: StopRequest
+            stopRequest: StopRequest
           , successCallback?: SuccessCallback
           , errorCallback?: ErrorCallback): void {
 
         this._sendMediaMessage(
-                { type: "STOP" }
+                MediaMessageType.StopMedia
+              , stopRequest
               , () => {
                     this.#isActive = false;
                     this.#listener.disconnect();
@@ -306,14 +462,14 @@ export default class Media {
               , errorCallback);
     }
 
-    public supportsCommand(_command: string): boolean {
-        logger.info("STUB :: Media#supportsCommand");
-        return true;
+    public supportsCommand(command: string): boolean {
+        return this.supportedMediaCommands.includes(command);
     }
 
 
     public _sendMediaMessage(
-            message: any
+            messageType: string
+          , message: MediaRequest
           , successCallback?: SuccessCallback
           , errorCallback?: ErrorCallback) {
 
@@ -331,10 +487,13 @@ export default class Media {
             return;
         }
 
-        message.mediaSessionId = this.mediaSessionId;
-        message.requestId = 0;
-        message.sessionId = this.sessionId;
-        message.customData = null;
+        // TODO: Fix this
+        (message as any).type = messageType;
+
+        (message as any).mediaSessionId = this.mediaSessionId;
+        (message as any).requestId = 0;
+        (message as any).sessionId = this.sessionId;
+        (message as any).customData = null;
 
         const messageId = uuid();
 

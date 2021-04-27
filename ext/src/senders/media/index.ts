@@ -270,9 +270,8 @@ async function registerMediaElementListeners() {
         });
 
         mediaElement.addEventListener("ratechange", () => {
-            currentMedia._sendMediaMessage({
-                type: "SET_PLAYBACK_RATE"
-              , playbackRate: mediaElement.playbackRate
+            currentMedia._sendMediaMessage("SET_PLAYBACK_RATE", {
+                playbackRate: mediaElement.playbackRate
             });
         });
 
