@@ -1,22 +1,23 @@
 "use strict";
 
 export interface ReceiverStatus {
-  volume: {
-      muted: boolean;
-      stepInterval: number;
-      controlType: string;
-      level: number;
-  };
-  applications?: Array<{
-      displayName: string;
-      statusText: string;
-      transportId: string;
-      isIdleScreen: boolean;
-      sessionId: string;
-      namespaces: Array<{ name: string }>;
-      appId: string;
-  }>;
-  userEq?: {};
+    applications?: Array<{
+        appId: string
+      , appType: string
+      , displayName: string
+      , iconUrl: string
+      , isIdleScreen: boolean
+      , launchedFromCloud: boolean
+      , namespaces: Array<{ name: string }>
+      , sessionId: string
+      , statusText: string
+      , transportId: string
+      , universalAppId: string
+    }>
+  , isActiveInput: boolean
+  , isStandBy: boolean
+  , userEq: unknown
+  , volume: Volume
 }
 
 export interface MediaStatus {
@@ -83,4 +84,21 @@ export interface Receiver {
     id: string;
     port: number;
     status?: ReceiverStatus;
+}
+
+
+export enum VolumeControlType {
+    ATTENUATION = "attenuation"
+  , FIXED = "fixed"
+  , MASTER = "master"
+}
+
+
+export class Volume {
+    public controlType?: VolumeControlType;
+    public stepInterval?: number;
+
+    constructor(
+            public level: (number | null) = null
+          , public muted: (boolean | null) = null) {}
 }

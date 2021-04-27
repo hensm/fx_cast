@@ -80,21 +80,19 @@ export default class Session {
             }
 
             case "shim:session/updateStatus": {
-                const volume: Volume = message.data.volume;
+                const status = message.data;
 
-                if (volume) {
+                if (status.volume) {
                     if (!this.receiver.volume) {
                         const receiverVolume = new Volume(
-                                volume.level
-                              , volume.muted);
+                                status.volume.level, status.volume.muted);
 
-                        receiverVolume.controlType = volume.controlType;
-                        receiverVolume.stepInterval = volume.stepInterval;
-
-                        this.receiver.volume = receiverVolume;
+                        receiverVolume.controlType = status.volume.controlType;
+                        receiverVolume.stepInterval =
+                                status.volume.stepInterval;
                     } else {
-                        this.receiver.volume.level = volume.level;
-                        this.receiver.volume.muted = volume.muted;
+                        this.receiver.volume.level = status.volume.level;
+                        this.receiver.volume.muted = status.volume.muted;
                     }
                 }
 
