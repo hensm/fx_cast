@@ -6,7 +6,6 @@ import ReactDOM from "react-dom";
 
 import defaultOptions from "../../defaultOptions";
 
-import About from "./About";
 import Bridge from "./Bridge";
 import EditableList from "./EditableList";
 
@@ -138,7 +137,6 @@ class OptionsApp extends Component<
 
         return (
             <div>
-                <About />
                 <form id="form" ref={ form => { this.form = form; }}
                         onSubmit={ this.handleFormSubmit }
                         onChange={ this.handleFormChange }>

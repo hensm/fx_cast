@@ -398,70 +398,6 @@ button.ghost:not(:hover) {
 }
 
 
-.about {
-    border-radius: 2px;
-    margin-bottom: 40px;
-}
-
-.about > summary {
-    padding: 0 10px;
-}
-
-.about,
-.about > summary {
-    background-color: rgba(0, 0, 0, 0.08);
-}
-
-.about__container {
-    padding: 10px;
-}
-
-.about h1,
-.about h2,
-.about h3,
-.about h4,
-.about h5,
-.about h6 {
-    display: inline-block;
-    font: inherit;
-    font-weight: bold;
-    margin: 5px 0;
-    text-transform: uppercase;
-}
-
-.about hr {
-    border: initial;
-    border-top: 1px solid rgba(0, 0, 0, 0.25);
-    margin: 10px 0;
-}
-
-.about__links {
-    margin: initial;
-    padding: initial;
-    list-style: none;
-}
-.about__link {
-    align-items: center;
-    display: inline-flex;
-    font-size: 1.2em;
-    gap: 5px;
-}
-.about__link > img {
-    vertical-align: middle;
-}
-
-.about__license > textarea {
-    height: 200px;
-    resize: vertical;
-    overflow-y: auto;
-    width: 100%;
-}
-
-.about__translators > ul {
-    margin: initial;
-    padding-left: 20px;
-}
-
 .translator__tag {
     color: #0a84ff;
     display: inline-block;
@@ -476,17 +412,5 @@ button.ghost:not(:hover) {
 @media (prefers-color-scheme: dark) {
     .editable-list__item:nth-child(odd) {
         background-color: var(--grey-80);
-    }
-
-    .about,
-    .about > summary {
-        background-color: rgba(255, 255, 255, 0.1) !important;
-    }
-    .about hr {
-        border-top: 1px solid rgba(255, 255, 255, 0.1) !important;
-    }
-
-    .about__link > img {
-        filter: invert(1);
     }
 }
