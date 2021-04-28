@@ -12,7 +12,7 @@ import { ApiConfig
        , DialRequest
        , Error as Error_
        , Image as Image_
-       , Receiver as Receiver_
+       , Receiver as Receiver
        , ReceiverDisplayStatus
        , SenderApplication
        , SessionRequest
@@ -30,6 +30,7 @@ import { AutoJoinPolicy
        , SenderPlatform
        , SessionStatus
        , VolumeControlType } from "./enums";
+import messaging from "../../messaging";
 
 
 export * as media from "./media";
@@ -46,7 +47,7 @@ export {
 
   , Error_ as Error
   , Image_ as Image
-  , Receiver_ as Receiver
+  , Receiver as Receiver
 };
 
 export let isAvailable = false;
@@ -55,7 +56,7 @@ export const VERSION = [ 1, 2 ];
 
 
 type ReceiverActionListener = (
-        receiver: Receiver_
+        receiver: Receiver
       , receiverAction: string) => void;
 
 type RequestSessionSuccessCallback = (session: Session) => void;
@@ -177,7 +178,7 @@ export function requestSession(
 }
 
 export function _requestSession(
-        _receiver: ReceiverDevice
+        receiver: ReceiverDevice
       , successCallback?: RequestSessionSuccessCallback
       , errorCallback?: ErrorCallback): void {
 
@@ -210,44 +211,12 @@ export function _requestSession(
 
     sessionRequestInProgress = true;
 
-
-    const selectedReceiver = new Receiver_(
-            _receiver.id
-          , _receiver.friendlyName);
-
-    (selectedReceiver as any)._address = _receiver.host;
-    (selectedReceiver as any)._port = _receiver.port;
-
-    function createSession() {
-        sessionList.push(new Session(
-                sessionList.length.toString()  // sessionId
-              , apiConfig.sessionRequest.appId // appId
-              , _receiver.friendlyName         // displayName
-              , []                             // appImages
-              , selectedReceiver               // receiver
-              , (session: Session) => {
-                    sendMessageResponse({
-                        subject: "main:sessionCreated"
-                    });
-
-                    sessionRequestInProgress = false;
-
-                    if (successCallback) {
-                        successCallback(session);
-                    }
-                }));
-    }
-
-    // If an existing session is active, stop it and start new one
-    if (sessionList.length) {
-        const lastSession = sessionList[sessionList.length - 1];
-
-        if (lastSession.status !== SessionStatus.STOPPED) {
-            lastSession.stop(createSession);
+    createSession(receiver).then(session => {
+        sessionRequestInProgress = false;
+        if (successCallback) {
+            successCallback(session);
         }
-    } else {
-        createSession();
-    }
+    });
 }
 
 export function requestSessionById(_sessionId: string): void {
@@ -255,7 +224,7 @@ export function requestSessionById(_sessionId: string): void {
 }
 
 export function setCustomReceivers(
-        _receivers: Receiver_[]
+        _receivers: Receiver[]
       , _successCallback?: SuccessCallback
       , _errorCallback?: ErrorCallback): void {
 
@@ -272,6 +241,50 @@ export function setReceiverDisplayStatus(_sessionId: string): void {
 
 export function unescape(escaped: string): string {
     return decodeURI(escaped);
+}
+
+
+function createSession(receiver: ReceiverDevice): Promise<Session> {
+    const selectedReceiver = new Receiver(
+        receiver.id
+      , receiver.friendlyName);
+
+    (selectedReceiver as any)._address = receiver.host;
+    (selectedReceiver as any)._port = receiver.port;
+
+    async function createSessionObject(): Promise<Session> {
+        return new Promise((resolve, _reject) => {
+            const session = new Session(
+                    sessionList.length.toString()   // sessionId
+                  , apiConfig.sessionRequest.appId  // appId
+                  , receiver.friendlyName           // displayName
+                  , []                              // appImages
+                  , selectedReceiver                // receiver
+                  , session => {
+                        sendMessageResponse({
+                            subject: "main:sessionCreated"
+                        });
+
+                        resolve(session);
+                    });
+        });
+    }
+
+    // If an existing session is active, stop it and start new one
+    // TODO: Fix whatever broken behaviour this is
+    if (sessionList.length) {
+        const lastSession = sessionList[sessionList.length - 1];
+
+        if (lastSession.status !== SessionStatus.STOPPED) {
+            return new Promise((resolve, _reject) => {
+                lastSession.stop(() => {
+                    resolve(createSessionObject());
+                });
+            });
+        }
+    }
+
+    return createSessionObject();
 }
 
 
@@ -330,49 +343,20 @@ onMessage(async message => {
                 break;
             }
 
-            const selectedReceiver = new Receiver_(
-                    message.data.receiver.id
-                  , message.data.receiver.friendlyName);
+            const { receiver } = message.data;
 
             for (const listener of receiverActionListeners) {
-                logger.info("Calling receiver action listener (CAST)"
-                      , message.data.receiver);
-                listener(selectedReceiver, ReceiverAction.CAST);
+                logger.info("Calling receiver action listener", receiver);
+
+                const castReceiver = new Receiver(
+                        receiver.id, receiver.friendlyName);
+                listener(castReceiver, ReceiverAction.CAST);
             }
 
-            (selectedReceiver as any)._address = message.data.receiver.host;
-            (selectedReceiver as any)._port = message.data.receiver.port;
-
-            // eslint-disable-next-line no-inner-declarations
-            function createSession() {
-                sessionList.push(new Session(
-                        sessionList.length.toString()  // sessionId
-                      , apiConfig.sessionRequest.appId // appId
-                      , selectedReceiver.friendlyName  // displayName
-                      , []                             // appImages
-                      , selectedReceiver               // receiver
-                      , (session: Session) => {
-                            sendMessageResponse({
-                                subject: "main:sessionCreated"
-                            });
-
-                            sessionRequestInProgress = false;
-
-                            if (sessionSuccessCallback) {
-                                sessionSuccessCallback(session);
-                            }
-                        }));
-            }
-
-            // If an existing session is active, stop it and start new one
-            if (sessionList.length) {
-                const lastSession = sessionList[sessionList.length - 1];
-
-                if (lastSession.status !== SessionStatus.STOPPED) {
-                    lastSession.stop(createSession);
-                }
-            } else {
-                createSession();
+            const session = await createSession(receiver);
+            sessionRequestInProgress = false;
+            if (sessionSuccessCallback) {
+                sessionSuccessCallback(session);
             }
 
             break;
@@ -385,7 +369,7 @@ onMessage(async message => {
                 sessionRequestInProgress = false;
 
                 for (const listener of receiverActionListeners) {
-                    const castReceiver = new Receiver_(
+                    const castReceiver = new Receiver(
                             message.data.receiver.id
                           , message.data.receiver.friendlyName);
 
