@@ -5,7 +5,7 @@ import options from "../../lib/options";
 import cast, { ensureInit } from "../../shim/export";
 
 import { Message } from "../../messaging";
-import { Receiver } from "../../types";
+import { ReceiverDevice } from "../../types";
 
 
 function startMediaServer(filePath: string, port: number)
@@ -343,7 +343,7 @@ async function registerMediaElementListeners() {
 
 interface InitOptions {
     mediaUrl: string;
-    receiver: Receiver;
+    receiver: ReceiverDevice;
     targetElementId?: number;
 }
 

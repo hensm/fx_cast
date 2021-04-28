@@ -3,7 +3,7 @@
 import { Volume } from "./shim/cast/dataClasses";
 
 
-export interface Receiver {
+export interface ReceiverDevice {
     host: string
     friendlyName: string
   , id: string
@@ -25,8 +25,8 @@ export interface ReceiverStatus {
       , transportId: string
       , universalAppId: string
     }>
-  , isActiveInput: boolean
-  , isStandBy: boolean
+  , isActiveInput?: boolean
+  , isStandBy?: boolean
   , userEq: unknown
   , volume: Volume
 }

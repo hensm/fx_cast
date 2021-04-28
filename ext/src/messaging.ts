@@ -4,7 +4,7 @@ import Messenger from "./lib/Messenger";
 import { TypedPort } from "./lib/TypedPort";
 
 import { BridgeInfo } from "./lib/bridge";
-import { Receiver, ReceiverStatus } from "./types";
+import { ReceiverDevice, ReceiverStatus } from "./types";
 import { ReceiverSelectorMediaType } from "./background/receiverSelector";
 import { ReceiverSelection, ReceiverSelectionCast, ReceiverSelectionStop }
     from "./background/receiverSelector/ReceiverSelector";
@@ -34,7 +34,7 @@ import { MediaInfo } from "./shim/cast/media";
 type ExtMessageDefinitions = {
     "popup:init": { appId?: string }
   , "popup:update": {
-        receivers: Receiver[]
+        receivers: ReceiverDevice[]
       , defaultMediaType?: ReceiverSelectorMediaType
       , availableMediaTypes?: ReceiverSelectorMediaType
     }
@@ -53,10 +53,10 @@ type ExtMessageDefinitions = {
   , "main:sessionCreated": {}
 
   , "shim:initialized": BridgeInfo
-  , "shim:serviceUp": { id: Receiver["id"] }
-  , "shim:serviceDown": { id: Receiver["id"] }
+  , "shim:serviceUp": { id: ReceiverDevice["id"] }
+  , "shim:serviceDown": { id: ReceiverDevice["id"] }
 
-  , "shim:launchApp": { receiver: Receiver }
+  , "shim:launchApp": { receiver: ReceiverDevice }
 }
 
 /**
@@ -184,7 +184,7 @@ type AppMessageDefinitions = {
   , "bridge:openReceiverSelector": string
   , "bridge:closeReceiverSelector": {}
 
-  , "bridge:stopReceiverApp": { receiver: Receiver }
+  , "bridge:stopReceiverApp": { receiverDevice: ReceiverDevice }
 
 
   , "bridge:startMediaServer": {
@@ -202,11 +202,10 @@ type AppMessageDefinitions = {
   , "mediaCast:mediaServerError": {}
 
 
-  , "main:serviceUp": Receiver
-  , "main:serviceDown": { id: string }
-
-  , "main:updateReceiverStatus": {
-        id: string
+  , "main:receiverDeviceUp": { receiverDevice: ReceiverDevice }
+  , "main:receiverDeviceDown": { receiverDeviceId: string }
+  , "main:receiverDeviceUpdated": {
+        receiverDeviceId: string
       , status: ReceiverStatus
     }
 }

@@ -2,9 +2,12 @@
 
 import mdns from "mdns";
 
-import StatusListener from "./chromecast/StatusListener";
-import { ReceiverStatus } from "../types";
 import { sendMessage } from "../lib/nativeMessaging";
+
+import { ReceiverStatus } from "../types";
+import { Message } from "../messaging";
+
+import StatusListener from "./chromecast/StatusListener";
 
 
 interface CastTxtRecord {
@@ -34,12 +37,14 @@ function onBrowserServiceUp(service: mdns.Service) {
     const txtRecord = service.txtRecord as CastTxtRecord;
 
     sendMessage({
-        subject: "main:serviceUp"
+        subject: "main:receiverDeviceUp"
       , data: {
-            host: service.addresses[0]
-          , port: service.port
-          , id: txtRecord.id
-          , friendlyName: txtRecord.fn
+            receiverDevice: {
+                host: service.addresses[0]
+              , port: service.port
+              , id: txtRecord.id
+              , friendlyName: txtRecord.fn
+            }
         }
     });
 }
@@ -72,41 +77,20 @@ export function startDiscovery(options: InitializeOptions) {
             return;
         }
 
-        const { id } = service.txtRecord;
-
         const listener = new StatusListener(
-                service.addresses[0]
-              , service.port);
+                service.addresses[0], service.port);
 
         listener.on("receiverStatus", (status: ReceiverStatus) => {
-            const receiverStatusMessage: any = {
-                subject: "main:updateReceiverStatus"
+            sendMessage({
+                subject: "main:receiverDeviceUpdated"
               , data: {
-                    id
-                  , status: {
-                        volume: {
-                            level: status.volume.level
-                          , muted: status.volume.muted
-                        }
-                    }
+                    receiverDeviceId: service.txtRecord.id
+                  , status
                 }
-            };
-
-            if (status.applications && status.applications.length) {
-                const application = status.applications[0];
-
-                receiverStatusMessage.data.status.application = {
-                    appId: application.appId
-                  , displayName: application.displayName
-                  , isIdleScreen: application.isIdleScreen
-                  , statusText: application.statusText
-                };
-            }
-
-            sendMessage(receiverStatusMessage);
+            });
         });
 
-        statusListeners.set(id, listener);
+        statusListeners.set(service.txtRecord.id, listener);
     }
 
     function onStatusBrowserServiceDown(_service: mdns.Service) {

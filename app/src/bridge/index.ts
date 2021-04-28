@@ -51,8 +51,8 @@ decodeTransform.on("data", (message: Message) => {
         }
 
         case "bridge:stopReceiverApp": {
-            const { host, port } = message.data.receiver;
-            stopReceiverApp(host, port);
+            const { receiverDevice } = message.data;
+            stopReceiverApp(receiverDevice.host, receiverDevice.port);
             break;
         }
 

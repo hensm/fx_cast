@@ -4,14 +4,14 @@ import options from "../lib/options";
 import cast, { ensureInit } from "../shim/export";
 
 import { ReceiverSelectorMediaType } from "../background/receiverSelector";
-import { Receiver } from "../types";
+import { ReceiverDevice } from "../types";
 
 
 // Variables passed from background
 const { selectedMedia
       , selectedReceiver }
     : { selectedMedia: ReceiverSelectorMediaType
-      , selectedReceiver: Receiver } = (window as any);
+      , selectedReceiver: ReceiverDevice } = (window as any);
 
 
 const FX_CAST_RECEIVER_APP_NAMESPACE = "urn:x-cast:fx_cast";

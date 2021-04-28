@@ -11,7 +11,8 @@ import ReceiverSelectorManager
         from "./receiverSelector/ReceiverSelectorManager";
 
 import ShimManager from "./ShimManager";
-import StatusManager from "./StatusManager";
+
+import receiverDevices from "./receiverDevices";
 
 import { initMenus } from "./menus";
 import { initWhitelist } from "./whitelist";
@@ -155,7 +156,7 @@ async function init() {
 
     await notifyBridgeCompat();
 
-    await StatusManager.init();
+    await receiverDevices.init();
     await ShimManager.init();
 
     await initMenus();

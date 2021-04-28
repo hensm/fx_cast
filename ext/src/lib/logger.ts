@@ -21,6 +21,14 @@ export class Logger {
             console.info(formattedMessage);
         }
     }
+    public warn(message: string, data?: any) {
+        const formattedMessage = `${this.prefix} (Warning): ${message}`;
+        if (data) {
+            console.warn(formattedMessage, data);
+        } else {
+            console.warn(formattedMessage);
+        }
+    }
     public error(message: string, data?: any) {
         const formattedMessage = `${this.prefix} (Error): ${message}`;
         if (data) {

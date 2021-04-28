@@ -4,7 +4,7 @@ import options from "../../lib/options";
 import logger from "../../lib/logger";
 
 import ShimManager from "../ShimManager";
-import StatusManager from "../StatusManager";
+import receiverDevices from "../receiverDevices";
 
 import { getMediaTypesForPageUrl } from "../../lib/utils";
 
@@ -120,12 +120,15 @@ async function getSelection(
 
 
         function onReceiverChange() {
-            sharedSelector.update(Array.from(StatusManager.getReceivers()));
+            sharedSelector.update(receiverDevices.getDevices());
         }
 
-        StatusManager.addEventListener("serviceUp", onReceiverChange);
-        StatusManager.addEventListener("serviceDown", onReceiverChange);
-        StatusManager.addEventListener("statusUpdate", onReceiverChange);
+        receiverDevices.addEventListener(
+                "receiverDeviceUp", onReceiverChange);
+        receiverDevices.addEventListener(
+                "receiverDeviceDown", onReceiverChange);
+        receiverDevices.addEventListener(
+                "receiverDeviceUpdated", onReceiverChange);
 
 
         let onSelected: any;
@@ -156,9 +159,12 @@ async function getSelection(
             sharedSelector.removeEventListener("error", onError);
             sharedSelector.removeEventListener("stop", onStop);
 
-            StatusManager.removeEventListener("serviceUp", onReceiverChange);
-            StatusManager.removeEventListener("serviceDown", onReceiverChange);
-            StatusManager.removeEventListener("statusUpdate", onReceiverChange);
+            receiverDevices.removeEventListener(
+                    "receiverDeviceUp", onReceiverChange);
+            receiverDevices.removeEventListener(
+                    "receiverDeviceDown", onReceiverChange);
+            receiverDevices.removeEventListener(
+                    "receiverDeviceUpdated", onReceiverChange);
         }
 
         sharedSelector.addEventListener("selected"
@@ -191,10 +197,9 @@ async function getSelection(
         sharedSelector.addEventListener("stop"
               , storeListener("stop", async ev => {
 
-            logger.info("Stopped receiver app", ev.detail);
+            logger.info("Stopping receiver app...", ev.detail);
 
-            await StatusManager.init();
-            await StatusManager.stopReceiverApp(ev.detail.receiver);
+            receiverDevices.stopReceiverApp(ev.detail.receiver.id);
 
             resolve({
                 actionType: ReceiverSelectionActionType.Stop
@@ -205,10 +210,10 @@ async function getSelection(
 
 
         // Ensure status manager is initialized
-        await StatusManager.init();
+        await receiverDevices.init();
 
         sharedSelector.open(
-                Array.from(StatusManager.getReceivers())
+                receiverDevices.getDevices()
               , defaultMediaType
               , availableMediaTypes
               , currentShim?.appId);

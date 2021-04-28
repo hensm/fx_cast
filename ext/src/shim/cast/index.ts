@@ -2,7 +2,7 @@
 
 import logger from "../../lib/logger";
 
-import { Receiver } from "../../types";
+import { ReceiverDevice } from "../../types";
 import { onMessage, sendMessageResponse } from "../eventMessageChannel";
 
 import Session from "./Session";
@@ -177,7 +177,7 @@ export function requestSession(
 }
 
 export function _requestSession(
-        _receiver: Receiver
+        _receiver: ReceiverDevice
       , successCallback?: RequestSessionSuccessCallback
       , errorCallback?: ErrorCallback): void {
 
@@ -414,7 +414,7 @@ onMessage(async message => {
         }
 
         case "shim:launchApp": {
-            const receiver: Receiver = message.data.receiver;
+            const receiver: ReceiverDevice = message.data.receiver;
             _requestSession(receiver
                   , session => {
                         apiConfig.sessionListener(session);

@@ -4,7 +4,7 @@ import castv2 from "castv2";
 
 import Session, { NS_CONNECTION, NS_RECEIVER } from "./Session";
 import Media from "./Media";
-import { Receiver } from "../../types";
+import { ReceiverDevice } from "../../types";
 
 
 // Existing counterpart Media/Session objects

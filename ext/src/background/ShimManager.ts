@@ -12,7 +12,7 @@ import { ReceiverSelectionActionType
 import ReceiverSelectorManager
     from "./receiverSelector/ReceiverSelectorManager";
 
-import StatusManager from "./StatusManager";
+import receiverDevices from "./receiverDevices";
 
 
 type AnyPort = Port | MessagePort;
@@ -37,20 +37,20 @@ export default new class ShimManager {
             }
         });
 
-        StatusManager.addEventListener("serviceUp", ev => {
+        receiverDevices.addEventListener("receiverDeviceUp", ev => {
             for (const shim of this.activeShims) {
                 shim.contentPort.postMessage({
                     subject: "shim:serviceUp"
-                  , data: { id: ev.detail.id }
+                  , data: { id: ev.detail.receiverDevice.id }
                 });
             }
         });
 
-        StatusManager.addEventListener("serviceDown", ev => {
+        receiverDevices.addEventListener("receiverDeviceDown", ev => {
             for (const shim of this.activeShims) {
                 shim.contentPort.postMessage({
                     subject: "shim:serviceDown"
-                  , data: { id: ev.detail.id }
+                  , data: { id: ev.detail.receiverDeviceId }
                 });
             }
         });
@@ -170,10 +170,10 @@ export default new class ShimManager {
             case "main:shimReady": {
                 shim.appId = message.data.appId;
 
-                for (const receiver of StatusManager.getReceivers()) {
+                for (const receiverDevice of receiverDevices.getDevices()) {
                     shim.contentPort.postMessage({
                         subject: "shim:serviceUp"
-                      , data: { id: receiver.id }
+                      , data: { id: receiverDevice.id }
                     });
                 }
 

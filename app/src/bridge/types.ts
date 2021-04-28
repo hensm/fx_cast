@@ -14,8 +14,8 @@ export interface ReceiverStatus {
       , transportId: string
       , universalAppId: string
     }>
-  , isActiveInput: boolean
-  , isStandBy: boolean
+  , isActiveInput?: boolean
+  , isStandBy?: boolean
   , userEq: unknown
   , volume: Volume
 }
@@ -68,17 +68,17 @@ export enum ReceiverSelectionActionType {
 
 export interface ReceiverSelectionCast {
     actionType: ReceiverSelectionActionType.Cast;
-    receiver: Receiver;
+    receiver: ReceiverDevice;
     mediaType: ReceiverSelectorMediaType;
     filePath?: string;
 }
 
 export interface ReceiverSelectionStop {
     actionType: ReceiverSelectionActionType.Stop;
-    receiver: Receiver;
+    receiver: ReceiverDevice;
 }
 
-export interface Receiver {
+export interface ReceiverDevice {
     host: string;
     friendlyName: string;
     id: string;

@@ -1,7 +1,7 @@
 "use strict";
 
 import { TypedEventTarget } from "../../lib/TypedEventTarget";
-import { Receiver } from "../../types";
+import { ReceiverDevice } from "../../types";
 
 
 export enum ReceiverSelectorMediaType {
@@ -18,13 +18,13 @@ export enum ReceiverSelectionActionType {
 
 export interface ReceiverSelectionCast {
     actionType: ReceiverSelectionActionType.Cast;
-    receiver: Receiver;
+    receiver: ReceiverDevice;
     mediaType: ReceiverSelectorMediaType;
     filePath?: string;
 }
 export interface ReceiverSelectionStop {
     actionType: ReceiverSelectionActionType.Stop;
-    receiver: Receiver;
+    receiver: ReceiverDevice;
 }
 
 export type ReceiverSelection = ReceiverSelectionCast | ReceiverSelectionStop;
@@ -43,12 +43,12 @@ export default abstract class ReceiverSelector
     abstract readonly isOpen: boolean;
 
     abstract open (
-            receivers: Receiver[]
+            receivers: ReceiverDevice[]
           , defaultMediaType: ReceiverSelectorMediaType
           , availableMediaTypes: ReceiverSelectorMediaType
           , appId?: string): void;
 
-    abstract update (receivers: Receiver[]): void;
+    abstract update (receivers: ReceiverDevice[]): void;
 
     abstract close (): void;
 }

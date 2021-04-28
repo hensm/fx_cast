@@ -27,7 +27,7 @@
       , "comma-style": [ "error", "first" ]
       , "no-multiple-empty-lines": [ "error", { "max": 2 }]
       , "no-console": [ "error", {
-            "allow": [ "info", "error" ]
+            "allow": [ "info", "warn", "error" ]
         }]
       , "operator-linebreak": [ "error", "after", {
             "overrides": {

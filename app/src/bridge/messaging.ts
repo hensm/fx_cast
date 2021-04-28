@@ -1,6 +1,6 @@
 "use strict";
 
-import { Receiver
+import { ReceiverDevice
        , ReceiverSelectionCast
        , ReceiverSelectionStop
        , ReceiverStatus } from "./types";
@@ -127,7 +127,7 @@ type MessageDefinitions = {
   , "bridge:openReceiverSelector": string
   , "bridge:closeReceiverSelector": {}
 
-  , "bridge:stopReceiverApp": { receiver: Receiver }
+  , "bridge:stopReceiverApp": { receiverDevice: ReceiverDevice }
 
 
   , "bridge:startMediaServer": {
@@ -145,11 +145,19 @@ type MessageDefinitions = {
   , "mediaCast:mediaServerError": {}
 
 
-  , "main:serviceUp": Receiver
+  , "main:serviceUp": ReceiverDevice
   , "main:serviceDown": { id: string }
   
   , "main:updateReceiverStatus": {
         id: string
+      , status: ReceiverStatus
+    }
+
+
+  , "main:receiverDeviceUp": { receiverDevice: ReceiverDevice }
+  , "main:receiverDeviceDown": { receiverDeviceId: string }
+  , "main:receiverDeviceUpdated": {
+        receiverDeviceId: string
       , status: ReceiverStatus
     }
 }

@@ -9,7 +9,7 @@ import { Message, Port } from "../messaging";
 import nativeMessaging from "./nativeMessaging";
 import options from "./options";
 
-import { Receiver } from "../types";
+import { ReceiverDevice } from "../types";
 import { ReceiverSelectionCast
        , ReceiverSelectionStop } from "../background/receiverSelector/ReceiverSelector";
 

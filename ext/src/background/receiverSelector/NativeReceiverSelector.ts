@@ -8,7 +8,7 @@ import options from "../../lib/options";
 
 import { TypedEventTarget } from "../../lib/TypedEventTarget";
 import { getWindowCenteredProps } from "../../lib/utils";
-import { Receiver } from "../../types";
+import { ReceiverDevice } from "../../types";
 
 import ReceiverSelector, {
         ReceiverSelection
@@ -34,7 +34,7 @@ export default class NativeReceiverSelector extends ReceiverSelector {
     }
 
     public async open(
-            receivers: Receiver[]
+            receivers: ReceiverDevice[]
           , defaultMediaType: ReceiverSelectorMediaType
           , availableMediaTypes: ReceiverSelectorMediaType
           , appId?: string): Promise<void> {

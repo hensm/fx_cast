@@ -9,7 +9,7 @@ import options from "../../lib/options";
 
 import { TypedEventTarget } from "../../lib/TypedEventTarget";
 import { getWindowCenteredProps, WindowCenteredProps } from "../../lib/utils";
-import { Receiver } from "../../types";
+import { ReceiverDevice } from "../../types";
 
 
 const POPUP_URL = browser.runtime.getURL("ui/popup/index.html");
@@ -20,7 +20,7 @@ export default class PopupReceiverSelector extends ReceiverSelector {
     private messagePort?: Port;
     private messagePortDisconnected?: boolean;
 
-    private receivers?: Receiver[];
+    private receivers?: ReceiverDevice[];
     private defaultMediaType?: ReceiverSelectorMediaType;
     private availableMediaTypes?: ReceiverSelectorMediaType;
 
@@ -53,7 +53,7 @@ export default class PopupReceiverSelector extends ReceiverSelector {
     }
 
     public async open(
-            receivers: Receiver[]
+            receivers: ReceiverDevice[]
           , defaultMediaType: ReceiverSelectorMediaType
           , availableMediaTypes: ReceiverSelectorMediaType
           , appId?: string): Promise<void> {
@@ -115,7 +115,7 @@ export default class PopupReceiverSelector extends ReceiverSelector {
         }
     }
 
-    public update(receivers: Receiver[]) {
+    public update(receivers: ReceiverDevice[]) {
         this.receivers = receivers;
         this.messagePort?.postMessage({
             subject: "popup:update"
