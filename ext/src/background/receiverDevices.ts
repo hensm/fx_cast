@@ -46,7 +46,7 @@ export default new class extends TypedEventTarget<EventMap> {
         port.onDisconnect.addListener(this.onBridgeDisconnect);
 
         port.postMessage({
-            subject: "bridge:initialize"
+            subject: "bridge:startDiscovery"
           , data: {
                 // Also send back status messages
                 shouldWatchStatus: true

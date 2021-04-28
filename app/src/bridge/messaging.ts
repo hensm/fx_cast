@@ -105,7 +105,7 @@ type MessageDefinitions = {
   , "bridge:getInfo": string
   , "bridge:/getInfo": string
 
-  , "bridge:initialize": {
+  , "bridge:startDiscovery": {
         shouldWatchStatus: boolean
     }
 

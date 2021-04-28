@@ -45,7 +45,7 @@ decodeTransform.on("data", (message: Message) => {
             break;
         }
 
-        case "bridge:initialize": {
+        case "bridge:startDiscovery": {
             startDiscovery(message.data);
             break;
         }

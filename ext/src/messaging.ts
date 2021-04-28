@@ -166,7 +166,7 @@ type AppMessageDefinitions = {
   , "bridge:getInfo": string
   , "bridge:/getInfo": string
 
-  , "bridge:initialize": {
+  , "bridge:startDiscovery": {
         shouldWatchStatus: boolean
     }
 
