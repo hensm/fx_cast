@@ -339,8 +339,9 @@ class ReceiverEntry extends Component<ReceiverEntryProps, ReceiverEntryState> {
                 </div>
                 <button className="button receiver__connect"
                         onClick={ this.handleCast }
-                        disabled={ (application && application.isIdleScreen)
-                                ?? (this.props.isLoading || !this.props.canCast) }>
+                        disabled={ this.state.showAlternateAction
+                            ? !application || application.isIdleScreen
+                            : this.props.isLoading || !this.props.canCast }>
                     { this.state.isLoading
                         ? _("popupCastingButtonTitle"
                               , (this.state.isLoading
@@ -362,7 +363,7 @@ class ReceiverEntry extends Component<ReceiverEntryProps, ReceiverEntryState> {
 
         const application = status.applications?.[0];
 
-        if (!application?.isIdleScreen && this.state.showAlternateAction) {
+        if (this.state.showAlternateAction) {
             this.props.onStop(this.props.receiver);
         } else {
             this.props.onCast(this.props.receiver);
