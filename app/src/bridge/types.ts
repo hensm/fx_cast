@@ -20,6 +20,7 @@ export interface ReceiverStatus {
   , volume: Volume
 }
 
+
 export interface MediaStatus {
   mediaSessionId: number;
   supportedMediaCommands: number;
@@ -102,3 +103,15 @@ export class Volume {
             public level: (number | null) = null
           , public muted: (boolean | null) = null) {}
 }
+
+
+export type ReceiverMessage =
+        { type: "LAUNCH", appId: string }
+      | { type: "STOP", sessionId: string }
+      | { type: "GET_STATUS" }
+      | { type: "GET_APP_AVAILABILITY", appId: string[] }
+      | {
+            type: "SET_VOLUME"
+          , volume: { level: number }
+                  | { muted: boolean }
+        };

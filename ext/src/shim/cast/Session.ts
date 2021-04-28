@@ -3,9 +3,9 @@
 import { v4 as uuid } from "uuid";
 
 import logger from "../../lib/logger";
+import { ReceiverMessage } from "../../types";
 
-import { ListenerObject
-       , onMessage
+import { onMessage
        , sendMessageResponse } from "../eventMessageChannel";
 
 import { Callbacks
@@ -38,11 +38,8 @@ export default class Session {
     #messageListeners = new Map<string, Set<MessageListener>>();
     #updateListeners = new Set<UpdateListener>();
 
-    #leaveCallbacks = new Map<string, Callbacks>();
     #sendMessageCallbacks = new Map<string, Callbacks>();
-    #setReceiverMutedCallbacks = new Map<string, Callbacks>();
-    #setReceiverVolumeLevelCallbacks = new Map<string, Callbacks>();
-    #stopCallbacks = new Map<string, Callbacks>();
+    #sendReceiverMessageCallbacks = new Map<string, Function>();
 
     #listener = onMessage(message => {
         // Filter other session messages
@@ -103,6 +100,17 @@ export default class Session {
                 break;
             }
 
+            case "shim:session/sendReceiverMessageResponse": {
+                const { messageId, wasError } = message.data;
+                const callback =
+                        this.#sendReceiverMessageCallbacks.get(messageId);
+                if (callback) {
+                    callback(wasError);
+                }
+
+                break;
+            }
+
 
             case "shim:session/impl_addMessageListener": {
                 const { namespace, data } = message.data;
@@ -129,66 +137,6 @@ export default class Session {
                 }
 
                 this.#sendMessageCallbacks.delete(messageId);
-
-                break;
-            }
-
-            case "shim:session/impl_setReceiverMuted": {
-                const { volumeId, error } = message.data;
-                const [ successCallback, errorCallback ] =
-                        this.#setReceiverMutedCallbacks.get(volumeId) ?? [];
-
-                if (error && errorCallback) {
-                    errorCallback(new _Error(ErrorCode.SESSION_ERROR));
-                } else if (successCallback) {
-                    successCallback();
-                }
-
-                this.#setReceiverMutedCallbacks.delete(volumeId);
-
-                break;
-            }
-
-            case "shim:session/impl_setReceiverVolumeLevel": {
-                const { volumeId, error } = message.data;
-                const [ successCallback, errorCallback ] =
-                        this.#setReceiverVolumeLevelCallbacks
-                            .get(volumeId) ?? [];
-
-                if (error && errorCallback) {
-                    errorCallback(new _Error(ErrorCode.SESSION_ERROR));
-                } else if (successCallback) {
-                    successCallback();
-                }
-
-                this.#setReceiverVolumeLevelCallbacks.delete(volumeId);
-
-                break;
-            }
-
-            case "shim:session/impl_stop": {
-                const { stopId, error } = message.data;
-                const [ successCallback, errorCallback ] =
-                        this.#stopCallbacks.get(stopId) ?? [];
-
-                // Disconnect from extension messages
-                this.#listener.disconnect();
-
-                if (error && errorCallback) {
-                    errorCallback(new _Error(ErrorCode.SESSION_ERROR));
-                } else {
-                    this.status = SessionStatus.STOPPED;
-
-                    for (const listener of this.#updateListeners) {
-                        listener(false);
-                    }
-
-                    if (successCallback) {
-                        successCallback();
-                    }
-                }
-
-                this.#stopCallbacks.delete(stopId);
 
                 break;
             }
@@ -262,23 +210,10 @@ export default class Session {
     }
 
     public leave(
-            successCallback?: SuccessCallback
-          , errorCallback?: ErrorCallback): void {
+            _successCallback?: SuccessCallback
+          , _errorCallback?: ErrorCallback): void {
 
-        const id = uuid();
-
-        sendMessageResponse({
-            subject: "bridge:session/impl_leave"
-          , data: {
-                id
-              , _id: this.#id
-            }
-        });
-
-        this.#leaveCallbacks.set(id, [
-            successCallback
-          , errorCallback
-        ]);
+        logger.info("STUB :: Session#leave");
     }
 
     public loadMedia(
@@ -394,21 +329,11 @@ export default class Session {
           , successCallback?: SuccessCallback
           , errorCallback?: ErrorCallback) {
 
-        const volumeId = uuid();
-
-        sendMessageResponse({
-            subject: "bridge:session/impl_setReceiverMuted"
-          , data: {
-                muted
-              , volumeId
-              , _id: this.#id
-            }
-        });
-
-        this.#setReceiverMutedCallbacks.set(volumeId, [
-            successCallback
-          , errorCallback
-        ]);
+        this.#sendReceiverMessage(
+                { type: "SET_VOLUME"
+                , volume: { muted }})
+            .then(successCallback)
+            .catch(errorCallback);
     }
 
     public setReceiverVolumeLevel(
@@ -416,43 +341,49 @@ export default class Session {
           , successCallback?: SuccessCallback
           , errorCallback?: ErrorCallback): void {
 
-        const volumeId = uuid();
-
-        sendMessageResponse({
-            subject: "bridge:session/impl_setReceiverVolumeLevel"
-          , data: {
-                newLevel
-              , volumeId
-              , _id: this.#id
-            }
-        });
-
-        this.#setReceiverVolumeLevelCallbacks.set(volumeId, [
-            successCallback
-          , errorCallback
-        ]);
+        this.#sendReceiverMessage(
+                { type: "SET_VOLUME"
+                , volume: { level: newLevel }})
+            .then(successCallback)
+            .catch(errorCallback);
     }
 
     public stop(
             successCallback?: SuccessCallback
           , errorCallback?: ErrorCallback): void {
 
-        const stopId = uuid();
-
-        sendMessageResponse({
-            subject: "bridge:session/impl_stop"
-          , data: {
-                stopId
-              , _id: this.#id
-            }
-        });
-
-        this.#stopCallbacks.set(stopId, [
-            successCallback
-          , errorCallback
-        ]);
+        this.#sendReceiverMessage(
+                { type: "STOP"
+                , sessionId: this.sessionId })
+            .then(successCallback)
+            .catch(errorCallback);
     }
 
+
+    /**
+     * Sends a message to the bridge that is forwarded to the
+     * receiver device. Promise resolves once the message is sent
+     * or an error occurs.
+     */
+    #sendReceiverMessage = (message: ReceiverMessage) => {
+        return new Promise<void>((resolve, reject) => {
+            const messageId = uuid();
+            sendMessageResponse({
+                subject: "bridge:session/sendReceiverMessage"
+              , data: { message, messageId, _id: this.#id }
+            });
+    
+            this.#sendReceiverMessageCallbacks.set(
+                    messageId, (wasError: boolean) => {
+                if (wasError) {
+                    reject(new _Error(ErrorCode.SESSION_ERROR));
+                    return;
+                }
+
+                resolve();
+            });
+        });
+    }
 
     private _sendMediaMessage(message: string | {}) {
         this.sendMessage("urn:x-cast:com.google.cast.media", message);

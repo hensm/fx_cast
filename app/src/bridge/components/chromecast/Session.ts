@@ -130,6 +130,22 @@ export default class Session {
                 this.close();
                 break;
 
+            case "bridge:session/sendReceiverMessage": {
+                let wasError = false;
+                try {
+                    this.clientReceiver?.send(message.data.message);
+                } catch (err) {
+                    wasError = true;
+                }
+
+                this.sendMessage("shim:session/sendReceiverMessageResponse", {
+                    messageId: message.data.messageId
+                  , wasError
+                });
+
+                break;
+            }
+
             case "bridge:session/impl_addMessageListener":
                 this._impl_addMessageListener(message.data.namespace);
                 break;
@@ -139,22 +155,6 @@ export default class Session {
                         message.data.namespace
                       , message.data.message
                       , message.data.messageId);
-                break;
-
-            case "bridge:session/impl_setReceiverMuted":
-                this._impl_setReceiverMuted(
-                        message.data.muted
-                      , message.data.volumeId);
-                break;
-
-            case "bridge:session/impl_setReceiverVolumeLevel":
-                this._impl_setReceiverVolumeLevel(
-                        message.data.newLevel
-                      , message.data.volumeId);
-                break;
-
-            case "bridge:session/impl_stop":
-                this._impl_stop(message.data.stopId);
                 break;
         }
     }
@@ -209,7 +209,7 @@ export default class Session {
             }
 
             this.createChannel(namespace);
-            this.channelMap.get(namespace)!.send(message);
+            this.channelMap.get(namespace)?.send(message);
         } catch (err) {
             error = true;
         }
@@ -220,66 +220,4 @@ export default class Session {
         });
     }
 
-    private _impl_setReceiverMuted(muted: boolean, volumeId: string) {
-
-        let error = false;
-
-        try {
-            this.clientReceiver!.send({
-                type: "SET_VOLUME"
-              , volume: { muted }
-              , requestId: 0
-            });
-        } catch (err) {
-            error = true;
-        }
-
-        this.sendMessage("shim:session/impl_setReceiverMuted", {
-            volumeId
-          , error
-        });
-    }
-
-    private _impl_setReceiverVolumeLevel(newLevel: number, volumeId: string) {
-
-        let error = false;
-
-        try {
-            this.clientReceiver!.send({
-                type: "SET_VOLUME"
-              , volume: { level: newLevel }
-              , requestId: 0
-            });
-        } catch (err) {
-            error = true;
-        }
-
-        this.sendMessage("shim:session/impl_setReceiverVolumeLevel", {
-            volumeId
-          , error
-        });
-    }
-
-    private _impl_stop(stopId: string) {
-        let error = false;
-
-        try {
-            this.clientReceiver!.send({
-                type: "STOP"
-              , sessionId: this.sessionId
-              , requestId: 0
-            });
-        } catch (err) {
-            error = true;
-        }
-
-        this.client.close();
-
-        clearInterval(this.clientHeartbeatIntervalId!);
-
-        this.sendMessage("shim:session/impl_stop", {
-            stopId
-          , error
-        });
-    }
 }

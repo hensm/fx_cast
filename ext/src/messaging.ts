@@ -1,13 +1,19 @@
 "use strict";
 
 import Messenger from "./lib/Messenger";
-import { TypedPort } from "./lib/TypedPort";
 
+import { TypedPort } from "./lib/TypedPort";
 import { BridgeInfo } from "./lib/bridge";
-import { ReceiverDevice, ReceiverStatus } from "./types";
+
+import { ReceiverDevice
+       , ReceiverMessage
+       , ReceiverStatus } from "./types";
+
 import { ReceiverSelectorMediaType } from "./background/receiverSelector";
-import { ReceiverSelection, ReceiverSelectionCast, ReceiverSelectionStop }
-    from "./background/receiverSelector/ReceiverSelector";
+import { ReceiverSelection
+       , ReceiverSelectionCast
+       , ReceiverSelectionStop }
+        from "./background/receiverSelector/ReceiverSelector";
 
 import { Volume } from "./shim/cast/dataClasses";
 import { MediaInfo } from "./shim/cast/media";
@@ -74,24 +80,16 @@ type AppMessageDefinitions = {
       , statusText: string
     }
   , "shim:session/updateStatus": { volume: Volume }
+  , "shim:session/sendReceiverMessageResponse": {
+        messageId: string
+      , wasError: boolean
+    }
   , "shim:session/impl_addMessageListener": {
         namespace: string
       , data: string
     }
   , "shim:session/impl_sendMessage": {
         messageId: string
-      , error: boolean
-    }
-  , "shim:session/impl_setReceiverMuted": {
-        volumeId: string
-      , error: boolean
-    }
-  , "shim:session/impl_setReceiverVolumeLevel": {
-        volumeId: string
-      , error: boolean
-    }
-  , "shim:session/impl_stop": {
-        stopId: string
       , error: boolean
     }
 
@@ -104,6 +102,11 @@ type AppMessageDefinitions = {
       , _id: string
     }
   , "bridge:session/close": {}
+  , "bridge:session/sendReceiverMessage": {
+        message: ReceiverMessage
+      , messageId: string
+      , _id: string
+    }
   , "bridge:session/impl_leave": {
         id: string
       , _id: string
@@ -113,20 +116,6 @@ type AppMessageDefinitions = {
       , message: any
       , messageId: string
       , _id: string
-    }
-  , "bridge:session/impl_setReceiverMuted": {
-        muted: boolean
-      , volumeId: string
-      , _id: string
-    }
-  , "bridge:session/impl_setReceiverVolumeLevel": {
-        newLevel: number
-      , volumeId: string
-      , _id: string
-    }
-  , "bridge:session/impl_stop": {
-        stopId: string;
-        _id: string;
     }
   , "bridge:session/impl_addMessageListener": {
         namespace: string;

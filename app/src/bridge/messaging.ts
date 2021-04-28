@@ -1,9 +1,11 @@
 "use strict";
 
 import { ReceiverDevice
+       , ReceiverMessage
        , ReceiverSelectionCast
        , ReceiverSelectionStop
-       , ReceiverStatus } from "./types";
+       , ReceiverStatus
+       , Volume } from "./types";
 
 
 type MessageDefinitions = {
@@ -15,25 +17,17 @@ type MessageDefinitions = {
       , displayName: string
       , statusText: string
     }
-  , "shim:session/updateStatus": { volume: any /* Volume */ }
+  , "shim:session/updateStatus": { volume: Volume }
+  , "shim:session/sendReceiverMessageResponse": {
+        messageId: string
+      , wasError: boolean
+    }
   , "shim:session/impl_addMessageListener": {
         namespace: string
       , data: string
     }
   , "shim:session/impl_sendMessage": {
         messageId: string
-      , error: boolean
-    }
-  , "shim:session/impl_setReceiverMuted": {
-        volumeId: string
-      , error: boolean
-    }
-  , "shim:session/impl_setReceiverVolumeLevel": {
-        volumeId: string
-      , error: boolean
-    }
-  , "shim:session/impl_stop": {
-        stopId: string
       , error: boolean
     }
 
@@ -46,6 +40,11 @@ type MessageDefinitions = {
       , _id: string
     }
   , "bridge:session/close": {}
+  , "bridge:session/sendReceiverMessage": {
+        message: ReceiverMessage
+      , messageId: string
+      , _id: string
+    }
   , "bridge:session/impl_leave": {
         id: string
       , _id: string
@@ -55,20 +54,6 @@ type MessageDefinitions = {
       , message: any
       , messageId: string
       , _id: string
-    }
-  , "bridge:session/impl_setReceiverMuted": {
-        muted: boolean
-      , volumeId: string
-      , _id: string
-    }
-  , "bridge:session/impl_setReceiverVolumeLevel": {
-        newLevel: number
-      , volumeId: string
-      , _id: string
-    }
-  , "bridge:session/impl_stop": {
-        stopId: string;
-        _id: string;
     }
   , "bridge:session/impl_addMessageListener": {
         namespace: string;

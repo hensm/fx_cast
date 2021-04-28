@@ -30,3 +30,14 @@ export interface ReceiverStatus {
   , userEq: unknown
   , volume: Volume
 }
+
+export type ReceiverMessage =
+        { type: "LAUNCH", appId: string }
+      | { type: "STOP", sessionId: string }
+      | { type: "GET_STATUS" }
+      | { type: "GET_APP_AVAILABILITY", appId: string[] }
+      | {
+            type: "SET_VOLUME"
+          , volume: { level: number }
+                  | { muted: boolean }
+        };
