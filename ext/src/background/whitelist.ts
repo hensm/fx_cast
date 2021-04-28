@@ -138,7 +138,7 @@ function onWhitelistedChildBeforeSendHeaders(
  * the API shim.
  */
 async function onBeforeCastSDKRequest(details: OnBeforeRequestDetails) {
-    if (!details.originUrl) {
+    if (!details.originUrl || details.tabId === -1) {
         return {};
     }
 
