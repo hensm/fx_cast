@@ -2,9 +2,11 @@
 
 import { Volume } from "./shim/cast/dataClasses";
 
-import { LoadRequest, QueueInsertItemsRequest, QueueJumpRequest
+import { EditTracksInfoRequest, GetStatusRequest, LoadRequest, PauseRequest
+       , PlayRequest, QueueInsertItemsRequest, QueueJumpRequest
        , QueueLoadRequest, QueueRemoveItemsRequest, QueueReorderItemsRequest
-       , QueueSetPropertiesRequest, QueueUpdateItemsRequest } from "./shim/cast/media";
+       , QueueSetPropertiesRequest, QueueUpdateItemsRequest, SeekRequest
+       , StopRequest, VolumeRequest } from "./shim/cast/media";
 
 
 export interface ReceiverDevice {
@@ -37,23 +39,14 @@ export interface ReceiverStatus {
 
 
 export type SessionMediaMessage =
-        { type: "PLAY", customData: (any | null) }
-      | { type: "PAUSE", customData: (any | null) }
-      | { type: "SEEK", customData: (any | null) }
-      | { type: "STOP", customData: (any | null) }
-      | { type: "MEDIA_GET_STATUS", customData: (any | null) }
+        { type: "PLAY" } & PlayRequest
+      | { type: "PAUSE" } & PauseRequest
+      | { type: "SEEK" } & SeekRequest
+      | { type: "STOP" } & StopRequest
+      | { type: "MEDIA_GET_STATUS" } & GetStatusRequest
+      | { type: "MEDIA_SET_VOLUME" } & VolumeRequest
+      | { type: "EDIT_TRACKS_INFO" } & EditTracksInfoRequest
       | { type: "SET_PLAYBACK_RATE", playbackRate: number }
-      | {
-            type: "MEDIA_SET_VOLUME"
-          , volume: Partial<Volume>
-          , customData: (any | null)
-        }
-      | {
-            type: "EDIT_TRACKS_INFO"
-          , requestId: number
-          , activeTrackIds?: (number[] | null)
-          , textTrackStyle?: (string | null)
-        }
       | LoadRequest
       | QueueLoadRequest
       | QueueInsertItemsRequest

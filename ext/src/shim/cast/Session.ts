@@ -3,7 +3,7 @@
 import { v4 as uuid } from "uuid";
 
 import logger from "../../lib/logger";
-import { SessionMediaMessage, SessionReceiverMessage } from "../../types";
+import { SessionReceiverMessage } from "../../types";
 
 import { onMessage
        , sendMessageResponse } from "../eventMessageChannel";
