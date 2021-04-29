@@ -143,12 +143,12 @@ export default class Session {
         }
     })
 
-    public media: Media[];
-    public namespaces: Array<{ name: string }>;
-    public senderApps: SenderApplication[];
-    public status: SessionStatus;
-    public statusText: string | null;
-    public transportId: string;
+    media: Media[];
+    namespaces: Array<{ name: string }>;
+    senderApps: SenderApplication[];
+    status: SessionStatus;
+    statusText: Nullable<string>;
+    transportId: string;
 
     constructor(
             public sessionId: string
@@ -182,11 +182,11 @@ export default class Session {
     }
 
 
-    public addMediaListener(_mediaListener: MediaListener) {
+    addMediaListener(_mediaListener: MediaListener) {
         logger.info("STUB :: Session#addMediaListener");
     }
 
-    public addMessageListener(
+    addMessageListener(
             namespace: string
           , listener: MessageListener) {
 
@@ -205,18 +205,18 @@ export default class Session {
         });
     }
 
-    public addUpdateListener(listener: UpdateListener) {
+    addUpdateListener(listener: UpdateListener) {
         this.#updateListeners.add(listener);
     }
 
-    public leave(
+    leave(
             _successCallback?: SuccessCallback
           , _errorCallback?: ErrorCallback): void {
 
         logger.info("STUB :: Session#leave");
     }
 
-    public loadMedia(
+    loadMedia(
             loadRequest: LoadRequest
           , successCallback?: LoadSuccessCallback
           , errorCallback?: ErrorCallback): void {
@@ -274,7 +274,7 @@ export default class Session {
         });
     }
 
-    public queueLoad(
+    queueLoad(
             _queueLoadRequest: QueueLoadRequest
           , _successCallback?: LoadSuccessCallback
           , _errorCallback?: ErrorCallback): void {
@@ -282,25 +282,25 @@ export default class Session {
         logger.info("STUB :: Session#queueLoad");
     }
 
-    public removeMediaListener(_mediaListener: MediaListener): void {
+    removeMediaListener(_mediaListener: MediaListener): void {
         logger.info("STUB :: Session#removeMediaListener");
     }
 
-    public removeMessageListener(
+    removeMessageListener(
             namespace: string
           , listener: MessageListener): void {
 
         this.#messageListeners.get(namespace)?.delete(listener);
     }
 
-    public removeUpdateListener(
+    removeUpdateListener(
             _namespace: string
           , listener: UpdateListener): void {
 
         this.#updateListeners.delete(listener);
     }
 
-    public sendMessage(
+    sendMessage(
             namespace: string
           , message: {} | string
           , successCallback?: SuccessCallback
@@ -324,7 +324,7 @@ export default class Session {
         ]);
     }
 
-    public setReceiverMuted(
+    setReceiverMuted(
             muted: boolean
           , successCallback?: SuccessCallback
           , errorCallback?: ErrorCallback) {
@@ -336,7 +336,7 @@ export default class Session {
             .catch(errorCallback);
     }
 
-    public setReceiverVolumeLevel(
+    setReceiverVolumeLevel(
             newLevel: number
           , successCallback?: SuccessCallback
           , errorCallback?: ErrorCallback): void {
@@ -348,7 +348,7 @@ export default class Session {
             .catch(errorCallback);
     }
 
-    public stop(
+    stop(
             successCallback?: SuccessCallback
           , errorCallback?: ErrorCallback): void {
 

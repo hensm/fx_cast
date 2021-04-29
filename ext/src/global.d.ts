@@ -3,6 +3,7 @@ declare const MIRRORING_APP_ID: string;
 declare const APPLICATION_NAME: string;
 declare const APPLICATION_VERSION: string;
 
+declare type Nullable<T> = T | null;
 
 declare interface Object {
     // eslint-disable-next-line @typescript-eslint/ban-types

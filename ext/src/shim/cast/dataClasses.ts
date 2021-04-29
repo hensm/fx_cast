@@ -32,41 +32,41 @@ export class CredentialsData {
 export class DialRequest {
     constructor(
             public appName: string
-          , public launchParameter: (string | null) = null) {}
+          , public launchParameter: Nullable<string> = null) {}
 }
 
 
 export class Error {
     constructor(
             public code: string
-          , public description: (string | null) = null
+          , public description: Nullable<string> = null
           , public details: any = null) {}
 }
 
 
 export class Image {
-    public width: (number | null) = null;
-    public height: (number | null) = null;
+    width: Nullable<number> = null;
+    height: Nullable<number> = null;
 
     constructor(public url: string) {}
 }
 
 
 export class Receiver {
-    public displayStatus: (ReceiverDisplayStatus | null) = null;
-    public isActiveInput: (boolean | null) = null;
-    public receiverType: string = ReceiverType.CAST;
+    displayStatus: Nullable<ReceiverDisplayStatus> = null;
+    isActiveInput: Nullable<boolean> = null;
+    receiverType: string = ReceiverType.CAST;
 
     constructor(
             public label: string
           , public friendlyName: string
           , public capabilities: Capability[] = []
-          , public volume: (Volume | null) = null) {}
+          , public volume: Nullable<Volume> = null) {}
 }
 
 
 export class ReceiverDisplayStatus {
-    public showStop: (boolean | null) = null;
+    showStop: Nullable<boolean> = null;
 
     constructor(
             public statusText: string
@@ -75,15 +75,15 @@ export class ReceiverDisplayStatus {
 
 
 export class SenderApplication {
-    public packageId: (string | null) = null;
-    public url: (string | null) = null;
+    packageId: Nullable<string> = null;
+    url: Nullable<string> = null;
 
     constructor(public platform: string) {}
 }
 
 
 export class SessionRequest {
-    public language: (string | null) = null;
+    language: Nullable<string> = null;
 
     constructor(
             public appId: string
@@ -91,24 +91,24 @@ export class SessionRequest {
                                   , Capability.AUDIO_OUT ]
           , public requestSessionTimeout = (new Timeout()).requestSession
           , public androidReceiverCompatible = false
-          , public credentialsData: (CredentialsData | null) = null) {}
+          , public credentialsData: Nullable<CredentialsData> = null) {}
 }
 
 
 export class Timeout {
-    public leaveSession = 3000;
-    public requestSession = 60000;
-    public sendCustomMessage = 3000;
-    public setReceiverVolume = 3000;
-    public stopSession = 3000;
+    leaveSession = 3000;
+    requestSession = 60000;
+    sendCustomMessage = 3000;
+    setReceiverVolume = 3000;
+    stopSession = 3000;
 }
 
 
 export class Volume {
-    public controlType?: VolumeControlType;
-    public stepInterval?: number;
+    controlType?: VolumeControlType;
+    stepInterval?: number;
 
     constructor(
-            public level: (number | null) = null
-          , public muted: (boolean | null) = null) {}
+            public level: Nullable<number> = null
+          , public muted: Nullable<boolean> = null) {}
 }
