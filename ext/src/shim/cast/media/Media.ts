@@ -79,7 +79,7 @@ export default class Media {
 
                 // Call update listeners
                 for (const listener of this.#updateListeners) {
-                    listener(true);
+                    listener(this.#isActive);
                 }
 
                 break;
