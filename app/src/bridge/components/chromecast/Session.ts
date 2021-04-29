@@ -138,6 +138,14 @@ export default class Session {
                     wasError = true;
                 }
 
+                if (message.data.message.type === "STOP") {
+                    if (this.clientHeartbeatIntervalId) {
+                        clearInterval(this.clientHeartbeatIntervalId);
+                    }
+
+                    this.client.close();
+                }
+
                 this.sendMessage("shim:session/sendReceiverMessageResponse", {
                     messageId: message.data.messageId
                   , wasError

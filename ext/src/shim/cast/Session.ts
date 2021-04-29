@@ -3,7 +3,7 @@
 import { v4 as uuid } from "uuid";
 
 import logger from "../../lib/logger";
-import { ReceiverMessage } from "../../types";
+import { SessionMediaMessage, SessionReceiverMessage } from "../../types";
 
 import { onMessage
        , sendMessageResponse } from "../eventMessageChannel";
@@ -365,8 +365,12 @@ export default class Session {
      * receiver device. Promise resolves once the message is sent
      * or an error occurs.
      */
-    #sendReceiverMessage = (message: ReceiverMessage) => {
+    #sendReceiverMessage = (message: SessionReceiverMessage) => {
         return new Promise<void>((resolve, reject) => {
+            if (!(message as any).requestId) {
+                (message as any).requestId = 0;
+            }
+            
             const messageId = uuid();
             sendMessageResponse({
                 subject: "bridge:session/sendReceiverMessage"

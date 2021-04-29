@@ -6,7 +6,7 @@ import { TypedPort } from "./lib/TypedPort";
 import { BridgeInfo } from "./lib/bridge";
 
 import { ReceiverDevice
-       , ReceiverMessage
+       , SessionReceiverMessage
        , ReceiverStatus } from "./types";
 
 import { ReceiverSelectorMediaType } from "./background/receiverSelector";
@@ -103,7 +103,7 @@ type AppMessageDefinitions = {
     }
   , "bridge:session/close": {}
   , "bridge:session/sendReceiverMessage": {
-        message: ReceiverMessage
+        message: SessionReceiverMessage
       , messageId: string
       , _id: string
     }
