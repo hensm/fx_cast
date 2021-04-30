@@ -14,9 +14,9 @@ import { ErrorCallback
        , SuccessCallback
        , UpdateListener } from "../types";
 
-import { SenderMediaMessage, SenderMessage } from "./types";
+import { ReceiverMediaMessage, SenderMediaMessage, SenderMessage } from "./types";
 
-import { Error as _Error
+import { Error as Error_
        , Image, Receiver
        , SenderApplication, Volume } from "./dataClasses";
 import { ErrorCode, SessionStatus } from "./enums";
@@ -26,12 +26,15 @@ import { Media
        , QueueLoadRequest } from "./media";
 
 
-type SenderMessageData<T = SenderMessage> =
+type DistributiveOmit<T, K extends keyof any> =
         T extends any
-            ? Omit<T, "requestId">
+            ? Omit<T, K>
             : never;
 
 type SessionSuccessCallback = (session: Session) => void;
+
+
+const NS_MEDIA = "urn:x-cast:com.google.cast.media";
 
 export default class Session {
     #id = uuid();
@@ -61,7 +64,7 @@ export default class Session {
                 this.status = SessionStatus.STOPPED;
 
                 for (const listener of this.#updateListeners) {
-                    listener(false);
+                    listener(this.status !== SessionStatus.STOPPED);
                 }
 
                 break;
@@ -73,8 +76,6 @@ export default class Session {
                 // First status message indicates session creation
                 if (!this.#isConnected && status.applications) {
                     this.#isConnected = true;
-
-                    this.status = SessionStatus.CONNECTED;
 
                     // Update app props
                     const app = status.applications[0];
@@ -93,7 +94,7 @@ export default class Session {
                 this.receiver.volume = status.volume;
 
                 for (const listener of this.#updateListeners) {
-                    listener(true);
+                    listener(this.status !== SessionStatus.STOPPED);
                 }
 
                 break;
@@ -119,7 +120,7 @@ export default class Session {
                         this.#sendMessageCallbacks.get(messageId) ?? [];
 
                 if (wasError && errorCallback) {
-                    errorCallback(new _Error(ErrorCode.SESSION_ERROR));
+                    errorCallback(new Error_(ErrorCode.SESSION_ERROR));
                 } else if (successCallback) {
                     successCallback();
                 }
@@ -129,7 +130,7 @@ export default class Session {
                 break;
             }
 
-            case "shim:session/impl_sendReceiverMessage": {
+            case "shim:session/impl_sendPlatformMessage": {
                 const { messageId, wasError } = message.data;
                 const callback =
                         this.#sendReceiverMessageCallbacks.get(messageId);
@@ -143,14 +144,15 @@ export default class Session {
     });
 
     /**
-     * Sends a message to the bridge that is forwarded to the
-     * receiver device. Promise resolves once the message is sent
-     * or an error occurs.
+     * Sends a message to the platform receiver.
+     * receiver-0 / urn:x-cast:com.google.cast.receiver
      */
-     #sendReceiverMessage = (message: SenderMessageData) => {
+     #sendPlatformMessage = (message: DistributiveOmit<
+            SenderMessage, "requestId">) => {
+
         const messageId = uuid();
         sendMessageResponse({
-            subject: "bridge:session/impl_sendReceiverMessage"
+            subject: "bridge:session/impl_sendPlatformMessage"
           , data: {
                 message: { requestId: 0, ...message }
               , messageId
@@ -163,7 +165,7 @@ export default class Session {
                   , (wasError: boolean) => {
 
                 if (wasError) {
-                    reject(new _Error(ErrorCode.SESSION_ERROR));
+                    reject(new Error_(ErrorCode.SESSION_ERROR));
                     return;
                 }
 
@@ -172,8 +174,20 @@ export default class Session {
         });
     }
 
-    private _sendMediaMessage(message: SenderMediaMessage) {
-        this.sendMessage("urn:x-cast:com.google.cast.media", message);
+    /**
+     * Sends a media message to the app receiver.
+     * urn:x-cast:com.google.cast.media
+     */
+    #sendMediaMessage = (message: DistributiveOmit<
+            SenderMediaMessage, "requestId">) => {
+
+        return new Promise<void>((resolve, reject) => {
+            this.sendMessage(
+                    "urn:x-cast:com.google.cast.media"
+                  , message
+                  , resolve, reject);
+
+        });
     }
 
     media: Media[] = [];
@@ -243,49 +257,54 @@ export default class Session {
     loadMedia(loadRequest: LoadRequest
             , successCallback?: LoadSuccessCallback
             , errorCallback?: ErrorCallback): void {
+        
+        /**
+         * When a media load (`LOAD`) request is sent, the receiver
+         * sends back a media status (`MEDIA_STATUS`) message, so add a
+         * media message listener that is removed on the first call to
+         * provide completion handling.
+         */
+        const this_ = this;
+        this.addMessageListener(NS_MEDIA
+              , function initialMediaListener(
+                        _namespace: string, messageString: string) {
 
-        this._sendMediaMessage(loadRequest);
+            const message: ReceiverMediaMessage = JSON.parse(messageString);
+            switch (message.type) {
+                case "MEDIA_STATUS": {
+                    this_.removeMessageListener(
+                            NS_MEDIA, initialMediaListener);
 
+                    // TODO: multiple status? (also diff between request ids)
+                    const [ status ] = message.status;
+                    if (!status) {
+                        if (errorCallback) {
+                            errorCallback(new Error_(ErrorCode.SESSION_ERROR));
+                        }
+                        return;
+                    }
 
-        let hasResponded = false;
+                    const media = new Media(
+                            this_.sessionId         // sessionId
+                          , status.mediaSessionId   // mediaSessionId
+                          , this_.#id);             // _internalSessionId
+                    
+                    media.media = { ...loadRequest.media, ...status };
+                    this_.media = [ media ];
 
-        this.addMessageListener(
-                "urn:x-cast:com.google.cast.media"
-              , (_namespace, data) => {
+                    media.play();
 
-            if (hasResponded) {
-                return;
-            }
+                    if (successCallback) {
+                        successCallback(media);
+                    }
 
-            const message = JSON.parse(data);
-
-            if (message.status && message.status.length > 0) {
-                const sessionId = this.#id;
-                if (!sessionId) {
-                    return;
-                }
-
-                hasResponded = true;
-
-                const media = new Media(
-                        this.sessionId
-                      , message.status[0].mediaSessionId
-                      , sessionId);
-
-                media.media = loadRequest.media;
-                this.media = [ media ];
-
-                media.play();
-
-                if (successCallback) {
-                    successCallback(media);
-                }
-            } else {
-                if (errorCallback) {
-                    errorCallback(new _Error(ErrorCode.SESSION_ERROR));
+                    break;
                 }
             }
         });
+
+        loadRequest.sessionId = this.sessionId;
+        this.#sendMediaMessage(loadRequest);
     }
 
     queueLoad(_queueLoadRequest: QueueLoadRequest
@@ -332,7 +351,7 @@ export default class Session {
                    , successCallback?: SuccessCallback
                    , errorCallback?: ErrorCallback) {
 
-        this.#sendReceiverMessage(
+        this.#sendPlatformMessage(
                 { type: "SET_VOLUME"
                 , volume: { muted }})
             .then(successCallback)
@@ -343,7 +362,7 @@ export default class Session {
                          , successCallback?: SuccessCallback
                          , errorCallback?: ErrorCallback): void {
 
-        this.#sendReceiverMessage(
+        this.#sendPlatformMessage(
                 { type: "SET_VOLUME"
                 , volume: { level: newLevel }})
             .then(successCallback)
@@ -353,7 +372,7 @@ export default class Session {
     stop(successCallback?: SuccessCallback
        , errorCallback?: ErrorCallback): void {
 
-        this.#sendReceiverMessage(
+        this.#sendPlatformMessage(
                 { type: "STOP"
                 , sessionId: this.sessionId })
             .then(successCallback)

@@ -223,10 +223,7 @@ export default class Media {
                    , errorCallback?: ErrorCallback) {
 
             this.#sendMediaMessage(
-                {
-                    ...queueInsertItemsRequest
-                  , type: "QUEUE_INSERT"
-                })
+                { ...queueInsertItemsRequest, type: "QUEUE_INSERT" })
             .then(successCallback)
             .catch(errorCallback);
         

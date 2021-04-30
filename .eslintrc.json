@@ -55,5 +55,8 @@
       , "@typescript-eslint/no-unused-vars": "off"
       , "@typescript-eslint/ban-types": "off"
       , "@typescript-eslint/ban-ts-comment": "off"
+      , "@typescript-eslint/no-this-alias": [ "error", {
+            "allowedNames": [ "this_" ]
+        }]
     }
 }

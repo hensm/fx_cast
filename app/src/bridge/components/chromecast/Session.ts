@@ -165,7 +165,7 @@ export default class Session {
                       , message.data.messageId);
                 break;
             }
-            case "bridge:session/impl_sendReceiverMessage": {
+            case "bridge:session/impl_sendPlatformMessage": {
                 const { message: receiverMessage
                       , messageId: receiverMessageId } = message.data;
 
@@ -187,6 +187,9 @@ export default class Session {
     }
 
     private sendMessage(message: Message) {
+        if (!message.data) {
+            message.data = {};
+        }
         (message.data as any)._id = this.referenceId;
         sendMessage(message);
     }
@@ -243,11 +246,12 @@ export default class Session {
 
         // Handle stop message
         if (message.type === "STOP") {
+            this.sendMessage({ subject: "shim:session/stopped" });
             this.client.close();
         }
 
         this.sendMessage({
-            subject: "shim:session/impl_sendReceiverMessage"
+            subject: "shim:session/impl_sendPlatformMessage"
           , data: { messageId, wasError }
         });
     }

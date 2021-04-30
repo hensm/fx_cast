@@ -13,7 +13,6 @@ import { ReceiverSelection
        , ReceiverSelectionStop }
         from "./background/receiverSelector/ReceiverSelector";
 
-import { Volume } from "./shim/cast/dataClasses";
 import { MediaStatus
        , SenderMessage
        , ReceiverApplication
@@ -84,7 +83,7 @@ type AppMessageDefinitions = {
         messageId: string
       , wasError: boolean
     }
-  , "shim:session/impl_sendReceiverMessage": {
+  , "shim:session/impl_sendPlatformMessage": {
         messageId: string
       , wasError: boolean
     }
@@ -108,7 +107,7 @@ type AppMessageDefinitions = {
       , messageId: string
       , _id: string
     }
-  , "bridge:session/impl_sendReceiverMessage": {
+  , "bridge:session/impl_sendPlatformMessage": {
         message: SenderMessage
       , messageId: string
       , _id: string

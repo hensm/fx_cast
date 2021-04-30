@@ -22,14 +22,12 @@ export class AudiobookChapterMediaMetadata {
     type = MetadataType.AUDIOBOOK_CHAPTER;
 }
 
-
 export class AudiobookContainerMetadata {
     authors?: string[];
     narrators?: string[];
     publisher?: string;
     releaseDate?: string;
 }
-
 
 export class Break {
     duration?: number;
@@ -41,7 +39,6 @@ export class Break {
           , public breakClipIds: string[]
           , public position: number) {}
 }
-
 
 export class BreakClip {
     clickThroughUrl?: string;
@@ -59,7 +56,6 @@ export class BreakClip {
     constructor(public id: string) {}
 }
 
-
 export class BreakStatus {
     breakClipId?: string;
     breakId?: string;
@@ -67,7 +63,6 @@ export class BreakStatus {
     currentBreakTime?: number;
     whenSkippable?: number;
 }
-
 
 export class ContainerMetadata {
     containerDuration?: number;
@@ -80,7 +75,6 @@ export class ContainerMetadata {
                     ContainerType.GENERIC_CONTAINER) {}
 }
 
-
 export class EditTracksInfoRequest {
     requestId = 0;
 
@@ -89,7 +83,6 @@ export class EditTracksInfoRequest {
           , public textTrackStyle: Nullable<string> = null) {
     }
 }
-
 
 export class GenericMediaMetadata {
     images?: Image[];
@@ -101,11 +94,9 @@ export class GenericMediaMetadata {
     type = MetadataType.GENERIC;
 }
 
-
 export class GetStatusRequest {
     customData: any = null;
 }
-
 
 export class LiveSeekableRange {
     constructor(
@@ -114,7 +105,6 @@ export class LiveSeekableRange {
           , public isMovingWindow?: boolean
           , public isLiveDone?: boolean) {}
 }
-
 
 export class LoadRequest {
     activeTrackIds: Nullable<number[]> = null;
@@ -180,7 +170,6 @@ export class MediaMetadata {
     }
 }
 
-
 export class MovieMediaMetadata {
     images?: Image[];
     metadataType = MetadataType.MOVIE;
@@ -191,7 +180,6 @@ export class MovieMediaMetadata {
     title?: string;
     type = MetadataType.MOVIE;
 }
-
 
 export class MusicTrackMediaMetadata {
     albumArtist?: string;
@@ -210,11 +198,9 @@ export class MusicTrackMediaMetadata {
     type = MetadataType.MUSIC_TRACK;
 }
 
-
 export class PauseRequest {
     customData: any = null;
 }
-
 
 export class PhotoMediaMetadata {
     artist?: string;
@@ -230,11 +216,9 @@ export class PhotoMediaMetadata {
     width?: number;
 }
 
-
 export class PlayRequest {
     customData: any = null;
 }
-
 
 export class QueueData {
     shuffle = false;
@@ -249,7 +233,6 @@ export class QueueData {
           , public startTime?: number) {}
 }
 
-
 export class QueueInsertItemsRequest {
     customData: any = null;
     insertBefore: Nullable<number> = null;
@@ -260,7 +243,6 @@ export class QueueInsertItemsRequest {
     constructor(
             public items: QueueItem[]) {}
 }
-
 
 export class QueueItem {
     activeTrackIds: Nullable<number[]> = null;
@@ -277,70 +259,47 @@ export class QueueItem {
     }
 }
 
-
 export class QueueJumpRequest {
+    type = "QUEUE_UPDATE";
     jump: Nullable<number> = null;
     currentItemId: Nullable<number> = null;
-    sessionId: Nullable<number> = null;
-    requestId: Nullable<number> = null;
-
-    type = "QUEUE_UPDATE";
 }
-
 
 export class QueueLoadRequest {
+    type = "QUEUE_LOAD";
     customData: any = null;
     repeatMode: string = RepeatMode.OFF;
-    requestId: Nullable<number> = null;
-    sessionId: Nullable<string> = null;
     startIndex = 0;
-    type = "QUEUE_LOAD";
 
-    constructor(
-            public items: QueueItem[]) {}
+    constructor(public items: QueueItem[]) {}
 }
-
 
 export class QueueRemoveItemsRequest {
-    customData: any = null;
-    requestId: Nullable<number> = null;
-    sessionId: Nullable<string> = null;
     type = "QUEUE_REMOVE";
+    customData: any = null;
 
-    constructor(
-            public itemIds: number[]) {}
+    constructor(public itemIds: number[]) {}
 }
-
 
 export class QueueReorderItemsRequest {
     customData: any = null;
     insertBefore: Nullable<number> = null;
-    requestId: Nullable<number> = null;
-    sessionId: Nullable<string> = null;
     type = "QUEUE_REORDER";
 
-    constructor(
-            public itemIds: number[]) {}
+    constructor(public itemIds: number[]) {}
 }
-
 
 export class QueueSetPropertiesRequest {
+    type = "QUEUE_UPDATE";
     customData: any = null;
     repeatMode: Nullable<string> = null;
-    requestId: Nullable<number> = null;
-    sessionId: Nullable<string> = null;
-    type = "QUEUE_UPDATE";
 }
 
-
 export class QueueUpdateItemsRequest {
-    customData: any = null;
-    requestId: Nullable<number> = null;
-    sessionId: Nullable<string> = null;
     type = "QUEUE_UPDATE";
+    customData: any = null;
 
-    constructor(
-            public items: QueueItem[]) {}
+    constructor(public items: QueueItem[]) {}
 }
 
 
@@ -350,11 +309,9 @@ export class SeekRequest {
     resumeState: Nullable<ResumeState> = null;
 }
 
-
 export class StopRequest {
     customData: any = null;
 }
-
 
 export class TextTrackStyle {
     backgroundColor: Nullable<string> = null;
@@ -371,7 +328,6 @@ export class TextTrackStyle {
     windowType: Nullable<string> = null;
 }
 
-
 export class Track {
     customData: any = null;
     language: Nullable<string> = null;
@@ -384,7 +340,6 @@ export class Track {
             public trackId: number
           , public type: TrackType) {}
 }
-
 
 export class TvShowMediaMetadata {
     episode?: number;
@@ -401,7 +356,6 @@ export class TvShowMediaMetadata {
     type = MetadataType.TV_SHOW;
 }
 
-
 export class UserActionState {
     customData: any = null;
 
@@ -409,12 +363,10 @@ export class UserActionState {
             public userAction: UserAction) {}
 }
 
-
 export class VastAdsRequest {
     adsResponse?: string;
     adTagUrl?: string;
 }
-
 
 export class VideoInformation {
     constructor(
@@ -422,7 +374,6 @@ export class VideoInformation {
           , public height: number
           , public hdrType: HdrType) {}
 }
-
 
 export class VolumeRequest {
     customData: any = null;
