@@ -438,11 +438,6 @@ export default class Media {
         }
 
         return new Promise<void>((resolve, reject) => {
-            // TODO: Look at this again
-            (message as any).mediaSessionId = this.mediaSessionId;
-            (message as any).requestId = 0;
-            (message as any).sessionId = this.sessionId;
-
             const messageId = uuid();
 
             this.#sendMediaMessageCallbacks.set(messageId, [
@@ -452,7 +447,12 @@ export default class Media {
             sendMessageResponse({
                 subject: "bridge:media/sendMediaMessage"
               , data: {
-                    message
+                    message: {
+                        // Default properties
+                        requestId: 0
+                      , mediaSessionId: this.mediaSessionId
+                      , ...message
+                    }
                   , messageId
                   , _id: this.#id
                 }
