@@ -5,9 +5,7 @@ import Messenger from "./lib/Messenger";
 import { TypedPort } from "./lib/TypedPort";
 import { BridgeInfo } from "./lib/bridge";
 
-import { ReceiverDevice
-       , SessionReceiverMessage
-       , ReceiverStatus } from "./types";
+import { ReceiverDevice } from "./types";
 
 import { ReceiverSelectorMediaType } from "./background/receiverSelector";
 import { ReceiverSelection
@@ -16,7 +14,10 @@ import { ReceiverSelection
         from "./background/receiverSelector/ReceiverSelector";
 
 import { Volume } from "./shim/cast/dataClasses";
-import { MediaInfo } from "./shim/cast/media";
+import { MediaStatus
+       , SenderMessage
+       , ReceiverApplication
+       , ReceiverStatus } from "./shim/cast/types";
 
 
 /**
@@ -73,24 +74,19 @@ type ExtMessageDefinitions = {
 type AppMessageDefinitions = {
     // Session messages
     "shim:session/stopped": {}
-  , "shim:session/connected": {
-        sessionId: string
-      , namespaces: Array<{ name: string }>
-      , displayName: string
-      , statusText: string
+  , "shim:session/connected": { application: ReceiverApplication }
+  , "shim:session/updateStatus": { status: ReceiverStatus }
+  , "shim:session/impl_addMessageListener": {
+        namespace: string
+      , message: string
     }
-  , "shim:session/updateStatus": { volume: Volume }
-  , "shim:session/sendReceiverMessageResponse": {
+    , "shim:session/impl_sendMessage": {
         messageId: string
       , wasError: boolean
     }
-  , "shim:session/impl_addMessageListener": {
-        namespace: string
-      , data: string
-    }
-  , "shim:session/impl_sendMessage": {
+  , "shim:session/impl_sendReceiverMessage": {
         messageId: string
-      , error: boolean
+      , wasError: boolean
     }
 
     // Bridge session messages
@@ -102,11 +98,6 @@ type AppMessageDefinitions = {
       , _id: string
     }
   , "bridge:session/close": {}
-  , "bridge:session/sendReceiverMessage": {
-        message: SessionReceiverMessage
-      , messageId: string
-      , _id: string
-    }
   , "bridge:session/impl_leave": {
         id: string
       , _id: string
@@ -117,23 +108,19 @@ type AppMessageDefinitions = {
       , messageId: string
       , _id: string
     }
+  , "bridge:session/impl_sendReceiverMessage": {
+        message: SenderMessage
+      , messageId: string
+      , _id: string
+    }
   , "bridge:session/impl_addMessageListener": {
         namespace: string;
         _id: string;
     }
 
     // Media messages
-  , "shim:media/update": {
-        currentTime: number
-      , _lastCurrentTime: number
-      , customData: any
-      , playbackRate: number
-      , playerState: string
-      , repeatMode: string
-      , _volumeLevel: number
-      , _volumeMuted: boolean
-      , media: MediaInfo
-      , mediaSessionId: number
+  , "shim:media/updateStatus": {
+        status: MediaStatus
     }
   , "shim:media/sendMediaMessageResponse": {
         messageId: string

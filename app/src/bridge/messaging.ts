@@ -1,34 +1,29 @@
 "use strict";
 
+import { MediaStatus, ReceiverStatus, ReceiverApplication, SenderMessage }
+        from "./components/chromecast/types";
+
 import { ReceiverDevice
-       , ReceiverMessage
        , ReceiverSelectionCast
-       , ReceiverSelectionStop
-       , ReceiverStatus
-       , Volume } from "./types";
+       , ReceiverSelectionStop } from "./types";
 
 
 type MessageDefinitions = {
     // Session messages
-    "shim:session/stopped": {}
-  , "shim:session/connected": {
-        sessionId: string
-      , namespaces: Array<{ name: string }>
-      , displayName: string
-      , statusText: string
-    }
-  , "shim:session/updateStatus": { volume: Volume }
-  , "shim:session/sendReceiverMessageResponse": {
-        messageId: string
-      , wasError: boolean
-    }
+    "shim:session/connected": { application: ReceiverApplication }
+  , "shim:session/updateStatus": { status: ReceiverStatus }
+  , "shim:session/stopped": {}
   , "shim:session/impl_addMessageListener": {
         namespace: string
-      , data: string
+      , message: string
     }
   , "shim:session/impl_sendMessage": {
         messageId: string
-      , error: boolean
+      , wasError: boolean
+    }
+  , "shim:session/impl_sendReceiverMessage": {
+        messageId: string
+      , wasError: boolean
     }
 
     // Bridge session messages
@@ -40,11 +35,6 @@ type MessageDefinitions = {
       , _id: string
     }
   , "bridge:session/close": {}
-  , "bridge:session/sendReceiverMessage": {
-        message: ReceiverMessage
-      , messageId: string
-      , _id: string
-    }
   , "bridge:session/impl_leave": {
         id: string
       , _id: string
@@ -55,23 +45,19 @@ type MessageDefinitions = {
       , messageId: string
       , _id: string
     }
+  , "bridge:session/impl_sendReceiverMessage": {
+        message: SenderMessage
+      , messageId: string
+      , _id: string
+    }
   , "bridge:session/impl_addMessageListener": {
         namespace: string;
         _id: string;
     }
 
     // Media messages
-  , "shim:media/update": {
-        currentTime: number
-      , _lastCurrentTime: number
-      , customData: any
-      , playbackRate: number
-      , playerState: string
-      , repeatMode: string
-      , _volumeLevel: number
-      , _volumeMuted: boolean
-      , media: unknown // MediaInfo
-      , mediaSessionId: number
+  , "shim:media/updateStatus": {
+        status: MediaStatus
     }
   , "shim:media/sendMediaMessageResponse": {
         messageId: string

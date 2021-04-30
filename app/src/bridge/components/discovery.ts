@@ -3,13 +3,12 @@
 import { EventEmitter } from "events";
 
 import { Channel, Client } from "castv2";
+
 import mdns from "mdns";
 
 import { sendMessage } from "../lib/nativeMessaging";
 
-import { ReceiverStatus } from "../types";
-import { Message } from "../messaging";
-
+import { ReceiverStatus } from "./chromecast/types";
 import { NS_CONNECTION
        , NS_HEARTBEAT
        , NS_RECEIVER } from "./chromecast/Session";

@@ -28,7 +28,6 @@ export function handleSessionMessage(message: any) {
                     message.data.address
                   , message.data.port
                   , message.data.appId
-                  , message.data.sessionId
                   , sessionId));
         }
     }

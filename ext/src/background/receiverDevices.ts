@@ -4,8 +4,9 @@ import bridge from "../lib/bridge";
 import logger from "../lib/logger";
 import { TypedEventTarget } from "../lib/TypedEventTarget";
 
-import messaging, { Message, Port } from "../messaging";
-import { ReceiverDevice, ReceiverStatus } from "../types";
+import { Message, Port } from "../messaging";
+import { ReceiverDevice } from "../types";
+import { ReceiverStatus } from "../shim/cast/types";
 
 
 interface EventMap {
@@ -124,7 +125,6 @@ export default new class extends TypedEventTarget<EventMap> {
                 if (receiverDevice.status) {
                     receiverDevice.status.isActiveInput = status.isActiveInput;
                     receiverDevice.status.isStandBy = status.isStandBy;
-                    receiverDevice.status.userEq = status.userEq;
                     receiverDevice.status.volume = status.volume;
 
                     if (status.applications) {

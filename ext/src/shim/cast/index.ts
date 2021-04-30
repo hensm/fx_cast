@@ -30,7 +30,6 @@ import { AutoJoinPolicy
        , SenderPlatform
        , SessionStatus
        , VolumeControlType } from "./enums";
-import messaging from "../../messaging";
 
 
 export * as media from "./media";

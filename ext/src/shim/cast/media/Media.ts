@@ -1,52 +1,40 @@
 "use strict";
 
-import logger from "../../../lib/logger";
-
 import { v1 as uuid } from "uuid";
 
-import { BreakStatus
-       , EditTracksInfoRequest
-       , GetStatusRequest
-       , LiveSeekableRange
-       , MediaInfo
-       , PauseRequest
-       , PlayRequest
-       , QueueData
-       , QueueJumpRequest
-       , QueueInsertItemsRequest
-       , QueueItem
-       , QueueSetPropertiesRequest
-       , QueueRemoveItemsRequest
-       , QueueReorderItemsRequest
-       , QueueUpdateItemsRequest
-       , SeekRequest
-       , StopRequest
-       , VideoInformation
-       , VolumeRequest } from "./dataClasses";
+import logger from "../../../lib/logger";
 
 import { Volume, Error as _Error } from "../dataClasses";
+import { BreakStatus, EditTracksInfoRequest, GetStatusRequest, LiveSeekableRange
+       , MediaInfo, PauseRequest, PlayRequest, QueueData, QueueJumpRequest
+       , QueueInsertItemsRequest, QueueItem, QueueSetPropertiesRequest
+       , QueueRemoveItemsRequest, QueueReorderItemsRequest
+       , QueueUpdateItemsRequest, SeekRequest, StopRequest, VideoInformation
+       , VolumeRequest } from "./dataClasses";
 
-import { PlayerState
-       , RepeatMode } from "./enums";
-
+import { PlayerState, RepeatMode } from "./enums";
 import { ErrorCode } from "../enums";
 
 import { onMessage, sendMessageResponse } from "../../eventMessageChannel";
 
-import { Callbacks
-       , ErrorCallback
+import { ErrorCallback
        , SuccessCallback
        , UpdateListener } from "../../types";
-
-import { SessionMediaMessage } from "../../../types";
+import { SenderMediaMessage } from "../types";
 
 
 export default class Media {
     #id = uuid();
     #isActive = true;
+
+    /**
+     * Timestamp of last status update
+     */
+    #lastUpdateTime = 0;
+
     #updateListeners = new Set<UpdateListener>();
-    #sendMediaMessageCallbacks = new Map<string, Callbacks>();
-    #lastCurrentTime = 0;
+    #sendMediaMessageCallbacks =
+            new Map<string, [ SuccessCallback?, ErrorCallback? ]>();
 
     #listener = onMessage(message => {
         if ((message as any).data._id !== this.#id) {
@@ -54,27 +42,24 @@ export default class Media {
         }
 
         switch (message.subject) {
-            case "shim:media/update": {
-                const status = message.data;
+            case "shim:media/updateStatus": {
+                const { status } = message.data;
+
+                // Store current update time
+                this.#lastUpdateTime = Date.now();
 
                 this.currentTime = status.currentTime;
-                this.#lastCurrentTime = status._lastCurrentTime;
-                this.customData = status.customData;
+                this.mediaSessionId = status.mediaSessionId;
                 this.playbackRate = status.playbackRate;
                 this.playerState = status.playerState;
                 this.repeatMode = status.repeatMode;
+                this.volume = status.volume;
 
-                if (status._volumeLevel && status._volumeMuted) {
-                    this.volume = new Volume(
-                            status._volumeLevel
-                          , status._volumeMuted);
+                if (status.customData) {
+                    this.customData = status.customData;
                 }
-
                 if (status.media) {
-                    this.media = status.media;
-                }
-                if (status.mediaSessionId) {
-                    this.mediaSessionId = status.mediaSessionId;
+                    this.media = status.media as MediaInfo;
                 }
 
                 // Call update listeners
@@ -106,8 +91,8 @@ export default class Media {
     activeTrackIds: Nullable<number[]> = null;
     breakStatus?: BreakStatus;
     currentItemId: Nullable<number> = null;
-    customData: any = null;
     currentTime = 0;
+    customData: any = null;
     idleReason: Nullable<string> = null;
     items: Nullable<QueueItem[]> = null;
     liveSeekableRange?: LiveSeekableRange;
@@ -123,10 +108,9 @@ export default class Media {
     volume: Volume = new Volume();
 
 
-    constructor(
-            public sessionId: string
-          , public mediaSessionId: number
-          , _internalSessionId: string) {
+    constructor(public sessionId: string
+              , public mediaSessionId: number
+              , _internalSessionId: string) {
 
         sendMessageResponse({
             subject: "bridge:media/initialize"
@@ -143,10 +127,9 @@ export default class Media {
         this.#updateListeners.add(listener);
     }
 
-    editTracksInfo(
-            editTracksInfoRequest: EditTracksInfoRequest
-          , successCallback?: SuccessCallback
-          , errorCallback?: ErrorCallback) {
+    editTracksInfo(editTracksInfoRequest: EditTracksInfoRequest
+                 , successCallback?: SuccessCallback
+                 , errorCallback?: ErrorCallback) {
 
         this.#sendMediaMessage(
                 { type: "EDIT_TRACKS_INFO", ...editTracksInfoRequest })
@@ -171,8 +154,8 @@ export default class Media {
      */
     getEstimatedTime(): number {
         if (this.playerState === PlayerState.PLAYING) {
-            let estimatedTime = this.currentTime + (this.playbackRate * (
-                    Date.now() - this.#lastCurrentTime) / 1000);
+            let estimatedTime = this.currentTime +
+                    ((Date.now() - this.#lastUpdateTime) / 1000);
 
             // Enforce valid range
             if (estimatedTime < 0) {
@@ -192,10 +175,9 @@ export default class Media {
      * Request media status from the receiver application. This
      * will also trigger any added media update listeners.
      */
-    getStatus(
-            getStatusRequest = new GetStatusRequest()
-          , successCallback?: SuccessCallback
-          , errorCallback?: ErrorCallback) {
+    getStatus(getStatusRequest = new GetStatusRequest()
+            , successCallback?: SuccessCallback
+            , errorCallback?: ErrorCallback) {
         
         this.#sendMediaMessage(
                 { type: "MEDIA_GET_STATUS", ...getStatusRequest })
@@ -203,10 +185,9 @@ export default class Media {
             .catch(errorCallback);
     }
 
-    pause(  
-            pauseRequest = new PauseRequest()
-          , successCallback?: SuccessCallback
-          , errorCallback?: ErrorCallback) {
+    pause(pauseRequest = new PauseRequest()
+        , successCallback?: SuccessCallback
+        , errorCallback?: ErrorCallback) {
 
         this.#sendMediaMessage(
                 { type: "PAUSE", ...pauseRequest })
@@ -214,10 +195,9 @@ export default class Media {
             .catch(errorCallback);
     }
 
-    play(   
-            playRequest = new PlayRequest()
-          , successCallback?: SuccessCallback
-          , errorCallback?: ErrorCallback) {
+    play(playRequest = new PlayRequest()
+       , successCallback?: SuccessCallback
+       , errorCallback?: ErrorCallback) {
 
         this.#sendMediaMessage(
                 { type: "PLAY", ...playRequest })
@@ -225,47 +205,52 @@ export default class Media {
             .catch(errorCallback);
     }
 
-    queueAppendItem(
-            item: QueueItem
-          , successCallback?: SuccessCallback
-          , errorCallback?: ErrorCallback) {
+    queueAppendItem(item: QueueItem
+                  , successCallback?: SuccessCallback
+                  , errorCallback?: ErrorCallback) {
         
-        this.#sendMediaMessage(new QueueInsertItemsRequest([ item ]))
+        this.#sendMediaMessage(
+                {
+                    ...new QueueInsertItemsRequest([ item ])
+                  , type: "QUEUE_INSERT"
+                })
             .then(successCallback)
             .catch(errorCallback);
     }
 
-    queueInsertItems(
-            queueInsertItemsRequest: QueueInsertItemsRequest
-          , successCallback?: SuccessCallback
-          , errorCallback?: ErrorCallback) {
+    queueInsertItems(queueInsertItemsRequest: QueueInsertItemsRequest
+                   , successCallback?: SuccessCallback
+                   , errorCallback?: ErrorCallback) {
 
-        this.#sendMediaMessage(queueInsertItemsRequest)
+            this.#sendMediaMessage(
+                {
+                    ...queueInsertItemsRequest
+                  , type: "QUEUE_INSERT"
+                })
             .then(successCallback)
             .catch(errorCallback);
         
     }
 
-    queueJumpToItem(
-            itemId: number
-          , successCallback?: SuccessCallback
-          , errorCallback?: ErrorCallback) {
+    queueJumpToItem(itemId: number
+                  , successCallback?: SuccessCallback
+                  , errorCallback?: ErrorCallback) {
 
         if (this.items?.find(item => item.itemId === itemId)) {
             const jumpRequest = new QueueJumpRequest();
             jumpRequest.currentItemId = itemId;
 
-            this.#sendMediaMessage(jumpRequest)
+            this.#sendMediaMessage(
+                    { ...jumpRequest, type: "QUEUE_UPDATE" })
                 .then(successCallback)
                 .catch(errorCallback);
         }
     }
 
-    queueMoveItemToNewIndex(
-            itemId: number
-          , newIndex: number
-          , successCallback?: SuccessCallback
-          , errorCallback?: ErrorCallback) {
+    queueMoveItemToNewIndex(itemId: number
+                          , newIndex: number
+                          , successCallback?: SuccessCallback
+                          , errorCallback?: ErrorCallback) {
 
         // Return early if not in queue
         if (!this.items) {
@@ -295,41 +280,41 @@ export default class Media {
                 reorderItemsRequest.insertBefore = existingItem.itemId;
             }
 
-            this.#sendMediaMessage(reorderItemsRequest)
+            this.#sendMediaMessage(
+                    { ...reorderItemsRequest, type: "QUEUE_REORDER" })
                 .then(successCallback)
                 .catch(errorCallback);
         }
     }
 
-    queueNext(
-            successCallback?: SuccessCallback
-          , errorCallback?: ErrorCallback) {
+    queueNext(successCallback?: SuccessCallback
+            , errorCallback?: ErrorCallback) {
 
         const jumpRequest = new QueueJumpRequest();
         jumpRequest.jump = 1;
 
-        this.#sendMediaMessage(jumpRequest)
+        this.#sendMediaMessage(
+                { ...jumpRequest, type: "QUEUE_UPDATE" })
             .then(successCallback)
             .catch(errorCallback);
     }
 
-    queuePrev(
-            successCallback?: SuccessCallback
-          , errorCallback?: ErrorCallback) {
+    queuePrev(successCallback?: SuccessCallback
+            , errorCallback?: ErrorCallback) {
 
         const jumpRequest = new QueueJumpRequest();
         jumpRequest.jump = -1;
 
-        this.#sendMediaMessage(jumpRequest)
+        this.#sendMediaMessage(
+                { ...jumpRequest, type: "QUEUE_UPDATE" })
             .then(successCallback)
             .catch(errorCallback);
     }
 
-    queueRemoveItem(
-            itemId: number
-          , successCallback?: SuccessCallback
-          , errorCallback?: ErrorCallback) {
-        
+    queueRemoveItem(itemId: number
+                  , successCallback?: SuccessCallback
+                  , errorCallback?: ErrorCallback) {
+
         const item = this.items?.find(item => item.itemId === itemId);
         if (item) {
             this.queueRemoveItems(
@@ -338,45 +323,45 @@ export default class Media {
         }
     }
 
-    queueRemoveItems(
-            queueRemoveItemsRequest: QueueRemoveItemsRequest
-          , successCallback?: SuccessCallback
-          , errorCallback?: ErrorCallback) {
+    queueRemoveItems(queueRemoveItemsRequest: QueueRemoveItemsRequest
+                   , successCallback?: SuccessCallback
+                   , errorCallback?: ErrorCallback) {
         
-        this.#sendMediaMessage(queueRemoveItemsRequest)
+        this.#sendMediaMessage(
+                { ...queueRemoveItemsRequest, type: "QUEUE_REMOVE" })
             .then(successCallback)
             .catch(errorCallback);
     }
 
-    queueReorderItems(
-            queueReorderItemsRequest: QueueReorderItemsRequest
-          , successCallback?: SuccessCallback
-          , errorCallback?: ErrorCallback) {
+    queueReorderItems(queueReorderItemsRequest: QueueReorderItemsRequest
+                    , successCallback?: SuccessCallback
+                    , errorCallback?: ErrorCallback) {
 
-        this.#sendMediaMessage(queueReorderItemsRequest)
+        this.#sendMediaMessage(
+                { ...queueReorderItemsRequest, type: "QUEUE_REORDER" })
             .then(successCallback)
             .catch(errorCallback);
     }
 
-    queueSetRepeatMode(
-            repeatMode: string
-          , successCallback?: SuccessCallback
-          , errorCallback?: ErrorCallback) {
-        
+    queueSetRepeatMode(repeatMode: string
+                     , successCallback?: SuccessCallback
+                     , errorCallback?: ErrorCallback) {
+
         const setPropertiesRequest = new QueueSetPropertiesRequest();
         setPropertiesRequest.repeatMode = repeatMode;
 
-        this.#sendMediaMessage(setPropertiesRequest)
+        this.#sendMediaMessage(
+                { ...setPropertiesRequest, type: "QUEUE_UPDATE" })
             .then(successCallback)
             .catch(errorCallback);
     }
 
-    queueUpdateItems(
-            queueUpdateItemsRequest: QueueUpdateItemsRequest
-          , successCallback?: SuccessCallback
-          , errorCallback?: ErrorCallback) {
+    queueUpdateItems(queueUpdateItemsRequest: QueueUpdateItemsRequest
+                  , successCallback?: SuccessCallback
+                  , errorCallback?: ErrorCallback) {
 
-        this.#sendMediaMessage(queueUpdateItemsRequest)
+        this.#sendMediaMessage(
+                { ...queueUpdateItemsRequest, type: "QUEUE_UPDATE" })
             .then(successCallback)
             .catch(errorCallback);
     }
@@ -385,10 +370,9 @@ export default class Media {
         this.#updateListeners.delete(listener);
     }
 
-    seek(
-            seekRequest: SeekRequest
-          , successCallback?: SuccessCallback
-          , errorCallback?: ErrorCallback) {
+    seek(seekRequest: SeekRequest
+       , successCallback?: SuccessCallback
+       , errorCallback?: ErrorCallback) {
 
         this.#sendMediaMessage(
                 { type: "SEEK", ...seekRequest })
@@ -396,10 +380,9 @@ export default class Media {
             .catch(errorCallback);
     }
 
-    setVolume(
-            volumeRequest: VolumeRequest
-          , successCallback?: SuccessCallback
-          , errorCallback?: ErrorCallback) {
+    setVolume(volumeRequest: VolumeRequest
+            , successCallback?: SuccessCallback
+            , errorCallback?: ErrorCallback) {
         
             this.#sendMediaMessage(
                     { type: "MEDIA_SET_VOLUME", ...volumeRequest })
@@ -407,10 +390,9 @@ export default class Media {
                 .catch(errorCallback);
     }
 
-    stop(
-            stopRequest?: StopRequest
-          , successCallback?: SuccessCallback
-          , errorCallback?: ErrorCallback) {
+    stop(stopRequest?: StopRequest
+       , successCallback?: SuccessCallback
+       , errorCallback?: ErrorCallback) {
 
         if (!stopRequest) {
             stopRequest = new StopRequest();
@@ -434,7 +416,11 @@ export default class Media {
     }
 
 
-    #sendMediaMessage = async (message: SessionMediaMessage) => {
+    #sendMediaMessage = async (
+            // Allow messages without requestId
+            message: Omit<SenderMediaMessage, "requestId">
+                  & { requestId?: Nullable<number> }) => {
+
         if (!this.media) {
             return;
         }
@@ -465,10 +451,10 @@ export default class Media {
 
             sendMessageResponse({
                 subject: "bridge:media/sendMediaMessage"
-            , data: {
+              , data: {
                     message
-                , messageId
-                , _id: this.#id
+                  , messageId
+                  , _id: this.#id
                 }
             });
         });

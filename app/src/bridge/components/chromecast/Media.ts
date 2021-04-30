@@ -2,26 +2,15 @@
 
 import castv2 from "castv2";
 
-import Session from "./Session";
+import { ReceiverMediaMessage } from "./types";
 
 import { Message } from "../../messaging";
 import { sendMessage } from "../../lib/nativeMessaging";
 
+import Session from "./Session";
+
 
 const NS_MEDIA = "urn:x-cast:com.google.cast.media";
-
-export interface UpdateMessageData {
-    _volumeLevel?: number;
-    _volumeMuted?: boolean;
-    _lastCurrentTime: number;
-    currentTime: number;
-    customData?: any;
-    playbackRate: number;
-    playerState: string;
-    repeatMode?: string;
-    media?: any;
-    mediaSessionId?: number;
-}
 
 
 export default class Media {
@@ -31,40 +20,32 @@ export default class Media {
             private referenceId: string
           , private session: Session) {
 
+        // Ensure channel exists
         this.session.createChannel(NS_MEDIA);
-        this.channel = this.session.channelMap.get(NS_MEDIA)!;
 
-        this.channel.on("message", (data: any) => {
-            if (data && data.type === "MEDIA_STATUS"
-                    && data.status && data.status.length > 0) {
+        const channel = this.session.channelMap.get(NS_MEDIA);
+        if (!channel) {
+            throw new Error("Media message cannel not found");
+        }
 
-                const status = data.status[0];
+        this.channel = channel;
+        this.channel.on("message", this.onMediaMessage);
+    }
 
-                const messageData: UpdateMessageData = {
-                    _lastCurrentTime: Date.now() / 1000
+    private onMediaMessage = (message: ReceiverMediaMessage) => {
+        switch (message.type) {
+            case "MEDIA_STATUS": {
+                // TODO: Fix for multiple media statuses
+                const status = message.status[0];
 
-                  , currentTime: status.currentTime
-                  , customData: status.customData
-                  , playbackRate: status.playbackRate
-                  , playerState: status.playerState
-                  , repeatMode: status.repeatMode
-                };
+                this.sendMessage({
+                    subject: "shim:media/updateStatus"
+                  , data: { status }
+                });
 
-                if (status.volume) {
-                    messageData._volumeLevel = status.volume.level;
-                    messageData._volumeMuted = status.volume.muted;
-                }
-
-                if (status.media) {
-                    messageData.media = status.media;
-                }
-                if (status.mediaSessionId) {
-                    messageData.mediaSessionId = status.mediaSessionId;
-                }
-
-                this.sendMessage("shim:media/update", messageData);
+                break;
             }
-        });
+        }
     }
 
     public messageHandler(message: Message) {
@@ -77,9 +58,12 @@ export default class Media {
                     error = true;
                 }
 
-                this.sendMessage("shim:media/sendMediaMessageResponse", {
-                    messageId: message.data.messageId
-                  , error
+                this.sendMessage({
+                    subject: "shim:media/sendMediaMessageResponse"
+                  , data: {
+                        messageId: message.data.messageId
+                      , error
+                    }
                 });
 
                 break;
@@ -87,11 +71,8 @@ export default class Media {
         }
     }
 
-    private sendMessage(subject: string, data: any) {
-        data._id = this.referenceId;
-        (sendMessage as any)({
-            subject
-          , data
-        });
+    private sendMessage(message: Message) {
+        (message.data as any)._id = this.referenceId;
+        sendMessage(message);
     }
 }

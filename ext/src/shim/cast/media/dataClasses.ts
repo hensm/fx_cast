@@ -8,8 +8,8 @@ import { ContainerType
        , HlsVideoSegmentFormat
        , MetadataType
        , RepeatMode
-       , StreamType
-       , UserAction } from "./enums";
+       , ResumeState, StreamType
+       , TrackType, UserAction } from "./enums";
 
 
 export class AudiobookChapterMediaMetadata {
@@ -93,12 +93,12 @@ export class EditTracksInfoRequest {
 
 export class GenericMediaMetadata {
     images?: Image[];
-    metadataType: number = MetadataType.GENERIC;
+    metadataType = MetadataType.GENERIC;
     releaseDate?: string;
     releaseYear?: number;
     subtitle?: string;
     title?: string;
-    type: number = MetadataType.GENERIC;
+    type = MetadataType.GENERIC;
 }
 
 
@@ -126,7 +126,7 @@ export class LoadRequest {
     media: MediaInfo;
     requestId = 0;
     sessionId: Nullable<string> = null;
-    type = "LOAD";
+    type: "LOAD" = "LOAD";
 
     constructor(mediaInfo: MediaInfo) {
         this.media = mediaInfo;
@@ -134,7 +134,7 @@ export class LoadRequest {
 }
 
 
-type Metadata =
+export type Metadata =
         GenericMediaMetadata
       | MovieMediaMetadata
       | MusicTrackMediaMetadata
@@ -183,13 +183,13 @@ export class MediaMetadata {
 
 export class MovieMediaMetadata {
     images?: Image[];
-    metadataType: number = MetadataType.MOVIE;
+    metadataType = MetadataType.MOVIE;
     releaseDate?: string;
     releaseYear?: number;
     studio?: string;
     subtitle?: string;
     title?: string;
-    type: number = MetadataType.MOVIE;
+    type = MetadataType.MOVIE;
 }
 
 
@@ -201,13 +201,13 @@ export class MusicTrackMediaMetadata {
     composer?: string;
     discNumber?: number;
     images?: Image[];
-    metadataType: number = MetadataType.MUSIC_TRACK;
+    metadataType = MetadataType.MUSIC_TRACK;
     releaseDate?: string;
     releaseYear?: number;
     songName?: string;
     title?: string;
     trackNumber?: number;
-    type: number = MetadataType.MUSIC_TRACK;
+    type = MetadataType.MUSIC_TRACK;
 }
 
 
@@ -224,9 +224,9 @@ export class PhotoMediaMetadata {
     latitude?: number;
     location?: string;
     longitude?: number;
-    metadataType: number = MetadataType.PHOTO;
+    metadataType = MetadataType.PHOTO;
     title?: string;
-    type: number = MetadataType.PHOTO;
+    type = MetadataType.PHOTO;
     width?: number;
 }
 
@@ -347,7 +347,7 @@ export class QueueUpdateItemsRequest {
 export class SeekRequest {
     currentTime: Nullable<number> = null;
     customData: any = null;
-    resumeState: Nullable<string> = null;
+    resumeState: Nullable<ResumeState> = null;
 }
 
 
@@ -382,7 +382,7 @@ export class Track {
 
     constructor(
             public trackId: number
-          , public type: string) {}
+          , public type: TrackType) {}
 }
 
 
@@ -398,7 +398,7 @@ export class TvShowMediaMetadata {
     seasonNumber?: number;
     seriesTitle?: string;
     title?: string;
-    type: number = MetadataType.TV_SHOW;
+    type = MetadataType.TV_SHOW;
 }
 
 
