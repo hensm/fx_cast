@@ -1,82 +1,114 @@
 "use strict";
 
-import castv2 from "castv2";
+import { sendMessage } from "../../lib/nativeMessaging";
+import { Message } from "../../messaging";
 
-import Session, { NS_CONNECTION, NS_RECEIVER } from "./Session";
-import Media from "./Media";
-import { ReceiverDevice } from "../../types";
+import Session from "./Session";
 
 
-// Existing counterpart Media/Session objects
-const existingSessions: Map<string, Session> = new Map();
-const existingMedia: Map<string, Media> = new Map();
+const sessions = new Map<string, Session>();
 
-export function handleSessionMessage(message: any) {
-    if (!message.data._id) {
-        console.error("Session message missing _id");
-        return;
-    }
+export function handleCastMessage(message: Message) {
+    switch (message.subject) {
+        case "bridge:createCastSession": {
+            const { appId, receiverDevice } = message.data;
 
-    const sessionId = message.data._id;
+            // Connect and store with returned ID
+            const session = new Session(appId, receiverDevice);
+            session.connect(
+                    receiverDevice.host, receiverDevice.port, sessionId => {
+                sessions.set(sessionId, session);
+            });
 
-    if (existingSessions.has(sessionId)) {
-        // Forward message to instance message handler
-        existingSessions.get(sessionId)?.messageHandler(message);
-    } else {
-        if (message.subject === "bridge:session/initialize") {
-            existingSessions.set(sessionId, new Session(
-                    message.data.address
-                  , message.data.port
-                  , message.data.appId
-                  , sessionId));
+            break;
         }
-    }
-}
 
-export function handleMediaMessage(message: any) {
-    if (!message.data._id) {
-        console.error("Media message missing _id");
-        return;
-    }
+        case "bridge:sendCastReceiverMessage": {
+            const { sessionId, messageData, messageId } = message.data;
 
-    const mediaId = message.data._id;
+            const session = sessions.get(sessionId);
+            if (!session) {
+                sendMessage({
+                    subject: "shim:impl_sendCastMessage"
+                  , data: {
+                        error: "Session does not exist"
+                      , sessionId, messageId
+                    }
+                });
 
-    if (existingMedia.has(mediaId)) {
-        // Forward message to instance message handler
-        existingMedia.get(mediaId)?.messageHandler(message);
-    } else {
-        if (message.subject === "bridge:media/initialize") {
-            // Get Session object media belongs to
-            const parentSession = existingSessions.get(
-                    message.data._internalSessionId);
-
-            if (parentSession) {
-                // Create Media
-                existingMedia.set(mediaId, new Media(
-                        mediaId
-                      , parentSession));
+                break;
             }
+
+            try {
+                session.sendReceiverMessage(messageData);
+            } catch (err) {
+                sendMessage({
+                    subject: "shim:impl_sendCastMessage"
+                  , data: {
+                        error: `Failed to send message (${err})`
+                      , sessionId, messageId
+                    }
+                });
+
+                break;
+            }
+
+            // Success
+            sendMessage({
+                subject: "shim:impl_sendCastMessage"
+              , data: { sessionId, messageId }
+            });
+
+            break;
+        }
+
+        case "bridge:sendCastSessionMessage": {
+            const { namespace, sessionId, messageId } = message.data;
+
+            const session = sessions.get(sessionId);
+            if (!session) {
+                sendMessage({
+                    subject: "shim:impl_sendCastMessage"
+                  , data: {
+                        error: "Session does not exist"
+                      , sessionId, messageId
+                    }
+                });
+
+                break;
+            }
+
+            try {
+                // Handle string messages
+                let { messageData } = message.data;
+                if (typeof messageData === "string") {
+                    messageData = JSON.parse(messageData);
+                }
+
+                session.sendMessage(namespace, messageData);
+            } catch (err) {
+                sendMessage({
+                    subject: "shim:impl_sendCastMessage"
+                  , data: {
+                        error: `Failed to send message (${err})`
+                      , sessionId, messageId
+                    }
+                });
+
+                break;
+            }
+
+            // Success
+            sendMessage({
+                subject: "shim:impl_sendCastMessage"
+              , data: { sessionId, messageId }
+            });
+
+            break;
+        }
+
+        case "bridge:stopCastApp": {
+            break;
         }
     }
-}
-
-export function stopReceiverApp(host: string, port: number) {
-    const client = new castv2.Client();
-
-    client.connect({ host, port }, () => {
-        const sourceId = "sender-0";
-        const destinationId = "receiver-0";
-
-        const clientConnection = client.createChannel(
-                sourceId, destinationId, NS_CONNECTION, "JSON");
-        const clientReceiver = client.createChannel(
-                sourceId, destinationId, NS_RECEIVER, "JSON");
-
-        clientConnection.send({ type: "CONNECT" });
-        clientReceiver.send({ type: "STOP", requestId: 1 });
-    });
-
-    client.on("error", err => {
-        console.error(`castv2 error (stopReceiverApp): ${err}`);
-    });
 }

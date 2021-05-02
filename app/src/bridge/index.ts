@@ -3,8 +3,7 @@
 import { decodeTransform, encodeTransform } from "./lib/nativeMessaging";
 import { Message } from "./messaging";
 
-import { handleSessionMessage, handleMediaMessage, stopReceiverApp }
-        from "./components/chromecast";
+import { handleCastMessage } from "./components/chromecast";
 import { startDiscovery, stopDiscovery } from "./components/discovery";
 import { startMediaServer, stopMediaServer } from "./components/mediaServer";
 import { startReceiverSelector, stopReceiverSelector }
@@ -28,16 +27,6 @@ process.on("SIGTERM", () => {
  * for managing existing ones.
  */
 decodeTransform.on("data", (message: Message) => {
-    if (message.subject.startsWith("bridge:session/")) {
-        handleSessionMessage(message);
-        return;
-    }
-    if (message.subject.startsWith("bridge:media/")) {
-        handleMediaMessage(message);
-        return;
-    }
-
-
     switch (message.subject) {
         case "bridge:getInfo":
         case "bridge:/getInfo": {
@@ -47,12 +36,6 @@ decodeTransform.on("data", (message: Message) => {
 
         case "bridge:startDiscovery": {
             startDiscovery(message.data);
-            break;
-        }
-
-        case "bridge:stopReceiverApp": {
-            const { receiverDevice } = message.data;
-            stopReceiverApp(receiverDevice.host, receiverDevice.port);
             break;
         }
 
@@ -73,6 +56,10 @@ decodeTransform.on("data", (message: Message) => {
         case "bridge:stopMediaServer": {
             stopMediaServer();
             break;
+        }
+
+        default: {
+            handleCastMessage(message);
         }
     }
 });

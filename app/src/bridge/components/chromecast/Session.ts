@@ -2,9 +2,9 @@
 
 import { Channel, Client } from "castv2";
 
-import { Message } from "../../messaging";
 import { sendMessage } from "../../lib/nativeMessaging";
 
+import { ReceiverDevice } from "../../types";
 import { ReceiverApplication, ReceiverMessage, SenderMessage } from "./types";
 
 
@@ -15,245 +15,237 @@ export const NS_RECEIVER = "urn:x-cast:com.google.cast.receiver";
 const HEARTBEAT_INTERVAL = 5000;
 
 
-export default class Session {
-        private isSessionCreated = false;
+class CastClient {
+    protected client = new Client();
 
-    private client: Client;
-    private clientId = `client-${Math.floor(Math.random() * 10e5)}`;
+    protected connectionChannel?: Channel;
+    protected heartbeatChannel?: Channel;
+    protected heartbeatIntervalId?: NodeJS.Timeout;
+
+    constructor(protected sourceId = "sender-0"
+              , protected destinationId = "receiver-0") {}
+
+    /**
+     * Create a channel on the client connection with a given
+     * namespace.
+     */
+    createChannel(namespace: string
+                , sourceId = this.sourceId
+                , destinationId = this.destinationId) {
+
+       return this.client.createChannel(sourceId, destinationId, namespace, "JSON");
+    }
+
+    connect(host: string, port: number, onHeartbeat?: () => void) {
+        return new Promise<void>((resolve, reject) => {
+            // Handle errors
+            this.client.on("error", reject);
+            this.client.on("close", () => {
+                if (this.heartbeatChannel && this.heartbeatIntervalId) {
+                    clearInterval(this.heartbeatIntervalId);
+                }
+            });
+
+            this.client.connect({ host, port }, () => {
+                this.connectionChannel = this.createChannel(NS_CONNECTION);
+                this.heartbeatChannel = this.createChannel(NS_HEARTBEAT);
+                
+                this.connectionChannel.send({ type: "CONNECT" });
+                this.heartbeatChannel.send({ type: "PING" });
+                
+                this.heartbeatIntervalId = setInterval(() => {
+                    this.heartbeatChannel?.send({ type: "PING" });
+                    if (onHeartbeat) {
+                        onHeartbeat();
+                    }
+                }, HEARTBEAT_INTERVAL);
+
+                resolve();
+            });
+        });
+    }
+}
+
+
+type OnSessionCreatedCallback = (sessionId: string) => void;
+
+export default class Session extends CastClient {
+    // Assigned by the receiver once the session is established
+    public sessionId?: string;
+
+    // Platform messaging
+    private receiverChannel?: Channel;
+    private receiverRequestId = 0;
+
+    // Receiver app messaging
     private transportId?: string;
-
-    public channelMap = new Map<string, Channel>();
-
-    private platformConnection?: Channel;
-    private platformHeartbeat?: Channel;
-    private platformReceiver?: Channel;
-    private platformHeartbeatIntervalId?: NodeJS.Timeout;
-
     private transportConnection?: Channel;
     private transportHeartbeat?: Channel;
+    
+    // Channels created by `sendCastSessionMessage` messages
+    private namespaceChannelMap = new Map<string, Channel>();
 
-    private app?: ReceiverApplication;
+    /**
+     * Request ID used to correlate the launch request with the
+     * RECEIVER_STATUS message associated with session creation.
+     */
+    private launchRequestId?: number;
 
-    constructor(
-            public host: string
-          , public port: number
-          , private appId: string
-          , private referenceId: string) {
+    // Session details
+    private application?: ReceiverApplication;
 
-        const client = new Client();
-        
-        client.on("error", err => {
-            console.error(`castv2 error: ${err}`);
-        });
+    private onSessionCreated?: OnSessionCreatedCallback;
 
-        client.on("close", () => {
-            // TODO: Don't send new data
-            if (this.platformHeartbeatIntervalId) {
-                clearInterval(this.platformHeartbeatIntervalId);
-            }
-        });
 
-        client.connect({ host, port }, this.onConnect.bind(this));
-        this.client = client;
+    private establishAppConnection(transportId: string) {
+        this.transportConnection = this.createChannel(
+                NS_CONNECTION, this.sourceId, transportId);
+        this.transportHeartbeat = this.createChannel(
+                NS_HEARTBEAT, this.sourceId, transportId);
+
+        this.transportConnection.send({ type: "CONNECT" });
     }
 
-    public createChannel(namespace: string) {
-        if (!this.channelMap.has(namespace)) {
-            this.channelMap.set(namespace, this.client.createChannel(
-                    this.clientId!, this.transportId!
-                  , namespace, "JSON"));
-        }
-    }
+    /**
+     * Handle incoming receiver messages.
+     */
+    private onReceiverMessage = (message: ReceiverMessage) => {
+        switch (message.type) {
+            case "RECEIVER_STATUS": {
+                const application = message.status.applications?.find(
+                        app => app.appId === this.appId);
 
-    private establishSession(app: ReceiverApplication) {
-        this.transportId = app.transportId;
-
-        // Mesage channel to app
-        this.transportConnection = this.client.createChannel(
-                this.clientId, this.transportId, NS_CONNECTION, "JSON");
-        this.transportHeartbeat = this.client.createChannel(
-                this.clientId, this.transportId, NS_HEARTBEAT, "JSON");
-
-        this.transportConnection.send({
-            type: "CONNECT"
-        });
-    }
-
-    private onConnect() {
-        const sourceId = "sender-0";
-        const destinationId = "receiver-0";
-
-        this.platformConnection = this.client.createChannel(
-                sourceId, destinationId, NS_CONNECTION, "JSON");
-        this.platformHeartbeat = this.client.createChannel(
-                sourceId, destinationId, NS_HEARTBEAT, "JSON");
-        this.platformReceiver = this.client.createChannel(
-                sourceId, destinationId, NS_RECEIVER, "JSON");
-
-        this.platformConnection.send({ type: "CONNECT" });
-        this.platformHeartbeat.send({ type: "PING" });
-
-        this.platformHeartbeatIntervalId = setInterval(() => {
-            this.platformHeartbeat?.send({ type: "PING" });
-
-            if (this.transportHeartbeat) {
-                this.transportHeartbeat.send({ type: "PING" });
-            }
-        }, HEARTBEAT_INTERVAL);
-
-        this.platformReceiver.send({
-            type: "LAUNCH"
-          , appId: this.appId
-          , requestId: 0
-        });
-
-        this.platformReceiver.on("message", (message: ReceiverMessage) => {
-            switch (message.type) {
-                case "RECEIVER_STATUS": {
-                    const { status } = message;
-
-                    if (status.applications) {
-                        // TODO: Fix for multiple applications?
-                        const app = status.applications[0];
-                        
-                        if (app.appId !== this.appId) {
-                            this.sendMessage({
-                                subject: "shim:session/stopped"
-                            });
-
-                            this.client.close();
-                            return;
-                        }
-
-                        if (!this.isSessionCreated) {
-                            this.isSessionCreated = true;
-                            this.establishSession(app);
-                        }
+                /**
+                 * If application isn't set, still waiting on the launch
+                 * request response.
+                 */
+                if (!this.application) {
+                    // Launch message response only
+                    if (message.requestId !== this.launchRequestId) {
+                        break;
                     }
 
-                    this.sendMessage({
-                        subject: "shim:session/updateStatus"
-                      , data: { status: message.status }
-                    });
+                    if (application) {
+                        this.application = application;
+                        this.sessionId = application.sessionId;
+                        this.transportId = application.transportId;
+
+                        this.establishAppConnection(this.transportId);
+                        this.onSessionCreated?.(this.sessionId);
+
+                        sendMessage({
+                            subject: "shim:castSessionCreated"
+                          , data: {
+                                sessionId: this.sessionId
+                              , application: this.application
+                              , volume: message.status.volume
+                              , receiverDevice: this.receiverDevice
+                            }
+                        });
+                    }
 
                     break;
                 }
 
-                default: {
-                    console.error(message);
+                // Handle session stop
+                if (!application) {
+                    /*sendMessage({
+                        subject: "shim:castSessionStopped"
+                      , data: { sessionId: this.application.sessionId }
+                    });*/
+
+                    break;
                 }
-            }
-        });
-    }
 
-    public messageHandler(message: Message) {
-        switch (message.subject) {
-            case "bridge:session/close": {
-                this.close();
+                sendMessage({
+                    subject: "shim:castSessionUpdated"
+                  , data: {
+                        sessionId: this.application.sessionId
+                      , application
+                      , volume: message.status.volume
+                    }
+                });
+                
                 break;
             }
 
-            case "bridge:session/impl_addMessageListener": {
-                this._impl_addMessageListener(message.data.namespace);
-                break;
-            }
-
-            case "bridge:session/impl_sendMessage": {
-                this._impl_sendMessage(
-                        message.data.namespace
-                      , message.data.message
-                      , message.data.messageId);
-                break;
-            }
-            case "bridge:session/impl_sendPlatformMessage": {
-                const { message: receiverMessage
-                      , messageId: receiverMessageId } = message.data;
-
-                this.impl_sendReceiverMessage(
-                        receiverMessage, receiverMessageId);
-
+            case "LAUNCH_ERROR": {
+                console.error(`err: LAUNCH_ERROR, ${message.reason}`);
+                this.client.close();
                 break;
             }
         }
     }
 
-    public close() {
-        this.platformConnection?.send({ type: "CLOSE" });
-        this.transportConnection?.send({ type: "CLOSE" });
-    }
-
-    public stop() {
-        this.platformConnection?.send({ type: "STOP" });
-    }
-
-    private sendMessage(message: Message) {
-        if (!message.data) {
-            message.data = {};
+    sendMessage(namespace: string, message: unknown) {
+        let channel = this.namespaceChannelMap.get(namespace);
+        if (!channel) {
+            channel = this.createChannel(
+                    namespace, this.sourceId, this.transportId);
+            this.namespaceChannelMap.set(namespace, channel);
         }
-        (message.data as any)._id = this.referenceId;
-        sendMessage(message);
-    }
 
-    private _impl_addMessageListener(namespace: string) {
-        // TODO: Limit to one listener per namespace
-        this.createChannel(namespace);
-        this.channelMap.get(namespace)?.on("message", (message: any) => {
-            this.sendMessage({
-                subject: "shim:session/impl_addMessageListener"
-              , data: {
-                    namespace
-                  , message: JSON.stringify(message)
-                }
+        channel.send(message);
+        channel.on("message", messageData => {
+            const sessionId = this.application?.sessionId;
+            if (!sessionId) {
+                return;
+            }
+
+            messageData = JSON.stringify(messageData);
+
+            sendMessage({
+                subject: "shim:receivedCastSessionMessage"
+              , data: { sessionId, namespace, messageData }
             });
         });
     }
 
-    private _impl_sendMessage(
-            namespace: string
-          , message: object | string
-          , messageId: string) {
+    sendReceiverMessage(message: DistributiveOmit<SenderMessage, "requestId">) {
+        if (!this.receiverChannel) {
+            this.receiverChannel = this.createChannel(NS_RECEIVER);
+            this.receiverChannel.on("message", this.onReceiverMessage);
+        }
 
-        let wasError = false;
+        const requestId = this.receiverRequestId++;
+        this.receiverChannel?.send({ ...message, requestId });
 
-        try {
-            // Decode string messages
-            if (typeof message === "string") {
-                message = JSON.parse(message);
+        return requestId;
+    }
+
+    constructor(public appId: string
+              , public receiverDevice: ReceiverDevice) {
+
+        super();
+
+        this.client.on("close", () => {
+            if (this.sessionId) {
+                sendMessage({
+                    subject: "shim:castSessionStopped"
+                  , data: { sessionId: this.sessionId }
+                });
             }
-
-            this.createChannel(namespace);
-            this.channelMap.get(namespace)?.send(message);
-        } catch (err) {
-            wasError = true;
-        }
-
-        this.sendMessage({
-            subject: "shim:session/impl_sendMessage"
-          , data: { messageId, wasError }
         });
     }
 
-    private impl_sendReceiverMessage(
-            message: SenderMessage
-          , messageId: string) {
+    async connect(host: string
+                , port: number
+                , onSessionCreated?: OnSessionCreatedCallback) {
 
-        let wasError = false;
-        try {
-            this.platformReceiver?.send(message);
-        } catch (err) {
-            wasError = true;
+        if (onSessionCreated) {
+            this.onSessionCreated = onSessionCreated;
         }
 
-        // Handle stop message
-        if (message.type === "STOP") {
-            this.sendMessage({ subject: "shim:session/stopped" });
-            this.client.close();
-        }
+        await super.connect(host, port, () => {
+            // Include transport heartbeat with platform heartbeat
+            if (this.transportHeartbeat) {
+                this.transportHeartbeat.send({ type: "PING" });
+            }
+        });
 
-        this.sendMessage({
-            subject: "shim:session/impl_sendPlatformMessage"
-          , data: { messageId, wasError }
+        this.launchRequestId = this.sendReceiverMessage({
+            type: "LAUNCH"
+          , appId: this.appId
         });
     }
-
 }

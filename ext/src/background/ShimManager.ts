@@ -41,7 +41,7 @@ export default new class ShimManager {
             for (const shim of this.activeShims) {
                 shim.contentPort.postMessage({
                     subject: "shim:serviceUp"
-                  , data: { id: ev.detail.receiverDevice.id }
+                  , data: { receiverDevice: ev.detail.receiverDevice }
                 });
             }
         });
@@ -50,7 +50,7 @@ export default new class ShimManager {
             for (const shim of this.activeShims) {
                 shim.contentPort.postMessage({
                     subject: "shim:serviceDown"
-                  , data: { id: ev.detail.receiverDeviceId }
+                  , data: { receiverDeviceId: ev.detail.receiverDeviceId }
                 });
             }
         });
@@ -173,7 +173,7 @@ export default new class ShimManager {
                 for (const receiverDevice of receiverDevices.getDevices()) {
                     shim.contentPort.postMessage({
                         subject: "shim:serviceUp"
-                      , data: { id: receiverDevice.id }
+                      , data: { receiverDevice }
                     });
                 }
 

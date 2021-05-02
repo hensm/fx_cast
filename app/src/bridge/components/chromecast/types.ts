@@ -2,8 +2,23 @@
 
 export interface Image {
     url: string;
-    height?: number;
-    width?: number;
+    height: Nullable<number>;
+    width: Nullable<number>;
+}
+
+enum Capability {
+    VIDEO_OUT = "video_out"
+  , AUDIO_OUT = "audio_out"
+  , VIDEO_IN = "video_in"
+  , AUDIO_IN = "audio_in"
+  , MULTIZONE_GROUP = "multizone_group"
+}
+
+enum ReceiverType {
+    CAST = "cast"
+  , DIAL = "dial"
+  , HANGOUT = "hangout"
+  , CUSTOM = "custom"
 }
 
 enum VolumeControlType {
@@ -257,13 +272,13 @@ interface QueueItem {
     startTime: number;
 }
 
-
 export interface MediaStatus {
     mediaSessionId: number;
     media?: MediaInformation;
     playbackRate: number;
     playerState: PlayerState;
     idleReason?: IdleReason;
+    items?: QueueItem[]
     currentTime: number;
     supportedMediaCommands: number;
     repeatMode: RepeatMode;
@@ -271,25 +286,41 @@ export interface MediaStatus {
     customData: unknown;
 }
 
+interface ReceiverDisplayStatus {
+    showStop: Nullable<boolean>;
+    statusText: string;
+    appImages: Image[];
+}
+
+export interface Receiver {
+    displayStatus: Nullable<ReceiverDisplayStatus>;
+    isActiveInput: Nullable<boolean>;
+    receiverType: ReceiverType;
+    label: string;
+    friendlyName: string;
+    capabilities: Capability[];
+    volume: Nullable<Volume>;
+}
+
 export interface ReceiverApplication {
-    appId: string
-  , appType: string
-  , displayName: string
-  , iconUrl: string
-  , isIdleScreen: boolean
-  , launchedFromCloud: boolean
-  , namespaces: Array<{ name: string }>
-  , sessionId: string
-  , statusText: string
-  , transportId: string
-  , universalAppId: string
+    appId: string;
+    appType: string;
+    displayName: string;
+    iconUrl: string;
+    isIdleScreen: boolean;
+    launchedFromCloud: boolean;
+    namespaces: Array<{ name: string }>;
+    sessionId: string;
+    statusText: string;
+    transportId: string;
+    universalAppId: string;
 }
 
 export interface ReceiverStatus {
-    applications?: ReceiverApplication[]
-  , isActiveInput?: boolean
-  , isStandBy?: boolean
-  , volume: Volume
+    applications?: ReceiverApplication[];
+    isActiveInput?: boolean;
+    isStandBy?: boolean;
+    volume: Volume;
 }
 
 
@@ -306,13 +337,12 @@ export type SenderMessage =
       | ReqBase & { type: "SET_VOLUME", volume: Volume };
 
 export type ReceiverMessage =
-        ReqBase & {
-            type: "RECEIVER_STATUS"
-          , status: ReceiverStatus
-        };
+        ReqBase & { type: "RECEIVER_STATUS", status: ReceiverStatus }
+      | ReqBase & { type: "LAUNCH_ERROR", reason: string }
 
 
 interface MediaReqBase extends ReqBase {
+    mediaSessionId: number;
     customData?: unknown;
 }
 
@@ -324,11 +354,16 @@ export type SenderMediaMessage =
       | MediaReqBase & { type: "STOP" }
       | MediaReqBase & { type: "MEDIA_SET_VOLUME", volume: Volume }
       | MediaReqBase & { type: "SET_PLAYBACK_RATE" , playbackRate: number }
-      | MediaReqBase & {
+      | ReqBase & {
             type: "LOAD"
-          , media: MediaInformation
+          , activeTrackIds: Nullable<number[]>
+          , atvCredentials?: string
+          , atvCredentialsType?: string
           , autoplay: Nullable<boolean>
           , currentTime: Nullable<number>
+          , customData?: unknown
+          , media: MediaInformation
+          , sessionId: Nullable<string>
         }
       | MediaReqBase & {
             type: "SEEK"
@@ -366,7 +401,7 @@ export type SenderMediaMessage =
             type: "QUEUE_UPDATE"
           , jump: Nullable<number>
           , currentItemId: Nullable<number>
-          , sessionId: Nullable<number>
+          , sessionId: Nullable<string>
         }
         // QueueRemoveItemsRequest
       | MediaReqBase & {

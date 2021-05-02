@@ -19,6 +19,7 @@ export interface MediaStatus {
     playbackRate: number;
     playerState: PlayerState;
     idleReason?: IdleReason;
+    items?: QueueItem[];
     currentTime: number;
     supportedMediaCommands: number;
     repeatMode: RepeatMode;
@@ -47,6 +48,12 @@ export interface ReceiverStatus {
   , volume: Volume
 }
 
+export interface CastSessionUpdate {
+    sessionId: string
+  , application: ReceiverApplication
+  , volume: Volume
+}
+
 
 interface ReqBase {
     requestId: number;
@@ -61,13 +68,12 @@ export type SenderMessage =
       | ReqBase & { type: "SET_VOLUME", volume: Partial<Volume> };
 
 export type ReceiverMessage =
-        ReqBase & {
-            type: "RECEIVER_STATUS"
-          , status: ReceiverStatus
-        };
+        ReqBase & { type: "RECEIVER_STATUS", status: ReceiverStatus }
+      | ReqBase & { type: "LAUNCH_ERROR", reason: string }
 
 
 interface MediaReqBase extends ReqBase {
+    mediaSessionId: number;
     customData?: unknown;
 }
 
@@ -79,16 +85,15 @@ export type SenderMediaMessage =
       | MediaReqBase & { type: "STOP" }
       | MediaReqBase & { type: "MEDIA_SET_VOLUME", volume: Partial<Volume> }
       | MediaReqBase & { type: "SET_PLAYBACK_RATE" , playbackRate: number }
-      | MediaReqBase & {
+      | ReqBase & {
             type: "LOAD"
           , activeTrackIds: Nullable<number[]>
           , atvCredentials?: string
           , atvCredentialsType?: string
           , autoplay: Nullable<boolean>
           , currentTime: Nullable<number>
-          , customData: any
+          , customData?: unknown
           , media: MediaInfo
-          , requestId: number
           , sessionId: Nullable<string>
         }
       | MediaReqBase & {
@@ -127,7 +132,7 @@ export type SenderMediaMessage =
             type: "QUEUE_UPDATE"
           , jump: Nullable<number>
           , currentItemId: Nullable<number>
-          , sessionId: Nullable<number>
+          , sessionId: Nullable<string>
         }
         // QueueRemoveItemsRequest
       | MediaReqBase & {

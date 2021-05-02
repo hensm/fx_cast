@@ -1,6 +1,6 @@
 "use strict";
 
-import { MediaStatus, ReceiverStatus, ReceiverApplication, SenderMessage }
+import { ReceiverStatus, ReceiverApplication, Volume, SenderMessage }
         from "./components/chromecast/types";
 
 import { ReceiverDevice
@@ -8,77 +8,50 @@ import { ReceiverDevice
        , ReceiverSelectionStop } from "./types";
 
 
+export interface CastSessionUpdate {
+    sessionId: string
+  , application: ReceiverApplication
+  , volume: Volume
+}
+
 type MessageDefinitions = {
-    // Session messages
-    "shim:session/connected": { application: ReceiverApplication }
-  , "shim:session/updateStatus": { status: ReceiverStatus }
-  , "shim:session/stopped": {}
-  , "shim:session/impl_addMessageListener": {
-        namespace: string
-      , message: string
-    }
-  , "shim:session/impl_sendMessage": {
-        messageId: string
-      , wasError: boolean
-    }
-  , "shim:session/impl_sendPlatformMessage": {
-        messageId: string
-      , wasError: boolean
-    }
-
-    // Bridge session messages
-  , "bridge:session/initialize": {
-        address: string
-      , port: number
-      , appId: string
-      , sessionId: string
-      , _id: string
-    }
-  , "bridge:session/close": {}
-  , "bridge:session/impl_leave": {
-        id: string
-      , _id: string
-    }
-  , "bridge:session/impl_sendMessage": {
-        namespace: string
-      , message: any
-      , messageId: string
-      , _id: string
-    }
-  , "bridge:session/impl_sendPlatformMessage": {
-        message: SenderMessage
-      , messageId: string
-      , _id: string
-    }
-  , "bridge:session/impl_addMessageListener": {
-        namespace: string;
-        _id: string;
-    }
-
-    // Media messages
-  , "shim:media/updateStatus": {
-        status: MediaStatus
-    }
-  , "shim:media/sendMediaMessageResponse": {
-        messageId: string
-      , error: boolean
-    }
-
-    // Bridge media messages
-  , "bridge:media/initialize": {
+    "shim:castSessionCreated": CastSessionUpdate & { receiverDevice: ReceiverDevice }
+  , "shim:castSessionUpdated": CastSessionUpdate
+  , "shim:castSessionStopped": {
         sessionId: string
-      , mediaSessionId: number
-      , _internalSessionId: string
-      , _id: string
     }
 
-  , "bridge:media/sendMediaMessage": {
-        message: any
+  , "shim:receivedCastSessionMessage": {
+        sessionId: string
+      , namespace: string
+      , messageData: string
+    }
+
+  , "shim:impl_sendCastMessage": {
+        sessionId: string
       , messageId: string
-      , _id: string
+      , error?: string
     }
 
-      // Bridge messages
+  , "bridge:createCastSession": {
+        appId: string
+      , receiverDevice: ReceiverDevice
+    }
+  , "bridge:sendCastReceiverMessage": {
+        sessionId: string
+      , messageData: SenderMessage
+      , messageId: string
+    }
+  , "bridge:sendCastSessionMessage": {
+        sessionId: string
+      , namespace: string
+      , messageData: object | string
+      , messageId: string
+    }
+
+  , "bridge:stopCastApp": { receiverDevice: ReceiverDevice }
+
+    // Bridge messages
   , "main:receiverSelector/selected": ReceiverSelectionCast
   , "main:receiverSelector/stopped": ReceiverSelectionStop
   , "main:receiverSelector/cancelled": {}
@@ -97,9 +70,6 @@ type MessageDefinitions = {
 
   , "bridge:openReceiverSelector": string
   , "bridge:closeReceiverSelector": {}
-
-  , "bridge:stopReceiverApp": { receiverDevice: ReceiverDevice }
-
 
   , "bridge:startMediaServer": {
         filePath: string
