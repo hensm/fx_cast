@@ -13,16 +13,64 @@ import { ErrorCallback
        , SuccessCallback
        , UpdateListener } from "../types";
 
-import { ReceiverMediaMessage, SenderMediaMessage, SenderMessage } from "./types";
+import { MediaStatus
+       , ReceiverMediaMessage
+       , SenderMediaMessage
+       , SenderMessage } from "./types";
 
-import { Error as Error_
-       , Image, Receiver
-       , SenderApplication } from "./dataClasses";
+import { Image, Receiver, SenderApplication } from "./dataClasses";
 import { SessionStatus } from "./enums";
-import { Media, LoadRequest, QueueLoadRequest } from "./media";
+import { Media, LoadRequest, QueueLoadRequest, QueueItem } from "./media";
 
 
 const NS_MEDIA = "urn:x-cast:com.google.cast.media";
+
+
+/**
+ * Takes a media object and a media status object and merges
+ * the status with the existing media object, updating it with
+ * new properties.
+ */
+ function updateMedia(media: Media, status: MediaStatus) {
+    if (status.currentTime) {
+        media._lastUpdateTime = Date.now();
+    }
+
+    // Copy props
+    for (const prop in status) {
+        if (prop !== "items" && status.hasOwnProperty(prop)) {
+            (media as any)[prop] = (status as any)[prop];
+        }
+    }
+
+    // Update queue state
+    if (status.items) {
+        const newItems: QueueItem[] = [];
+
+        for (const newItem of status.items) {
+            if (!newItem.media) {
+                // Existing queue item with the same ID
+                const existingItem = media.items?.find(
+                        item => item.itemId === newItem.itemId);
+
+                /**
+                 * Use existing queue item's media info if available
+                 * otherwise, if the current queue item, use the main
+                 * media item.
+                 */
+                if (existingItem?.media) {
+                    newItem.media = existingItem.media;
+                } else if (media.media
+                      && newItem.itemId === media.currentItemId) {
+                    newItem.media = media.media;
+                }
+            }
+        }
+
+        media.items = newItems;
+    }
+}
+
 
 export default class Session {
     #id = uuid();
@@ -47,6 +95,8 @@ export default class Session {
         if (namespace !== NS_MEDIA) return;
 
         const message: ReceiverMediaMessage = JSON.parse(messageString);
+        console.info(message);
+
         switch (message.type) {
             case "MEDIA_STATUS": {
                 // Update media
@@ -54,9 +104,10 @@ export default class Session {
                     let media = this.media.find(
                             media => media.mediaSessionId ===
                                      mediaStatus.mediaSessionId);
+
+                    // Handle Media creation
                     if (!media) {
                         media = new Media(
-                                // TODO: Change to status session id?
                                 this.sessionId
                               , mediaStatus.mediaSessionId
                               , this.#sendMediaMessage);
@@ -64,9 +115,13 @@ export default class Session {
                         this.media.push(media);
                     }
 
-                    //updateMedia(media, mediaStatus);
+                    updateMedia(media, mediaStatus);
 
-                    //for (const )
+                    this.#loadMediaSuccessCallback?.(media);
+
+                    for (const listener of media._updateListeners) {
+                        listener(true);
+                    }
 
                     break;
                 }
@@ -125,6 +180,8 @@ export default class Session {
               , public receiver: Receiver) {
 
         this.transportId = sessionId || "";
+
+        this.addMessageListener(NS_MEDIA, this.#mediaMessageListener);
     }
 
 

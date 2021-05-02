@@ -203,52 +203,6 @@ function updateSession(update: CastSessionUpdate) {
 }
 
 
-/**
- * Takes a media object and a media status object and merges
- * the status with the existing media object, updating it with
- * new properties.
- */
- function updateMedia(media: Media, status: MediaStatus) {
-    if (status.currentTime) {
-        media._lastUpdateTime = Date.now();
-    }
-
-    // Copy props
-    for (const prop in status) {
-        if (prop !== "items" && status.hasOwnProperty(prop)) {
-            (media as any)[prop] = (status as any)[prop];
-        }
-    }
-
-    // Update queue state
-    if (status.items) {
-        const newItems: QueueItem[] = [];
-
-        for (const newItem of status.items) {
-            if (!newItem.media) {
-                // Existing queue item with the same ID
-                const existingItem = media.items?.find(
-                        item => item.itemId === newItem.itemId);
-
-                /**
-                 * Use existing queue item's media info if available
-                 * otherwise, if the current queue item, use the main
-                 * media item.
-                 */
-                if (existingItem?.media) {
-                    newItem.media = existingItem.media;
-                } else if (media.media
-                      && newItem.itemId === media.currentItemId) {
-                    newItem.media = media.media;
-                }
-            }
-        }
-
-        media.items = newItems;
-    }
-}
-
-
 onMessage(async message => {
     switch (message.subject) {
         case "shim:initialized": {
@@ -336,18 +290,20 @@ onMessage(async message => {
             const { sessionId, messageId, error } = message.data;
 
             const session = sessions.get(sessionId);
-            if (session) {
-                const callbacks = session._sendMessageCallbacks.get(messageId);
-                if (callbacks) {
-                    const [ successCallback, errorCallback ] = callbacks;
-                    
-                    if (error) {
-                        errorCallback?.(new Error_(error));
-                        return;
-                    }
+            if (!session) {
+                break;
+            }
 
-                    successCallback?.();
+            const callbacks = session._sendMessageCallbacks.get(messageId);
+            if (callbacks) {
+                const [ successCallback, errorCallback ] = callbacks;
+                
+                if (error) {
+                    errorCallback?.(new Error_(error));
+                    return;
                 }
+
+                successCallback?.();
             }
 
             break;

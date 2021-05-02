@@ -15,8 +15,6 @@ import { BreakStatus, EditTracksInfoRequest, GetStatusRequest, LiveSeekableRange
 import { PlayerState, RepeatMode } from "./enums";
 import { ErrorCode } from "../enums";
 
-import { onMessage, sendMessageResponse } from "../../eventMessageChannel";
-
 import { ErrorCallback
        , SuccessCallback
        , UpdateListener } from "../../types";
