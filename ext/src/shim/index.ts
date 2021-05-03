@@ -14,9 +14,6 @@ if (!_window.chrome) {
 }
 
 
-// Remove private APIs
-delete (cast as any)._requestSession;
-
 // Create page-accessible API object
 _window.chrome.cast = cast;
 

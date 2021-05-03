@@ -64,10 +64,10 @@ function getSession(opts: InitOptions): Promise<cast.Session> {
         function receiverListener(availability: string) {
             if (availability === cast.ReceiverAvailability.AVAILABLE) {
                 if (opts.receiver) {
-                    cast._requestSession(
+                    /*cast._requestSession(
                             opts.receiver
                           , onRequestSessionSuccess
-                          , onRequestSessionError);
+                          , onRequestSessionError);*/
                 } else {
                     cast.requestSession(
                             onRequestSessionSuccess

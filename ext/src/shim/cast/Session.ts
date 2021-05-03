@@ -4,8 +4,7 @@ import { v4 as uuid } from "uuid";
 
 import logger from "../../lib/logger";
 
-import { onMessage
-       , sendMessageResponse } from "../eventMessageChannel";
+import { sendMessageResponse } from "../eventMessageChannel";
 
 import { ErrorCallback
        , LoadSuccessCallback
@@ -14,167 +13,157 @@ import { ErrorCallback
        , SuccessCallback
        , UpdateListener } from "../types";
 
-import { SenderMediaMessage, SenderMessage } from "./types";
+import { MediaStatus
+       , ReceiverMediaMessage
+       , SenderMediaMessage
+       , SenderMessage } from "./types";
 
-import { Error as _Error
-       , Image, Receiver
-       , SenderApplication, Volume } from "./dataClasses";
-import { ErrorCode, SessionStatus } from "./enums";
-
-import { Media
-       , LoadRequest
-       , QueueLoadRequest } from "./media";
+import { Image, Receiver, SenderApplication } from "./dataClasses";
+import { SessionStatus } from "./enums";
+import { Media, LoadRequest, QueueLoadRequest, QueueItem } from "./media";
 
 
-type SenderMessageData<T = SenderMessage> =
-        T extends any
-            ? Omit<T, "requestId">
-            : never;
+const NS_MEDIA = "urn:x-cast:com.google.cast.media";
 
-type SessionSuccessCallback = (session: Session) => void;
+
+/**
+ * Takes a media object and a media status object and merges
+ * the status with the existing media object, updating it with
+ * new properties.
+ */
+ function updateMedia(media: Media, status: MediaStatus) {
+    if (status.currentTime) {
+        media._lastUpdateTime = Date.now();
+    }
+
+    // Copy props
+    for (const prop in status) {
+        if (prop !== "items" && status.hasOwnProperty(prop)) {
+            (media as any)[prop] = (status as any)[prop];
+        }
+    }
+
+    // Update queue state
+    if (status.items) {
+        const newItems: QueueItem[] = [];
+
+        for (const newItem of status.items) {
+            if (!newItem.media) {
+                // Existing queue item with the same ID
+                const existingItem = media.items?.find(
+                        item => item.itemId === newItem.itemId);
+
+                /**
+                 * Use existing queue item's media info if available
+                 * otherwise, if the current queue item, use the main
+                 * media item.
+                 */
+                if (existingItem?.media) {
+                    newItem.media = existingItem.media;
+                } else if (media.media
+                      && newItem.itemId === media.currentItemId) {
+                    newItem.media = media.media;
+                }
+            }
+        }
+
+        media.items = newItems;
+    }
+}
+
 
 export default class Session {
     #id = uuid();
 
     #isConnected = false;
-    #successCallback?: SessionSuccessCallback;
 
-    #messageListeners = new Map<string, Set<MessageListener>>();
-    #updateListeners = new Set<UpdateListener>();
+    #loadMediaSuccessCallback?: (media: Media) => void;
+    #loadMediaErrorCallback?: ErrorCallback;
+    #loadMediaRequest?: LoadRequest;
 
-    #sendMessageCallbacks =
+    _messageListeners = new Map<string, Set<MessageListener>>();
+    _updateListeners = new Set<UpdateListener>();
+
+
+    _sendMessageCallbacks =
             new Map<string, [ SuccessCallback?, ErrorCallback? ]>();
-    #sendReceiverMessageCallbacks =
-            new Map<string, (wasError: boolean) => void>();
-
-    #listener = onMessage(message => {
-        // Filter other session messages
-        if ((message as any).data._id !== this.#id) {
-            return;
-        }
-
-        switch (message.subject) {
-            case "shim:session/stopped": {
-                // Disconnect from extension messages
-                this.#listener.disconnect();
-
-                this.status = SessionStatus.STOPPED;
-
-                for (const listener of this.#updateListeners) {
-                    listener(false);
-                }
-
-                break;
-            }
-
-            case "shim:session/updateStatus": {
-                const { status } = message.data;
-
-                // First status message indicates session creation
-                if (!this.#isConnected && status.applications) {
-                    this.#isConnected = true;
-
-                    this.status = SessionStatus.CONNECTED;
-
-                    // Update app props
-                    const app = status.applications[0];
-                    this.sessionId = app.sessionId;
-                    this.namespaces = app.namespaces;
-                    this.displayName = app.displayName;
-                    this.statusText = app.statusText;
-
-                    if (this.#successCallback) {
-                        this.#successCallback(this);
-                    }
-
-                    return;
-                }
-
-                this.receiver.volume = status.volume;
-
-                for (const listener of this.#updateListeners) {
-                    listener(true);
-                }
-
-                break;
-            }
-
-
-            case "shim:session/impl_addMessageListener": {
-                const { namespace, message: newMessage } = message.data;
-                const messageListeners = this.#messageListeners.get(namespace);
-
-                if (messageListeners) {
-                    for (const listener of messageListeners) {
-                        listener(namespace, newMessage);
-                    }
-                }
-
-                break;
-            }
-
-            case "shim:session/impl_sendMessage": {
-                const { messageId, wasError } = message.data;
-                const [ successCallback, errorCallback ] =
-                        this.#sendMessageCallbacks.get(messageId) ?? [];
-
-                if (wasError && errorCallback) {
-                    errorCallback(new _Error(ErrorCode.SESSION_ERROR));
-                } else if (successCallback) {
-                    successCallback();
-                }
-
-                this.#sendMessageCallbacks.delete(messageId);
-
-                break;
-            }
-
-            case "shim:session/impl_sendReceiverMessage": {
-                const { messageId, wasError } = message.data;
-                const callback =
-                        this.#sendReceiverMessageCallbacks.get(messageId);
-                if (callback) {
-                    callback(wasError);
-                }
-
-                break;
-            }
-        }
-    });
 
     /**
-     * Sends a message to the bridge that is forwarded to the
-     * receiver device. Promise resolves once the message is sent
-     * or an error occurs.
+     * 
      */
-     #sendReceiverMessage = (message: SenderMessageData) => {
-        const messageId = uuid();
-        sendMessageResponse({
-            subject: "bridge:session/impl_sendReceiverMessage"
-          , data: {
-                message: { requestId: 0, ...message }
-              , messageId
-              , _id: this.#id
-            }
-        });
+     #mediaMessageListener = (namespace: string, messageString: string) => {
+        if (namespace !== NS_MEDIA) return;
 
-        return new Promise<void>((resolve, reject) => {   
-            this.#sendReceiverMessageCallbacks.set(messageId
-                  , (wasError: boolean) => {
+        const message: ReceiverMediaMessage = JSON.parse(messageString);
+        switch (message.type) {
+            case "MEDIA_STATUS": {
+                // Update media
+                for (const mediaStatus of message.status) {
+                    let media = this.media.find(
+                            media => media.mediaSessionId ===
+                                     mediaStatus.mediaSessionId);
 
-                if (wasError) {
-                    reject(new _Error(ErrorCode.SESSION_ERROR));
-                    return;
+                    console.info(media);
+
+                    // Handle Media creation
+                    if (!media) {
+                        media = new Media(
+                                this.sessionId
+                              , mediaStatus.mediaSessionId
+                              , this.#sendMediaMessage);
+                        
+                        this.media.push(media);
+                        this.#loadMediaSuccessCallback?.(media);
+                    }
+
+                    updateMedia(media, mediaStatus);
+
+                    for (const listener of media._updateListeners) {
+                        listener(true);
+                    }
+
+                    break;
                 }
+            }
+        }
+    }
 
-                resolve();
-            });
+    /**
+     * Sends a media message to the app receiver.
+     * urn:x-cast:com.google.cast.media
+     */
+    #sendMediaMessage = (message: DistributiveOmit<
+            SenderMediaMessage, "requestId">) => {
+        
+        return new Promise<void>((resolve, reject) => {
+            this.sendMessage(
+                    "urn:x-cast:com.google.cast.media"
+                  , { ...message, requestId: 0 }
+                  , resolve, reject);
+
         });
     }
 
-    private _sendMediaMessage(message: SenderMediaMessage) {
-        this.sendMessage("urn:x-cast:com.google.cast.media", message);
+    #sendReceiverMessage = (message: DistributiveOmit<
+            SenderMessage, "requestId">) => {
+
+        return new Promise<void>((resolve, reject) => {
+            const messageId = uuid();
+
+            sendMessageResponse({
+                subject: "bridge:sendCastReceiverMessage"
+              , data: {
+                    sessionId: this.sessionId
+                  , messageData: message as SenderMessage
+                  , messageId
+                }
+            });
+
+            this._sendMessageCallbacks.set(
+                    messageId, [ resolve, reject ]);
+        });
     }
+
 
     media: Media[] = [];
     namespaces: Array<{ name: string }> = [];
@@ -187,51 +176,37 @@ export default class Session {
               , public appId: string
               , public displayName: string
               , public appImages: Image[]
-              , public receiver: Receiver
-              , _successCallback: SessionSuccessCallback) {
+              , public receiver: Receiver) {
 
-        this.#successCallback = _successCallback;
         this.transportId = sessionId || "";
 
-        if (receiver) {
-            sendMessageResponse({
-                subject: "bridge:session/initialize"
-              , data: {
-                    address: (receiver as any)._address
-                  , port: (receiver as any)._port
-                  , appId
-                  , sessionId
-                  , _id: this.#id
-                }
-            });
-        }
+        this.addMessageListener(NS_MEDIA, this.#mediaMessageListener);
     }
 
 
     addMediaListener(_mediaListener: MediaListener) {
         logger.info("STUB :: Session#addMediaListener");
     }
+    removeMediaListener(_mediaListener: MediaListener): void {
+        logger.info("STUB :: Session#removeMediaListener");
+    }
 
-    addMessageListener(namespace: string
-                     , listener: MessageListener) {
-
-        if (!this.#messageListeners.has(namespace)) {
-            this.#messageListeners.set(namespace, new Set());
+    addMessageListener(namespace: string, listener: MessageListener) {
+        if (!this._messageListeners.has(namespace)) {
+            this._messageListeners.set(namespace, new Set());
         }
 
-        this.#messageListeners.get(namespace)?.add(listener);
-
-        sendMessageResponse({
-            subject: "bridge:session/impl_addMessageListener"
-          , data: {
-                namespace
-              , _id: this.#id
-            }
-        });
+        this._messageListeners.get(namespace)?.add(listener);
+    }
+    removeMessageListener(namespace: string, listener: MessageListener): void {
+        this._messageListeners.get(namespace)?.delete(listener);
     }
 
     addUpdateListener(listener: UpdateListener) {
-        this.#updateListeners.add(listener);
+        this._updateListeners.add(listener);
+    }
+    removeUpdateListener(listener: UpdateListener): void {
+        this._updateListeners.delete(listener);
     }
 
     leave(_successCallback?: SuccessCallback
@@ -244,48 +219,13 @@ export default class Session {
             , successCallback?: LoadSuccessCallback
             , errorCallback?: ErrorCallback): void {
 
-        this._sendMediaMessage(loadRequest);
+        this.#loadMediaSuccessCallback = successCallback;
+        this.#loadMediaErrorCallback = errorCallback;
+        this.#loadMediaRequest = loadRequest;
 
-
-        let hasResponded = false;
-
-        this.addMessageListener(
-                "urn:x-cast:com.google.cast.media"
-              , (_namespace, data) => {
-
-            if (hasResponded) {
-                return;
-            }
-
-            const message = JSON.parse(data);
-
-            if (message.status && message.status.length > 0) {
-                const sessionId = this.#id;
-                if (!sessionId) {
-                    return;
-                }
-
-                hasResponded = true;
-
-                const media = new Media(
-                        this.sessionId
-                      , message.status[0].mediaSessionId
-                      , sessionId);
-
-                media.media = loadRequest.media;
-                this.media = [ media ];
-
-                media.play();
-
-                if (successCallback) {
-                    successCallback(media);
-                }
-            } else {
-                if (errorCallback) {
-                    errorCallback(new _Error(ErrorCode.SESSION_ERROR));
-                }
-            }
-        });
+        loadRequest.sessionId = this.sessionId;
+        this.#sendMediaMessage(loadRequest)
+            .catch(errorCallback);
     }
 
     queueLoad(_queueLoadRequest: QueueLoadRequest
@@ -295,34 +235,24 @@ export default class Session {
         logger.info("STUB :: Session#queueLoad");
     }
 
-    removeMediaListener(_mediaListener: MediaListener): void {
-        logger.info("STUB :: Session#removeMediaListener");
-    }
-    removeMessageListener(namespace: string, listener: MessageListener): void {
-        this.#messageListeners.get(namespace)?.delete(listener);
-    }
-    removeUpdateListener(_namespace: string, listener: UpdateListener): void {
-        this.#updateListeners.delete(listener);
-    }
-
     sendMessage(namespace: string
-              , message: {} | string
+              , message: object | string
               , successCallback?: SuccessCallback
               , errorCallback?: ErrorCallback): void {
 
         const messageId = uuid();
 
         sendMessageResponse({
-            subject: "bridge:session/impl_sendMessage"
+            subject: "bridge:sendCastSessionMessage"
           , data: {
-                namespace
-              , message
+                sessionId: this.sessionId
+              , namespace
+              , messageData: message
               , messageId
-              , _id: this.#id
             }
         });
 
-        this.#sendMessageCallbacks.set(messageId, [
+        this._sendMessageCallbacks.set(messageId, [
             successCallback
           , errorCallback
         ]);

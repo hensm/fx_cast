@@ -3,7 +3,14 @@ declare const MIRRORING_APP_ID: string;
 declare const APPLICATION_NAME: string;
 declare const APPLICATION_VERSION: string;
 
+
 declare type Nullable<T> = T | null;
+
+declare type DistributiveOmit<T, K extends keyof any> =
+        T extends any
+            ? Omit<T, K>
+            : never;
+
 
 declare interface Object {
     // eslint-disable-next-line @typescript-eslint/ban-types

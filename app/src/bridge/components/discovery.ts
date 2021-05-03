@@ -8,10 +8,9 @@ import mdns from "mdns";
 
 import { sendMessage } from "../lib/nativeMessaging";
 
-import { ReceiverStatus } from "./chromecast/types";
-import { NS_CONNECTION
-       , NS_HEARTBEAT
-       , NS_RECEIVER } from "./chromecast/Session";
+import { ReceiverStatus } from "./cast/types";
+import { NS_CONNECTION, NS_HEARTBEAT, NS_RECEIVER }
+        from "./cast/Session";
 
 
 interface CastTxtRecord {
@@ -152,8 +151,10 @@ export function stopDiscovery() {
      * Closes status listener connection.
      */
     public deregister(): void {
-        if (this.clientReceiver) {
-            this.clientReceiver.send({ type: "CLOSE" });
+        try {
+            this.clientReceiver?.send({ type: "CLOSE" });
+        } catch (err) {
+            // Supress
         }
 
         this.client.close();

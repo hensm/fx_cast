@@ -5,19 +5,18 @@ import Messenger from "./lib/Messenger";
 import { TypedPort } from "./lib/TypedPort";
 import { BridgeInfo } from "./lib/bridge";
 
-import { ReceiverDevice } from "./types";
-
 import { ReceiverSelectorMediaType } from "./background/receiverSelector";
 import { ReceiverSelection
        , ReceiverSelectionCast
        , ReceiverSelectionStop }
         from "./background/receiverSelector/ReceiverSelector";
 
-import { Volume } from "./shim/cast/dataClasses";
-import { MediaStatus
-       , SenderMessage
-       , ReceiverApplication
-       , ReceiverStatus } from "./shim/cast/types";
+import { CastSessionCreated
+       , CastSessionUpdated
+       , ReceiverStatus
+       , SenderMessage } from "./shim/cast/types";
+
+import { ReceiverDevice } from "./types";
 
 
 /**
@@ -60,8 +59,8 @@ type ExtMessageDefinitions = {
   , "main:sessionCreated": {}
 
   , "shim:initialized": BridgeInfo
-  , "shim:serviceUp": { id: ReceiverDevice["id"] }
-  , "shim:serviceDown": { id: ReceiverDevice["id"] }
+  , "shim:serviceUp": { receiverDevice: ReceiverDevice }
+  , "shim:serviceDown": { receiverDeviceId: ReceiverDevice["id"] }
 
   , "shim:launchApp": { receiver: ReceiverDevice }
 }
@@ -72,73 +71,41 @@ type ExtMessageDefinitions = {
  *   app/bridge/messaging.ts > MessagesBase
  */
 type AppMessageDefinitions = {
-    // Session messages
-    "shim:session/stopped": {}
-  , "shim:session/connected": { application: ReceiverApplication }
-  , "shim:session/updateStatus": { status: ReceiverStatus }
-  , "shim:session/impl_addMessageListener": {
-        namespace: string
-      , message: string
-    }
-    , "shim:session/impl_sendMessage": {
-        messageId: string
-      , wasError: boolean
-    }
-  , "shim:session/impl_sendReceiverMessage": {
-        messageId: string
-      , wasError: boolean
-    }
-
-    // Bridge session messages
-  , "bridge:session/initialize": {
-        address: string
-      , port: number
-      , appId: string
-      , sessionId: string
-      , _id: string
-    }
-  , "bridge:session/close": {}
-  , "bridge:session/impl_leave": {
-        id: string
-      , _id: string
-    }
-  , "bridge:session/impl_sendMessage": {
-        namespace: string
-      , message: any
-      , messageId: string
-      , _id: string
-    }
-  , "bridge:session/impl_sendReceiverMessage": {
-        message: SenderMessage
-      , messageId: string
-      , _id: string
-    }
-  , "bridge:session/impl_addMessageListener": {
-        namespace: string;
-        _id: string;
-    }
-
-    // Media messages
-  , "shim:media/updateStatus": {
-        status: MediaStatus
-    }
-  , "shim:media/sendMediaMessageResponse": {
-        messageId: string
-      , error: boolean
-    }
-
-    // Bridge media messages
-  , "bridge:media/initialize": {
+    "shim:castSessionCreated": CastSessionCreated
+  , "shim:castSessionUpdated": CastSessionUpdated
+  , "shim:castSessionStopped": {
         sessionId: string
-      , mediaSessionId: number
-      , _internalSessionId: string
-      , _id: string
     }
-  , "bridge:media/sendMediaMessage": {
-        message: any
+
+  , "shim:receivedCastSessionMessage": {
+        sessionId: string
+      , namespace: string
+      , messageData: string
+    }
+
+  , "shim:impl_sendCastMessage": {
+        sessionId: string
       , messageId: string
-      , _id: string
+      , error?: string
     }
+
+  , "bridge:createCastSession": {
+        appId: string
+      , receiverDevice: ReceiverDevice
+    }
+  , "bridge:sendCastReceiverMessage": {
+        sessionId: string
+      , messageData: SenderMessage
+      , messageId: string
+    }
+  , "bridge:sendCastSessionMessage": {
+        sessionId: string
+      , namespace: string
+      , messageData: object | string
+      , messageId: string
+    }
+
+  , "bridge:stopCastApp": { receiverDevice: ReceiverDevice }
 
     // Bridge messages
   , "main:receiverSelector/selected": ReceiverSelectionCast
@@ -159,9 +126,6 @@ type AppMessageDefinitions = {
 
   , "bridge:openReceiverSelector": string
   , "bridge:closeReceiverSelector": {}
-
-  , "bridge:stopReceiverApp": { receiverDevice: ReceiverDevice }
-
 
   , "bridge:startMediaServer": {
         filePath: string

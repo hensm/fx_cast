@@ -55,7 +55,7 @@ export class Image {
 export class Receiver {
     displayStatus: Nullable<ReceiverDisplayStatus> = null;
     isActiveInput: Nullable<boolean> = null;
-    receiverType: string = ReceiverType.CAST;
+    receiverType = ReceiverType.CAST;
 
     constructor(
             public label: string

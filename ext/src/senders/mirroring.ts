@@ -162,10 +162,10 @@ function receiverListener(availability: string) {
 
     if (availability === cast.ReceiverAvailability.AVAILABLE) {
         wasSessionRequested = true;
-        cast._requestSession(
+        /*cast._requestSession(
                 selectedReceiver
               , onRequestSessionSuccess
-              , onRequestSessionError);
+              , onRequestSessionError);*/
     }
 }
 
