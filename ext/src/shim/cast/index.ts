@@ -3,6 +3,7 @@
 import logger from "../../lib/logger";
 
 import { ReceiverDevice } from "../../types";
+import { ErrorCallback, SuccessCallback } from "../types";
 
 import { onMessage, sendMessageResponse } from "../eventMessageChannel";
 
@@ -22,9 +23,6 @@ type ReceiverActionListener = (
   , receiverAction: string) => void;
 
 type RequestSessionSuccessCallback = (session: Session) => void;
-
-type SuccessCallback = () => void;
-type ErrorCallback = (err: Error_) => void;
 
 
 let apiConfig: Nullable<ApiConfig>;
@@ -57,6 +55,26 @@ export const timeout = new Timeout();
 export * as media from "./media";
 
 
+function sendSessionRequest(sessionRequest: SessionRequest
+                          , receiverDevice: ReceiverDevice) {
+
+    for (const listener of receiverActionListeners) {
+        const receiver = new Receiver(
+                receiverDevice.id
+              , receiverDevice.friendlyName);
+
+        listener(receiver, ReceiverAction.CAST);
+    }
+
+    sendMessageResponse({
+        subject: "bridge:createCastSession"
+      , data: {
+            appId: sessionRequest.appId
+          , receiverDevice: receiverDevice
+        }
+    });
+}
+
 export function initialize(newApiConfig: ApiConfig
                          , successCallback?: SuccessCallback
                          , errorCallback?: ErrorCallback) {
@@ -85,7 +103,8 @@ export function initialize(newApiConfig: ApiConfig
 
 export function requestSession(successCallback: RequestSessionSuccessCallback
                              , errorCallback: ErrorCallback
-                             , newSessionRequest?: SessionRequest) {
+                             , newSessionRequest?: SessionRequest
+                             , receiverDevice?: ReceiverDevice) {
 
     logger.info("cast.requestSession");
 
@@ -118,10 +137,20 @@ export function requestSession(successCallback: RequestSessionSuccessCallback
     requestSessionSuccessCallback = successCallback;
     requestSessionErrorCallback = errorCallback;
 
-    // Open receiver selector UI
-    sendMessageResponse({
-        subject: "main:selectReceiver"
-    });
+    /**
+     * If a receiver was provided, skip the receiver selector
+     * process.
+     */
+    if (receiverDevice) {
+        if (receiverDevice?.id && receiverDevices.has(receiverDevice.id)) {
+            sendSessionRequest(sessionRequest, receiverDevice);
+        }
+    } else {
+        // Open receiver selector UI
+        sendMessageResponse({
+            subject: "main:selectReceiver"
+        });
+    }
 }
 
 export function requestSessionById(_sessionId: string): void {
@@ -183,18 +212,18 @@ onMessage(message => {
 
             // TODO: Implement persistent per-origin receiver IDs
             const receiver = new Receiver(
-                    status.receiverFriendlyName                           // label
-                  , status.receiverFriendlyName  // friendlyName
-                  , [ Capability.VIDEO_OUT
+                    status.receiverFriendlyName  // label
+                , status.receiverFriendlyName  // friendlyName
+                , [ Capability.VIDEO_OUT
                     , Capability.AUDIO_OUT ]     // capabilities
-                  , status.volume);              // volume
+                , status.volume);              // volume
 
             const session = new Session(
                     status.sessionId    // sessionId
-                  , status.appId        // appId
-                  , status.displayName  // displayName
-                  , status.appImages    // appImages
-                  , receiver);          // receiver
+                , status.appId        // appId
+                , status.displayName  // displayName
+                , status.appImages    // appImages
+                , receiver);          // receiver
 
             session.senderApps = status.senderApps;
             session.transportId = status.transportId;
@@ -316,24 +345,7 @@ onMessage(message => {
                 break;
             }
 
-            const { receiver: receiverDevice } = message.data;
-
-            for (const listener of receiverActionListeners) {
-                const receiver = new Receiver(
-                        receiverDevice.id
-                      , receiverDevice.friendlyName);
-
-                listener(receiver, ReceiverAction.CAST);
-            }
-
-            sendMessageResponse({
-                subject: "bridge:createCastSession"
-              , data: {
-                    appId: sessionRequest.appId
-                  , receiverDevice: receiverDevice
-                }
-            });
-
+            sendSessionRequest(sessionRequest, message.data.receiver);
             break;
         }
 

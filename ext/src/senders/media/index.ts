@@ -63,16 +63,11 @@ function getSession(opts: InitOptions): Promise<cast.Session> {
          */
         function receiverListener(availability: string) {
             if (availability === cast.ReceiverAvailability.AVAILABLE) {
-                if (opts.receiver) {
-                    /*cast._requestSession(
-                            opts.receiver
-                          , onRequestSessionSuccess
-                          , onRequestSessionError);*/
-                } else {
-                    cast.requestSession(
-                            onRequestSessionSuccess
-                          , onRequestSessionError);
-                }
+                cast.requestSession(
+                        onRequestSessionSuccess
+                      , onRequestSessionError
+                      , undefined
+                      , opts.receiver);
             }
         }
 
@@ -340,7 +335,7 @@ async function registerMediaElementListeners() {
 
 interface InitOptions {
     mediaUrl: string;
-    receiver: ReceiverDevice;
+    receiver?: ReceiverDevice;
     targetElementId?: number;
 }
 
