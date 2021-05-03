@@ -5,7 +5,7 @@
  *   app/src/bridge/components/chromecast/types.ts
  */
 
-import { Volume } from "./dataClasses";
+import { SenderApplication, Volume, Image } from "./dataClasses";
 import { MediaInfo, QueueItem } from "./media/dataClasses";
 import { IdleReason
        , PlayerState
@@ -48,10 +48,21 @@ export interface ReceiverStatus {
   , volume: Volume
 }
 
-export interface CastSessionUpdate {
+
+export interface CastSessionUpdated {
     sessionId: string
-  , application: ReceiverApplication
+  , statusText: string
+  , namespaces: Array<{ name: string }>
   , volume: Volume
+}
+
+export interface CastSessionCreated extends CastSessionUpdated {
+    appId: string
+  , appImages: Image[]
+  , displayName: string
+  , receiverFriendlyName: string
+  , senderApps: SenderApplication[]
+  , transportId: string
 }
 
 

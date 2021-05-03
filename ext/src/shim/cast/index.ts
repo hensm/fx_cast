@@ -6,49 +6,20 @@ import { ReceiverDevice } from "../../types";
 
 import { onMessage, sendMessageResponse } from "../eventMessageChannel";
 
+import { AutoJoinPolicy, Capability, DefaultActionPolicy, DialAppState
+      , ErrorCode, ReceiverAction, ReceiverAvailability, ReceiverType
+      , SenderPlatform, SessionStatus, VolumeControlType } from "./enums";
+
+import { ApiConfig, CredentialsData, DialRequest, Error as Error_, Image
+       , Receiver, ReceiverDisplayStatus, SenderApplication, SessionRequest
+       , Timeout, Volume } from "./dataClasses";
+
 import Session from "./Session";
-
-import { ApiConfig
-       , Error as Error_
-       , Image as Image_
-       , Receiver
-       , SessionRequest
-       , Timeout } from "./dataClasses";
-
-import { ErrorCode
-       , ReceiverAction
-       , ReceiverAvailability
-       , SessionStatus } from "./enums";
-
-import { PlayerState } from "./media/enums";
-import { QueueItem } from "./media/dataClasses";
-
-import Media from "./media/Media";
-
-import { CastSessionUpdate, MediaStatus } from "./types";
-
-
-export * from "./enums";
-export * from "./dataClasses";
-
-export * as media from "./media";
-
-export {
-    Session
-
-  , Error_ as Error
-  , Image_ as Image
-  , Receiver as Receiver
-};
-
-export let isAvailable = false;
-export const timeout = new Timeout();
-export const VERSION = [ 1, 2 ];
 
 
 type ReceiverActionListener = (
-        receiver: Receiver
-      , receiverAction: string) => void;
+    receiver: Receiver
+  , receiverAction: string) => void;
 
 type RequestSessionSuccessCallback = (session: Session) => void;
 
@@ -56,40 +27,47 @@ type SuccessCallback = () => void;
 type ErrorCallback = (err: Error_) => void;
 
 
-let apiConfig: ApiConfig;
+let apiConfig: Nullable<ApiConfig>;
+let sessionRequest: Nullable<SessionRequest>;
+
+let requestSessionSuccessCallback: Nullable<
+        RequestSessionSuccessCallback>;
+let requestSessionErrorCallback: Nullable<ErrorCallback>;
+
+const receiverActionListeners = new Set<ReceiverActionListener>();
 
 const receiverDevices = new Map<string, ReceiverDevice>();
 const sessions = new Map<string, Session>();
 
-const receiverActionListeners = new Set<ReceiverActionListener>();
 
-let sessionRequestInProgress = false;
-let sessionSuccessCallback: RequestSessionSuccessCallback;
-let sessionErrorCallback: ErrorCallback;
+export { AutoJoinPolicy, Capability, DefaultActionPolicy, DialAppState
+    , ErrorCode, ReceiverAction, ReceiverAvailability, ReceiverType
+    , SenderPlatform, SessionStatus, VolumeControlType };
+
+export { ApiConfig, CredentialsData, DialRequest, Error_ as Error, Image
+    , Receiver, ReceiverDisplayStatus, SenderApplication, SessionRequest
+    , Timeout, Volume, Session };
+
+export const VERSION = [ 1, 2 ];
+export let isAvailable = false;
+
+export const timeout = new Timeout();
+
+// chrome.cast.media namespace
+export * as media from "./media";
 
 
-export function addReceiverActionListener(
-        listener: ReceiverActionListener): void {
-
-    receiverActionListeners.add(listener);
-}
-
-export function initialize(
-        newApiConfig: ApiConfig
-      , successCallback?: SuccessCallback
-      , errorCallback?: ErrorCallback): void {
+export function initialize(newApiConfig: ApiConfig
+                         , successCallback?: SuccessCallback
+                         , errorCallback?: ErrorCallback) {
 
     logger.info("cast.initialize");
 
     // Already initialized
     if (apiConfig) {
-        if (errorCallback) {
-            errorCallback(new Error_(ErrorCode.INVALID_PARAMETER));
-        }
-
+        errorCallback?.(new Error_(ErrorCode.INVALID_PARAMETER));
         return;
     }
-
 
     apiConfig = newApiConfig;
 
@@ -98,61 +76,47 @@ export function initialize(
       , data: { appId: apiConfig.sessionRequest.appId }
     });
 
-    if (successCallback) {
-        successCallback();
-    }
+    successCallback?.();
 
     apiConfig.receiverListener(receiverDevices.size
         ? ReceiverAvailability.AVAILABLE
         : ReceiverAvailability.UNAVAILABLE);
 }
 
-export function logMessage(message: string): void {
-    // eslint-disable-next-line no-console
-    console.log("CAST MSG:", message);
-}
-
-export function precache(_data: string): void {
-    logger.info("STUB :: cast.precache");
-}
-
-export function removeReceiverActionListener(
-        listener: ReceiverActionListener): void {
-
-    receiverActionListeners.delete(listener);
-}
-
-export function requestSession(
-        successCallback: RequestSessionSuccessCallback
-      , errorCallback: ErrorCallback
-      , _sessionRequest: SessionRequest = apiConfig.sessionRequest): void {
+export function requestSession(successCallback: RequestSessionSuccessCallback
+                             , errorCallback: ErrorCallback
+                             , newSessionRequest?: SessionRequest) {
 
     logger.info("cast.requestSession");
 
-    // Called before initialization
+    // Not yet initialized
     if (!apiConfig) {
         errorCallback?.(new Error_(ErrorCode.API_NOT_INITIALIZED));
         return;
     }
 
     // Already requesting session
-    if (sessionRequestInProgress) {
+    if (sessionRequest) {
         errorCallback?.(new Error_(
                 ErrorCode.INVALID_PARAMETER
-              , "Session request already in progress."));
+            , "Session request already in progress."));
         return;
     }
 
-    // No available receivers
+    // No receivers available
     if (!receiverDevices.size) {
         errorCallback?.(new Error_(ErrorCode.RECEIVER_UNAVAILABLE));
         return;
     }
 
-    sessionRequestInProgress = true;
+    /**
+     * Store session request for use in return message from
+     * receiver selection.
+     */
+    sessionRequest = newSessionRequest ?? apiConfig.sessionRequest;
 
-    sessionSuccessCallback = successCallback;
-    sessionErrorCallback = errorCallback;
+    requestSessionSuccessCallback = successCallback;
+    requestSessionErrorCallback = errorCallback;
 
     // Open receiver selector UI
     sendMessageResponse({
@@ -164,11 +128,9 @@ export function requestSessionById(_sessionId: string): void {
     logger.info("STUB :: cast.requestSessionById");
 }
 
-export function setCustomReceivers(
-        _receivers: Receiver[]
-      , _successCallback?: SuccessCallback
-      , _errorCallback?: ErrorCallback): void {
-
+export function setCustomReceivers(_receivers: Receiver[]
+                                 , _successCallback?: SuccessCallback
+                                 , _errorCallback?: ErrorCallback): void {
     logger.info("STUB :: cast.setCustomReceivers");
 }
 
@@ -181,76 +143,83 @@ export function setReceiverDisplayStatus(_sessionId: string): void {
 }
 
 export function unescape(escaped: string): string {
-    return decodeURI(escaped);
+    return window.decodeURI(escaped);
+}
+
+export function addReceiverActionListener(listener: ReceiverActionListener) {
+    receiverActionListeners.add(listener);
+}
+export function removeReceiverActionListener(listener: ReceiverActionListener) {
+    receiverActionListeners.delete(listener);
+}
+
+export function logMessage(message: string) {
+    logger.info("cast.logMessage", message);
+}
+
+export function precache(_data: string) {
+    logger.info("STUB :: cast.precache");
 }
 
 
-/**
- * Handle session object creation and updates.
- */
-function updateSession(update: CastSessionUpdate) {
-    const { application } = update;
-    const { sessionId } = application;
-
-    const session = sessions.get(sessionId);
-    if (!session) {
-        logger.error(`Session not found (${sessionId})`);
-        return;
-    }
-
-    sessions.set(sessionId, session);
-    return session;
-}
-
-
-onMessage(async message => {
+onMessage(message => {
     switch (message.subject) {
         case "shim:initialized": {
             isAvailable = true;
             break;
         }
 
+        /**
+         * Once the bridge detects a session creation, session info
+         * and data needed to create cast API objects is sent.
+         */
         case "shim:castSessionCreated": {
-            const { sessionId
-                  , receiverDevice
-                  , application
-                  , volume } = message.data;
-
-            // TODO: Implement persistent per-origin receiver IDs
-            const receiver = new Receiver(
-                    ""                           // label
-                  , receiverDevice.friendlyName  // friendlyName
-                  , undefined                    // capabilities
-                  , volume);                     // volume
-
-            const session = new Session(
-                    sessionId                // sessionId
-                  , application.appId        // appId
-                  , application.displayName  // displayName
-                  , []                       // senderApps
-                  , receiver);               // receiver
-
-            session.sessionId = sessionId;
-            session.namespaces = application.namespaces;
-            session.displayName = application.displayName;
-            session.receiver.volume = volume;
-            session.statusText = application.statusText;
-
-            // Success callback
-            if (sessionSuccessCallback) {
-                sessionSuccessCallback(session);
-            }
-
-            sessions.set(sessionId, session);
-
             // Notify background to close UI
             sendMessageResponse({
                 subject: "main:sessionCreated"
             });
+
+            const status = message.data;
+
+            // TODO: Implement persistent per-origin receiver IDs
+            const receiver = new Receiver(
+                    status.receiverFriendlyName                           // label
+                  , status.receiverFriendlyName  // friendlyName
+                  , [ Capability.VIDEO_OUT
+                    , Capability.AUDIO_OUT ]     // capabilities
+                  , status.volume);              // volume
+
+            const session = new Session(
+                    status.sessionId    // sessionId
+                  , status.appId        // appId
+                  , status.displayName  // displayName
+                  , status.appImages    // appImages
+                  , receiver);          // receiver
+
+            session.senderApps = status.senderApps;
+            session.transportId = status.transportId;
+
+            sessions.set(session.sessionId, session);
         }
         // eslint-disable-next-line no-fallthrough
         case "shim:castSessionUpdated": {
-            updateSession(message.data);
+            const status = message.data;
+            const session = sessions.get(status.sessionId);
+            if (!session) {
+                logger.error(`Session not found (${status.sessionId})`);
+                return;
+            }
+
+            session.statusText = status.statusText;
+            session.namespaces = status.namespaces;
+            session.receiver.volume = status.volume;
+
+            if (requestSessionSuccessCallback) {
+                requestSessionSuccessCallback(session);
+                requestSessionSuccessCallback = null;
+                requestSessionErrorCallback = null;
+            }
+
             break;
         }
 
@@ -270,14 +239,13 @@ onMessage(async message => {
 
         case "shim:receivedCastSessionMessage": {
             const { sessionId, namespace, messageData } = message.data;
-            
             const session = sessions.get(sessionId);
             if (session) {
                 const _messageListeners = session._messageListeners;
-                const namespaceListeners = _messageListeners.get(namespace);
+                const listeners = _messageListeners.get(namespace);
 
-                if (namespaceListeners) {
-                    for (const listener of namespaceListeners) {
+                if (listeners) {
+                    for (const listener of listeners) {
                         listener(namespace, messageData);
                     }
                 }
@@ -309,10 +277,6 @@ onMessage(async message => {
             break;
         }
 
-        /**
-         * Cast destination found (serviceUp). Set the API availability
-         * property and call the page event function (__onGCastApiAvailable).
-         */
         case "shim:serviceUp": {
             const { receiverDevice } = message.data;
             if (receiverDevices.has(receiverDevice.id)) {
@@ -323,16 +287,13 @@ onMessage(async message => {
 
             if (apiConfig) {
                 // Notify listeners of new cast destination
-                apiConfig.receiverListener(ReceiverAvailability.AVAILABLE);
+                apiConfig.receiverListener(
+                        ReceiverAvailability.AVAILABLE);
             }
 
             break;
         }
 
-        /**
-         * Cast destination lost (serviceDown). Remove from the receiver list
-         * and update availability state.
-         */
         case "shim:serviceDown": {
             const { receiverDeviceId } = message.data;
 
@@ -351,15 +312,13 @@ onMessage(async message => {
         case "shim:selectReceiver/selected": {
             logger.info("Selected receiver");
 
-            if (!sessionRequestInProgress) {
+            if (!sessionRequest) {
                 break;
             }
 
             const { receiver: receiverDevice } = message.data;
 
             for (const listener of receiverActionListeners) {
-                logger.info("Calling receiver action listener", receiverDevice);
-
                 const receiver = new Receiver(
                         receiverDevice.id
                       , receiverDevice.friendlyName);
@@ -370,7 +329,7 @@ onMessage(async message => {
             sendMessageResponse({
                 subject: "bridge:createCastSession"
               , data: {
-                    appId: apiConfig.sessionRequest.appId
+                    appId: sessionRequest.appId
                   , receiverDevice: receiverDevice
                 }
             });
@@ -379,18 +338,18 @@ onMessage(async message => {
         }
 
         case "shim:selectReceiver/stopped": {
+            const { receiver } = message.data;
+
             logger.info("Stopped receiver");
 
-            if (sessionRequestInProgress) {
-                sessionRequestInProgress = false;
+            if (sessionRequest) {
+                sessionRequest = null;
 
                 for (const listener of receiverActionListeners) {
                     const castReceiver = new Receiver(
-                            message.data.receiver.id
-                          , message.data.receiver.friendlyName);
+                            receiver.id
+                          , receiver.friendlyName);
 
-                    logger.info("Calling receiver action listener (STOP)"
-                          , message.data.receiver);
                     listener(castReceiver, ReceiverAction.STOP);
                 }
             }
@@ -402,15 +361,15 @@ onMessage(async message => {
          * Popup closed before session established.
          */
         case "shim:selectReceiver/cancelled": {
-            if (sessionRequestInProgress) {
-                sessionRequestInProgress = false;
+            if (sessionRequest) {
+                sessionRequest = null;
 
-                if (sessionErrorCallback) {
-                    sessionErrorCallback(new Error_(ErrorCode.CANCEL));
-                }
+                requestSessionErrorCallback?.(
+                        new Error_(ErrorCode.CANCEL));
             }
 
             break;
         }
     }
 });
+

@@ -95,8 +95,6 @@ export default class Session {
         if (namespace !== NS_MEDIA) return;
 
         const message: ReceiverMediaMessage = JSON.parse(messageString);
-        console.info(message);
-
         switch (message.type) {
             case "MEDIA_STATUS": {
                 // Update media
@@ -104,6 +102,8 @@ export default class Session {
                     let media = this.media.find(
                             media => media.mediaSessionId ===
                                      mediaStatus.mediaSessionId);
+
+                    console.info(media);
 
                     // Handle Media creation
                     if (!media) {
@@ -113,11 +113,10 @@ export default class Session {
                               , this.#sendMediaMessage);
                         
                         this.media.push(media);
+                        this.#loadMediaSuccessCallback?.(media);
                     }
 
                     updateMedia(media, mediaStatus);
-
-                    this.#loadMediaSuccessCallback?.(media);
 
                     for (const listener of media._updateListeners) {
                         listener(true);

@@ -91,9 +91,6 @@ export default class Session extends CastClient {
      */
     private launchRequestId?: number;
 
-    // Session details
-    private application?: ReceiverApplication;
-
     private onSessionCreated?: OnSessionCreatedCallback;
 
 
@@ -112,34 +109,44 @@ export default class Session extends CastClient {
     private onReceiverMessage = (message: ReceiverMessage) => {
         switch (message.type) {
             case "RECEIVER_STATUS": {
-                const application = message.status.applications?.find(
+                const { status } = message;
+                const application = status.applications?.find(
                         app => app.appId === this.appId);
 
                 /**
                  * If application isn't set, still waiting on the launch
                  * request response.
                  */
-                if (!this.application) {
+                if (!this.sessionId) {
                     // Launch message response only
                     if (message.requestId !== this.launchRequestId) {
                         break;
                     }
 
                     if (application) {
-                        this.application = application;
                         this.sessionId = application.sessionId;
                         this.transportId = application.transportId;
 
                         this.establishAppConnection(this.transportId);
                         this.onSessionCreated?.(this.sessionId);
 
+                        const { friendlyName } = this.receiverDevice;
+
                         sendMessage({
                             subject: "shim:castSessionCreated"
                           , data: {
                                 sessionId: this.sessionId
-                              , application: this.application
-                              , volume: message.status.volume
-                              , receiverDevice: this.receiverDevice
+                              , statusText: application.statusText
+                              , namespaces: application.namespaces
+                              , volume: status.volume
+                              , appId: application.appId
+                              , displayName: application.displayName
+                              , receiverFriendlyName: friendlyName
+                              , transportId: this.sessionId
+
+                              // TODO: Fix this
+                              , senderApps: []
+                              , appImages: []
                             }
                         });
                     }
@@ -149,19 +156,16 @@ export default class Session extends CastClient {
 
                 // Handle session stop
                 if (!application) {
-                    /*sendMessage({
-                        subject: "shim:castSessionStopped"
-                      , data: { sessionId: this.application.sessionId }
-                    });*/
-
+                    this.client.close();
                     break;
                 }
 
                 sendMessage({
                     subject: "shim:castSessionUpdated"
                   , data: {
-                        sessionId: this.application.sessionId
-                      , application
+                        sessionId: this.sessionId
+                      , statusText: application.statusText
+                      , namespaces: application.namespaces
                       , volume: message.status.volume
                     }
                 });
@@ -182,23 +186,28 @@ export default class Session extends CastClient {
         if (!channel) {
             channel = this.createChannel(
                     namespace, this.sourceId, this.transportId);
+
+            channel.on("message", messageData => {
+                if (!this.sessionId) {
+                    return;
+                }
+
+                messageData = JSON.stringify(messageData);
+
+                sendMessage({
+                    subject: "shim:receivedCastSessionMessage"
+                  , data: {
+                        sessionId: this.sessionId
+                      , namespace
+                      , messageData
+                    }
+                });
+            });
+
             this.namespaceChannelMap.set(namespace, channel);
         }
 
         channel.send(message);
-        channel.on("message", messageData => {
-            const sessionId = this.application?.sessionId;
-            if (!sessionId) {
-                return;
-            }
-
-            messageData = JSON.stringify(messageData);
-
-            sendMessage({
-                subject: "shim:receivedCastSessionMessage"
-              , data: { sessionId, namespace, messageData }
-            });
-        });
     }
 
     sendReceiverMessage(message: DistributiveOmit<SenderMessage, "requestId">) {

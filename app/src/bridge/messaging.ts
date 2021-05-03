@@ -1,22 +1,36 @@
 "use strict";
 
-import { ReceiverStatus, ReceiverApplication, Volume, SenderMessage }
-        from "./components/chromecast/types";
+import { Image
+       , ReceiverApplication
+       , ReceiverStatus
+       , SenderApplication
+       , SenderMessage
+       , Volume } from "./components/chromecast/types";
 
 import { ReceiverDevice
        , ReceiverSelectionCast
        , ReceiverSelectionStop } from "./types";
 
 
-export interface CastSessionUpdate {
+interface CastSessionUpdated {
     sessionId: string
-  , application: ReceiverApplication
+  , statusText: string
+  , namespaces: Array<{ name: string }>
   , volume: Volume
 }
 
+interface CastSessionCreated extends CastSessionUpdated {
+    appId: string
+  , appImages: Image[]
+  , displayName: string
+  , receiverFriendlyName: string
+  , senderApps: SenderApplication[]
+  , transportId: string
+}
+
 type MessageDefinitions = {
-    "shim:castSessionCreated": CastSessionUpdate & { receiverDevice: ReceiverDevice }
-  , "shim:castSessionUpdated": CastSessionUpdate
+    "shim:castSessionCreated": CastSessionCreated
+  , "shim:castSessionUpdated": CastSessionUpdated
   , "shim:castSessionStopped": {
         sessionId: string
     }

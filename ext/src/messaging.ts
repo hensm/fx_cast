@@ -11,7 +11,10 @@ import { ReceiverSelection
        , ReceiverSelectionStop }
         from "./background/receiverSelector/ReceiverSelector";
 
-import { CastSessionUpdate, ReceiverStatus, SenderMessage } from "./shim/cast/types";
+import { CastSessionCreated
+       , CastSessionUpdated
+       , ReceiverStatus
+       , SenderMessage } from "./shim/cast/types";
 
 import { ReceiverDevice } from "./types";
 
@@ -68,8 +71,8 @@ type ExtMessageDefinitions = {
  *   app/bridge/messaging.ts > MessagesBase
  */
 type AppMessageDefinitions = {
-    "shim:castSessionCreated": CastSessionUpdate & { receiverDevice: ReceiverDevice }
-  , "shim:castSessionUpdated": CastSessionUpdate
+    "shim:castSessionCreated": CastSessionCreated
+  , "shim:castSessionUpdated": CastSessionUpdated
   , "shim:castSessionStopped": {
         sessionId: string
     }

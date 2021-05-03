@@ -21,6 +21,12 @@ enum ReceiverType {
   , CUSTOM = "custom"
 }
 
+export interface SenderApplication {
+    packageId: Nullable<string>;
+    platform: string;
+    url: Nullable<string>;
+}
+
 enum VolumeControlType {
     ATTENUATION = "attenuation"
   , FIXED = "fixed"
