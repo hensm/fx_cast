@@ -1,6 +1,6 @@
 "use strict";
 
-import { ReceiverStatus } from "./components/chromecast/types";
+import { ReceiverStatus } from "./components/cast/types";
 
 
 export enum ReceiverSelectorMediaType {

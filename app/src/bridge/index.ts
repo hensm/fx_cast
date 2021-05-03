@@ -3,7 +3,7 @@
 import { decodeTransform, encodeTransform } from "./lib/nativeMessaging";
 import { Message } from "./messaging";
 
-import { handleCastMessage } from "./components/chromecast";
+import { handleCastMessage } from "./components/cast";
 import { startDiscovery, stopDiscovery } from "./components/discovery";
 import { startMediaServer, stopMediaServer } from "./components/mediaServer";
 import { startReceiverSelector, stopReceiverSelector }

@@ -8,9 +8,9 @@ import mdns from "mdns";
 
 import { sendMessage } from "../lib/nativeMessaging";
 
-import { ReceiverStatus } from "./chromecast/types";
+import { ReceiverStatus } from "./cast/types";
 import { NS_CONNECTION, NS_HEARTBEAT, NS_RECEIVER }
-        from "./chromecast/Session";
+        from "./cast/Session";
 
 
 interface CastTxtRecord {

@@ -1,11 +1,10 @@
 "use strict";
 
 import { Image
-       , ReceiverApplication
        , ReceiverStatus
        , SenderApplication
        , SenderMessage
-       , Volume } from "./components/chromecast/types";
+       , Volume } from "./components/cast/types";
 
 import { ReceiverDevice
        , ReceiverSelectionCast
