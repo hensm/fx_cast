@@ -1,7 +1,5 @@
 "use strict";
 
-import Messenger from "./lib/Messenger";
-
 import { TypedPort } from "./lib/TypedPort";
 import { BridgeInfo } from "./lib/bridge";
 
@@ -179,5 +177,35 @@ type NarrowedMessage<L extends MessageBase<keyof MessageDefinitions>> =
 export type Port = TypedPort<Message>;
 export type Message = NarrowedMessage<Messages[keyof Messages]>;
 
+
+/**
+ * Typed WebExtension-style messaging utility class.
+ */
+class Messenger<T> {
+    connect(connectInfo: { name: string; }) {
+        return browser.runtime.connect(connectInfo) as
+                unknown as TypedPort<T>;
+    }
+
+    connectTab(tabId: number
+            , connectInfo: { name: string
+                           , frameId: number }) {
+
+        return browser.tabs.connect(tabId, connectInfo) as
+                unknown as TypedPort<T>;
+    }
+
+    onConnect = {
+        addListener(cb: (port: TypedPort<T>) => void) {
+            browser.runtime.onConnect.addListener(cb as any);
+        }
+      , removeListener(cb: (port: TypedPort<T>) => void) {
+            browser.runtime.onConnect.removeListener(cb as any);
+        }
+      , hasListener(cb: (port: TypedPort<T>) => void) {
+            return browser.runtime.onConnect.hasListener(cb as any);
+        }
+    }
+}
 
 export default new Messenger<Message>();
