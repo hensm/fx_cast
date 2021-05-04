@@ -1,7 +1,7 @@
 "use strict";
 
 /**
- * Allows typed access to a runtime.Port object.
+ * Provides a typed interface to runtime.Port objects.
  */
 export interface TypedPort<T>
         extends Omit<browser.runtime.Port

@@ -4,6 +4,9 @@ interface TypedEvents {
     [key: string]: any;
 }
 
+/**
+ * Provides a typed interface to EventTarget objects.
+ */
 export class TypedEventTarget<T extends TypedEvents> extends EventTarget {
     // @ts-ignore
     public addEventListener<K extends keyof T>(

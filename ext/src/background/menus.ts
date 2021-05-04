@@ -32,7 +32,6 @@ let menuIdWhitelistRecommended: MenuId;
 
 const whitelistChildMenuPatterns = new Map<MenuId, string>();
 
-
 export async function initMenus() {
     logger.info("init (menus)");
 
@@ -89,7 +88,6 @@ browser.menus.onClicked.addListener(async (info, tab) => {
 
         return;
     }
-
 
     if (tab?.id === undefined) {
         throw logger.error("Menu handler tab ID not found.");
@@ -192,7 +190,6 @@ browser.menus.onShown.addListener(async info => {
         return;
     }
 
-
     /**
      * If page URL doesn't exist, we're not on a page and have
      * nothing to whitelist, so disable the menu and return.
@@ -205,7 +202,6 @@ browser.menus.onShown.addListener(async info => {
         browser.menus.refresh();
         return;
     }
-
 
     const url = new URL(info.pageUrl);
     const urlHasOrigin = url.origin !== "null";
@@ -224,12 +220,10 @@ browser.menus.onShown.addListener(async info => {
         return;
     }
 
-
     // Enable the whitelist menu
     browser.menus.update(menuIdWhitelist, {
         enabled: true
     });
-
 
     for (const [ menuId ] of whitelistChildMenuPatterns) {
         // Clear all page-specific temporary menus
@@ -239,7 +233,6 @@ browser.menus.onShown.addListener(async info => {
 
         whitelistChildMenuPatterns.delete(menuId);
     }
-
 
     // If there is more than one subdomain, get the base domain
     const baseDomain = (url.hostname.match(/\./g) || []).length > 1
@@ -253,7 +246,6 @@ browser.menus.onShown.addListener(async info => {
     const patternWildcardProtocol = `*://${url.hostname}/*`;
     const patternWildcardSubdomain = `${url.protocol}//*.${baseDomain}/*`;
     const patternWildcardProtocolAndSubdomain = `*://*.${baseDomain}/*`;
-
 
     // Update recommended menu item
     browser.menus.update(menuIdWhitelistRecommended, {
@@ -273,7 +265,6 @@ browser.menus.onShown.addListener(async info => {
         whitelistChildMenuPatterns.set(
                 whitelistSearchMenuId, patternSearch);
     }
-
 
     /**
      * Split URL path into segments and add menu items for each
@@ -307,7 +298,6 @@ browser.menus.onShown.addListener(async info => {
             }
         }
     }
-
 
     const wildcardProtocolMenuId = browser.menus.create({
         title: _("contextAddToWhitelistAdvancedAdd"

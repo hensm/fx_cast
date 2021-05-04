@@ -2,20 +2,17 @@
 
 import semver from "semver";
 
-import { TypedPort } from "./TypedPort";
-
 import logger from "./logger";
-import { Message, Port } from "../messaging";
+import { Port } from "../messaging";
 import nativeMessaging from "./nativeMessaging";
 import options from "./options";
-
-import { ReceiverDevice } from "../types";
-import { ReceiverSelectionCast
-       , ReceiverSelectionStop } from "../background/receiverSelector/ReceiverSelector";
 
 
 export const BRIDGE_TIMEOUT = 5000;
 
+/**
+ * Creates a bridge instance and returns a message port.
+ */
 async function connect(): Promise<Port> {
     const applicationName = await options.get("bridgeApplicationName");
     const bridgePort = nativeMessaging.connectNative(applicationName) as
@@ -47,6 +44,12 @@ export interface BridgeInfo {
 export class BridgeConnectionError extends Error {}
 export class BridgeTimedOutError extends Error {}
 
+/**
+ * Creates a temporary bridge to query the version info,
+ * compares the version to the extension version using semver
+ * rules to determine compatiblity, then returns a
+ * BridgeInfo object.
+ */
 const getInfo = () => new Promise<BridgeInfo>(async (resolve, reject) => {
     const applicationName = await options.get("bridgeApplicationName");
     if (!applicationName) {
