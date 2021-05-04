@@ -39,12 +39,12 @@ const sessions = new Map<string, Session>();
 
 
 export { AutoJoinPolicy, Capability, DefaultActionPolicy, DialAppState
-    , ErrorCode, ReceiverAction, ReceiverAvailability, ReceiverType
-    , SenderPlatform, SessionStatus, VolumeControlType };
+       , ErrorCode, ReceiverAction, ReceiverAvailability, ReceiverType
+       , SenderPlatform, SessionStatus, VolumeControlType };
 
 export { ApiConfig, CredentialsData, DialRequest, Error_ as Error, Image
-    , Receiver, ReceiverDisplayStatus, SenderApplication, SessionRequest
-    , Timeout, Volume, Session };
+       , Receiver, ReceiverDisplayStatus, SenderApplication, SessionRequest
+       , Timeout, Volume, Session };
 
 export const VERSION = [ 1, 2 ];
 export let isAvailable = false;

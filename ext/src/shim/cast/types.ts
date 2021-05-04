@@ -2,7 +2,7 @@
 
 /**
  * Keep in sync with bridge types at:
- *   app/src/bridge/components/chromecast/types.ts
+ *   app/src/bridge/components/cast/types.ts
  */
 
 import { SenderApplication, Volume, Image } from "./dataClasses";
@@ -118,7 +118,7 @@ export type SenderMediaMessage =
           , textTrackStyle: Nullable<string>
         }
         // QueueLoadRequest
-      | MediaReqBase & {
+      | ReqBase & {
             type: "QUEUE_LOAD"
           , items: QueueItem[]
           , startIndex: number

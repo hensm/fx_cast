@@ -65,6 +65,8 @@ const NS_MEDIA = "urn:x-cast:com.google.cast.media";
                     newItem.media = media.media;
                 }
             }
+
+            newItems.push(newItem);
         }
 
         media.items = newItems;
@@ -187,7 +189,7 @@ export default class Session {
     addMediaListener(_mediaListener: MediaListener) {
         logger.info("STUB :: Session#addMediaListener");
     }
-    removeMediaListener(_mediaListener: MediaListener): void {
+    removeMediaListener(_mediaListener: MediaListener) {
         logger.info("STUB :: Session#removeMediaListener");
     }
 
@@ -198,26 +200,26 @@ export default class Session {
 
         this._messageListeners.get(namespace)?.add(listener);
     }
-    removeMessageListener(namespace: string, listener: MessageListener): void {
+    removeMessageListener(namespace: string, listener: MessageListener) {
         this._messageListeners.get(namespace)?.delete(listener);
     }
 
     addUpdateListener(listener: UpdateListener) {
         this._updateListeners.add(listener);
     }
-    removeUpdateListener(listener: UpdateListener): void {
+    removeUpdateListener(listener: UpdateListener) {
         this._updateListeners.delete(listener);
     }
 
     leave(_successCallback?: SuccessCallback
-        , _errorCallback?: ErrorCallback): void {
+        , _errorCallback?: ErrorCallback) {
 
         logger.info("STUB :: Session#leave");
     }
 
     loadMedia(loadRequest: LoadRequest
             , successCallback?: LoadSuccessCallback
-            , errorCallback?: ErrorCallback): void {
+            , errorCallback?: ErrorCallback) {
 
         this.#loadMediaSuccessCallback = successCallback;
         this.#loadMediaErrorCallback = errorCallback;
@@ -230,7 +232,7 @@ export default class Session {
 
     queueLoad(_queueLoadRequest: QueueLoadRequest
             , _successCallback?: LoadSuccessCallback
-            , _errorCallback?: ErrorCallback): void {
+            , _errorCallback?: ErrorCallback) {
 
         logger.info("STUB :: Session#queueLoad");
     }
@@ -238,7 +240,7 @@ export default class Session {
     sendMessage(namespace: string
               , message: object | string
               , successCallback?: SuccessCallback
-              , errorCallback?: ErrorCallback): void {
+              , errorCallback?: ErrorCallback) {
 
         const messageId = uuid();
 
@@ -271,7 +273,7 @@ export default class Session {
 
     setReceiverVolumeLevel(newLevel: number
                          , successCallback?: SuccessCallback
-                         , errorCallback?: ErrorCallback): void {
+                         , errorCallback?: ErrorCallback) {
 
         this.#sendReceiverMessage(
                 { type: "SET_VOLUME"
@@ -281,7 +283,7 @@ export default class Session {
     }
 
     stop(successCallback?: SuccessCallback
-       , errorCallback?: ErrorCallback): void {
+       , errorCallback?: ErrorCallback) {
 
         this.#sendReceiverMessage(
                 { type: "STOP"
