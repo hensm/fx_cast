@@ -178,7 +178,7 @@ async function onBeforeCastSDKRequest(details: OnBeforeRequestDetails) {
     });
 
     return {
-        redirectUrl: browser.runtime.getURL("shim/bundle.js")
+        redirectUrl: browser.runtime.getURL("shim/index.js")
     };
 }
 

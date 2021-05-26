@@ -16,7 +16,8 @@ const paths = require("./lib/paths");
 const { author
       , homepage } = require("../../package.json");
 
-const { __extensionId: extensionId } = require("../../ext/package.json");
+      
+const EXTENSION_ID = "fx_cast@matt.tf";
 
 
 // Command line args
@@ -98,7 +99,7 @@ async function build () {
         "name": meta.__applicationName
       , "description": ""
       , "type": "stdio"
-      , "allowed_extensions": [ extensionId ]
+      , "allowed_extensions": [ EXTENSION_ID ]
     };
 
     /**

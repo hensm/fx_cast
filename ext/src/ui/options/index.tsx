@@ -133,8 +133,8 @@ class OptionsApp extends Component<
         return (
             <div>
                 <form id="form" ref={ form => { this.form = form; }}
-                        onSubmit={ this.handleFormSubmit }
-                        onChange={ this.handleFormChange }>
+                      onSubmit={ this.handleFormSubmit }
+                      onChange={ this.handleFormChange }>
 
                     <Bridge info={ this.state.bridgeInfo }
                             loading={ this.state.bridgeLoading }

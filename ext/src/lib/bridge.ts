@@ -101,7 +101,7 @@ const getInfo = () => new Promise<BridgeInfo>(async (resolve, reject) => {
 
     // Print compatibility info to console
     if (!isVersionCompatible) {
-        logger.error(`Expecting ${applicationName} v${APPLICATION_VERSION}, found v${applicationVersion}. ${
+        logger.error(`Expecting ${applicationName} v${BRIDGE_VERSION}, found v${applicationVersion}. ${
                 isVersionOlder
                     ? "Try updating the native app to the latest version."
                     : "Try updating the extension to the latest version"}`);
@@ -110,7 +110,7 @@ const getInfo = () => new Promise<BridgeInfo>(async (resolve, reject) => {
     resolve({
         name: applicationName
       , version: applicationVersion
-      , expectedVersion: APPLICATION_VERSION
+      , expectedVersion: BRIDGE_VERSION
 
         // Version info
       , isVersionExact

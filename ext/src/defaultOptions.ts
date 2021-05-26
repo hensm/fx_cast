@@ -5,7 +5,7 @@ import { Options } from "./lib/options";
 
 
 export default {
-    bridgeApplicationName: APPLICATION_NAME
+    bridgeApplicationName: BRIDGE_NAME
   , bridgeBackupEnabled: false
   , bridgeBackupHost: "localhost"
   , bridgeBackupPort: 9556

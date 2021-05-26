@@ -1,8 +1,6 @@
-// Define replacement types
+declare const BRIDGE_VERSION: string;
+declare const BRIDGE_NAME: string;
 declare const MIRRORING_APP_ID: string;
-declare const APPLICATION_NAME: string;
-declare const APPLICATION_VERSION: string;
-
 
 declare type Nullable<T> = T | null;
 

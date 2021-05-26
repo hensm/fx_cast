@@ -144,7 +144,7 @@ browser.menus.onClicked.addListener(async (info, tab) => {
                         });
 
                         await browser.tabs.executeScript(tab.id, {
-                            file: "senders/media/bundle.js"
+                            file: "senders/media/index.js"
                           , frameId: info.frameId
                         });
                     } else {

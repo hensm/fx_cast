@@ -1,6 +1,6 @@
 {
     "extensionName": {
-        "message": "EXTENSION_NAME"
+        "message": "fx_cast"
       , "description": "Name of the extension and the native receiver selector window title."
     }
   , "extensionDescription": {

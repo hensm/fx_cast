@@ -1,29 +1,26 @@
 "use strict";
 
+const esbuild = require("esbuild");
 const fs = require("fs-extra");
 const path = require("path");
 const minimist = require("minimist");
-const webpack = require("webpack");
 const webExt = require("web-ext");
 
-const { ROOT
-      , INCLUDE_PATH
-      , DIST_PATH
-      , UNPACKED_PATH } = require("./lib/paths");
 
-const packageMeta = require(`${ROOT}/../package.json`);
-const extPackageMeta = require(`${ROOT}/package.json`);
-const appPackageMeta = require(`${ROOT}/../app/package.json`);
+const BRIDGE_NAME = "fx_cast_bridge";
+const BRIDGE_VERSION = "0.1.0";
+
+const MIRRORING_APP_ID = "19A6F4AE";
 
 
 const argv = minimist(process.argv.slice(2), {
     boolean: [ "package", "watch" ]
   , string: [ "mirroringAppId", "mode" ]
   , default: {
-        package: false                                  // Should package with web-ext
-      , watch: false                                    // Should run webpack in watch mode
-      , mirroringAppId: extPackageMeta.__mirroringAppId // Chromecast receiver app ID
-      , mode: "development"                             // webpack mode
+        package: false
+      , watch: false
+      , mirroringAppId: MIRRORING_APP_ID
+      , mode: "development"
     }
 });
 
@@ -38,107 +35,161 @@ if (argv.package) {
 }
 
 
-// Import webpack config and specify env values
-const webpackConfig = require(`${ROOT}/webpack.config.js`)({
-    includePath: INCLUDE_PATH
+// Paths
+const rootPath = path.resolve(__dirname, "../");
+const srcPath = path.join(rootPath, "src");
+
+const distPath = path.join(rootPath, "../dist/ext/");
+const unpackedPath = path.join(distPath, "unpacked");
+
+const outPath = argv.package ? unpackedPath : distPath;
+
+/** @type esbuild.Plugin */
+const preactCompatPlugin = {
     /**
-     * If watching files, output directly to dist. Unpacked
-     * directory is used as a staging area for web-ext builds.
+     * Handle react/react-dom preact compat modules.
      */
-  , outputPath: argv.package
-        ? UNPACKED_PATH
-        : DIST_PATH
+    name: "preact-compat",
+    setup(build) {
+        const preactPath = path.resolve(__dirname
+              , "../node_modules/preact/compat/dist/compat.module.js");
 
-  , extensionName: extPackageMeta.__extensionName
-  , extensionId: extPackageMeta.__extensionId
-  , extensionVersion: extPackageMeta.__extensionVersion
-  , applicationName: appPackageMeta.__applicationName
-  , applicationVersion: appPackageMeta.__applicationVersion
-  , mirroringAppId: argv.mirroringAppId
-
-    // eval source map needs special CSP
-  , contentSecurityPolicy: argv.mode === "production"
-        ? "script-src 'self'; object-src 'self'"
-        : "script-src 'self' 'unsafe-eval'; object-src 'self'"
-
-    // Developer info
-  , author: packageMeta.author
-  , authorHomepage: packageMeta.homepage
-});
-
-// Add mode to config
-webpackConfig.mode = argv.mode;
-if (argv.mode !== "production") {
-    webpackConfig.devtool = "source-map";
+        build.onResolve(
+                { filter: /^(react|react-dom)$/ }
+              , (args) => ({ path: preactPath }));
+    }
 }
 
+/** @type esbuild.BuildOptions */
+const buildOpts = {
+    bundle: true
+  , target: "firefox64"
+  , logLevel: "info"
+  , sourcemap: "inline"
+
+  , outdir: outPath
+  , outbase: srcPath
+
+  , entryPoints: [
+        // Main
+        `${srcPath}/background/background.ts`
+        // Media sender
+      , `${srcPath}/senders/media/index.ts`
+      , `${srcPath}/senders/media/overlay/overlayContent.ts`
+      , `${srcPath}/senders/media/overlay/overlayContentLoader.ts`
+        // Mirroring sender
+      , `${srcPath}/senders/mirroring.ts`
+        // Shim
+      , `${srcPath}/shim/index.ts`
+      , `${srcPath}/shim/content.ts`
+      , `${srcPath}/shim/contentBridge.ts`
+        // UI
+      , `${srcPath}/ui/popup/index.tsx`
+      , `${srcPath}/ui/options/index.tsx`
+    ]
+  , define: {
+        BRIDGE_NAME: `"${BRIDGE_NAME}"`
+      , BRIDGE_VERSION: `"${BRIDGE_VERSION}"`
+      , MIRRORING_APP_ID: `"${argv.mirroringAppId}"`
+    }
+  , plugins: [ preactCompatPlugin ]
+};
+
+// Set production options
+if (argv.mode === "production") {
+    buildOpts.minify = true;
+    buildOpts.sourcemap = false;
+}
+
+/**
+ * Handle build results.
+ *
+ * @param {esbuild.BuildResult} result 
+ */
+function onBuildResult(result) {
+    if (result.errors.length) {
+        console.error("Build error!");
+        return;
+    }
+
+    const manifest = JSON.parse(
+            fs.readFileSync(`${srcPath}/manifest.json`
+                          , { encoding: "utf-8" }));
+
+    manifest.content_security_policy = argv.mode === "production"
+        ? "script-src 'self'; object-src 'self'"
+        : "script-src 'self' 'unsafe-eval'; object-src 'self'";
+
+    fs.writeFileSync(`${outPath}/manifest.json`, JSON.stringify(manifest));
+
+    copy(srcPath, outPath, /^(manifest\.json|.*\.(ts|tsx|js|jsx))$/);
+}
+
+/**
+ * Recursively copy directory contents.
+ *
+ * @param {string} src Source path
+ * @param {string} dest Destination path
+ * @param {RegExp} excludeRegex Match for file exclusion
+ */
+ function copy(src, dest, excludeRegex) {
+    if (!fs.existsSync(src)) return;
+
+    const stats = fs.statSync(src);
+    if (!stats.isDirectory()) {
+        const dirName = path.dirname(dest);
+        if (!fs.existsSync(dirName)) {
+            fs.mkdirSync(dirName , { recursive: true });
+        }
+        fs.copyFileSync(src, dest);
+        return;
+    }
+
+    for (const file of fs.readdirSync(src)) {
+        if (excludeRegex.test(file)) continue;
+        copy(path.join(src, file), path.join(dest, file), excludeRegex);
+    }
+}
 
 // Clean
-fs.removeSync(DIST_PATH);
-
-
-// Create webpack compiler instance
-const compiler = webpack(webpackConfig);
+fs.removeSync(distPath);
 
 if (argv.watch) {
-    // Start webpack watch
-    compiler.watch({}, handleCompilerOutput);
+    esbuild.build({
+        ...buildOpts
+      , watch: {
+            onRebuild(_err, result) {
+                return onBuildResult(result);
+            }
+        }
+    }).then(onBuildResult);
 } else {
-    compiler.run((...args) => {
-        handleCompilerOutput(...args);
+    esbuild.build(buildOpts).then(result => {
+        onBuildResult(result);
 
         if (argv.package) {
             webExt.cmd.build({
                 /**
-                 * Webpack output at sourceDir is built into an extension
-                 * archive at artifactsDir.
-                 */
-                sourceDir: UNPACKED_PATH
-              , artifactsDir: DIST_PATH
+                * Webpack output at sourceDir is built into an extension
+                * archive at artifactsDir.
+                */
+                sourceDir: unpackedPath
+              , artifactsDir: distPath
               , overwriteDest: true
             }, {
                 // Prevent auto-exit
                 shouldExitProgram: false
-
             }).then(result => {
                 const outputName = path.basename(result.extensionPath);
-
+                
                 // Rename output extension to XPI
-                fs.moveSync(path.join(DIST_PATH, outputName)
-                      , path.join(DIST_PATH, outputName.replace("zip", "xpi")));
-
+                fs.moveSync(path.join(distPath, outputName)
+                          , path.join(distPath, outputName.replace(
+                                    "zip", "xpi")));
+                    
                 // Only need the built extension archive
-                fs.remove(UNPACKED_PATH);
+                fs.remove(unpackedPath);
             });
         }
     });
-}
-
-/**
- * Log errors and output formatted compilation info.
- */
-function handleCompilerOutput (err, stats) {
-    // If there are fatal errors, log and exit
-    if (err) {
-        console.error(err.stack || err);
-        if (err.details) {
-            console.error(err.details);
-        }
-
-        return;
-    }
-
-    // Get compilation info
-    const info = stats.toJson();
-
-    // Log errors/warnings
-    if (stats.hasErrors()) {
-        console.error(info.errors);
-    }
-    if (stats.hasWarnings()) {
-        console.warn(info.warnings);
-    }
-
-    // Log formatted output
-    console.log(stats.toString());
 }
