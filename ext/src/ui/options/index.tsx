@@ -14,8 +14,6 @@ import logger from "../../lib/logger";
 import options, { Options } from "../../lib/options";
 import { REMOTE_MATCH_PATTERN_REGEX } from "../../lib/utils";
 
-import { ReceiverSelectorType } from "../../background/receiverSelector";
-
 
 const _ = browser.i18n.getMessage;
 
@@ -85,9 +83,6 @@ class OptionsApp extends Component<
         this.handleFormChange = this.handleFormChange.bind(this);
         this.handleInputChange = this.handleInputChange.bind(this);
         this.handleWhitelistChange = this.handleWhitelistChange.bind(this);
-
-        this.handleReceiverSelectorTypeChange =
-                this.handleReceiverSelectorTypeChange.bind(this);
 
         this.getWhitelistItemPatternError =
                 this.getWhitelistItemPatternError.bind(this);
@@ -287,27 +282,6 @@ class OptionsApp extends Component<
                             { _("optionsReceiverSelectorCategoryDescription") }
                         </p>
 
-                        { this.state.platform === "mac" &&
-                            <label className="option">
-                                <div className="option__label">
-                                    { _("optionsReceiverSelectorType") }
-                                </div>
-                                <div className="option__control">
-                                    <div className="select-wrapper">
-                                        <select name="receiverSelectorType"
-                                                value={ this.state.options?.receiverSelectorType }
-                                                onChange={ this.handleReceiverSelectorTypeChange }>
-                                            <option value={ ReceiverSelectorType.Popup }>
-                                                { _("optionsReceiverSelectorTypeBrowser") }
-                                            </option>
-                                            <option value={ ReceiverSelectorType.Native }>
-                                                { _("optionsReceiverSelectorTypeNative") }
-                                            </option>
-                                        </select>
-                                    </div>
-                                </div>
-                            </label> }
-
                         <label className="option option--inline">
                             <div className="option__control">
                                 <input name="receiverSelectorWaitForConnection"
@@ -457,19 +431,6 @@ class OptionsApp extends Component<
         this.setState(currentState => {
             if (currentState.options) {
                 currentState.options[ev.target.name] = getInputValue(ev.target);
-            }
-
-            return currentState;
-        });
-    }
-
-    private handleReceiverSelectorTypeChange(
-            ev: React.ChangeEvent<HTMLSelectElement>) {
-
-        this.setState(currentState => {
-            if (currentState.options) {
-                currentState.options[ev.target.name] =
-                        parseInt(ev.target.value);
             }
 
             return currentState;

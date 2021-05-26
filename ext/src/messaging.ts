@@ -6,8 +6,7 @@ import { BridgeInfo } from "./lib/bridge";
 import { ReceiverSelectorMediaType } from "./background/receiverSelector";
 import { ReceiverSelection
        , ReceiverSelectionCast
-       , ReceiverSelectionStop }
-        from "./background/receiverSelector/ReceiverSelector";
+       , ReceiverSelectionStop } from "./background/receiverSelector";
 
 import { CastSessionCreated
        , CastSessionUpdated

@@ -26,7 +26,6 @@ export interface Options {
     localMediaServerPort: number;
     mirroringEnabled: boolean;
     mirroringAppId: string;
-    receiverSelectorType: ReceiverSelectorType;
     receiverSelectorCloseIfFocusLost: boolean;
     receiverSelectorWaitForConnection: boolean;
     userAgentWhitelistEnabled: boolean;

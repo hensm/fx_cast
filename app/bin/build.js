@@ -182,29 +182,6 @@ NODE_PATH="${modulesDir}" node $(dirname $0)/src/main.js --__name $(basename $0)
         fs.chmodSync(path.resolve(BUILD_PATH, file), 0o755);
     }
 
-
-    // Build NativeMacReceiverSelector
-    if (process.platform === "darwin" && !argv.skipNativeBuilds) {
-        const selectorPath = path.join(__dirname, "../selector/mac/");
-        const derivedDataPath = path.join(__dirname, "../selector/mac/build/");
-
-        spawnSync(`
-            xcodebuild -project ${selectorPath}/fx_cast_selector.xcodeproj \
-                       -configuration Release \
-                       -scheme fx_cast_selector \
-                       -derivedDataPath ${derivedDataPath} \
-                       build`
-          , spawnOptions);
-
-        const selectorBundlePath = path.join(derivedDataPath
-              , "Build/Products/Release/", paths.SELECTOR_EXECUTABLE_NAME);
-
-        fs.moveSync(selectorBundlePath
-              , path.join(BUILD_PATH, paths.SELECTOR_EXECUTABLE_NAME));
-        fs.removeSync(derivedDataPath);
-    }
-
-
     /**
      * If packaging, create an installer package and move it to
      * dist, otherwise move the built executable and app manifest
@@ -312,12 +289,6 @@ function packageDarwin (
           , path.join(rootExecutablePath, MDNS_BINDING_NAME));
     fs.moveSync(path.join(BUILD_PATH, paths.MANIFEST_NAME)
           , path.join(rootManifestPath, paths.MANIFEST_NAME));
-
-    if (process.platform === "darwin" && !argv.skipNativeBuilds) {
-        // Move selector executable alongside main executable
-        fs.moveSync(path.join(BUILD_PATH, paths.SELECTOR_EXECUTABLE_NAME)
-              , path.join(rootExecutablePath, paths.SELECTOR_EXECUTABLE_NAME));
-    }
 
 
     // Copy static files to be processed

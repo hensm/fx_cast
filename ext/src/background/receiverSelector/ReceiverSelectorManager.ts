@@ -8,26 +8,15 @@ import receiverDevices from "../receiverDevices";
 
 import { getMediaTypesForPageUrl } from "../../lib/utils";
 
-import { ReceiverSelector
-       , ReceiverSelectorType } from "./";
 import { ReceiverSelection
        , ReceiverSelectionActionType
-       , ReceiverSelectorMediaType } from "./ReceiverSelector";
+       , ReceiverSelectorMediaType } from "./index";
 
-import NativeReceiverSelector from "./NativeReceiverSelector";
-import PopupReceiverSelector from "./PopupReceiverSelector";
+import ReceiverSelector from "./ReceiverSelector";
 
 
 async function createSelector() {
-    const type = await options.get("receiverSelectorType");
-    const platformInfo = await browser.runtime.getPlatformInfo();
-
-    if (platformInfo.os === "mac"
-            && type === ReceiverSelectorType.Native) {
-        return new NativeReceiverSelector();
-    }
-
-    return new PopupReceiverSelector();
+    return new ReceiverSelector();
 }
 
 

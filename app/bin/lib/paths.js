@@ -21,7 +21,6 @@ exports.pkgPlatformMap = {
 };
 
 exports.MANIFEST_NAME = `${__applicationName}.json`;
-exports.SELECTOR_EXECUTABLE_NAME = "fx_cast_selector.app";
 
 exports.getExecutableName = platform => {
     switch (platform) {
