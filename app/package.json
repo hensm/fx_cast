@@ -30,7 +30,7 @@
         "@types/node-fetch": "^2.5.7",
         "fs-extra": "^9.1.0",
         "mustache": "^4.0.1",
-        "pkg": "^4.4.9",
+        "pkg": "^5.2.1",
         "typescript": "^4.1.5"
     },
     "optionalDependencies": {

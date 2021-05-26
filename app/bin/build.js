@@ -37,6 +37,7 @@ const supportedTargets = [
     "win-x64"
   , "win-x86"
   , "macos-x64"
+  , "macos-arm64"
   , "linux-x64"
 ];
 
