@@ -2,13 +2,14 @@
     --shadow-10: 0 1px 4px rgba(12, 12, 13, 0.1);
     --shadow-20: 0 2px 8px rgba(12, 12, 13, 0.1);
     --shadow-30: 0 4px 16px rgba(12, 12, 13, 0.1);
+    
+    --focus-border-color: var(--blue-50);
 
     --box-background: var(--white-100);
     --box-color: var(--grey-90);
 
     --focus-box-shadow:
-        0 0 0 1px var(--blue-50)
-      , 0 0 0 4px var(--blue-50-a30);
+        0 0 0 1px var(--focus-border-color);
 
     --button-background: var(--grey-90-a10);
     --button-background-hover: var(--grey-90-a20);
@@ -35,12 +36,12 @@
 
 @media (prefers-color-scheme: dark) {
     :root {
-        --box-background: #202023;
+        --box-background: rgb(35, 34, 43);
         --box-color: var(--white-100);
 
-        --button-background: #474749;
-        --button-background-hover: #505054;
-        --button-background-active: #5c5c5e;
+        --button-background: rgb(71, 70, 79);
+        --button-background-hover: rgb(80, 79, 88);
+        --button-background-active: rgb(92, 91, 100);
         --button-color: var(--white-100);
 
         --field-placeholder-color: var(--grey-30);
@@ -85,7 +86,7 @@ textarea:hover {
 }
 
 :-moz-any(button, input, textarea, select):focus {
-    border-color: var(--blue-50) !important;
+    border-color: var(--focus-border-color) !important;
     box-shadow: var(--focus-box-shadow);
     outline: initial;
 }

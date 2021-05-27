@@ -1,3 +1,9 @@
+:root {
+    --button-background: #474749;
+    --button-background-hover: #505054;
+    --button-background-active: #5c5c5e;
+}
+
 body {
     background: var(--grey-10);
     color: var(--grey-90);

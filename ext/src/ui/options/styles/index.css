@@ -356,7 +356,7 @@ button.ghost:not(:hover) {
 }
 
 .editable-list__item:nth-child(odd) {
-    background-color: var(--grey-20);
+    background-color: rgba(0, 0, 0, 0.05);
 }
 
 .editable-list__item--selected {
@@ -411,6 +411,6 @@ button.ghost:not(:hover) {
 
 @media (prefers-color-scheme: dark) {
     .editable-list__item:nth-child(odd) {
-        background-color: var(--grey-80);
+        background-color: rgba(255, 255, 255, 0.05);
     }
 }
