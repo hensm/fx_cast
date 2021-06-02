@@ -51,7 +51,7 @@ let backgroundPort: MessagePort;
 let currentSession: cast.Session;
 let currentMedia: cast.media.Media;
 
-let mediaElement: HTMLMediaElement;
+let targetElement: HTMLElement;
 
 
 function getSession(opts: InitOptions): Promise<cast.Session> {
@@ -147,18 +147,18 @@ function getMedia(opts: InitOptions): Promise<cast.media.Media> {
             mediaInfo.tracks.push(castTrack);
         }
 
-        if (mediaElement) {
-            if (mediaElement instanceof HTMLVideoElement) {
-                if (mediaElement.poster) {
+        if (targetElement instanceof HTMLMediaElement) {
+            if (targetElement instanceof HTMLVideoElement) {
+                if (targetElement.poster) {
                     mediaInfo.metadata.images = [
-                        new cast.Image(mediaElement.poster)
+                        new cast.Image(targetElement.poster)
                     ];
                 }
             }
 
-            if (mediaElement.textTracks.length) {
-                const tracks = Array.from(mediaElement.textTracks);
-                const trackElements = mediaElement.querySelectorAll("track");
+            if (targetElement.textTracks.length) {
+                const tracks = Array.from(targetElement.textTracks);
+                const trackElements = targetElement.querySelectorAll("track");
 
                 tracks.forEach((track, index) => {
                     const trackElement = trackElements[index];
@@ -218,7 +218,7 @@ function getMedia(opts: InitOptions): Promise<cast.media.Media> {
         }
 
         const loadRequest = new cast.media.LoadRequest(mediaInfo);
-        loadRequest.autoplay = false;
+        loadRequest.autoplay = true;
         loadRequest.activeTrackIds = activeTrackIds;
 
         currentSession.loadMedia(loadRequest, resolve, reject);
@@ -228,7 +228,7 @@ function getMedia(opts: InitOptions): Promise<cast.media.Media> {
 
 let ignoreMediaEvents = false;
 
-async function registerMediaElementListeners() {
+async function registerMediaElementListeners(mediaElement: HTMLMediaElement) {
     function checkIgnore(ev: Event) {
         if (ignoreMediaEvents) {
             ignoreMediaEvents = false;
@@ -349,32 +349,34 @@ export async function init(opts: InitOptions) {
         cast.logMessage("Local media casting not enabled");
         return;
     }
-
-    if (opts.targetElementId) {
-        mediaElement = browser.menus.getTargetElement(
-                opts.targetElementId) as HTMLMediaElement;
+    if (!opts.targetElementId) {
+        cast.logMessage("Target element ID not found");
+        return;
     }
+
+    targetElement = browser.menus.getTargetElement(
+            opts.targetElementId) as HTMLMediaElement;
 
     currentSession = await getSession(opts);
     currentMedia = await getMedia(opts);
 
-    if (opts.targetElementId) {
-        registerMediaElementListeners();
+    if (targetElement instanceof HTMLMediaElement) {
+        registerMediaElementListeners(targetElement);
 
         if (options.get("mediaOverlayEnabled")) {
             // TODO: Un-hide overlay here
         }
-
-        window.addEventListener("beforeunload", async () => {
-            backgroundPort.postMessage({
-                subject: "bridge:mediaServer/stop"
-            });
-
-            if (await options.get("mediaStopOnUnload")) {
-                currentSession.stop();
-            }
-        });
     }
+
+    window.addEventListener("beforeunload", async () => {
+        backgroundPort.postMessage({
+            subject: "bridge:mediaServer/stop"
+        });
+
+        if (await options.get("mediaStopOnUnload")) {
+            currentSession.stop();
+        }
+    });
 }
 
 /**

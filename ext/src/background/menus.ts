@@ -45,7 +45,7 @@ export async function initMenus() {
 
     // <video>/<audio> "Cast..." context menu item
     menuIdMediaCast = browser.menus.create({
-        contexts: [ "audio", "video" ]
+        contexts: [ "audio", "video", "image" ]
       , title: _("contextCast")
       , visible: opts.mediaEnabled
       , targetUrlPatterns: opts.localMediaEnabled
