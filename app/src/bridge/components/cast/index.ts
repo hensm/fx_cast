@@ -1,9 +1,12 @@
 "use strict";
 
+import castv2 from "castv2";
+
 import { sendMessage } from "../../lib/nativeMessaging";
 import { Message } from "../../messaging";
 
-import Session from "./Session";
+import Session, { NS_CONNECTION
+                , NS_RECEIVER } from "./Session";
 
 
 const sessions = new Map<string, Session>();
@@ -108,6 +111,22 @@ export function handleCastMessage(message: Message) {
         }
 
         case "bridge:stopCastApp": {
+            const { host, port } = message.data.receiverDevice;
+            const client = new castv2.Client();
+
+            client.connect({ host, port }, () => {
+                const sourceId = "sender-0";
+                const destinationId = "receiver-0";
+        
+                const clientConnection = client.createChannel(
+                        sourceId, destinationId, NS_CONNECTION, "JSON");
+                const clientReceiver = client.createChannel(
+                        sourceId, destinationId, NS_RECEIVER, "JSON");
+        
+                clientConnection.send({ type: "CONNECT" });
+                clientReceiver.send({ type: "STOP", requestId: 1 });
+            });
+
             break;
         }
     }
