@@ -16,12 +16,16 @@ describe("chrome.cast.media.LoadRequest", () => {
 
     it("should have expected assigned properties", async () => {
         const mediaInfo = new chrome.cast.media.MediaInfo(
-                "__contentId", "video/mp4");
+            "__contentId",
+            "video/mp4"
+        );
         const loadRequest = new chrome.cast.media.LoadRequest(mediaInfo);
 
-        expect(loadRequest.media).toEqual(jasmine.objectContaining({
-            contentId: "__contentId"
-          , contentType: "video/mp4"
-        }));
+        expect(loadRequest.media).toEqual(
+            jasmine.objectContaining({
+                contentId: "__contentId",
+                contentType: "video/mp4"
+            })
+        );
     });
 });

@@ -18,19 +18,23 @@ describe("chrome.cast.media.QueueLoadRequest", () => {
         const media2 = new chrome.cast.media.MediaInfo("media2", "audio/mp3");
 
         const queueLoadRequest = new chrome.cast.media.QueueLoadRequest([
-            new chrome.cast.media.QueueItem(media1)
-          , new chrome.cast.media.QueueItem(media2)
+            new chrome.cast.media.QueueItem(media1),
+            new chrome.cast.media.QueueItem(media2)
         ]);
 
         expect(queueLoadRequest.items).toEqual([
-            jasmine.objectContaining({ media: jasmine.objectContaining({
-                contentId: "media1"
-              , contentType: "video/mp4"
-            })})
-          , jasmine.objectContaining({ media: jasmine.objectContaining({
-                contentId: "media2"
-              , contentType: "audio/mp3"
-            })})
+            jasmine.objectContaining({
+                media: jasmine.objectContaining({
+                    contentId: "media1",
+                    contentType: "video/mp4"
+                })
+            }),
+            jasmine.objectContaining({
+                media: jasmine.objectContaining({
+                    contentId: "media2",
+                    contentType: "audio/mp3"
+                })
+            })
         ]);
     });
 });

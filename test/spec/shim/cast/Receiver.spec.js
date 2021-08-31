@@ -15,15 +15,20 @@ describe("chrome.cast.Receiver", () => {
 
     it("should have expected assigned properties", async () => {
         const receiver = new chrome.cast.Receiver(
-                "testLabel"
-              , "testFriendlyName"
-              , [   chrome.cast.Capability.VIDEO_OUT
-                  , chrome.cast.Capability.AUDIO_OUT ]
-              , new chrome.cast.Volume(1, false));
+            "testLabel",
+            "testFriendlyName",
+            [
+                chrome.cast.Capability.VIDEO_OUT,
+                chrome.cast.Capability.AUDIO_OUT
+            ],
+            new chrome.cast.Volume(1, false)
+        );
 
-        expect(receiver.capabilities).toEqual([ "video_out", "audio_out" ]);
+        expect(receiver.capabilities).toEqual(["video_out", "audio_out"]);
         expect(receiver.friendlyName).toBe("testFriendlyName");
         expect(receiver.label).toBe("testLabel");
-        expect(receiver.volume).toEqual(jasmine.objectContaining({ level: 1, muted: false }));
+        expect(receiver.volume).toEqual(
+            jasmine.objectContaining({ level: 1, muted: false })
+        );
     });
 });

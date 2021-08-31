@@ -19,10 +19,12 @@ describe("chrome.cast.media.Media", () => {
         expect(media.repeatMode).toBe("REPEAT_OFF");
         expect(media.sessionId).toBe(undefined);
         expect(media.supportedMediaCommands).toEqual([]);
-        expect(media.volume).toEqual(jasmine.objectContaining({
-            level: null
-          , muted: null
-        }));
+        expect(media.volume).toEqual(
+            jasmine.objectContaining({
+                level: null,
+                muted: null
+            })
+        );
     });
 
     it("should have expected assigned properties", async () => {

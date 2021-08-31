@@ -15,19 +15,18 @@ const chrome = require("selenium-webdriver/chrome");
 // Webdriver shorthands
 const { By, until } = webdriver;
 
-
-const { __extensionName
-      , __extensionVersion } = require("../ext/package.json");
+const { __extensionName, __extensionVersion } = require("../ext/package.json");
 
 const extensionArchivePath = path.join(
-        __dirname, "../dist/ext"
-      , `${__extensionName}-${__extensionVersion}.xpi`)
+    __dirname,
+    "../dist/ext",
+    `${__extensionName}-${__extensionVersion}.xpi`
+);
 
 if (!fs.existsSync(extensionArchivePath)) {
     console.error("Extension archive not found.");
     process.exit(1);
 }
-
 
 const TEST_PAGE_URL = `file:///${__dirname}/SpecRunner.html`;
 const POLLING_PAGE_URL = `file:///${__dirname}/polling.html`;
@@ -37,10 +36,10 @@ const firefoxOptions = new firefox.Options()
     .addExtensions(extensionArchivePath)
     .setPreference("xpinstall.signatures.required", false);
 
-const chromeOptions = new chrome.Options()
-    .excludeSwitches([ "disable-background-networking"
-                     , "disable-default-apps"]);
-
+const chromeOptions = new chrome.Options().excludeSwitches([
+    "disable-background-networking",
+    "disable-default-apps"
+]);
 
 /**
  * Chrome doesn't load the media router extension immediately
@@ -50,11 +49,11 @@ const chromeOptions = new chrome.Options()
  * Workaround is to poll every 100ms, refresh the page, and
  * check whether the chrome.cast API objects are defined.
  */
-function waitUntilDefined (
-        driver
-      , pollingTimeout = 10000
-      , pollingFrequency = 100) {
-
+function waitUntilDefined(
+    driver,
+    pollingTimeout = 10000,
+    pollingFrequency = 100
+) {
     return new Promise(async (resolve, reject) => {
         let elapsedTime = pollingFrequency;
 
@@ -92,7 +91,7 @@ function waitUntilDefined (
  * channel.
  */
 class MessageProxy extends EventEmitter {
-    constructor () {
+    constructor() {
         super();
 
         const wss = new WebSocket.Server({
@@ -104,7 +103,7 @@ class MessageProxy extends EventEmitter {
                 const messageContent = JSON.parse(message);
                 this.emit(messageContent.subject, messageContent.data);
             });
-        })
+        });
     }
 }
 
@@ -112,13 +111,13 @@ class MessageProxy extends EventEmitter {
  * Ensures cast API is loaded before finding and injecting spec
  * file scripts into the test page.
  */
-async function injectSpecs (driver) {
-    const [ loaded, errorInfo ] = await driver.executeAsyncScript(() => {
+async function injectSpecs(driver) {
+    const [loaded, errorInfo] = await driver.executeAsyncScript(() => {
         const callback = arguments[arguments.length - 1];
 
         // If already loaded, return immediately
         if (chrome.cast !== undefined) {
-            callback([ true ]);
+            callback([true]);
         }
 
         // Set Cast API callback
@@ -132,7 +131,6 @@ async function injectSpecs (driver) {
         console.error("Failed to load cast API", errorInfo);
         return;
     }
-
 
     // Get spec files
     const specFiles = glob.sync("spec/**/*.spec.js", {
@@ -171,7 +169,6 @@ async function injectSpecs (driver) {
         console.log("Cast extension loaded!");
     }
 
-
     // Create console reporter and message proxy.
     const reporter = new JasmineConsoleReporter();
     const messageProxy = new MessageProxy();
@@ -185,12 +182,14 @@ async function injectSpecs (driver) {
      * Forward events from Jasmine standlone via message proxy to
      * console reporter.
      */
-    messageProxy.on("jasmineDone"    , result => reporter.jasmineDone(result));
-    messageProxy.on("jasmineStarted" , result => reporter.jasmineStarted(result));
-    messageProxy.on("specDone"       , result => reporter.specDone(result));
-    messageProxy.on("specStarted"    , result => reporter.specStarted(result));
-    messageProxy.on("suiteDone"      , result => reporter.suiteDone(result));
-    messageProxy.on("suiteStarted"   , result => reporter.suiteStarted(result));
+    messageProxy.on("jasmineDone", result => reporter.jasmineDone(result));
+    messageProxy.on("jasmineStarted", result =>
+        reporter.jasmineStarted(result)
+    );
+    messageProxy.on("specDone", result => reporter.specDone(result));
+    messageProxy.on("specStarted", result => reporter.specStarted(result));
+    messageProxy.on("suiteDone", result => reporter.suiteDone(result));
+    messageProxy.on("suiteStarted", result => reporter.suiteStarted(result));
 
     // Load Jasmine test page
     driver.get(TEST_PAGE_URL);

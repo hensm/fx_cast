@@ -2,7 +2,8 @@
 
 describe("chrome.cast.media.QueueUpdateItemsRequest", () => {
     it("should have all properties", async () => {
-        const queueUpdateItemsRequest = new chrome.cast.media.QueueUpdateItemsRequest();
+        const queueUpdateItemsRequest =
+            new chrome.cast.media.QueueUpdateItemsRequest();
 
         expect(queueUpdateItemsRequest.customData).toBe(null);
         expect(queueUpdateItemsRequest.items).toBe(undefined);
@@ -15,20 +16,25 @@ describe("chrome.cast.media.QueueUpdateItemsRequest", () => {
         const media1 = new chrome.cast.media.MediaInfo("media1", "video/mp4");
         const media2 = new chrome.cast.media.MediaInfo("media2", "audio/mp3");
 
-        const queueUpdateItemsRequest = new chrome.cast.media.QueueUpdateItemsRequest([
-            new chrome.cast.media.QueueItem(media1)
-          , new chrome.cast.media.QueueItem(media2)
-        ]);
+        const queueUpdateItemsRequest =
+            new chrome.cast.media.QueueUpdateItemsRequest([
+                new chrome.cast.media.QueueItem(media1),
+                new chrome.cast.media.QueueItem(media2)
+            ]);
 
         expect(queueUpdateItemsRequest.items).toEqual([
-            jasmine.objectContaining({ media: jasmine.objectContaining({
-                contentId: "media1"
-              , contentType: "video/mp4"
-            })})
-          , jasmine.objectContaining({ media: jasmine.objectContaining({
-                contentId: "media2"
-              , contentType: "audio/mp3"
-            })})
+            jasmine.objectContaining({
+                media: jasmine.objectContaining({
+                    contentId: "media1",
+                    contentType: "video/mp4"
+                })
+            }),
+            jasmine.objectContaining({
+                media: jasmine.objectContaining({
+                    contentId: "media2",
+                    contentType: "audio/mp3"
+                })
+            })
         ]);
     });
 });

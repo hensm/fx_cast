@@ -8,12 +8,12 @@ const mediaManager = new cast.receiver.MediaManager(mediaElement);
 mediaElement.height = window.innerHeight;
 mediaElement.width = window.innerWidth;
 
-
 let senderId;
 
 const messageBus = castReceiverManager.getCastMessageBus(
-        "urn:x-cast:fx_cast"
-      , cast.receiver.CastMessageBus.MessageType.JSON);
+    "urn:x-cast:fx_cast",
+    cast.receiver.CastMessageBus.MessageType.JSON
+);
 
 messageBus.onMessage = async message => {
     const { subject, data } = message.data;
@@ -27,8 +27,8 @@ messageBus.onMessage = async message => {
             await pc.setLocalDescription(desc);
 
             messageBus.send(message.senderId, {
-                subject: "peerConnectionAnswer"
-              , data: desc
+                subject: "peerConnectionAnswer",
+                data: desc
             });
 
             break;
@@ -46,13 +46,12 @@ messageBus.onMessage = async message => {
     }
 };
 
-
 const pc = new RTCPeerConnection();
 
 pc.addEventListener("icecandidate", ev => {
     messageBus.send(senderId, {
-        subject: "iceCandidate"
-      , data: ev.candidate
+        subject: "iceCandidate",
+        data: ev.candidate
     });
 });
 
@@ -63,7 +62,6 @@ pc.addEventListener("addstream", ev => {
     const splash = document.querySelector(".splash");
     splash.classList.add("splash--disabled");
 });
-
 
 // TODO: Fix API shim to make this work
 castReceiverManager.onSenderDisconnected = ev => {

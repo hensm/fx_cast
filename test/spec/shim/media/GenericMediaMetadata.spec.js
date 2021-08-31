@@ -2,7 +2,8 @@
 
 describe("chrome.cast.media.GenericMediaMetadata", () => {
     it("should have all properties", async () => {
-        const genericMediaMetadata = new chrome.cast.media.GenericMediaMetadata();
+        const genericMediaMetadata =
+            new chrome.cast.media.GenericMediaMetadata();
 
         expect(genericMediaMetadata.images).toBe(undefined);
         expect(genericMediaMetadata.metadataType).toBe(0);

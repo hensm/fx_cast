@@ -6,21 +6,19 @@ const path = require("path");
 const minimist = require("minimist");
 const webExt = require("web-ext");
 
-
 const BRIDGE_NAME = "fx_cast_bridge";
 const BRIDGE_VERSION = "0.1.0";
 
 const MIRRORING_APP_ID = "19A6F4AE";
 
-
 const argv = minimist(process.argv.slice(2), {
-    boolean: [ "package", "watch" ]
-  , string: [ "mirroringAppId", "mode" ]
-  , default: {
-        package: false
-      , watch: false
-      , mirroringAppId: MIRRORING_APP_ID
-      , mode: "development"
+    boolean: ["package", "watch"],
+    string: ["mirroringAppId", "mode"],
+    default: {
+        package: false,
+        watch: false,
+        mirroringAppId: MIRRORING_APP_ID,
+        mode: "development"
     }
 });
 
@@ -33,7 +31,6 @@ if (argv.package && argv.watch) {
 if (argv.package) {
     argv.mode = "production";
 }
-
 
 // Paths
 const rootPath = path.resolve(__dirname, "../");
@@ -51,48 +48,50 @@ const preactCompatPlugin = {
      */
     name: "preact-compat",
     setup(build) {
-        const preactPath = path.resolve(__dirname
-              , "../node_modules/preact/compat/dist/compat.module.js");
+        const preactPath = path.resolve(
+            __dirname,
+            "../node_modules/preact/compat/dist/compat.module.js"
+        );
 
-        build.onResolve(
-                { filter: /^(react|react-dom)$/ }
-              , (args) => ({ path: preactPath }));
+        build.onResolve({ filter: /^(react|react-dom)$/ }, args => ({
+            path: preactPath
+        }));
     }
-}
+};
 
 /** @type esbuild.BuildOptions */
 const buildOpts = {
-    bundle: true
-  , target: "firefox64"
-  , logLevel: "info"
-  , sourcemap: "inline"
+    bundle: true,
+    target: "firefox64",
+    logLevel: "info",
+    sourcemap: "inline",
 
-  , outdir: outPath
-  , outbase: srcPath
+    outdir: outPath,
+    outbase: srcPath,
 
-  , entryPoints: [
+    entryPoints: [
         // Main
-        `${srcPath}/background/background.ts`
+        `${srcPath}/background/background.ts`,
         // Media sender
-      , `${srcPath}/senders/media/index.ts`
-      , `${srcPath}/senders/media/overlay/overlayContent.ts`
-      , `${srcPath}/senders/media/overlay/overlayContentLoader.ts`
+        `${srcPath}/senders/media/index.ts`,
+        `${srcPath}/senders/media/overlay/overlayContent.ts`,
+        `${srcPath}/senders/media/overlay/overlayContentLoader.ts`,
         // Mirroring sender
-      , `${srcPath}/senders/mirroring.ts`
+        `${srcPath}/senders/mirroring.ts`,
         // Shim
-      , `${srcPath}/shim/index.ts`
-      , `${srcPath}/shim/content.ts`
-      , `${srcPath}/shim/contentBridge.ts`
+        `${srcPath}/shim/index.ts`,
+        `${srcPath}/shim/content.ts`,
+        `${srcPath}/shim/contentBridge.ts`,
         // UI
-      , `${srcPath}/ui/popup/index.tsx`
-      , `${srcPath}/ui/options/index.tsx`
-    ]
-  , define: {
-        BRIDGE_NAME: `"${BRIDGE_NAME}"`
-      , BRIDGE_VERSION: `"${BRIDGE_VERSION}"`
-      , MIRRORING_APP_ID: `"${argv.mirroringAppId}"`
-    }
-  , plugins: [ preactCompatPlugin ]
+        `${srcPath}/ui/popup/index.tsx`,
+        `${srcPath}/ui/options/index.tsx`
+    ],
+    define: {
+        BRIDGE_NAME: `"${BRIDGE_NAME}"`,
+        BRIDGE_VERSION: `"${BRIDGE_VERSION}"`,
+        MIRRORING_APP_ID: `"${argv.mirroringAppId}"`
+    },
+    plugins: [preactCompatPlugin]
 };
 
 // Set production options
@@ -104,7 +103,7 @@ if (argv.mode === "production") {
 /**
  * Handle build results.
  *
- * @param {esbuild.BuildResult} result 
+ * @param {esbuild.BuildResult} result
  */
 function onBuildResult(result) {
     if (result.errors.length) {
@@ -113,12 +112,13 @@ function onBuildResult(result) {
     }
 
     const manifest = JSON.parse(
-            fs.readFileSync(`${srcPath}/manifest.json`
-                          , { encoding: "utf-8" }));
+        fs.readFileSync(`${srcPath}/manifest.json`, { encoding: "utf-8" })
+    );
 
-    manifest.content_security_policy = argv.mode === "production"
-        ? "script-src 'self'; object-src 'self'"
-        : "script-src 'self' 'unsafe-eval'; object-src 'self'";
+    manifest.content_security_policy =
+        argv.mode === "production"
+            ? "script-src 'self'; object-src 'self'"
+            : "script-src 'self' 'unsafe-eval'; object-src 'self'";
 
     fs.writeFileSync(`${outPath}/manifest.json`, JSON.stringify(manifest));
 
@@ -132,14 +132,14 @@ function onBuildResult(result) {
  * @param {string} dest Destination path
  * @param {RegExp} excludeRegex Match for file exclusion
  */
- function copy(src, dest, excludeRegex) {
+function copy(src, dest, excludeRegex) {
     if (!fs.existsSync(src)) return;
 
     const stats = fs.statSync(src);
     if (!stats.isDirectory()) {
         const dirName = path.dirname(dest);
         if (!fs.existsSync(dirName)) {
-            fs.mkdirSync(dirName , { recursive: true });
+            fs.mkdirSync(dirName, { recursive: true });
         }
         fs.copyFileSync(src, dest);
         return;
@@ -155,41 +155,49 @@ function onBuildResult(result) {
 fs.removeSync(distPath);
 
 if (argv.watch) {
-    esbuild.build({
-        ...buildOpts
-      , watch: {
-            onRebuild(_err, result) {
-                return onBuildResult(result);
+    esbuild
+        .build({
+            ...buildOpts,
+            watch: {
+                onRebuild(_err, result) {
+                    return onBuildResult(result);
+                }
             }
-        }
-    }).then(onBuildResult);
+        })
+        .then(onBuildResult);
 } else {
     esbuild.build(buildOpts).then(result => {
         onBuildResult(result);
 
         if (argv.package) {
-            webExt.cmd.build({
-                /**
-                * Webpack output at sourceDir is built into an extension
-                * archive at artifactsDir.
-                */
-                sourceDir: unpackedPath
-              , artifactsDir: distPath
-              , overwriteDest: true
-            }, {
-                // Prevent auto-exit
-                shouldExitProgram: false
-            }).then(result => {
-                const outputName = path.basename(result.extensionPath);
-                
-                // Rename output extension to XPI
-                fs.moveSync(path.join(distPath, outputName)
-                          , path.join(distPath, outputName.replace(
-                                    "zip", "xpi")));
-                    
-                // Only need the built extension archive
-                fs.remove(unpackedPath);
-            });
+            webExt.cmd
+                .build(
+                    {
+                        /**
+                         * Webpack output at sourceDir is built into an extension
+                         * archive at artifactsDir.
+                         */
+                        sourceDir: unpackedPath,
+                        artifactsDir: distPath,
+                        overwriteDest: true
+                    },
+                    {
+                        // Prevent auto-exit
+                        shouldExitProgram: false
+                    }
+                )
+                .then(result => {
+                    const outputName = path.basename(result.extensionPath);
+
+                    // Rename output extension to XPI
+                    fs.moveSync(
+                        path.join(distPath, outputName),
+                        path.join(distPath, outputName.replace("zip", "xpi"))
+                    );
+
+                    // Only need the built extension archive
+                    fs.remove(unpackedPath);
+                });
         }
     });
 }

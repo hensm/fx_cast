@@ -15,7 +15,10 @@ describe("chrome.cast.media.MediaInfo", () => {
     });
 
     it("should have expected assigned properties", async () => {
-        const mediaInfo = new chrome.cast.media.MediaInfo("__contentId", "video/mp4");
+        const mediaInfo = new chrome.cast.media.MediaInfo(
+            "__contentId",
+            "video/mp4"
+        );
 
         expect(mediaInfo.contentId).toBe("__contentId");
         expect(mediaInfo.contentType).toBe("video/mp4");

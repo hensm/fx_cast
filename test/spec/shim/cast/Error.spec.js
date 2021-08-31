@@ -11,13 +11,13 @@ describe("chrome.cast.Error", () => {
 
     it("should have expected assigned properties", async () => {
         const error = new chrome.cast.Error(
-                chrome.cast.ErrorCode.CANCEL
-              , "testErrorDescription"
-              , { testErrorDetails: "testErrorDetails" });
+            chrome.cast.ErrorCode.CANCEL,
+            "testErrorDescription",
+            { testErrorDetails: "testErrorDetails" }
+        );
 
         expect(error.code).toBe("cancel");
         expect(error.description).toBe("testErrorDescription");
-        expect(error.details).toEqual(
-                { testErrorDetails: "testErrorDetails" });
+        expect(error.details).toEqual({ testErrorDetails: "testErrorDetails" });
     });
 });

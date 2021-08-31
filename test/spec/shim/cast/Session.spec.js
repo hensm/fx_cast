@@ -19,16 +19,19 @@ describe("chrome.cast.Session", () => {
 
     it("should have expected assigned properties", async () => {
         const session = new chrome.cast.Session(
-                "__sessionId"
-              , "__appId"
-              , "__displayName"
-              , [ new chrome.cast.Image("http://example.com") ]
-              , new chrome.cast.Receiver("__label", "__friendlyName"));
+            "__sessionId",
+            "__appId",
+            "__displayName",
+            [new chrome.cast.Image("http://example.com")],
+            new chrome.cast.Receiver("__label", "__friendlyName")
+        );
 
         expect(session.appId).toBe("__appId");
-        expect(session.appImages).toEqual(jasmine.arrayContaining([
-            jasmine.objectContaining({ url: "http://example.com" })
-        ]));
+        expect(session.appImages).toEqual(
+            jasmine.arrayContaining([
+                jasmine.objectContaining({ url: "http://example.com" })
+            ])
+        );
         expect(session.displayName).toBe("__displayName");
         expect(session.receiver).toEqual(jasmine.any(chrome.cast.Receiver));
         expect(session.sessionId).toBe("__sessionId");

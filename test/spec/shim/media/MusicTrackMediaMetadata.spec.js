@@ -2,7 +2,8 @@
 
 describe("chrome.cast.media.MusicTrackMediaMetadata", () => {
     it("should have all properties", async () => {
-        const musicTrackMediaMetadata = new chrome.cast.media.MusicTrackMediaMetadata();
+        const musicTrackMediaMetadata =
+            new chrome.cast.media.MusicTrackMediaMetadata();
 
         expect(musicTrackMediaMetadata.albumArtist).toBe(undefined);
         expect(musicTrackMediaMetadata.albumName).toBe(undefined);

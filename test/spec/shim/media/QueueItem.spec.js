@@ -15,12 +15,17 @@ describe("chrome.cast.media.QueueItem", () => {
     });
 
     it("should have expected assigned properties", async () => {
-        const media = new chrome.cast.media.MediaInfo("__contentId", "video/mp4");
+        const media = new chrome.cast.media.MediaInfo(
+            "__contentId",
+            "video/mp4"
+        );
         const queueItem = new chrome.cast.media.QueueItem(media);
 
-        expect(queueItem.media).toEqual(jasmine.objectContaining({
-            contentId: "__contentId"
-          , contentType: "video/mp4"
-        }));
+        expect(queueItem.media).toEqual(
+            jasmine.objectContaining({
+                contentId: "__contentId",
+                contentType: "video/mp4"
+            })
+        );
     });
 });

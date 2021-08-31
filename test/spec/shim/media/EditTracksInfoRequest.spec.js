@@ -2,7 +2,8 @@
 
 describe("chrome.cast.media.EditTracksInfoRequest", () => {
     it("should have all properties", async () => {
-        const editTracksInfoRequest = new chrome.cast.media.EditTracksInfoRequest();
+        const editTracksInfoRequest =
+            new chrome.cast.media.EditTracksInfoRequest();
 
         expect(editTracksInfoRequest.activeTrackIds).toBe(null);
         expect(editTracksInfoRequest.requestId).toBe(0);
@@ -15,14 +16,19 @@ describe("chrome.cast.media.EditTracksInfoRequest", () => {
         textTrackStyle.fontFamily = "__fontFamily";
         textTrackStyle.windowRoundedCornerRadius = 5;
 
-        const editTracksInfoRequest = new chrome.cast.media.EditTracksInfoRequest(
-                [ 5, 8, 12 ], textTrackStyle);
+        const editTracksInfoRequest =
+            new chrome.cast.media.EditTracksInfoRequest(
+                [5, 8, 12],
+                textTrackStyle
+            );
 
-        expect(editTracksInfoRequest.activeTrackIds).toEqual([ 5, 8, 12 ]);
-        expect(editTracksInfoRequest.textTrackStyle).toEqual(jasmine.objectContaining({
-            backgroundColor: "#fefefeff"
-          , fontFamily: "__fontFamily"
-          , windowRoundedCornerRadius: 5
-        }));
+        expect(editTracksInfoRequest.activeTrackIds).toEqual([5, 8, 12]);
+        expect(editTracksInfoRequest.textTrackStyle).toEqual(
+            jasmine.objectContaining({
+                backgroundColor: "#fefefeff",
+                fontFamily: "__fontFamily",
+                windowRoundedCornerRadius: 5
+            })
+        );
     });
 });

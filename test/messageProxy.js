@@ -4,18 +4,18 @@
 const socket = new WebSocket("ws://localhost:8080");
 
 window.messageProxy = {
-    sendMessage (message) {
+    sendMessage(message) {
         socket.send(JSON.stringify(message));
     }
-}
+};
 
 const reporterMethods = [
-    "jasmineDone"
-  , "jasmineStarted"
-  , "specDone"
-  , "specStarted"
-  , "suiteDone"
-  , "suiteStarted"
+    "jasmineDone",
+    "jasmineStarted",
+    "specDone",
+    "specStarted",
+    "suiteDone",
+    "suiteStarted"
 ];
 
 const customReporter = {};
@@ -24,10 +24,10 @@ const customReporter = {};
 for (const method of reporterMethods) {
     customReporter[method] = function (result) {
         messageProxy.sendMessage({
-            subject: method
-          , data: result
+            subject: method,
+            data: result
         });
-    }
+    };
 }
 
 socket.addEventListener("open", ev => {

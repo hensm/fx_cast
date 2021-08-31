@@ -15,7 +15,10 @@ describe("chrome.cast.media.Track", () => {
     });
 
     it("should have expected assigned properties", async () => {
-        const track = new chrome.cast.media.Track(5, chrome.cast.media.TrackType.TEXT);
+        const track = new chrome.cast.media.Track(
+            5,
+            chrome.cast.media.TrackType.TEXT
+        );
 
         expect(track.trackId).toBe(5);
         expect(track.type).toBe("TEXT");

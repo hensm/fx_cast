@@ -11,7 +11,8 @@ describe("chrome.cast.SenderApplication", () => {
 
     it("should have expected assigned properties", async () => {
         const senderApplication = new chrome.cast.SenderApplication(
-                chrome.cast.SenderPlatform.CHROME);
+            chrome.cast.SenderPlatform.CHROME
+        );
 
         expect(senderApplication.platform).toBe("chrome");
     });

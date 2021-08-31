@@ -10,8 +10,9 @@ describe("chrome.cast.DialRequest", () => {
 
     it("should have expected assigned properties", async () => {
         const dialRequest = new chrome.cast.DialRequest(
-                "testAppName"
-              , "testLaunchParameter");
+            "testAppName",
+            "testLaunchParameter"
+        );
 
         expect(dialRequest.appName).toBe("testAppName");
         expect(dialRequest.launchParameter).toBe("testLaunchParameter");

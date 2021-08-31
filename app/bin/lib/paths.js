@@ -2,10 +2,11 @@
 
 const path = require("path");
 
-const { __applicationName
-      , __applicationDirectoryName
-      , __applicationExecutableName } = require("../../package.json");
-
+const {
+    __applicationName,
+    __applicationDirectoryName,
+    __applicationExecutableName
+} = require("../../package.json");
 
 const rootPath = path.join(__dirname, "../../../");
 
@@ -15,9 +16,9 @@ exports.LICENSE_PATH = path.join(rootPath, "LICENSE");
 exports.REGISTRY_KEY = __applicationName;
 
 exports.pkgPlatformMap = {
-    win32: "win"
-  , darwin: "macos"
-  , linux: "linux"
+    win32: "win",
+    darwin: "macos",
+    linux: "linux"
 };
 
 exports.MANIFEST_NAME = `${__applicationName}.json`;
@@ -30,7 +31,7 @@ exports.getExecutableName = platform => {
         case "linux":
             return __applicationExecutableName;
     }
-}
+};
 
 exports.getExecutablePath = (platform, arch) => {
     const EXECUTABLE_PATH_WIN32_X64 = `C:\\Program Files\\${__applicationDirectoryName}\\`;
@@ -41,32 +42,42 @@ exports.getExecutablePath = (platform, arch) => {
     switch (platform) {
         case "win32":
             switch (arch) {
-                case "x86": return EXECUTABLE_PATH_WIN32_X86;
-                case "x64": return EXECUTABLE_PATH_WIN32_X64;
+                case "x86":
+                    return EXECUTABLE_PATH_WIN32_X86;
+                case "x64":
+                    return EXECUTABLE_PATH_WIN32_X64;
             }
             break;
-        case "darwin": return EXECUTABLE_PATH_DARWIN;
-        case "linux":  return EXECUTABLE_PATH_LINUX;
+        case "darwin":
+            return EXECUTABLE_PATH_DARWIN;
+        case "linux":
+            return EXECUTABLE_PATH_LINUX;
     }
 };
 
 exports.getManifestPath = (platform, arch, linuxPackageType) => {
-    const MANIFEST_PATH_DARWIN = "/Library/Application Support/Mozilla/NativeMessagingHosts/";
+    const MANIFEST_PATH_DARWIN =
+        "/Library/Application Support/Mozilla/NativeMessagingHosts/";
     const MANIFEST_PATH_LINUX_DEB = "/usr/lib/mozilla/native-messaging-hosts/";
-    const MANIFEST_PATH_LINUX_RPM ="/usr/lib64/mozilla/native-messaging-hosts/";
+    const MANIFEST_PATH_LINUX_RPM =
+        "/usr/lib64/mozilla/native-messaging-hosts/";
 
     switch (platform) {
         case "win32":
             switch (arch) {
                 case "x86":
-                case "x64": return exports.getExecutablePath(platform, arch);
+                case "x64":
+                    return exports.getExecutablePath(platform, arch);
             }
             break;
-        case "darwin": return MANIFEST_PATH_DARWIN;
+        case "darwin":
+            return MANIFEST_PATH_DARWIN;
         case "linux":
             switch (linuxPackageType) {
-                case "deb": return MANIFEST_PATH_LINUX_DEB;
-                case "rpm": return MANIFEST_PATH_LINUX_RPM;
+                case "deb":
+                    return MANIFEST_PATH_LINUX_DEB;
+                case "rpm":
+                    return MANIFEST_PATH_LINUX_RPM;
             }
 
             break;
