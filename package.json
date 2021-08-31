@@ -22,15 +22,15 @@
         "lint:ext": "eslint ext/src --ext .ts,.tsx"
     },
     "devDependencies": {
-        "@typescript-eslint/eslint-plugin": "^4.22.0",
-        "@typescript-eslint/parser": "^4.22.0",
-        "eslint": "^7.25.0",
-        "fs-extra": "^9.1.0",
-        "glob": "^7.1.6",
+        "@typescript-eslint/eslint-plugin": "^4.30.0",
+        "@typescript-eslint/parser": "^4.30.0",
+        "eslint": "^7.32.0",
+        "fs-extra": "^10.0.0",
+        "glob": "^7.1.7",
         "jasmine-console-reporter": "^3.1.0",
         "minimist": "^1.2.5",
         "prettier": "^2.3.2",
-        "selenium-webdriver": "^4.0.0-beta.1",
-        "ws": "^7.4.3"
+        "selenium-webdriver": "^4.0.0-beta.4",
+        "ws": "^8.2.1"
     }
 }
