@@ -84,7 +84,7 @@ const MDNS_BINDING_NAME = "dns_sd_bindings.node";
 async function build() {
     // Run tsc
     spawnSync(
-        `tsc --project ${ROOT_PATH}
+        `tsc --project ${ROOT_PATH} \
              --outDir ${BUILD_PATH}`,
         spawnOptions
     );
@@ -217,12 +217,6 @@ NODE_PATH="${modulesDir}" node $(dirname $0)/src/main.js --__name $(basename $0)
     } else {
         // Move tsc output and launcher to dist
         fs.moveSync(BUILD_PATH, paths.DIST_PATH, { overwrite: true });
-        /*
-    spawnSync("npm install --production", {
-        ...spawnOptions
-      , cwd: paths.DIST_PATH
-    });
-    */
     }
 
     // Remove build directory
