@@ -6,10 +6,11 @@ import { Message } from "../messaging";
 import { BridgeInfo } from "../lib/bridge";
 import { TypedMessagePort } from "../lib/TypedMessagePort";
 
-import { onMessage
-       , onMessageResponse
-       , sendMessage } from "./eventMessageChannel";
-
+import {
+    onMessage,
+    onMessageResponse,
+    sendMessage
+} from "./eventMessageChannel";
 
 let initializedBridgeInfo: BridgeInfo;
 let initializedBackgroundPort: MessagePort;
@@ -23,7 +24,6 @@ let initializedBackgroundPort: MessagePort;
  */
 export function ensureInit(): Promise<TypedMessagePort<Message>> {
     return new Promise(async (resolve, reject) => {
-
         // If already initialized, just return existing bridge info
         if (initializedBridgeInfo) {
             if (initializedBridgeInfo.isVersionCompatible) {
@@ -45,8 +45,9 @@ export function ensureInit(): Promise<TypedMessagePort<Message>> {
          * URL.
          */
         if (window.location.protocol === "moz-extension:") {
-            const { default: ShimManager } =
-                    await import("../background/ShimManager");
+            const { default: ShimManager } = await import(
+                "../background/ShimManager"
+            );
 
             // port2 will post bridge messages to port 1
             await ShimManager.init();

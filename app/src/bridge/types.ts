@@ -2,17 +2,16 @@
 
 import { ReceiverStatus } from "./components/cast/types";
 
-
 export enum ReceiverSelectorMediaType {
-    App = 1
-  , Tab = 2
-  , Screen = 4
-  , File = 8
+    App = 1,
+    Tab = 2,
+    Screen = 4,
+    File = 8
 }
 
 export enum ReceiverSelectionActionType {
-    Cast = 1
-  , Stop = 2
+    Cast = 1,
+    Stop = 2
 }
 
 export interface ReceiverSelectionCast {

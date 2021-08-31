@@ -8,9 +8,8 @@ import { ReceiverSelectorType } from "../background/receiverSelector";
 import { TypedEventTarget } from "./TypedEventTarget";
 import { TypedStorageArea } from "./TypedStorageArea";
 
-
 const storageArea = new TypedStorageArea<{
-    options: Options
+    options: Options;
 }>(browser.storage.sync);
 
 export interface Options {
@@ -35,12 +34,11 @@ export interface Options {
     [key: string]: Options[keyof Options];
 }
 
-
 interface EventMap {
-    "changed": Array<keyof Options>;
+    changed: Array<keyof Options>;
 }
 
-export default new class extends TypedEventTarget<EventMap> {
+export default new (class extends TypedEventTarget<EventMap> {
     constructor() {
         super();
         this.onStorageChanged = this.onStorageChanged.bind(this);
@@ -53,9 +51,9 @@ export default new class extends TypedEventTarget<EventMap> {
     }
 
     private onStorageChanged(
-            changes: { [key: string]: browser.storage.StorageChange }
-          , areaName: string) {
-
+        changes: { [key: string]: browser.storage.StorageChange },
+        areaName: string
+    ) {
         if (areaName !== "sync") {
             return;
         }
@@ -80,11 +78,16 @@ export default new class extends TypedEventTarget<EventMap> {
                     }
 
                     // Array comparison
-                    if (oldKeyValue instanceof Array
-                        && newKeyValue instanceof Array) {
-                        if (oldKeyValue.length === newKeyValue.length
-                            && oldKeyValue.every((value, index) =>
-                                value === newKeyValue[index])) {
+                    if (
+                        oldKeyValue instanceof Array &&
+                        newKeyValue instanceof Array
+                    ) {
+                        if (
+                            oldKeyValue.length === newKeyValue.length &&
+                            oldKeyValue.every(
+                                (value, index) => value === newKeyValue[index]
+                            )
+                        ) {
                             continue;
                         }
                     }
@@ -93,9 +96,11 @@ export default new class extends TypedEventTarget<EventMap> {
                 changedKeys.push(key);
             }
 
-            this.dispatchEvent(new CustomEvent("changed", {
-                detail: changedKeys as Array<keyof Options>
-            }));
+            this.dispatchEvent(
+                new CustomEvent("changed", {
+                    detail: changedKeys as Array<keyof Options>
+                })
+            );
         }
     }
 
@@ -135,14 +140,13 @@ export default new class extends TypedEventTarget<EventMap> {
      * promise.
      */
     public async set<T extends keyof Options>(
-            name: T
-          , value: Options[T]): Promise<void> {
-
+        name: T,
+        value: Options[T]
+    ): Promise<void> {
         const options = await this.getAll();
         options[name] = value;
         return this.setAll(options);
     }
-
 
     /**
      * Gets existing options from storage and compares it
@@ -153,7 +157,7 @@ export default new class extends TypedEventTarget<EventMap> {
         const newOpts = await this.getAll();
 
         // Find options not already in storage
-        for (const [ optName, optVal ] of Object.entries(defaults)) {
+        for (const [optName, optVal] of Object.entries(defaults)) {
             if (!newOpts.hasOwnProperty(optName)) {
                 newOpts[optName] = optVal;
             }
@@ -162,4 +166,4 @@ export default new class extends TypedEventTarget<EventMap> {
         // Update storage with default values of new options
         return this.setAll(newOpts);
     }
-};
+})();

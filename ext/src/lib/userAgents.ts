@@ -5,15 +5,14 @@ const PLATFORM_MAC_HYBRID = "Macintosh; Intel Mac OS X 10.15; rv:72.0";
 const PLATFORM_WIN = "Windows NT 10.0; Win64; x64";
 const PLATFORM_LINUX = "X11; Linux x86_64";
 
-const UA_CHROME = "AppleWebKit/537.36 (KHTML, like Gecko) Chrome/80.0.3987.87 Safari/537.36";
+const UA_CHROME =
+    "AppleWebKit/537.36 (KHTML, like Gecko) Chrome/80.0.3987.87 Safari/537.36";
 const UA_HYBRID = "Chrome/80.0.3987.87 Gecko/20100101 Firefox/72.0";
 
 export function getChromeUserAgent(platform: string, hybrid = false) {
     let platformComponent: string;
     if (platform === "mac") {
-        platformComponent = hybrid
-            ? PLATFORM_MAC_HYBRID
-            : PLATFORM_MAC;
+        platformComponent = hybrid ? PLATFORM_MAC_HYBRID : PLATFORM_MAC;
     } else if (platform === "win") {
         platformComponent = PLATFORM_WIN;
     } else if (platform === "linux") {
@@ -22,9 +21,7 @@ export function getChromeUserAgent(platform: string, hybrid = false) {
         return;
     }
 
-    const browserComponent = hybrid
-        ? UA_HYBRID
-        : UA_CHROME;
+    const browserComponent = hybrid ? UA_HYBRID : UA_CHROME;
 
     return `Mozilla/5.0 (${platformComponent}) ${browserComponent}`;
 }

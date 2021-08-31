@@ -3,12 +3,13 @@
 import logger from "./logger";
 import { stringify } from "./utils";
 
-import { ReceiverSelection
-       , ReceiverSelectionActionType
-       , ReceiverSelectorMediaType } from "../background/receiverSelector";
+import {
+    ReceiverSelection,
+    ReceiverSelectionActionType,
+    ReceiverSelectorMediaType
+} from "../background/receiverSelector";
 
 import ShimManager from "../background/ShimManager";
-
 
 interface LoadSenderOptions {
     tabId: number;
@@ -34,13 +35,14 @@ export default async function loadSender(opts: LoadSenderOptions) {
         case ReceiverSelectorMediaType.App: {
             const shim = ShimManager.getShim(opts.tabId, opts.frameId);
             if (!shim) {
-                throw logger.error(`Shim not found at tabId ${
-                        opts.tabId} / frameId ${opts.frameId}`);
+                throw logger.error(
+                    `Shim not found at tabId ${opts.tabId} / frameId ${opts.frameId}`
+                );
             }
 
             shim.contentPort.postMessage({
-                subject: "shim:launchApp"
-              , data: { receiver: opts.selection.receiver }
+                subject: "shim:launchApp",
+                data: { receiver: opts.selection.receiver }
             });
 
             break;
@@ -52,13 +54,13 @@ export default async function loadSender(opts: LoadSenderOptions) {
                 code: stringify`
                     window.selectedMedia = ${opts.selection.mediaType};
                     window.selectedReceiver = ${opts.selection.receiver};
-                `
-              , frameId: opts.frameId
+                `,
+                frameId: opts.frameId
             });
 
             await browser.tabs.executeScript(opts.tabId, {
-                file: "senders/mirroring.js"
-              , frameId: opts.frameId
+                file: "senders/mirroring.js",
+                frameId: opts.frameId
             });
 
             break;
@@ -69,8 +71,8 @@ export default async function loadSender(opts: LoadSenderOptions) {
             const { init } = await import("../senders/media");
 
             init({
-                mediaUrl: fileUrl.href
-              , receiver: opts.selection.receiver
+                mediaUrl: fileUrl.href,
+                receiver: opts.selection.receiver
             });
 
             break;

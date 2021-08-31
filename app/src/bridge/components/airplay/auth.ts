@@ -14,7 +14,6 @@ import fetch, { Headers } from "node-fetch";
 import nacl from "tweetnacl";
 import bplist from "./bplist";
 
-
 const AIRPLAY_PORT = 7000;
 const MIMETYPE_BPLIST = "application/x-apple-binary-plist";
 
@@ -27,10 +26,10 @@ export class AirPlayAuthCredentials {
     public clientPk: Uint8Array;
 
     constructor(
-            clientId?: string
-          , clientSk?: Uint8Array
-          , clientPk?: Uint8Array) {
-
+        clientId?: string,
+        clientSk?: Uint8Array,
+        clientPk?: Uint8Array
+    ) {
         if (clientId && clientSk && clientPk) {
             this.clientId = clientId;
             this.clientSk = clientSk;
@@ -74,8 +73,7 @@ export class AirPlayAuth {
      */
     public async finishPairing(pin: string) {
         // Stage 1 response
-        const { pk: serverPk
-              , salt: serverSalt } = await this.pairSetupPin1();
+        const { pk: serverPk, salt: serverSalt } = await this.pairSetupPin1();
 
         // SRP params must 2048-bit SHA1
         const srpParams = srp6a.params[2048];
@@ -83,19 +81,21 @@ export class AirPlayAuth {
 
         // Create SRP client
         const srpClient = new srp6a.Client(
-                srpParams                                // Params
-              , serverSalt                               // Receiver salt
-              , Buffer.from(this.credentials.clientId)   // Username
-              , Buffer.from(pin)                         // Password (receiver pin)
-              , Buffer.from(this.credentials.clientSk)); // Client secret key
+            srpParams, //                              Params
+            serverSalt, //                             Receiver salt
+            Buffer.from(this.credentials.clientId), // Username
+            Buffer.from(pin), //                       Password (receiver pin)
+            Buffer.from(this.credentials.clientSk) //  Client secret key
+        );
 
         // Add receiver's public key
         srpClient.setB(serverPk);
 
         // Stage 2 response
         await this.pairSetupPin2(
-                srpClient.computeA()    // SRP public key
-              , srpClient.computeM1()); // SRP proof
+            srpClient.computeA(), // SRP public key
+            srpClient.computeM1() // SRP proof
+        );
 
         // Stage 3 response
         await this.pairSetupPin3(srpClient.computeK());
@@ -108,12 +108,10 @@ export class AirPlayAuth {
      * its public key / salt.
      */
     public async pairSetupPin1(): Promise<any> {
-        const [ response ] = await this.sendPostRequestBplist(
-                "/pair-setup-pin"
-              , {
-                    method: "pin"
-                  , user: this.credentials.clientId
-                });
+        const [response] = await this.sendPostRequestBplist("/pair-setup-pin", {
+            method: "pin",
+            user: this.credentials.clientId
+        });
 
         return response;
     }
@@ -125,13 +123,11 @@ export class AirPlayAuth {
      * public keys, sending them to the receiver and receiving its
      * proof.
      */
-    public async pairSetupPin2(
-            pk: Buffer
-          , proof: Buffer): Promise<any> {
-
-        const [ response ] = await this.sendPostRequestBplist(
-                "/pair-setup-pin"
-              , { pk, proof });
+    public async pairSetupPin2(pk: Buffer, proof: Buffer): Promise<any> {
+        const [response] = await this.sendPostRequestBplist("/pair-setup-pin", {
+            pk,
+            proof
+        });
 
         return response;
     }
@@ -144,24 +140,25 @@ export class AirPlayAuth {
      * responds confirming the pairing is complete.
      */
     public async pairSetupPin3(
-            sharedSecretHash: crypto.BinaryLike): Promise<any> {
-
+        sharedSecretHash: crypto.BinaryLike
+    ): Promise<any> {
         // Create AES key
-        const aesKey = crypto.createHash("sha512")
+        const aesKey = crypto
+            .createHash("sha512")
             .update("Pair-Setup-AES-Key")
             .update(sharedSecretHash)
             .digest()
             .slice(0, 16);
 
         // Create AES IV
-        const aesIv = crypto.createHash("sha512")
+        const aesIv = crypto
+            .createHash("sha512")
             .update("Pair-Setup-AES-IV")
             .update(sharedSecretHash)
             .digest()
             .slice(0, 16);
 
         aesIv[15]++;
-
 
         const cipher = crypto.createCipheriv("aes-128-gcm", aesKey, aesIv);
 
@@ -170,23 +167,23 @@ export class AirPlayAuth {
         cipher.final();
         const authTag = cipher.getAuthTag();
 
-        const [ response ] = await this.sendPostRequestBplist(
-                "/pair-setup-pin"
-              , { epk, authTag });
+        const [response] = await this.sendPostRequestBplist("/pair-setup-pin", {
+            epk,
+            authTag
+        });
 
         return response;
     }
-
 
     /**
      * Sends a POST request to receiver and returns the
      * response.
      */
     public async sendPostRequest(
-            path: string
-          , contentType?: string
-          , data?: Buffer | string): Promise<any> {
-
+        path: string,
+        contentType?: string,
+        data?: Buffer | string
+    ): Promise<any> {
         // Create URL from base receiver URL and path
         const requestUrl = new URL(path, this.baseUrl);
 
@@ -200,9 +197,9 @@ export class AirPlayAuth {
         }
 
         const response = await fetch(requestUrl.href, {
-            method: "POST"
-          , headers: requestHeaders
-          , body: data
+            method: "POST",
+            headers: requestHeaders,
+            body: data
         });
 
         if (!response.ok) {
@@ -217,16 +214,17 @@ export class AirPlayAuth {
      * receiver, then decodes and returns the response.
      */
     public async sendPostRequestBplist(
-            path: string
-          , data?: object): Promise<any> {
-
+        path: string,
+        data?: object
+    ): Promise<any> {
         // Convert data to compatible type
-        const requestBody = data
-            ? bplist.create(data)
-            : undefined;
+        const requestBody = data ? bplist.create(data) : undefined;
 
         const response = await this.sendPostRequest(
-                path, MIMETYPE_BPLIST, requestBody);
+            path,
+            MIMETYPE_BPLIST,
+            requestBody
+        );
 
         // Convert response data to Buffer for bplist-parser
         return bplist.parse.parseBuffer(response);

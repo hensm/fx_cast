@@ -11,7 +11,6 @@ import mime from "mime-types";
 import { sendMessage } from "../lib/nativeMessaging";
 import { convertSrtToVtt } from "../lib/subtitles";
 
-
 export let mediaServer: http.Server | undefined;
 
 export async function startMediaServer(filePath: string, port: number) {
@@ -41,7 +40,7 @@ export async function startMediaServer(filePath: string, port: number) {
     } catch (err) {
         console.error("Error: Failed to find media path.");
         sendMessage({
-            subject:  "mediaCast:mediaServerError"
+            subject: "mediaCast:mediaServerError"
         });
 
         return;
@@ -63,15 +62,19 @@ export async function startMediaServer(filePath: string, port: number) {
      */
     const subtitles = new Map<string, string>();
     try {
-        const dirEntries = await fs.promises.readdir(
-                fileDir, { withFileTypes: true });
+        const dirEntries = await fs.promises.readdir(fileDir, {
+            withFileTypes: true
+        });
 
         for (const dirEntry of dirEntries) {
-            if (dirEntry.isFile()
-             && mime.lookup(dirEntry.name) === "application/x-subrip") {
-
-                subtitles.set(dirEntry.name, await convertSrtToVtt(
-                        path.join(fileDir, dirEntry.name)));
+            if (
+                dirEntry.isFile() &&
+                mime.lookup(dirEntry.name) === "application/x-subrip"
+            ) {
+                subtitles.set(
+                    dirEntry.name,
+                    await convertSrtToVtt(path.join(fileDir, dirEntry.name))
+                );
             }
         }
     } catch (err) {
@@ -96,22 +99,20 @@ export async function startMediaServer(filePath: string, port: number) {
                 if (range) {
                     const bounds = range.substring(6).split("-");
                     const start = parseInt(bounds[0]);
-                    const end = bounds[1]
-                        ? parseInt(bounds[1]) : fileSize - 1;
+                    const end = bounds[1] ? parseInt(bounds[1]) : fileSize - 1;
 
                     res.writeHead(206, {
-                        "Accept-Ranges": "bytes"
-                      , "Content-Range": `bytes ${start}-${end}/${fileSize}`
-                      , "Content-Length": (end - start) + 1
-                      , "Content-Type": contentType
+                        "Accept-Ranges": "bytes",
+                        "Content-Range": `bytes ${start}-${end}/${fileSize}`,
+                        "Content-Length": end - start + 1,
+                        "Content-Type": contentType
                     });
 
-                    fs.createReadStream(
-                            filePath, { start, end }).pipe(res);
+                    fs.createReadStream(filePath, { start, end }).pipe(res);
                 } else {
                     res.writeHead(200, {
-                        "Content-Length": fileSize
-                      , "Content-Type": contentType
+                        "Content-Length": fileSize,
+                        "Content-Type": contentType
                     });
 
                     fs.createReadStream(filePath).pipe(res);
@@ -139,7 +140,8 @@ export async function startMediaServer(filePath: string, port: number) {
         const ifaces = Object.values(os.networkInterfaces());
         for (const iface of ifaces) {
             const matchingIface = iface?.find(
-                    details => details.family === "IPv4" && !details.internal);
+                details => details.family === "IPv4" && !details.internal
+            );
             if (matchingIface) {
                 localAddress = matchingIface.address;
             }
@@ -155,21 +157,25 @@ export async function startMediaServer(filePath: string, port: number) {
         }
 
         sendMessage({
-            subject: "mediaCast:mediaServerStarted"
-          , data: {
-                mediaPath: fileName
-              , subtitlePaths: Array.from(subtitles.keys())
-              , localAddress
+            subject: "mediaCast:mediaServerStarted",
+            data: {
+                mediaPath: fileName,
+                subtitlePaths: Array.from(subtitles.keys()),
+                localAddress
             }
         });
     });
 
-    mediaServer.on("close", () => sendMessage({
-        subject: "mediaCast:mediaServerStopped"
-    }));
-    mediaServer.on("error", () => sendMessage({
-        subject: "mediaCast:mediaServerError"
-    }));
+    mediaServer.on("close", () =>
+        sendMessage({
+            subject: "mediaCast:mediaServerStopped"
+        })
+    );
+    mediaServer.on("error", () =>
+        sendMessage({
+            subject: "mediaCast:mediaServerError"
+        })
+    );
 
     mediaServer.listen(port);
 }

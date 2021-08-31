@@ -6,9 +6,7 @@ import { Readable } from "stream";
 import minimist from "minimist";
 import WebSocket from "ws";
 
-import { DecodeTransform
-       , EncodeTransform } from "./transforms";
-
+import { DecodeTransform, EncodeTransform } from "./transforms";
 
 export function init(port: number) {
     process.stdout.write("Starting WebSocket server... ");
@@ -18,12 +16,11 @@ export function init(port: number) {
         console.log("Done!");
     });
 
-    wss.on("error", (err) => {
+    wss.on("error", err => {
         // eslint-disable-next-line no-console
         console.log("Failed!");
         console.error(err);
     });
-
 
     wss.on("connection", socket => {
         // Stream for incoming WebSocket messages
@@ -35,27 +32,22 @@ export function init(port: number) {
             messageStream.push(JSON.parse(message));
         });
 
-
         /**
          * Daemon and bridge are the same binary, so spawn a new
          * version of self in bridge mode.
          */
-        const bridge = spawn(process.execPath, [ process.argv[1] ]);
+        const bridge = spawn(process.execPath, [process.argv[1]]);
 
         // socket -> bridge.stdin
-        messageStream
-            .pipe(new EncodeTransform())
-            .pipe(bridge.stdin);
+        messageStream.pipe(new EncodeTransform()).pipe(bridge.stdin);
 
         // bridge.stdout -> socket
-        bridge.stdout
-            .pipe(new DecodeTransform())
-            .on("data", data => {
-                // Socket can be CLOSING here
-                if (socket.readyState === WebSocket.OPEN) {
-                    socket.send(JSON.stringify(data));
-                }
-            });
+        bridge.stdout.pipe(new DecodeTransform()).on("data", data => {
+            // Socket can be CLOSING here
+            if (socket.readyState === WebSocket.OPEN) {
+                socket.send(JSON.stringify(data));
+            }
+        });
 
         // Handle termination
         socket.on("close", () => bridge.kill());

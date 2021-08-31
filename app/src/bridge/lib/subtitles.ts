@@ -2,13 +2,11 @@
 
 import fs from "fs";
 
-
 /**
  * Reads a SubRip file and outputs text content as WebVTT.
  */
 export async function convertSrtToVtt(srtFilePath: string) {
-    const fileStream = fs.createReadStream(
-            srtFilePath, { encoding: "utf-8" });
+    const fileStream = fs.createReadStream(srtFilePath, { encoding: "utf-8" });
 
     let fileContents = "";
     for await (let chunk of fileStream) {
@@ -21,7 +19,6 @@ export async function convertSrtToVtt(srtFilePath: string) {
         fileContents += chunk.replace(/$\r\n/gm, "\n");
     }
 
-
     let vttText = "WEBVTT\n";
 
     /**
@@ -30,7 +27,8 @@ export async function convertSrtToVtt(srtFilePath: string) {
      * (followed by a new line), then any text content until a blank
      * line.
      */
-    const REGEX_CAPTION = /(?:(\d+)\n(\d{2}:\d{2}:\d{2},\d{3} --> \d{2}:\d{2}:\d{2},\d{3}))\n((?:.+)\n?)*/g;
+    const REGEX_CAPTION =
+        /(?:(\d+)\n(\d{2}:\d{2}:\d{2},\d{3} --> \d{2}:\d{2}:\d{2},\d{3}))\n((?:.+)\n?)*/g;
 
     /**
      * WebVTT is very similar to SubRip, the main differences being

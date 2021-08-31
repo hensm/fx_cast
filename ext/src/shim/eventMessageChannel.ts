@@ -2,13 +2,11 @@
 
 import { Message } from "../messaging";
 
-
 type ListenerFunc = (message: Message) => void;
 
 export interface ListenerObject {
-    disconnect (): void;
+    disconnect(): void;
 }
-
 
 export function onMessage(listener: ListenerFunc): ListenerObject {
     function on__castMessage(ev: CustomEvent) {
@@ -26,16 +24,16 @@ export function onMessage(listener: ListenerFunc): ListenerObject {
     }
 
     // @ts-ignore
-    document.addEventListener(
-            "__castMessage"
-          , on__castMessage, true);
+    document.addEventListener("__castMessage", on__castMessage, true);
 
     return {
         disconnect() {
             // @ts-ignore
             document.removeEventListener(
-                    "__castMessage"
-                  , on__castMessage, true);
+                "__castMessage",
+                on__castMessage,
+                true
+            );
         }
     };
 }
@@ -48,7 +46,6 @@ export function sendMessageResponse(message: Message) {
     document.dispatchEvent(event);
 }
 
-
 export function onMessageResponse(listener: ListenerFunc): ListenerObject {
     function on__castMessageResponse(ev: CustomEvent) {
         listener(JSON.parse(ev.detail));
@@ -56,15 +53,19 @@ export function onMessageResponse(listener: ListenerFunc): ListenerObject {
 
     // @ts-ignore
     document.addEventListener(
-            "__castMessageResponse"
-          , on__castMessageResponse, true);
+        "__castMessageResponse",
+        on__castMessageResponse,
+        true
+    );
 
     return {
         disconnect() {
             // @ts-ignore
             document.removeEventListener(
-                    "__castMessageResponse"
-                  , on__castMessageResponse, true);
+                "__castMessageResponse",
+                on__castMessageResponse,
+                true
+            );
         }
     };
 }

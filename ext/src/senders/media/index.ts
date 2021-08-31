@@ -7,18 +7,20 @@ import cast, { ensureInit } from "../../shim/export";
 import { Message } from "../../messaging";
 import { ReceiverDevice } from "../../types";
 
-
-function startMediaServer(filePath: string, port: number)
-        : Promise<{ mediaPath: string
-                  , subtitlePaths: string[]
-                  , localAddress: string }> {
-
+function startMediaServer(
+    filePath: string,
+    port: number
+): Promise<{
+    mediaPath: string;
+    subtitlePaths: string[];
+    localAddress: string;
+}> {
     return new Promise((resolve, reject) => {
         backgroundPort.postMessage({
-            subject: "bridge:startMediaServer"
-          , data: {
-                filePath: decodeURI(filePath)
-              , port
+            subject: "bridge:startMediaServer",
+            data: {
+                filePath: decodeURI(filePath),
+                port
             }
         } as Message);
 
@@ -45,14 +47,12 @@ function startMediaServer(filePath: string, port: number)
     });
 }
 
-
 let backgroundPort: MessagePort;
 
 let currentSession: cast.Session;
 let currentMedia: cast.media.Media;
 
 let targetElement: HTMLElement;
-
 
 function getSession(opts: InitOptions): Promise<cast.Session> {
     return new Promise(async (resolve, reject) => {
@@ -64,10 +64,11 @@ function getSession(opts: InitOptions): Promise<cast.Session> {
         function receiverListener(availability: string) {
             if (availability === cast.ReceiverAvailability.AVAILABLE) {
                 cast.requestSession(
-                        onRequestSessionSuccess
-                      , onRequestSessionError
-                      , undefined
-                      , opts.receiver);
+                    onRequestSessionSuccess,
+                    onRequestSessionError,
+                    undefined,
+                    opts.receiver
+                );
             }
         }
 
@@ -82,15 +83,15 @@ function getSession(opts: InitOptions): Promise<cast.Session> {
             reject(err.description);
         }
 
-
         const sessionRequest = new cast.SessionRequest(
-                cast.media.DEFAULT_MEDIA_RECEIVER_APP_ID);
+            cast.media.DEFAULT_MEDIA_RECEIVER_APP_ID
+        );
 
         const apiConfig = new cast.ApiConfig(
-                sessionRequest
-              , sessionListener    // sessionListener
-              , receiverListener); // receiverListener
-
+            sessionRequest,
+            sessionListener, // sessionListener
+            receiverListener
+        ); // receiverListener
 
         cast.initialize(apiConfig);
     });
@@ -113,18 +114,17 @@ function getMedia(opts: InitOptions): Promise<cast.media.Media> {
             try {
                 // Wait until media server is listening
                 const { localAddress, mediaPath, subtitlePaths } =
-                        await startMediaServer(mediaTitle, port);
+                    await startMediaServer(mediaTitle, port);
 
                 const baseUrl = new URL(`http://${localAddress}:${port}/`);
                 mediaUrl = new URL(mediaPath, baseUrl);
                 subtitleUrls = subtitlePaths.map(
-                        path => new URL(path, baseUrl));
-
+                    path => new URL(path, baseUrl)
+                );
             } catch (err) {
                 throw logger.error("Failed to start media server");
             }
         }
-
 
         const activeTrackIds: number[] = [];
         const mediaInfo = new cast.media.MediaInfo(mediaUrl.href, "");
@@ -137,7 +137,9 @@ function getMedia(opts: InitOptions): Promise<cast.media.Media> {
         let trackIndex = 0;
         for (const subtitleUrl of subtitleUrls) {
             const castTrack = new cast.media.Track(
-                    trackIndex, cast.media.TrackType.TEXT);
+                trackIndex,
+                cast.media.TrackType.TEXT
+            );
 
             castTrack.name = subtitleUrl.pathname;
             castTrack.trackContentId = subtitleUrl.href;
@@ -168,7 +170,9 @@ function getMedia(opts: InitOptions): Promise<cast.media.Media> {
                      * and type as TrackType.TEXT.
                      */
                     const castTrack = new cast.media.Track(
-                            trackIndex, cast.media.TrackType.TEXT);
+                        trackIndex,
+                        cast.media.TrackType.TEXT
+                    );
 
                     // Copy TextTrack properties
                     castTrack.name = track.label || `track-${trackIndex}`;
@@ -179,29 +183,29 @@ function getMedia(opts: InitOptions): Promise<cast.media.Media> {
                     switch (track.kind) {
                         case "subtitles":
                             castTrack.subtype =
-                                    cast.media.TextTrackType.SUBTITLES;
+                                cast.media.TextTrackType.SUBTITLES;
                             break;
                         case "captions":
                             castTrack.subtype =
-                                    cast.media.TextTrackType.CAPTIONS;
+                                cast.media.TextTrackType.CAPTIONS;
                             break;
                         case "descriptions":
                             castTrack.subtype =
-                                    cast.media.TextTrackType.DESCRIPTIONS;
+                                cast.media.TextTrackType.DESCRIPTIONS;
                             break;
                         case "chapters":
                             castTrack.subtype =
-                                    cast.media.TextTrackType.CHAPTERS;
+                                cast.media.TextTrackType.CHAPTERS;
                             break;
                         case "metadata":
                             castTrack.subtype =
-                                    cast.media.TextTrackType.METADATA;
+                                cast.media.TextTrackType.METADATA;
                             break;
 
                         // Default to subtitles
                         default:
                             castTrack.subtype =
-                                    cast.media.TextTrackType.SUBTITLES;
+                                cast.media.TextTrackType.SUBTITLES;
                     }
 
                     // Add track to mediaInfo
@@ -225,7 +229,6 @@ function getMedia(opts: InitOptions): Promise<cast.media.Media> {
     });
 }
 
-
 let ignoreMediaEvents = false;
 
 async function registerMediaElementListeners(mediaElement: HTMLMediaElement) {
@@ -243,7 +246,6 @@ async function registerMediaElementListeners(mediaElement: HTMLMediaElement) {
         mediaElement.addEventListener("seeking", checkIgnore, true);
         mediaElement.addEventListener("ratechange", checkIgnore, true);
         mediaElement.addEventListener("volumechange", checkIgnore, true);
-
 
         mediaElement.addEventListener("play", () => {
             currentMedia.play();
@@ -270,14 +272,14 @@ async function registerMediaElementListeners(mediaElement: HTMLMediaElement) {
 
         mediaElement.addEventListener("volumechange", () => {
             const newVolume = new cast.Volume(
-                    currentMedia.volume.level
-                  , currentMedia.volume.muted);
+                currentMedia.volume.level,
+                currentMedia.volume.muted
+            );
 
             const volumeRequest = new cast.media.VolumeRequest(newVolume);
 
             currentMedia.setVolume(volumeRequest);
         });
-
 
         currentMedia.addUpdateListener(isAlive => {
             if (!isAlive) {
@@ -303,7 +305,6 @@ async function registerMediaElementListeners(mediaElement: HTMLMediaElement) {
                 }
             }
 
-
             const localRepeatMode = mediaElement.loop
                 ? cast.media.RepeatMode.SINGLE
                 : cast.media.RepeatMode.OFF;
@@ -323,7 +324,6 @@ async function registerMediaElementListeners(mediaElement: HTMLMediaElement) {
                 }
             }
 
-
             if (currentMedia.currentTime !== mediaElement.currentTime) {
                 ignoreMediaEvents = true;
                 mediaElement.currentTime = currentMedia.currentTime;
@@ -331,7 +331,6 @@ async function registerMediaElementListeners(mediaElement: HTMLMediaElement) {
         });
     }
 }
-
 
 interface InitOptions {
     mediaUrl: string;
@@ -355,7 +354,8 @@ export async function init(opts: InitOptions) {
     }
 
     targetElement = browser.menus.getTargetElement(
-            opts.targetElementId) as HTMLMediaElement;
+        opts.targetElementId
+    ) as HTMLMediaElement;
 
     currentSession = await getSession(opts);
     currentMedia = await getMedia(opts);
@@ -384,11 +384,11 @@ export async function init(opts: InitOptions) {
  * provided on the window object.
  */
 if (window.location.protocol !== "moz-extension:") {
-    const _window = (window as any);
+    const _window = window as any;
 
     init({
-        mediaUrl: _window.mediaUrl
-      , receiver: _window.receiver
-      , targetElementId: _window.targetElementId
+        mediaUrl: _window.mediaUrl,
+        receiver: _window.receiver,
+        targetElementId: _window.targetElementId
     });
 }

@@ -8,7 +8,7 @@
  * UA string checking.
  */
 export const CAST_LOADER_SCRIPT_URL =
-        "https://www.gstatic.com/cv/js/sender/v1/cast_sender.js";
+    "https://www.gstatic.com/cv/js/sender/v1/cast_sender.js";
 
 /**
  * Cast Chrome Sender Framework API loader script.
@@ -18,8 +18,7 @@ export const CAST_LOADER_SCRIPT_URL =
  * the framework API script is conditionally loaded in
  * addition to the regular SDK script.
  */
-export const CAST_FRAMEWORK_LOADER_SCRIPT_URL =
-        `${CAST_LOADER_SCRIPT_URL}?loadCastFramework=1`;
+export const CAST_FRAMEWORK_LOADER_SCRIPT_URL = `${CAST_LOADER_SCRIPT_URL}?loadCastFramework=1`;
 
 /**
  * Cast extension URLs.
@@ -29,8 +28,8 @@ export const CAST_FRAMEWORK_LOADER_SCRIPT_URL =
  * chrome-extension: URLs for compatibility reasons (?).
  */
 export const CAST_SCRIPT_URLS = [
-    "chrome-extension://pkedcjkdefgpdelpbcmbmeomcjbeemfm/cast_sender.js"
-  , "chrome-extension://enhhojjnijigcajfphajepfemndkmdlo/cast_sender.js"
+    "chrome-extension://pkedcjkdefgpdelpbcmbmeomcjbeemfm/cast_sender.js",
+    "chrome-extension://enhhojjnijigcajfphajepfemndkmdlo/cast_sender.js"
 ];
 
 /**
@@ -41,4 +40,4 @@ export const CAST_SCRIPT_URLS = [
  * opposed to within the cast extension.
  */
 export const CAST_FRAMEWORK_SCRIPT_URL =
-        "https://www.gstatic.com/cast/sdk/libs/sender/1.0/cast_framework.js";
+    "https://www.gstatic.com/cast/sdk/libs/sender/1.0/cast_framework.js";

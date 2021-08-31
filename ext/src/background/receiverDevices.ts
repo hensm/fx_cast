@@ -8,17 +8,16 @@ import { Message, Port } from "../messaging";
 import { ReceiverDevice } from "../types";
 import { ReceiverStatus } from "../shim/cast/types";
 
-
 interface EventMap {
-    "receiverDeviceUp": { receiverDevice: ReceiverDevice }
-  , "receiverDeviceDown": { receiverDeviceId: string }
-  , "receiverDeviceUpdated": {
-        receiverDeviceId: string
-      , status: ReceiverStatus
-    }
+    receiverDeviceUp: { receiverDevice: ReceiverDevice };
+    receiverDeviceDown: { receiverDeviceId: string };
+    receiverDeviceUpdated: {
+        receiverDeviceId: string;
+        status: ReceiverStatus;
+    };
 }
 
-export default new class extends TypedEventTarget<EventMap> {
+export default new (class extends TypedEventTarget<EventMap> {
     /**
      * Map of receiver device IDs to devices. Updated as
      * receiverDevice messages are received from the bridge.
@@ -26,7 +25,6 @@ export default new class extends TypedEventTarget<EventMap> {
     private receiverDevices = new Map<string, ReceiverDevice>();
 
     private bridgePort?: Port;
-
 
     async init() {
         if (!this.bridgePort) {
@@ -47,8 +45,8 @@ export default new class extends TypedEventTarget<EventMap> {
         port.onDisconnect.addListener(this.onBridgeDisconnect);
 
         port.postMessage({
-            subject: "bridge:startDiscovery"
-          , data: {
+            subject: "bridge:startDiscovery",
+            data: {
                 // Also send back status messages
                 shouldWatchStatus: true
             }
@@ -69,15 +67,17 @@ export default new class extends TypedEventTarget<EventMap> {
      */
     stopReceiverApp(receiverDeviceId: string) {
         if (!this.bridgePort) {
-            logger.error("Failed to stop receiver device, no bridge connection");
+            logger.error(
+                "Failed to stop receiver device, no bridge connection"
+            );
             return;
         }
 
         const receiverDevice = this.receiverDevices.get(receiverDeviceId);
         if (receiverDevice) {
             this.bridgePort.postMessage({
-                subject: "bridge:stopCastApp"
-              , data: { receiverDevice }
+                subject: "bridge:stopCastApp",
+                data: { receiverDevice }
             });
         }
     }
@@ -89,10 +89,10 @@ export default new class extends TypedEventTarget<EventMap> {
 
                 this.receiverDevices.set(receiverDevice.id, receiverDevice);
                 this.dispatchEvent(
-                        new CustomEvent("receiverDeviceUp"
-                      , {
-                            detail: { receiverDevice }
-                        }));
+                    new CustomEvent("receiverDeviceUp", {
+                        detail: { receiverDevice }
+                    })
+                );
 
                 break;
             }
@@ -104,10 +104,10 @@ export default new class extends TypedEventTarget<EventMap> {
                     this.receiverDevices.delete(receiverDeviceId);
                 }
                 this.dispatchEvent(
-                        new CustomEvent("receiverDeviceDown"
-                      , {
-                            detail: { receiverDeviceId }
-                        }));
+                    new CustomEvent("receiverDeviceDown", {
+                        detail: { receiverDeviceId }
+                    })
+                );
 
                 break;
             }
@@ -115,10 +115,12 @@ export default new class extends TypedEventTarget<EventMap> {
             case "main:receiverDeviceUpdated": {
                 const { receiverDeviceId, status } = message.data;
                 const receiverDevice =
-                        this.receiverDevices.get(receiverDeviceId);
+                    this.receiverDevices.get(receiverDeviceId);
 
                 if (!receiverDevice) {
-                    logger.error(`Receiver ID \`${receiverDeviceId}\` not found!`);
+                    logger.error(
+                        `Receiver ID \`${receiverDeviceId}\` not found!`
+                    );
                     break;
                 }
 
@@ -129,27 +131,27 @@ export default new class extends TypedEventTarget<EventMap> {
 
                     if (status.applications) {
                         receiverDevice.status.applications =
-                                status.applications;
+                            status.applications;
                     }
                 } else {
                     receiverDevice.status = status;
                 }
 
                 this.dispatchEvent(
-                        new CustomEvent("receiverDeviceUpdated"
-                      , {
-                            detail: {
-                                receiverDeviceId
-                              , status: receiverDevice.status
-                            }
-                        }));
+                    new CustomEvent("receiverDeviceUpdated", {
+                        detail: {
+                            receiverDeviceId,
+                            status: receiverDevice.status
+                        }
+                    })
+                );
             }
         }
-    }
+    };
 
     private onBridgeDisconnect = () => {
         // Notify listeners of device availablility
-        for (const [ , receiverDevice ] of this.receiverDevices) {
+        for (const [, receiverDevice] of this.receiverDevices) {
             const event = new CustomEvent("receiverDeviceDown", {
                 detail: { receiverDeviceId: receiverDevice.id }
             });
@@ -163,5 +165,5 @@ export default new class extends TypedEventTarget<EventMap> {
         window.setTimeout(() => {
             this.refresh();
         }, 10000);
-    }
-};
+    };
+})();

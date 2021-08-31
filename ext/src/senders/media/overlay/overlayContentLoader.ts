@@ -7,17 +7,22 @@ const _ = browser.i18n.getMessage;
  * scripts from loading before its execution.
  */
 const req = new XMLHttpRequest();
-req.open("GET", browser.runtime.getURL(
-        "senders/media/overlay/overlayContent.js"), false);
+req.open(
+    "GET",
+    browser.runtime.getURL("senders/media/overlay/overlayContent.js"),
+    false
+);
 
 req.send();
 
 if (req.status === 200) {
     // TODO: Replace with cast icons until AirPlay support is ready
     const iconAirPlayAudio = browser.runtime.getURL(
-            "senders/media/overlay/AirPlay_Audio.svg");
+        "senders/media/overlay/AirPlay_Audio.svg"
+    );
     const iconAirPlayVideo = browser.runtime.getURL(
-            "senders/media/overlay/AirPlay_Audio.svg");
+        "senders/media/overlay/AirPlay_Audio.svg"
+    );
 
     const scriptElement = document.createElement("script");
     scriptElement.textContent = `(function(){

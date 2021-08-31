@@ -7,29 +7,47 @@ import { ErrorCallback, SuccessCallback } from "../types";
 
 import { onMessage, sendMessageResponse } from "../eventMessageChannel";
 
-import { AutoJoinPolicy, Capability, DefaultActionPolicy, DialAppState
-      , ErrorCode, ReceiverAction, ReceiverAvailability, ReceiverType
-      , SenderPlatform, SessionStatus, VolumeControlType } from "./enums";
+import {
+    AutoJoinPolicy,
+    Capability,
+    DefaultActionPolicy,
+    DialAppState,
+    ErrorCode,
+    ReceiverAction,
+    ReceiverAvailability,
+    ReceiverType,
+    SenderPlatform,
+    SessionStatus,
+    VolumeControlType
+} from "./enums";
 
-import { ApiConfig, CredentialsData, DialRequest, Error as Error_, Image
-       , Receiver, ReceiverDisplayStatus, SenderApplication, SessionRequest
-       , Timeout, Volume } from "./dataClasses";
+import {
+    ApiConfig,
+    CredentialsData,
+    DialRequest,
+    Error as Error_,
+    Image,
+    Receiver,
+    ReceiverDisplayStatus,
+    SenderApplication,
+    SessionRequest,
+    Timeout,
+    Volume
+} from "./dataClasses";
 
 import Session from "./Session";
 
-
 type ReceiverActionListener = (
-    receiver: Receiver
-  , receiverAction: string) => void;
+    receiver: Receiver,
+    receiverAction: string
+) => void;
 
 type RequestSessionSuccessCallback = (session: Session) => void;
-
 
 let apiConfig: Nullable<ApiConfig>;
 let sessionRequest: Nullable<SessionRequest>;
 
-let requestSessionSuccessCallback: Nullable<
-        RequestSessionSuccessCallback>;
+let requestSessionSuccessCallback: Nullable<RequestSessionSuccessCallback>;
 let requestSessionErrorCallback: Nullable<ErrorCallback>;
 
 const receiverActionListeners = new Set<ReceiverActionListener>();
@@ -37,16 +55,36 @@ const receiverActionListeners = new Set<ReceiverActionListener>();
 const receiverDevices = new Map<string, ReceiverDevice>();
 const sessions = new Map<string, Session>();
 
+export {
+    AutoJoinPolicy,
+    Capability,
+    DefaultActionPolicy,
+    DialAppState,
+    ErrorCode,
+    ReceiverAction,
+    ReceiverAvailability,
+    ReceiverType,
+    SenderPlatform,
+    SessionStatus,
+    VolumeControlType
+};
 
-export { AutoJoinPolicy, Capability, DefaultActionPolicy, DialAppState
-       , ErrorCode, ReceiverAction, ReceiverAvailability, ReceiverType
-       , SenderPlatform, SessionStatus, VolumeControlType };
+export {
+    ApiConfig,
+    CredentialsData,
+    DialRequest,
+    Error_ as Error,
+    Image,
+    Receiver,
+    ReceiverDisplayStatus,
+    SenderApplication,
+    SessionRequest,
+    Timeout,
+    Volume,
+    Session
+};
 
-export { ApiConfig, CredentialsData, DialRequest, Error_ as Error, Image
-       , Receiver, ReceiverDisplayStatus, SenderApplication, SessionRequest
-       , Timeout, Volume, Session };
-
-export const VERSION = [ 1, 2 ];
+export const VERSION = [1, 2];
 export let isAvailable = false;
 
 export const timeout = new Timeout();
@@ -54,31 +92,33 @@ export const timeout = new Timeout();
 // chrome.cast.media namespace
 export * as media from "./media";
 
-
-function sendSessionRequest(sessionRequest: SessionRequest
-                          , receiverDevice: ReceiverDevice) {
-
+function sendSessionRequest(
+    sessionRequest: SessionRequest,
+    receiverDevice: ReceiverDevice
+) {
     for (const listener of receiverActionListeners) {
         const receiver = new Receiver(
-                receiverDevice.id
-              , receiverDevice.friendlyName);
+            receiverDevice.id,
+            receiverDevice.friendlyName
+        );
 
         listener(receiver, ReceiverAction.CAST);
     }
 
     sendMessageResponse({
-        subject: "bridge:createCastSession"
-      , data: {
-            appId: sessionRequest.appId
-          , receiverDevice: receiverDevice
+        subject: "bridge:createCastSession",
+        data: {
+            appId: sessionRequest.appId,
+            receiverDevice: receiverDevice
         }
     });
 }
 
-export function initialize(newApiConfig: ApiConfig
-                         , successCallback?: SuccessCallback
-                         , errorCallback?: ErrorCallback) {
-
+export function initialize(
+    newApiConfig: ApiConfig,
+    successCallback?: SuccessCallback,
+    errorCallback?: ErrorCallback
+) {
     logger.info("cast.initialize");
 
     // Already initialized
@@ -90,22 +130,25 @@ export function initialize(newApiConfig: ApiConfig
     apiConfig = newApiConfig;
 
     sendMessageResponse({
-        subject: "main:shimReady"
-      , data: { appId: apiConfig.sessionRequest.appId }
+        subject: "main:shimReady",
+        data: { appId: apiConfig.sessionRequest.appId }
     });
 
     successCallback?.();
 
-    apiConfig.receiverListener(receiverDevices.size
-        ? ReceiverAvailability.AVAILABLE
-        : ReceiverAvailability.UNAVAILABLE);
+    apiConfig.receiverListener(
+        receiverDevices.size
+            ? ReceiverAvailability.AVAILABLE
+            : ReceiverAvailability.UNAVAILABLE
+    );
 }
 
-export function requestSession(successCallback: RequestSessionSuccessCallback
-                             , errorCallback: ErrorCallback
-                             , newSessionRequest?: SessionRequest
-                             , receiverDevice?: ReceiverDevice) {
-
+export function requestSession(
+    successCallback: RequestSessionSuccessCallback,
+    errorCallback: ErrorCallback,
+    newSessionRequest?: SessionRequest,
+    receiverDevice?: ReceiverDevice
+) {
     logger.info("cast.requestSession");
 
     // Not yet initialized
@@ -116,9 +159,12 @@ export function requestSession(successCallback: RequestSessionSuccessCallback
 
     // Already requesting session
     if (sessionRequest) {
-        errorCallback?.(new Error_(
-                ErrorCode.INVALID_PARAMETER
-            , "Session request already in progress."));
+        errorCallback?.(
+            new Error_(
+                ErrorCode.INVALID_PARAMETER,
+                "Session request already in progress."
+            )
+        );
         return;
     }
 
@@ -157,9 +203,11 @@ export function requestSessionById(_sessionId: string): void {
     logger.info("STUB :: cast.requestSessionById");
 }
 
-export function setCustomReceivers(_receivers: Receiver[]
-                                 , _successCallback?: SuccessCallback
-                                 , _errorCallback?: ErrorCallback): void {
+export function setCustomReceivers(
+    _receivers: Receiver[],
+    _successCallback?: SuccessCallback,
+    _errorCallback?: ErrorCallback
+): void {
     logger.info("STUB :: cast.setCustomReceivers");
 }
 
@@ -190,7 +238,6 @@ export function precache(_data: string) {
     logger.info("STUB :: cast.precache");
 }
 
-
 onMessage(message => {
     switch (message.subject) {
         case "shim:initialized": {
@@ -212,18 +259,19 @@ onMessage(message => {
 
             // TODO: Implement persistent per-origin receiver IDs
             const receiver = new Receiver(
-                    status.receiverFriendlyName  // label
-                , status.receiverFriendlyName  // friendlyName
-                , [ Capability.VIDEO_OUT
-                    , Capability.AUDIO_OUT ]     // capabilities
-                , status.volume);              // volume
+                status.receiverFriendlyName, //                  label
+                status.receiverFriendlyName, //                  friendlyName
+                [Capability.VIDEO_OUT, Capability.AUDIO_OUT], // capabilities
+                status.volume //                                 volume
+            );
 
             const session = new Session(
-                    status.sessionId    // sessionId
-                , status.appId        // appId
-                , status.displayName  // displayName
-                , status.appImages    // appImages
-                , receiver);          // receiver
+                status.sessionId, //   sessionId
+                status.appId, //       appId
+                status.displayName, // displayName
+                status.appImages, //   appImages
+                receiver //            receiver
+            );
 
             session.senderApps = status.senderApps;
             session.transportId = status.transportId;
@@ -293,8 +341,8 @@ onMessage(message => {
 
             const callbacks = session._sendMessageCallbacks.get(messageId);
             if (callbacks) {
-                const [ successCallback, errorCallback ] = callbacks;
-                
+                const [successCallback, errorCallback] = callbacks;
+
                 if (error) {
                     errorCallback?.(new Error_(error));
                     return;
@@ -316,8 +364,7 @@ onMessage(message => {
 
             if (apiConfig) {
                 // Notify listeners of new cast destination
-                apiConfig.receiverListener(
-                        ReceiverAvailability.AVAILABLE);
+                apiConfig.receiverListener(ReceiverAvailability.AVAILABLE);
             }
 
             break;
@@ -331,7 +378,8 @@ onMessage(message => {
             if (receiverDevices.size === 0) {
                 if (apiConfig) {
                     apiConfig.receiverListener(
-                            ReceiverAvailability.UNAVAILABLE);
+                        ReceiverAvailability.UNAVAILABLE
+                    );
                 }
             }
 
@@ -359,8 +407,9 @@ onMessage(message => {
 
                 for (const listener of receiverActionListeners) {
                     const castReceiver = new Receiver(
-                            receiver.id
-                          , receiver.friendlyName);
+                        receiver.id,
+                        receiver.friendlyName
+                    );
 
                     listener(castReceiver, ReceiverAction.STOP);
                 }
@@ -376,12 +425,10 @@ onMessage(message => {
             if (sessionRequest) {
                 sessionRequest = null;
 
-                requestSessionErrorCallback?.(
-                        new Error_(ErrorCode.CANCEL));
+                requestSessionErrorCallback?.(new Error_(ErrorCode.CANCEL));
             }
 
             break;
         }
     }
 });
-

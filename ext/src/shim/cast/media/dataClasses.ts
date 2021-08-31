@@ -2,15 +2,18 @@
 
 import { Image, Volume } from "../dataClasses";
 
-import { ContainerType
-       , HdrType
-       , HlsSegmentFormat
-       , HlsVideoSegmentFormat
-       , MetadataType
-       , RepeatMode
-       , ResumeState, StreamType
-       , TrackType, UserAction } from "./enums";
-
+import {
+    ContainerType,
+    HdrType,
+    HlsSegmentFormat,
+    HlsVideoSegmentFormat,
+    MetadataType,
+    RepeatMode,
+    ResumeState,
+    StreamType,
+    TrackType,
+    UserAction
+} from "./enums";
 
 export class AudiobookChapterMediaMetadata {
     bookTitle?: string;
@@ -35,9 +38,10 @@ export class Break {
     isWatched = false;
 
     constructor(
-            public id: string
-          , public breakClipIds: string[]
-          , public position: number) {}
+        public id: string,
+        public breakClipIds: string[],
+        public position: number
+    ) {}
 }
 
 export class BreakClip {
@@ -71,17 +75,17 @@ export class ContainerMetadata {
     title?: string;
 
     constructor(
-            public containerType: ContainerType =
-                    ContainerType.GENERIC_CONTAINER) {}
+        public containerType: ContainerType = ContainerType.GENERIC_CONTAINER
+    ) {}
 }
 
 export class EditTracksInfoRequest {
     requestId = 0;
 
     constructor(
-            public activeTrackIds: Nullable<number[]> = null
-          , public textTrackStyle: Nullable<string> = null) {
-    }
+        public activeTrackIds: Nullable<number[]> = null,
+        public textTrackStyle: Nullable<string> = null
+    ) {}
 }
 
 export class GenericMediaMetadata {
@@ -100,10 +104,11 @@ export class GetStatusRequest {
 
 export class LiveSeekableRange {
     constructor(
-            public start?: number
-          , public end?: number
-          , public isMovingWindow?: boolean
-          , public isLiveDone?: boolean) {}
+        public start?: number,
+        public end?: number,
+        public isMovingWindow?: boolean,
+        public isLiveDone?: boolean
+    ) {}
 }
 
 export class LoadRequest {
@@ -123,13 +128,12 @@ export class LoadRequest {
     }
 }
 
-
 export type Metadata =
-        GenericMediaMetadata
-      | MovieMediaMetadata
-      | MusicTrackMediaMetadata
-      | PhotoMediaMetadata
-      | TvShowMediaMetadata;
+    | GenericMediaMetadata
+    | MovieMediaMetadata
+    | MusicTrackMediaMetadata
+    | PhotoMediaMetadata
+    | TvShowMediaMetadata;
 
 export class MediaInfo {
     atvEntity?: string;
@@ -149,11 +153,8 @@ export class MediaInfo {
     userActionStates?: UserActionState[];
     vmapAdsRequest?: VastAdsRequest;
 
-    constructor(
-            public contentId: string
-          , public contentType: string) {}
+    constructor(public contentId: string, public contentType: string) {}
 }
-
 
 export class MediaMetadata {
     queueItemId?: number;
@@ -224,13 +225,14 @@ export class QueueData {
     shuffle = false;
 
     constructor(
-            public id?: string
-          , public name?: string
-          , public description?: string
-          , public repeatMode?: RepeatMode
-          , public items?: QueueItem[]
-          , public startIndex?: number
-          , public startTime?: number) {}
+        public id?: string,
+        public name?: string,
+        public description?: string,
+        public repeatMode?: RepeatMode,
+        public items?: QueueItem[],
+        public startIndex?: number,
+        public startTime?: number
+    ) {}
 }
 
 export class QueueInsertItemsRequest {
@@ -240,8 +242,7 @@ export class QueueInsertItemsRequest {
     sessionId: Nullable<string> = null;
     type = "QUEUE_INSERT";
 
-    constructor(
-            public items: QueueItem[]) {}
+    constructor(public items: QueueItem[]) {}
 }
 
 export class QueueItem {
@@ -302,7 +303,6 @@ export class QueueUpdateItemsRequest {
     constructor(public items: QueueItem[]) {}
 }
 
-
 export class SeekRequest {
     currentTime: Nullable<number> = null;
     customData: any = null;
@@ -336,9 +336,7 @@ export class Track {
     trackContentId: Nullable<string> = null;
     trackContentType: Nullable<string> = null;
 
-    constructor(
-            public trackId: number
-          , public type: TrackType) {}
+    constructor(public trackId: number, public type: TrackType) {}
 }
 
 export class TvShowMediaMetadata {
@@ -359,8 +357,7 @@ export class TvShowMediaMetadata {
 export class UserActionState {
     customData: any = null;
 
-    constructor(
-            public userAction: UserAction) {}
+    constructor(public userAction: UserAction) {}
 }
 
 export class VastAdsRequest {
@@ -370,14 +367,14 @@ export class VastAdsRequest {
 
 export class VideoInformation {
     constructor(
-            public width: number
-          , public height: number
-          , public hdrType: HdrType) {}
+        public width: number,
+        public height: number,
+        public hdrType: HdrType
+    ) {}
 }
 
 export class VolumeRequest {
     customData: any = null;
 
-    constructor(
-            public volume: Volume) {}
+    constructor(public volume: Volume) {}
 }

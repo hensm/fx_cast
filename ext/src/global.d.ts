@@ -4,11 +4,9 @@ declare const MIRRORING_APP_ID: string;
 
 declare type Nullable<T> = T | null;
 
-declare type DistributiveOmit<T, K extends keyof any> =
-        T extends any
-            ? Omit<T, K>
-            : never;
-
+declare type DistributiveOmit<T, K extends keyof any> = T extends any
+    ? Omit<T, K>
+    : never;
 
 declare interface Object {
     // eslint-disable-next-line @typescript-eslint/ban-types
@@ -22,16 +20,19 @@ declare interface CanvasRenderingContext2D {
     DRAWWINDOW_USE_WIDGET_LAYERS: 0x08;
     DRAWWINDOW_ASYNC_DECODE_IMAGES: 0x10;
 
-    drawWindow (
-            window: Window
-          , x: number, y: number
-          , w: number, h: number
-          , bgColor: string
-          , flags: number): void;
+    drawWindow(
+        window: Window,
+        x: number,
+        y: number,
+        w: number,
+        h: number,
+        bgColor: string,
+        flags: number
+    ): void;
 }
 
 declare interface HTMLCanvasElement {
-    captureStream (frameRate?: number): MediaStream;
+    captureStream(frameRate?: number): MediaStream;
 }
 
 declare interface MediaTrackConstraints {
@@ -39,25 +40,23 @@ declare interface MediaTrackConstraints {
 }
 
 declare interface RTCPeerConnection {
-    addStream (mediaStream: MediaStream): void;
+    addStream(mediaStream: MediaStream): void;
 }
 
 declare interface MediaDevices {
-    getDisplayMedia (constraints: MediaStreamConstraints)
-            : Promise<MediaStream>;
+    getDisplayMedia(constraints: MediaStreamConstraints): Promise<MediaStream>;
 }
-
 
 interface CloneIntoOptions {
     cloneFunctions?: boolean;
     wrapReflectors?: boolean;
 }
 
-declare function cloneInto<T> (
-        obj: T
-      , targetScope: Window
-      , options?: CloneIntoOptions): T;
-
+declare function cloneInto<T>(
+    obj: T,
+    targetScope: Window,
+    options?: CloneIntoOptions
+): T;
 
 interface ExportFunctionOptions {
     defineAs: string;
@@ -67,11 +66,11 @@ interface ExportFunctionOptions {
 
 type ExportFunctionFunc = (...args: any[]) => any;
 
-declare function exportFunction (
-        func: ExportFunctionFunc
-      , targetScope: any
-      , options?: ExportFunctionOptions): ExportFunctionFunc;
-
+declare function exportFunction(
+    func: ExportFunctionFunc,
+    targetScope: any,
+    options?: ExportFunctionOptions
+): ExportFunctionFunc;
 
 // Fix issues with @types/firefox-webext-browser
 declare namespace browser.events {
@@ -80,8 +79,8 @@ declare namespace browser.events {
      * event types.
      */
     interface Event {
-        addListener (...args: any[]): void | Promise<void>;
-        removeListener (...args: any[]): void | Promise<void>;
+        addListener(...args: any[]): void | Promise<void>;
+        removeListener(...args: any[]): void | Promise<void>;
     }
 }
 
@@ -97,7 +96,7 @@ declare namespace browser.runtime {
     }
 
     function connect(connectInfo: {
-            name?: string
-          , includeTlsChannelId?: boolean
-        }): browser.runtime.Port;
+        name?: string;
+        includeTlsChannelId?: boolean;
+    }): browser.runtime.Port;
 }

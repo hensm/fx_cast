@@ -8,25 +8,22 @@ import { TypedEventTarget } from "../../lib/TypedEventTarget";
 import { getWindowCenteredProps, WindowCenteredProps } from "../../lib/utils";
 import { ReceiverDevice } from "../../types";
 
-import { ReceiverSelectionCast
-       , ReceiverSelectionStop
-       , ReceiverSelectorMediaType } from "./index";
-
-
+import {
+    ReceiverSelectionCast,
+    ReceiverSelectionStop,
+    ReceiverSelectorMediaType
+} from "./index";
 
 const POPUP_URL = browser.runtime.getURL("ui/popup/index.html");
 
-
 interface ReceiverSelectorEvents {
-    "selected": ReceiverSelectionCast;
-    "error": string;
-    "cancelled": void;
-    "stop": ReceiverSelectionStop;
+    selected: ReceiverSelectionCast;
+    error: string;
+    cancelled: void;
+    stop: ReceiverSelectionStop;
 }
 
-export default class ReceiverSelector
-        extends TypedEventTarget<ReceiverSelectorEvents> {
-
+export default class ReceiverSelector extends TypedEventTarget<ReceiverSelectorEvents> {
     private windowId?: number;
 
     private messagePort?: Port;
@@ -65,11 +62,11 @@ export default class ReceiverSelector
     }
 
     public async open(
-            receivers: ReceiverDevice[]
-          , defaultMediaType: ReceiverSelectorMediaType
-          , availableMediaTypes: ReceiverSelectorMediaType
-          , appId?: string): Promise<void> {
-
+        receivers: ReceiverDevice[],
+        defaultMediaType: ReceiverSelectorMediaType,
+        availableMediaTypes: ReceiverSelectorMediaType,
+        appId?: string
+    ): Promise<void> {
         this.appId = appId;
 
         // If popup already exists, close it
@@ -81,27 +78,28 @@ export default class ReceiverSelector
         this.defaultMediaType = defaultMediaType;
         this.availableMediaTypes = availableMediaTypes;
 
-
         let centeredProps: WindowCenteredProps = {
-            left: 100
-          , top: 100
-          , width: 350
-          , height: 200
+            left: 100,
+            top: 100,
+            width: 350,
+            height: 200
         };
 
         try {
             // Calculate centered size/position based on current window
             centeredProps = getWindowCenteredProps(
-                    await browser.windows.getCurrent()
-                  , centeredProps.width, centeredProps.height);
+                await browser.windows.getCurrent(),
+                centeredProps.width,
+                centeredProps.height
+            );
         } catch {
             // Shouldn't ever hit this, but defaults are provided in case
         }
 
         const popup = await browser.windows.create({
-            url: POPUP_URL
-          , type: "popup"
-          , ...centeredProps
+            url: POPUP_URL,
+            type: "popup",
+            ...centeredProps
         });
 
         if (popup?.id === undefined) {
@@ -116,22 +114,23 @@ export default class ReceiverSelector
             ...centeredProps
         });
 
-
         const closeIfFocusLost = await options.get(
-                "receiverSelectorCloseIfFocusLost");
+            "receiverSelectorCloseIfFocusLost"
+        );
 
         if (closeIfFocusLost) {
             // Add focus listener
             browser.windows.onFocusChanged.addListener(
-                    this.onWindowsFocusChanged);
+                this.onWindowsFocusChanged
+            );
         }
     }
 
     public update(receivers: ReceiverDevice[]) {
         this.receivers = receivers;
         this.messagePort?.postMessage({
-            subject: "popup:update"
-          , data: {
+            subject: "popup:update",
+            data: {
                 receivers: this.receivers
             }
         });
@@ -167,23 +166,25 @@ export default class ReceiverSelector
             this.messagePortDisconnected = true;
         });
 
-        if (!this.receivers
-         || !this.defaultMediaType
-         || !this.availableMediaTypes) {
+        if (
+            !this.receivers ||
+            !this.defaultMediaType ||
+            !this.availableMediaTypes
+        ) {
             throw logger.error("Popup receiver data not found.");
         }
 
         this.messagePort.postMessage({
-            subject: "popup:init"
-          , data: { appId: this.appId }
+            subject: "popup:init",
+            data: { appId: this.appId }
         });
 
         this.messagePort.postMessage({
-            subject: "popup:update"
-          , data: {
-                receivers: this.receivers
-              , defaultMediaType: this.defaultMediaType
-              , availableMediaTypes: this.availableMediaTypes
+            subject: "popup:update",
+            data: {
+                receivers: this.receivers,
+                defaultMediaType: this.defaultMediaType,
+                availableMediaTypes: this.availableMediaTypes
             }
         });
 
@@ -197,17 +198,21 @@ export default class ReceiverSelector
         switch (message.subject) {
             case "receiverSelector:selected": {
                 this.wasReceiverSelected = true;
-                this.dispatchEvent(new CustomEvent("selected", {
-                    detail: message.data
-                }));
+                this.dispatchEvent(
+                    new CustomEvent("selected", {
+                        detail: message.data
+                    })
+                );
 
                 break;
             }
 
             case "receiverSelector:stop": {
-                this.dispatchEvent(new CustomEvent("stop", {
-                    detail: message.data
-                }));
+                this.dispatchEvent(
+                    new CustomEvent("stop", {
+                        detail: message.data
+                    })
+                );
 
                 break;
             }
@@ -226,7 +231,8 @@ export default class ReceiverSelector
 
         browser.windows.onRemoved.removeListener(this.onWindowsRemoved);
         browser.windows.onFocusChanged.removeListener(
-                this.onWindowsFocusChanged);
+            this.onWindowsFocusChanged
+        );
 
         if (!this.wasReceiverSelected) {
             this.dispatchEvent(new CustomEvent("cancelled"));
@@ -247,12 +253,14 @@ export default class ReceiverSelector
      * `WINDOW_ID_NONE` or if the popup window is re-focused.
      */
     private onWindowsFocusChanged(windowId: number) {
-        if (windowId !== browser.windows.WINDOW_ID_NONE
-                && windowId !== this.windowId) {
-
+        if (
+            windowId !== browser.windows.WINDOW_ID_NONE &&
+            windowId !== this.windowId
+        ) {
             // Only run once
             browser.windows.onFocusChanged.removeListener(
-                    this.onWindowsFocusChanged);
+                this.onWindowsFocusChanged
+            );
 
             if (this.windowId) {
                 browser.windows.remove(this.windowId);

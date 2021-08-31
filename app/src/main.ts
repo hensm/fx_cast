@@ -5,21 +5,20 @@ import minimist from "minimist";
 import { __applicationVersion } from "../package.json";
 
 const argv = minimist(process.argv.slice(2), {
-    boolean: [ "daemon", "help", "version" ]
-  , string: [ "__name", "port" ]
-  , alias: {
-        d: "daemon"
-      , h: "help"
-      , v: "version"
-      , p: "port"
-    }
-  , default: {
-        __name: path.basename(process.argv[0])
-      , daemon: false
-      , port: "9556"
+    boolean: ["daemon", "help", "version"],
+    string: ["__name", "port"],
+    alias: {
+        d: "daemon",
+        h: "help",
+        v: "version",
+        p: "port"
+    },
+    default: {
+        __name: path.basename(process.argv[0]),
+        daemon: false,
+        port: "9556"
     }
 });
-
 
 if (argv.version) {
     // eslint-disable-next-line no-console
@@ -27,7 +26,7 @@ if (argv.version) {
 } else if (argv.help) {
     // eslint-disable-next-line no-console
     console.log(
-`Usage: ${argv.__name} [options]
+        `Usage: ${argv.__name} [options]
 
 Options:
   -h, --help       Print usage info
@@ -37,8 +36,8 @@ Options:
                    options.
   -p, --port       Set port number for WebSocket server. This must match the
                    port set in the extension options.
-`);
-
+`
+    );
 } else if (argv.daemon) {
     const port = parseInt(argv.port);
     if (!port || port < 1025 || port > 65535) {
@@ -46,10 +45,9 @@ Options:
         process.exit(1);
     }
 
-    import("./daemon")
-        .then(daemon => {
-            daemon.init(port);
-        });
+    import("./daemon").then(daemon => {
+        daemon.init(port);
+    });
 } else {
     import("./bridge");
 }

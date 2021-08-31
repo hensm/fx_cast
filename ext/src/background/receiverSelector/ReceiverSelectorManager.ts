@@ -8,17 +8,17 @@ import receiverDevices from "../receiverDevices";
 
 import { getMediaTypesForPageUrl } from "../../lib/utils";
 
-import { ReceiverSelection
-       , ReceiverSelectionActionType
-       , ReceiverSelectorMediaType } from "./index";
+import {
+    ReceiverSelection,
+    ReceiverSelectionActionType,
+    ReceiverSelectorMediaType
+} from "./index";
 
 import ReceiverSelector from "./ReceiverSelector";
-
 
 async function createSelector() {
     return new ReceiverSelector();
 }
-
 
 let sharedSelector: ReceiverSelector;
 
@@ -34,7 +34,6 @@ async function getSelector() {
     return sharedSelector;
 }
 
-
 /**
  * Opens a receiver selector with the specified
  * default/available media types.
@@ -46,21 +45,18 @@ async function getSelector() {
  *   - Rejects if the selection fails.
  */
 async function getSelection(
-        contextTabId: number
-      , contextFrameId = 0
-      , withMediaSender = false)
-        : Promise<ReceiverSelection | null> {
-
+    contextTabId: number,
+    contextFrameId = 0,
+    withMediaSender = false
+): Promise<ReceiverSelection | null> {
     return new Promise(async (resolve, reject) => {
-        let currentShim = ShimManager.getShim(
-                contextTabId, contextFrameId);
+        let currentShim = ShimManager.getShim(contextTabId, contextFrameId);
 
         /**
          * If the current context is running the mirroring app, pretend
          * it doesn't exist because it shouldn't be launched like this.
          */
-        if (currentShim?.appId ===
-                await options.get("mirroringAppId")) {
+        if (currentShim?.appId === (await options.get("mirroringAppId"))) {
             currentShim = undefined;
         }
 
@@ -69,13 +65,15 @@ async function getSelection(
 
         try {
             const { url } = await browser.webNavigation.getFrame({
-                tabId: contextTabId
-              , frameId: contextFrameId
+                tabId: contextTabId,
+                frameId: contextFrameId
             });
 
             availableMediaTypes = getMediaTypesForPageUrl(url);
         } catch {
-            logger.error("Failed to locate frame, falling back to default available media types.");
+            logger.error(
+                "Failed to locate frame, falling back to default available media types."
+            );
             availableMediaTypes = ReceiverSelectorMediaType.File;
         }
 
@@ -90,8 +88,8 @@ async function getSelection(
         // Remove mirroring media types if mirroring is not enabled
         if (!opts.mirroringEnabled) {
             availableMediaTypes &= ~(
-                    ReceiverSelectorMediaType.Tab
-                  | ReceiverSelectorMediaType.Screen);
+                ReceiverSelectorMediaType.Tab | ReceiverSelectorMediaType.Screen
+            );
         }
 
         // Remove file media type if local media is not enabled
@@ -107,26 +105,28 @@ async function getSelection(
         // Get a new selector for each selection
         sharedSelector = await createSelector();
 
-
         function onReceiverChange() {
             sharedSelector.update(receiverDevices.getDevices());
         }
 
+        receiverDevices.addEventListener("receiverDeviceUp", onReceiverChange);
         receiverDevices.addEventListener(
-                "receiverDeviceUp", onReceiverChange);
+            "receiverDeviceDown",
+            onReceiverChange
+        );
         receiverDevices.addEventListener(
-                "receiverDeviceDown", onReceiverChange);
-        receiverDevices.addEventListener(
-                "receiverDeviceUpdated", onReceiverChange);
-
+            "receiverDeviceUpdated",
+            onReceiverChange
+        );
 
         let onSelected: any;
         let onCancelled: any;
         let onError: any;
         let onStop: any;
 
-        type EvParamsType =
-                Parameters<typeof sharedSelector.addEventListener>[0];
+        type EvParamsType = Parameters<
+            typeof sharedSelector.addEventListener
+        >[0];
 
         function storeListener<T>(type: EvParamsType, fn: T) {
             if (type === "selected") {
@@ -149,67 +149,78 @@ async function getSelection(
             sharedSelector.removeEventListener("stop", onStop);
 
             receiverDevices.removeEventListener(
-                    "receiverDeviceUp", onReceiverChange);
+                "receiverDeviceUp",
+                onReceiverChange
+            );
             receiverDevices.removeEventListener(
-                    "receiverDeviceDown", onReceiverChange);
+                "receiverDeviceDown",
+                onReceiverChange
+            );
             receiverDevices.removeEventListener(
-                    "receiverDeviceUpdated", onReceiverChange);
+                "receiverDeviceUpdated",
+                onReceiverChange
+            );
         }
 
-        sharedSelector.addEventListener("selected"
-              , storeListener("selected", ev => {
+        sharedSelector.addEventListener(
+            "selected",
+            storeListener("selected", ev => {
+                logger.info("Selected receiver", ev.detail);
+                resolve({
+                    actionType: ReceiverSelectionActionType.Cast,
+                    receiver: ev.detail.receiver,
+                    mediaType: ev.detail.mediaType,
+                    filePath: ev.detail.filePath
+                });
+                removeListeners();
+            })
+        );
 
-            logger.info("Selected receiver", ev.detail);
-            resolve({
-                actionType: ReceiverSelectionActionType.Cast
-              , receiver: ev.detail.receiver
-              , mediaType: ev.detail.mediaType
-              , filePath: ev.detail.filePath
-            });
-            removeListeners();
-        }));
+        sharedSelector.addEventListener(
+            "cancelled",
+            storeListener("cancelled", () => {
+                logger.info("Cancelled receiver selection");
+                resolve(null);
+                removeListeners();
+            })
+        );
 
-        sharedSelector.addEventListener("cancelled"
-              , storeListener("cancelled", () => {
+        sharedSelector.addEventListener(
+            "error",
+            storeListener("error", () => {
+                reject();
+                removeListeners();
+            })
+        );
 
-            logger.info("Cancelled receiver selection");
-            resolve(null);
-            removeListeners();
-        }));
+        sharedSelector.addEventListener(
+            "stop",
+            storeListener("stop", async ev => {
+                logger.info("Stopping receiver app...", ev.detail);
 
-        sharedSelector.addEventListener("error"
-              , storeListener("error", () => {
-            reject();
-            removeListeners();
-        }));
+                receiverDevices.stopReceiverApp(ev.detail.receiver.id);
 
-        sharedSelector.addEventListener("stop"
-              , storeListener("stop", async ev => {
-
-            logger.info("Stopping receiver app...", ev.detail);
-
-            receiverDevices.stopReceiverApp(ev.detail.receiver.id);
-
-            resolve({
-                actionType: ReceiverSelectionActionType.Stop
-              , receiver: ev.detail.receiver
-            });
-            removeListeners();
-        }));
-
+                resolve({
+                    actionType: ReceiverSelectionActionType.Stop,
+                    receiver: ev.detail.receiver
+                });
+                removeListeners();
+            })
+        );
 
         // Ensure status manager is initialized
         await receiverDevices.init();
 
         sharedSelector.open(
-                receiverDevices.getDevices()
-              , defaultMediaType
-              , availableMediaTypes
-              , currentShim?.appId);
+            receiverDevices.getDevices(),
+            defaultMediaType,
+            availableMediaTypes,
+            currentShim?.appId
+        );
     });
 }
 
 export default {
-    getSelection
-  , getSelector
+    getSelection,
+    getSelector
 };

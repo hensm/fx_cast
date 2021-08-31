@@ -9,25 +9,31 @@ import mdns from "mdns";
 import { sendMessage } from "../lib/nativeMessaging";
 
 import { ReceiverStatus } from "./cast/types";
-import { NS_CONNECTION, NS_HEARTBEAT, NS_RECEIVER }
-        from "./cast/Session";
-
+import { NS_CONNECTION, NS_HEARTBEAT, NS_RECEIVER } from "./cast/Session";
 
 interface CastTxtRecord {
-    id: string; cd: string; rm: string;
-    ve: string; md: string; ic: string;
-    fn: string; ca: string; st: string;
-    bs: string; nf: string; rs: string;
+    id: string;
+    cd: string;
+    rm: string;
+    ve: string;
+    md: string;
+    ic: string;
+    fn: string;
+    ca: string;
+    st: string;
+    bs: string;
+    nf: string;
+    rs: string;
 }
 
 const browser = mdns.createBrowser(mdns.tcp("googlecast"), {
     resolverSequence: [
-        mdns.rst.DNSServiceResolve()
-      , "DNSServiceGetAddrInfo" in mdns.dns_sd
+        mdns.rst.DNSServiceResolve(),
+        "DNSServiceGetAddrInfo" in mdns.dns_sd
             ? mdns.rst.DNSServiceGetAddrInfo()
-              // Some issues on Linux with IPv6, so restrict to IPv4
-            : mdns.rst.getaddrinfo({ families: [ 4 ]})
-      , mdns.rst.makeAddressesUnique()
+            : // Some issues on Linux with IPv6, so restrict to IPv4
+              mdns.rst.getaddrinfo({ families: [4] }),
+        mdns.rst.makeAddressesUnique()
     ]
 });
 
@@ -39,13 +45,13 @@ function onBrowserServiceUp(service: mdns.Service) {
 
     const txtRecord = service.txtRecord as CastTxtRecord;
     sendMessage({
-        subject: "main:receiverDeviceUp"
-      , data: {
+        subject: "main:receiverDeviceUp",
+        data: {
             receiverDevice: {
-                host: service.addresses[0]
-              , port: service.port
-              , id: service.name
-              , friendlyName: txtRecord.fn
+                host: service.addresses[0],
+                port: service.port,
+                id: service.name,
+                friendlyName: txtRecord.fn
             }
         }
     });
@@ -59,14 +65,13 @@ function onBrowserServiceDown(service: mdns.Service) {
 
     const txtRecord = service.txtRecord as CastTxtRecord;
     sendMessage({
-        subject: "main:receiverDeviceDown"
-      , data: { receiverDeviceId: service.name }
+        subject: "main:receiverDeviceDown",
+        data: { receiverDeviceId: service.name }
     });
 }
 
 browser.on("serviceUp", onBrowserServiceUp);
 browser.on("serviceDown", onBrowserServiceDown);
-
 
 interface InitializeOptions {
     shouldWatchStatus?: boolean;
@@ -88,8 +93,7 @@ export function startDiscovery(options: InitializeOptions) {
             return;
         }
 
-        const listener = new StatusListener(
-                service.addresses[0], service.port);
+        const listener = new StatusListener(service.addresses[0], service.port);
 
         listener.on("receiverStatus", (status: ReceiverStatus) => {
             if (!service.name) {
@@ -97,10 +101,10 @@ export function startDiscovery(options: InitializeOptions) {
             }
 
             sendMessage({
-                subject: "main:receiverDeviceUpdated"
-              , data: {
-                    receiverDeviceId: service.name
-                  , status
+                subject: "main:receiverDeviceUpdated",
+                data: {
+                    receiverDeviceId: service.name,
+                    status
                 }
             });
         });
@@ -122,12 +126,11 @@ export function stopDiscovery() {
     browser.stop();
 }
 
-
 /**
  * Creates a connection to a receiver device and forwards
  * RECEIVER_STATUS updates to the extension.
  */
- export default class StatusListener extends EventEmitter {
+export default class StatusListener extends EventEmitter {
     private client: Client;
     private clientReceiver?: Channel;
     private clientHeartbeatIntervalId?: NodeJS.Timeout;
@@ -160,17 +163,28 @@ export function stopDiscovery() {
         this.client.close();
     }
 
-
     private onConnect(): void {
         const sourceId = "sender-0";
         const destinationId = "receiver-0";
 
         const clientConnection = this.client.createChannel(
-                sourceId, destinationId, NS_CONNECTION, "JSON");
+            sourceId,
+            destinationId,
+            NS_CONNECTION,
+            "JSON"
+        );
         const clientHeartbeat = this.client.createChannel(
-                sourceId, destinationId, NS_HEARTBEAT, "JSON");
+            sourceId,
+            destinationId,
+            NS_HEARTBEAT,
+            "JSON"
+        );
         const clientReceiver = this.client.createChannel(
-                sourceId, destinationId, NS_RECEIVER, "JSON");
+            sourceId,
+            destinationId,
+            NS_RECEIVER,
+            "JSON"
+        );
 
         clientReceiver.on("message", data => {
             switch (data.type) {

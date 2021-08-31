@@ -3,7 +3,6 @@
 import { Transform } from "stream";
 import { Message } from "./bridge/messaging";
 
-
 type ResponseHandlerFunction = (message: Message) => Promise<any>;
 
 /**
@@ -13,28 +12,26 @@ type ResponseHandlerFunction = (message: Message) => Promise<any>;
 export class ResponseTransform extends Transform {
     constructor(private _handler: ResponseHandlerFunction) {
         super({
-            readableObjectMode: true
-          , writableObjectMode: true
+            readableObjectMode: true,
+            writableObjectMode: true
         });
     }
 
     public _transform(
-            chunk: Message
-          , _encoding: string
-            // tslint:disable-next-line:ban-types
-          , callback: Function) {
-
-        Promise.resolve(this._handler(chunk))
-            .then(res => {
-                if (res) {
-                    callback(null, res);
-                } else {
-                    callback(null);
-                }
-            });
+        chunk: Message,
+        _encoding: string,
+        // tslint:disable-next-line:ban-types
+        callback: Function
+    ) {
+        Promise.resolve(this._handler(chunk)).then(res => {
+            if (res) {
+                callback(null, res);
+            } else {
+                callback(null);
+            }
+        });
     }
 }
-
 
 /**
  * Takes input, decodes the message string, parses as JSON
@@ -52,53 +49,52 @@ export class DecodeTransform extends Transform {
     }
 
     public _transform(
-            chunk: any
-          , _encoding: string
-            // tslint:disable-next-line:ban-types
-          , callback: Function) {
+        chunk: any,
+        _encoding: string,
+        // tslint:disable-next-line:ban-types
+        callback: Function
+    ) {
+        // Append next chunk to buffer
+        this._messageBuffer = Buffer.concat([this._messageBuffer, chunk]);
 
-       // Append next chunk to buffer
-       this._messageBuffer = Buffer.concat([
-           this._messageBuffer
-         , chunk
-       ]);
+        for (;;) {
+            if (this._messageLength === undefined) {
+                if (this._messageBuffer.length >= 4) {
+                    // Read message length and offset buffer
+                    this._messageLength = this._messageBuffer.readUInt32LE(0);
+                    this._messageBuffer = this._messageBuffer.slice(4);
 
-       for (;;) {
-           if (this._messageLength === undefined) {
-               if (this._messageBuffer.length >= 4) {
-                   // Read message length and offset buffer
-                   this._messageLength = this._messageBuffer.readUInt32LE(0);
-                   this._messageBuffer = this._messageBuffer.slice(4);
+                    // Next message chunk
+                    continue;
+                }
+            } else {
+                if (this._messageBuffer.length >= this._messageLength) {
+                    const message = JSON.parse(
+                        this._messageBuffer
+                            .slice(0, this._messageLength)
+                            .toString()
+                    );
 
-                   // Next message chunk
-                   continue;
-               }
-           } else {
-              if (this._messageBuffer.length >= this._messageLength) {
-                   const message = JSON.parse(this._messageBuffer
-                       .slice(0, this._messageLength)
-                       .toString());
+                    // Push message content
+                    this.push(message);
 
-                   // Push message content
-                   this.push(message);
+                    // Offset buffer to start of next message
+                    this._messageBuffer = this._messageBuffer.slice(
+                        this._messageLength
+                    );
+                    this._messageLength = undefined;
 
-                   // Offset buffer to start of next message
-                   this._messageBuffer = this._messageBuffer.slice(
-                           this._messageLength);
-                   this._messageLength = undefined;
+                    // Next message
+                    continue;
+                }
+            }
 
-                   // Next message
-                   continue;
-               }
-           }
-
-           // No complete messages left
-           callback();
-           break;
-       }
+            // No complete messages left
+            callback();
+            break;
+        }
     }
- }
-
+}
 
 /**
  * Takes input, encodes the message length and content and
@@ -112,11 +108,11 @@ export class EncodeTransform extends Transform {
     }
 
     public _transform(
-            chunk: any
-          , _encoding: string
-            // tslint:disable-next-line:ban-types
-          , callback: Function) {
-
+        chunk: any,
+        _encoding: string,
+        // tslint:disable-next-line:ban-types
+        callback: Function
+    ) {
         const messageLength = Buffer.alloc(4);
         const message = Buffer.from(JSON.stringify(chunk));
 
@@ -124,9 +120,6 @@ export class EncodeTransform extends Transform {
         messageLength.writeUInt32LE(message.length, 0);
 
         // Output joined length and content
-        callback(null, Buffer.concat([
-            messageLength
-          , message
-        ]));
+        callback(null, Buffer.concat([messageLength, message]));
     }
- }
+}

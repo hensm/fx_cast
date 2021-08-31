@@ -5,7 +5,6 @@ import logger from "../../../lib/logger";
 import CastOptions from "./CastOptions";
 import CastSession from "./CastSession";
 
-
 export default class CastContext extends EventTarget {
     public endCurrentSession(_stopCasting: boolean): void {
         logger.info("STUB :: CastContext#endCurrentSession");

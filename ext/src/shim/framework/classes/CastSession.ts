@@ -6,9 +6,7 @@ import * as cast from "../../cast";
 
 import ApplicationMetadata from "./ApplicationMetadata";
 
-
 type MessageListener = (namespace: string, message: string) => void;
-
 
 export default class CastSession extends EventTarget {
     constructor(_sessionObj: cast.Session, _state: string) {
@@ -17,9 +15,9 @@ export default class CastSession extends EventTarget {
     }
 
     public addMessageListener(
-            _namespace: string
-          , _listener: MessageListener): void {
-
+        _namespace: string,
+        _listener: MessageListener
+    ): void {
         logger.info("STUB :: CastSession#addMessageListener");
     }
 
@@ -83,17 +81,17 @@ export default class CastSession extends EventTarget {
     }
 
     public removeMessageListener(
-            _namespace: string
-          , _listener: MessageListener): void {
-
+        _namespace: string,
+        _listener: MessageListener
+    ): void {
         logger.info("STUB :: CastSession#removeMessageListener");
     }
 
     public sendMessage(
-            _namespace: string
-            // @ts-ignore
-          , _data: any): Promise<string> {
-
+        _namespace: string,
+        // @ts-ignore
+        _data: any
+    ): Promise<string> {
         logger.info("STUB :: CastSession#sendMessage");
     }
 

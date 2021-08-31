@@ -6,14 +6,14 @@ import logger from "../lib/logger";
 import messaging, { Message, Port } from "../messaging";
 import options from "../lib/options";
 
-import { ReceiverSelectionActionType
-       , ReceiverSelectorMediaType } from "./receiverSelector";
+import {
+    ReceiverSelectionActionType,
+    ReceiverSelectorMediaType
+} from "./receiverSelector";
 
-import ReceiverSelectorManager
-    from "./receiverSelector/ReceiverSelectorManager";
+import ReceiverSelectorManager from "./receiverSelector/ReceiverSelectorManager";
 
 import receiverDevices from "./receiverDevices";
-
 
 type AnyPort = Port | MessagePort;
 
@@ -25,8 +25,7 @@ export interface Shim {
     appId?: string;
 }
 
-
-export default new class ShimManager {
+export default new (class ShimManager {
     private activeShims = new Set<Shim>();
 
     public async init() {
@@ -40,8 +39,8 @@ export default new class ShimManager {
         receiverDevices.addEventListener("receiverDeviceUp", ev => {
             for (const shim of this.activeShims) {
                 shim.contentPort.postMessage({
-                    subject: "shim:serviceUp"
-                  , data: { receiverDevice: ev.detail.receiverDevice }
+                    subject: "shim:serviceUp",
+                    data: { receiverDevice: ev.detail.receiverDevice }
                 });
             }
         });
@@ -49,8 +48,8 @@ export default new class ShimManager {
         receiverDevices.addEventListener("receiverDeviceDown", ev => {
             for (const shim of this.activeShims) {
                 shim.contentPort.postMessage({
-                    subject: "shim:serviceDown"
-                  , data: { receiverDeviceId: ev.detail.receiverDeviceId }
+                    subject: "shim:serviceDown",
+                    data: { receiverDeviceId: ev.detail.receiverDeviceId }
                 });
             }
         });
@@ -74,19 +73,19 @@ export default new class ShimManager {
             : this.createShimFromContent(port));
 
         shim.contentPort.postMessage({
-            subject: "shim:initialized"
-          , data: await bridge.getInfo()
+            subject: "shim:initialized",
+            data: await bridge.getInfo()
         });
 
         this.activeShims.add(shim);
     }
 
     private async createShimFromBackground(
-            contentPort: MessagePort): Promise<Shim> {
-
+        contentPort: MessagePort
+    ): Promise<Shim> {
         const shim: Shim = {
-            bridgePort: await bridge.connect()
-          , contentPort
+            bridgePort: await bridge.connect(),
+            contentPort
         };
 
         shim.bridgePort.onDisconnect.addListener(() => {
@@ -105,12 +104,14 @@ export default new class ShimManager {
         return shim;
     }
 
-    private async createShimFromContent(
-            contentPort: Port): Promise<Shim> {
-
-        if (contentPort.sender?.tab?.id === undefined
-         || contentPort.sender?.frameId === undefined) {
-            throw logger.error("Content shim created with an invalid port context.");
+    private async createShimFromContent(contentPort: Port): Promise<Shim> {
+        if (
+            contentPort.sender?.tab?.id === undefined ||
+            contentPort.sender?.frameId === undefined
+        ) {
+            throw logger.error(
+                "Content shim created with an invalid port context."
+            );
         }
 
         /**
@@ -118,19 +119,20 @@ export default new class ShimManager {
          * tab/frame ID, disconnect it.
          */
         for (const activeShim of this.activeShims) {
-            if (activeShim.contentTabId === contentPort.sender.tab.id
-             && activeShim.contentFrameId === contentPort.sender.frameId) {
+            if (
+                activeShim.contentTabId === contentPort.sender.tab.id &&
+                activeShim.contentFrameId === contentPort.sender.frameId
+            ) {
                 activeShim.bridgePort.disconnect();
             }
         }
 
         const shim: Shim = {
-            bridgePort: await bridge.connect()
-          , contentPort
-          , contentTabId: contentPort.sender.tab.id
-          , contentFrameId: contentPort.sender.frameId
+            bridgePort: await bridge.connect(),
+            contentPort,
+            contentTabId: contentPort.sender.tab.id,
+            contentFrameId: contentPort.sender.frameId
         };
-
 
         const onContentPortMessage = (message: Message) => {
             this.handleContentMessage(shim, message);
@@ -150,7 +152,6 @@ export default new class ShimManager {
             this.activeShims.delete(shim);
         };
 
-
         shim.bridgePort.onDisconnect.addListener(onDisconnect);
         shim.bridgePort.onMessage.addListener(onBridgePortMessage);
 
@@ -161,7 +162,7 @@ export default new class ShimManager {
     }
 
     private async handleContentMessage(shim: Shim, message: Message) {
-        const [ destination ] = message.subject.split(":");
+        const [destination] = message.subject.split(":");
         if (destination === "bridge") {
             shim.bridgePort.postMessage(message);
         }
@@ -172,8 +173,8 @@ export default new class ShimManager {
 
                 for (const receiverDevice of receiverDevices.getDevices()) {
                     shim.contentPort.postMessage({
-                        subject: "shim:serviceUp"
-                      , data: { receiverDevice }
+                        subject: "shim:serviceUp",
+                        data: { receiverDevice }
                     });
                 }
 
@@ -181,15 +182,21 @@ export default new class ShimManager {
             }
 
             case "main:selectReceiver": {
-                if (shim.contentTabId === undefined
-                 || shim.contentFrameId === undefined) {
-                    throw logger.error("Shim associated with content sender missing tab/frame ID");
+                if (
+                    shim.contentTabId === undefined ||
+                    shim.contentFrameId === undefined
+                ) {
+                    throw logger.error(
+                        "Shim associated with content sender missing tab/frame ID"
+                    );
                 }
 
                 try {
                     const selection =
-                            await ReceiverSelectorManager.getSelection(
-                                    shim.contentTabId, shim.contentFrameId);
+                        await ReceiverSelectorManager.getSelection(
+                            shim.contentTabId,
+                            shim.contentFrameId
+                        );
 
                     // Handle cancellation
                     if (!selection) {
@@ -207,25 +214,26 @@ export default new class ShimManager {
                              * been changed, we need to cancel the current
                              * sender and switch it out for the right one.
                              */
-                            if (selection.mediaType !==
-                                    ReceiverSelectorMediaType.App) {
-
+                            if (
+                                selection.mediaType !==
+                                ReceiverSelectorMediaType.App
+                            ) {
                                 shim.contentPort.postMessage({
                                     subject: "shim:selectReceiver/cancelled"
                                 });
 
                                 loadSender({
-                                    tabId: shim.contentTabId
-                                  , frameId: shim.contentFrameId
-                                  , selection
+                                    tabId: shim.contentTabId,
+                                    frameId: shim.contentFrameId,
+                                    selection
                                 });
 
                                 break;
                             }
 
                             shim.contentPort.postMessage({
-                                subject: "shim:selectReceiver/selected"
-                              , data: selection
+                                subject: "shim:selectReceiver/selected",
+                                data: selection
                             });
 
                             break;
@@ -233,8 +241,8 @@ export default new class ShimManager {
 
                         case ReceiverSelectionActionType.Stop: {
                             shim.contentPort.postMessage({
-                                subject: "shim:selectReceiver/stopped"
-                              , data: selection
+                                subject: "shim:selectReceiver/stopped",
+                                data: selection
                             });
 
                             break;
@@ -257,7 +265,8 @@ export default new class ShimManager {
             case "main:sessionCreated": {
                 const selector = await ReceiverSelectorManager.getSelector();
                 const shouldClose = await options.get(
-                        "receiverSelectorWaitForConnection");
+                    "receiverSelectorWaitForConnection"
+                );
 
                 if (selector.isOpen && shouldClose) {
                     selector.close();
@@ -267,4 +276,4 @@ export default new class ShimManager {
             }
         }
     }
-};
+})();

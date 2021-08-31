@@ -5,9 +5,7 @@ import castv2 from "castv2";
 import { sendMessage } from "../../lib/nativeMessaging";
 import { Message } from "../../messaging";
 
-import Session, { NS_CONNECTION
-                , NS_RECEIVER } from "./Session";
-
+import Session, { NS_CONNECTION, NS_RECEIVER } from "./Session";
 
 const sessions = new Map<string, Session>();
 
@@ -19,9 +17,12 @@ export function handleCastMessage(message: Message) {
             // Connect and store with returned ID
             const session = new Session(appId, receiverDevice);
             session.connect(
-                    receiverDevice.host, receiverDevice.port, sessionId => {
-                sessions.set(sessionId, session);
-            });
+                receiverDevice.host,
+                receiverDevice.port,
+                sessionId => {
+                    sessions.set(sessionId, session);
+                }
+            );
 
             break;
         }
@@ -32,10 +33,11 @@ export function handleCastMessage(message: Message) {
             const session = sessions.get(sessionId);
             if (!session) {
                 sendMessage({
-                    subject: "shim:impl_sendCastMessage"
-                  , data: {
-                        error: "Session does not exist"
-                      , sessionId, messageId
+                    subject: "shim:impl_sendCastMessage",
+                    data: {
+                        error: "Session does not exist",
+                        sessionId,
+                        messageId
                     }
                 });
 
@@ -46,10 +48,11 @@ export function handleCastMessage(message: Message) {
                 session.sendReceiverMessage(messageData);
             } catch (err) {
                 sendMessage({
-                    subject: "shim:impl_sendCastMessage"
-                  , data: {
-                        error: `Failed to send message (${err})`
-                      , sessionId, messageId
+                    subject: "shim:impl_sendCastMessage",
+                    data: {
+                        error: `Failed to send message (${err})`,
+                        sessionId,
+                        messageId
                     }
                 });
 
@@ -58,8 +61,8 @@ export function handleCastMessage(message: Message) {
 
             // Success
             sendMessage({
-                subject: "shim:impl_sendCastMessage"
-              , data: { sessionId, messageId }
+                subject: "shim:impl_sendCastMessage",
+                data: { sessionId, messageId }
             });
 
             break;
@@ -71,10 +74,11 @@ export function handleCastMessage(message: Message) {
             const session = sessions.get(sessionId);
             if (!session) {
                 sendMessage({
-                    subject: "shim:impl_sendCastMessage"
-                  , data: {
-                        error: "Session does not exist"
-                      , sessionId, messageId
+                    subject: "shim:impl_sendCastMessage",
+                    data: {
+                        error: "Session does not exist",
+                        sessionId,
+                        messageId
                     }
                 });
 
@@ -91,10 +95,11 @@ export function handleCastMessage(message: Message) {
                 session.sendMessage(namespace, messageData);
             } catch (err) {
                 sendMessage({
-                    subject: "shim:impl_sendCastMessage"
-                  , data: {
-                        error: `Failed to send message (${err})`
-                      , sessionId, messageId
+                    subject: "shim:impl_sendCastMessage",
+                    data: {
+                        error: `Failed to send message (${err})`,
+                        sessionId,
+                        messageId
                     }
                 });
 
@@ -103,8 +108,8 @@ export function handleCastMessage(message: Message) {
 
             // Success
             sendMessage({
-                subject: "shim:impl_sendCastMessage"
-              , data: { sessionId, messageId }
+                subject: "shim:impl_sendCastMessage",
+                data: { sessionId, messageId }
             });
 
             break;
@@ -117,12 +122,20 @@ export function handleCastMessage(message: Message) {
             client.connect({ host, port }, () => {
                 const sourceId = "sender-0";
                 const destinationId = "receiver-0";
-        
+
                 const clientConnection = client.createChannel(
-                        sourceId, destinationId, NS_CONNECTION, "JSON");
+                    sourceId,
+                    destinationId,
+                    NS_CONNECTION,
+                    "JSON"
+                );
                 const clientReceiver = client.createChannel(
-                        sourceId, destinationId, NS_RECEIVER, "JSON");
-        
+                    sourceId,
+                    destinationId,
+                    NS_RECEIVER,
+                    "JSON"
+                );
+
                 clientConnection.send({ type: "CONNECT" });
                 clientReceiver.send({ type: "STOP", requestId: 1 });
             });

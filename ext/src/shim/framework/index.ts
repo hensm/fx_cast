@@ -18,48 +18,62 @@ import RemotePlayerController from "./classes/RemotePlayerController";
 import SessionStateEventData from "./classes/SessionStateEventData";
 import VolumeEventData from "./classes/VolumeEventData";
 
-import { ActiveInputState
-       , CastContextEventType
-       , CastState
-       , LoggerLevel
-       , RemotePlayerEventType
-       , SessionEventType
-       , SessionState } from "./enums";
+import {
+    ActiveInputState,
+    CastContextEventType,
+    CastState,
+    LoggerLevel,
+    RemotePlayerEventType,
+    SessionEventType,
+    SessionState
+} from "./enums";
 
 import GoogleCastLauncher from "./GoogleCastLauncher";
 
-
 export default {
     // Enums
-    ActiveInputState, CastContextEventType, CastState, LoggerLevel
-  , RemotePlayerEventType, SessionEventType, SessionState
+    ActiveInputState,
+    CastContextEventType,
+    CastState,
+    LoggerLevel,
+    RemotePlayerEventType,
+    SessionEventType,
+    SessionState,
 
     // Classes
-  , ActiveInputStateEventData, ApplicationMetadata
-  , ApplicationMetadataEventData, ApplicationStatusEventData, CastOptions
-  , CastSession, CastStateEventData, EventData, MediaSessionEventData
-  , RemotePlayer, RemotePlayerChangedEvent, RemotePlayerController
-  , SessionStateEventData, VolumeEventData
+    ActiveInputStateEventData,
+    ApplicationMetadata,
+    ApplicationMetadataEventData,
+    ApplicationStatusEventData,
+    CastOptions,
+    CastSession,
+    CastStateEventData,
+    EventData,
+    MediaSessionEventData,
+    RemotePlayer,
+    RemotePlayerChangedEvent,
+    RemotePlayerController,
+    SessionStateEventData,
+    VolumeEventData,
 
     /**
      * CastContext class with an extra getInstance method used to
      * instantiate and fetch a singleton instance.
      */
-  , CastContext: {
-        ...CastContext
+    CastContext: {
+        ...CastContext,
 
-      , getInstance() {
+        getInstance() {
             return instance;
         }
-    }
+    },
 
-  , VERSION: "1.0.07"
+    VERSION: "1.0.07",
 
-  , setLoggerLevel(_level: number) {
+    setLoggerLevel(_level: number) {
         logger.info("STUB :: cast.framework.setLoggerLevel");
     }
 };
-
 
 /**
  * The Framework API defines a <google-cast-launcher> element

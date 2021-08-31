@@ -4,7 +4,6 @@ import logger from "../../../lib/logger";
 
 import RemotePlayer from "./RemotePlayer";
 
-
 export default class RemotePlayerController extends EventTarget {
     constructor(_player: RemotePlayer) {
         super();
@@ -16,7 +15,7 @@ export default class RemotePlayerController extends EventTarget {
         const minutes = Math.floor(timeInSec / 60) % 60;
         const seconds = timeInSec % 60;
 
-        return [ hours, minutes, seconds ]
+        return [hours, minutes, seconds]
             .map(c => c.toString().padStart(2, "0"))
             .join(":");
     }

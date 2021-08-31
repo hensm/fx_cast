@@ -3,7 +3,6 @@
 import { DecodeTransform, EncodeTransform } from "../../transforms";
 import { Message } from "../messaging";
 
-
 export const decodeTransform = new DecodeTransform();
 export const encodeTransform = new EncodeTransform();
 

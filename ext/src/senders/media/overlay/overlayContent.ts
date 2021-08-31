@@ -2,17 +2,18 @@
 
 import logger from "../../../lib/logger";
 
-import { bindPropertyDescriptor
-       , clonePropsDescriptor
-       , getPropertyDescriptor
-       , makeGetterDescriptor
-       , makeValueDescriptor } from "./descriptorUtils";
+import {
+    bindPropertyDescriptor,
+    clonePropsDescriptor,
+    getPropertyDescriptor,
+    makeGetterDescriptor,
+    makeValueDescriptor
+} from "./descriptorUtils";
 
 // Injected by content loader
 declare const iconAirPlayAudio: string;
 declare const iconAirPlayVideo: string;
 declare const mediaOverlayTitle: string;
-
 
 /**
  * Intercept and store references to shadow root nodes created by
@@ -27,7 +28,6 @@ Element.prototype.attachShadow = function (init) {
     return shadowRoot;
 };
 
-
 function getShadowRootFromNode(node: Node): ShadowRoot | undefined {
     // Don't touch our custom element
     if (node instanceof PlayerElement) {
@@ -37,7 +37,6 @@ function getShadowRootFromNode(node: Node): ShadowRoot | undefined {
     return internalShadowRoots.get(node as Element);
 }
 
-
 const DQS_XPATH_EXPRESSION = `//*[contains(name(), "-")]`;
 
 /**
@@ -46,12 +45,15 @@ const DQS_XPATH_EXPRESSION = `//*[contains(name(), "-")]`;
  */
 function deepQuerySelector(selector: string): Element | null {
     const result = document.evaluate(
-            DQS_XPATH_EXPRESSION, document, null
-          , XPathResult.ORDERED_NODE_ITERATOR_TYPE);
+        DQS_XPATH_EXPRESSION,
+        document,
+        null,
+        XPathResult.ORDERED_NODE_ITERATOR_TYPE
+    );
 
     let node: Node | null;
     // eslint-disable-next-line no-cond-assign
-    while (node = result.iterateNext()) {
+    while ((node = result.iterateNext())) {
         const shadowRoot = getShadowRootFromNode(node);
         if (!shadowRoot) {
             continue;
@@ -72,14 +74,17 @@ function deepQuerySelector(selector: string): Element | null {
  */
 function deepQuerySelectorAll(selector: string): Node[] {
     const result = document.evaluate(
-            DQS_XPATH_EXPRESSION, document, null
-          , XPathResult.ORDERED_NODE_ITERATOR_TYPE);
+        DQS_XPATH_EXPRESSION,
+        document,
+        null,
+        XPathResult.ORDERED_NODE_ITERATOR_TYPE
+    );
 
     const nodes: Node[] = [];
 
     let node: Node | null;
     // eslint-disable-next-line no-cond-assign
-    while (node = result.iterateNext()) {
+    while ((node = result.iterateNext())) {
         const shadowRoot = getShadowRootFromNode(node);
         if (shadowRoot) {
             nodes.push(...shadowRoot.querySelectorAll(selector));
@@ -89,25 +94,44 @@ function deepQuerySelectorAll(selector: string): Node[] {
     return nodes;
 }
 
-
 const mediaElementTypes = [
-    HTMLMediaElement
-  , HTMLVideoElement
-  , HTMLAudioElement
+    HTMLMediaElement,
+    HTMLVideoElement,
+    HTMLAudioElement
 ];
 
 const mediaElementEvents = [
-    "abort", "canplay", "canplaythrough", "durationchange", "emptied"
-  , "encrypted", "ended", "error", "interruptbegin", "interruptend"
-  , "loadeddata", "loadedmetadata", "loadstart", "mozaudioavailable", "pause"
-  , "play", "playing", "progress", "ratechange", "seeked", "seeking", "stalled"
-  , "suspend", "timeupdate", "volumechange", "waiting"
+    "abort",
+    "canplay",
+    "canplaythrough",
+    "durationchange",
+    "emptied",
+    "encrypted",
+    "ended",
+    "error",
+    "interruptbegin",
+    "interruptend",
+    "loadeddata",
+    "loadedmetadata",
+    "loadstart",
+    "mozaudioavailable",
+    "pause",
+    "play",
+    "playing",
+    "progress",
+    "ratechange",
+    "seeked",
+    "seeking",
+    "stalled",
+    "suspend",
+    "timeupdate",
+    "volumechange",
+    "waiting"
 ];
 
 const mediaElementAttributes = mediaElementTypes
     .flatMap(type => Object.getOwnPropertyNames(type.prototype))
     .concat(mediaElementEvents.map(ev => `on${ev}`));
-
 
 /**
  * Opaque wrapper around the media element to provide an overlay without
@@ -125,8 +149,14 @@ class PlayerElement extends HTMLElement {
         switch (this.constructor) {
             // URL variables injected ahead of current script
 
-            case AudioPlayerElement: { iconUrl = iconAirPlayAudio; break; }
-            case VideoPlayerElement: { iconUrl = iconAirPlayVideo; break; }
+            case AudioPlayerElement: {
+                iconUrl = iconAirPlayAudio;
+                break;
+            }
+            case VideoPlayerElement: {
+                iconUrl = iconAirPlayVideo;
+                break;
+            }
         }
 
         shadowRoot.innerHTML = `
@@ -192,10 +222,19 @@ class PlayerElement extends HTMLElement {
          * listeners, etc... on the media element, but since it's hidden
          * within the shadow DOM, these properties must be proxied.
          */
-        Object.defineProperties(host, clonePropsDescriptor(videoElement, [
-                "attributes", "setAttribute", "removeAttribute", "setAttribute"
-              , "addEventListener", "removeEventListener", "hasEventListener"
-              , ...mediaElementAttributes as any ]));
+        Object.defineProperties(
+            host,
+            clonePropsDescriptor(videoElement, [
+                "attributes",
+                "setAttribute",
+                "removeAttribute",
+                "setAttribute",
+                "addEventListener",
+                "removeEventListener",
+                "hasEventListener",
+                ...(mediaElementAttributes as any)
+            ])
+        );
 
         shadowRoot.prepend(videoElement);
     }
@@ -217,12 +256,13 @@ try {
     customElements.define("audio-player-element", AudioPlayerElement);
     customElements.define("video-player-element", VideoPlayerElement);
 } catch (err) {
-    if (err instanceof DOMException
-     && err.code === DOMException.NOT_SUPPORTED_ERR) {
+    if (
+        err instanceof DOMException &&
+        err.code === DOMException.NOT_SUPPORTED_ERR
+    ) {
         // Script already injected
     }
 }
-
 
 // Original functions
 const _createElement = document.createElement;
@@ -233,23 +273,22 @@ const _createElementNS = document.createElementNS;
  * custom element version that imitates the original. Otherwise, returns
  * the result of the original.
  */
-function createElement(
-        tagName: string
-      , options?: ElementCreationOptions) {
-
+function createElement(tagName: string, options?: ElementCreationOptions) {
     // Normalize formatting
     const lowerTagName = tagName.toLowerCase();
     const upperTagName = tagName.toUpperCase();
 
     if (lowerTagName === "audio" || lowerTagName === "video") {
-        const fakeElement = _createElement.call(document
-              , `${lowerTagName}-player-element`) as HTMLMediaElement;
+        const fakeElement = _createElement.call(
+            document,
+            `${lowerTagName}-player-element`
+        ) as HTMLMediaElement;
 
         // Ensure all references to the element name match tagName
         Object.defineProperties(fakeElement, {
-            tagName: makeGetterDescriptor(upperTagName)
-          , nodeName: makeGetterDescriptor(upperTagName)
-          , localName: makeGetterDescriptor(lowerTagName)
+            tagName: makeGetterDescriptor(upperTagName),
+            nodeName: makeGetterDescriptor(upperTagName),
+            localName: makeGetterDescriptor(lowerTagName)
         });
 
         return fakeElement;
@@ -264,33 +303,40 @@ function createElement(
  * original.
  */
 function createElementNS(
-        namespaceURI: string
-      , qualifiedName: string
-      , options?: ElementCreationOptions) {
-
+    namespaceURI: string,
+    qualifiedName: string,
+    options?: ElementCreationOptions
+) {
     if (namespaceURI === document.namespaceURI) {
         return createElement(qualifiedName, options);
     }
 
-    return _createElementNS.call(document
-          , namespaceURI, qualifiedName, options);
+    return _createElementNS.call(
+        document,
+        namespaceURI,
+        qualifiedName,
+        options
+    );
 }
 
 /**
  * Attempt to hide function source from page scripts by returning the
  * toString/toSource values of the native function.
  */
-Object.defineProperties(createElement, clonePropsDescriptor(
-        _createElement, [ "toString", "toSource" ]));
-Object.defineProperties(createElementNS, clonePropsDescriptor(
-        _createElementNS, [ "toString", "toSource" ]));
+Object.defineProperties(
+    createElement,
+    clonePropsDescriptor(_createElement, ["toString", "toSource"])
+);
+Object.defineProperties(
+    createElementNS,
+    clonePropsDescriptor(_createElementNS, ["toString", "toSource"])
+);
 
 // Re-define element creation functions
 Object.defineProperties(document, {
-    createElement: makeValueDescriptor(createElement)
-  , createElementNS: makeValueDescriptor(createElementNS)
+    createElement: makeValueDescriptor(createElement),
+    createElementNS: makeValueDescriptor(createElementNS)
 });
-
 
 /**
  * Takes a media element, creates a `PlayerElement` via the patched
@@ -321,7 +367,10 @@ function wrapMediaElement(mediaElement: HTMLMediaElement) {
              * internal media element instead.
              */
             HTMLElement.prototype.setAttribute.call(
-                    wrappedMedia, attr.name, attr.value);
+                wrappedMedia,
+                attr.name,
+                attr.value
+            );
         }
     }
 
@@ -362,7 +411,7 @@ document.addEventListener("DOMContentLoaded", () => {
         const mediaElements = document.querySelectorAll(mediaSelector);
         const deepMediaElements = deepQuerySelectorAll(mediaSelector);
 
-        for (const mediaElement of [ ...mediaElements, ...deepMediaElements ]) {
+        for (const mediaElement of [...mediaElements, ...deepMediaElements]) {
             wrapMediaElement(mediaElement as HTMLMediaElement);
         }
     });

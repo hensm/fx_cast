@@ -5,7 +5,6 @@ import options from "./options";
 
 import { Message, Port } from "../messaging";
 
-
 type DisconnectListener = (port: Port) => void;
 type MessageListener = (message: Message) => void;
 
@@ -26,7 +25,6 @@ function connectNative(application: string): Port {
 
     const port = browser.runtime.connectNative(application);
 
-
     let socket: WebSocket;
 
     const onDisconnectListeners = new Set<DisconnectListener>();
@@ -34,47 +32,47 @@ function connectNative(application: string): Port {
 
     // Port proxy API
     const portObject: Port = {
-        error: null as any
-      , name: ""
+        error: null as any,
+        name: "",
 
-      , onDisconnect: {
+        onDisconnect: {
             addListener(cb: DisconnectListener) {
                 onDisconnectListeners.add(cb);
-            }
-          , removeListener(cb: DisconnectListener) {
+            },
+            removeListener(cb: DisconnectListener) {
                 onDisconnectListeners.delete(cb);
-            }
-          , hasListener(cb: DisconnectListener) {
+            },
+            hasListener(cb: DisconnectListener) {
                 return onDisconnectListeners.has(cb);
+            },
+            hasListeners() {
+                return onDisconnectListeners.size > 0;
             }
-          , hasListeners() {
-                return onDisconnectListeners.size > 0;  
-            }
-        }
-      , onMessage: {
+        },
+        onMessage: {
             addListener(cb: MessageListener) {
                 onMessageListeners.add(cb);
-            }
-          , removeListener(cb: MessageListener) {
+            },
+            removeListener(cb: MessageListener) {
                 onMessageListeners.delete(cb);
-            }
-          , hasListener(cb: MessageListener) {
+            },
+            hasListener(cb: MessageListener) {
                 return onMessageListeners.has(cb);
+            },
+            hasListeners() {
+                return onMessageListeners.size > 0;
             }
-          , hasListeners() {
-                return onMessageListeners.size > 0;  
-            }
-        }
+        },
 
-      , disconnect() {
+        disconnect() {
             if (socket) {
                 socket.close();
             } else {
                 port.disconnect();
             }
-        }
+        },
 
-      , postMessage(message) {
+        postMessage(message) {
             if (socket) {
                 switch (socket.readyState) {
                     case WebSocket.CONNECTING: {
@@ -99,11 +97,9 @@ function connectNative(application: string): Port {
         }
     };
 
-
     port.onDisconnect.addListener(async () => {
-        const { bridgeBackupEnabled
-              , bridgeBackupHost
-              , bridgeBackupPort } = await options.getAll();
+        const { bridgeBackupEnabled, bridgeBackupHost, bridgeBackupPort } =
+            await options.getAll();
 
         if (!bridgeBackupEnabled) {
             portObject.error = {
@@ -114,14 +110,17 @@ function connectNative(application: string): Port {
                 listener(portObject);
             }
 
-            throw logger.error("Bridge connection failed and backup not enabled.");
+            throw logger.error(
+                "Bridge connection failed and backup not enabled."
+            );
         }
 
         if (port.error && !isNativeHostStatusKnown) {
             isNativeHostStatusKnown = true;
 
             socket = new WebSocket(
-                    `ws://${bridgeBackupHost}:${bridgeBackupPort}`);
+                `ws://${bridgeBackupHost}:${bridgeBackupPort}`
+            );
 
             socket.addEventListener("open", () => {
                 // Send all messages in queue
@@ -163,30 +162,28 @@ function connectNative(application: string): Port {
         }
     });
 
-
     return portObject;
 }
 
-async function sendNativeMessage(
-        application: string
-      , message: Message) {
-
+async function sendNativeMessage(application: string, message: Message) {
     try {
         return await browser.runtime.sendNativeMessage(application, message);
     } catch {
-        const { bridgeBackupEnabled
-              , bridgeBackupHost
-              , bridgeBackupPort } = await options.getAll();
+        const { bridgeBackupEnabled, bridgeBackupHost, bridgeBackupPort } =
+            await options.getAll();
 
         if (!bridgeBackupEnabled) {
-            throw logger.error("Bridge connection failed and backup not enabled.");
+            throw logger.error(
+                "Bridge connection failed and backup not enabled."
+            );
         }
 
         const port = await options.get("bridgeBackupPort");
 
         return await new Promise((resolve, reject) => {
             const ws = new WebSocket(
-                    `ws://${bridgeBackupHost}:${bridgeBackupPort}`);
+                `ws://${bridgeBackupHost}:${bridgeBackupPort}`
+            );
 
             ws.addEventListener("open", () => {
                 ws.send(JSON.stringify(message));
@@ -205,8 +202,7 @@ async function sendNativeMessage(
     }
 }
 
-
 export default {
-    connectNative
-  , sendNativeMessage
+    connectNative,
+    sendNativeMessage
 };

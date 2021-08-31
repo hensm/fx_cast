@@ -7,13 +7,11 @@ import { sendMessage } from "../../lib/nativeMessaging";
 import { ReceiverDevice } from "../../types";
 import { ReceiverApplication, ReceiverMessage, SenderMessage } from "./types";
 
-
 export const NS_CONNECTION = "urn:x-cast:com.google.cast.tp.connection";
 export const NS_HEARTBEAT = "urn:x-cast:com.google.cast.tp.heartbeat";
 export const NS_RECEIVER = "urn:x-cast:com.google.cast.receiver";
 
 const HEARTBEAT_INTERVAL = 5000;
-
 
 class CastClient {
     protected client = new Client();
@@ -22,18 +20,26 @@ class CastClient {
     protected heartbeatChannel?: Channel;
     protected heartbeatIntervalId?: NodeJS.Timeout;
 
-    constructor(protected sourceId = "sender-0"
-              , protected destinationId = "receiver-0") {}
+    constructor(
+        protected sourceId = "sender-0",
+        protected destinationId = "receiver-0"
+    ) {}
 
     /**
      * Create a channel on the client connection with a given
      * namespace.
      */
-    createChannel(namespace: string
-                , sourceId = this.sourceId
-                , destinationId = this.destinationId) {
-
-       return this.client.createChannel(sourceId, destinationId, namespace, "JSON");
+    createChannel(
+        namespace: string,
+        sourceId = this.sourceId,
+        destinationId = this.destinationId
+    ) {
+        return this.client.createChannel(
+            sourceId,
+            destinationId,
+            namespace,
+            "JSON"
+        );
     }
 
     connect(host: string, port: number, onHeartbeat?: () => void) {
@@ -49,10 +55,10 @@ class CastClient {
             this.client.connect({ host, port }, () => {
                 this.connectionChannel = this.createChannel(NS_CONNECTION);
                 this.heartbeatChannel = this.createChannel(NS_HEARTBEAT);
-                
+
                 this.connectionChannel.send({ type: "CONNECT" });
                 this.heartbeatChannel.send({ type: "PING" });
-                
+
                 this.heartbeatIntervalId = setInterval(() => {
                     this.heartbeatChannel?.send({ type: "PING" });
                     if (onHeartbeat) {
@@ -65,7 +71,6 @@ class CastClient {
         });
     }
 }
-
 
 type OnSessionCreatedCallback = (sessionId: string) => void;
 
@@ -81,7 +86,7 @@ export default class Session extends CastClient {
     private transportId?: string;
     private transportConnection?: Channel;
     private transportHeartbeat?: Channel;
-    
+
     // Channels created by `sendCastSessionMessage` messages
     private namespaceChannelMap = new Map<string, Channel>();
 
@@ -93,12 +98,17 @@ export default class Session extends CastClient {
 
     private onSessionCreated?: OnSessionCreatedCallback;
 
-
     private establishAppConnection(transportId: string) {
         this.transportConnection = this.createChannel(
-                NS_CONNECTION, this.sourceId, transportId);
+            NS_CONNECTION,
+            this.sourceId,
+            transportId
+        );
         this.transportHeartbeat = this.createChannel(
-                NS_HEARTBEAT, this.sourceId, transportId);
+            NS_HEARTBEAT,
+            this.sourceId,
+            transportId
+        );
 
         this.transportConnection.send({ type: "CONNECT" });
     }
@@ -111,7 +121,8 @@ export default class Session extends CastClient {
             case "RECEIVER_STATUS": {
                 const { status } = message;
                 const application = status.applications?.find(
-                        app => app.appId === this.appId);
+                    app => app.appId === this.appId
+                );
 
                 /**
                  * If application isn't set, still waiting on the launch
@@ -133,20 +144,20 @@ export default class Session extends CastClient {
                         const { friendlyName } = this.receiverDevice;
 
                         sendMessage({
-                            subject: "shim:castSessionCreated"
-                          , data: {
-                                sessionId: this.sessionId
-                              , statusText: application.statusText
-                              , namespaces: application.namespaces
-                              , volume: status.volume
-                              , appId: application.appId
-                              , displayName: application.displayName
-                              , receiverFriendlyName: friendlyName
-                              , transportId: this.sessionId
+                            subject: "shim:castSessionCreated",
+                            data: {
+                                sessionId: this.sessionId,
+                                statusText: application.statusText,
+                                namespaces: application.namespaces,
+                                volume: status.volume,
+                                appId: application.appId,
+                                displayName: application.displayName,
+                                receiverFriendlyName: friendlyName,
+                                transportId: this.sessionId,
 
-                              // TODO: Fix this
-                              , senderApps: []
-                              , appImages: []
+                                // TODO: Fix this
+                                senderApps: [],
+                                appImages: []
                             }
                         });
                     }
@@ -161,15 +172,15 @@ export default class Session extends CastClient {
                 }
 
                 sendMessage({
-                    subject: "shim:castSessionUpdated"
-                  , data: {
-                        sessionId: this.sessionId
-                      , statusText: application.statusText
-                      , namespaces: application.namespaces
-                      , volume: message.status.volume
+                    subject: "shim:castSessionUpdated",
+                    data: {
+                        sessionId: this.sessionId,
+                        statusText: application.statusText,
+                        namespaces: application.namespaces,
+                        volume: message.status.volume
                     }
                 });
-                
+
                 break;
             }
 
@@ -179,13 +190,16 @@ export default class Session extends CastClient {
                 break;
             }
         }
-    }
+    };
 
     sendMessage(namespace: string, message: unknown) {
         let channel = this.namespaceChannelMap.get(namespace);
         if (!channel) {
             channel = this.createChannel(
-                    namespace, this.sourceId, this.transportId);
+                namespace,
+                this.sourceId,
+                this.transportId
+            );
 
             channel.on("message", messageData => {
                 if (!this.sessionId) {
@@ -195,11 +209,11 @@ export default class Session extends CastClient {
                 messageData = JSON.stringify(messageData);
 
                 sendMessage({
-                    subject: "shim:receivedCastSessionMessage"
-                  , data: {
-                        sessionId: this.sessionId
-                      , namespace
-                      , messageData
+                    subject: "shim:receivedCastSessionMessage",
+                    data: {
+                        sessionId: this.sessionId,
+                        namespace,
+                        messageData
                     }
                 });
             });
@@ -222,25 +236,24 @@ export default class Session extends CastClient {
         return requestId;
     }
 
-    constructor(public appId: string
-              , public receiverDevice: ReceiverDevice) {
-
+    constructor(public appId: string, public receiverDevice: ReceiverDevice) {
         super();
 
         this.client.on("close", () => {
             if (this.sessionId) {
                 sendMessage({
-                    subject: "shim:castSessionStopped"
-                  , data: { sessionId: this.sessionId }
+                    subject: "shim:castSessionStopped",
+                    data: { sessionId: this.sessionId }
                 });
             }
         });
     }
 
-    async connect(host: string
-                , port: number
-                , onSessionCreated?: OnSessionCreatedCallback) {
-
+    async connect(
+        host: string,
+        port: number,
+        onSessionCreated?: OnSessionCreatedCallback
+    ) {
         if (onSessionCreated) {
             this.onSessionCreated = onSessionCreated;
         }
@@ -253,8 +266,8 @@ export default class Session extends CastClient {
         });
 
         this.launchRequestId = this.sendReceiverMessage({
-            type: "LAUNCH"
-          , appId: this.appId
+            type: "LAUNCH",
+            appId: this.appId
         });
     }
 }

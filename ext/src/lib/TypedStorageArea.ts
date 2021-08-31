@@ -13,21 +13,18 @@ export class TypedStorageArea<Schema extends { [key: string]: any }> {
         this.storageArea = storageArea;
     }
 
-    public async get<SchemaKey extends keyof Schema
-                   , SchemaPartial extends Partial<Schema>>(
-            keys?: SchemaKey
-                 | SchemaKey[]
-                 | SchemaPartial
-                 | null | undefined)
-            : Promise<Pick<Schema, Extract<
-                    keyof SchemaPartial, SchemaKey>>> {
-
+    public async get<
+        SchemaKey extends keyof Schema,
+        SchemaPartial extends Partial<Schema>
+    >(
+        keys?: SchemaKey | SchemaKey[] | SchemaPartial | null | undefined
+    ): Promise<Pick<Schema, Extract<keyof SchemaPartial, SchemaKey>>> {
         return await this.storageArea.get(keys);
     }
 
     public async getBytesInUse<SchemaKey extends keyof Schema>(
-            keys?: Schema | SchemaKey[]): Promise<number> {
-
+        keys?: Schema | SchemaKey[]
+    ): Promise<number> {
         return await this.storageArea.getBytesInUse(keys);
     }
 
@@ -36,8 +33,8 @@ export class TypedStorageArea<Schema extends { [key: string]: any }> {
     }
 
     public async remove<SchemaKey extends keyof Schema>(
-            keys: SchemaKey | SchemaKey[]): Promise<void> {
-
+        keys: SchemaKey | SchemaKey[]
+    ): Promise<void> {
         await this.storageArea.remove(keys);
     }
 

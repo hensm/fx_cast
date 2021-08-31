@@ -7,17 +7,16 @@ declare module "bplist-parser" {
     export var maxObjectCount: number;
 
     export class UID {
-        constructor (id: number);
+        constructor(id: number);
         UID: number;
     }
 
-    type ParseFileCallback = (
-            err: string
-          , result?: Buffer) => void;
+    type ParseFileCallback = (err: string, result?: Buffer) => void;
 
-    export function parseFile (
-            fileNameOrBuffer: Buffer | string
-          , callback: ParseFileCallback): void;
+    export function parseFile(
+        fileNameOrBuffer: Buffer | string,
+        callback: ParseFileCallback
+    ): void;
 
-    export function parseBuffer (buffer: Buffer): any;
+    export function parseBuffer(buffer: Buffer): any;
 }

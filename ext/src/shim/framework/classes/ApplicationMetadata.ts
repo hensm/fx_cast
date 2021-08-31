@@ -2,7 +2,6 @@
 
 import * as cast from "../../cast";
 
-
 export default class ApplicationMetadata {
     public applicationId: string;
     public images: cast.Image[];
@@ -16,6 +15,7 @@ export default class ApplicationMetadata {
 
         // Convert [{ name: <ns> }, ...] to [ <ns>, ... ]
         this.namespaces = sessionObj.namespaces.map(
-                namespaceObj => namespaceObj.name);
+            namespaceObj => namespaceObj.name
+        );
     }
 }

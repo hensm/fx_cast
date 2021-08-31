@@ -6,22 +6,21 @@ import cast, { ensureInit } from "../shim/export";
 import { ReceiverSelectorMediaType } from "../background/receiverSelector";
 import { ReceiverDevice } from "../types";
 
-
 // Variables passed from background
-const { selectedMedia
-      , selectedReceiver }
-    : { selectedMedia: ReceiverSelectorMediaType
-      , selectedReceiver: ReceiverDevice } = (window as any);
-
+const {
+    selectedMedia,
+    selectedReceiver
+}: {
+    selectedMedia: ReceiverSelectorMediaType;
+    selectedReceiver: ReceiverDevice;
+} = window as any;
 
 const FX_CAST_RECEIVER_APP_NAMESPACE = "urn:x-cast:fx_cast";
-
 
 let session: cast.Session;
 let wasSessionRequested = false;
 
 let peerConnection: RTCPeerConnection;
-
 
 /**
  * Sends a message to the fx_cast app running on the
@@ -33,40 +32,39 @@ function sendAppMessage(subject: string, data: any) {
     }
 
     session.sendMessage(FX_CAST_RECEIVER_APP_NAMESPACE, {
-        subject
-      , data
+        subject,
+        data
     });
 }
-
 
 window.addEventListener("beforeunload", () => {
     sendAppMessage("close", null);
 });
 
-
 async function onRequestSessionSuccess(newSession: cast.Session) {
     cast.logMessage("onRequestSessionSuccess");
 
     session = newSession;
-    session.addMessageListener(FX_CAST_RECEIVER_APP_NAMESPACE
-          , async (_namespace, message) => {
+    session.addMessageListener(
+        FX_CAST_RECEIVER_APP_NAMESPACE,
+        async (_namespace, message) => {
+            const { subject, data } = JSON.parse(message);
 
-        const { subject, data } = JSON.parse(message);
-
-        switch (subject) {
-            case "peerConnectionAnswer": {
-                peerConnection.setRemoteDescription(data);
-                break;
-            }
-            case "iceCandidate": {
-                peerConnection.addIceCandidate(data);
-                break;
+            switch (subject) {
+                case "peerConnectionAnswer": {
+                    peerConnection.setRemoteDescription(data);
+                    break;
+                }
+                case "iceCandidate": {
+                    peerConnection.addIceCandidate(data);
+                    break;
+                }
             }
         }
-    });
+    );
 
     peerConnection = new RTCPeerConnection();
-    peerConnection.addEventListener("icecandidate", (ev) => {
+    peerConnection.addEventListener("icecandidate", ev => {
         sendAppMessage("iceCandidate", ev.candidate);
     });
 
@@ -95,27 +93,29 @@ async function onRequestSessionSuccess(newSession: cast.Session) {
 
             // TODO: Test performance
             const drawFlags =
-                    ctx.DRAWWINDOW_DRAW_CARET
-                  | ctx.DRAWWINDOW_DRAW_VIEW
-                  | ctx.DRAWWINDOW_ASYNC_DECODE_IMAGES
-                  | ctx.DRAWWINDOW_USE_WIDGET_LAYERS;
+                ctx.DRAWWINDOW_DRAW_CARET |
+                ctx.DRAWWINDOW_DRAW_VIEW |
+                ctx.DRAWWINDOW_ASYNC_DECODE_IMAGES |
+                ctx.DRAWWINDOW_USE_WIDGET_LAYERS;
 
             let lastFrame: DOMHighResTimeStamp;
-            window.requestAnimationFrame(
-                    function draw(now: DOMHighResTimeStamp) {
-
+            window.requestAnimationFrame(function draw(
+                now: DOMHighResTimeStamp
+            ) {
                 if (!lastFrame) {
                     lastFrame = now;
                 }
 
-                if ((now - lastFrame) > (1000 / 30)) {
+                if (now - lastFrame > 1000 / 30) {
                     ctx.drawWindow(
-                            window        // window
-                          , 0, 0          // x, y
-                          , canvas.width  // w
-                          , canvas.height // h
-                          , "white"       // bgColor
-                          , drawFlags);   // flags
+                        window, // window
+                        0,
+                        0, // x, y
+                        canvas.width, // w
+                        canvas.height, // h
+                        "white", // bgColor
+                        drawFlags
+                    ); // flags
 
                     lastFrame = now;
                 }
@@ -134,8 +134,8 @@ async function onRequestSessionSuccess(newSession: cast.Session) {
 
         case ReceiverSelectorMediaType.Screen: {
             const stream = await navigator.mediaDevices.getDisplayMedia({
-                video: { cursor: "motion" }
-              , audio: false
+                video: { cursor: "motion" },
+                audio: false
             });
 
             peerConnection.addStream(stream);
@@ -152,7 +152,6 @@ async function onRequestSessionSuccess(newSession: cast.Session) {
     sendAppMessage("peerConnectionOffer", offer);
 }
 
-
 function receiverListener(availability: string) {
     cast.logMessage("receiverListener");
 
@@ -162,13 +161,14 @@ function receiverListener(availability: string) {
 
     if (availability === cast.ReceiverAvailability.AVAILABLE) {
         wasSessionRequested = true;
-        cast.requestSession(onRequestSessionSuccess
-                          , onRequestSessionError
-                          , undefined
-                          , selectedReceiver);
+        cast.requestSession(
+            onRequestSessionSuccess,
+            onRequestSessionError,
+            undefined,
+            selectedReceiver
+        );
     }
 }
-
 
 function onRequestSessionError() {
     cast.logMessage("onRequestSessionError");
@@ -183,18 +183,17 @@ function onInitializeError() {
     cast.logMessage("onInitializeError");
 }
 
-
 ensureInit().then(async () => {
     const mirroringAppId = await options.get("mirroringAppId");
     const sessionRequest = new cast.SessionRequest(mirroringAppId);
 
     const apiConfig = new cast.ApiConfig(
-            sessionRequest
-          , sessionListener
-          , receiverListener
-          , undefined, undefined);
+        sessionRequest,
+        sessionListener,
+        receiverListener,
+        undefined,
+        undefined
+    );
 
-    cast.initialize(apiConfig
-          , onInitializeSuccess
-          , onInitializeError);
+    cast.initialize(apiConfig, onInitializeSuccess, onInitializeError);
 });

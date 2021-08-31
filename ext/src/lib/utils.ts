@@ -4,7 +4,6 @@ import logger from "./logger";
 
 import { ReceiverSelectorMediaType } from "../background/receiverSelector";
 
-
 export function getNextEllipsis(ellipsis: string): string {
     if (ellipsis === "") return ".";
     if (ellipsis === ".") return "..";
@@ -18,9 +17,9 @@ export function getNextEllipsis(ellipsis: string): string {
  * Template literal tag function, JSON-encodes substitutions.
  */
 export function stringify(
-        templateStrings: TemplateStringsArray
-      , ...substitutions: any[]) {
-
+    templateStrings: TemplateStringsArray,
+    ...substitutions: any[]
+) {
     let formattedString = "";
 
     for (const templateString of templateStrings) {
@@ -35,8 +34,8 @@ export function stringify(
 }
 
 export function getMediaTypesForPageUrl(
-        pageUrl: string): ReceiverSelectorMediaType {
-
+    pageUrl: string
+): ReceiverSelectorMediaType {
     const url = new URL(pageUrl);
     let availableMediaTypes = ReceiverSelectorMediaType.File;
 
@@ -45,18 +44,18 @@ export function getMediaTypesForPageUrl(
      * Mozilla domains.
      */
     const blockedHosts = [
-        "accounts-static.cdn.mozilla.net"
-      , "accounts.firefox.com"
-      , "addons.cdn.mozilla.net"
-      , "addons.mozilla.org"
-      , "api.accounts.firefox.com"
-      , "content.cdn.mozilla.net"
-      , "discovery.addons.mozilla.org"
-      , "install.mozilla.org"
-      , "oauth.accounts.firefox.com"
-      , "profile.accounts.firefox.com"
-      , "support.mozilla.org"
-      , "sync.services.mozilla.com"
+        "accounts-static.cdn.mozilla.net",
+        "accounts.firefox.com",
+        "addons.cdn.mozilla.net",
+        "addons.mozilla.org",
+        "api.accounts.firefox.com",
+        "content.cdn.mozilla.net",
+        "discovery.addons.mozilla.org",
+        "install.mozilla.org",
+        "oauth.accounts.firefox.com",
+        "profile.accounts.firefox.com",
+        "support.mozilla.org",
+        "sync.services.mozilla.com"
     ];
 
     if (blockedHosts.includes(url.host)) {
@@ -80,7 +79,6 @@ export function getMediaTypesForPageUrl(
     return availableMediaTypes;
 }
 
-
 export interface WindowCenteredProps {
     width: number;
     height: number;
@@ -89,33 +87,37 @@ export interface WindowCenteredProps {
 }
 
 export function getWindowCenteredProps(
-        refWin: browser.windows.Window
-      , width: number
-      , height: number): WindowCenteredProps {
-
-    if (refWin.left === undefined || refWin.width === undefined
-     || refWin.top === undefined || refWin.height === undefined) {
+    refWin: browser.windows.Window,
+    width: number,
+    height: number
+): WindowCenteredProps {
+    if (
+        refWin.left === undefined ||
+        refWin.width === undefined ||
+        refWin.top === undefined ||
+        refWin.height === undefined
+    ) {
         throw logger.error("refWin missing positional attributes.");
     }
 
-    const centerX = refWin.left + (refWin.width / 2);
-    const centerY = refWin.top + (refWin.height / 3);
+    const centerX = refWin.left + refWin.width / 2;
+    const centerY = refWin.top + refWin.height / 3;
 
     return {
-        width, height
-      , left: Math.floor(centerX - width / 2)
-      , top: Math.floor(centerY - height / 2)
+        width,
+        height,
+        left: Math.floor(centerX - width / 2),
+        top: Math.floor(centerY - height / 2)
     };
 }
 
-
-export const REMOTE_MATCH_PATTERN_REGEX = /^(?:(?:(\*|https?|ftp):\/\/(\*|(?:\*\.(?:[^\/\*:]\.?)+(?:[^\.])|[^\/\*:]*))?)(\/.*)|<all_urls>)$/;
-
+export const REMOTE_MATCH_PATTERN_REGEX =
+    /^(?:(?:(\*|https?|ftp):\/\/(\*|(?:\*\.(?:[^\/\*:]\.?)+(?:[^\.])|[^\/\*:]*))?)(\/.*)|<all_urls>)$/;
 
 export function loadScript(
-        scriptUrl: string
-      , doc: Document = document): HTMLScriptElement {
-
+    scriptUrl: string,
+    doc: Document = document
+): HTMLScriptElement {
     const scriptElement = doc.createElement("script");
     scriptElement.src = scriptUrl;
     (doc.head || doc.documentElement).append(scriptElement);

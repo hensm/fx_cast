@@ -5,15 +5,13 @@
  * descriptor is found, otherwise return undefined.
  */
 export function getPropertyDescriptor(
-        target: any, prop: string | number | symbol)
-      : PropertyDescriptor | undefined {
-
+    target: any,
+    prop: string | number | symbol
+): PropertyDescriptor | undefined {
     let desc: PropertyDescriptor | undefined;
     while (!desc && target !== null) {
         desc = Object.getOwnPropertyDescriptor(target, prop);
-        if (!desc) {
-            target = Object.getPrototypeOf(target);
-        }
+        if (!desc) target = Object.getPrototypeOf(target);
     }
 
     return desc;
@@ -24,14 +22,14 @@ export function getPropertyDescriptor(
  * to a target object.
  */
 export function bindPropertyDescriptor(
-        desc: PropertyDescriptor, target: any)
-      : PropertyDescriptor {
-
+    desc: PropertyDescriptor,
+    target: any
+): PropertyDescriptor {
     if (typeof desc.value === "function") {
         desc.value = desc.value.bind(target);
     } else {
-        if (desc.get) { desc.get = desc.get.bind(target); }
-        if (desc.set) { desc.set = desc.set.bind(target); }
+        if (desc.get) desc.get = desc.get.bind(target);
+        if (desc.set) desc.set = desc.set.bind(target);
     }
 
     return desc;
@@ -43,9 +41,9 @@ export function bindPropertyDescriptor(
  * element and collect them into a property descriptor map.
  */
 export function clonePropsDescriptor<T>(
-        target: T, props: any[])
-      : PropertyDescriptorMap {
-
+    target: T,
+    props: any[]
+): PropertyDescriptorMap {
     return props.reduce<PropertyDescriptorMap>((descriptorMap, prop) => {
         const desc = getPropertyDescriptor(target, prop);
         if (desc) {
@@ -59,17 +57,19 @@ export function clonePropsDescriptor<T>(
 
 export function makeGetterDescriptor(val: any): PropertyDescriptor {
     return {
-        enumerable: true
-      , configurable: true
-      , get() { return val; }
+        enumerable: true,
+        configurable: true,
+        get() {
+            return val;
+        }
     };
 }
 
 export function makeValueDescriptor(val: any): PropertyDescriptor {
     return {
-        enumerable: true
-      , configurable: true
-      , writable: true
-      , value: val
+        enumerable: true,
+        configurable: true,
+        writable: true,
+        value: val
     };
 }

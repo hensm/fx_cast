@@ -3,7 +3,6 @@
 import { Error as Error_ } from "./cast/dataClasses";
 import { Media } from "./cast/media";
 
-
 export type SuccessCallback = () => void;
 export type ErrorCallback = (err: Error_) => void;
 

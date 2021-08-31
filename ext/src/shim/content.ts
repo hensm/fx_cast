@@ -1,10 +1,8 @@
 "use strict";
 
-import { CAST_LOADER_SCRIPT_URL
-       , CAST_SCRIPT_URLS } from "../lib/endpoints";
+import { CAST_LOADER_SCRIPT_URL, CAST_SCRIPT_URLS } from "../lib/endpoints";
 
-
-const _window = (window.wrappedJSObject as any);
+const _window = window.wrappedJSObject as any;
 
 _window.chrome = cloneInto({}, window);
 
@@ -16,7 +14,6 @@ if (window.location.host === "www.youtube.com") {
     _window.navigator.presentation = cloneInto({}, window);
 }
 
-
 /**
  * Replace the src property setter on <script> elements to
  * intercept the new value.
@@ -26,16 +23,16 @@ if (window.location.host === "www.youtube.com") {
  * which is handled in the main script.
  */
 const desc = Reflect.getOwnPropertyDescriptor(
-        HTMLScriptElement.prototype.wrappedJSObject, "src");
+    HTMLScriptElement.prototype.wrappedJSObject,
+    "src"
+);
 
-Reflect.defineProperty(
-        HTMLScriptElement.prototype.wrappedJSObject, "src", {
+Reflect.defineProperty(HTMLScriptElement.prototype.wrappedJSObject, "src", {
+    configurable: true,
+    enumerable: true,
+    get: desc?.get,
 
-    configurable: true
-  , enumerable: true
-  , get: desc?.get
-
-  , set: exportFunction(function setFunc(this: HTMLScriptElement, value) {
+    set: exportFunction(function setFunc(this: HTMLScriptElement, value) {
         if (CAST_SCRIPT_URLS.includes(value)) {
             return desc?.set?.call(this, CAST_LOADER_SCRIPT_URL);
         }
