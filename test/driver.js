@@ -15,13 +15,10 @@ const chrome = require("selenium-webdriver/chrome");
 // Webdriver shorthands
 const { By, until } = webdriver;
 
-const { __extensionName, __extensionVersion } = require("../ext/package.json");
-
-const extensionArchivePath = path.join(
-    __dirname,
-    "../dist/ext",
-    `${__extensionName}-${__extensionVersion}.xpi`
-);
+const extensionArchivePath = glob.sync("*.xpi", {
+    cwd: path.join(__dirname, "../dist/ext"),
+    absolute: true
+})[0];
 
 if (!fs.existsSync(extensionArchivePath)) {
     console.error("Extension archive not found.");
