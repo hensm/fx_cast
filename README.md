@@ -18,17 +18,14 @@ Install the Firefox extension (from within Firefox) and companion bridge applica
 
 On Linux platforms, it may be necessary to [configure local hostname resolution](https://wiki.archlinux.org/index.php/avahi#Hostname_resolution).
 
-### Install as a daemon
-
-To install fx_cast as a daemon for systemd.
-You can do the following steps:
+### Installing as a systemd deamon
 
 1. Create fx_cast user: `sudo useradd --system fx_cast`
 2. Create service file in /etc/systemd/fx_cast.service:
 ```
 [Unit]
 
-Description=FX Cast daemon
+Description=fx_cast daemon
 
 [Service]
 
