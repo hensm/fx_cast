@@ -59,7 +59,7 @@ HTML5 media elements also have a different `Cast...` context menu item that trig
 ## Building
 
 ### Requirements
-* Node.js v12.x.x
+* Node.js v16.x.x
 * Native build tools (see [here](https://github.com/nodejs/node-gyp#installation))
 * Bonjour/Avahi (on Windows/Linux respectively)
 

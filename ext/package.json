@@ -7,17 +7,17 @@
         "lint": "eslint src --ext .ts,.tsx"
     },
     "devDependencies": {
-        "@types/firefox-webext-browser": "^82.0.1",
-        "@types/react": "^17.0.19",
-        "@types/react-dom": "^17.0.9",
-        "@types/semver": "^7.3.8",
-        "@types/uuid": "^8.3.1",
-        "esbuild": "^0.12.24",
-        "preact": "^10.5.14",
+        "@types/firefox-webext-browser": "^94.0.1",
+        "@types/react": "^17.0.39",
+        "@types/react-dom": "^17.0.13",
+        "@types/semver": "^7.3.9",
+        "@types/uuid": "^8.3.4",
+        "esbuild": "^0.14.25",
+        "preact": "^10.6.6",
         "semver": "^7.3.5",
-        "ts-loader": "^9.2.5",
-        "typescript": "^4.4.2",
+        "ts-loader": "^9.2.7",
+        "typescript": "^4.6.2",
         "uuid": "^8.3.2",
-        "web-ext": "^6.3.0"
+        "web-ext": "^6.7.0"
     }
 }

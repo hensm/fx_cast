@@ -58,7 +58,6 @@ if (!supportedArchs.includes(argv.arch)) {
 }
 
 const ROOT_PATH = path.join(__dirname, "..");
-const SRC_PATH = path.join(ROOT_PATH, "src");
 const BUILD_PATH = path.join(ROOT_PATH, "build");
 
 const spawnOptions = {
@@ -133,7 +132,7 @@ async function build() {
         await pkg.exec([
             path.join(BUILD_PATH, "src"),
             "--target",
-            `node12-${paths.pkgPlatformMap[process.platform]}-${argv.arch}`,
+            `node16-${paths.pkgPlatformMap[process.platform]}-${argv.arch}`,
             "--output",
             path.join(BUILD_PATH, executableName)
         ]);

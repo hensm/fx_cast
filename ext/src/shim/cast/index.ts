@@ -5,7 +5,10 @@ import logger from "../../lib/logger";
 import { ReceiverDevice } from "../../types";
 import { ErrorCallback, SuccessCallback } from "../types";
 
-import { onMessage, sendMessageResponse } from "../eventMessageChannel";
+import {
+    onMessage,
+    sendMessageResponse
+} from "../eventMessageChannel";
 
 import {
     AutoJoinPolicy,
@@ -306,8 +309,11 @@ onMessage(message => {
             if (session) {
                 session.status = SessionStatus.STOPPED;
 
-                for (const listener of session?._updateListeners) {
-                    listener(false);
+                const updateListeners = session?._updateListeners;
+                if (updateListeners) {
+                    for (const listener of updateListeners) {
+                        listener(false);
+                    }
                 }
             }
 
