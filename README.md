@@ -36,7 +36,7 @@ Restart=always
 [Install]
 WantedBy=multi-user.target
 ```
-3. Enable the service: `sudo systemd enable fx_cast`
+3. Enable the service: `sudo systemctl enable --now fx_cast`
 
 ### Package managers
 * #### Arch Linux (AUR) - https://aur.archlinux.org/packages/fx_cast/
