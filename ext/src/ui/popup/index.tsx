@@ -4,7 +4,7 @@
 import React, { Component } from "react";
 import ReactDOM from "react-dom";
 
-import knownApps from "../../lib/knownApps";
+import knownApps from "../../cast/knownApps";
 import options from "../../lib/options";
 
 import messaging, { Message, Port } from "../../messaging";
