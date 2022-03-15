@@ -25,39 +25,48 @@ export interface CastInstance {
     appId?: string;
 }
 
+/**
+ * Keeps track of cast API instances and provides bridge
+ * messaging.
+ */
 export default new (class CastManager {
     private activeInstances = new Set<CastInstance>();
 
     public async init() {
-        // Wait for "cast" ports
+        // Handle incoming instance connections
         messaging.onConnect.addListener(async port => {
             if (port.name === "cast") {
                 this.createInstance(port);
             }
         });
 
+        // Forward receiver eventes to cast instances
         receiverDevices.addEventListener("receiverDeviceUp", ev => {
             for (const instance of this.activeInstances) {
                 instance.contentPort.postMessage({
-                    subject: "cast:serviceUp",
+                    subject: "cast:receiverDeviceUp",
                     data: { receiverDevice: ev.detail.deviceInfo }
                 });
             }
         });
-
         receiverDevices.addEventListener("receiverDeviceDown", ev => {
             for (const instance of this.activeInstances) {
                 instance.contentPort.postMessage({
-                    subject: "cast:serviceDown",
+                    subject: "cast:receiverDeviceDown",
                     data: { receiverDeviceId: ev.detail.deviceId }
                 });
             }
         });
     }
 
+    /**
+     * Finds a cast instance at the given tab (and optionally
+     * frame) ID.
+     */
     public getInstance(tabId: number, frameId?: number) {
         for (const instance of this.activeInstances) {
             if (instance.contentTabId === tabId) {
+                // If frame ID doesn't match go to next instance
                 if (frameId && instance.contentFrameId !== frameId) {
                     continue;
                 }
@@ -67,19 +76,28 @@ export default new (class CastManager {
         }
     }
 
+    /**
+     * Creates a cast instance with a given port and connects
+     * messaging correctly depending on the type of port.
+     */
     public async createInstance(port: AnyPort) {
         const instance = await (port instanceof MessagePort
             ? this.createInstanceFromBackground(port)
             : this.createInstanceFromContent(port));
+
+        this.activeInstances.add(instance);
 
         instance.contentPort.postMessage({
             subject: "cast:initialized",
             data: await bridge.getInfo()
         });
 
-        this.activeInstances.add(instance);
+        return instance;
     }
 
+    /**
+     * Creates a cast instance with a `MessagePort` content port.
+     */
     private async createInstanceFromBackground(
         contentPort: MessagePort
     ): Promise<CastInstance> {
@@ -93,10 +111,12 @@ export default new (class CastManager {
             this.activeInstances.delete(instance);
         });
 
+        // bridge -> content
         instance.bridgePort.onMessage.addListener(message => {
             contentPort.postMessage(message);
         });
 
+        // content -> (any)
         contentPort.addEventListener("message", ev => {
             this.handleContentMessage(instance, ev.data);
         });
@@ -104,7 +124,13 @@ export default new (class CastManager {
         return instance;
     }
 
-    private async createInstanceFromContent(contentPort: Port): Promise<CastInstance> {
+    /**
+     * Creates a cast instance with a WebExtension `Port` content
+     * port.
+     */
+    private async createInstanceFromContent(
+        contentPort: Port
+    ): Promise<CastInstance> {
         if (
             contentPort.sender?.tab?.id === undefined ||
             contentPort.sender?.frameId === undefined
@@ -117,6 +143,8 @@ export default new (class CastManager {
         /**
          * If there's already an active instance for the sender
          * tab/frame ID, disconnect it.
+         * 
+         * TODO: Fix this behaviour!
          */
         for (const instance of this.activeInstances) {
             if (
@@ -134,10 +162,11 @@ export default new (class CastManager {
             contentFrameId: contentPort.sender.frameId
         };
 
+        // content -> (any)
         const onContentPortMessage = (message: Message) => {
             this.handleContentMessage(instance, message);
         };
-
+        // bridge -> content
         const onBridgePortMessage = (message: Message) => {
             contentPort.postMessage(message);
         };
@@ -161,19 +190,28 @@ export default new (class CastManager {
         return instance;
     }
 
-    private async handleContentMessage(instance: CastInstance, message: Message) {
+    /**
+     * Handle content messages from the cast instance. These will
+     * either be handled here in the background script or forwarded
+     * to the bridge associated with the cast instance.
+     */
+    private async handleContentMessage(
+        instance: CastInstance,
+        message: Message
+    ) {
         const [destination] = message.subject.split(":");
         if (destination === "bridge") {
             instance.bridgePort.postMessage(message);
         }
 
         switch (message.subject) {
-            case "main:castReady": {
+            // Cast API has been initialized
+            case "main:initializeCast": {
                 instance.appId = message.data.appId;
 
                 for (const receiverDevice of receiverDevices.getDevices()) {
                     instance.contentPort.postMessage({
-                        subject: "cast:serviceUp",
+                        subject: "cast:receiverDeviceUp",
                         data: { receiverDevice }
                     });
                 }
@@ -181,6 +219,7 @@ export default new (class CastManager {
                 break;
             }
 
+            // User has triggered receiver selection via the cast API
             case "main:selectReceiver": {
                 if (
                     instance.contentTabId === undefined ||
@@ -262,7 +301,7 @@ export default new (class CastManager {
              * TODO: If we're closing a selector, make sure it's the same
              * one that caused the session creation.
              */
-            case "main:sessionCreated": {
+            case "main:closeReceiverSelector": {
                 const selector = await ReceiverSelectorManager.getSelector();
                 const shouldClose = await options.get(
                     "receiverSelectorWaitForConnection"

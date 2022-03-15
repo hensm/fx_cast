@@ -51,18 +51,18 @@ type ExtMessageDefinitions = {
     "receiverSelector:selected": ReceiverSelection;
     "receiverSelector:stop": ReceiverSelection;
 
-    "main:castReady": { appId: string };
-
     "main:selectReceiver": {};
     "cast:selectReceiver/selected": ReceiverSelectionCast;
     "cast:selectReceiver/stopped": ReceiverSelectionStop;
     "cast:selectReceiver/cancelled": {};
 
-    "main:sessionCreated": {};
-
+    "main:closeReceiverSelector": {};
+    
+    "main:initializeCast": { appId: string };
     "cast:initialized": BridgeInfo;
-    "cast:serviceUp": { receiverDevice: ReceiverDevice };
-    "cast:serviceDown": { receiverDeviceId: ReceiverDevice["id"] };
+
+    "cast:receiverDeviceUp": { receiverDevice: ReceiverDevice };
+    "cast:receiverDeviceDown": { receiverDeviceId: ReceiverDevice["id"] };
     "cast:launchApp": { receiver: ReceiverDevice };
 };
 

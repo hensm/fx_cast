@@ -133,7 +133,7 @@ export function initialize(
     apiConfig = newApiConfig;
 
     sendMessageResponse({
-        subject: "main:castReady",
+        subject: "main:initializeCast",
         data: { appId: apiConfig.sessionRequest.appId }
     });
 
@@ -255,7 +255,7 @@ onMessage(message => {
         case "cast:sessionCreated": {
             // Notify background to close UI
             sendMessageResponse({
-                subject: "main:sessionCreated"
+                subject: "main:closeReceiverSelector"
             });
 
             const status = message.data;
@@ -360,7 +360,7 @@ onMessage(message => {
             break;
         }
 
-        case "cast:serviceUp": {
+        case "cast:receiverDeviceUp": {
             const { receiverDevice } = message.data;
             if (receiverDevices.has(receiverDevice.id)) {
                 break;
@@ -376,7 +376,7 @@ onMessage(message => {
             break;
         }
 
-        case "cast:serviceDown": {
+        case "cast:receiverDeviceDown": {
             const { receiverDeviceId } = message.data;
 
             receiverDevices.delete(receiverDeviceId);
