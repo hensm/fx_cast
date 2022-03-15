@@ -1,6 +1,6 @@
 "use strict";
 
-import CastClient, { NS_RECEIVER } from "./client";
+import CastClient from "./client";
 
 import {
     MediaStatus,
@@ -27,13 +27,12 @@ export default class Remote extends CastClient {
 
     constructor(private host: string, private options?: CastRemoteOptions) {
         super();
-        this.connect(host).then(() => {
-            // Request receiver status
-            const receiverChannel = this.createChannel(NS_RECEIVER);
-            receiverChannel.on("message", message => {
+        super.connect(host, {
+            onReceiverMessage: message => {
                 this.onReceiverMessage(message);
-            });
-            receiverChannel.send({ type: "GET_STATUS", requestId: 1 });
+            }
+        }).then(() => {
+            this.sendReceiverMessage({ type: "GET_STATUS" });
         });
     }
 
@@ -47,7 +46,7 @@ export default class Remote extends CastClient {
      * On initial connection, a `GET_STATUS` message is sent that
      * results in a `RECEIVER_STATUS` response. If an application
      * is running, get the transport ID and make a connection to
-     * fetch media status updates.
+     * receive media status updates.
      */
     private onReceiverMessage(message: ReceiverMessage) {
         if (message.type !== "RECEIVER_STATUS") {
@@ -62,7 +61,7 @@ export default class Remote extends CastClient {
                 this.options?.onApplicationClose?.();
             }
         }
-        
+
         // Update status before possible transport init
         this.options?.onReceiverStatusUpdate?.(message.status);
 

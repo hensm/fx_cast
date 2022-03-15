@@ -2,6 +2,8 @@
 
 import { Channel, Client } from "castv2";
 
+import { ReceiverMessage, SenderMessage } from "./types";
+
 export const NS_CONNECTION = "urn:x-cast:com.google.cast.tp.connection";
 export const NS_HEARTBEAT = "urn:x-cast:com.google.cast.tp.heartbeat";
 export const NS_RECEIVER = "urn:x-cast:com.google.cast.receiver";
@@ -11,6 +13,7 @@ const HEARTBEAT_INTERVAL_MS = 5000;
 
 interface CastClientConnectOptions {
     port?: number;
+    onReceiverMessage?: (message: ReceiverMessage) => void;
     onHeartbeat?: () => void;
 }
 
@@ -20,6 +23,10 @@ export default class CastClient {
     protected connectionChannel?: Channel;
     protected heartbeatChannel?: Channel;
     protected heartbeatIntervalId?: NodeJS.Timeout;
+
+    // Platform messaging
+    private receiverChannel?: Channel;
+    private receiverRequestId = 0;
 
     constructor(
         protected sourceId = "sender-0",
@@ -44,6 +51,18 @@ export default class CastClient {
     }
 
     /**
+     * Sends a message on the receiver channel with the correct
+     * request ID.
+     */
+    sendReceiverMessage(message: DistributiveOmit<SenderMessage, "requestId">) {
+        if (!this.receiverChannel) return;
+
+        const requestId = this.receiverRequestId++;
+        this.receiverChannel.send({ ...message, requestId });
+        return requestId;
+    }
+
+    /**
      * Connects to a cast receiver at a given host, returning a
      * promise that resolves once the client is connected.
      */
@@ -57,25 +76,33 @@ export default class CastClient {
                 }
             });
 
-            const connectOpts = {
-                host,
-                port: options?.port ?? DEFAULT_PORT
-            };
+            this.client.connect(
+                {
+                    host,
+                    port: options?.port ?? DEFAULT_PORT
+                },
+                // On connection callback
+                () => {
+                    this.connectionChannel = this.createChannel(NS_CONNECTION);
+                    this.heartbeatChannel = this.createChannel(NS_HEARTBEAT);
 
-            this.client.connect(connectOpts, () => {
-                this.connectionChannel = this.createChannel(NS_CONNECTION);
-                this.heartbeatChannel = this.createChannel(NS_HEARTBEAT);
+                    // Handle receiver messages
+                    this.receiverChannel = this.createChannel(NS_RECEIVER);
+                    this.receiverChannel.on("message", message => {
+                        options?.onReceiverMessage?.(message);
+                    });
 
-                this.connectionChannel.send({ type: "CONNECT" });
-                this.heartbeatChannel.send({ type: "PING" });
+                    this.connectionChannel.send({ type: "CONNECT" });
+                    this.heartbeatChannel.send({ type: "PING" });
 
-                this.heartbeatIntervalId = setInterval(() => {
-                    this.heartbeatChannel?.send({ type: "PING" });
-                    options?.onHeartbeat?.();
-                }, HEARTBEAT_INTERVAL_MS);
+                    this.heartbeatIntervalId = setInterval(() => {
+                        this.heartbeatChannel?.send({ type: "PING" });
+                        options?.onHeartbeat?.();
+                    }, HEARTBEAT_INTERVAL_MS);
 
-                resolve();
-            });
+                    resolve();
+                }
+            );
         });
     }
 

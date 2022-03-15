@@ -5,19 +5,15 @@ import { Channel } from "castv2";
 import { sendMessage } from "../../lib/nativeMessaging";
 
 import { ReceiverDevice } from "../../types";
-import { ReceiverApplication, ReceiverMessage, SenderMessage } from "./types";
+import { ReceiverMessage } from "./types";
 
-import CastClient, { NS_CONNECTION, NS_HEARTBEAT, NS_RECEIVER } from "./client";
+import CastClient, { NS_CONNECTION, NS_HEARTBEAT } from "./client";
 
 type OnSessionCreatedCallback = (sessionId: string) => void;
 
 export default class Session extends CastClient {
     // Assigned by the receiver once the session is established
     public sessionId?: string;
-
-    // Platform messaging
-    private receiverChannel?: Channel;
-    private receiverRequestId = 0;
 
     // Receiver app messaging
     private transportId?: string;
@@ -64,7 +60,7 @@ export default class Session extends CastClient {
                  * request response.
                  */
                 if (!this.sessionId) {
-                    // Launch message response only
+                    // Match request ID on the response to the launch request ID.
                     if (message.requestId !== this.launchRequestId) {
                         break;
                     }
@@ -159,18 +155,6 @@ export default class Session extends CastClient {
         channel.send(message);
     }
 
-    sendReceiverMessage(message: DistributiveOmit<SenderMessage, "requestId">) {
-        if (!this.receiverChannel) {
-            this.receiverChannel = this.createChannel(NS_RECEIVER);
-            this.receiverChannel.on("message", this.onReceiverMessage);
-        }
-
-        const requestId = this.receiverRequestId++;
-        this.receiverChannel?.send({ ...message, requestId });
-
-        return requestId;
-    }
-
     constructor(
         private appId: string,
         private receiverDevice: ReceiverDevice,
@@ -178,6 +162,25 @@ export default class Session extends CastClient {
     ) {
         super();
 
+        super.connect(receiverDevice.host, {
+            onHeartbeat: () => {
+                // Include transport heartbeat with platform heartbeat
+                if (this.transportHeartbeat) {
+                    this.transportHeartbeat.send({ type: "PING" });
+                }
+            },
+            onReceiverMessage: message => {
+                this.onReceiverMessage(message);
+            }
+        }).then(() => {
+            // Send a launch request and store the request ID for reference
+            this.launchRequestId = this.sendReceiverMessage({
+                type: "LAUNCH",
+                appId: this.appId
+            });
+        });
+
+        // Handle client connection closed
         this.client.on("close", () => {
             if (this.sessionId) {
                 sendMessage({
@@ -185,20 +188,6 @@ export default class Session extends CastClient {
                     data: { sessionId: this.sessionId }
                 });
             }
-        });
-
-        super.connect(receiverDevice.host, {
-            onHeartbeat: () => {
-                // Include transport heartbeat with platform heartbeat
-                if (this.transportHeartbeat) {
-                    this.transportHeartbeat.send({ type: "PING" });
-                }
-            }
-        }).then(() => {
-            this.launchRequestId = this.sendReceiverMessage({
-                type: "LAUNCH",
-                appId: this.appId
-            });
         });
     }
 }
