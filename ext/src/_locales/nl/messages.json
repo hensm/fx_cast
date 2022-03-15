@@ -257,18 +257,6 @@
         "message": "Ontvangstapparaat selectie interface",
         "description": "Options page receiver selector category description."
     },
-    "optionsReceiverSelectorType": {
-        "message": "Type:",
-        "description": "Receiver selector type option label."
-    },
-    "optionsReceiverSelectorTypeBrowser": {
-        "message": "Browser",
-        "description": "Receiver selector type browser radio option label."
-    },
-    "optionsReceiverSelectorTypeNative": {
-        "message": "Ingebouwd",
-        "description": "Receiver selector type native radio option label."
-    },
     "optionsReceiverSelectorWaitForConnection": {
         "message": "Wachten op verbinding",
         "description": "Receiver selector wait for connection option checkbox label."

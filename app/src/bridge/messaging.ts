@@ -9,11 +9,7 @@ import {
     Volume
 } from "./components/cast/types";
 
-import {
-    ReceiverDevice,
-    ReceiverSelectionCast,
-    ReceiverSelectionStop
-} from "./types";
+import { ReceiverDevice } from "./types";
 
 interface CastSessionUpdated {
     sessionId: string;
@@ -69,23 +65,17 @@ type MessageDefinitions = {
     };
     "bridge:stopCastApp": { receiverDevice: ReceiverDevice };
 
-    // Bridge messages
-    "main:receiverSelector/selected": ReceiverSelectionCast;
-    "main:receiverSelector/stopped": ReceiverSelectionStop;
-    "main:receiverSelector/cancelled": {};
-    "main:receiverSelector/error": string;
-
     /**
      * getInfo uses the old :/ form for compat with old bridge
      * versions.
      */
     "bridge:getInfo": string;
     "bridge:/getInfo": string;
+
     "bridge:startDiscovery": {
         shouldWatchStatus: boolean;
     };
-    "bridge:openReceiverSelector": string;
-    "bridge:closeReceiverSelector": {};
+
     "bridge:startMediaServer": {
         filePath: string;
         port: number;
@@ -98,13 +88,8 @@ type MessageDefinitions = {
     };
     "mediaCast:mediaServerStopped": {};
     "mediaCast:mediaServerError": {};
-    "main:serviceUp": ReceiverDevice;
-    "main:serviceDown": { id: string };
-    "main:updateReceiverStatus": {
-        id: string;
-        status: ReceiverStatus;
-    };
-    "main:receiverDeviceUp": { deviceId: string, deviceInfo: ReceiverDevice };
+
+    "main:receiverDeviceUp": { deviceId: string; deviceInfo: ReceiverDevice };
     "main:receiverDeviceDown": { deviceId: string };
     "main:receiverDeviceStatusUpdated": {
         deviceId: string;

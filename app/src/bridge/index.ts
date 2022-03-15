@@ -6,17 +6,12 @@ import { Message } from "./messaging";
 import { handleCastMessage } from "./components/cast";
 import { startDiscovery, stopDiscovery } from "./components/discovery";
 import { startMediaServer, stopMediaServer } from "./components/mediaServer";
-import {
-    startReceiverSelector,
-    stopReceiverSelector
-} from "./components/receiverSelector";
 
 import { __applicationName, __applicationVersion } from "../../package.json";
 
 process.on("SIGTERM", () => {
     stopDiscovery();
     stopMediaServer();
-    stopReceiverSelector();
 });
 
 /**
@@ -36,16 +31,6 @@ decodeTransform.on("data", (message: Message) => {
 
         case "bridge:startDiscovery": {
             startDiscovery(message.data);
-            break;
-        }
-
-        // Receiver selector
-        case "bridge:openReceiverSelector": {
-            startReceiverSelector(message.data);
-            break;
-        }
-        case "bridge:closeReceiverSelector": {
-            stopReceiverSelector();
             break;
         }
 

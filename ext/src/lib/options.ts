@@ -4,7 +4,6 @@ import defaultOptions from "../defaultOptions";
 
 import logger from "./logger";
 
-import { ReceiverSelectorType } from "../background/receiverSelector";
 import { TypedEventTarget } from "./TypedEventTarget";
 import { TypedStorageArea } from "./TypedStorageArea";
 

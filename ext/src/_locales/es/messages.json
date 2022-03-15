@@ -280,18 +280,6 @@
         "message": "Interfaz de selección del dispositivo receptor."
       , "description": "Options page receiver selector category description."
     }
-  , "optionsReceiverSelectorType": {
-        "message": "Tipo:"
-      , "description": "Receiver selector type option label."
-    }
-  , "optionsReceiverSelectorTypeBrowser": {
-        "message": "Navegador"
-      , "description": "Receiver selector type browser radio option label."
-    }
-  , "optionsReceiverSelectorTypeNative": {
-        "message": "Nativo"
-      , "description": "Receiver selector type native radio option label."
-    }
   , "optionsReceiverSelectorWaitForConnection": {
         "message": "Esperar conexión"
       , "description": "Receiver selector wait for connection option checkbox label."

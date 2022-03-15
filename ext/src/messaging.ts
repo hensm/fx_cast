@@ -99,23 +99,17 @@ type AppMessageDefinitions = {
     };
     "bridge:stopCastApp": { receiverDevice: ReceiverDevice };
 
-    // Bridge messages
-    "main:receiverSelector/selected": ReceiverSelectionCast;
-    "main:receiverSelector/stopped": ReceiverSelectionStop;
-    "main:receiverSelector/cancelled": {};
-    "main:receiverSelector/error": string;
-
     /**
      * getInfo uses the old :/ form for compat with old bridge
      * versions.
      */
     "bridge:getInfo": string;
     "bridge:/getInfo": string;
+
     "bridge:startDiscovery": {
         shouldWatchStatus: boolean;
     };
-    "bridge:openReceiverSelector": string;
-    "bridge:closeReceiverSelector": {};
+
     "bridge:startMediaServer": {
         filePath: string;
         port: number;

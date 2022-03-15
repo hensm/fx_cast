@@ -276,18 +276,6 @@
         "message": "Auswahloberfläche für Empfängergeräte."
       , "description": "Options page receiver selector category description."
     }
-  , "optionsReceiverSelectorType": {
-        "message": "Art:"
-      , "description": "Receiver selector type option label."
-    }
-  , "optionsReceiverSelectorTypeBrowser": {
-        "message": "Browser"
-      , "description": "Receiver selector type browser radio option label."
-    }
-  , "optionsReceiverSelectorTypeNative": {
-        "message": "Nativ"
-      , "description": "Receiver selector type native radio option label."
-    }
   , "optionsReceiverSelectorWaitForConnection": {
         "message": "Auf Verbindung warten"
       , "description": "Receiver selector wait for connection option checkbox label."

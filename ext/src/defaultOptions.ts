@@ -1,6 +1,5 @@
 "use strict";
 
-import { ReceiverSelectorType } from "./background/receiverSelector";
 import { Options } from "./lib/options";
 
 export default {

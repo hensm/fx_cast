@@ -280,18 +280,6 @@
         "message": "Grensesnitt for valg av mottager"
       , "description": "Options page receiver selector category description."
     }
-  , "optionsReceiverSelectorType": {
-        "message": "Type:"
-      , "description": "Receiver selector type option label."
-    }
-  , "optionsReceiverSelectorTypeBrowser": {
-        "message": "Nettleser"
-      , "description": "Receiver selector type browser radio option label."
-    }
-  , "optionsReceiverSelectorTypeNative": {
-        "message": "Native"
-      , "description": "Receiver selector type native radio option label."
-    }
   , "optionsReceiverSelectorWaitForConnection": {
         "message": "Vent på tilkobling"
       , "description": "Receiver selector wait for connection option checkbox label."

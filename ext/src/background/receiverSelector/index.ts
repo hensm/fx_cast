@@ -2,11 +2,6 @@
 
 import { ReceiverDevice } from "../../types";
 
-export enum ReceiverSelectorType {
-    Popup,
-    Native
-}
-
 export enum ReceiverSelectorMediaType {
     None = 0,
     App = 1,
