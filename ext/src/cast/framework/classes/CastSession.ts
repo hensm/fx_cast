@@ -2,7 +2,7 @@
 
 import logger from "../../../lib/logger";
 
-import * as cast from "../../cast";
+import * as cast from "../../api";
 
 import ApplicationMetadata from "./ApplicationMetadata";
 
@@ -91,17 +91,17 @@ export default class CastSession extends EventTarget {
         _namespace: string,
         // @ts-ignore
         _data: any
-    ): Promise<string> {
+    ): Promise<void> {
         logger.info("STUB :: CastSession#sendMessage");
     }
 
     // @ts-ignore
-    public setMute(_isMute: boolean): Promise<string> {
+    public setMute(_isMute: boolean): Promise<void> {
         logger.info("STUB :: CastSession#setMute");
     }
 
     // @ts-ignore
-    public setVolume(_volume: number): Promise<string> {
+    public setVolume(_volume: number): Promise<void> {
         logger.info("STUB :: CastSession#setVolume");
     }
 }

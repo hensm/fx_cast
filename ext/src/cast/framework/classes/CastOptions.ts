@@ -1,6 +1,6 @@
 "use strict";
 
-import * as cast from "../../cast";
+import * as cast from "../../api";
 
 export default class CastOptions {
     public autoJoinPolicy: string = cast.AutoJoinPolicy.TAB_AND_ORIGIN_SCOPED;

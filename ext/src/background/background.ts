@@ -3,13 +3,12 @@
 import defaultOptions from "../defaultOptions";
 import loadSender from "../lib/loadSender";
 import logger from "../lib/logger";
-import messaging from "../messaging";
 import options from "../lib/options";
 import bridge, { BridgeInfo } from "../lib/bridge";
 
 import ReceiverSelectorManager from "./receiverSelector/ReceiverSelectorManager";
 
-import ShimManager from "./ShimManager";
+import CastManager from "./CastManager";
 
 import receiverDevices from "./receiverDevices";
 
@@ -150,7 +149,7 @@ async function init() {
     await notifyBridgeCompat();
 
     await receiverDevices.init();
-    await ShimManager.init();
+    await CastManager.init();
 
     await initMenus();
     await initWhitelist();

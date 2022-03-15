@@ -33,17 +33,17 @@ interface CastSessionCreated extends CastSessionUpdated {
  *   ext/src/messaging.ts > MessageDefinitions
  */
 type MessageDefinitions = {
-    "shim:castSessionCreated": CastSessionCreated;
-    "shim:castSessionUpdated": CastSessionUpdated;
-    "shim:castSessionStopped": {
+    "cast:sessionCreated": CastSessionCreated;
+    "cast:sessionUpdated": CastSessionUpdated;
+    "cast:sessionStopped": {
         sessionId: string;
     };
-    "shim:receivedCastSessionMessage": {
+    "cast:receivedSessionMessage": {
         sessionId: string;
         namespace: string;
         messageData: string;
     };
-    "shim:impl_sendCastMessage": {
+    "cast:impl_sendMessage": {
         sessionId: string;
         messageId: string;
         error?: string;

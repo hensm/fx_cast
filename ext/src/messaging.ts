@@ -16,7 +16,7 @@ import {
     MediaStatus,
     ReceiverStatus,
     SenderMessage
-} from "./shim/cast/types";
+} from "./cast/api/types";
 
 import { ReceiverDevice } from "./types";
 
@@ -47,18 +47,23 @@ type ExtMessageDefinitions = {
         availableMediaTypes?: ReceiverSelectorMediaType;
     };
     "popup:close": {};
+
     "receiverSelector:selected": ReceiverSelection;
     "receiverSelector:stop": ReceiverSelection;
-    "main:shimReady": { appId: string };
+
+    "main:castReady": { appId: string };
+
     "main:selectReceiver": {};
-    "shim:selectReceiver/selected": ReceiverSelectionCast;
-    "shim:selectReceiver/stopped": ReceiverSelectionStop;
-    "shim:selectReceiver/cancelled": {};
+    "cast:selectReceiver/selected": ReceiverSelectionCast;
+    "cast:selectReceiver/stopped": ReceiverSelectionStop;
+    "cast:selectReceiver/cancelled": {};
+
     "main:sessionCreated": {};
-    "shim:initialized": BridgeInfo;
-    "shim:serviceUp": { receiverDevice: ReceiverDevice };
-    "shim:serviceDown": { receiverDeviceId: ReceiverDevice["id"] };
-    "shim:launchApp": { receiver: ReceiverDevice };
+
+    "cast:initialized": BridgeInfo;
+    "cast:serviceUp": { receiverDevice: ReceiverDevice };
+    "cast:serviceDown": { receiverDeviceId: ReceiverDevice["id"] };
+    "cast:launchApp": { receiver: ReceiverDevice };
 };
 
 /**
@@ -67,17 +72,17 @@ type ExtMessageDefinitions = {
  *   app/src/bridge/messaging.ts > MessageDefinitions
  */
 type AppMessageDefinitions = {
-    "shim:castSessionCreated": CastSessionCreated;
-    "shim:castSessionUpdated": CastSessionUpdated;
-    "shim:castSessionStopped": {
+    "cast:sessionCreated": CastSessionCreated;
+    "cast:sessionUpdated": CastSessionUpdated;
+    "cast:sessionStopped": {
         sessionId: string;
     };
-    "shim:receivedCastSessionMessage": {
+    "cast:receivedSessionMessage": {
         sessionId: string;
         namespace: string;
         messageData: string;
     };
-    "shim:impl_sendCastMessage": {
+    "cast:impl_sendMessage": {
         sessionId: string;
         messageId: string;
         error?: string;

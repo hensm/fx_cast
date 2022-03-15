@@ -3,7 +3,7 @@
 import options from "../../lib/options";
 import logger from "../../lib/logger";
 
-import ShimManager from "../ShimManager";
+import CastManager from "../CastManager";
 import receiverDevices from "../receiverDevices";
 
 import { getMediaTypesForPageUrl } from "../../lib/utils";
@@ -50,14 +50,17 @@ async function getSelection(
     withMediaSender = false
 ): Promise<ReceiverSelection | null> {
     return new Promise(async (resolve, reject) => {
-        let currentShim = ShimManager.getShim(contextTabId, contextFrameId);
+        let castInstance = CastManager.getInstance(
+            contextTabId,
+            contextFrameId
+        );
 
         /**
          * If the current context is running the mirroring app, pretend
          * it doesn't exist because it shouldn't be launched like this.
          */
-        if (currentShim?.appId === (await options.get("mirroringAppId"))) {
-            currentShim = undefined;
+        if (castInstance?.appId === (await options.get("mirroringAppId"))) {
+            castInstance = undefined;
         }
 
         let defaultMediaType = ReceiverSelectorMediaType.Tab;
@@ -78,7 +81,7 @@ async function getSelection(
         }
 
         // Enable app media type if initialized sender app is found
-        if (currentShim || withMediaSender) {
+        if (castInstance || withMediaSender) {
             defaultMediaType = ReceiverSelectorMediaType.App;
             availableMediaTypes |= ReceiverSelectorMediaType.App;
         }
@@ -215,7 +218,7 @@ async function getSelection(
             receiverDevices.getDevices(),
             defaultMediaType,
             availableMediaTypes,
-            currentShim?.appId
+            castInstance?.appId
         );
     });
 }

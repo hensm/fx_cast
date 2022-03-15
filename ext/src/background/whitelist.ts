@@ -141,7 +141,7 @@ function onWhitelistedChildBeforeSendHeaders(
  * hosted script.
  *
  * We can redirect this and inject our own script to setup
- * the API shim.
+ * the API.
  */
 async function onBeforeCastSDKRequest(details: OnBeforeRequestDetails) {
     if (!details.originUrl || details.tabId === -1) {
@@ -179,13 +179,13 @@ async function onBeforeCastSDKRequest(details: OnBeforeRequestDetails) {
     });
 
     await browser.tabs.executeScript(details.tabId, {
-        file: "shim/contentBridge.js",
+        file: "cast/contentBridge.js",
         frameId: details.frameId,
         runAt: "document_start"
     });
 
     return {
-        redirectUrl: browser.runtime.getURL("shim/index.js")
+        redirectUrl: browser.runtime.getURL("cast/index.js")
     };
 }
 

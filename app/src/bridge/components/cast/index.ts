@@ -30,7 +30,7 @@ export function handleCastMessage(message: Message) {
             const session = sessions.get(sessionId);
             if (!session) {
                 sendMessage({
-                    subject: "shim:impl_sendCastMessage",
+                    subject: "cast:impl_sendMessage",
                     data: {
                         error: "Session does not exist",
                         sessionId,
@@ -45,7 +45,7 @@ export function handleCastMessage(message: Message) {
                 session.sendReceiverMessage(messageData);
             } catch (err) {
                 sendMessage({
-                    subject: "shim:impl_sendCastMessage",
+                    subject: "cast:impl_sendMessage",
                     data: {
                         error: `Failed to send message (${err})`,
                         sessionId,
@@ -58,7 +58,7 @@ export function handleCastMessage(message: Message) {
 
             // Success
             sendMessage({
-                subject: "shim:impl_sendCastMessage",
+                subject: "cast:impl_sendMessage",
                 data: { sessionId, messageId }
             });
 
@@ -71,7 +71,7 @@ export function handleCastMessage(message: Message) {
             const session = sessions.get(sessionId);
             if (!session) {
                 sendMessage({
-                    subject: "shim:impl_sendCastMessage",
+                    subject: "cast:impl_sendMessage",
                     data: {
                         error: "Session does not exist",
                         sessionId,
@@ -92,7 +92,7 @@ export function handleCastMessage(message: Message) {
                 session.sendMessage(namespace, messageData);
             } catch (err) {
                 sendMessage({
-                    subject: "shim:impl_sendCastMessage",
+                    subject: "cast:impl_sendMessage",
                     data: {
                         error: `Failed to send message (${err})`,
                         sessionId,
@@ -105,7 +105,7 @@ export function handleCastMessage(message: Message) {
 
             // Success
             sendMessage({
-                subject: "shim:impl_sendCastMessage",
+                subject: "cast:impl_sendMessage",
                 data: { sessionId, messageId }
             });
 

@@ -78,10 +78,10 @@ const buildOpts = {
         `${srcPath}/senders/media/overlay/overlayContentLoader.ts`,
         // Mirroring sender
         `${srcPath}/senders/mirroring.ts`,
-        // Shim
-        `${srcPath}/shim/index.ts`,
-        `${srcPath}/shim/content.ts`,
-        `${srcPath}/shim/contentBridge.ts`,
+        // Cast
+        `${srcPath}/cast/index.ts`,
+        `${srcPath}/cast/content.ts`,
+        `${srcPath}/cast/contentBridge.ts`,
         // UI
         `${srcPath}/ui/popup/index.tsx`,
         `${srcPath}/ui/options/index.tsx`

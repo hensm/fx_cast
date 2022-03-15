@@ -1,6 +1,6 @@
 "use strict";
 
-import { ReceiverStatus } from "./shim/cast/types";
+import { ReceiverStatus } from "./cast/api/types";
 
 export interface ReceiverDevice {
     host: string;

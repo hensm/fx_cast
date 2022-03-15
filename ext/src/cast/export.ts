@@ -1,6 +1,6 @@
 "use strict";
 
-import * as cast from "./cast";
+import * as cast from "./api";
 import { Message } from "../messaging";
 
 import { BridgeInfo } from "../lib/bridge";
@@ -18,9 +18,9 @@ let initializedBackgroundPort: MessagePort;
 /**
  * To support exporting an API from a module, we need to
  * retain the event-based message passing despite not
- * actually crossing any context boundaries. The shim listens
- * for and emits these messages, and changing that behavior
- * is too messy.
+ * actually crossing any context boundaries. The cast instance
+ * listens for and emits these messages, and changing that
+ * behavior is too messy.
  */
 export function ensureInit(): Promise<TypedMessagePort<Message>> {
     return new Promise(async (resolve, reject) => {
@@ -45,24 +45,24 @@ export function ensureInit(): Promise<TypedMessagePort<Message>> {
          * URL.
          */
         if (window.location.protocol === "moz-extension:") {
-            const { default: ShimManager } = await import(
-                "../background/ShimManager"
+            const { default: CastManager } = await import(
+                "../background/CastManager"
             );
 
             // port2 will post bridge messages to port 1
-            await ShimManager.init();
-            await ShimManager.createShim(channel.port2);
+            await CastManager.init();
+            await CastManager.createInstance(channel.port2);
 
-            // bridge -> shim
+            // bridge -> cast instance
             channel.port1.onmessage = ev => {
                 const message = ev.data as Message;
 
-                // Send message to shim
+                // Send message to cast instance
                 sendMessage(message);
-                handleIncomingMessageToShim(message);
+                handleIncomingMessageToCast(message);
             };
 
-            // shim -> bridge
+            // cast instance -> bridge
             onMessageResponse(message => {
                 channel.port1.postMessage(message);
             });
@@ -85,13 +85,13 @@ export function ensureInit(): Promise<TypedMessagePort<Message>> {
                 backgroundPort.postMessage(message);
             };
 
-            // Handle shim messages
-            onMessage(handleIncomingMessageToShim);
+            // Handle cast messages
+            onMessage(handleIncomingMessageToCast);
         }
 
-        function handleIncomingMessageToShim(message: Message) {
+        function handleIncomingMessageToCast(message: Message) {
             switch (message.subject) {
-                case "shim:initialized": {
+                case "cast:initialized": {
                     initializedBridgeInfo = message.data;
 
                     if (initializedBridgeInfo.isVersionCompatible) {

@@ -216,7 +216,7 @@ Netflix / HTML5:
 
 ## Credit
 
-_**Note**: Since it seems to be causing confusion, this project does not use electron. The electron-chromecast library was only used as a reference for the initial implementation of the API shim._
+_**Note**: Since it seems to be causing confusion, this project does not use electron. The electron-chromecast library was only used as a reference for the initial implementation of the API._
 
 * [electron-chromecast](https://github.com/GPMDP/electron-chromecast)
 * [node-castv2](https://github.com/thibauts/node-castv2)

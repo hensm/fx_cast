@@ -9,7 +9,7 @@ import {
     ReceiverSelectorMediaType
 } from "../background/receiverSelector";
 
-import ShimManager from "../background/ShimManager";
+import CastManager from "../background/CastManager";
 
 interface LoadSenderOptions {
     tabId: number;
@@ -33,15 +33,15 @@ export default async function loadSender(opts: LoadSenderOptions) {
 
     switch (opts.selection.mediaType) {
         case ReceiverSelectorMediaType.App: {
-            const shim = ShimManager.getShim(opts.tabId, opts.frameId);
-            if (!shim) {
+            const instance = CastManager.getInstance(opts.tabId, opts.frameId);
+            if (!instance) {
                 throw logger.error(
-                    `Shim not found at tabId ${opts.tabId} / frameId ${opts.frameId}`
+                    `Cast instance not found at tabId ${opts.tabId} / frameId ${opts.frameId}`
                 );
             }
 
-            shim.contentPort.postMessage({
-                subject: "shim:launchApp",
+            instance.contentPort.postMessage({
+                subject: "cast:launchApp",
                 data: { receiver: opts.selection.receiver }
             });
 

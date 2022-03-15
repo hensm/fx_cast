@@ -133,7 +133,7 @@ export function initialize(
     apiConfig = newApiConfig;
 
     sendMessageResponse({
-        subject: "main:shimReady",
+        subject: "main:castReady",
         data: { appId: apiConfig.sessionRequest.appId }
     });
 
@@ -243,7 +243,7 @@ export function precache(_data: string) {
 
 onMessage(message => {
     switch (message.subject) {
-        case "shim:initialized": {
+        case "cast:initialized": {
             isAvailable = true;
             break;
         }
@@ -252,7 +252,7 @@ onMessage(message => {
          * Once the bridge detects a session creation, session info
          * and data needed to create cast API objects is sent.
          */
-        case "shim:castSessionCreated": {
+        case "cast:sessionCreated": {
             // Notify background to close UI
             sendMessageResponse({
                 subject: "main:sessionCreated"
@@ -282,7 +282,7 @@ onMessage(message => {
             sessions.set(session.sessionId, session);
         }
         // eslint-disable-next-line no-fallthrough
-        case "shim:castSessionUpdated": {
+        case "cast:sessionUpdated": {
             const status = message.data;
             const session = sessions.get(status.sessionId);
             if (!session) {
@@ -303,7 +303,7 @@ onMessage(message => {
             break;
         }
 
-        case "shim:castSessionStopped": {
+        case "cast:sessionStopped": {
             const { sessionId } = message.data;
             const session = sessions.get(sessionId);
             if (session) {
@@ -320,7 +320,7 @@ onMessage(message => {
             break;
         }
 
-        case "shim:receivedCastSessionMessage": {
+        case "cast:receivedSessionMessage": {
             const { sessionId, namespace, messageData } = message.data;
             const session = sessions.get(sessionId);
             if (session) {
@@ -337,7 +337,7 @@ onMessage(message => {
             break;
         }
 
-        case "shim:impl_sendCastMessage": {
+        case "cast:impl_sendMessage": {
             const { sessionId, messageId, error } = message.data;
 
             const session = sessions.get(sessionId);
@@ -360,7 +360,7 @@ onMessage(message => {
             break;
         }
 
-        case "shim:serviceUp": {
+        case "cast:serviceUp": {
             const { receiverDevice } = message.data;
             if (receiverDevices.has(receiverDevice.id)) {
                 break;
@@ -376,7 +376,7 @@ onMessage(message => {
             break;
         }
 
-        case "shim:serviceDown": {
+        case "cast:serviceDown": {
             const { receiverDeviceId } = message.data;
 
             receiverDevices.delete(receiverDeviceId);
@@ -392,7 +392,7 @@ onMessage(message => {
             break;
         }
 
-        case "shim:selectReceiver/selected": {
+        case "cast:selectReceiver/selected": {
             logger.info("Selected receiver");
 
             if (!sessionRequest) {
@@ -403,7 +403,7 @@ onMessage(message => {
             break;
         }
 
-        case "shim:selectReceiver/stopped": {
+        case "cast:selectReceiver/stopped": {
             const { receiver } = message.data;
 
             logger.info("Stopped receiver");
@@ -427,7 +427,7 @@ onMessage(message => {
         /**
          * Popup closed before session established.
          */
-        case "shim:selectReceiver/cancelled": {
+        case "cast:selectReceiver/cancelled": {
             if (sessionRequest) {
                 sessionRequest = null;
 

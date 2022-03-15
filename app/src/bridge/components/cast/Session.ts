@@ -79,7 +79,7 @@ export default class Session extends CastClient {
                         const { friendlyName } = this.receiverDevice;
 
                         sendMessage({
-                            subject: "shim:castSessionCreated",
+                            subject: "cast:sessionCreated",
                             data: {
                                 sessionId: this.sessionId,
                                 statusText: application.statusText,
@@ -107,7 +107,7 @@ export default class Session extends CastClient {
                 }
 
                 sendMessage({
-                    subject: "shim:castSessionUpdated",
+                    subject: "cast:sessionUpdated",
                     data: {
                         sessionId: this.sessionId,
                         statusText: application.statusText,
@@ -144,7 +144,7 @@ export default class Session extends CastClient {
                 messageData = JSON.stringify(messageData);
 
                 sendMessage({
-                    subject: "shim:receivedCastSessionMessage",
+                    subject: "cast:receivedSessionMessage",
                     data: {
                         sessionId: this.sessionId,
                         namespace,
@@ -181,7 +181,7 @@ export default class Session extends CastClient {
         this.client.on("close", () => {
             if (this.sessionId) {
                 sendMessage({
-                    subject: "shim:castSessionStopped",
+                    subject: "cast:sessionStopped",
                     data: { sessionId: this.sessionId }
                 });
             }

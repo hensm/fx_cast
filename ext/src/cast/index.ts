@@ -1,6 +1,6 @@
 "use strict";
 
-import * as cast from "./cast";
+import * as cast from "./api";
 
 import { CAST_FRAMEWORK_SCRIPT_URL } from "../lib/endpoints";
 import { loadScript } from "../lib/utils";
@@ -60,7 +60,7 @@ if (document.currentScript) {
 
 onMessage(message => {
     switch (message.subject) {
-        case "shim:initialized": {
+        case "cast:initialized": {
             bridgeInfo = message.data;
 
             if (!isFramework) {
