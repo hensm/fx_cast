@@ -102,7 +102,9 @@ type AppMessageDefinitions = {
         messageData: object | string;
         messageId: string;
     };
-    "bridge:stopCastApp": { receiverDevice: ReceiverDevice };
+    "bridge:stopCastSession": {
+        receiverDevice: ReceiverDevice;
+    };
 
     /**
      * getInfo uses the old :/ form for compat with old bridge

@@ -73,7 +73,7 @@ export default new (class extends TypedEventTarget<EventMap> {
         const receiverDevice = this.receiverDevices.get(receiverDeviceId);
         if (receiverDevice) {
             this.bridgePort.postMessage({
-                subject: "bridge:stopCastApp",
+                subject: "bridge:stopCastSession",
                 data: { receiverDevice }
             });
         }

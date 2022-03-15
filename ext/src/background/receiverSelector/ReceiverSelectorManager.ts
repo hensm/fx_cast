@@ -200,7 +200,6 @@ async function getSelection(
             "stop",
             storeListener("stop", async ev => {
                 logger.info("Stopping receiver app...", ev.detail);
-
                 receiverDevices.stopReceiverApp(ev.detail.receiver.id);
 
                 resolve({

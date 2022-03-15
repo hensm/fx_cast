@@ -26,7 +26,7 @@ export default class CastClient {
 
     // Platform messaging
     private receiverChannel?: Channel;
-    private receiverRequestId = 0;
+    private receiverRequestId = Math.floor(Math.random() * 1e6);
 
     constructor(
         protected sourceId = "sender-0",
