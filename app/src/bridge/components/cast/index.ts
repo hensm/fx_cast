@@ -5,7 +5,9 @@ import castv2 from "castv2";
 import { sendMessage } from "../../lib/nativeMessaging";
 import { Message } from "../../messaging";
 
-import Session, { NS_CONNECTION, NS_RECEIVER } from "./Session";
+import Session from "./Session";
+import { NS_CONNECTION, NS_RECEIVER } from "./client";
+
 
 const sessions = new Map<string, Session>();
 
@@ -15,14 +17,9 @@ export function handleCastMessage(message: Message) {
             const { appId, receiverDevice } = message.data;
 
             // Connect and store with returned ID
-            const session = new Session(appId, receiverDevice);
-            session.connect(
-                receiverDevice.host,
-                receiverDevice.port,
-                sessionId => {
-                    sessions.set(sessionId, session);
-                }
-            );
+            const session = new Session(appId, receiverDevice, sessionId => {
+                sessions.set(sessionId, session);
+            });
 
             break;
         }

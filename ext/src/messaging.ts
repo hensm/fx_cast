@@ -13,6 +13,7 @@ import {
 import {
     CastSessionCreated,
     CastSessionUpdated,
+    MediaStatus,
     ReceiverStatus,
     SenderMessage
 } from "./shim/cast/types";
@@ -37,7 +38,9 @@ import { ReceiverDevice } from "./types";
  * components.
  */
 type ExtMessageDefinitions = {
-    "popup:init": { appId?: string };
+    "popup:init": {
+        appId?: string;
+    };
     "popup:update": {
         receivers: ReceiverDevice[];
         defaultMediaType?: ReceiverSelectorMediaType;
@@ -61,7 +64,7 @@ type ExtMessageDefinitions = {
 /**
  * Messages that cross the native messaging channel. MUST keep
  * in-sync with the bridge's version at:
- *   app/bridge/messaging.ts > MessagesBase
+ *   app/src/bridge/messaging.ts > MessageDefinitions
  */
 type AppMessageDefinitions = {
     "shim:castSessionCreated": CastSessionCreated;
@@ -125,11 +128,17 @@ type AppMessageDefinitions = {
     };
     "mediaCast:mediaServerStopped": {};
     "mediaCast:mediaServerError": {};
-    "main:receiverDeviceUp": { receiverDevice: ReceiverDevice };
-    "main:receiverDeviceDown": { receiverDeviceId: string };
-    "main:receiverDeviceUpdated": {
-        receiverDeviceId: string;
+
+    // Device discovery
+    "main:receiverDeviceUp": { deviceId: string; deviceInfo: ReceiverDevice };
+    "main:receiverDeviceDown": { deviceId: string };
+    "main:receiverDeviceStatusUpdated": {
+        deviceId: string;
         status: ReceiverStatus;
+    };
+    "main:receiverDeviceMediaStatusUpdated": {
+        deviceId: string;
+        status: MediaStatus;
     };
 };
 
@@ -145,8 +154,8 @@ type Messages = {
 };
 
 /**
- * For better call semantics, make message data key optional if
- * specified as blank or with all-optional keys.
+ * Make message data key optional if specified as blank or with
+ * all-optional keys.
  */
 type NarrowedMessage<L extends MessageBase<keyof MessageDefinitions>> =
     L extends any
@@ -161,29 +170,24 @@ export type Message = NarrowedMessage<Messages[keyof Messages]>;
 /**
  * Typed WebExtension-style messaging utility class.
  */
-class Messenger<T> {
+export default new (class Messenger {
     connect(connectInfo: { name: string }) {
-        return browser.runtime.connect(connectInfo) as unknown as TypedPort<T>;
+        return browser.runtime.connect(connectInfo) as unknown as Port;
     }
 
     connectTab(tabId: number, connectInfo: { name: string; frameId: number }) {
-        return browser.tabs.connect(
-            tabId,
-            connectInfo
-        ) as unknown as TypedPort<T>;
+        return browser.tabs.connect(tabId, connectInfo) as unknown as Port;
     }
 
     onConnect = {
-        addListener(cb: (port: TypedPort<T>) => void) {
+        addListener(cb: (port: Port) => void) {
             browser.runtime.onConnect.addListener(cb as any);
         },
-        removeListener(cb: (port: TypedPort<T>) => void) {
+        removeListener(cb: (port: Port) => void) {
             browser.runtime.onConnect.removeListener(cb as any);
         },
-        hasListener(cb: (port: TypedPort<T>) => void) {
+        hasListener(cb: (port: Port) => void) {
             return browser.runtime.onConnect.hasListener(cb as any);
         }
     };
-}
-
-export default new Messenger<Message>();
+})();

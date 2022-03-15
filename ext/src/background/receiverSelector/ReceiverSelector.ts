@@ -167,9 +167,9 @@ export default class ReceiverSelector extends TypedEventTarget<ReceiverSelectorE
         });
 
         if (
-            !this.receivers ||
-            !this.defaultMediaType ||
-            !this.availableMediaTypes
+            this.receivers === undefined ||
+            this.defaultMediaType === undefined ||
+            this.availableMediaTypes === undefined
         ) {
             throw logger.error("Popup receiver data not found.");
         }

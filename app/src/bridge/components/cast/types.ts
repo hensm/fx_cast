@@ -353,9 +353,19 @@ interface MediaReqBase extends ReqBase {
 export type SenderMediaMessage =
     | (MediaReqBase & { type: "PLAY" })
     | (MediaReqBase & { type: "PAUSE" })
-    | (MediaReqBase & { type: "MEDIA_GET_STATUS" })
+    | {
+          type: "MEDIA_GET_STATUS";
+          mediaSessionId?: number;
+          customData?: unknown;
+      }
+    | {
+          type: "GET_STATUS";
+          mediaSessionId?: number;
+          customData?: unknown;
+      }
     | (MediaReqBase & { type: "STOP" })
     | (MediaReqBase & { type: "MEDIA_SET_VOLUME"; volume: Volume })
+    | (MediaReqBase & { type: "SET_VOLUME"; volume: Volume })
     | (MediaReqBase & { type: "SET_PLAYBACK_RATE"; playbackRate: number })
     | (ReqBase & {
           type: "LOAD";

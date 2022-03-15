@@ -2,6 +2,7 @@
 
 import {
     Image,
+    MediaStatus,
     ReceiverStatus,
     SenderApplication,
     SenderMessage,
@@ -30,6 +31,11 @@ interface CastSessionCreated extends CastSessionUpdated {
     transportId: string;
 }
 
+/**
+ * Messages that cross the native messaging channel. MUST keep
+ * in-sync with the extension's version at:
+ *   ext/src/messaging.ts > MessageDefinitions
+ */
 type MessageDefinitions = {
     "shim:castSessionCreated": CastSessionCreated;
     "shim:castSessionUpdated": CastSessionUpdated;
@@ -98,11 +104,15 @@ type MessageDefinitions = {
         id: string;
         status: ReceiverStatus;
     };
-    "main:receiverDeviceUp": { receiverDevice: ReceiverDevice };
-    "main:receiverDeviceDown": { receiverDeviceId: string };
-    "main:receiverDeviceUpdated": {
-        receiverDeviceId: string;
+    "main:receiverDeviceUp": { deviceId: string, deviceInfo: ReceiverDevice };
+    "main:receiverDeviceDown": { deviceId: string };
+    "main:receiverDeviceStatusUpdated": {
+        deviceId: string;
         status: ReceiverStatus;
+    };
+    "main:receiverDeviceMediaStatusUpdated": {
+        deviceId: string;
+        status: MediaStatus;
     };
 };
 
@@ -116,8 +126,8 @@ type Messages = {
 };
 
 /**
- * For better call semantics, make message data key optional if
- * specified as blank or with all-optional keys.
+ * Make message data key optional if specified as blank or with
+ * all-optional keys.
  */
 type NarrowedMessage<L extends MessageBase<keyof MessageDefinitions>> =
     L extends any

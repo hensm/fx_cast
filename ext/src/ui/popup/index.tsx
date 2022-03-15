@@ -11,23 +11,22 @@ import messaging, { Message, Port } from "../../messaging";
 import { getNextEllipsis } from "../../lib/utils";
 import { ReceiverDevice } from "../../types";
 
-import { ReceiverSelectionActionType
-       , ReceiverSelectorMediaType } from "../../background/receiverSelector";
-
+import {
+    ReceiverSelectionActionType,
+    ReceiverSelectorMediaType
+} from "../../background/receiverSelector";
 
 const _ = browser.i18n.getMessage;
 
 // macOS styles
-browser.runtime.getPlatformInfo()
-    .then(platformInfo => {
-        if (platformInfo.os === "mac") {
-            const link = document.createElement("link");
-            link.rel = "stylesheet";
-            link.href = "styles/mac.css";
-            document.head.appendChild(link);
-        }
-    });
-
+browser.runtime.getPlatformInfo().then(platformInfo => {
+    if (platformInfo.os === "mac") {
+        const link = document.createElement("link");
+        link.rel = "stylesheet";
+        link.href = "styles/mac.css";
+        document.head.appendChild(link);
+    }
+});
 
 interface PopupAppProps {}
 interface PopupAppState {
@@ -51,11 +50,11 @@ class PopupApp extends Component<PopupAppProps, PopupAppState> {
         super(props);
 
         this.state = {
-            receivers: []
-          , mediaType: ReceiverSelectorMediaType.App
-          , availableMediaTypes: ReceiverSelectorMediaType.App
-          , isLoading: false
-          , mirroringEnabled: false
+            receivers: [],
+            mediaType: ReceiverSelectorMediaType.App,
+            availableMediaTypes: ReceiverSelectorMediaType.App,
+            isLoading: false,
+            mirroringEnabled: false
         };
 
         // Store window ref
@@ -63,9 +62,26 @@ class PopupApp extends Component<PopupAppProps, PopupAppState> {
             this.win = win;
         });
 
+        new ResizeObserver(() => {
+            this.updateWindowHeight();
+        }).observe(document.body);
+
         this.onSelectChange = this.onSelectChange.bind(this);
         this.onCast = this.onCast.bind(this);
         this.onStop = this.onStop.bind(this);
+    }
+
+    public updateWindowHeight() {
+        if (this.win?.id === undefined) {
+            return;
+        }
+
+        const frameHeight = window.outerHeight - window.innerHeight;
+        const windowHeight = document.body.clientHeight + frameHeight;
+
+        browser.windows.update(this.win.id, {
+            height: windowHeight
+        });
     }
 
     public async componentDidMount() {
@@ -82,18 +98,19 @@ class PopupApp extends Component<PopupAppProps, PopupAppState> {
                 }
 
                 case "popup:update": {
-                    const { receivers
-                          , availableMediaTypes
-                          , defaultMediaType } = message.data;
-
-                    this.defaultMediaType = defaultMediaType;
+                    const { receivers, availableMediaTypes, defaultMediaType } =
+                        message.data;
 
                     this.setState({ receivers });
 
-                    if (availableMediaTypes && defaultMediaType) {
+                    if (
+                        availableMediaTypes !== undefined &&
+                        defaultMediaType !== undefined
+                    ) {
+                        this.defaultMediaType = defaultMediaType;
                         this.setState({
-                            availableMediaTypes
-                          , mediaType: defaultMediaType
+                            availableMediaTypes,
+                            mediaType: defaultMediaType
                         });
                     }
 
@@ -114,17 +131,7 @@ class PopupApp extends Component<PopupAppProps, PopupAppState> {
 
     public componentDidUpdate() {
         setTimeout(() => {
-            if (this.win?.id === undefined) {
-                return;
-            }
-
-            // Fit window to content height
-            const frameHeight = window.outerHeight - window.innerHeight;
-            const windowHeight = document.body.clientHeight + frameHeight;
-
-            browser.windows.update(this.win.id, {
-                height: windowHeight
-            });
+            this.updateWindowHeight();
         }, 1);
     }
 
@@ -146,72 +153,99 @@ class PopupApp extends Component<PopupAppProps, PopupAppState> {
         */
 
         const isAppMediaTypeSelected =
-                this.state.mediaType === ReceiverSelectorMediaType.App;
+            this.state.mediaType === ReceiverSelectorMediaType.App;
         const isTabMediaTypeSelected =
-                this.state.mediaType === ReceiverSelectorMediaType.Tab;
+            this.state.mediaType === ReceiverSelectorMediaType.Tab;
         const isScreenMediaTypeSelected =
-                this.state.mediaType === ReceiverSelectorMediaType.Screen;
+            this.state.mediaType === ReceiverSelectorMediaType.Screen;
 
-        const isSelectedMediaTypeAvailable =
-                !!(this.state.availableMediaTypes & this.state.mediaType);
-        const isAppMediaTypeAvailable = !!(this.state.availableMediaTypes
-                & ReceiverSelectorMediaType.App);
+        const isSelectedMediaTypeAvailable = !!(
+            this.state.availableMediaTypes & this.state.mediaType
+        );
+        const isAppMediaTypeAvailable = !!(
+            this.state.availableMediaTypes & ReceiverSelectorMediaType.App
+        );
 
-        return <>
-            <div className="media-select">
-                <div className="media-select__label-cast">
-                    { _("popupMediaSelectCastLabel") }
-                </div>
-                <div className="select-wrapper">
-                    <select onChange={ this.onSelectChange }
+
+        return (
+            <>
+                <div className="media-select">
+                    <div className="media-select__label-cast">
+                        {_("popupMediaSelectCastLabel")}
+                    </div>
+                    <div className="select-wrapper">
+                        <select
+                            onChange={this.onSelectChange}
                             className="media-select__dropdown"
-                            disabled={ this.state.availableMediaTypes === 0 }>
+                            disabled={
+                                this.state.availableMediaTypes ===
+                                ReceiverSelectorMediaType.None
+                            }
+                        >
+                            <option
+                                value={ReceiverSelectorMediaType.App}
+                                selected={isAppMediaTypeSelected}
+                                disabled={!isAppMediaTypeAvailable}
+                            >
+                                {(this.state.appId &&
+                                    knownApps[this.state.appId]?.name) ??
+                                    _("popupMediaTypeApp")}
+                            </option>
 
-                        <option value={ ReceiverSelectorMediaType.App }
-                                selected={ isAppMediaTypeSelected }
-                                disabled={ !isAppMediaTypeAvailable }>
-                            { (this.state.appId && knownApps[this.state.appId]?.name)
-                                        ?? (isAppMediaTypeAvailable
-                                            ? _("popupMediaTypeApp")
-                                            : _("popupMediaTypeAppNotFound")) }
-                        </option>
-
-                        { this.state.mirroringEnabled &&
-                            <>
-                                <option value={ ReceiverSelectorMediaType.Tab }
-                                        selected={ isTabMediaTypeSelected }
-                                        disabled={ !(this.state.availableMediaTypes
-                                                & ReceiverSelectorMediaType.Tab) }>
-                                    { _("popupMediaTypeTab") }
-                                </option>
-                                <option value={ ReceiverSelectorMediaType.Screen }
-                                        selected={ isScreenMediaTypeSelected }
-                                        disabled={ !(this.state.availableMediaTypes
-                                                & ReceiverSelectorMediaType.Screen) }>
-                                    { _("popupMediaTypeScreen") }
-                                </option>
-                            </> }
-                    </select>
+                            {this.state.mirroringEnabled && (
+                                <>
+                                    <option
+                                        value={ReceiverSelectorMediaType.Tab}
+                                        selected={isTabMediaTypeSelected}
+                                        disabled={
+                                            !(
+                                                this.state.availableMediaTypes &
+                                                ReceiverSelectorMediaType.Tab
+                                            )
+                                        }
+                                    >
+                                        {_("popupMediaTypeTab")}
+                                    </option>
+                                    <option
+                                        value={ReceiverSelectorMediaType.Screen}
+                                        selected={isScreenMediaTypeSelected}
+                                        disabled={
+                                            !(
+                                                this.state.availableMediaTypes &
+                                                ReceiverSelectorMediaType.Screen
+                                            )
+                                        }
+                                    >
+                                        {_("popupMediaTypeScreen")}
+                                    </option>
+                                </>
+                            )}
+                        </select>
+                    </div>
+                    <div className="media-select__label-to">
+                        {_("popupMediaSelectToLabel")}
+                    </div>
                 </div>
-                <div className="media-select__label-to">
-                    { _("popupMediaSelectToLabel") }
-                </div>
-            </div>
-            <ul className="receivers">
-                { this.state.receivers && this.state.receivers.length
-                    ? this.state.receivers.map((receiver, i) => (
-                        <ReceiverEntry receiver={ receiver }
-                                       onCast={ this.onCast }
-                                       onStop={ this.onStop }
-                                       isLoading={ this.state.isLoading }
-                                       canCast={ isSelectedMediaTypeAvailable }
-                                       key={ i } /> ))
-                    : (
+                <ul className="receivers">
+                    {this.state.receivers && this.state.receivers.length ? (
+                        this.state.receivers.map((receiver, i) => (
+                            <ReceiverEntry
+                                receiver={receiver}
+                                onCast={this.onCast}
+                                onStop={this.onStop}
+                                isLoading={this.state.isLoading}
+                                canCast={isSelectedMediaTypeAvailable}
+                                key={i}
+                            />
+                        ))
+                    ) : (
                         <div className="receivers__not-found">
-                            { _("popupNoReceiversFound") }
-                        </div> )}
-            </ul>
-        </>;
+                            {_("popupNoReceiversFound")}
+                        </div>
+                    )}
+                </ul>
+            </>
+        );
     }
 
     private onCast(receiver: ReceiverDevice) {
@@ -220,22 +254,22 @@ class PopupApp extends Component<PopupAppProps, PopupAppState> {
         });
 
         this.port?.postMessage({
-            subject: "receiverSelector:selected"
-          , data: {
-                actionType: ReceiverSelectionActionType.Cast
-              , receiver
-              , mediaType: this.state.mediaType
-              , filePath: this.state.filePath
+            subject: "receiverSelector:selected",
+            data: {
+                actionType: ReceiverSelectionActionType.Cast,
+                receiver,
+                mediaType: this.state.mediaType,
+                filePath: this.state.filePath
             }
         });
     }
 
     private onStop(receiver: ReceiverDevice) {
         this.port?.postMessage({
-            subject: "receiverSelector:stop"
-          , data: {
-                actionType: ReceiverSelectionActionType.Stop
-              , receiver
+            subject: "receiverSelector:stop",
+            data: {
+                actionType: ReceiverSelectionActionType.Stop,
+                receiver
             }
         });
     }
@@ -247,8 +281,8 @@ class PopupApp extends Component<PopupAppProps, PopupAppState> {
             const fileUrl = window.prompt();
             if (fileUrl) {
                 this.setState({
-                    mediaType
-                  , filePath: fileUrl
+                    mediaType,
+                    filePath: fileUrl
                 });
 
                 return;
@@ -272,13 +306,12 @@ class PopupApp extends Component<PopupAppProps, PopupAppState> {
     }
 }
 
-
 interface ReceiverEntryProps {
     receiver: ReceiverDevice;
     isLoading: boolean;
     canCast: boolean;
-    onCast (receiver: ReceiverDevice): void;
-    onStop (receiver: ReceiverDevice): void;
+    onCast(receiver: ReceiverDevice): void;
+    onStop(receiver: ReceiverDevice): void;
 }
 
 interface ReceiverEntryState {
@@ -292,9 +325,9 @@ class ReceiverEntry extends Component<ReceiverEntryProps, ReceiverEntryState> {
         super(props);
 
         this.state = {
-            ellipsis: ""
-          , isLoading: false
-          , showAlternateAction: false
+            ellipsis: "",
+            isLoading: false,
+            showAlternateAction: false
         };
 
         const handleActionKeyEvents = (ev: KeyboardEvent) => {
@@ -315,41 +348,40 @@ class ReceiverEntry extends Component<ReceiverEntryProps, ReceiverEntryState> {
             });
         });
 
-
         this.handleCast = this.handleCast.bind(this);
     }
 
     public render() {
         const { status } = this.props.receiver;
-        if (!status) {
-            return;
-        }
-
-        const application = status.applications?.[0];
+        const application = status?.applications?.[0];
 
         return (
             <li className="receiver">
                 <div className="receiver__name">
-                    { this.props.receiver.friendlyName }
+                    {this.props.receiver.friendlyName}
                 </div>
                 <div className="receiver__address">
-                    { application && !application.isIdleScreen
+                    {application && !application.isIdleScreen
                         ? application.statusText
-                        : `${this.props.receiver.host}:${this.props.receiver.port}` }
+                        : `${this.props.receiver.host}:${this.props.receiver.port}`}
                 </div>
-                <button className="button receiver__connect"
-                        onClick={ this.handleCast }
-                        disabled={ this.state.showAlternateAction
+                <button
+                    className="button receiver__connect"
+                    onClick={this.handleCast}
+                    disabled={
+                        this.state.showAlternateAction
                             ? !application || application.isIdleScreen
-                            : this.props.isLoading || !this.props.canCast }>
-                    { this.state.isLoading
-                        ? _("popupCastingButtonTitle"
-                              , (this.state.isLoading
-                                    ? this.state.ellipsis
-                                    : ""))
+                            : this.props.isLoading || !this.props.canCast
+                    }
+                >
+                    {this.state.isLoading
+                        ? _(
+                              "popupCastingButtonTitle",
+                              this.state.isLoading ? this.state.ellipsis : ""
+                          )
                         : this.state.showAlternateAction
-                            ? _("popupStopButtonTitle")
-                            : _("popupCastButtonTitle") }
+                        ? _("popupStopButtonTitle")
+                        : _("popupCastButtonTitle")}
                 </button>
             </li>
         );
@@ -376,18 +408,14 @@ class ReceiverEntry extends Component<ReceiverEntryProps, ReceiverEntryState> {
                 this.setState(state => ({
                     ellipsis: getNextEllipsis(state.ellipsis)
                 }));
-
             }, 500);
         }
     }
 }
 
-
 // Render after CSS has loaded
 window.addEventListener("load", () => {
-    ReactDOM.render(
-        <PopupApp />
-      , document.querySelector("#root"));
+    ReactDOM.render(<PopupApp />, document.querySelector("#root"));
 });
 
 window.addEventListener("contextmenu", () => {

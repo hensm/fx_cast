@@ -1,11 +1,14 @@
 "use strict";
 
+import { ReceiverDevice } from "../../types";
+
 export enum ReceiverSelectorType {
     Popup,
     Native
 }
 
 export enum ReceiverSelectorMediaType {
+    None = 0,
     App = 1,
     Tab = 2,
     Screen = 4,

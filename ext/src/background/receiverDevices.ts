@@ -9,10 +9,10 @@ import { ReceiverDevice } from "../types";
 import { ReceiverStatus } from "../shim/cast/types";
 
 interface EventMap {
-    receiverDeviceUp: { receiverDevice: ReceiverDevice };
-    receiverDeviceDown: { receiverDeviceId: string };
+    receiverDeviceUp: { deviceInfo: ReceiverDevice };
+    receiverDeviceDown: { deviceId: string };
     receiverDeviceUpdated: {
-        receiverDeviceId: string;
+        deviceId: string;
         status: ReceiverStatus;
     };
 }
@@ -25,7 +25,6 @@ export default new (class extends TypedEventTarget<EventMap> {
     private receiverDevices = new Map<string, ReceiverDevice>();
 
     private bridgePort?: Port;
-
     async init() {
         if (!this.bridgePort) {
             await this.refresh();
@@ -38,21 +37,19 @@ export default new (class extends TypedEventTarget<EventMap> {
      */
     async refresh() {
         this.bridgePort?.disconnect();
+        this.receiverDevices.clear();
 
-        const port = await bridge.connect();
+        this.bridgePort = await bridge.connect();
+        this.bridgePort.onMessage.addListener(this.onBridgeMessage);
+        this.bridgePort.onDisconnect.addListener(this.onBridgeDisconnect);
 
-        port.onMessage.addListener(this.onBridgeMessage);
-        port.onDisconnect.addListener(this.onBridgeDisconnect);
-
-        port.postMessage({
+        this.bridgePort.postMessage({
             subject: "bridge:startDiscovery",
             data: {
                 // Also send back status messages
                 shouldWatchStatus: true
             }
         });
-
-        this.bridgePort = port;
     }
 
     /**
@@ -85,12 +82,12 @@ export default new (class extends TypedEventTarget<EventMap> {
     private onBridgeMessage = (message: Message) => {
         switch (message.subject) {
             case "main:receiverDeviceUp": {
-                const { receiverDevice } = message.data;
+                const { deviceId, deviceInfo } = message.data;
 
-                this.receiverDevices.set(receiverDevice.id, receiverDevice);
+                this.receiverDevices.set(deviceId, deviceInfo);
                 this.dispatchEvent(
                     new CustomEvent("receiverDeviceUp", {
-                        detail: { receiverDevice }
+                        detail: { deviceInfo }
                     })
                 );
 
@@ -98,29 +95,26 @@ export default new (class extends TypedEventTarget<EventMap> {
             }
 
             case "main:receiverDeviceDown": {
-                const { receiverDeviceId } = message.data;
+                const { deviceId } = message.data;
 
-                if (this.receiverDevices.has(receiverDeviceId)) {
-                    this.receiverDevices.delete(receiverDeviceId);
+                if (this.receiverDevices.has(deviceId)) {
+                    this.receiverDevices.delete(deviceId);
                 }
                 this.dispatchEvent(
                     new CustomEvent("receiverDeviceDown", {
-                        detail: { receiverDeviceId }
+                        detail: { deviceId: deviceId }
                     })
                 );
 
                 break;
             }
 
-            case "main:receiverDeviceUpdated": {
-                const { receiverDeviceId, status } = message.data;
-                const receiverDevice =
-                    this.receiverDevices.get(receiverDeviceId);
+            case "main:receiverDeviceStatusUpdated": {
+                const { deviceId, status } = message.data;
+                const receiverDevice = this.receiverDevices.get(deviceId);
 
                 if (!receiverDevice) {
-                    logger.error(
-                        `Receiver ID \`${receiverDeviceId}\` not found!`
-                    );
+                    logger.error(`Receiver ID \`${deviceId}\` not found!`);
                     break;
                 }
 
@@ -140,11 +134,17 @@ export default new (class extends TypedEventTarget<EventMap> {
                 this.dispatchEvent(
                     new CustomEvent("receiverDeviceUpdated", {
                         detail: {
-                            receiverDeviceId,
+                            deviceId,
                             status: receiverDevice.status
                         }
                     })
                 );
+
+                break;
+            }
+
+            case "main:receiverDeviceMediaStatusUpdated": {
+                break;
             }
         }
     };
@@ -153,7 +153,7 @@ export default new (class extends TypedEventTarget<EventMap> {
         // Notify listeners of device availablility
         for (const [, receiverDevice] of this.receiverDevices) {
             const event = new CustomEvent("receiverDeviceDown", {
-                detail: { receiverDeviceId: receiverDevice.id }
+                detail: { deviceId: receiverDevice.id }
             });
 
             this.dispatchEvent(event);

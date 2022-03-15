@@ -37,7 +37,7 @@ export function getMediaTypesForPageUrl(
     pageUrl: string
 ): ReceiverSelectorMediaType {
     const url = new URL(pageUrl);
-    let availableMediaTypes = ReceiverSelectorMediaType.File;
+    let availableMediaTypes = ReceiverSelectorMediaType.None;
 
     /**
      * Content scripts are prohibited from running on some
