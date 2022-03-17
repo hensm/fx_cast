@@ -1,6 +1,11 @@
 "use strict";
 
-import { ReceiverStatus } from "./components/cast/types";
+import {
+    Image,
+    ReceiverStatus,
+    SenderApplication,
+    Volume
+} from "./components/cast/types";
 
 export interface ReceiverDevice {
     host: string;
@@ -8,4 +13,19 @@ export interface ReceiverDevice {
     id: string;
     port: number;
     status?: ReceiverStatus;
+}
+
+export interface CastSessionUpdatedDetails {
+    sessionId: string;
+    statusText: string;
+    namespaces: Array<{ name: string }>;
+    volume: Volume;
+}
+export interface CastSessionCreatedDetails extends CastSessionUpdatedDetails {
+    appId: string;
+    appImages: Image[];
+    displayName: string;
+    receiverFriendlyName: string;
+    senderApps: SenderApplication[];
+    transportId: string;
 }

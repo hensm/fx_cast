@@ -49,14 +49,14 @@ export interface ReceiverStatus {
     volume: Volume;
 }
 
-export interface CastSessionUpdated {
+export interface CastSessionUpdatedDetails {
     sessionId: string;
     statusText: string;
     namespaces: Array<{ name: string }>;
     volume: Volume;
 }
 
-export interface CastSessionCreated extends CastSessionUpdated {
+export interface CastSessionCreatedDetails extends CastSessionUpdatedDetails {
     appId: string;
     appImages: Image[];
     displayName: string;
