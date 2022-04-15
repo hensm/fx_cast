@@ -362,10 +362,6 @@ export async function init(opts: InitOptions) {
 
     if (targetElement instanceof HTMLMediaElement) {
         registerMediaElementListeners(targetElement);
-
-        if (await options.get("mediaOverlayEnabled")) {
-            // TODO: Un-hide overlay here
-        }
     }
 
     window.addEventListener("beforeunload", async () => {

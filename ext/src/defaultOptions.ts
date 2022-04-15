@@ -8,7 +8,6 @@ export default {
     bridgeBackupHost: "localhost",
     bridgeBackupPort: 9556,
     mediaEnabled: true,
-    mediaOverlayEnabled: false,
     mediaSyncElement: false,
     mediaStopOnUnload: false,
     localMediaEnabled: true,

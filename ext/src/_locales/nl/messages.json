@@ -85,16 +85,6 @@
             }
         }
     },
-    "mediaOverlayTitle": {
-        "message": "Speelt af op $receiverName$",
-        "description": "Main title for overlay displayed on media elements whilst casting.",
-        "placeholders": {
-            "receiverName": {
-                "content": "$1",
-                "example": "Living Room TV"
-            }
-        }
-    },
     "optionsBridgeLoading": {
         "message": "Bezig met laden van bridge-informatie...",
         "description": "Loading placeholder text for bridge section on options page."
@@ -208,18 +198,6 @@
     "optionsMediaEnabled": {
         "message": "Mediacasten ingeschakeld",
         "description": "Media casting enabled checkbox label."
-    },
-    "optionsMediaOverlayEnabled": {
-        "message": "Inschakelen overlay media element",
-        "description": "Media element overlay checkbox label."
-    },
-    "optionsMediaOverlayEnabledTemp": {
-        "message": "Inschakelen overlay media element (Experimenteel)",
-        "description": "Experimental-labelled version of above."
-    },
-    "optionsMediaOverlayEnabledDescription": {
-        "message": "Een overlay over media elementen die informatie weergeeft over de huidige sessie indien verbonden.",
-        "description": "Media element overlay option description."
     },
     "optionsMediaSyncElement": {
         "message": "Ontvangerstatus synchroniseren met media-element",

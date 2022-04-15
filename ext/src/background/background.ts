@@ -41,48 +41,6 @@ browser.runtime.onInstalled.addListener(async details => {
     }
 });
 
-/**
- * Sets up media overlay content script and handles toggling
- * on options change.
- */
-async function initMediaOverlay() {
-    logger.info("init (media overlay)");
-
-    let contentScript: browser.contentScripts.RegisteredContentScript;
-
-    async function registerMediaOverlayContentScript() {
-        if (!(await options.get("mediaOverlayEnabled"))) {
-            return;
-        }
-
-        try {
-            contentScript = await browser.contentScripts.register({
-                allFrames: true,
-                js: [{ file: "senders/media/overlay/overlayContentLoader.js" }],
-                matches: ["<all_urls>"],
-                runAt: "document_start"
-            });
-        } catch (err) {
-            logger.error("Failed to register media overlay");
-        }
-    }
-
-    async function unregisterMediaOverlayContentScript() {
-        await contentScript?.unregister();
-    }
-
-    registerMediaOverlayContentScript();
-
-    // Update if toggled
-    options.addEventListener("changed", async ev => {
-        const alteredOpts = ev.detail;
-
-        if (alteredOpts.includes("mediaOverlayEnabled")) {
-            await unregisterMediaOverlayContentScript();
-            await registerMediaOverlayContentScript();
-        }
-    });
-}
 
 /**
  * Checks whether the bridge can be reached and is compatible
@@ -153,7 +111,6 @@ async function init() {
 
     await initMenus();
     await initWhitelist();
-    await initMediaOverlay();
 
     /**
      * When the browser action is clicked, open a receiver

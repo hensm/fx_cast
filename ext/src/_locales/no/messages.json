@@ -97,17 +97,6 @@
     }
 
 
-  , "mediaOverlayTitle": {
-        "message": "Spiller på $receiverName$"
-      , "description": "Main title for overlay displayed on media elements whilst casting."
-      , "placeholders": {
-            "receiverName": {
-                "content": "$1"
-              , "example": "Living Room TV"
-            }
-        }
-    }
-
   , "optionsBridgeLoading": {
         "message": "Laster bro-info"
       , "description": "Loading placeholder text for bridge section on options page."
@@ -229,18 +218,6 @@
   , "optionsMediaEnabled": {
         "message": "Skru på media-casting"
       , "description": "Media casting enabled checkbox label."
-    }
-  , "optionsMediaOverlayEnabled": {
-        "message": "Skru på element-overlegg (eksperimentell)"
-      , "description": "Media element overlay checkbox label."
-    }
-  , "optionsMediaOverlayEnabledTemp": {
-        "message": "Skru på element-overlegg (eksperimentell)"
-      , "description": "Experimental-labelled version of above."
-    }
-  , "optionsMediaOverlayEnabledDescription": {
-        "message": "mediaelementer "
-      , "description": "Media element overlay option description."
     }
   , "optionsMediaSyncElement": {
         "message": "Synkroniser mottager med mediaelement"

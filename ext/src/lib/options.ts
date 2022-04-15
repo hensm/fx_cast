@@ -17,7 +17,6 @@ export interface Options {
     bridgeBackupHost: string;
     bridgeBackupPort: number;
     mediaEnabled: boolean;
-    mediaOverlayEnabled: boolean;
     mediaSyncElement: boolean;
     mediaStopOnUnload: boolean;
     localMediaEnabled: boolean;

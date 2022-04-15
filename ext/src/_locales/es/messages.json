@@ -97,18 +97,6 @@
     }
 
 
-  , "mediaOverlayTitle": {
-        "message": "Reproduciendo en $receiverName$"
-      , "description": "Main title for overlay displayed on media elements whilst casting."
-      , "placeholders": {
-            "receiverName": {
-                "content": "$1"
-              , "example": "Living Room TV"
-            }
-        }
-    }
-
-
   , "optionsBridgeLoading": {
         "message": "Cargando información de la aplicación puente..."
       , "description": "Loading placeholder text for bridge section on options page."
@@ -230,18 +218,6 @@
   , "optionsMediaEnabled": {
         "message": "Activar transmisión de contenidos"
       , "description": "Media casting enabled checkbox label."
-    }
-  , "optionsMediaOverlayEnabled": {
-        "message": "Activar sobreposición en el elemento de medios"
-      , "description": "Media element overlay checkbox label."
-    }
-  , "optionsMediaOverlayEnabledTemp": {
-        "message": "Activar sobreposición en el elemento de medios (experimental)"
-      , "description": "Experimental-labelled version of above."
-    }
-  , "optionsMediaOverlayEnabledDescription": {
-        "message": "Sobreposición en elementos de medios mostrando información acerca de la sesión actual si está conectado."
-      , "description": "Media element overlay option description."
     }
   , "optionsMediaSyncElement": {
         "message": "Sincronizar estado del receptor con el contenido"

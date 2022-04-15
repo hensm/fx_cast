@@ -189,21 +189,6 @@ class OptionsApp extends Component<
                             </div>
                         </label>
 
-                        <label className="option option--inline">
-                            <div className="option__control">
-                                <input name="mediaOverlayEnabled"
-                                       type="checkbox"
-                                       checked={ this.state.options?.mediaOverlayEnabled }
-                                       onChange={ this.handleInputChange } />
-                            </div>
-                            <div className="option__label">
-                                { _("optionsMediaOverlayEnabledTemp") }
-                            </div>
-                            <div className="option__description">
-                                { _("optionsMediaOverlayEnabledDescription") }
-                            </div>
-                        </label>
-
                         <hr />
 
                         <label className="option option--inline">

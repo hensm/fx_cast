@@ -74,8 +74,6 @@ const buildOpts = {
         `${srcPath}/background/background.ts`,
         // Media sender
         `${srcPath}/senders/media/index.ts`,
-        `${srcPath}/senders/media/overlay/overlayContent.ts`,
-        `${srcPath}/senders/media/overlay/overlayContentLoader.ts`,
         // Mirroring sender
         `${srcPath}/senders/mirroring.ts`,
         // Cast
