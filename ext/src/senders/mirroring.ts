@@ -91,7 +91,6 @@ async function onRequestSessionSuccess(newSession: cast.Session) {
                 ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
             });
 
-            // TODO: Test performance
             const drawFlags =
                 ctx.DRAWWINDOW_DRAW_CARET |
                 ctx.DRAWWINDOW_DRAW_VIEW |
