@@ -117,10 +117,13 @@ export const REMOTE_MATCH_PATTERN_REGEX =
 export function loadScript(
     scriptUrl: string,
     doc: Document = document
-): HTMLScriptElement {
-    const scriptElement = doc.createElement("script");
-    scriptElement.src = scriptUrl;
-    (doc.head || doc.documentElement).append(scriptElement);
-
-    return scriptElement;
+): Promise<HTMLScriptElement> {
+    return new Promise((resolve, reject) => {
+        const scriptEl = doc.createElement("script");
+        scriptEl.src = scriptUrl;
+        (doc.head || doc.documentElement).append(scriptEl);
+    
+        scriptEl.addEventListener("load", () => resolve(scriptEl));
+        scriptEl.addEventListener("error", () => reject());
+    });
 }

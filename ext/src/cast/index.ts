@@ -1,6 +1,7 @@
 "use strict";
 
 import * as cast from "./api";
+import logger from "../lib/logger";
 
 import { CAST_FRAMEWORK_SCRIPT_URL } from "../lib/endpoints";
 import { loadScript } from "../lib/utils";
@@ -18,14 +19,6 @@ _window.chrome.cast = cast;
 let bridgeInfo: any;
 let isFramework = false;
 
-// Call page's API loaded function if defined
-function callPageReadyFunction() {
-    const readyFunction = _window.__onGCastApiAvailable;
-    if (readyFunction && typeof readyFunction === "function") {
-        readyFunction(bridgeInfo && bridgeInfo.isVersionCompatible);
-    }
-}
-
 /**
  * If loaded within a page via a <script> element,
  * document.currentScript should exist and we can check its
@@ -42,29 +35,32 @@ if (document.currentScript) {
             _window.cast = {};
         }
 
+        /**
+         * Set isFramework flag to load framework once the base cast API is
+         * initialized
+         */
         isFramework = true;
-
-        const script = loadScript(CAST_FRAMEWORK_SCRIPT_URL);
-        script.addEventListener("load", () => {
-            callPageReadyFunction();
-        });
-
-        /*
-        // TODO: Finish cast.framework and replace Google's implementation
-        import("./framework").then(framework => {
-            _window.cast.framework = framework.default;
-        });
-        */
     }
 }
 
-onMessage(message => {
+onMessage(async message => {
     switch (message.subject) {
         case "cast:initialized": {
             bridgeInfo = message.data;
 
-            if (!isFramework) {
-                callPageReadyFunction();
+            // If framework API is requested, load that first
+            if (isFramework) {
+                try {
+                    await loadScript(CAST_FRAMEWORK_SCRIPT_URL);
+                } catch (err) {
+                    logger.error("Failed to load CAF script!");
+                }
+            }
+            
+            // Call page script/framework API script's init function
+            const initFn = _window.__onGCastApiAvailable;
+            if (initFn && typeof initFn === "function") {
+                initFn(bridgeInfo && bridgeInfo.isVersionCompatible);
             }
 
             break;
