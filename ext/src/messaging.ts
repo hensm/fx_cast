@@ -186,9 +186,6 @@ type AppMessageDefinitions = {
      * Sent to cast API instance from bridge whenever a message
      * operation is completed. If an error ocurred, an error string will
      * be passed as the `error` data property.
-     *
-     * TODO: Check how/if this works with receiver messages (via
-     * `bridge:sendCastReceiverMessage`).
      */
     "cast:impl_sendMessage": {
         sessionId: string;
