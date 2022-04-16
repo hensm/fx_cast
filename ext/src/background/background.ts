@@ -6,11 +6,11 @@ import logger from "../lib/logger";
 import options from "../lib/options";
 import bridge, { BridgeInfo } from "../lib/bridge";
 
-import ReceiverSelectorManager from "./receiverSelector/ReceiverSelectorManager";
+import { RemoteMatchPattern } from "../lib/matchPattern";
 
 import CastManager from "./CastManager";
-
 import receiverDevices from "./receiverDevices";
+import ReceiverSelectorManager from "./receiverSelector/ReceiverSelectorManager";
 
 import { initMenus } from "./menus";
 import { initWhitelist } from "./whitelist";
@@ -40,7 +40,6 @@ browser.runtime.onInstalled.addListener(async details => {
         }
     }
 });
-
 
 /**
  * Checks whether the bridge can be reached and is compatible

@@ -1,15 +1,13 @@
-:root {
-    --button-background: #474749;
-    --button-background-hover: #505054;
-    --button-background-active: #5c5c5e;
-}
-
 body {
     background: var(--grey-10);
     color: var(--grey-90);
     margin: initial;
     font: message-box;
     font-size: 13px;
+}
+
+[hidden] {
+    display: none !important;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -26,8 +24,35 @@ body {
     }
 }
 
-.media-select {
+.whitelist-suggest {
     align-items: center;
+    background-color: var(--blue-50-a30);
+    border-bottom: 1px solid rgba(0, 0, 0, 0.25);
+    display: flex;
+    font-size: 0.9em;
+    gap: 0.5em;
+    padding: 0.75em;
+}
+.whitelist-suggest > button {
+    --button-background: hsla(0, 0%, 50%, 0.3);
+    --button-background-hover: hsla(0, 0%, 30%, 0.3);
+    --button-background-active: hsla(0, 0%, 10%, 0.3);
+    margin-left: auto;
+}
+
+@media (prefers-color-scheme: dark) {
+    .whitelist-suggest {
+        border-bottom: 1px solid rgba(255, 255, 255, 0.25);
+    }
+    .whitelist-suggest > button {
+        --button-background: hsla(0, 0%, 50%, 0.3);
+        --button-background-hover: hsla(0, 0%, 70%, 0.3);
+        --button-background-active: hsla(0, 0%, 90%, 0.3);
+    }
+}
+
+.media-select {
+    align-items: baseline;
     border-bottom: 1px solid rgba(0, 0, 0, 0.25);
     display: flex;
     margin: 0 1em;
@@ -43,11 +68,6 @@ body {
 }
 .media-select__label-to:not(:empty) {
     margin-inline-start: 0.5em;
-}
-
-.media-select__dropdown {
-    padding-top: 2px;
-    padding-bottom: 2px;
 }
 
 .receivers {

@@ -111,9 +111,6 @@ export function getWindowCenteredProps(
     };
 }
 
-export const REMOTE_MATCH_PATTERN_REGEX =
-    /^(?:(?:(\*|https?|ftp):\/\/(\*|(?:\*\.(?:[^\/\*:]\.?)+(?:[^\.])|[^\/\*:]*))?)(\/.*)|<all_urls>)$/;
-
 export function loadScript(
     scriptUrl: string,
     doc: Document = document
@@ -122,7 +119,7 @@ export function loadScript(
         const scriptEl = doc.createElement("script");
         scriptEl.src = scriptUrl;
         (doc.head || doc.documentElement).append(scriptEl);
-    
+
         scriptEl.addEventListener("load", () => resolve(scriptEl));
         scriptEl.addEventListener("error", () => reject());
     });

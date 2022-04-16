@@ -12,7 +12,7 @@ import EditableList from "./EditableList";
 import bridge, { BridgeInfo, BridgeTimedOutError } from "../../lib/bridge";
 import logger from "../../lib/logger";
 import options, { Options } from "../../lib/options";
-import { REMOTE_MATCH_PATTERN_REGEX } from "../../lib/utils";
+import { REMOTE_MATCH_PATTERN_REGEX } from "../../lib/matchPattern";
 
 
 const _ = browser.i18n.getMessage;

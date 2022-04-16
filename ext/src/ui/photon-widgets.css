@@ -2,14 +2,13 @@
     --shadow-10: 0 1px 4px rgba(12, 12, 13, 0.1);
     --shadow-20: 0 2px 8px rgba(12, 12, 13, 0.1);
     --shadow-30: 0 4px 16px rgba(12, 12, 13, 0.1);
-    
+
     --focus-border-color: var(--blue-50);
 
     --box-background: var(--white-100);
     --box-color: var(--grey-90);
 
-    --focus-box-shadow:
-        0 0 0 1px var(--focus-border-color);
+    --focus-box-shadow: 0 0 0 1px var(--focus-border-color);
 
     --button-background: var(--grey-90-a10);
     --button-background-hover: var(--grey-90-a20);
@@ -26,12 +25,10 @@
     --field-border-color: var(--grey-90-a20);
     --field-border-color-hover: var(--grey-90-a30);
 
-    --field-box-shadow-warning:
-        0 0 0 1px var(--yellow-60)
-      , 0 0 0 4px var(--yellow-60-a30);
-    --field-box-shadow-error:
-        0 0 0 1px var(--red-60)
-      , 0 0 0 4px var(--red-60-a30);
+    --field-box-shadow-warning: 0 0 0 1px var(--yellow-60),
+        0 0 0 4px var(--yellow-60-a30);
+    --field-box-shadow-error: 0 0 0 1px var(--red-60),
+        0 0 0 4px var(--red-60-a30);
 }
 
 @media (prefers-color-scheme: dark) {
@@ -102,7 +99,9 @@ textarea:invalid {
 }
 
 button:disabled,
-input:disabled {
+input:disabled,
+textarea:disabled,
+select:disabled {
     opacity: 0.35;
 }
 
@@ -111,6 +110,7 @@ input,
 textarea,
 select {
     padding: 4px 8px;
+    font: inherit;
 }
 
 /* No inset for spinbox control */
@@ -130,13 +130,14 @@ button:default:hover:active {
 }
 
 .select-wrapper {
-    --arrow-width: 20px;
+    --arrow-width: 16px;
     position: relative;
     display: inline-block;
 }
 .select-wrapper::after {
     align-items: center;
     content: "▼";
+    opacity: 0.5;
     display: flex;
     height: 100%;
     margin-right: 4px;

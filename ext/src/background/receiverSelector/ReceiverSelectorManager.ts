@@ -66,13 +66,16 @@ async function getSelection(
         let defaultMediaType = ReceiverSelectorMediaType.Tab;
         let availableMediaTypes;
 
+        let pageUrl: string | undefined;
         try {
-            const { url } = await browser.webNavigation.getFrame({
-                tabId: contextTabId,
-                frameId: contextFrameId
-            });
+            pageUrl = (
+                await browser.webNavigation.getFrame({
+                    tabId: contextTabId,
+                    frameId: contextFrameId
+                })
+            ).url;
 
-            availableMediaTypes = getMediaTypesForPageUrl(url);
+            availableMediaTypes = getMediaTypesForPageUrl(pageUrl);
         } catch {
             logger.error(
                 "Failed to locate frame, falling back to default available media types."
@@ -213,11 +216,20 @@ async function getSelection(
         // Ensure status manager is initialized
         await receiverDevices.init();
 
+        const pageInfo = pageUrl
+            ? {
+                  url: pageUrl,
+                  tabId: contextTabId,
+                  frameId: contextFrameId
+              }
+            : undefined;
+
         sharedSelector.open(
             receiverDevices.getDevices(),
             defaultMediaType,
             availableMediaTypes,
-            castInstance?.appId
+            castInstance?.appId,
+            pageInfo
         );
     });
 }
