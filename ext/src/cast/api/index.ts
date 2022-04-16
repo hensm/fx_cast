@@ -395,11 +395,11 @@ onMessage(message => {
         case "cast:selectReceiver/selected": {
             logger.info("Selected receiver");
 
-            if (!sessionRequest) {
-                break;
+            if (sessionRequest) {
+                sendSessionRequest(sessionRequest, message.data.receiver);
+                sessionRequest = null;
             }
 
-            sendSessionRequest(sessionRequest, message.data.receiver);
             break;
         }
 
