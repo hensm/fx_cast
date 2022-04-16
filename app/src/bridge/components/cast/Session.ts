@@ -83,7 +83,9 @@ export default class Session extends CastClient {
                                 volume: status.volume,
                                 appId: application.appId,
                                 displayName: application.displayName,
-                                receiverFriendlyName: friendlyName,
+                                receiverId: this.receiverDevice.id,
+                                receiverFriendlyName:
+                                    this.receiverDevice.friendlyName,
                                 transportId: this.sessionId,
 
                                 // TODO: Fix this
@@ -162,23 +164,25 @@ export default class Session extends CastClient {
     ) {
         super();
 
-        super.connect(receiverDevice.host, {
-            onHeartbeat: () => {
-                // Include transport heartbeat with platform heartbeat
-                if (this.transportHeartbeat) {
-                    this.transportHeartbeat.send({ type: "PING" });
+        super
+            .connect(receiverDevice.host, {
+                onHeartbeat: () => {
+                    // Include transport heartbeat with platform heartbeat
+                    if (this.transportHeartbeat) {
+                        this.transportHeartbeat.send({ type: "PING" });
+                    }
+                },
+                onReceiverMessage: message => {
+                    this.onReceiverMessage(message);
                 }
-            },
-            onReceiverMessage: message => {
-                this.onReceiverMessage(message);
-            }
-        }).then(() => {
-            // Send a launch request and store the request ID for reference
-            this.launchRequestId = this.sendReceiverMessage({
-                type: "LAUNCH",
-                appId: this.appId
+            })
+            .then(() => {
+                // Send a launch request and store the request ID for reference
+                this.launchRequestId = this.sendReceiverMessage({
+                    type: "LAUNCH",
+                    appId: this.appId
+                });
             });
-        });
 
         // Handle client connection closed
         this.client.on("close", () => {

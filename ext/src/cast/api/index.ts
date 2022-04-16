@@ -5,10 +5,7 @@ import logger from "../../lib/logger";
 import { ReceiverDevice } from "../../types";
 import { ErrorCallback, SuccessCallback } from "../types";
 
-import {
-    onMessage,
-    sendMessageResponse
-} from "../eventMessageChannel";
+import { onMessage, sendMessageResponse } from "../eventMessageChannel";
 
 import {
     AutoJoinPolicy,
@@ -262,7 +259,7 @@ onMessage(message => {
 
             // TODO: Implement persistent per-origin receiver IDs
             const receiver = new Receiver(
-                status.receiverFriendlyName, //                  label
+                status.receiverId, //                            label
                 status.receiverFriendlyName, //                  friendlyName
                 [Capability.VIDEO_OUT, Capability.AUDIO_OUT], // capabilities
                 status.volume //                                 volume

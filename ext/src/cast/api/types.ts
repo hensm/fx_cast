@@ -60,6 +60,7 @@ export interface CastSessionCreatedDetails extends CastSessionUpdatedDetails {
     appId: string;
     appImages: Image[];
     displayName: string;
+    receiverId: string;
     receiverFriendlyName: string;
     senderApps: SenderApplication[];
     transportId: string;
