@@ -40,6 +40,11 @@ import { ReceiverDevice } from "./types";
 type ExtMessageDefinitions = {
     "popup:init": {
         appId?: string;
+        pageInfo?: {
+            url: string;
+            tabId: number;
+            frameId: number;
+        };
     };
     "popup:update": {
         receivers: ReceiverDevice[];

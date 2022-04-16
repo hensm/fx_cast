@@ -2,7 +2,7 @@
 
 const _ = browser.i18n.getMessage;
 
-interface KnownApp {
+export interface KnownApp {
     name: string;
     matches?: string;
 }

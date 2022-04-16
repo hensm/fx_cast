@@ -23,6 +23,12 @@ interface ReceiverSelectorEvents {
     stop: ReceiverSelectionStop;
 }
 
+export interface PageInfo {
+    url: string;
+    tabId: number;
+    frameId: number;
+}
+
 export default class ReceiverSelector extends TypedEventTarget<ReceiverSelectorEvents> {
     private windowId?: number;
 
@@ -36,6 +42,7 @@ export default class ReceiverSelector extends TypedEventTarget<ReceiverSelectorE
     private wasReceiverSelected = false;
 
     private appId?: string;
+    private pageInfo?: PageInfo;
 
     #isOpen = false;
 
@@ -65,9 +72,11 @@ export default class ReceiverSelector extends TypedEventTarget<ReceiverSelectorE
         receivers: ReceiverDevice[],
         defaultMediaType: ReceiverSelectorMediaType,
         availableMediaTypes: ReceiverSelectorMediaType,
-        appId?: string
+        appId?: string,
+        pageInfo?: PageInfo
     ): Promise<void> {
         this.appId = appId;
+        this.pageInfo = pageInfo;
 
         // If popup already exists, close it
         if (this.windowId) {
@@ -176,7 +185,7 @@ export default class ReceiverSelector extends TypedEventTarget<ReceiverSelectorE
 
         this.messagePort.postMessage({
             subject: "popup:init",
-            data: { appId: this.appId }
+            data: { appId: this.appId, pageInfo: this.pageInfo }
         });
 
         this.messagePort.postMessage({

@@ -4,17 +4,19 @@
 import React, { Component } from "react";
 import ReactDOM from "react-dom";
 
-import knownApps from "../../cast/knownApps";
+import knownApps, { KnownApp } from "../../cast/knownApps";
 import options from "../../lib/options";
 
 import messaging, { Message, Port } from "../../messaging";
 import { getNextEllipsis } from "../../lib/utils";
+import { RemoteMatchPattern } from "../../lib/matchPattern";
 import { ReceiverDevice } from "../../types";
 
 import {
     ReceiverSelectionActionType,
     ReceiverSelectorMediaType
 } from "../../background/receiverSelector";
+import { PageInfo } from "../../background/receiverSelector/ReceiverSelector";
 
 const _ = browser.i18n.getMessage;
 
@@ -37,8 +39,14 @@ interface PopupAppState {
 
     filePath?: string;
     appId?: string;
+    pageInfo?: PageInfo;
 
     mirroringEnabled: boolean;
+    userAgentWhitelistEnabled: boolean;
+    userAgentWhitelist: string[];
+
+    knownApp?: KnownApp;
+    isPageWhitelisted: boolean;
 }
 
 class PopupApp extends Component<PopupAppProps, PopupAppState> {
@@ -54,7 +62,10 @@ class PopupApp extends Component<PopupAppProps, PopupAppState> {
             mediaType: ReceiverSelectorMediaType.App,
             availableMediaTypes: ReceiverSelectorMediaType.App,
             isLoading: false,
-            mirroringEnabled: false
+            mirroringEnabled: false,
+            userAgentWhitelistEnabled: true,
+            userAgentWhitelist: [],
+            isPageWhitelisted: false
         };
 
         // Store window ref
@@ -66,6 +77,7 @@ class PopupApp extends Component<PopupAppProps, PopupAppState> {
             this.updateWindowHeight();
         }).observe(document.body);
 
+        this.onAddToWhitelist = this.onAddToWhitelist.bind(this);
         this.onSelectChange = this.onSelectChange.bind(this);
         this.onCast = this.onCast.bind(this);
         this.onStop = this.onStop.bind(this);
@@ -91,7 +103,8 @@ class PopupApp extends Component<PopupAppProps, PopupAppState> {
             switch (message.subject) {
                 case "popup:init": {
                     this.setState({
-                        appId: message.data?.appId
+                        appId: message.data?.appId,
+                        pageInfo: message.data?.pageInfo
                     });
 
                     break;
@@ -114,6 +127,8 @@ class PopupApp extends Component<PopupAppProps, PopupAppState> {
                         });
                     }
 
+                    this.updateKnownApp();
+
                     break;
                 }
 
@@ -124,15 +139,73 @@ class PopupApp extends Component<PopupAppProps, PopupAppState> {
             }
         });
 
+        const opts = await options.getAll();
+
         this.setState({
-            mirroringEnabled: await options.get("mirroringEnabled")
+            mirroringEnabled: opts.mirroringEnabled,
+            userAgentWhitelistEnabled: opts.userAgentWhitelistEnabled,
+            userAgentWhitelist: opts.userAgentWhitelist
         });
+
+        this.updateKnownApp();
     }
 
     public componentDidUpdate() {
         setTimeout(() => {
             this.updateWindowHeight();
         }, 1);
+    }
+
+    private updateKnownApp() {
+        const isAppMediaTypeAvailable = !!(
+            this.state.availableMediaTypes & ReceiverSelectorMediaType.App
+        );
+
+        let knownApp: Nullable<KnownApp> = null;
+
+        /**
+         * Check knownApps for an app with an ID matching the registered
+         * app on the target page.
+         * Or if there isn't an registered app, check for an app with a
+         * match pattern matching the target page URL.
+         */
+        if (isAppMediaTypeAvailable && this.state.appId) {
+            knownApp = knownApps[this.state.appId];
+        } else if (this.state.pageInfo) {
+            const pageUrl = this.state.pageInfo.url;
+
+            for (const [, app] of Object.entries(knownApps)) {
+                if (!app.matches) {
+                    continue;
+                }
+
+                const pattern = new RemoteMatchPattern(app.matches);
+                if (pattern.matches(pageUrl)) {
+                    knownApp = app;
+                    break;
+                }
+            }
+        }
+
+        let isPageWhitelisted = false;
+
+        /**
+         * Check if target page URL is whitelisted.
+         */
+        if (this.state.pageInfo) {
+            for (const patternString of this.state.userAgentWhitelist) {
+                const pattern = new RemoteMatchPattern(patternString);
+                if (pattern.matches(this.state.pageInfo.url)) {
+                    isPageWhitelisted = true;
+                    break;
+                }
+            }
+        }
+
+        this.setState({
+            knownApp: knownApp ?? undefined,
+            isPageWhitelisted
+        });
     }
 
     public render() {
@@ -166,9 +239,42 @@ class PopupApp extends Component<PopupAppProps, PopupAppState> {
             this.state.availableMediaTypes & ReceiverSelectorMediaType.App
         );
 
-
         return (
             <>
+                <div
+                    className="whitelist-suggest"
+                    hidden={
+                        // If we don't know the app
+                        !this.state.knownApp ||
+                        // If the whitelist is disabled
+                        !this.state.userAgentWhitelistEnabled ||
+                        // If the whitelist is enabled, and the page is whitelisted
+                        (this.state.userAgentWhitelistEnabled &&
+                            this.state.isPageWhitelisted) ||
+                        // If an app is already loaded on the page
+                        isAppMediaTypeAvailable
+                    }
+                >
+                    <img src="photon_info.svg" />
+                    {_(
+                        "popupWhitelistNotWhitelisted",
+                        this.state.knownApp?.name
+                    )}
+                    <button
+                        onClick={() => {
+                            if (!this.state.knownApp || !this.state.pageInfo) {
+                                return;
+                            }
+
+                            this.onAddToWhitelist(
+                                this.state.knownApp,
+                                this.state.pageInfo
+                            );
+                        }}
+                    >
+                        {_("popupWhitelistAddToWhitelist")}
+                    </button>
+                </div>
                 <div className="media-select">
                     <div className="media-select__label-cast">
                         {_("popupMediaSelectCastLabel")}
@@ -187,8 +293,7 @@ class PopupApp extends Component<PopupAppProps, PopupAppState> {
                                 selected={isAppMediaTypeSelected}
                                 disabled={!isAppMediaTypeAvailable}
                             >
-                                {(this.state.appId &&
-                                    knownApps[this.state.appId]?.name) ??
+                                {this.state.knownApp?.name ??
                                     _("popupMediaTypeApp")}
                             </option>
 
@@ -246,6 +351,21 @@ class PopupApp extends Component<PopupAppProps, PopupAppState> {
                 </ul>
             </>
         );
+    }
+
+    private async onAddToWhitelist(app: KnownApp, pageInfo: PageInfo) {
+        if (!app.matches) {
+            return;
+        }
+
+        const whitelist = await options.get("userAgentWhitelist");
+        if (!whitelist.includes(app.matches)) {
+            whitelist.push(app.matches);
+            await options.set("userAgentWhitelist", whitelist);
+
+            await browser.tabs.reload(pageInfo.tabId);
+            window.close();
+        }
     }
 
     private onCast(receiver: ReceiverDevice) {
