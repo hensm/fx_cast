@@ -17,7 +17,7 @@ if (!_window.chrome) {
 _window.chrome.cast = cast;
 
 let bridgeInfo: any;
-let isFramework = false;
+let frameworkScriptPromise: Promise<HTMLScriptElement>;
 
 /**
  * If loaded within a page via a <script> element,
@@ -35,11 +35,11 @@ if (document.currentScript) {
             _window.cast = {};
         }
 
-        /**
-         * Set isFramework flag to load framework once the base cast API is
-         * initialized
-         */
-        isFramework = true;
+        // Queue up the framework script load to speed up init
+         frameworkScriptPromise = loadScript(CAST_FRAMEWORK_SCRIPT_URL);
+         frameworkScriptPromise.catch(() => {
+             logger.error("Failed to load CAF script!");
+         });
     }
 }
 
@@ -48,13 +48,9 @@ onMessage(async message => {
         case "cast:initialized": {
             bridgeInfo = message.data;
 
-            // If framework API is requested, load that first
-            if (isFramework) {
-                try {
-                    await loadScript(CAST_FRAMEWORK_SCRIPT_URL);
-                } catch (err) {
-                    logger.error("Failed to load CAF script!");
-                }
+            // If framework API is requested, ensure loaded
+            if (frameworkScriptPromise) {
+                await frameworkScriptPromise;
             }
             
             // Call page script/framework API script's init function
