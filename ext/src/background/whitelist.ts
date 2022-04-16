@@ -8,7 +8,7 @@ import { getChromeUserAgent } from "../lib/userAgents";
 import {
     CAST_FRAMEWORK_LOADER_SCRIPT_URL,
     CAST_LOADER_SCRIPT_URL
-} from "../lib/endpoints";
+} from "../cast/endpoints";
 
 // Missing on @types/firefox-webext-browser
 type OnBeforeSendHeadersDetails = Parameters<

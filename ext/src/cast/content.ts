@@ -1,6 +1,6 @@
 "use strict";
 
-import { CAST_LOADER_SCRIPT_URL, CAST_SCRIPT_URLS } from "../lib/endpoints";
+import { CAST_LOADER_SCRIPT_URL, CAST_SCRIPT_URLS } from "./endpoints";
 
 const _window = window.wrappedJSObject as any;
 

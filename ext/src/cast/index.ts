@@ -3,8 +3,8 @@
 import * as cast from "./api";
 import logger from "../lib/logger";
 
-import { CAST_FRAMEWORK_SCRIPT_URL } from "../lib/endpoints";
 import { loadScript } from "../lib/utils";
+import { CAST_FRAMEWORK_SCRIPT_URL } from "./endpoints";
 import { onMessage } from "./eventMessageChannel";
 
 const _window = window as any;
@@ -36,10 +36,10 @@ if (document.currentScript) {
         }
 
         // Queue up the framework script load to speed up init
-         frameworkScriptPromise = loadScript(CAST_FRAMEWORK_SCRIPT_URL);
-         frameworkScriptPromise.catch(() => {
-             logger.error("Failed to load CAF script!");
-         });
+        frameworkScriptPromise = loadScript(CAST_FRAMEWORK_SCRIPT_URL);
+        frameworkScriptPromise.catch(() => {
+            logger.error("Failed to load CAF script!");
+        });
     }
 }
 
@@ -52,7 +52,7 @@ onMessage(async message => {
             if (frameworkScriptPromise) {
                 await frameworkScriptPromise;
             }
-            
+
             // Call page script/framework API script's init function
             const initFn = _window.__onGCastApiAvailable;
             if (initFn && typeof initFn === "function") {
