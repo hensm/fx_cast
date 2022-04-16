@@ -291,10 +291,18 @@ onMessage(message => {
             session.namespaces = status.namespaces;
             session.receiver.volume = status.volume;
 
+            /**
+             * If session created via requestSession, the success
+             * callback will be set, otherwise the session was created
+             * by the extension and the session listener should be
+             * called instead.
+             */
             if (requestSessionSuccessCallback) {
                 requestSessionSuccessCallback(session);
                 requestSessionSuccessCallback = null;
                 requestSessionErrorCallback = null;
+            } else {
+                apiConfig?.sessionListener(session);
             }
 
             break;
@@ -421,15 +429,29 @@ onMessage(message => {
             break;
         }
 
-        /**
-         * Popup closed before session established.
-         */
+        // Popup closed before session established
         case "cast:selectReceiver/cancelled": {
             if (sessionRequest) {
                 sessionRequest = null;
 
                 requestSessionErrorCallback?.(new Error_(ErrorCode.CANCEL));
             }
+
+            break;
+        }
+
+        // Session request initiated via receiver selector
+        case "cast:launchApp": {
+            if (sessionRequest) {
+                logger.error("Session request already in progress.");
+                break;
+            }
+            if (!apiConfig?.sessionRequest) {
+                logger.error("Session request not found!");
+                break;
+            }
+
+            sendSessionRequest(apiConfig.sessionRequest, message.data.receiver);
 
             break;
         }
