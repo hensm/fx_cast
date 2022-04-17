@@ -5,7 +5,6 @@ import messaging, { Port, Message } from "../../messaging";
 import options from "../../lib/options";
 
 import { TypedEventTarget } from "../../lib/TypedEventTarget";
-import { getWindowCenteredProps, WindowCenteredProps } from "../../lib/utils";
 import { ReceiverDevice } from "../../types";
 
 import {
@@ -29,6 +28,10 @@ export interface PageInfo {
     frameId: number;
 }
 
+/**
+ * Manages the receiver selector popup window and communication with the
+ * extension page hosted within.
+ */
 export default class ReceiverSelector extends TypedEventTarget<ReceiverSelectorEvents> {
     private windowId?: number;
 
@@ -49,7 +52,6 @@ export default class ReceiverSelector extends TypedEventTarget<ReceiverSelectorE
     constructor() {
         super();
 
-        // Bind methods to pass to addListener
         this.onConnect = this.onConnect.bind(this);
         this.onPopupMessage = this.onPopupMessage.bind(this);
         this.onWindowsRemoved = this.onWindowsRemoved.bind(this);
@@ -68,13 +70,16 @@ export default class ReceiverSelector extends TypedEventTarget<ReceiverSelectorE
         return this.#isOpen;
     }
 
+    /**
+     * Creates and opens a receiver selector window.
+     */
     public async open(
         receiverDevices: ReceiverDevice[],
         defaultMediaType: ReceiverSelectorMediaType,
         availableMediaTypes: ReceiverSelectorMediaType,
         appId?: string,
         pageInfo?: PageInfo
-    ): Promise<void> {
+    ) {
         this.appId = appId;
         this.pageInfo = pageInfo;
 
@@ -87,54 +92,59 @@ export default class ReceiverSelector extends TypedEventTarget<ReceiverSelectorE
         this.defaultMediaType = defaultMediaType;
         this.availableMediaTypes = availableMediaTypes;
 
-        let centeredProps: WindowCenteredProps = {
-            left: 100,
-            top: 100,
+        const popupSizePosition = {
             width: 350,
-            height: 200
+            height: 200,
+            left: 100,
+            top: 100
         };
 
-        try {
-            // Calculate centered size/position based on current window
-            centeredProps = getWindowCenteredProps(
-                await browser.windows.getCurrent(),
-                centeredProps.width,
-                centeredProps.height
+        /**
+         * Get current browser window and calculate relative centered
+         * left/top positions for the popup.
+         */
+        const refWin = await browser.windows.getCurrent();
+        if (refWin.width && refWin.height && refWin.left && refWin.top) {
+            const centerX = refWin.left + refWin.width / 2;
+            const centerY = refWin.top + refWin.height / 3;
+
+            popupSizePosition.left = Math.floor(
+                centerX - popupSizePosition.width / 2
             );
-        } catch {
-            // Shouldn't ever hit this, but defaults are provided in case
+            popupSizePosition.top = Math.floor(
+                centerY - popupSizePosition.height / 2
+            );
+        } else {
+            logger.log("Reference window missing positional properties.");
         }
 
+        // Create popup window
         const popup = await browser.windows.create({
             url: POPUP_URL,
             type: "popup",
-            ...centeredProps
+            ...popupSizePosition
         });
-
         if (popup?.id === undefined) {
             throw logger.error("Failed to create receiver selector popup.");
         }
 
+        // Size/position not set correctly on creation (bug 1396881)
+        await browser.windows.update(popup.id, {
+            ...popupSizePosition
+        });
+
         this.#isOpen = true;
         this.windowId = popup.id;
 
-        // Size/position not set correctly on creation (bug?)
-        await browser.windows.update(this.windowId, {
-            ...centeredProps
-        });
-
-        const closeIfFocusLost = await options.get(
-            "receiverSelectorCloseIfFocusLost"
-        );
-
-        if (closeIfFocusLost) {
-            // Add focus listener
+        // Add focus listener
+        if (await options.get("receiverSelectorCloseIfFocusLost")) {
             browser.windows.onFocusChanged.addListener(
                 this.onWindowsFocusChanged
             );
         }
     }
 
+    /** Updates receiver devices displayed in the receiver selector. */
     public update(receiverDevices: ReceiverDevice[]) {
         this.receiverDevices = receiverDevices;
         this.messagePort?.postMessage({
@@ -145,7 +155,8 @@ export default class ReceiverSelector extends TypedEventTarget<ReceiverSelectorE
         });
     }
 
-    public async close(): Promise<void> {
+    /** Closes the receiver selector (if open). */
+    public async close() {
         if (this.windowId) {
             await browser.windows.remove(this.windowId);
         }
@@ -158,16 +169,19 @@ export default class ReceiverSelector extends TypedEventTarget<ReceiverSelectorE
         }
     }
 
+    /**
+     * Handles incoming port connection from the extension page and
+     * sends init data.
+     */
     private onConnect(port: Port) {
+        // Keep history state clean
         browser.history.deleteUrl({ url: POPUP_URL });
 
         if (port.name !== "popup") {
             return;
         }
 
-        if (this.messagePort) {
-            this.messagePort.disconnect();
-        }
+        this.messagePort?.disconnect();
 
         this.messagePort = port;
         this.messagePort.onMessage.addListener(this.onPopupMessage);
@@ -180,7 +194,8 @@ export default class ReceiverSelector extends TypedEventTarget<ReceiverSelectorE
             this.defaultMediaType === undefined ||
             this.availableMediaTypes === undefined
         ) {
-            throw logger.error("Popup receiver data not found.");
+            logger.error("Popup receiver data not found.");
+            return;
         }
 
         this.messagePort.postMessage({
@@ -196,13 +211,9 @@ export default class ReceiverSelector extends TypedEventTarget<ReceiverSelectorE
                 availableMediaTypes: this.availableMediaTypes
             }
         });
-
-        messaging.onConnect.removeListener(this.onConnect);
     }
 
-    /**
-     * Handles popup messages.
-     */
+    /** Handles messages from the popup extension page. */
     private onPopupMessage(message: Message) {
         switch (message.subject) {
             case "receiverSelector:selected": {
