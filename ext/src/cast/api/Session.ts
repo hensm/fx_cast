@@ -24,9 +24,25 @@ import {
 
 import { Image, Receiver, SenderApplication } from "./dataClasses";
 import { SessionStatus } from "./enums";
-import { Media, LoadRequest, QueueLoadRequest, QueueItem } from "./media";
+import {
+    Media,
+    LoadRequest,
+    QueueLoadRequest,
+    QueueItem,
+    MediaCommand
+} from "./media";
 
 const NS_MEDIA = "urn:x-cast:com.google.cast.media";
+
+/** supportedMediaCommands bitflag returned in MEDIA_STATUS messages */
+enum _MediaCommand {
+    PAUSE = 1,
+    SEEK = 2,
+    STREAM_VOLUME = 4,
+    STREAM_MUTE = 8,
+    QUEUE_NEXT = 64,
+    QUEUE_PREV = 128
+}
 
 /**
  * Takes a media object and a media status object and merges
@@ -40,10 +56,34 @@ function updateMedia(media: Media, status: MediaStatus) {
 
     // Copy props
     for (const prop in status) {
-        if (prop !== "items" && status.hasOwnProperty(prop)) {
+        switch (prop) {
+            case "items":
+            case "supportedMediaCommands":
+                continue;
+        }
+
+        if (status.hasOwnProperty(prop)) {
             (media as any)[prop] = (status as any)[prop];
         }
     }
+
+    // Convert supportedMediaCommands bitflag to string array
+    const supportedMediaCommands: string[] = [];
+    if (status.supportedMediaCommands & _MediaCommand.PAUSE) {
+        supportedMediaCommands.push(MediaCommand.PAUSE);
+    } else if (status.supportedMediaCommands & _MediaCommand.SEEK) {
+        supportedMediaCommands.push(MediaCommand.SEEK);
+    } else if (status.supportedMediaCommands & _MediaCommand.STREAM_VOLUME) {
+        supportedMediaCommands.push(MediaCommand.STREAM_VOLUME);
+    } else if (status.supportedMediaCommands & _MediaCommand.STREAM_MUTE) {
+        supportedMediaCommands.push(MediaCommand.STREAM_MUTE);
+    } else if (status.supportedMediaCommands & _MediaCommand.QUEUE_NEXT) {
+        supportedMediaCommands.push("queue_next");
+    } else if (status.supportedMediaCommands & _MediaCommand.QUEUE_PREV) {
+        supportedMediaCommands.push("queue_prev");
+    }
+
+    media.supportedMediaCommands = supportedMediaCommands;
 
     // Update queue state
     if (status.items) {
