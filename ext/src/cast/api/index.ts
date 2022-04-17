@@ -282,15 +282,6 @@ onMessage(message => {
             });
 
             const status = message.data;
-
-            // TODO: Implement persistent per-origin receiver IDs
-            const receiver1 = new Receiver(
-                status.receiverId, //                            label
-                status.receiverFriendlyName, //                  friendlyName
-                [Capability.VIDEO_OUT, Capability.AUDIO_OUT], // capabilities
-                status.volume //                                 volume
-            );
-
             const receiverDevice = receiverDevices.get(status.receiverId);
             if (!receiverDevice) {
                 logger.error(
