@@ -1,6 +1,6 @@
 body {
-    background: var(--grey-10);
-    color: var(--grey-90);
+    background: var(--box-background);
+    color: var(--box-color);
     margin: initial;
     font: message-box;
     font-size: 13px;
@@ -11,10 +11,6 @@ body {
 }
 
 @media (prefers-color-scheme: dark) {
-    body {
-        background: var(--grey-80) !important;
-        color: white !important;
-    }
     .media-select,
     .receiver:not(:last-child) {
         border-bottom-color: var(--grey-50) !important;
@@ -31,7 +27,7 @@ body {
     display: flex;
     font-size: 0.9em;
     gap: 0.5em;
-    padding: 0.75em;
+    padding: 0.5em 0.75em;
 }
 .whitelist-suggest > button {
     --button-background: hsla(0, 0%, 50%, 0.3);
