@@ -35,7 +35,7 @@ export default class ReceiverSelector extends TypedEventTarget<ReceiverSelectorE
     private messagePort?: Port;
     private messagePortDisconnected?: boolean;
 
-    private receivers?: ReceiverDevice[];
+    private receiverDevices?: ReceiverDevice[];
     private defaultMediaType?: ReceiverSelectorMediaType;
     private availableMediaTypes?: ReceiverSelectorMediaType;
 
@@ -69,7 +69,7 @@ export default class ReceiverSelector extends TypedEventTarget<ReceiverSelectorE
     }
 
     public async open(
-        receivers: ReceiverDevice[],
+        receiverDevices: ReceiverDevice[],
         defaultMediaType: ReceiverSelectorMediaType,
         availableMediaTypes: ReceiverSelectorMediaType,
         appId?: string,
@@ -83,7 +83,7 @@ export default class ReceiverSelector extends TypedEventTarget<ReceiverSelectorE
             await browser.windows.remove(this.windowId);
         }
 
-        this.receivers = receivers;
+        this.receiverDevices = receiverDevices;
         this.defaultMediaType = defaultMediaType;
         this.availableMediaTypes = availableMediaTypes;
 
@@ -135,12 +135,12 @@ export default class ReceiverSelector extends TypedEventTarget<ReceiverSelectorE
         }
     }
 
-    public update(receivers: ReceiverDevice[]) {
-        this.receivers = receivers;
+    public update(receiverDevices: ReceiverDevice[]) {
+        this.receiverDevices = receiverDevices;
         this.messagePort?.postMessage({
             subject: "popup:update",
             data: {
-                receivers: this.receivers
+                receiverDevices: this.receiverDevices
             }
         });
     }
@@ -176,7 +176,7 @@ export default class ReceiverSelector extends TypedEventTarget<ReceiverSelectorE
         });
 
         if (
-            this.receivers === undefined ||
+            this.receiverDevices === undefined ||
             this.defaultMediaType === undefined ||
             this.availableMediaTypes === undefined
         ) {
@@ -191,7 +191,7 @@ export default class ReceiverSelector extends TypedEventTarget<ReceiverSelectorE
         this.messagePort.postMessage({
             subject: "popup:update",
             data: {
-                receivers: this.receivers,
+                receiverDevices: this.receiverDevices,
                 defaultMediaType: this.defaultMediaType,
                 availableMediaTypes: this.availableMediaTypes
             }
@@ -250,7 +250,7 @@ export default class ReceiverSelector extends TypedEventTarget<ReceiverSelectorE
         // Cleanup
         this.windowId = undefined;
         this.messagePort = undefined;
-        this.receivers = undefined;
+        this.receiverDevices = undefined;
         this.defaultMediaType = undefined;
         this.availableMediaTypes = undefined;
         this.wasReceiverSelected = false;

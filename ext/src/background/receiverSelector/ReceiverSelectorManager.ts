@@ -174,7 +174,7 @@ async function getSelection(
                 logger.info("Selected receiver", ev.detail);
                 resolve({
                     actionType: ReceiverSelectionActionType.Cast,
-                    receiver: ev.detail.receiver,
+                    receiverDevice: ev.detail.receiverDevice,
                     mediaType: ev.detail.mediaType,
                     filePath: ev.detail.filePath
                 });
@@ -203,11 +203,11 @@ async function getSelection(
             "stop",
             storeListener("stop", async ev => {
                 logger.info("Stopping receiver app...", ev.detail);
-                receiverDevices.stopReceiverApp(ev.detail.receiver.id);
+                receiverDevices.stopReceiverApp(ev.detail.receiverDevice.id);
 
                 resolve({
                     actionType: ReceiverSelectionActionType.Stop,
-                    receiver: ev.detail.receiver
+                    receiverDevice: ev.detail.receiverDevice
                 });
                 removeListeners();
             })

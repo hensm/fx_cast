@@ -42,7 +42,7 @@ export default async function loadSender(opts: LoadSenderOptions) {
 
             instance.contentPort.postMessage({
                 subject: "cast:launchApp",
-                data: { receiver: opts.selection.receiver }
+                data: { receiverDevice: opts.selection.receiverDevice }
             });
 
             break;
@@ -53,7 +53,7 @@ export default async function loadSender(opts: LoadSenderOptions) {
             await browser.tabs.executeScript(opts.tabId, {
                 code: stringify`
                     window.selectedMedia = ${opts.selection.mediaType};
-                    window.selectedReceiver = ${opts.selection.receiver};
+                    window.selectedReceiver = ${opts.selection.receiverDevice};
                 `,
                 frameId: opts.frameId
             });
@@ -72,7 +72,7 @@ export default async function loadSender(opts: LoadSenderOptions) {
 
             init({
                 mediaUrl: fileUrl.href,
-                receiver: opts.selection.receiver
+                receiver: opts.selection.receiverDevice
             });
 
             break;

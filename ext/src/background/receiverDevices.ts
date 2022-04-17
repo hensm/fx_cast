@@ -5,7 +5,7 @@ import logger from "../lib/logger";
 import { TypedEventTarget } from "../lib/TypedEventTarget";
 
 import { Message, Port } from "../messaging";
-import { ReceiverDevice } from "../types";
+import { ReceiverDevice, ReceiverDeviceCapabilities } from "../types";
 import { ReceiverStatus } from "../cast/api/types";
 
 interface EventMap {
@@ -84,6 +84,16 @@ export default new (class extends TypedEventTarget<EventMap> {
             case "main:receiverDeviceUp": {
                 const { deviceId, deviceInfo } = message.data;
 
+                // TODO: Add proper support for Chromecast Audio devices
+                if (
+                    !(
+                        deviceInfo.capabilities &
+                        ReceiverDeviceCapabilities.VIDEO_OUT
+                    )
+                ) {
+                    break;
+                }
+
                 this.receiverDevices.set(deviceId, deviceInfo);
                 this.dispatchEvent(
                     new CustomEvent("receiverDeviceUp", {
@@ -112,9 +122,7 @@ export default new (class extends TypedEventTarget<EventMap> {
             case "main:receiverDeviceStatusUpdated": {
                 const { deviceId, status } = message.data;
                 const receiverDevice = this.receiverDevices.get(deviceId);
-
                 if (!receiverDevice) {
-                    logger.error(`Receiver ID \`${deviceId}\` not found!`);
                     break;
                 }
 

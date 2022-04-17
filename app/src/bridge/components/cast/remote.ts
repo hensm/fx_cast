@@ -27,13 +27,15 @@ export default class Remote extends CastClient {
 
     constructor(private host: string, private options?: CastRemoteOptions) {
         super();
-        super.connect(host, {
-            onReceiverMessage: message => {
-                this.onReceiverMessage(message);
-            }
-        }).then(() => {
-            this.sendReceiverMessage({ type: "GET_STATUS" });
-        });
+        super
+            .connect(host, {
+                onReceiverMessage: message => {
+                    this.onReceiverMessage(message);
+                }
+            })
+            .then(() => {
+                this.sendReceiverMessage({ type: "GET_STATUS" });
+            });
     }
 
     disconnect() {

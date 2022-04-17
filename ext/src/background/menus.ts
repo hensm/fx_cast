@@ -137,7 +137,7 @@ browser.menus.onClicked.addListener(async (info, tab) => {
                     if (selection.mediaType === ReceiverSelectorMediaType.App) {
                         await browser.tabs.executeScript(tab.id, {
                             code: stringify`
-                                window.receiver = ${selection.receiver};
+                                window.receiver = ${selection.receiverDevice};
                                 window.mediaUrl = ${info.srcUrl};
                                 window.targetElementId = ${info.targetElementId};
                             `,

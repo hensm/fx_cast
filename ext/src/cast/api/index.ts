@@ -2,7 +2,10 @@
 
 import logger from "../../lib/logger";
 
-import { ReceiverDevice } from "../../types";
+import {
+    ReceiverDevice,
+    ReceiverDeviceCapabilities as ReceiverDeviceCapabilities
+} from "../../types";
 import { ErrorCallback, SuccessCallback } from "../types";
 
 import { onMessage, sendMessageResponse } from "../eventMessageChannel";
@@ -92,17 +95,40 @@ export const timeout = new Timeout();
 // chrome.cast.media namespace
 export * as media from "./media";
 
+/**
+ * Create `chrome.cast.Receiver` object from receiver device info.
+ */
+function createReceiver(device: ReceiverDevice) {
+    // Convert capabilities bitflag to string array
+    const capabilities: Capability[] = [];
+    if (device.capabilities & ReceiverDeviceCapabilities.VIDEO_OUT) {
+        capabilities.push(Capability.VIDEO_OUT);
+    } else if (device.capabilities & ReceiverDeviceCapabilities.VIDEO_IN) {
+        capabilities.push(Capability.VIDEO_IN);
+    } else if (device.capabilities & ReceiverDeviceCapabilities.AUDIO_OUT) {
+        capabilities.push(Capability.AUDIO_OUT);
+    } else if (device.capabilities & ReceiverDeviceCapabilities.AUDIO_IN) {
+        capabilities.push(Capability.AUDIO_IN);
+    } else if (
+        device.capabilities & ReceiverDeviceCapabilities.MULTIZONE_GROUP
+    ) {
+        capabilities.push(Capability.MULTIZONE_GROUP);
+    }
+
+    const receiver = new Receiver(device.id, device.friendlyName, capabilities);
+
+    // Currently only supports CAST receivers
+    receiver.receiverType = ReceiverType.CAST;
+
+    return receiver;
+}
+
 function sendSessionRequest(
     sessionRequest: SessionRequest,
     receiverDevice: ReceiverDevice
 ) {
     for (const listener of receiverActionListeners) {
-        const receiver = new Receiver(
-            receiverDevice.id,
-            receiverDevice.friendlyName
-        );
-
-        listener(receiver, ReceiverAction.CAST);
+        listener(createReceiver(receiverDevice), ReceiverAction.CAST);
     }
 
     sendMessageResponse({
@@ -258,11 +284,26 @@ onMessage(message => {
             const status = message.data;
 
             // TODO: Implement persistent per-origin receiver IDs
-            const receiver = new Receiver(
+            const receiver1 = new Receiver(
                 status.receiverId, //                            label
                 status.receiverFriendlyName, //                  friendlyName
                 [Capability.VIDEO_OUT, Capability.AUDIO_OUT], // capabilities
                 status.volume //                                 volume
+            );
+
+            const receiverDevice = receiverDevices.get(status.receiverId);
+            if (!receiverDevice) {
+                logger.error(
+                    `Could not find receiver device "${status.receiverFriendlyName}" (${status.receiverId})`
+                );
+                break;
+            }
+
+            const receiver = createReceiver(receiverDevice);
+            receiver.volume = status.volume;
+            receiver.displayStatus = new ReceiverDisplayStatus(
+                status.statusText,
+                status.appImages
             );
 
             const session = new Session(
@@ -401,7 +442,7 @@ onMessage(message => {
             logger.info("Selected receiver");
 
             if (sessionRequest) {
-                sendSessionRequest(sessionRequest, message.data.receiver);
+                sendSessionRequest(sessionRequest, message.data.receiverDevice);
                 sessionRequest = null;
             }
 
@@ -409,7 +450,7 @@ onMessage(message => {
         }
 
         case "cast:selectReceiver/stopped": {
-            const { receiver } = message.data;
+            const { receiverDevice } = message.data;
 
             logger.info("Stopped receiver");
 
@@ -417,12 +458,11 @@ onMessage(message => {
                 sessionRequest = null;
 
                 for (const listener of receiverActionListeners) {
-                    const castReceiver = new Receiver(
-                        receiver.id,
-                        receiver.friendlyName
+                    listener(
+                        // TODO: Use existing receiver object?
+                        createReceiver(receiverDevice),
+                        ReceiverAction.STOP
                     );
-
-                    listener(castReceiver, ReceiverAction.STOP);
                 }
             }
 
@@ -451,7 +491,10 @@ onMessage(message => {
                 break;
             }
 
-            sendSessionRequest(apiConfig.sessionRequest, message.data.receiver);
+            sendSessionRequest(
+                apiConfig.sessionRequest,
+                message.data.receiverDevice
+            );
 
             break;
         }

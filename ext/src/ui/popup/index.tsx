@@ -32,7 +32,7 @@ browser.runtime.getPlatformInfo().then(platformInfo => {
 
 interface PopupAppProps {}
 interface PopupAppState {
-    receivers: ReceiverDevice[];
+    receiverDevices: ReceiverDevice[];
     mediaType: ReceiverSelectorMediaType;
     availableMediaTypes: ReceiverSelectorMediaType;
     isLoading: boolean;
@@ -58,7 +58,7 @@ class PopupApp extends Component<PopupAppProps, PopupAppState> {
         super(props);
 
         this.state = {
-            receivers: [],
+            receiverDevices: [],
             mediaType: ReceiverSelectorMediaType.App,
             availableMediaTypes: ReceiverSelectorMediaType.App,
             isLoading: false,
@@ -111,10 +111,13 @@ class PopupApp extends Component<PopupAppProps, PopupAppState> {
                 }
 
                 case "popup:update": {
-                    const { receivers, availableMediaTypes, defaultMediaType } =
-                        message.data;
+                    const {
+                        receiverDevices: receivers,
+                        availableMediaTypes,
+                        defaultMediaType
+                    } = message.data;
 
-                    this.setState({ receivers });
+                    this.setState({ receiverDevices: receivers });
 
                     if (
                         availableMediaTypes !== undefined &&
@@ -332,10 +335,11 @@ class PopupApp extends Component<PopupAppProps, PopupAppState> {
                     </div>
                 </div>
                 <ul className="receivers">
-                    {this.state.receivers && this.state.receivers.length ? (
-                        this.state.receivers.map((receiver, i) => (
+                    {this.state.receiverDevices &&
+                    this.state.receiverDevices.length ? (
+                        this.state.receiverDevices.map((receiver, i) => (
                             <ReceiverEntry
-                                receiver={receiver}
+                                receiverDevice={receiver}
                                 onCast={this.onCast}
                                 onStop={this.onStop}
                                 isLoading={this.state.isLoading}
@@ -368,7 +372,7 @@ class PopupApp extends Component<PopupAppProps, PopupAppState> {
         }
     }
 
-    private onCast(receiver: ReceiverDevice) {
+    private onCast(receiverDevice: ReceiverDevice) {
         this.setState({
             isLoading: true
         });
@@ -376,20 +380,20 @@ class PopupApp extends Component<PopupAppProps, PopupAppState> {
         this.port?.postMessage({
             subject: "receiverSelector:selected",
             data: {
+                receiverDevice,
                 actionType: ReceiverSelectionActionType.Cast,
-                receiver,
                 mediaType: this.state.mediaType,
                 filePath: this.state.filePath
             }
         });
     }
 
-    private onStop(receiver: ReceiverDevice) {
+    private onStop(receiverDevice: ReceiverDevice) {
         this.port?.postMessage({
             subject: "receiverSelector:stop",
             data: {
-                actionType: ReceiverSelectionActionType.Stop,
-                receiver
+                receiverDevice,
+                actionType: ReceiverSelectionActionType.Stop
             }
         });
     }
@@ -427,11 +431,11 @@ class PopupApp extends Component<PopupAppProps, PopupAppState> {
 }
 
 interface ReceiverEntryProps {
-    receiver: ReceiverDevice;
+    receiverDevice: ReceiverDevice;
     isLoading: boolean;
     canCast: boolean;
-    onCast(receiver: ReceiverDevice): void;
-    onStop(receiver: ReceiverDevice): void;
+    onCast(receiverDevice: ReceiverDevice): void;
+    onStop(receiverDevice: ReceiverDevice): void;
 }
 
 interface ReceiverEntryState {
@@ -472,18 +476,18 @@ class ReceiverEntry extends Component<ReceiverEntryProps, ReceiverEntryState> {
     }
 
     public render() {
-        const { status } = this.props.receiver;
+        const { status } = this.props.receiverDevice;
         const application = status?.applications?.[0];
 
         return (
             <li className="receiver">
                 <div className="receiver__name">
-                    {this.props.receiver.friendlyName}
+                    {this.props.receiverDevice.friendlyName}
                 </div>
                 <div className="receiver__address">
                     {application && !application.isIdleScreen
                         ? application.statusText
-                        : `${this.props.receiver.host}:${this.props.receiver.port}`}
+                        : `${this.props.receiverDevice.host}:${this.props.receiverDevice.port}`}
                 </div>
                 <button
                     className="button receiver__connect"
@@ -508,7 +512,7 @@ class ReceiverEntry extends Component<ReceiverEntryProps, ReceiverEntryState> {
     }
 
     private handleCast() {
-        const { status } = this.props.receiver;
+        const { status } = this.props.receiverDevice;
         if (!status) {
             return;
         }
@@ -516,9 +520,9 @@ class ReceiverEntry extends Component<ReceiverEntryProps, ReceiverEntryState> {
         const application = status.applications?.[0];
 
         if (this.state.showAlternateAction) {
-            this.props.onStop(this.props.receiver);
+            this.props.onStop(this.props.receiverDevice);
         } else {
-            this.props.onCast(this.props.receiver);
+            this.props.onCast(this.props.receiverDevice);
 
             this.setState({
                 isLoading: true

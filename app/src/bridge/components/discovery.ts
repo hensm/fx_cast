@@ -16,6 +16,8 @@ interface CastRecord {
     md: string;
     // Friendly name (user-visible)
     fn: string;
+    // Capabilities
+    ca: string;
     // Version (?)
     ve: string;
     // Icon path (?)
@@ -23,7 +25,6 @@ interface CastRecord {
 
     cd: string;
     rm: string;
-    ca: string;
     st: string;
     bs: string;
     nf: string;
@@ -71,16 +72,18 @@ browser.on("serviceUp", service => {
 
     const record = service.txtRecord as CastRecord;
     const device: ReceiverDevice = {
+        id: record.id,
+        friendlyName: record.fn,
+        modelName: record.md,
+        capabilities: parseInt(record.ca),
         host: service.addresses[0],
-        port: service.port,
-        id: service.name,
-        friendlyName: record.fn
+        port: service.port
     };
 
     sendMessage({
         subject: "main:receiverDeviceUp",
         data: {
-            deviceId: service.name,
+            deviceId: device.id,
             deviceInfo: device
         }
     });

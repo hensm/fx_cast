@@ -17,13 +17,13 @@ export enum ReceiverSelectionActionType {
 
 export interface ReceiverSelectionCast {
     actionType: ReceiverSelectionActionType.Cast;
-    receiver: ReceiverDevice;
+    receiverDevice: ReceiverDevice;
     mediaType: ReceiverSelectorMediaType;
     filePath?: string;
 }
 export interface ReceiverSelectionStop {
     actionType: ReceiverSelectionActionType.Stop;
-    receiver: ReceiverDevice;
+    receiverDevice: ReceiverDevice;
 }
 
 export type ReceiverSelection = ReceiverSelectionCast | ReceiverSelectionStop;

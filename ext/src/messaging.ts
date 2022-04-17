@@ -47,7 +47,7 @@ type ExtMessageDefinitions = {
         };
     };
     "popup:update": {
-        receivers: ReceiverDevice[];
+        receiverDevices: ReceiverDevice[];
         defaultMediaType?: ReceiverSelectorMediaType;
         availableMediaTypes?: ReceiverSelectorMediaType;
     };
@@ -68,7 +68,7 @@ type ExtMessageDefinitions = {
 
     "cast:receiverDeviceUp": { receiverDevice: ReceiverDevice };
     "cast:receiverDeviceDown": { receiverDeviceId: ReceiverDevice["id"] };
-    "cast:launchApp": { receiver: ReceiverDevice };
+    "cast:launchApp": { receiverDevice: ReceiverDevice };
 };
 
 /**
