@@ -20,7 +20,7 @@ export default {
     "CC32E753": { name: "Spotify", matches: "https://open.spotify.com/*" },
     "5E81F6DB": {
         name: "BBC iPlayer",
-        matches: "https://www.bbc.co.uk/iplayer/*"
+        matches: "https://www.bbc.co.uk/iplayer*"
     },
     "03977A48": {
         name: "BBC Sounds",
