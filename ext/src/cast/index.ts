@@ -31,10 +31,6 @@ if (document.currentScript) {
 
     // Load Framework API if requested
     if (currentScriptParams.get("loadCastFramework") === "1") {
-        if (!_window.cast) {
-            _window.cast = {};
-        }
-
         // Queue up the framework script load to speed up init
         frameworkScriptPromise = loadScript(CAST_FRAMEWORK_SCRIPT_URL);
         frameworkScriptPromise.catch(() => {
