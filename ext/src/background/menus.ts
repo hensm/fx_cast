@@ -6,6 +6,7 @@ import options from "../lib/options";
 import { stringify } from "../lib/utils";
 
 import {
+    ReceiverSelection,
     ReceiverSelectionActionType,
     ReceiverSelectorMediaType
 } from "./receiverSelector";
@@ -25,12 +26,14 @@ const URL_PATTERNS_ALL = [...URL_PATTERNS_REMOTE, URL_PATTERN_FILE];
 type MenuId = string | number;
 
 let menuIdCast: MenuId;
-let menuIdMediaCast: MenuId;
+let menuIdCastMedia: MenuId;
 let menuIdWhitelist: MenuId;
 let menuIdWhitelistRecommended: MenuId;
 
+/** Match patterns for the whitelist option menus. */
 const whitelistChildMenuPatterns = new Map<MenuId, string>();
 
+/** Handles initial menu setup. */
 export async function initMenus() {
     logger.info("init (menus)");
 
@@ -43,7 +46,7 @@ export async function initMenus() {
     });
 
     // <video>/<audio> "Cast..." context menu item
-    menuIdMediaCast = browser.menus.create({
+    menuIdCastMedia = browser.menus.create({
         contexts: ["audio", "video", "image"],
         title: _("contextCast"),
         visible: opts.mediaEnabled,
@@ -67,9 +70,47 @@ export async function initMenus() {
         type: "separator",
         parentId: menuIdWhitelist
     });
+
+    browser.menus.onShown.addListener(onMenuShown);
+    browser.menus.onClicked.addListener(onMenuClicked);
+
+    options.addEventListener("changed", async ev => {
+        const alteredOpts = ev.detail;
+        const newOpts = await options.getAll();
+
+        if (menuIdCastMedia && alteredOpts.includes("mediaEnabled")) {
+            browser.menus.update(menuIdCastMedia, {
+                visible: newOpts.mediaEnabled
+            });
+        }
+
+        if (menuIdCastMedia && alteredOpts.includes("localMediaEnabled")) {
+            browser.menus.update(menuIdCastMedia, {
+                targetUrlPatterns: newOpts.localMediaEnabled
+                    ? URL_PATTERNS_ALL
+                    : URL_PATTERNS_REMOTE
+            });
+        }
+    });
 }
 
-browser.menus.onClicked.addListener(async (info, tab) => {
+/** Handle updating menus when shown. */
+async function onMenuShown(info: browser.menus._OnShownInfo) {
+    const menuIds = info.menuIds as unknown as number[];
+
+    // Only rebuild menus if whitelist menu present
+    if (menuIds.includes(menuIdWhitelist as number)) {
+        updateWhitelistMenu(info.pageUrl);
+        return;
+    }
+}
+
+/** Handle menu click events */
+async function onMenuClicked(
+    info: browser.menus.OnClickData,
+    tab?: browser.tabs.Tab
+) {
+    // Handle whitelist menus
     if (info.parentMenuItemId === menuIdWhitelist) {
         const pattern = whitelistChildMenuPatterns.get(info.menuItemId);
         if (!pattern) {
@@ -88,113 +129,81 @@ browser.menus.onClicked.addListener(async (info, tab) => {
         return;
     }
 
-    if (tab?.id === undefined) {
-        throw logger.error("Menu handler tab ID not found.");
-    }
-    if (!info.pageUrl) {
-        throw logger.error("Menu handler page URL not found.");
-    }
+    // Handle cast menus
+    const castMenuClicked = info.menuItemId === menuIdCast;
+    const castMediaMenuClicked = info.menuItemId === menuIdCastMedia;
+    if (castMenuClicked || castMediaMenuClicked) {
+        if (tab?.id === undefined) {
+            throw logger.error("Menu handler tab ID not found.");
+        }
+        if (!info.pageUrl) {
+            throw logger.error("Menu handler page URL not found.");
+        }
 
-    switch (info.menuItemId) {
-        case menuIdCast: {
-            const selection = await ReceiverSelectorManager.getSelection(
+        let selection: Nullable<ReceiverSelection> = null;
+        try {
+            selection = await ReceiverSelectorManager.getSelection(
                 tab.id,
-                info.frameId
+                info.frameId,
+                { withMediaSender: castMediaMenuClicked }
             );
+        } catch (err) {
+            logger.error("Failed to get receiver selection (cast menu)", err);
+            return;
+        }
+        // Invalid selection result
+        if (
+            !selection ||
+            selection.actionType !== ReceiverSelectionActionType.Cast
+        ) {
+            return;
+        }
 
-            // Selection cancelled
-            if (!selection) {
-                break;
-            }
-
+        if (castMenuClicked) {
             CastManager.loadSender({
                 tabId: tab.id,
                 frameId: info.frameId,
                 selection
             });
+        } else if (castMediaMenuClicked) {
+            /**
+             * If the selected media type is App, that refers to
+             * the media sender in this context, so load media
+             * sender.
+             */
+            if (selection.mediaType === ReceiverSelectorMediaType.App) {
+                await browser.tabs.executeScript(tab.id, {
+                    code: stringify`
+                            window.receiver = ${selection.receiverDevice};
+                            window.mediaUrl = ${info.srcUrl};
+                            window.targetElementId = ${info.targetElementId};
+                        `,
+                    frameId: info.frameId
+                });
 
-            break;
-        }
-
-        case menuIdMediaCast: {
-            const selection = await ReceiverSelectorManager.getSelection(
-                tab.id,
-                info.frameId,
-                true
-            );
-
-            // Selection cancelled
-            if (!selection) {
-                break;
+                await browser.tabs.executeScript(tab.id, {
+                    file: "cast/senders/media/index.js",
+                    frameId: info.frameId
+                });
+            } else {
+                // Handle other responses
+                CastManager.loadSender({
+                    tabId: tab.id,
+                    frameId: info.frameId,
+                    selection
+                });
             }
-
-            switch (selection.actionType) {
-                case ReceiverSelectionActionType.Cast: {
-                    /**
-                     * If the selected media type is App, that refers to the
-                     * media sender in this context, so load media sender.
-                     */
-                    if (selection.mediaType === ReceiverSelectorMediaType.App) {
-                        await browser.tabs.executeScript(tab.id, {
-                            code: stringify`
-                                window.receiver = ${selection.receiverDevice};
-                                window.mediaUrl = ${info.srcUrl};
-                                window.targetElementId = ${info.targetElementId};
-                            `,
-                            frameId: info.frameId
-                        });
-
-                        await browser.tabs.executeScript(tab.id, {
-                            file: "cast/senders/media/index.js",
-                            frameId: info.frameId
-                        });
-                    } else {
-                        // Handle other responses
-                        CastManager.loadSender({
-                            tabId: tab.id,
-                            frameId: info.frameId,
-                            selection
-                        });
-                    }
-
-                    break;
-                }
-            }
-
-            break;
         }
     }
-});
+}
 
-// Hide cast item on extension pages
-browser.menus.onShown.addListener(info => {
-    if (info.pageUrl?.startsWith(browser.runtime.getURL(""))) {
-        browser.menus.update(menuIdCast, {
-            visible: false
-        });
-
-        browser.menus.refresh();
-    }
-});
-browser.menus.onHidden.addListener(() => {
-    browser.menus.update(menuIdCast, {
-        visible: true
-    });
-});
-
-browser.menus.onShown.addListener(async info => {
-    // Only rebuild menus if whitelist menu present
-    // WebExt typings are broken again here, so ugly casting
-    const menuIds = info.menuIds as unknown as number[];
-    if (!menuIds.includes(menuIdWhitelist as number)) {
-        return;
-    }
-
+/** Handles updating the whitelist menus for a given URL */
+async function updateWhitelistMenu(pageUrl?: string) {
     /**
-     * If page URL doesn't exist, we're not on a page and have
-     * nothing to whitelist, so disable the menu and return.
+     * If page URL doesn't exist, we're not on a page and have nothing
+     * to whitelist, so disable the menu and return.
      */
-    if (!info.pageUrl) {
+    if (!pageUrl) {
         browser.menus.update(menuIdWhitelist, {
             enabled: false
         });
@@ -203,7 +212,7 @@ browser.menus.onShown.addListener(async info => {
         return;
     }
 
-    const url = new URL(info.pageUrl);
+    const url = new URL(pageUrl);
     const urlHasOrigin = url.origin !== "null";
 
     /**
@@ -331,23 +340,4 @@ browser.menus.onShown.addListener(async info => {
     );
 
     await browser.menus.refresh();
-});
-
-options.addEventListener("changed", async ev => {
-    const alteredOpts = ev.detail;
-    const newOpts = await options.getAll();
-
-    if (menuIdMediaCast && alteredOpts.includes("mediaEnabled")) {
-        browser.menus.update(menuIdMediaCast, {
-            visible: newOpts.mediaEnabled
-        });
-    }
-
-    if (menuIdMediaCast && alteredOpts.includes("localMediaEnabled")) {
-        browser.menus.update(menuIdMediaCast, {
-            targetUrlPatterns: newOpts.localMediaEnabled
-                ? URL_PATTERNS_ALL
-                : URL_PATTERNS_REMOTE
-        });
-    }
-});
+}

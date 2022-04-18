@@ -35,8 +35,8 @@ async function getSelector() {
 }
 
 /**
- * Opens a receiver selector with the specified
- * default/available media types.
+ * Opens a receiver selector with the specified default/available media
+ * types.
  *
  * Returns a promise that:
  *   - Resolves to a ReceiverSelection object if selection is
@@ -47,7 +47,7 @@ async function getSelector() {
 async function getSelection(
     contextTabId: number,
     contextFrameId = 0,
-    withMediaSender = false
+    selectionOpts?: { withMediaSender?: boolean }
 ): Promise<ReceiverSelection | null> {
     return new Promise(async (resolve, reject) => {
         let castInstance = CastManager.getInstance(
@@ -84,7 +84,7 @@ async function getSelection(
         }
 
         // Enable app media type if initialized sender app is found
-        if (castInstance || withMediaSender) {
+        if (castInstance || selectionOpts?.withMediaSender) {
             defaultMediaType = ReceiverSelectorMediaType.App;
             availableMediaTypes |= ReceiverSelectorMediaType.App;
         }
@@ -193,8 +193,8 @@ async function getSelection(
 
         sharedSelector.addEventListener(
             "error",
-            storeListener("error", () => {
-                reject();
+            storeListener("error", ev => {
+                reject(ev.detail);
                 removeListeners();
             })
         );

@@ -25,10 +25,7 @@ export interface CastInstance {
     appId?: string;
 }
 
-/**
- * Keeps track of cast API instances and provides bridge
- * messaging.
- */
+/** Keeps track of cast API instances and provides bridge messaging. */
 export default new (class CastManager {
     private activeInstances = new Set<CastInstance>();
 
@@ -60,8 +57,7 @@ export default new (class CastManager {
     }
 
     /**
-     * Finds a cast instance at the given tab (and optionally
-     * frame) ID.
+     * Finds a cast instance at the given tab (and optionally frame) ID.
      */
     public getInstance(tabId: number, frameId?: number) {
         for (const instance of this.activeInstances) {
@@ -77,8 +73,8 @@ export default new (class CastManager {
     }
 
     /**
-     * Creates a cast instance with a given port and connects
-     * messaging correctly depending on the type of port.
+     * Creates a cast instance with a given port and connects messaging
+     * correctly depending on the type of port.
      */
     public async createInstance(port: AnyPort) {
         const instance = await (port instanceof MessagePort
@@ -95,9 +91,7 @@ export default new (class CastManager {
         return instance;
     }
 
-    /**
-     * Creates a cast instance with a `MessagePort` content port.
-     */
+    /** Creates a cast instance with a `MessagePort` content port. */
     private async createInstanceFromBackground(
         contentPort: MessagePort
     ): Promise<CastInstance> {
@@ -125,8 +119,7 @@ export default new (class CastManager {
     }
 
     /**
-     * Creates a cast instance with a WebExtension `Port` content
-     * port.
+     * Creates a cast instance with a WebExtension `Port` content port.
      */
     private async createInstanceFromContent(
         contentPort: Port
@@ -191,9 +184,9 @@ export default new (class CastManager {
     }
 
     /**
-     * Handle content messages from the cast instance. These will
-     * either be handled here in the background script or forwarded
-     * to the bridge associated with the cast instance.
+     * Handle content messages from the cast instance. These will either
+     * be handled here in the background script or forwarded to the
+     * bridge associated with the cast instance.
      */
     private async handleContentMessage(
         instance: CastInstance,
@@ -249,9 +242,10 @@ export default new (class CastManager {
                     switch (selection.actionType) {
                         case ReceiverSelectionActionType.Cast: {
                             /**
-                             * If the media type returned from the selector has
-                             * been changed, we need to cancel the current
-                             * sender and switch it out for the right one.
+                             * If the media type returned from the
+                             * selector has been changed, we need to
+                             * cancel the current sender and switch it
+                             * out for the right one.
                              */
                             if (
                                 selection.mediaType !==
@@ -298,8 +292,8 @@ export default new (class CastManager {
             }
 
             /**
-             * TODO: If we're closing a selector, make sure it's the same
-             * one that caused the session creation.
+             * TODO: If we're closing a selector, make sure it's the
+             * same one that caused the session creation.
              */
             case "main:closeReceiverSelector": {
                 const selector = await ReceiverSelectorManager.getSelector();
@@ -317,8 +311,8 @@ export default new (class CastManager {
     }
 
     /**
-     * Loads the appropriate sender for a given receiver
-     * selector response.
+     * Loads the appropriate sender for a given receiver selector
+     * response.
      */
     public async loadSender(opts: {
         tabId: number;

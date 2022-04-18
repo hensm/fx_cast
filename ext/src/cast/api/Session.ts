@@ -45,9 +45,8 @@ enum _MediaCommand {
 }
 
 /**
- * Takes a media object and a media status object and merges
- * the status with the existing media object, updating it with
- * new properties.
+ * Takes a media object and a media status object and merges the status
+ * with the existing media object, updating it with new properties.
  */
 function updateMedia(media: Media, status: MediaStatus) {
     if (status.currentTime) {
@@ -179,7 +178,7 @@ export default class Session {
 
     /**
      * Sends a media message to the app receiver.
-     * urn:x-cast:com.google.cast.media
+     * `urn:x-cast:com.google.cast.media`
      */
     #sendMediaMessage = (
         message: DistributiveOmit<SenderMediaMessage, "requestId">

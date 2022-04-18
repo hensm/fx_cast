@@ -194,7 +194,11 @@ export default class ReceiverSelector extends TypedEventTarget<ReceiverSelectorE
             this.defaultMediaType === undefined ||
             this.availableMediaTypes === undefined
         ) {
-            logger.error("Popup receiver data not found.");
+            this.dispatchEvent(
+                new CustomEvent("error", {
+                    detail: "Popup receiver data not found."
+                })
+            );
             return;
         }
 

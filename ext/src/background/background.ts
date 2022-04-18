@@ -16,8 +16,8 @@ const _ = browser.i18n.getMessage;
 
 /**
  * On install, set the default options before initializing the
- * extension. On update, handle any unset values and set to
- * the new defaults.
+ * extension. On update, handle any unset values and set to the new
+ * defaults.
  */
 browser.runtime.onInstalled.addListener(async details => {
     switch (details.reason) {
@@ -39,9 +39,9 @@ browser.runtime.onInstalled.addListener(async details => {
 });
 
 /**
- * Checks whether the bridge can be reached and is compatible
- * with the current version of the extension. If not, triggers
- * a notification with the appropriate info.
+ * Checks whether the bridge can be reached and is compatible with the
+ * current version of the extension. If not, triggers a notification
+ * with the appropriate info.
  */
 async function notifyBridgeCompat() {
     logger.info("checking for bridge...");
@@ -89,9 +89,8 @@ async function init() {
     }
 
     /**
-     * If options haven't been set yet, we can't properly
-     * initialize, so wait until init is called again in the
-     * onInstalled listener.
+     * If options haven't been set yet, we can't properly initialize,
+     * so wait until init is called again in the onInstalled listener.
      */
     if (!(await options.getAll())) {
         return;
@@ -109,9 +108,9 @@ async function init() {
     await initWhitelist();
 
     /**
-     * When the browser action is clicked, open a receiver
-     * selector and load a sender for the response. The
-     * mirroring sender is loaded into the current tab at the
+     * When the browser action is clicked, open a receiver selector and
+     * load a sender for the response. The mirroring sender is loaded
+     * into the current tab at the
      * top-level frame.
      */
     browser.browserAction.onClicked.addListener(async tab => {
