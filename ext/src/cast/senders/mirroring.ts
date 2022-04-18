@@ -1,10 +1,10 @@
 "use strict";
 
-import options from "../lib/options";
-import cast, { ensureInit } from "../cast/export";
+import options from "../../lib/options";
+import cast, { ensureInit } from "../export";
 
-import { ReceiverSelectorMediaType } from "../background/receiverSelector";
-import { ReceiverDevice } from "../types";
+import { ReceiverSelectorMediaType } from "../../background/receiverSelector";
+import { ReceiverDevice } from "../../types";
 
 // Variables passed from background
 const {

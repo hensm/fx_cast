@@ -72,14 +72,14 @@ const buildOpts = {
     entryPoints: [
         // Main
         `${srcPath}/background/background.ts`,
-        // Media sender
-        `${srcPath}/senders/media/index.ts`,
-        // Mirroring sender
-        `${srcPath}/senders/mirroring.ts`,
         // Cast
         `${srcPath}/cast/index.ts`,
         `${srcPath}/cast/content.ts`,
         `${srcPath}/cast/contentBridge.ts`,
+        // Media sender
+        `${srcPath}/cast/senders/media/index.ts`,
+        // Mirroring sender
+        `${srcPath}/cast/senders/mirroring.ts`,
         // UI
         `${srcPath}/ui/popup/index.tsx`,
         `${srcPath}/ui/options/index.tsx`

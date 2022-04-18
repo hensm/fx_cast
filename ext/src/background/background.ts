@@ -1,12 +1,9 @@
 "use strict";
 
 import defaultOptions from "../defaultOptions";
-import loadSender from "../lib/loadSender";
 import logger from "../lib/logger";
 import options from "../lib/options";
 import bridge, { BridgeInfo } from "../lib/bridge";
-
-import { RemoteMatchPattern } from "../lib/matchPattern";
 
 import CastManager from "../cast/CastManager";
 import receiverDevices from "./receiverDevices";
@@ -119,12 +116,13 @@ async function init() {
      */
     browser.browserAction.onClicked.addListener(async tab => {
         if (tab.id === undefined) {
-            throw logger.error("Tab ID not found in browser action handler.");
+            logger.error("Tab ID not found in browser action handler.");
+            return;
         }
 
         const selection = await ReceiverSelectorManager.getSelection(tab.id);
         if (selection) {
-            loadSender({
+            CastManager.loadSender({
                 tabId: tab.id,
                 frameId: 0,
                 selection

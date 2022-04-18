@@ -1,18 +1,18 @@
 "use strict";
 
 import bridge from "../lib/bridge";
-import loadSender from "../lib/loadSender";
 import logger from "../lib/logger";
 import messaging, { Message, Port } from "../messaging";
 import options from "../lib/options";
+import { stringify } from "../lib/utils";
 
 import {
+    ReceiverSelection,
     ReceiverSelectionActionType,
     ReceiverSelectorMediaType
 } from "../background/receiverSelector";
 
 import ReceiverSelectorManager from "../background/receiverSelector/ReceiverSelectorManager";
-
 import receiverDevices from "../background/receiverDevices";
 
 type AnyPort = Port | MessagePort;
@@ -261,7 +261,7 @@ export default new (class CastManager {
                                     subject: "cast:selectReceiver/cancelled"
                                 });
 
-                                loadSender({
+                                this.loadSender({
                                     tabId: instance.contentTabId,
                                     frameId: instance.contentFrameId,
                                     selection
@@ -310,6 +310,73 @@ export default new (class CastManager {
                 if (selector.isOpen && shouldClose) {
                     selector.close();
                 }
+
+                break;
+            }
+        }
+    }
+
+    /**
+     * Loads the appropriate sender for a given receiver
+     * selector response.
+     */
+    public async loadSender(opts: {
+        tabId: number;
+        frameId?: number;
+        selection: ReceiverSelection;
+    }) {
+        // Cancelled
+        if (!opts.selection) {
+            return;
+        }
+
+        if (opts.selection.actionType !== ReceiverSelectionActionType.Cast) {
+            return;
+        }
+
+        switch (opts.selection.mediaType) {
+            case ReceiverSelectorMediaType.App: {
+                const instance = this.getInstance(opts.tabId, opts.frameId);
+                if (!instance) {
+                    throw logger.error(
+                        `Cast instance not found at tabId ${opts.tabId} / frameId ${opts.frameId}`
+                    );
+                }
+
+                instance.contentPort.postMessage({
+                    subject: "cast:launchApp",
+                    data: { receiverDevice: opts.selection.receiverDevice }
+                });
+
+                break;
+            }
+
+            case ReceiverSelectorMediaType.Tab:
+            case ReceiverSelectorMediaType.Screen: {
+                await browser.tabs.executeScript(opts.tabId, {
+                    code: stringify`
+                        window.selectedMedia = ${opts.selection.mediaType};
+                        window.selectedReceiver = ${opts.selection.receiverDevice};
+                    `,
+                    frameId: opts.frameId
+                });
+
+                await browser.tabs.executeScript(opts.tabId, {
+                    file: "cast/senders/mirroring.js",
+                    frameId: opts.frameId
+                });
+
+                break;
+            }
+
+            case ReceiverSelectorMediaType.File: {
+                const fileUrl = new URL(`file://${opts.selection.filePath}`);
+                const { init } = await import("./senders/media");
+
+                init({
+                    mediaUrl: fileUrl.href,
+                    receiver: opts.selection.receiverDevice
+                });
 
                 break;
             }

@@ -1,6 +1,5 @@
 "use strict";
 
-import loadSender from "../lib/loadSender";
 import logger from "../lib/logger";
 import options from "../lib/options";
 
@@ -12,6 +11,7 @@ import {
 } from "./receiverSelector";
 
 import ReceiverSelectorManager from "./receiverSelector/ReceiverSelectorManager";
+import CastManager from "../cast/CastManager";
 
 const _ = browser.i18n.getMessage;
 
@@ -107,7 +107,7 @@ browser.menus.onClicked.addListener(async (info, tab) => {
                 break;
             }
 
-            loadSender({
+            CastManager.loadSender({
                 tabId: tab.id,
                 frameId: info.frameId,
                 selection
@@ -145,12 +145,12 @@ browser.menus.onClicked.addListener(async (info, tab) => {
                         });
 
                         await browser.tabs.executeScript(tab.id, {
-                            file: "senders/media/index.js",
+                            file: "cast/senders/media/index.js",
                             frameId: info.frameId
                         });
                     } else {
                         // Handle other responses
-                        loadSender({
+                        CastManager.loadSender({
                             tabId: tab.id,
                             frameId: info.frameId,
                             selection
