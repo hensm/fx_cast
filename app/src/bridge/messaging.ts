@@ -169,7 +169,7 @@ type MessageDefinitions = {
      * Sent to media sender from bridge when the media server has
      * encountered an error.
      */
-    "mediaCast:mediaServerError": {};
+    "mediaCast:mediaServerError": string;
 };
 
 interface MessageBase<K extends keyof MessageDefinitions> {

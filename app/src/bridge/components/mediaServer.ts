@@ -15,7 +15,7 @@ export let mediaServer: http.Server | undefined;
 
 export async function startMediaServer(filePath: string, port: number) {
     if (mediaServer?.listening) {
-        stopMediaServer();
+        await stopMediaServer();
     }
 
     let fileDir: string;
@@ -30,17 +30,17 @@ export async function startMediaServer(filePath: string, port: number) {
             fileName = path.basename(filePath);
             fileSize = stat.size;
         } else {
-            console.error("Error: Media path is not a file.");
             sendMessage({
-                subject: "mediaCast:mediaServerError"
+                subject: "mediaCast:mediaServerError",
+                data: "Media path is not a file."
             });
 
             return;
         }
     } catch (err) {
-        console.error("Error: Failed to find media path.");
         sendMessage({
-            subject: "mediaCast:mediaServerError"
+            subject: "mediaCast:mediaServerError",
+            data: "Failed to find media path."
         });
 
         return;
@@ -48,9 +48,9 @@ export async function startMediaServer(filePath: string, port: number) {
 
     const contentType = mime.lookup(filePath);
     if (!contentType) {
-        console.error("Error: Failed to find media type.");
         sendMessage({
-            subject: "mediaCast:mediaServerError"
+            subject: "mediaCast:mediaServerError",
+            data: "Failed to find media type."
         });
 
         return;
@@ -78,7 +78,7 @@ export async function startMediaServer(filePath: string, port: number) {
             }
         }
     } catch (err) {
-        // TODO: Handle?
+        console.error(`Error: Failed to find/convert subtitles (${filePath}).`);
     }
 
     mediaServer = http.createServer(async (req, res) => {
@@ -86,12 +86,13 @@ export async function startMediaServer(filePath: string, port: number) {
             return;
         }
 
+        let decodedUrl = decodeURIComponent(req.url);
         // Drop leading slash
-        if (req.url.startsWith("/")) {
-            req.url = req.url.slice(1);
+        if (decodedUrl.startsWith("/")) {
+            decodedUrl = decodedUrl.slice(1);
         }
 
-        switch (req.url) {
+        switch (decodedUrl) {
             case fileName: {
                 const { range } = req.headers;
 
@@ -135,22 +136,33 @@ export async function startMediaServer(filePath: string, port: number) {
         }
     });
 
-    mediaServer.on("listening", () => {
-        let localAddress = "";
-        const ifaces = Object.values(os.networkInterfaces());
-        for (const iface of ifaces) {
+    mediaServer.on("close", () => {
+        sendMessage({
+            subject: "mediaCast:mediaServerStopped"
+        });
+    });
+    mediaServer.on("error", err => {
+        sendMessage({
+            subject: "mediaCast:mediaServerError",
+            data: err.message
+        });
+    });
+
+    mediaServer.listen(port, () => {
+        const localAddresses: string[] = [];
+        for (const iface of Object.values(os.networkInterfaces())) {
             const matchingIface = iface?.find(
                 details => details.family === "IPv4" && !details.internal
             );
             if (matchingIface) {
-                localAddress = matchingIface.address;
+                localAddresses.push(matchingIface.address);
             }
         }
 
-        if (!localAddress) {
-            console.error("Failed to get local address.");
+        if (!localAddresses.length) {
             sendMessage({
-                subject: "mediaCast:mediaServerError"
+                subject: "mediaCast:mediaServerError",
+                data: "Failed to get local address."
             });
             stopMediaServer();
             return;
@@ -161,28 +173,24 @@ export async function startMediaServer(filePath: string, port: number) {
             data: {
                 mediaPath: fileName,
                 subtitlePaths: Array.from(subtitles.keys()),
-                localAddress
+                localAddress: localAddresses[0]
             }
         });
     });
-
-    mediaServer.on("close", () =>
-        sendMessage({
-            subject: "mediaCast:mediaServerStopped"
-        })
-    );
-    mediaServer.on("error", () =>
-        sendMessage({
-            subject: "mediaCast:mediaServerError"
-        })
-    );
-
-    mediaServer.listen(port);
 }
 
 export function stopMediaServer() {
-    if (mediaServer?.listening) {
-        mediaServer.close();
-        mediaServer = undefined;
-    }
+    return new Promise<void>((resolve, reject) => {
+        if (mediaServer?.listening) {
+            mediaServer.close(err => {
+                if (err) {
+                    reject();
+                }
+
+                resolve();
+            });
+
+            mediaServer = undefined;
+        }
+    });
 }

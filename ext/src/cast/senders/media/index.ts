@@ -37,7 +37,7 @@ function startMediaServer(
                     break;
                 }
                 case "mediaCast:mediaServerError": {
-                    reject();
+                    reject(message.data);
                     break;
                 }
             }
@@ -100,9 +100,8 @@ function getSession(opts: InitOptions): Promise<cast.Session> {
 function getMedia(opts: InitOptions): Promise<cast.media.Media> {
     return new Promise(async (resolve, reject) => {
         let mediaUrl = new URL(opts.mediaUrl);
-        let subtitleUrls: URL[] = [];
-
         const mediaTitle = mediaUrl.pathname.slice(1);
+        const subtitleUrls: URL[] = [];
 
         /**
          * If the media is a local file, start an HTTP media server
@@ -118,11 +117,13 @@ function getMedia(opts: InitOptions): Promise<cast.media.Media> {
 
                 const baseUrl = new URL(`http://${localAddress}:${port}/`);
                 mediaUrl = new URL(mediaPath, baseUrl);
-                subtitleUrls = subtitlePaths.map(
-                    path => new URL(path, baseUrl)
+                subtitleUrls.push(
+                    ...subtitlePaths.map(path => new URL(path, baseUrl))
                 );
+
+                console.info(mediaUrl);
             } catch (err) {
-                throw logger.error("Failed to start media server");
+                throw logger.error("Failed to start media server", err);
             }
         }
 
@@ -340,6 +341,14 @@ interface InitOptions {
 
 export async function init(opts: InitOptions) {
     backgroundPort = await ensureInit();
+
+    backgroundPort.addEventListener("message", ev => {
+        const message = ev.data as Message;
+        switch (message.subject) {
+            case "mediaCast:mediaServerError":
+                logger.error("Media server error", message.data);
+        }
+    });
 
     const isLocalMedia = opts.mediaUrl.startsWith("file://");
     const isLocalMediaEnabled = await options.get("localMediaEnabled");

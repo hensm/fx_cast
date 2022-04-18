@@ -150,8 +150,6 @@ export default class Session {
                             media.mediaSessionId === mediaStatus.mediaSessionId
                     );
 
-                    console.info(media);
-
                     // Handle Media creation
                     if (!media) {
                         media = new Media(

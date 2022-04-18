@@ -228,7 +228,7 @@ type AppMessageDefinitions = {
      * Sent to media sender from bridge when the media server has
      * encountered an error.
      */
-    "mediaCast:mediaServerError": {};
+    "mediaCast:mediaServerError": string;
 };
 
 type MessageDefinitions = ExtMessageDefinitions & AppMessageDefinitions;
