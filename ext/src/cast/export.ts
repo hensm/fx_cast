@@ -45,9 +45,7 @@ export function ensureInit(): Promise<TypedMessagePort<Message>> {
          * URL.
          */
         if (window.location.protocol === "moz-extension:") {
-            const { default: CastManager } = await import(
-                "../background/CastManager"
-            );
+            const { default: CastManager } = await import("./CastManager");
 
             // port2 will post bridge messages to port 1
             await CastManager.init();

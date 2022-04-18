@@ -8,7 +8,7 @@ import bridge, { BridgeInfo } from "../lib/bridge";
 
 import { RemoteMatchPattern } from "../lib/matchPattern";
 
-import CastManager from "./CastManager";
+import CastManager from "../cast/CastManager";
 import receiverDevices from "./receiverDevices";
 import ReceiverSelectorManager from "./receiverSelector/ReceiverSelectorManager";
 

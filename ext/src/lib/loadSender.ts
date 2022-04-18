@@ -9,7 +9,7 @@ import {
     ReceiverSelectorMediaType
 } from "../background/receiverSelector";
 
-import CastManager from "../background/CastManager";
+import CastManager from "../cast/CastManager";
 
 interface LoadSenderOptions {
     tabId: number;

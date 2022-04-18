@@ -3,7 +3,7 @@
 import options from "../../lib/options";
 import logger from "../../lib/logger";
 
-import CastManager from "../CastManager";
+import CastManager from "../../cast/CastManager";
 import receiverDevices from "../receiverDevices";
 
 import { getMediaTypesForPageUrl } from "../../lib/utils";

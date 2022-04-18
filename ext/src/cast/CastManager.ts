@@ -9,11 +9,11 @@ import options from "../lib/options";
 import {
     ReceiverSelectionActionType,
     ReceiverSelectorMediaType
-} from "./receiverSelector";
+} from "../background/receiverSelector";
 
-import ReceiverSelectorManager from "./receiverSelector/ReceiverSelectorManager";
+import ReceiverSelectorManager from "../background/receiverSelector/ReceiverSelectorManager";
 
-import receiverDevices from "./receiverDevices";
+import receiverDevices from "../background/receiverDevices";
 
 type AnyPort = Port | MessagePort;
 
@@ -143,7 +143,7 @@ export default new (class CastManager {
         /**
          * If there's already an active instance for the sender
          * tab/frame ID, disconnect it.
-         * 
+         *
          * TODO: Fix this behaviour!
          */
         for (const instance of this.activeInstances) {
