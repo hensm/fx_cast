@@ -1,20 +1,23 @@
 <!DOCTYPE html>
 <html lang="en" class="theme-dark">
     <head>
-        <meta charset="utf-8">
-        <meta name="description" content="A browser extension that enables Chromecast support for casting web apps (like YouTube, Netflix or BBC iPlayer).">
-        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta charset="utf-8" />
+        <meta
+            name="description"
+            content="A browser extension that enables Chromecast support for casting web apps (like YouTube, Netflix or BBC iPlayer)."
+        />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
 
         <title>fx_cast: Chromecast for Firefox</title>
 
-        <link rel="stylesheet" href="fonts/stylesheet.css">
-        <link rel="stylesheet" href="photon-colors.css">
-        <link rel="stylesheet" href="photon.css">
-        <link rel="stylesheet" href="index.css">
+        <link rel="stylesheet" href="fonts/stylesheet.css" />
+        <link rel="stylesheet" href="photon-colors.css" />
+        <link rel="stylesheet" href="photon.css" />
+        <link rel="stylesheet" href="index.css" />
 
-        <link rel="icon" type="image/svg+xml" href="favicon.svg" sizes="any">
-        <link rel="icon" type="image/png" href="favicon-16.png" sizes="16x16">
-        <link rel="icon" type="image/png" href="favicon-32.png" sizes="32x32">
+        <link rel="icon" type="image/svg+xml" href="favicon.svg" sizes="any" />
+        <link rel="icon" type="image/png" href="favicon-16.png" sizes="16x16" />
+        <link rel="icon" type="image/png" href="favicon-32.png" sizes="32x32" />
 
         <script src="index.js" defer></script>
     </head>
@@ -22,69 +25,103 @@
         <div class="container">
             <header class="site-header">
                 <h1 class="site-header__title">fx_cast</h1>
-                <p class="site-header__subtitle">Chromecast <nobr>for Firefox</nobr></p>
+                <p class="site-header__subtitle">
+                    Chromecast <nobr>for Firefox</nobr>
+                </p>
             </header>
             <main class="site-content">
                 <section class="description">
                     <h2 hidden>Description</h2>
                     <p>
-                        A browser extension that enables Chromecast support for casting web apps (like YouTube, Netflix or BBC iPlayer), HTML5 media and <nobr>screen/tab sharing</nobr>.
+                        A browser extension that enables Chromecast support for
+                        casting web apps (like YouTube, Netflix or BBC iPlayer),
+                        HTML5 media and <nobr>screen/tab sharing</nobr>.
                     </p>
                     <p class="description__disclaimer">
-                        Requires a native bridge app to connect with receiver devices. Currently supported on Windows, macOS and Linux.
+                        Requires a native bridge app to connect with receiver
+                        devices. Currently supported on Windows, macOS and
+                        Linux.
                     </p>
                     <p class="description__prerelease">
-                        No full public release yet! Pre-release beta version is incomplete and likely buggy.
+                        No full public release yet! Pre-release beta version is
+                        incomplete and likely buggy.
+                    </p>
+                    <p class="description__disclaimer">
+                        Latest release is missing macOS x86 build and Windows
+                        32-bit build. See
+                        <a href="https://github.com/hensm/fx_cast/issues/209"
+                            >#209</a
+                        >
+                        for more info. Older releases are
+                        <a href="https://github.com/hensm/fx_cast/releases"
+                            >available</a
+                        >.
                     </p>
                 </section>
                 <section class="download">
                     <h2 hidden>Downloads</h2>
-                    <a class="download__ext button button--puffy button--primary"
-                      title="No available download found"
-                      disabled>
-                        <img class="button__icon"
-                             src="icons/extension_light.svg"
-                             alt="Extension symbol (puzzle) icon">
+                    <a
+                        class="download__ext button button--puffy button--primary"
+                        title="No available download found"
+                        disabled
+                    >
+                        <img
+                            class="button__icon"
+                            src="icons/extension_light.svg"
+                            alt="Extension symbol (puzzle) icon"
+                        />
                         Firefox Extension
                     </a>
-                    <a class="download__app button button--puffy" 
-                       title="No available download found"
-                       disabled>
+                    <a
+                        class="download__app button button--puffy"
+                        title="No available download found"
+                        disabled
+                    >
                     </a>
                     <details class="download__app-other">
                         <summary>
                             <h3>Other bridge downloads</h3>
                         </summary>
                         <div class="app-list">
-                            <a class="app-list__app app-list__mac"
-                               title="No available download found"
-                               disabled>
+                            <a
+                                class="app-list__app app-list__mac"
+                                title="No available download found"
+                                disabled
+                            >
                                 macOS
                             </a>
                             <div class="app-list__platform">
-                                <a class="app-list__app app-list__win64"
-                                   title="No available download found"
-                                   disabled>
+                                <a
+                                    class="app-list__app app-list__win64"
+                                    title="No available download found"
+                                    disabled
+                                >
                                     Windows
                                     <span class="app-list__app-label">x64</span>
                                 </a>
-                                <a class="app-list__app app-list__win32"
-                                   title="No available download found"
-                                   disabled>
+                                <a
+                                    class="app-list__app app-list__win32"
+                                    title="No available download found"
+                                    disabled
+                                >
                                     Windows
                                     <span class="app-list__app-label">x86</span>
                                 </a>
                             </div>
                             <div class="app-list__platform">
-                                <a class="app-list__app app-list__deb"
-                                   title="No available download found"
-                                   disabled>
+                                <a
+                                    class="app-list__app app-list__deb"
+                                    title="No available download found"
+                                    disabled
+                                >
                                     Linux
                                     <span class="app-list__app-label">DEB</span>
                                 </a>
-                                <a class="app-list__app app-list__rpm"
-                                   title="No available download found"
-                                   disabled>
+                                <a
+                                    class="app-list__app app-list__rpm"
+                                    title="No available download found"
+                                    disabled
+                                >
                                     Linux
                                     <span class="app-list__app-label">RPM</span>
                                 </a>
@@ -102,37 +139,72 @@
                                 </summary>
                                 <div class="faq__content">
                                     <picture style="float: right">
-                                        <source type="image/webp"
-                                                srcset="images/webp/menu_light.webp,
-                                                        images/webp/menu_light@2x.webp 2x"
-                                                media="(prefers-color-scheme: light)">
-                                        <source type="image/webp"
-                                                srcset="images/webp/menu_dark.webp,
-                                                        images/webp/menu_dark@2x.webp 2x"
-                                                media="(prefers-color-scheme: dark)">
-                                        <source type="image/png"
-                                                srcset="images/menu_light.png,
-                                                        images/menu_light@2x.png 2x"
-                                                media="(prefers-color-scheme: light)">
-                                        <source type="image/png"
-                                                srcset="images/menu_dark.png,
-                                                        images/menu_dark@2x.png 2x"
-                                                media="(prefers-color-scheme: dark)">
+                                        <source
+                                            type="image/webp"
+                                            srcset="
+                                                images/webp/menu_light.webp,
+                                                images/webp/menu_light@2x.webp 2x
+                                            "
+                                            media="(prefers-color-scheme: light)"
+                                        />
+                                        <source
+                                            type="image/webp"
+                                            srcset="
+                                                images/webp/menu_dark.webp,
+                                                images/webp/menu_dark@2x.webp 2x
+                                            "
+                                            media="(prefers-color-scheme: dark)"
+                                        />
+                                        <source
+                                            type="image/png"
+                                            srcset="
+                                                images/menu_light.png,
+                                                images/menu_light@2x.png 2x
+                                            "
+                                            media="(prefers-color-scheme: light)"
+                                        />
+                                        <source
+                                            type="image/png"
+                                            srcset="
+                                                images/menu_dark.png,
+                                                images/menu_dark@2x.png 2x
+                                            "
+                                            media="(prefers-color-scheme: dark)"
+                                        />
 
-                                        <img alt="Screenshot, media context menu."
-                                             src="images/menu_dark.png">
+                                        <img
+                                            alt="Screenshot, media context menu."
+                                            src="images/menu_dark.png"
+                                        />
                                     </picture>
                                     <p>
-                                        For sites with built-in cast support, click the cast button in the page and select the destination in the receiver selector popup. You may have to add the site to the whitelist to get the cast button to appear.
+                                        For sites with built-in cast support,
+                                        click the cast button in the page and
+                                        select the destination in the receiver
+                                        selector popup. You may have to add the
+                                        site to the whitelist to get the cast
+                                        button to appear.
                                     </p>
                                     <p>
-                                        For other sites, there is a "Cast..." item in the context menu when right-clicking on a media player. This may not be visible depending on whether the site has chosen to obscure the player with an overlay or if the media is DRM-encumbered (see below).
+                                        For other sites, there is a "Cast..."
+                                        item in the context menu when
+                                        right-clicking on a media player. This
+                                        may not be visible depending on whether
+                                        the site has chosen to obscure the
+                                        player with an overlay or if the media
+                                        is DRM-encumbered (see below).
                                     </p>
                                     <p>
-                                        Clicking the toolbar button will open the popup, but depending on the context, it may not be possible to cast anything.
+                                        Clicking the toolbar button will open
+                                        the popup, but depending on the context,
+                                        it may not be possible to cast anything.
                                     </p>
                                     <p>
-                                        As a last resort, casting the tab or screen may provide a means of displaying this media on the Chromecast, but it has its own limitations: the performance is very poor and there's no audio casting.
+                                        As a last resort, casting the tab or
+                                        screen may provide a means of displaying
+                                        this media on the Chromecast, but it has
+                                        its own limitations: the performance is
+                                        very poor and there's no audio casting.
                                     </p>
                                     <div style="clear: right"></div>
                                 </div>
@@ -144,21 +216,40 @@
                                     <h3>Why do I need the bridge?</h3>
                                 </summary>
                                 <div class="faq__content">
+                                    <p>Access to TCP/UDP sockets.</p>
                                     <p>
-                                        Access to TCP/UDP sockets.
+                                        Network discovery for Chromecast devices
+                                        relies on mDNS, the implementation of
+                                        which is reliant on being able to send
+                                        UDP packets. Communication with the
+                                        Chromecast device itself relies on a TCP
+                                        connection. The current workaround is to
+                                        offload that work to a native companion
+                                        application that the extension can then
+                                        launch and communicate with.
                                     </p>
                                     <p>
-                                        Network discovery for Chromecast devices relies on mDNS, the implementation of which is reliant on being able to send UDP packets. Communication with the Chromecast device itself relies on a TCP connection. The current workaround is to offload that work to a native companion application that the extension can then launch and communicate with.
-                                    </p>
-                                    <p>
-                                        It's possible that this functionality will be re-exposed to extensions, in which case the bridge will be made redundant:
+                                        It's possible that this functionality
+                                        will be re-exposed to extensions, in
+                                        which case the bridge will be made
+                                        redundant:
                                     </p>
                                     <ul>
                                         <li>
-                                            <a href="https://bugzilla.mozilla.org/show_bug.cgi?id=1247628">bug 1247628 — Enable "TCP and UDP Socket API" for WebExtensions</a>
+                                            <a
+                                                href="https://bugzilla.mozilla.org/show_bug.cgi?id=1247628"
+                                                >bug 1247628 — Enable "TCP and
+                                                UDP Socket API" for
+                                                WebExtensions</a
+                                            >
                                         </li>
                                         <li>
-                                            <a href="https://bugzilla.mozilla.org/show_bug.cgi?id=1461830">bug 1461830 — [experimental api] mDNS APIs for IoT and p2p extensions</a>
+                                            <a
+                                                href="https://bugzilla.mozilla.org/show_bug.cgi?id=1461830"
+                                                >bug 1461830 — [experimental
+                                                api] mDNS APIs for IoT and p2p
+                                                extensions</a
+                                            >
                                         </li>
                                     </ul>
                                 </div>
@@ -167,62 +258,97 @@
                         <li class="faqs__list-item">
                             <details class="faq card">
                                 <summary class="faq__summary">
-                                    <h3>How do I completely remove the bridge?</h3>
+                                    <h3>
+                                        How do I completely remove the bridge?
+                                    </h3>
                                 </summary>
                                 <div class="faq__content">
                                     <ul>
                                         <li>
                                             <h4>Windows</h4>
                                             <p>
-                                                Removing the bridge on Windows should be as easy as running the uninstaller (<code>C:\Program Files\fx_cast\uninstaller.exe</code>) found in the control panel or settings application.
+                                                Removing the bridge on Windows
+                                                should be as easy as running the
+                                                uninstaller (<code
+                                                    >C:\Program
+                                                    Files\fx_cast\uninstaller.exe</code
+                                                >) found in the control panel or
+                                                settings application.
                                             </p>
                                             <p>
-                                                To manually uninstall, remove the following files/folders and registry keys:
+                                                To manually uninstall, remove
+                                                the following files/folders and
+                                                registry keys:
                                             </p>
                                             <ul>
                                                 <li>
-                                                    <code>C:\Program Files\fx_cast\</code>
+                                                    <code
+                                                        >C:\Program
+                                                        Files\fx_cast\</code
+                                                    >
                                                 </li>
-                                            
+
                                                 <li>
-                                                    <code>HKLM\Software\Mozilla\NativeMessagingHosts\fx_cast_bridge</code>
+                                                    <code
+                                                        >HKLM\Software\Mozilla\NativeMessagingHosts\fx_cast_bridge</code
+                                                    >
                                                 </li>
                                                 <li>
-                                                    <code>HKLM\Software\Microsoft\Windows\CurrentVersion\Uninstall\fx_cast_bridge</code>
+                                                    <code
+                                                        >HKLM\Software\Microsoft\Windows\CurrentVersion\Uninstall\fx_cast_bridge</code
+                                                    >
                                                 </li>
                                             </ul>
                                         </li>
                                         <li>
                                             <h4>macOS</h4>
                                             <p>
-                                                Remove the following files/folders:
+                                                Remove the following
+                                                files/folders:
                                             </p>
                                             <ul>
                                                 <li>
-                                                    <code>/Library/Application Support/fx_cast/</code>
+                                                    <code
+                                                        >/Library/Application
+                                                        Support/fx_cast/</code
+                                                    >
                                                 </li>
                                                 <li>
-                                                    <code>/Library/Application Support/Mozilla/NativeMessagingHosts/fx_cast_bridge.json</code>
+                                                    <code
+                                                        >/Library/Application
+                                                        Support/Mozilla/NativeMessagingHosts/fx_cast_bridge.json</code
+                                                    >
                                                 </li>
                                             </ul>
                                         </li>
                                         <li>
                                             <h4>Linux</h4>
                                             <p>
-                                                On Debian-based systems, remove the <code>fx-cast-bridge</code> package, otherwise remove the <code>fx_cast_bridge</code> package.
+                                                On Debian-based systems, remove
+                                                the
+                                                <code>fx-cast-bridge</code>
+                                                package, otherwise remove the
+                                                <code>fx_cast_bridge</code>
+                                                package.
                                             </p>
                                             <p>
-                                                To manually uninstall, remove the following files/folders:
+                                                To manually uninstall, remove
+                                                the following files/folders:
                                             </p>
                                             <ul>
                                                 <li>
                                                     <code>/opt/fx_cast/</code>
                                                 </li>
                                                 <li>
-                                                    <code>/usr/lib/mozilla/native-messaging-hosts/fx_cast_bridge.json</code> OR
+                                                    <code
+                                                        >/usr/lib/mozilla/native-messaging-hosts/fx_cast_bridge.json</code
+                                                    >
+                                                    OR
                                                 </li>
                                                 <li>
-                                                    <code>/usr/lib64/mozilla/native-messaging-hosts/fx_cast_bridge.json</code>
+                                                    <code
+                                                        >/usr/lib64/mozilla/native-messaging-hosts/fx_cast_bridge.json</code
+                                                    >
                                                 </li>
                                             </ul>
                                         </li>
@@ -233,18 +359,32 @@
                         <li class="faqs__list-item">
                             <details class="faq card">
                                 <summary class="faq__summary">
-                                    <h3>Why is there no sound when casting a screen or tab?</h3>
+                                    <h3>
+                                        Why is there no sound when casting a
+                                        screen or tab?
+                                    </h3>
                                 </summary>
                                 <div class="faq__content">
                                     <p>
-                                        API limitations. There's no method of obtaining the audio streams. Merging of audio streams from remote media is also not possible due to cross-origin issues.
+                                        API limitations. There's no method of
+                                        obtaining the audio streams. Merging of
+                                        audio streams from remote media is also
+                                        not possible due to cross-origin issues.
                                     </p>
                                     <ul>
                                         <li>
-                                            <a href="https://bugzilla.mozilla.org/show_bug.cgi?id=1391223">bug 1391223 — Implement tabCapture API</a>
+                                            <a
+                                                href="https://bugzilla.mozilla.org/show_bug.cgi?id=1391223"
+                                                >bug 1391223 — Implement
+                                                tabCapture API</a
+                                            >
                                         </li>
                                         <li>
-                                            <a href="https://bugzilla.mozilla.org/show_bug.cgi?id=1541425">bug 1541425 — Implement audio capture for getDisplayMedia</a>
+                                            <a
+                                                href="https://bugzilla.mozilla.org/show_bug.cgi?id=1541425"
+                                                >bug 1541425 — Implement audio
+                                                capture for getDisplayMedia</a
+                                            >
                                         </li>
                                     </ul>
                                 </div>
@@ -257,13 +397,36 @@
                                 </summary>
                                 <div class="faq__content">
                                     <p>
-                                        Compatibility with Chrome is far from perfect. Most sites will only enable their cast support if the browser reports itself as Chrome. Ensure that you've added the site to the whitelist. Some sites may not test their Chrome-specific code with Firefox, so it's possible that they're using incompatible/non-standard APIs.
+                                        Compatibility with Chrome is far from
+                                        perfect. Most sites will only enable
+                                        their cast support if the browser
+                                        reports itself as Chrome. Ensure that
+                                        you've added the site to the whitelist.
+                                        Some sites may not test their
+                                        Chrome-specific code with Firefox, so
+                                        it's possible that they're using
+                                        incompatible/non-standard APIs.
                                     </p>
                                     <p>
-                                        The API is also not fully implemented and is missing some methods (mostly queue management). The current implementation likely also has edge-cases and bugs which may cause issues.
+                                        The API is also not fully implemented
+                                        and is missing some methods (mostly
+                                        queue management). The current
+                                        implementation likely also has
+                                        edge-cases and bugs which may cause
+                                        issues.
                                     </p>
                                     <p>
-                                        Check the <a href="https://github.com/hensm/fx_cast-compat/issues?q=is%3Aissue+label%3Acompat">compatibility list</a> or if it's missing, <a href="https://github.com/hensm/fx_cast-compat/issues/new/choose">submit a new compatibility report issue</a>.
+                                        Check the
+                                        <a
+                                            href="https://github.com/hensm/fx_cast-compat/issues?q=is%3Aissue+label%3Acompat"
+                                            >compatibility list</a
+                                        >
+                                        or if it's missing,
+                                        <a
+                                            href="https://github.com/hensm/fx_cast-compat/issues/new/choose"
+                                            >submit a new compatibility report
+                                            issue</a
+                                        >.
                                     </p>
                                 </div>
                             </details>
@@ -271,11 +434,20 @@
                         <li class="faqs__list-item">
                             <details class="faq card">
                                 <summary class="faq__summary">
-                                    <h3>Why can't I cast DRM-encumbered media?</h3>
+                                    <h3>
+                                        Why can't I cast DRM-encumbered media?
+                                    </h3>
                                 </summary>
                                 <div class="faq__content">
                                     <p>
-                                        Unforunately, for DRM-encumbered media, there's no network-accessible URL to provide to the Chromecast and no means of accessing the media streams. The only way to cast on sites like this is via built-in Chromecast support (look for a cast button), which may not always be available.
+                                        Unforunately, for DRM-encumbered media,
+                                        there's no network-accessible URL to
+                                        provide to the Chromecast and no means
+                                        of accessing the media streams. The only
+                                        way to cast on sites like this is via
+                                        built-in Chromecast support (look for a
+                                        cast button), which may not always be
+                                        available.
                                     </p>
                                 </div>
                             </details>
@@ -283,11 +455,18 @@
                         <li class="faqs__list-item">
                             <details class="faq card">
                                 <summary class="faq__summary">
-                                    <h3>Why is it taking so long for a full release?</h3>
+                                    <h3>
+                                        Why is it taking so long for a full
+                                        release?
+                                    </h3>
                                 </summary>
                                 <div class="faq__content">
                                     <p>
-                                        Though I do enjoy working on this, it's (obviously) not a full-time thing. It's just a hobby project. You can help speed up development by contributing (see below).
+                                        Though I do enjoy working on this, it's
+                                        (obviously) not a full-time thing. It's
+                                        just a hobby project. You can help speed
+                                        up development by contributing (see
+                                        below).
                                     </p>
                                 </div>
                             </details>
@@ -299,15 +478,25 @@
                                 </summary>
                                 <div class="faq__content">
                                     <p>
-                                        Contributing code, translations, compatibility reports, or even reporting bugs is very helpful. See the <a href="https://github.com/hensm/fx_cast/blob/master/CONTRIBUTING.md">contributing guide</a> for more information.
+                                        Contributing code, translations,
+                                        compatibility reports, or even reporting
+                                        bugs is very helpful. See the
+                                        <a
+                                            href="https://github.com/hensm/fx_cast/blob/master/CONTRIBUTING.md"
+                                            >contributing guide</a
+                                        >
+                                        for more information.
                                     </p>
-                                    <hr>
+                                    <hr />
+                                    <p>You can also donate via PayPal:</p>
                                     <p>
-                                        You can also donate via PayPal:
-                                    </p>
-                                    <p>
-                                        <a href="https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=3Z2FTMSG976WN&source=url">
-                                            <img src="images/paypal.png" alt="Donate with PayPal button">
+                                        <a
+                                            href="https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=3Z2FTMSG976WN&source=url"
+                                        >
+                                            <img
+                                                src="images/paypal.png"
+                                                alt="Donate with PayPal button"
+                                            />
                                         </a>
                                     </p>
                                 </div>
@@ -318,52 +507,84 @@
             </main>
 
             <picture style="display: contents">
-                <source type="image/webp"
-                        srcset="images/webp/preview-bg.webp,
-                                images/webp/preview-bg@2x.webp 2x">
-                <source type="image/png"
-                        srcset="images/preview-bg.png,
-                                images/preview-bg@2x.png 2x">
+                <source
+                    type="image/webp"
+                    srcset="
+                        images/webp/preview-bg.webp,
+                        images/webp/preview-bg@2x.webp 2x
+                    "
+                />
+                <source
+                    type="image/png"
+                    srcset="images/preview-bg.png, images/preview-bg@2x.png 2x"
+                />
 
-                <img class="preview preview--bg"
-                     alt="Screenshot preview (background), browser window."
-                     src="images/preview-bg.png">
+                <img
+                    class="preview preview--bg"
+                    alt="Screenshot preview (background), browser window."
+                    src="images/preview-bg.png"
+                />
             </picture>
 
             <picture style="display: contents">
-                <source type="image/webp"
-                        srcset="images/webp/preview-fg_light.webp,
-                                images/webp/preview-fg_light@2x.webp 2x"
-                        media="(prefers-color-scheme: light)">
-                <source type="image/webp"
-                        srcset="images/webp/preview-fg_dark.webp,
-                                images/webp/preview-fg_dark@2x.webp 2x"
-                        media="(prefers-color-scheme: dark)">
-                <source type="image/png"
-                        srcset="images/preview-fg_light.png,
-                                images/preview-fg_light@2x.png 2x"
-                        media="(prefers-color-scheme: light)">
-                <source type="image/png"
-                        srcset="images/preview-fg_dark.png,
-                                images/preview-fg_dark@2x.png 2x"
-                        media="(prefers-color-scheme: dark)">
+                <source
+                    type="image/webp"
+                    srcset="
+                        images/webp/preview-fg_light.webp,
+                        images/webp/preview-fg_light@2x.webp 2x
+                    "
+                    media="(prefers-color-scheme: light)"
+                />
+                <source
+                    type="image/webp"
+                    srcset="
+                        images/webp/preview-fg_dark.webp,
+                        images/webp/preview-fg_dark@2x.webp 2x
+                    "
+                    media="(prefers-color-scheme: dark)"
+                />
+                <source
+                    type="image/png"
+                    srcset="
+                        images/preview-fg_light.png,
+                        images/preview-fg_light@2x.png 2x
+                    "
+                    media="(prefers-color-scheme: light)"
+                />
+                <source
+                    type="image/png"
+                    srcset="
+                        images/preview-fg_dark.png,
+                        images/preview-fg_dark@2x.png 2x
+                    "
+                    media="(prefers-color-scheme: dark)"
+                />
 
-                <img class="preview preview--fg"
-                     alt="Screenshot preview (foreground), receiver selector popup."
-                     width="462" height="275"
-                     src="images/preview-fg_dark.png">
+                <img
+                    class="preview preview--fg"
+                    alt="Screenshot preview (foreground), receiver selector popup."
+                    width="462"
+                    height="275"
+                    src="images/preview-fg_dark.png"
+                />
             </picture>
 
             <footer class="footer">
                 <div class="links">
-                    <a class="links__link links__link-github"
-                       href="https://github.com/hensm/fx_cast"
-                       title="Visit GitHub repository">
-                        <img src="icons/GitHub-Mark-32px.png"
-                             srcset="icons/GitHub-Mark-32px.png,
-                                     icons/GitHub-Mark-64px.png 2x,
-                                     icons/GitHub-Mark-120px-plus.png 3x"
-                             alt="GitHub logo">
+                    <a
+                        class="links__link links__link-github"
+                        href="https://github.com/hensm/fx_cast"
+                        title="Visit GitHub repository"
+                    >
+                        <img
+                            src="icons/GitHub-Mark-32px.png"
+                            srcset="
+                                icons/GitHub-Mark-32px.png,
+                                icons/GitHub-Mark-64px.png       2x,
+                                icons/GitHub-Mark-120px-plus.png 3x
+                            "
+                            alt="GitHub logo"
+                        />
                     </a>
                 </div>
             </footer>
