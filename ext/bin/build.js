@@ -7,7 +7,7 @@ const minimist = require("minimist");
 const webExt = require("web-ext");
 
 const BRIDGE_NAME = "fx_cast_bridge";
-const BRIDGE_VERSION = "0.1.0";
+const BRIDGE_VERSION = "0.2.0";
 
 const MIRRORING_APP_ID = "19A6F4AE";
 
