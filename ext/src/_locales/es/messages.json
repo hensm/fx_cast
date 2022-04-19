@@ -1,14 +1,29 @@
 {
     "extensionName": {
-        "message": "EXTENSION_NAME"
+        "message": "fx_cast"
       , "description": "Name of the extension and the native receiver selector window title."
     }
   , "extensionDescription": {
         "message": "Habilita el soporte de Chromecast para transmitir aplicaciones web (como Netflix y BBC iPlayer), video HTML5 y enviar pantalla/pestañas."
       , "description": "Description of the extension shown in the add-ons manager."
     }
+  ,
 
-
+    "popupWhitelistNotWhitelisted": {
+        "message": "$appName$ no está en la lista blanca",
+        "description": "Receiver selector whitelist suggestion banner label.",
+        "placeholders": {
+            "appName": {
+                "content": "$1",
+                "example": "Netflix"
+            }
+        }
+    }
+  ,
+    "popupWhitelistAddToWhitelist": {
+        "message": "Añadir a la lista blanca",
+        "description": "Receiver selector whitelist suggestion banner button label."
+    }
   , "popupMediaTypeApp": {
         "message": "la aplicación de este sitio"
       , "description": "Receiver selector media type <option> text for current site's sender application."
