@@ -1,70 +1,66 @@
 {
-    "name": "__MSG_extensionName__"
-  , "description": "__MSG_extensionDescription__"
-  , "version": "0.1.2"
-  , "developer": {
-        "name": "Matt Hensman"
-      , "url": "https://matt.tf/"
-    } 
+    "name": "__MSG_extensionName__",
+    "description": "__MSG_extensionDescription__",
+    "version": "0.2.0",
+    "developer": {
+        "name": "Matt Hensman",
+        "url": "https://matt.tf/"
+    },
 
-  , "applications": {
+    "applications": {
         "gecko": {
-            "id": "fx_cast@matt.tf"
-          , "strict_min_version": "64.0"
-          , "update_url": "https://hensm.github.io/fx_cast/updates.json"
+            "id": "fx_cast@matt.tf",
+            "strict_min_version": "64.0",
+            "update_url": "https://hensm.github.io/fx_cast/updates.json"
         }
-    }
-  , "browser_action": {
+    },
+    "browser_action": {
         "theme_icons": [
             {
-                "light": "icons/cast-default-light.svg"
-              , "dark": "icons/cast-default-dark.svg"
-              , "size": 32
+                "light": "icons/cast-default-light.svg",
+                "dark": "icons/cast-default-dark.svg",
+                "size": 32
             }
         ]
-    }
+    },
 
-  , "background": {
-        "scripts": [ "background/background.js" ]
-    }
+    "background": {
+        "scripts": ["background/background.js"]
+    },
 
-  , "content_scripts": [
+    "content_scripts": [
         {
-            "all_frames": true
-          , "js": [
-                "cast/content.js"
-            ]
-          , "matches": [ "<all_urls>" ]
-          , "run_at": "document_start"
+            "all_frames": true,
+            "js": ["cast/content.js"],
+            "matches": ["<all_urls>"],
+            "run_at": "document_start"
         }
-    ]
+    ],
 
-  , "default_locale": "en"
+    "default_locale": "en",
 
-  , "icons": {
-        "48": "icons/icon.svg"
-      , "96": "icons/icon.svg"
-    }
+    "icons": {
+        "48": "icons/icon.svg",
+        "96": "icons/icon.svg"
+    },
 
-  , "manifest_version": 2
+    "manifest_version": 2,
 
-  , "options_ui": {
+    "options_ui": {
         "page": "ui/options/index.html"
-    }
-  , "permissions": [
-        "history"
-      , "menus"
-      , "menus.overrideContext"
-      , "nativeMessaging"
-      , "notifications"
-      , "storage"
-      , "tabs"
-      , "webNavigation"
-      , "webRequest"
-      , "webRequestBlocking"
-      , "<all_urls>"
-    ]
-  , "web_accessible_resources": [
-        "cast/index.js"
-    ]
+    },
+    "permissions": [
+        "history",
+        "menus",
+        "menus.overrideContext",
+        "nativeMessaging",
+        "notifications",
+        "storage",
+        "tabs",
+        "webNavigation",
+        "webRequest",
+        "webRequestBlocking",
+        "<all_urls>"
+    ],
+    "web_accessible_resources": ["cast/index.js"]
 }
