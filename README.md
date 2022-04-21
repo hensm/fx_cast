@@ -205,9 +205,9 @@ The test script expects a compatible installed bridge version and a packaged ext
 Test results will be displayed in the terminal and within the opened browser tab. Chrome may take some time to initialize the media router component before the cast API is available for testing.
 
 ```sh
-$ npm run build --prefix ./app
+$ npm run build:app
 $ npm run install-manifest
-$ npm run package --prefix ./ext
+$ npm run package:ext
 $ npm test
 
 # Or if testing in Chrome
