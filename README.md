@@ -174,9 +174,9 @@ Build and package extension and bridge application for current platform:
 $ npm run package
 ```
 
-- `dist/app/`
+- `dist/app/`  
     ... contains the installer package: `fx_cast_bridge-<version>-<arch>.(pkg|deb|rpm|exe)`
-- `dist/ext/`
+- `dist/ext/`  
     ... contains the built extension archive: `fx_cast-<version>.xpi`.
 
 Packaging examples:
@@ -190,9 +190,7 @@ $ npm run package:app -- -- --packageType=deb
 $ npm run package:app -- -- --packageType=rpm
 ```
 
-#### Bridge package script arguments
-
-_**Note**: Includes the build script arguments._
+Bridge package script arguments (includes the build script arguments):
 
 - `--packageType` `"deb"`,`"rpm"`  
     Select the package type. Defaults to `deb`. Only relevant when building for Linux.
