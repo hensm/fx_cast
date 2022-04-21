@@ -29,11 +29,11 @@ The bridge application is currently supported on Windows, macOS and Linux.
 <details>
     <summary>Daemon configuration (systemd)</summary>
 
-1. Create `fx_cast` user:
+1. Create a new `fx_cast` user:
 ```sh
 $ sudo useradd --system fx_cast
 ```
-2. Create service file in `/etc/systemd/fx_cast.service`:
+2. Create a service file in `/etc/systemd/fx_cast.service`:
 ```
 [Unit]
 Description=fx_cast daemon
@@ -48,7 +48,7 @@ WantedBy=multi-user.target
 ```
 3. Enable the service:
 ```sh
-$ sudo systemctl enable --now fx_cast`
+$ sudo systemctl enable --now fx_cast
 ```
 </details>
 
