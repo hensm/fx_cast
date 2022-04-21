@@ -122,13 +122,13 @@ This will build the ext and app, outputting to `dist/`:
 Watching ext changes:
 
 ````sh
-$ npm run watch --prefix ./ext
+$ npm run watch:ext
 ````
 
 Launch Firefox with built extension (run in separate terminal):
 
 ````sh
-$ npm run start --prefix ./ext
+$ npm run start:ext
 ````
 
 #### 32-bit on Windows
