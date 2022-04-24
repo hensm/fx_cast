@@ -78,7 +78,7 @@ export class SessionRequest {
 
     constructor(
         public appId: string,
-        public capabilities = [Capability.VIDEO_OUT, Capability.AUDIO_OUT],
+        public capabilities = [],
         public requestSessionTimeout = new Timeout().requestSession,
         public androidReceiverCompatible = false,
         public credentialsData: Nullable<CredentialsData> = null
