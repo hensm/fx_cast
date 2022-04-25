@@ -1,13 +1,9 @@
 "use strict";
 
-import castv2 from "castv2";
-
-import { sendMessage } from "../../lib/nativeMessaging";
-import { Message } from "../../messaging";
+import messaging, { Message } from "../../messaging";
 
 import Session from "./Session";
 import CastClient, { NS_CONNECTION, NS_RECEIVER } from "./client";
-
 
 const sessions = new Map<string, Session>();
 
@@ -29,7 +25,7 @@ export function handleCastMessage(message: Message) {
 
             const session = sessions.get(sessionId);
             if (!session) {
-                sendMessage({
+                messaging.sendMessage({
                     subject: "cast:impl_sendMessage",
                     data: {
                         error: "Session does not exist",
@@ -44,7 +40,7 @@ export function handleCastMessage(message: Message) {
             try {
                 session.sendReceiverMessage(messageData);
             } catch (err) {
-                sendMessage({
+                messaging.sendMessage({
                     subject: "cast:impl_sendMessage",
                     data: {
                         error: `Failed to send message (${err})`,
@@ -57,7 +53,7 @@ export function handleCastMessage(message: Message) {
             }
 
             // Success
-            sendMessage({
+            messaging.sendMessage({
                 subject: "cast:impl_sendMessage",
                 data: { sessionId, messageId }
             });
@@ -70,7 +66,7 @@ export function handleCastMessage(message: Message) {
 
             const session = sessions.get(sessionId);
             if (!session) {
-                sendMessage({
+                messaging.sendMessage({
                     subject: "cast:impl_sendMessage",
                     data: {
                         error: "Session does not exist",
@@ -91,7 +87,7 @@ export function handleCastMessage(message: Message) {
 
                 session.sendMessage(namespace, messageData);
             } catch (err) {
-                sendMessage({
+                messaging.sendMessage({
                     subject: "cast:impl_sendMessage",
                     data: {
                         error: `Failed to send message (${err})`,
@@ -104,7 +100,7 @@ export function handleCastMessage(message: Message) {
             }
 
             // Success
-            sendMessage({
+            messaging.sendMessage({
                 subject: "cast:impl_sendMessage",
                 data: { sessionId, messageId }
             });
@@ -116,7 +112,7 @@ export function handleCastMessage(message: Message) {
             const { receiverDevice } = message.data;
 
             const client = new CastClient();
-            client.connect(receiverDevice.host). then(() => {
+            client.connect(receiverDevice.host).then(() => {
                 (client.sendReceiverMessage as any)({ type: "STOP" });
             });
 

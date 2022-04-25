@@ -2,9 +2,10 @@
 
 import mdns from "mdns";
 
+import messaging from "../messaging";
+import { ReceiverDevice } from "../messagingTypes";
+
 import Remote from "./cast/remote";
-import { ReceiverDevice } from "../types";
-import { sendMessage } from "../lib/nativeMessaging";
 
 /**
  * Chromecast TXT record
@@ -80,7 +81,7 @@ browser.on("serviceUp", service => {
         port: service.port
     };
 
-    sendMessage({
+    messaging.sendMessage({
         subject: "main:receiverDeviceUp",
         data: {
             deviceId: device.id,
@@ -94,7 +95,7 @@ browser.on("serviceUp", service => {
             new Remote(device.host, {
                 // RECEIVER_STATUS
                 onReceiverStatusUpdate(status) {
-                    sendMessage({
+                    messaging.sendMessage({
                         subject: "main:receiverDeviceStatusUpdated",
                         data: { deviceId: device.id, status }
                     });
@@ -103,7 +104,7 @@ browser.on("serviceUp", service => {
                 onMediaStatusUpdate(status) {
                     if (!status) return;
 
-                    sendMessage({
+                    messaging.sendMessage({
                         subject: "main:receiverDeviceMediaStatusUpdated",
                         data: { deviceId: device.id, status }
                     });
@@ -121,7 +122,7 @@ browser.on("serviceDown", service => {
     // Filter invalid results
     if (!service.name) return;
 
-    sendMessage({
+    messaging.sendMessage({
         subject: "main:receiverDeviceDown",
         data: { deviceId: service.name }
     });

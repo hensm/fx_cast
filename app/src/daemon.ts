@@ -3,7 +3,6 @@
 import { spawn } from "child_process";
 import { Readable } from "stream";
 
-import minimist from "minimist";
 import WebSocket from "ws";
 
 import { DecodeTransform, EncodeTransform } from "./transforms";

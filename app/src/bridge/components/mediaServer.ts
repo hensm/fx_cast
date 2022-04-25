@@ -8,7 +8,7 @@ import stream from "stream";
 
 import mime from "mime-types";
 
-import { sendMessage } from "../lib/nativeMessaging";
+import messaging from "../messaging";
 import { convertSrtToVtt } from "../lib/subtitles";
 
 export let mediaServer: http.Server | undefined;
@@ -30,7 +30,7 @@ export async function startMediaServer(filePath: string, port: number) {
             fileName = path.basename(filePath);
             fileSize = stat.size;
         } else {
-            sendMessage({
+            messaging.sendMessage({
                 subject: "mediaCast:mediaServerError",
                 data: "Media path is not a file."
             });
@@ -38,7 +38,7 @@ export async function startMediaServer(filePath: string, port: number) {
             return;
         }
     } catch (err) {
-        sendMessage({
+        messaging.sendMessage({
             subject: "mediaCast:mediaServerError",
             data: "Failed to find media path."
         });
@@ -48,7 +48,7 @@ export async function startMediaServer(filePath: string, port: number) {
 
     const contentType = mime.lookup(filePath);
     if (!contentType) {
-        sendMessage({
+        messaging.sendMessage({
             subject: "mediaCast:mediaServerError",
             data: "Failed to find media type."
         });
@@ -137,12 +137,12 @@ export async function startMediaServer(filePath: string, port: number) {
     });
 
     mediaServer.on("close", () => {
-        sendMessage({
+        messaging.sendMessage({
             subject: "mediaCast:mediaServerStopped"
         });
     });
     mediaServer.on("error", err => {
-        sendMessage({
+        messaging.sendMessage({
             subject: "mediaCast:mediaServerError",
             data: err.message
         });
@@ -160,7 +160,7 @@ export async function startMediaServer(filePath: string, port: number) {
         }
 
         if (!localAddresses.length) {
-            sendMessage({
+            messaging.sendMessage({
                 subject: "mediaCast:mediaServerError",
                 data: "Failed to get local address."
             });
@@ -168,7 +168,7 @@ export async function startMediaServer(filePath: string, port: number) {
             return;
         }
 
-        sendMessage({
+        messaging.sendMessage({
             subject: "mediaCast:mediaServerStarted",
             data: {
                 mediaPath: fileName,

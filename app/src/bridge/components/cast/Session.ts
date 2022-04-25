@@ -2,9 +2,9 @@
 
 import { Channel } from "castv2";
 
-import { sendMessage } from "../../lib/nativeMessaging";
+import messaging from "../../messaging";
 
-import { ReceiverDevice } from "../../types";
+import { ReceiverDevice } from "../../messagingTypes";
 import { ReceiverMessage } from "./types";
 
 import CastClient, { NS_CONNECTION, NS_HEARTBEAT } from "./client";
@@ -74,7 +74,7 @@ export default class Session extends CastClient {
 
                         const { friendlyName } = this.receiverDevice;
 
-                        sendMessage({
+                        messaging.sendMessage({
                             subject: "cast:sessionCreated",
                             data: {
                                 sessionId: this.sessionId,
@@ -104,7 +104,7 @@ export default class Session extends CastClient {
                     break;
                 }
 
-                sendMessage({
+                messaging.sendMessage({
                     subject: "cast:sessionUpdated",
                     data: {
                         sessionId: this.sessionId,
@@ -141,7 +141,7 @@ export default class Session extends CastClient {
 
                 messageData = JSON.stringify(messageData);
 
-                sendMessage({
+                messaging.sendMessage({
                     subject: "cast:receivedSessionMessage",
                     data: {
                         sessionId: this.sessionId,
@@ -187,7 +187,7 @@ export default class Session extends CastClient {
         // Handle client connection closed
         this.client.on("close", () => {
             if (this.sessionId) {
-                sendMessage({
+                messaging.sendMessage({
                     subject: "cast:sessionStopped",
                     data: { sessionId: this.sessionId }
                 });

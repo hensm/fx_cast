@@ -1,7 +1,6 @@
 "use strict";
 
-import { decodeTransform, encodeTransform } from "./lib/nativeMessaging";
-import { Message } from "./messaging";
+import messaging, { Message } from "./messaging";
 
 import { handleCastMessage } from "./components/cast";
 import { startDiscovery, stopDiscovery } from "./components/discovery";
@@ -21,11 +20,11 @@ process.on("SIGTERM", () => {
  * Initializes the counterpart objects and is responsible
  * for managing existing ones.
  */
-decodeTransform.on("data", (message: Message) => {
+messaging.on("message", (message: Message) => {
     switch (message.subject) {
         case "bridge:getInfo":
         case "bridge:/getInfo": {
-            encodeTransform.write(__applicationVersion);
+            messaging.send(__applicationVersion);
             break;
         }
 

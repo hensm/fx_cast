@@ -1,5 +1,9 @@
 "use strict";
 
+import { TypedEmitter } from "tiny-typed-emitter";
+
+import { DecodeTransform, EncodeTransform } from "../transforms";
+
 import {
     MediaStatus,
     ReceiverStatus,
@@ -10,7 +14,7 @@ import {
     ReceiverDevice,
     CastSessionCreatedDetails,
     CastSessionUpdatedDetails
-} from "./types";
+} from "./messagingTypes";
 
 /**
  * IMPORTANT:
@@ -193,3 +197,43 @@ type NarrowedMessage<L extends MessageBase<keyof MessageDefinitions>> =
         : never;
 
 export type Message = NarrowedMessage<Messages[keyof Messages]>;
+
+interface MessengerEvents {
+    message: (message: Message) => void;
+}
+
+class Messenger extends TypedEmitter<MessengerEvents> {
+    // Native messaging transforms
+    private decodeTransform = new DecodeTransform();
+    private encodeTransform = new EncodeTransform();
+
+    constructor() {
+        super();
+
+        // Hook up stdin -> stdout
+        process.stdin.pipe(this.decodeTransform);
+        this.encodeTransform.pipe(process.stdout);
+
+        this.decodeTransform.on("error", err =>
+            console.error("err (message decode):", err)
+        );
+        this.encodeTransform.on("error", err =>
+            console.error("err (message encode):", err)
+        );
+
+        this.decodeTransform.on("data", (message: Message) => {
+            this.emit("message", message);
+        });
+    }
+
+    /** Sends a message to the extension. */
+    sendMessage(message: Message) {
+        this.encodeTransform.write(message);
+    }
+
+    send(data: any) {
+        this.encodeTransform.write(data);
+    }
+}
+
+export default new Messenger();
