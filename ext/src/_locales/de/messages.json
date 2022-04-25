@@ -1,9 +1,5 @@
 {
-    "extensionName": {
-        "message": "EXTENSION_NAME"
-      , "description": "Name of the extension and the native receiver selector window title."
-    }
-  , "extensionDescription": {
+    "extensionDescription": {
         "message": "Aktiviert Chromecast-Support zum Streamen von Web-Apps (wie Netflix oder BBC iPlayer), HTML5-Video und Bildschirm-/Tabfreigaben."
       , "description": "Description of the extension shown in the add-ons manager."
     }

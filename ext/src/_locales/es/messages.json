@@ -1,9 +1,5 @@
 {
-    "extensionName": {
-        "message": "fx_cast"
-      , "description": "Name of the extension and the native receiver selector window title."
-    }
-  , "extensionDescription": {
+    "extensionDescription": {
         "message": "Habilita el soporte de Chromecast para transmitir aplicaciones web (como Netflix y BBC iPlayer), video HTML5 y enviar pantalla/pestañas."
       , "description": "Description of the extension shown in the add-ons manager."
     }

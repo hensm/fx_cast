@@ -1,9 +1,5 @@
 {
-    "extensionName": {
-        "message": "EXTENSION_NAME"
-      , "description": "Name of the extension and the native receiver selector window title."
-    }
-  , "extensionDescription": {
+    "extensionDescription": {
         "message": "Skrur på Chromecast for å caste apper på nettet (som Netflix eller BBC iPlayer), HTML5 video og skjerm/fane-deling"
       , "description": "Description of the extension shown in the add-ons manager."
     }
