@@ -1,6 +1,5 @@
 "use strict";
 
-import * as cast from "./api";
 import { Message } from "../messaging";
 
 import { BridgeInfo } from "../lib/bridge";
@@ -11,6 +10,8 @@ import {
     onMessageResponse,
     sendMessage
 } from "./eventMessageChannel";
+
+import CastSDK from "./sdk";
 
 let initializedBridgeInfo: BridgeInfo;
 let initializedBackgroundPort: MessagePort;
@@ -103,4 +104,4 @@ export function ensureInit(): Promise<TypedMessagePort<Message>> {
     });
 }
 
-export default cast;
+export default new CastSDK();

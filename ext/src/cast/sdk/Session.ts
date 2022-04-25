@@ -22,17 +22,12 @@ import {
     SenderMessage
 } from "./types";
 
-import { Image, Receiver, SenderApplication } from "./dataClasses";
 import { SessionStatus } from "./enums";
-import {
-    Media,
-    LoadRequest,
-    QueueLoadRequest,
-    QueueItem,
-    MediaCommand
-} from "./media";
+import { Image, Receiver, SenderApplication } from "./classes";
 
-const NS_MEDIA = "urn:x-cast:com.google.cast.media";
+import { MediaCommand } from "./media/enums";
+import { LoadRequest, QueueLoadRequest, QueueItem } from "./media/classes";
+import Media, { NS_MEDIA } from "./media/Media";
 
 /** supportedMediaCommands bitflag returned in MEDIA_STATUS messages */
 enum _MediaCommand {
@@ -53,20 +48,18 @@ function updateMedia(media: Media, status: MediaStatus) {
         media._lastUpdateTime = Date.now();
     }
 
-    // Copy props
-    for (const prop in status) {
-        switch (prop) {
-            case "items":
-            case "supportedMediaCommands":
-                continue;
-        }
+    // Copy basic props
+    if (status.currentTime) media.currentTime = status.currentTime;
+    if (status.customData) media.customData = status.customData;
+    if (status.idleReason) media.idleReason = status.idleReason;
+    if (status.media) media.media = status.media;
+    if (status.mediaSessionId) media.mediaSessionId = status.mediaSessionId;
+    if (status.playbackRate) media.playbackRate = status.playbackRate;
+    if (status.playerState) media.playerState = status.playerState;
+    if (status.repeatMode) media.repeatMode = status.repeatMode;
+    if (status.volume) media.volume = status.volume;
 
-        if (status.hasOwnProperty(prop)) {
-            (media as any)[prop] = (status as any)[prop];
-        }
-    }
-
-    // Convert supportedMediaCommands bitflag to string array
+    // Convert supportedMediaCommands bitflags to string array
     const supportedMediaCommands: string[] = [];
     if (status.supportedMediaCommands & _MediaCommand.PAUSE) {
         supportedMediaCommands.push(MediaCommand.PAUSE);
@@ -118,10 +111,6 @@ function updateMedia(media: Media, status: MediaStatus) {
 }
 
 export default class Session {
-    #id = uuid();
-
-    #isConnected = false;
-
     #loadMediaSuccessCallback?: (media: Media) => void;
     #loadMediaErrorCallback?: ErrorCallback;
     #loadMediaRequest?: LoadRequest;
@@ -134,9 +123,25 @@ export default class Session {
         [SuccessCallback?, ErrorCallback?]
     >();
 
-    /**
-     *
-     */
+    media: Media[] = [];
+    namespaces: Array<{ name: string }> = [];
+    senderApps: SenderApplication[] = [];
+    status = SessionStatus.CONNECTED;
+    statusText: Nullable<string> = null;
+    transportId: string;
+
+    constructor(
+        public sessionId: string,
+        public appId: string,
+        public displayName: string,
+        public appImages: Image[],
+        public receiver: Receiver
+    ) {
+        this.transportId = sessionId || "";
+
+        this.addMessageListener(NS_MEDIA, this.#mediaMessageListener);
+    }
+
     #mediaMessageListener = (namespace: string, messageString: string) => {
         if (namespace !== NS_MEDIA) return;
 
@@ -176,14 +181,13 @@ export default class Session {
 
     /**
      * Sends a media message to the app receiver.
-     * `urn:x-cast:com.google.cast.media`
      */
     #sendMediaMessage = (
         message: DistributiveOmit<SenderMediaMessage, "requestId">
     ) => {
         return new Promise<void>((resolve, reject) => {
             this.sendMessage(
-                "urn:x-cast:com.google.cast.media",
+                NS_MEDIA,
                 { ...message, requestId: 0 },
                 resolve,
                 reject
@@ -209,25 +213,6 @@ export default class Session {
             this._sendMessageCallbacks.set(messageId, [resolve, reject]);
         });
     };
-
-    media: Media[] = [];
-    namespaces: Array<{ name: string }> = [];
-    senderApps: SenderApplication[] = [];
-    status = SessionStatus.CONNECTED;
-    statusText: Nullable<string> = null;
-    transportId: string;
-
-    constructor(
-        public sessionId: string,
-        public appId: string,
-        public displayName: string,
-        public appImages: Image[],
-        public receiver: Receiver
-    ) {
-        this.transportId = sessionId || "";
-
-        this.addMessageListener(NS_MEDIA, this.#mediaMessageListener);
-    }
 
     addMediaListener(_mediaListener: MediaListener) {
         logger.info("STUB :: Session#addMediaListener");
@@ -265,7 +250,6 @@ export default class Session {
     ) {
         this.#loadMediaSuccessCallback = successCallback;
         this.#loadMediaErrorCallback = errorCallback;
-        this.#loadMediaRequest = loadRequest;
 
         loadRequest.sessionId = this.sessionId;
         this.#sendMediaMessage(loadRequest).catch(errorCallback);

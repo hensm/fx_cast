@@ -4,7 +4,7 @@ import { v1 as uuid } from "uuid";
 
 import logger from "../../../lib/logger";
 
-import { Volume, Error as _Error } from "../dataClasses";
+import { Volume, Error as _Error } from "../classes";
 import {
     BreakStatus,
     EditTracksInfoRequest,
@@ -25,13 +25,15 @@ import {
     StopRequest,
     VideoInformation,
     VolumeRequest
-} from "./dataClasses";
+} from "./classes";
 
 import { PlayerState, RepeatMode } from "./enums";
 import { ErrorCode } from "../enums";
 
 import { ErrorCallback, SuccessCallback, UpdateListener } from "../../types";
 import { SenderMediaMessage } from "../types";
+
+export const NS_MEDIA = "urn:x-cast:com.google.cast.media";
 
 export default class Media {
     #id = uuid();

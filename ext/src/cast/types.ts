@@ -1,7 +1,7 @@
 "use strict";
 
-import { Error as Error_ } from "./api/dataClasses";
-import { Media } from "./api/media";
+import { Error as Error_ } from "./sdk/classes";
+import Media from "./sdk/media/Media";
 
 export type SuccessCallback = () => void;
 export type ErrorCallback = (err: Error_) => void;

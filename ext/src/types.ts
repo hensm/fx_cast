@@ -1,6 +1,6 @@
 "use strict";
 
-import { ReceiverStatus } from "./cast/api/types";
+import { ReceiverStatus } from "./cast/sdk/types";
 
 export enum ReceiverDeviceCapabilities {
     NONE = 0,

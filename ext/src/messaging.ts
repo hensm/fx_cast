@@ -16,7 +16,7 @@ import {
     MediaStatus,
     ReceiverStatus,
     SenderMessage
-} from "./cast/api/types";
+} from "./cast/sdk/types";
 
 import { ReceiverDevice } from "./types";
 

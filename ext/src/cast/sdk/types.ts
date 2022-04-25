@@ -5,8 +5,8 @@
  *   app/src/bridge/components/cast/types.ts
  */
 
-import { SenderApplication, Volume, Image } from "./dataClasses";
-import { MediaInfo, QueueItem } from "./media/dataClasses";
+import { SenderApplication, Volume, Image } from "./classes";
+import { MediaInfo, QueueItem } from "./media/classes";
 import {
     IdleReason,
     PlayerState,

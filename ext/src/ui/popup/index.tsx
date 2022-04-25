@@ -10,7 +10,9 @@ import options from "../../lib/options";
 import messaging, { Message, Port } from "../../messaging";
 import { getNextEllipsis } from "../../lib/utils";
 import { RemoteMatchPattern } from "../../lib/matchPattern";
+
 import { ReceiverDevice } from "../../types";
+import { Capability } from "../../cast/sdk/enums";
 
 import {
     ReceiverSelectionActionType,

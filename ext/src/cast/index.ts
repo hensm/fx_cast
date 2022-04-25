@@ -1,11 +1,12 @@
 "use strict";
 
-import * as cast from "./api";
 import logger from "../lib/logger";
 
 import { loadScript } from "../lib/utils";
 import { CAST_FRAMEWORK_SCRIPT_URL } from "./endpoints";
 import { onMessage } from "./eventMessageChannel";
+
+import CastSDK from "./sdk";
 
 const _window = window as any;
 
@@ -14,7 +15,7 @@ if (!_window.chrome) {
 }
 
 // Create page-accessible API object
-_window.chrome.cast = cast;
+_window.chrome.cast = new CastSDK();
 
 let bridgeInfo: any;
 let frameworkScriptPromise: Promise<HTMLScriptElement>;
