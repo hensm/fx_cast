@@ -11,7 +11,7 @@ import messaging, { Message, Port } from "../../messaging";
 import { getNextEllipsis } from "../../lib/utils";
 import { RemoteMatchPattern } from "../../lib/matchPattern";
 
-import { ReceiverDevice } from "../../types";
+import { ReceiverDevice, ReceiverDeviceCapabilities } from "../../types";
 import { Capability } from "../../cast/sdk/enums";
 
 import {
@@ -31,6 +31,38 @@ browser.runtime.getPlatformInfo().then(platformInfo => {
         document.head.appendChild(link);
     }
 });
+
+/**
+ * Check receiver device capabilities bitflags against array of
+ * capability strings requested by the sender application.
+ */
+function hasRequiredCapabilities(
+    receiverDevice: ReceiverDevice,
+    capabilities: Capability[] = []
+) {
+    const { capabilities: deviceCapabilities } = receiverDevice;
+    return capabilities.every(capability => {
+        switch (capability) {
+            case Capability.AUDIO_IN:
+                return deviceCapabilities & ReceiverDeviceCapabilities.AUDIO_IN;
+            case Capability.AUDIO_OUT:
+                return (
+                    deviceCapabilities & ReceiverDeviceCapabilities.AUDIO_OUT
+                );
+            case Capability.MULTIZONE_GROUP:
+                return (
+                    deviceCapabilities &
+                    ReceiverDeviceCapabilities.MULTIZONE_GROUP
+                );
+            case Capability.VIDEO_IN:
+                return deviceCapabilities & ReceiverDeviceCapabilities.VIDEO_IN;
+            case Capability.VIDEO_OUT:
+                return (
+                    deviceCapabilities & ReceiverDeviceCapabilities.VIDEO_OUT
+                );
+        }
+    });
+}
 
 interface PopupAppProps {}
 interface PopupAppState {
@@ -114,12 +146,26 @@ class PopupApp extends Component<PopupAppProps, PopupAppState> {
 
                 case "popup:update": {
                     const {
-                        receiverDevices: receivers,
+                        receiverDevices,
                         availableMediaTypes,
                         defaultMediaType
                     } = message.data;
 
-                    this.setState({ receiverDevices: receivers });
+                    this.setState({
+                        /**
+                         * Filter receiver devices without the required
+                         * capabilities.
+                         */
+                        receiverDevices: receiverDevices.filter(
+                            receiverDevice => {
+                                return hasRequiredCapabilities(
+                                    receiverDevice,
+                                    this.state.pageInfo?.sessionRequest
+                                        ?.capabilities
+                                );
+                            }
+                        )
+                    });
 
                     if (
                         availableMediaTypes !== undefined &&
@@ -542,10 +588,4 @@ class ReceiverEntry extends Component<ReceiverEntryProps, ReceiverEntryState> {
 // Render after CSS has loaded
 window.addEventListener("load", () => {
     ReactDOM.render(<PopupApp />, document.querySelector("#root"));
-});
-
-window.addEventListener("contextmenu", () => {
-    browser.menus.overrideContext({
-        showDefaults: false
-    });
 });

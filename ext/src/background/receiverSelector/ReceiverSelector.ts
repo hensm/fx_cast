@@ -6,6 +6,7 @@ import options from "../../lib/options";
 
 import { TypedEventTarget } from "../../lib/TypedEventTarget";
 import { ReceiverDevice } from "../../types";
+import { SessionRequest } from "../../cast/sdk/classes";
 
 import {
     ReceiverSelectionCast,
@@ -26,6 +27,7 @@ export interface PageInfo {
     url: string;
     tabId: number;
     frameId: number;
+    sessionRequest?: SessionRequest;
 }
 
 /**

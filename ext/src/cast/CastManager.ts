@@ -227,7 +227,8 @@ export default new (class CastManager {
                     const selection =
                         await ReceiverSelectorManager.getSelection(
                             instance.contentTabId,
-                            instance.contentFrameId
+                            instance.contentFrameId,
+                            { sessionRequest: message.data.sessionRequest }
                         );
 
                     // Handle cancellation

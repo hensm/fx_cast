@@ -4,6 +4,7 @@ import options from "../../lib/options";
 import logger from "../../lib/logger";
 
 import CastManager from "../../cast/CastManager";
+import { SessionRequest } from "../../cast/sdk/classes";
 import receiverDevices from "../receiverDevices";
 
 import { getMediaTypesForPageUrl } from "../../lib/utils";
@@ -47,7 +48,10 @@ async function getSelector() {
 async function getSelection(
     contextTabId: number,
     contextFrameId = 0,
-    selectionOpts?: { withMediaSender?: boolean }
+    selectionOpts?: {
+        sessionRequest: SessionRequest;
+        withMediaSender?: boolean;
+    }
 ): Promise<ReceiverSelection | null> {
     return new Promise(async (resolve, reject) => {
         let castInstance = CastManager.getInstance(
@@ -220,7 +224,8 @@ async function getSelection(
             ? {
                   url: pageUrl,
                   tabId: contextTabId,
-                  frameId: contextFrameId
+                  frameId: contextFrameId,
+                  sessionRequest: selectionOpts?.sessionRequest
               }
             : undefined;
 

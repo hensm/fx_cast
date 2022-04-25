@@ -466,7 +466,8 @@ export default class {
         } else {
             // Open receiver selector UI
             sendMessageResponse({
-                subject: "main:selectReceiver"
+                subject: "main:selectReceiver",
+                data: { sessionRequest: this.#sessionRequest }
             });
         }
     }

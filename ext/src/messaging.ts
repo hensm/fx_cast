@@ -17,6 +17,7 @@ import {
     ReceiverStatus,
     SenderMessage
 } from "./cast/sdk/types";
+import { SessionRequest } from "./cast/sdk/classes";
 
 import { ReceiverDevice } from "./types";
 
@@ -56,7 +57,9 @@ type ExtMessageDefinitions = {
     "receiverSelector:selected": ReceiverSelection;
     "receiverSelector:stop": ReceiverSelection;
 
-    "main:selectReceiver": {};
+    "main:selectReceiver": {
+        sessionRequest: SessionRequest;
+    };
     "cast:selectReceiver/selected": ReceiverSelectionCast;
     "cast:selectReceiver/stopped": ReceiverSelectionStop;
     "cast:selectReceiver/cancelled": {};
