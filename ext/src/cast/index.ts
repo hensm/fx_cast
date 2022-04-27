@@ -17,8 +17,7 @@ if (!_window.chrome) {
 // Create page-accessible API object
 _window.chrome.cast = new CastSDK();
 
-let bridgeInfo: any;
-let frameworkScriptPromise: Promise<HTMLScriptElement>;
+let frameworkScriptPromise: Promise<HTMLScriptElement> | undefined;
 
 /**
  * If loaded within a page via a <script> element,
@@ -27,8 +26,9 @@ let frameworkScriptPromise: Promise<HTMLScriptElement>;
  */
 if (document.currentScript) {
     const currentScript = document.currentScript as HTMLScriptElement;
-    const currentScriptUrl = new URL(currentScript.src);
-    const currentScriptParams = new URLSearchParams(currentScriptUrl.search);
+    const currentScriptParams = new URLSearchParams(
+        new URL(currentScript.src).search
+    );
 
     // Load Framework API if requested
     if (currentScriptParams.get("loadCastFramework") === "1") {
@@ -43,17 +43,13 @@ if (document.currentScript) {
 eventMessaging.page.addListener(async message => {
     switch (message.subject) {
         case "cast:initialized": {
-            bridgeInfo = message.data;
-
             // If framework API is requested, ensure loaded
-            if (frameworkScriptPromise) {
-                await frameworkScriptPromise;
-            }
+            await frameworkScriptPromise;
 
             // Call page script/framework API script's init function
             const initFn = _window.__onGCastApiAvailable;
             if (initFn && typeof initFn === "function") {
-                initFn(bridgeInfo && bridgeInfo.isVersionCompatible);
+                initFn(message.data.isVersionCompatible);
             }
 
             break;

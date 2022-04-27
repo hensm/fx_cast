@@ -6,7 +6,7 @@ import { handleCastMessage } from "./components/cast";
 import { startDiscovery, stopDiscovery } from "./components/discovery";
 import { startMediaServer, stopMediaServer } from "./components/mediaServer";
 
-import { __applicationName, __applicationVersion } from "../../package.json";
+import { __applicationVersion } from "../../package.json";
 
 process.on("SIGTERM", () => {
     stopDiscovery();

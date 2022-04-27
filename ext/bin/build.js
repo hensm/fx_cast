@@ -53,7 +53,7 @@ const preactCompatPlugin = {
             "../node_modules/preact/compat/dist/compat.module.js"
         );
 
-        build.onResolve({ filter: /^(react|react-dom)$/ }, args => ({
+        build.onResolve({ filter: /^(react|react-dom)$/ }, () => ({
             path: preactPath
         }));
     }

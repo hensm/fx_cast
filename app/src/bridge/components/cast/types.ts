@@ -125,7 +125,7 @@ interface BreakClip {
     contentId?: string;
     contentType?: string;
     contentUrl?: string;
-    customData?: {};
+    customData?: unknown;
     duration?: number;
     id: string;
     hlsSegmentFormat?: HlsSegmentFormat;
@@ -137,7 +137,7 @@ interface BreakClip {
 
 interface TextTrackStyle {
     backgroundColor: Nullable<string>;
-    customData: any;
+    customData: unknown;
     edgeColor: Nullable<string>;
     edgeType: Nullable<string>;
     fontFamily: Nullable<string>;
@@ -151,7 +151,7 @@ interface TextTrackStyle {
 }
 
 interface Track {
-    customData: any;
+    customData: unknown;
     language: Nullable<string>;
     name: Nullable<string>;
     subtype: Nullable<string>;
@@ -162,7 +162,7 @@ interface Track {
 }
 
 interface UserActionState {
-    customData: any;
+    customData: unknown;
     userAction: UserAction;
 }
 
@@ -185,7 +185,7 @@ interface MediaInformation {
     contentId: string;
     contentType: string;
     contentUrl?: string;
-    customData: any;
+    customData: unknown;
     duration: Nullable<number>;
     entity?: string;
     hlsSegmentFormat?: HlsSegmentFormat;
@@ -269,7 +269,7 @@ interface PhotoMediaMetadata {
 interface QueueItem {
     activeTrackIds: Nullable<number[]>;
     autoplay: boolean;
-    customData: any;
+    customData: unknown;
     itemId: Nullable<number>;
     media: MediaInformation;
     playbackDuration: Nullable<number>;

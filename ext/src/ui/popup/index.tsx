@@ -565,8 +565,6 @@ class ReceiverEntry extends Component<ReceiverEntryProps, ReceiverEntryState> {
             return;
         }
 
-        const application = status.applications?.[0];
-
         if (this.state.showAlternateAction) {
             this.props.onStop(this.props.receiverDevice);
         } else {

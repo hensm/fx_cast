@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
+
 declare const BRIDGE_VERSION: string;
 declare const BRIDGE_NAME: string;
 declare const MIRRORING_APP_ID: string;
@@ -68,7 +70,7 @@ type ExportFunctionFunc = (...args: any[]) => any;
 
 declare function exportFunction(
     func: ExportFunctionFunc,
-    targetScope: any,
+    targetScope: Window,
     options?: ExportFunctionOptions
 ): ExportFunctionFunc;
 

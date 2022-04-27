@@ -7,6 +7,10 @@ import cast, { ensureInit } from "../../export";
 import { Message } from "../../../messaging";
 import { ReceiverDevice } from "../../../types";
 
+import type Session from "../../sdk/Session";
+import type Media from "../../sdk/media/Media";
+import type { Error as Error_ } from "../../sdk/classes";
+
 function startMediaServer(
     filePath: string,
     port: number
@@ -49,12 +53,12 @@ function startMediaServer(
 
 let backgroundPort: MessagePort;
 
-let currentSession: cast.Session;
-let currentMedia: cast.media.Media;
+let currentSession: Session;
+let currentMedia: Media;
 
 let targetElement: HTMLElement;
 
-function getSession(opts: InitOptions): Promise<cast.Session> {
+function getSession(opts: InitOptions): Promise<Session> {
     return new Promise(async (resolve, reject) => {
         /**
          * If a receiver is available, call requestSession. If a
@@ -76,10 +80,10 @@ function getSession(opts: InitOptions): Promise<cast.Session> {
             // TODO: Handle this
         }
 
-        function onRequestSessionSuccess(session: cast.Session) {
+        function onRequestSessionSuccess(session: Session) {
             resolve(session);
         }
-        function onRequestSessionError(err: cast.Error) {
+        function onRequestSessionError(err: Error_) {
             reject(err.description);
         }
 
@@ -97,7 +101,7 @@ function getSession(opts: InitOptions): Promise<cast.Session> {
     });
 }
 
-function getMedia(opts: InitOptions): Promise<cast.media.Media> {
+function getMedia(opts: InitOptions): Promise<Media> {
     return new Promise(async (resolve, reject) => {
         let mediaUrl = new URL(opts.mediaUrl);
         const mediaTitle = mediaUrl.pathname.slice(1);

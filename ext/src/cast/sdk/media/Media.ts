@@ -45,7 +45,7 @@ export default class Media {
     activeTrackIds: Nullable<number[]> = null;
     breakStatus?: BreakStatus;
     currentTime = 0;
-    customData: any = null;
+    customData: unknown = null;
     idleReason: Nullable<string> = null;
     liveSeekableRange?: LiveSeekableRange;
     media: Nullable<MediaInfo> = null;

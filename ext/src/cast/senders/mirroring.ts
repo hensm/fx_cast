@@ -6,6 +6,8 @@ import cast, { ensureInit } from "../export";
 import { ReceiverSelectorMediaType } from "../../background/receiverSelector";
 import { ReceiverDevice } from "../../types";
 
+import type Session from "../sdk/Session";
+
 // Variables passed from background
 const {
     selectedMedia,
@@ -17,7 +19,7 @@ const {
 
 const FX_CAST_RECEIVER_APP_NAMESPACE = "urn:x-cast:fx_cast";
 
-let session: cast.Session;
+let session: Session;
 let wasSessionRequested = false;
 
 let peerConnection: RTCPeerConnection;
@@ -26,7 +28,7 @@ let peerConnection: RTCPeerConnection;
  * Sends a message to the fx_cast app running on the
  * receiver device.
  */
-function sendAppMessage(subject: string, data: any) {
+function sendAppMessage(subject: string, data: unknown) {
     if (!session) {
         return;
     }
@@ -41,7 +43,7 @@ window.addEventListener("beforeunload", () => {
     sendAppMessage("close", null);
 });
 
-async function onRequestSessionSuccess(newSession: cast.Session) {
+async function onRequestSessionSuccess(newSession: Session) {
     cast.logMessage("onRequestSessionSuccess");
 
     session = newSession;

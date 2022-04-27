@@ -72,8 +72,6 @@ export default class Session extends CastClient {
                         this.establishAppConnection(this.transportId);
                         this.onSessionCreated?.(this.sessionId);
 
-                        const { friendlyName } = this.receiverDevice;
-
                         messaging.sendMessage({
                             subject: "cast:sessionCreated",
                             data: {

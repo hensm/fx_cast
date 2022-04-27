@@ -489,8 +489,7 @@ function packageLinuxRpm(
 function packageWin32(
     arch,
     platformExecutableName,
-    platformExecutablePath,
-    platformManifestPath
+    platformExecutablePath
 ) {
     const outputName = `${meta.__applicationName}-${meta.__applicationVersion}-${arch}.exe`;
 
@@ -525,6 +524,6 @@ function packageWin32(
 }
 
 build().catch(e => {
-    console.log("Build failed", e);
+    console.error("Build failed", e);
     process.exit(1);
 });

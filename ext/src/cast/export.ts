@@ -1,6 +1,6 @@
 "use strict";
 
-import messaging, { Message } from "../messaging";
+import { Message } from "../messaging";
 
 import { BridgeInfo } from "../lib/bridge";
 import { TypedMessagePort } from "../lib/TypedMessagePort";

@@ -3,7 +3,7 @@
 export class Logger {
     constructor(private prefix: string) {}
 
-    public log(message: string, data?: any) {
+    public log(message: string, data?: unknown) {
         const formattedMessage = `${this.prefix} (Log): ${message}`;
         if (data) {
             // eslint-disable-next-line no-console
@@ -13,7 +13,7 @@ export class Logger {
             console.log(formattedMessage);
         }
     }
-    public info(message: string, data?: any) {
+    public info(message: string, data?: unknown) {
         const formattedMessage = `${this.prefix} (Info): ${message}`;
         if (data) {
             console.info(formattedMessage, data);
@@ -21,7 +21,7 @@ export class Logger {
             console.info(formattedMessage);
         }
     }
-    public warn(message: string, data?: any) {
+    public warn(message: string, data?: unknown) {
         const formattedMessage = `${this.prefix} (Warning): ${message}`;
         if (data) {
             console.warn(formattedMessage, data);
@@ -29,7 +29,7 @@ export class Logger {
             console.warn(formattedMessage);
         }
     }
-    public error(message: string, data?: any) {
+    public error(message: string, data?: unknown) {
         const formattedMessage = `${this.prefix} (Error): ${message}`;
         if (data) {
             console.error(formattedMessage, data);

@@ -52,7 +52,7 @@ type ExtMessageDefinitions = {
         defaultMediaType?: ReceiverSelectorMediaType;
         availableMediaTypes?: ReceiverSelectorMediaType;
     };
-    "popup:close": {};
+    "popup:close": undefined;
 
     "receiverSelector:selected": ReceiverSelection;
     "receiverSelector:stop": ReceiverSelection;
@@ -62,9 +62,9 @@ type ExtMessageDefinitions = {
     };
     "cast:selectReceiver/selected": ReceiverSelectionCast;
     "cast:selectReceiver/stopped": ReceiverSelectionStop;
-    "cast:selectReceiver/cancelled": {};
+    "cast:selectReceiver/cancelled": undefined;
 
-    "main:closeReceiverSelector": {};
+    "main:closeReceiverSelector": undefined;
 
     "main:initializeCast": { appId: string };
     "cast:initialized": BridgeInfo;
@@ -221,12 +221,12 @@ type AppMessageDefinitions = {
     /**
      * Sent to bridge to stop HTTP media server.
      */
-    "bridge:stopMediaServer": {};
+    "bridge:stopMediaServer": undefined;
     /**
      * Sent to media sender from bridge when the media server has
      * stopped.
      */
-    "mediaCast:mediaServerStopped": {};
+    "mediaCast:mediaServerStopped": undefined;
     /**
      * Sent to media sender from bridge when the media server has
      * encountered an error.
@@ -250,8 +250,8 @@ type Messages = {
  * all-optional keys.
  */
 type NarrowedMessage<L extends MessageBase<keyof MessageDefinitions>> =
-    L extends any
-        ? {} extends L["data"]
+    L extends unknown
+        ? undefined extends L["data"]
             ? Omit<L, "data"> & Partial<L>
             : L
         : never;
@@ -264,22 +264,28 @@ export type Message = NarrowedMessage<Messages[keyof Messages]>;
  */
 export default new (class Messenger {
     connect(connectInfo: { name: string }) {
-        return browser.runtime.connect(connectInfo) as unknown as Port;
+        return browser.runtime.connect(connectInfo) as Port;
     }
 
     connectTab(tabId: number, connectInfo: { name: string; frameId: number }) {
-        return browser.tabs.connect(tabId, connectInfo) as unknown as Port;
+        return browser.tabs.connect(tabId, connectInfo) as Port;
     }
 
     onConnect = {
         addListener(cb: (port: Port) => void) {
-            browser.runtime.onConnect.addListener(cb as any);
+            browser.runtime.onConnect.addListener(
+                cb as (port: browser.runtime.Port) => void
+            );
         },
         removeListener(cb: (port: Port) => void) {
-            browser.runtime.onConnect.removeListener(cb as any);
+            browser.runtime.onConnect.removeListener(
+                cb as (port: browser.runtime.Port) => void
+            );
         },
         hasListener(cb: (port: Port) => void) {
-            return browser.runtime.onConnect.hasListener(cb as any);
+            return browser.runtime.onConnect.hasListener(
+                cb as (port: browser.runtime.Port) => void
+            );
         }
     };
 })();

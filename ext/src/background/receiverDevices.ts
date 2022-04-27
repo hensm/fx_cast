@@ -5,7 +5,7 @@ import logger from "../lib/logger";
 import { TypedEventTarget } from "../lib/TypedEventTarget";
 
 import { Message, Port } from "../messaging";
-import { ReceiverDevice, ReceiverDeviceCapabilities } from "../types";
+import { ReceiverDevice } from "../types";
 import { ReceiverStatus } from "../cast/sdk/types";
 
 interface EventMap {

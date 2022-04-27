@@ -37,7 +37,6 @@ export async function convertSrtToVtt(srtFilePath: string) {
      * millisecond separator.
      */
     for (const groups of fileContents.matchAll(REGEX_CAPTION)) {
-        const captionSource = groups[0];
         const captionIndex = groups[1];
         const captionTime = groups[2];
         const captionText = groups[3];

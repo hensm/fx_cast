@@ -1,9 +1,9 @@
 "use strict";
 
-import { Transform } from "stream";
+import { Transform, TransformCallback } from "stream";
 import { Message } from "./bridge/messaging";
 
-type ResponseHandlerFunction = (message: Message) => Promise<any>;
+type ResponseHandlerFunction = (message: Message) => Promise<unknown>;
 
 /**
  * Takes a handler function that implements the transform
@@ -20,8 +20,7 @@ export class ResponseTransform extends Transform {
     public _transform(
         chunk: Message,
         _encoding: string,
-        // tslint:disable-next-line:ban-types
-        callback: Function
+        callback: TransformCallback
     ) {
         Promise.resolve(this._handler(chunk)).then(res => {
             if (res) {
@@ -49,10 +48,10 @@ export class DecodeTransform extends Transform {
     }
 
     public _transform(
-        chunk: any,
+        chunk: Uint8Array,
         _encoding: string,
         // tslint:disable-next-line:ban-types
-        callback: Function
+        callback: TransformCallback
     ) {
         // Append next chunk to buffer
         this._messageBuffer = Buffer.concat([this._messageBuffer, chunk]);
@@ -108,10 +107,10 @@ export class EncodeTransform extends Transform {
     }
 
     public _transform(
-        chunk: any,
+        chunk: Uint8Array,
         _encoding: string,
         // tslint:disable-next-line:ban-types
-        callback: Function
+        callback: TransformCallback
     ) {
         const messageLength = Buffer.alloc(4);
         const message = Buffer.from(JSON.stringify(chunk));

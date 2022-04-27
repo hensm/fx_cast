@@ -163,12 +163,12 @@ type MessageDefinitions = {
     /**
      * Sent to bridge to stop HTTP media server.
      */
-    "bridge:stopMediaServer": {};
+    "bridge:stopMediaServer": undefined;
     /**
      * Sent to media sender from bridge when the media server has
      * stopped.
      */
-    "mediaCast:mediaServerStopped": {};
+    "mediaCast:mediaServerStopped": undefined;
     /**
      * Sent to media sender from bridge when the media server has
      * encountered an error.
@@ -190,8 +190,8 @@ type Messages = {
  * all-optional keys.
  */
 type NarrowedMessage<L extends MessageBase<keyof MessageDefinitions>> =
-    L extends any
-        ? {} extends L["data"]
+    L extends unknown
+        ? undefined extends L["data"]
             ? Omit<L, "data"> & Partial<L>
             : L
         : never;
@@ -231,7 +231,7 @@ class Messenger extends TypedEmitter<MessengerEvents> {
         this.encodeTransform.write(message);
     }
 
-    send(data: any) {
+    send(data: unknown) {
         this.encodeTransform.write(data);
     }
 }

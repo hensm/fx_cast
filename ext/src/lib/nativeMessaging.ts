@@ -32,7 +32,6 @@ function connectNative(application: string): Port {
 
     // Port proxy API
     const portObject: Port = {
-        error: null as any,
         name: "",
 
         onDisconnect: {
@@ -150,7 +149,7 @@ function connectNative(application: string): Port {
         }
     });
 
-    port.onMessage.addListener((message: any) => {
+    port.onMessage.addListener((message: Message) => {
         if (!isNativeHostStatusKnown) {
             isNativeHostStatusKnown = true;
             messageQueue = [];
@@ -176,8 +175,6 @@ async function sendNativeMessage(application: string, message: Message) {
                 "Bridge connection failed and backup not enabled."
             );
         }
-
-        const port = await options.get("bridgeBackupPort");
 
         return await new Promise((resolve, reject) => {
             const ws = new WebSocket(

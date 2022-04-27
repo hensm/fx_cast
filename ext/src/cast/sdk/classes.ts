@@ -36,7 +36,7 @@ export class Error {
     constructor(
         public code: string,
         public description: Nullable<string> = null,
-        public details: any = null
+        public details: unknown = null
     ) {}
 }
 

@@ -49,7 +49,7 @@ export class BreakClip {
     contentId?: string;
     contentType?: string;
     contentUrl?: string;
-    customData?: {};
+    customData?: unknown;
     duration?: number;
     hlsSegmentFormat?: HlsSegmentFormat;
     posterUrl?: string;
@@ -99,7 +99,7 @@ export class GenericMediaMetadata {
 }
 
 export class GetStatusRequest {
-    customData: any = null;
+    customData: unknown = null;
 }
 
 export class LiveSeekableRange {
@@ -117,7 +117,7 @@ export class LoadRequest {
     atvCredentialsType?: string;
     autoplay: Nullable<boolean> = true;
     currentTime: Nullable<number> = null;
-    customData: any = null;
+    customData: unknown = null;
     media: MediaInfo;
     requestId = 0;
     sessionId: Nullable<string> = null;
@@ -139,7 +139,7 @@ export class MediaInfo {
     atvEntity?: string;
     breakClips?: BreakClip[];
     breaks?: Break[];
-    customData: any = null;
+    customData: unknown = null;
     contentUrl?: string;
     duration: Nullable<number> = null;
     entity?: string;
@@ -200,7 +200,7 @@ export class MusicTrackMediaMetadata {
 }
 
 export class PauseRequest {
-    customData: any = null;
+    customData: unknown = null;
 }
 
 export class PhotoMediaMetadata {
@@ -218,7 +218,7 @@ export class PhotoMediaMetadata {
 }
 
 export class PlayRequest {
-    customData: any = null;
+    customData: unknown = null;
 }
 
 export class QueueData {
@@ -236,7 +236,7 @@ export class QueueData {
 }
 
 export class QueueInsertItemsRequest {
-    customData: any = null;
+    customData: unknown = null;
     insertBefore: Nullable<number> = null;
     requestId: Nullable<number> = null;
     sessionId: Nullable<string> = null;
@@ -248,7 +248,7 @@ export class QueueInsertItemsRequest {
 export class QueueItem {
     activeTrackIds: Nullable<number[]> = null;
     autoplay = true;
-    customData: any = null;
+    customData: unknown = null;
     itemId: Nullable<number> = null;
     media: MediaInfo;
     playbackDuration: Nullable<number> = null;
@@ -268,7 +268,7 @@ export class QueueJumpRequest {
 
 export class QueueLoadRequest {
     type = "QUEUE_LOAD";
-    customData: any = null;
+    customData: unknown = null;
     repeatMode: string = RepeatMode.OFF;
     startIndex = 0;
 
@@ -277,13 +277,13 @@ export class QueueLoadRequest {
 
 export class QueueRemoveItemsRequest {
     type = "QUEUE_REMOVE";
-    customData: any = null;
+    customData: unknown = null;
 
     constructor(public itemIds: number[]) {}
 }
 
 export class QueueReorderItemsRequest {
-    customData: any = null;
+    customData: unknown = null;
     insertBefore: Nullable<number> = null;
     type = "QUEUE_REORDER";
 
@@ -292,30 +292,30 @@ export class QueueReorderItemsRequest {
 
 export class QueueSetPropertiesRequest {
     type = "QUEUE_UPDATE";
-    customData: any = null;
+    customData: unknown = null;
     repeatMode: Nullable<string> = null;
 }
 
 export class QueueUpdateItemsRequest {
     type = "QUEUE_UPDATE";
-    customData: any = null;
+    customData: unknown = null;
 
     constructor(public items: QueueItem[]) {}
 }
 
 export class SeekRequest {
     currentTime: Nullable<number> = null;
-    customData: any = null;
+    customData: unknown = null;
     resumeState: Nullable<ResumeState> = null;
 }
 
 export class StopRequest {
-    customData: any = null;
+    customData: unknown = null;
 }
 
 export class TextTrackStyle {
     backgroundColor: Nullable<string> = null;
-    customData: any = null;
+    customData: unknown = null;
     edgeColor: Nullable<string> = null;
     edgeType: Nullable<string> = null;
     fontFamily: Nullable<string> = null;
@@ -329,7 +329,7 @@ export class TextTrackStyle {
 }
 
 export class Track {
-    customData: any = null;
+    customData: unknown = null;
     language: Nullable<string> = null;
     name: Nullable<string> = null;
     subtype: Nullable<string> = null;
@@ -355,7 +355,7 @@ export class TvShowMediaMetadata {
 }
 
 export class UserActionState {
-    customData: any = null;
+    customData: unknown = null;
 
     constructor(public userAction: UserAction) {}
 }
@@ -374,7 +374,7 @@ export class VideoInformation {
 }
 
 export class VolumeRequest {
-    customData: any = null;
+    customData: unknown = null;
 
     constructor(public volume: Volume) {}
 }

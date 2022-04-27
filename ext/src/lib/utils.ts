@@ -1,7 +1,5 @@
 "use strict";
 
-import logger from "./logger";
-
 import { ReceiverSelectorMediaType } from "../background/receiverSelector";
 
 export function getNextEllipsis(ellipsis: string): string {
@@ -18,7 +16,7 @@ export function getNextEllipsis(ellipsis: string): string {
  */
 export function stringify(
     templateStrings: TemplateStringsArray,
-    ...substitutions: any[]
+    ...substitutions: unknown[]
 ) {
     let formattedString = "";
 

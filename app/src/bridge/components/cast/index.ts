@@ -3,7 +3,7 @@
 import messaging, { Message } from "../../messaging";
 
 import Session from "./Session";
-import CastClient, { NS_CONNECTION, NS_RECEIVER } from "./client";
+import CastClient from "./client";
 
 const sessions = new Map<string, Session>();
 
