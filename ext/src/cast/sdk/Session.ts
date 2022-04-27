@@ -4,7 +4,7 @@ import { v4 as uuid } from "uuid";
 
 import logger from "../../lib/logger";
 
-import { sendMessageResponse } from "../eventMessageChannel";
+import eventMessaging from "../eventMessaging";
 
 import {
     ErrorCallback,
@@ -201,7 +201,7 @@ export default class Session {
         return new Promise<void>((resolve, reject) => {
             const messageId = uuid();
 
-            sendMessageResponse({
+            eventMessaging.page.sendMessage({
                 subject: "bridge:sendCastReceiverMessage",
                 data: {
                     sessionId: this.sessionId,
@@ -271,7 +271,7 @@ export default class Session {
     ) {
         const messageId = uuid();
 
-        sendMessageResponse({
+        eventMessaging.page.sendMessage({
             subject: "bridge:sendCastSessionMessage",
             data: {
                 sessionId: this.sessionId,

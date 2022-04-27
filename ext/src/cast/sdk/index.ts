@@ -8,7 +8,7 @@ import {
 } from "../../types";
 import { ErrorCallback, SuccessCallback } from "../types";
 
-import { onMessage, sendMessageResponse } from "../eventMessageChannel";
+import eventMessaging from "../eventMessaging";
 
 import {
     AutoJoinPolicy,
@@ -125,7 +125,7 @@ export default class {
     timeout = new Timeout();
 
     constructor() {
-        onMessage(this.#onMessage.bind(this));
+        eventMessaging.page.addListener(this.#onMessage.bind(this));
     }
 
     #sendSessionRequest(
@@ -136,7 +136,7 @@ export default class {
             listener(createReceiver(receiverDevice), ReceiverAction.CAST);
         }
 
-        sendMessageResponse({
+        eventMessaging.page.sendMessage({
             subject: "bridge:createCastSession",
             data: {
                 appId: sessionRequest.appId,
@@ -158,7 +158,7 @@ export default class {
              */
             case "cast:sessionCreated": {
                 // Notify background to close UI
-                sendMessageResponse({
+                eventMessaging.page.sendMessage({
                     subject: "main:closeReceiverSelector"
                 });
 
@@ -397,7 +397,7 @@ export default class {
 
         this.#apiConfig = apiConfig;
 
-        sendMessageResponse({
+        eventMessaging.page.sendMessage({
             subject: "main:initializeCast",
             data: { appId: this.#apiConfig.sessionRequest.appId }
         });
@@ -465,7 +465,7 @@ export default class {
             }
         } else {
             // Open receiver selector UI
-            sendMessageResponse({
+            eventMessaging.page.sendMessage({
                 subject: "main:selectReceiver",
                 data: { sessionRequest: this.#sessionRequest }
             });

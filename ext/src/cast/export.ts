@@ -1,17 +1,19 @@
 "use strict";
 
-import { Message } from "../messaging";
+import messaging, { Message } from "../messaging";
 
 import { BridgeInfo } from "../lib/bridge";
 import { TypedMessagePort } from "../lib/TypedMessagePort";
 
-import {
-    onMessage,
-    onMessageResponse,
-    sendMessage
-} from "./eventMessageChannel";
-
 import CastSDK from "./sdk";
+
+import { PageEventMessenger, ExtensionEventMessenger } from "./eventMessaging";
+
+// Create messengers manually instead of relying on getters
+const eventMessaging = {
+    page: new PageEventMessenger(),
+    extension: new ExtensionEventMessenger()
+};
 
 let initializedBridgeInfo: BridgeInfo;
 let initializedBackgroundPort: MessagePort;
@@ -57,14 +59,14 @@ export function ensureInit(): Promise<TypedMessagePort<Message>> {
                 const message = ev.data as Message;
 
                 // Send message to cast instance
-                sendMessage(message);
+                eventMessaging.extension.sendMessage(message);
                 handleIncomingMessageToCast(message);
             };
 
             // cast instance -> bridge
-            onMessageResponse(message => {
-                channel.port1.postMessage(message);
-            });
+            eventMessaging.extension.addListener(message =>
+                channel.port1.postMessage(message)
+            );
         } else {
             /**
              * Import reference to message port created by contentBridge.
@@ -85,7 +87,9 @@ export function ensureInit(): Promise<TypedMessagePort<Message>> {
             };
 
             // Handle cast messages
-            onMessage(handleIncomingMessageToCast);
+            eventMessaging.page.addListener(message =>
+                handleIncomingMessageToCast(message)
+            );
         }
 
         function handleIncomingMessageToCast(message: Message) {

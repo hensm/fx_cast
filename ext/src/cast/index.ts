@@ -4,7 +4,7 @@ import logger from "../lib/logger";
 
 import { loadScript } from "../lib/utils";
 import { CAST_FRAMEWORK_SCRIPT_URL } from "./endpoints";
-import { onMessage } from "./eventMessageChannel";
+import eventMessaging from "./eventMessaging";
 
 import CastSDK from "./sdk";
 
@@ -40,7 +40,7 @@ if (document.currentScript) {
     }
 }
 
-onMessage(async message => {
+eventMessaging.page.addListener(async message => {
     switch (message.subject) {
         case "cast:initialized": {
             bridgeInfo = message.data;
