@@ -12,21 +12,18 @@ import { getMediaTypesForPageUrl } from "../../lib/utils";
 import {
     ReceiverSelection,
     ReceiverSelectionActionType,
+    ReceiverSelectionCast,
+    ReceiverSelectionStop,
     ReceiverSelectorMediaType
 } from "./index";
 
 import ReceiverSelector from "./ReceiverSelector";
 
-async function createSelector() {
-    return new ReceiverSelector();
-}
-
 let sharedSelector: ReceiverSelector;
-
 async function getSelector() {
     if (!sharedSelector) {
         try {
-            sharedSelector = await createSelector();
+            sharedSelector = new ReceiverSelector();
         } catch (err) {
             throw logger.error("Failed to create receiver selector.");
         }
@@ -68,7 +65,7 @@ async function getSelection(
         }
 
         let defaultMediaType = ReceiverSelectorMediaType.Tab;
-        let availableMediaTypes;
+        let availableMediaTypes = ReceiverSelectorMediaType.None;
 
         let pageUrl: string | undefined;
         try {
@@ -84,10 +81,9 @@ async function getSelection(
             logger.error(
                 "Failed to locate frame, falling back to default available media types."
             );
-            availableMediaTypes = ReceiverSelectorMediaType.File;
         }
 
-        // Enable app media type if initialized sender app is found
+        // Enable app media type if sender application is present
         if (castInstance || selectionOpts?.withMediaSender) {
             defaultMediaType = ReceiverSelectorMediaType.App;
             availableMediaTypes |= ReceiverSelectorMediaType.App;
@@ -95,7 +91,7 @@ async function getSelection(
 
         const opts = await options.getAll();
 
-        // Remove mirroring media types if mirroring is not enabled
+        // Disable mirroring media types if mirroring is not enabled
         if (!opts.mirroringEnabled) {
             availableMediaTypes &= ~(
                 ReceiverSelectorMediaType.Tab | ReceiverSelectorMediaType.Screen
@@ -113,7 +109,7 @@ async function getSelection(
         }
 
         // Get a new selector for each selection
-        sharedSelector = await createSelector();
+        sharedSelector = new ReceiverSelector();
 
         function onReceiverChange() {
             sharedSelector.update(receiverDevices.getDevices());
@@ -129,34 +125,52 @@ async function getSelection(
             onReceiverChange
         );
 
-        let onSelected: any;
-        let onCancelled: any;
-        let onError: any;
-        let onStop: any;
+        function onSelectorSelected(ev: CustomEvent<ReceiverSelectionCast>) {
+            logger.info("Selected receiver", ev.detail);
 
-        type EvParamsType = Parameters<
-            typeof sharedSelector.addEventListener
-        >[0];
+            removeListeners();
+            resolve({
+                actionType: ReceiverSelectionActionType.Cast,
+                receiverDevice: ev.detail.receiverDevice,
+                mediaType: ev.detail.mediaType,
+                filePath: ev.detail.filePath
+            });
+        }
+        function onSelectorStop(ev: CustomEvent<ReceiverSelectionStop>) {
+            logger.info("Stopping receiver app...", ev.detail);
 
-        function storeListener<T>(type: EvParamsType, fn: T) {
-            if (type === "selected") {
-                onSelected = fn;
-            } else if (type === "cancelled") {
-                onCancelled = fn;
-            } else if (type === "error") {
-                onError = fn;
-            } else if (type === "stop") {
-                onStop = fn;
-            }
+            receiverDevices.stopReceiverApp(ev.detail.receiverDevice.id);
 
-            return fn;
+            removeListeners();
+            resolve({
+                actionType: ReceiverSelectionActionType.Stop,
+                receiverDevice: ev.detail.receiverDevice
+            });
+        }
+        function onSelectorCancelled() {
+            logger.info("Cancelled receiver selection");
+
+            removeListeners();
+            resolve(null);
+        }
+        function onSelectorError(ev: CustomEvent<string>) {
+            removeListeners();
+            reject(ev.detail);
         }
 
+        sharedSelector.addEventListener("selected", onSelectorSelected);
+        sharedSelector.addEventListener("stop", onSelectorStop);
+        sharedSelector.addEventListener("cancelled", onSelectorCancelled);
+        sharedSelector.addEventListener("error", onSelectorError);
+
         function removeListeners() {
-            sharedSelector.removeEventListener("selected", onSelected);
-            sharedSelector.removeEventListener("cancelled", onCancelled);
-            sharedSelector.removeEventListener("error", onError);
-            sharedSelector.removeEventListener("stop", onStop);
+            sharedSelector.removeEventListener("selected", onSelectorSelected);
+            sharedSelector.removeEventListener("stop", onSelectorStop);
+            sharedSelector.removeEventListener(
+                "cancelled",
+                onSelectorCancelled
+            );
+            sharedSelector.removeEventListener("error", onSelectorError);
 
             receiverDevices.removeEventListener(
                 "receiverDeviceUp",
@@ -172,70 +186,24 @@ async function getSelection(
             );
         }
 
-        sharedSelector.addEventListener(
-            "selected",
-            storeListener("selected", ev => {
-                logger.info("Selected receiver", ev.detail);
-                resolve({
-                    actionType: ReceiverSelectionActionType.Cast,
-                    receiverDevice: ev.detail.receiverDevice,
-                    mediaType: ev.detail.mediaType,
-                    filePath: ev.detail.filePath
-                });
-                removeListeners();
-            })
-        );
-
-        sharedSelector.addEventListener(
-            "cancelled",
-            storeListener("cancelled", () => {
-                logger.info("Cancelled receiver selection");
-                resolve(null);
-                removeListeners();
-            })
-        );
-
-        sharedSelector.addEventListener(
-            "error",
-            storeListener("error", ev => {
-                reject(ev.detail);
-                removeListeners();
-            })
-        );
-
-        sharedSelector.addEventListener(
-            "stop",
-            storeListener("stop", async ev => {
-                logger.info("Stopping receiver app...", ev.detail);
-                receiverDevices.stopReceiverApp(ev.detail.receiverDevice.id);
-
-                resolve({
-                    actionType: ReceiverSelectionActionType.Stop,
-                    receiverDevice: ev.detail.receiverDevice
-                });
-                removeListeners();
-            })
-        );
-
         // Ensure status manager is initialized
         await receiverDevices.init();
 
-        const pageInfo = pageUrl
-            ? {
-                  url: pageUrl,
-                  tabId: contextTabId,
-                  frameId: contextFrameId,
-                  sessionRequest: selectionOpts?.sessionRequest
-              }
-            : undefined;
-
-        sharedSelector.open(
-            receiverDevices.getDevices(),
+        sharedSelector.open({
+            receiverDevices: receiverDevices.getDevices(),
             defaultMediaType,
             availableMediaTypes,
-            castInstance?.appId,
-            pageInfo
-        );
+            appId: castInstance?.appId,
+            // Create page info
+            pageInfo: pageUrl
+                ? {
+                      url: pageUrl,
+                      tabId: contextTabId,
+                      frameId: contextFrameId,
+                      sessionRequest: selectionOpts?.sessionRequest
+                  }
+                : undefined
+        });
     });
 }
 

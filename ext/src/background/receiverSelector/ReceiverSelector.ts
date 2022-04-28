@@ -16,13 +16,6 @@ import {
 
 const POPUP_URL = browser.runtime.getURL("ui/popup/index.html");
 
-interface ReceiverSelectorEvents {
-    selected: ReceiverSelectionCast;
-    error: string;
-    cancelled: void;
-    stop: ReceiverSelectionStop;
-}
-
 export interface PageInfo {
     url: string;
     tabId: number;
@@ -30,17 +23,27 @@ export interface PageInfo {
     sessionRequest?: SessionRequest;
 }
 
+interface ReceiverSelectorEvents {
+    selected: ReceiverSelectionCast;
+    error: string;
+    cancelled: void;
+    stop: ReceiverSelectionStop;
+}
+
 /**
  * Manages the receiver selector popup window and communication with the
  * extension page hosted within.
  */
 export default class ReceiverSelector extends TypedEventTarget<ReceiverSelectorEvents> {
+    /** Popup window ID. */
     private windowId?: number;
 
+    /** Message port to extension page within popup window. */
     private messagePort?: Port;
     private messagePortDisconnected?: boolean;
 
     private receiverDevices?: ReceiverDevice[];
+
     private defaultMediaType?: ReceiverSelectorMediaType;
     private availableMediaTypes?: ReceiverSelectorMediaType;
 
@@ -68,6 +71,7 @@ export default class ReceiverSelector extends TypedEventTarget<ReceiverSelectorE
         messaging.onConnect.addListener(this.onConnect);
     }
 
+    /** Is receiver selector window currently open. */
     get isOpen() {
         return this.#isOpen;
     }
@@ -75,24 +79,24 @@ export default class ReceiverSelector extends TypedEventTarget<ReceiverSelectorE
     /**
      * Creates and opens a receiver selector window.
      */
-    public async open(
-        receiverDevices: ReceiverDevice[],
-        defaultMediaType: ReceiverSelectorMediaType,
-        availableMediaTypes: ReceiverSelectorMediaType,
-        appId?: string,
-        pageInfo?: PageInfo
-    ) {
-        this.appId = appId;
-        this.pageInfo = pageInfo;
+    public async open(opts: {
+        receiverDevices: ReceiverDevice[];
+        defaultMediaType: ReceiverSelectorMediaType;
+        availableMediaTypes: ReceiverSelectorMediaType;
+        appId?: string;
+        pageInfo?: PageInfo;
+    }) {
+        this.appId = opts.appId;
+        this.pageInfo = opts.pageInfo;
 
         // If popup already exists, close it
         if (this.windowId) {
             await browser.windows.remove(this.windowId);
         }
 
-        this.receiverDevices = receiverDevices;
-        this.defaultMediaType = defaultMediaType;
-        this.availableMediaTypes = availableMediaTypes;
+        this.receiverDevices = opts.receiverDevices;
+        this.defaultMediaType = opts.defaultMediaType;
+        this.availableMediaTypes = opts.availableMediaTypes;
 
         const popupSizePosition = {
             width: 350,
@@ -163,7 +167,6 @@ export default class ReceiverSelector extends TypedEventTarget<ReceiverSelectorE
             await browser.windows.remove(this.windowId);
         }
 
-        this.#isOpen = false;
         this.appId = undefined;
 
         if (this.messagePort && !this.messagePortDisconnected) {
@@ -255,6 +258,8 @@ export default class ReceiverSelector extends TypedEventTarget<ReceiverSelectorE
             return;
         }
 
+        this.#isOpen = false;
+
         browser.windows.onRemoved.removeListener(this.onWindowsRemoved);
         browser.windows.onFocusChanged.removeListener(
             this.onWindowsFocusChanged
@@ -265,11 +270,11 @@ export default class ReceiverSelector extends TypedEventTarget<ReceiverSelectorE
         }
 
         // Cleanup
-        this.windowId = undefined;
-        this.messagePort = undefined;
-        this.receiverDevices = undefined;
-        this.defaultMediaType = undefined;
-        this.availableMediaTypes = undefined;
+        delete this.windowId;
+        delete this.messagePort;
+        delete this.receiverDevices;
+        delete this.defaultMediaType;
+        delete this.availableMediaTypes;
         this.wasReceiverSelected = false;
     }
 
