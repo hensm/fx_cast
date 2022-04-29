@@ -3,8 +3,7 @@
 import options from "../../lib/options";
 import cast, { ensureInit } from "../export";
 
-import { ReceiverSelectorMediaType } from "../../background/receiverSelector";
-import { ReceiverDevice } from "../../types";
+import { ReceiverDevice, ReceiverSelectorMediaType } from "../../types";
 
 import type Session from "../sdk/Session";
 

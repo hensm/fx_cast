@@ -11,14 +11,15 @@ import messaging, { Message, Port } from "../../messaging";
 import { getNextEllipsis } from "../../lib/utils";
 import { RemoteMatchPattern } from "../../lib/matchPattern";
 
-import { ReceiverDevice, ReceiverDeviceCapabilities } from "../../types";
-import { Capability } from "../../cast/sdk/enums";
-
 import {
+    ReceiverDevice,
+    ReceiverDeviceCapabilities,
     ReceiverSelectionActionType,
     ReceiverSelectorMediaType
-} from "../../background/receiverSelector";
-import { PageInfo } from "../../background/receiverSelector/ReceiverSelector";
+} from "../../types";
+
+import { ReceiverSelectorPageInfo } from "../../background/ReceiverSelector";
+import { Capability } from "../../cast/sdk/enums";
 
 const _ = browser.i18n.getMessage;
 
@@ -73,7 +74,7 @@ interface PopupAppState {
 
     filePath?: string;
     appId?: string;
-    pageInfo?: PageInfo;
+    pageInfo?: ReceiverSelectorPageInfo;
 
     mirroringEnabled: boolean;
     userAgentWhitelistEnabled: boolean;
@@ -405,7 +406,10 @@ class PopupApp extends Component<PopupAppProps, PopupAppState> {
         );
     }
 
-    private async onAddToWhitelist(app: KnownApp, pageInfo: PageInfo) {
+    private async onAddToWhitelist(
+        app: KnownApp,
+        pageInfo: ReceiverSelectorPageInfo
+    ) {
         if (!app.matches) {
             return;
         }

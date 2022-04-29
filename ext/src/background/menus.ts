@@ -2,17 +2,17 @@
 
 import logger from "../lib/logger";
 import options from "../lib/options";
-
 import { stringify } from "../lib/utils";
 
 import {
-    ReceiverSelection,
     ReceiverSelectionActionType,
     ReceiverSelectorMediaType
-} from "./receiverSelector";
+} from "../types";
 
-import ReceiverSelectorManager from "./receiverSelector/ReceiverSelectorManager";
-import CastManager from "../cast/CastManager";
+import { ReceiverSelection } from "./ReceiverSelector";
+
+import selectorManager from "./selectorManager";
+import castManager from "./castManager";
 
 const _ = browser.i18n.getMessage;
 
@@ -142,7 +142,7 @@ async function onMenuClicked(
 
         let selection: Nullable<ReceiverSelection> = null;
         try {
-            selection = await ReceiverSelectorManager.getSelection(
+            selection = await selectorManager.getSelection(
                 tab.id,
                 info.frameId,
                 { withMediaSender: castMediaMenuClicked }
@@ -160,7 +160,7 @@ async function onMenuClicked(
         }
 
         if (castMenuClicked) {
-            CastManager.loadSender({
+            castManager.loadSender({
                 tabId: tab.id,
                 frameId: info.frameId,
                 selection
@@ -187,7 +187,7 @@ async function onMenuClicked(
                 });
             } else {
                 // Handle other responses
-                CastManager.loadSender({
+                castManager.loadSender({
                     tabId: tab.id,
                     frameId: info.frameId,
                     selection

@@ -3,7 +3,6 @@
 import { TypedPort } from "./lib/TypedPort";
 import { BridgeInfo } from "./lib/bridge";
 
-import { ReceiverSelectorMediaType } from "./background/receiverSelector";
 import {
     ReceiverSelection,
     ReceiverSelectionCast,
@@ -19,7 +18,7 @@ import {
 } from "./cast/sdk/types";
 import { SessionRequest } from "./cast/sdk/classes";
 
-import { ReceiverDevice } from "./types";
+import { ReceiverDevice, ReceiverSelectorMediaType } from "./types";
 
 /**
  * Messages are JSON objects with a `subject` string key and a

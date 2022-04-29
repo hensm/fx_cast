@@ -5,9 +5,9 @@ import logger from "../lib/logger";
 import options from "../lib/options";
 import bridge, { BridgeInfo } from "../lib/bridge";
 
-import CastManager from "../cast/CastManager";
-import receiverDevices from "./receiverDevices";
-import ReceiverSelectorManager from "./receiverSelector/ReceiverSelectorManager";
+import castManager from "./castManager";
+import deviceManager from "./deviceManager";
+import selectorManager from "./selectorManager";
 
 import { initMenus } from "./menus";
 import { initWhitelist } from "./whitelist";
@@ -101,8 +101,8 @@ async function init() {
 
     await notifyBridgeCompat();
 
-    await receiverDevices.init();
-    await CastManager.init();
+    await deviceManager.init();
+    await castManager.init();
 
     await initMenus();
     await initWhitelist();
@@ -119,9 +119,9 @@ async function init() {
             return;
         }
 
-        const selection = await ReceiverSelectorManager.getSelection(tab.id);
+        const selection = await selectorManager.getSelection(tab.id);
         if (selection) {
-            CastManager.loadSender({
+            castManager.loadSender({
                 tabId: tab.id,
                 frameId: 0,
                 selection

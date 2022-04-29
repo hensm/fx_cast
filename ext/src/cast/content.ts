@@ -32,7 +32,7 @@ Reflect.defineProperty(HTMLScriptElement.prototype.wrappedJSObject, "src", {
     enumerable: true,
     get: desc?.get,
 
-    set: exportFunction(function setFunc(this: HTMLScriptElement, value) {
+    set: exportFunction(function (this: HTMLScriptElement, value: string) {
         if (CAST_SCRIPT_URLS.includes(value)) {
             return desc?.set?.call(this, CAST_LOADER_SCRIPT_URL);
         }

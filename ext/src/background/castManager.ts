@@ -7,13 +7,14 @@ import options from "../lib/options";
 import { stringify } from "../lib/utils";
 
 import {
-    ReceiverSelection,
     ReceiverSelectionActionType,
     ReceiverSelectorMediaType
-} from "../background/receiverSelector";
+} from "../types";
 
-import ReceiverSelectorManager from "../background/receiverSelector/ReceiverSelectorManager";
-import receiverDevices from "../background/receiverDevices";
+import { ReceiverSelection } from "./ReceiverSelector";
+
+import deviceManager from "./deviceManager";
+import selectorManager from "./selectorManager";
 
 type AnyPort = Port | MessagePort;
 
@@ -26,7 +27,7 @@ export interface CastInstance {
 }
 
 /** Keeps track of cast API instances and provides bridge messaging. */
-export default new (class CastManager {
+export default new (class {
     private activeInstances = new Set<CastInstance>();
 
     public async init() {
@@ -38,7 +39,7 @@ export default new (class CastManager {
         });
 
         // Forward receiver eventes to cast instances
-        receiverDevices.addEventListener("receiverDeviceUp", ev => {
+        deviceManager.addEventListener("receiverDeviceUp", ev => {
             for (const instance of this.activeInstances) {
                 instance.contentPort.postMessage({
                     subject: "cast:receiverDeviceUp",
@@ -46,7 +47,7 @@ export default new (class CastManager {
                 });
             }
         });
-        receiverDevices.addEventListener("receiverDeviceDown", ev => {
+        deviceManager.addEventListener("receiverDeviceDown", ev => {
             for (const instance of this.activeInstances) {
                 instance.contentPort.postMessage({
                     subject: "cast:receiverDeviceDown",
@@ -202,7 +203,7 @@ export default new (class CastManager {
             case "main:initializeCast": {
                 instance.appId = message.data.appId;
 
-                for (const receiverDevice of receiverDevices.getDevices()) {
+                for (const receiverDevice of deviceManager.getDevices()) {
                     instance.contentPort.postMessage({
                         subject: "cast:receiverDeviceUp",
                         data: { receiverDevice }
@@ -224,12 +225,11 @@ export default new (class CastManager {
                 }
 
                 try {
-                    const selection =
-                        await ReceiverSelectorManager.getSelection(
-                            instance.contentTabId,
-                            instance.contentFrameId,
-                            { sessionRequest: message.data.sessionRequest }
-                        );
+                    const selection = await selectorManager.getSelection(
+                        instance.contentTabId,
+                        instance.contentFrameId,
+                        { sessionRequest: message.data.sessionRequest }
+                    );
 
                     // Handle cancellation
                     if (!selection) {
@@ -297,7 +297,7 @@ export default new (class CastManager {
              * same one that caused the session creation.
              */
             case "main:closeReceiverSelector": {
-                const selector = await ReceiverSelectorManager.getSelector();
+                const selector = await selectorManager.getSelector();
                 const shouldClose = await options.get(
                     "receiverSelectorWaitForConnection"
                 );
@@ -366,7 +366,7 @@ export default new (class CastManager {
 
             case ReceiverSelectorMediaType.File: {
                 const fileUrl = new URL(`file://${opts.selection.filePath}`);
-                const { init } = await import("./senders/media");
+                const { init } = await import("../cast/senders/media");
 
                 init({
                     mediaUrl: fileUrl.href,

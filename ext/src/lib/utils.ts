@@ -1,6 +1,6 @@
 "use strict";
 
-import { ReceiverSelectorMediaType } from "../background/receiverSelector";
+import { ReceiverSelectorMediaType } from "../types";
 
 export function getNextEllipsis(ellipsis: string): string {
     if (ellipsis === "") return ".";

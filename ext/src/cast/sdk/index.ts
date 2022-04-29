@@ -2,10 +2,7 @@
 
 import logger from "../../lib/logger";
 
-import {
-    ReceiverDevice,
-    ReceiverDeviceCapabilities as ReceiverDeviceCapabilities
-} from "../../types";
+import { ReceiverDevice, ReceiverDeviceCapabilities } from "../../types";
 import { ErrorCallback, SuccessCallback } from "../types";
 
 import eventMessaging from "../eventMessaging";

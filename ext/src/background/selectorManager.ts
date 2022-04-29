@@ -1,23 +1,24 @@
 "use strict";
 
-import options from "../../lib/options";
-import logger from "../../lib/logger";
+import options from "../lib/options";
+import logger from "../lib/logger";
 
-import CastManager from "../../cast/CastManager";
-import { SessionRequest } from "../../cast/sdk/classes";
-import receiverDevices from "../receiverDevices";
+import { getMediaTypesForPageUrl } from "../lib/utils";
+import { SessionRequest } from "../cast/sdk/classes";
 
-import { getMediaTypesForPageUrl } from "../../lib/utils";
+import castManager from "./castManager";
+import deviceManager from "./deviceManager";
+
+import ReceiverSelector, {
+    ReceiverSelection,
+    ReceiverSelectionCast,
+    ReceiverSelectionStop
+} from "./ReceiverSelector";
 
 import {
-    ReceiverSelection,
     ReceiverSelectionActionType,
-    ReceiverSelectionCast,
-    ReceiverSelectionStop,
     ReceiverSelectorMediaType
-} from "./index";
-
-import ReceiverSelector from "./ReceiverSelector";
+} from "../types";
 
 let sharedSelector: ReceiverSelector;
 async function getSelector() {
@@ -46,12 +47,12 @@ async function getSelection(
     contextTabId: number,
     contextFrameId = 0,
     selectionOpts?: {
-        sessionRequest: SessionRequest;
+        sessionRequest?: SessionRequest;
         withMediaSender?: boolean;
     }
 ): Promise<ReceiverSelection | null> {
     return new Promise(async (resolve, reject) => {
-        let castInstance = CastManager.getInstance(
+        let castInstance = castManager.getInstance(
             contextTabId,
             contextFrameId
         );
@@ -112,15 +113,12 @@ async function getSelection(
         sharedSelector = new ReceiverSelector();
 
         function onReceiverChange() {
-            sharedSelector.update(receiverDevices.getDevices());
+            sharedSelector.update(deviceManager.getDevices());
         }
 
-        receiverDevices.addEventListener("receiverDeviceUp", onReceiverChange);
-        receiverDevices.addEventListener(
-            "receiverDeviceDown",
-            onReceiverChange
-        );
-        receiverDevices.addEventListener(
+        deviceManager.addEventListener("receiverDeviceUp", onReceiverChange);
+        deviceManager.addEventListener("receiverDeviceDown", onReceiverChange);
+        deviceManager.addEventListener(
             "receiverDeviceUpdated",
             onReceiverChange
         );
@@ -139,7 +137,7 @@ async function getSelection(
         function onSelectorStop(ev: CustomEvent<ReceiverSelectionStop>) {
             logger.info("Stopping receiver app...", ev.detail);
 
-            receiverDevices.stopReceiverApp(ev.detail.receiverDevice.id);
+            deviceManager.stopReceiverApp(ev.detail.receiverDevice.id);
 
             removeListeners();
             resolve({
@@ -172,25 +170,25 @@ async function getSelection(
             );
             sharedSelector.removeEventListener("error", onSelectorError);
 
-            receiverDevices.removeEventListener(
+            deviceManager.removeEventListener(
                 "receiverDeviceUp",
                 onReceiverChange
             );
-            receiverDevices.removeEventListener(
+            deviceManager.removeEventListener(
                 "receiverDeviceDown",
                 onReceiverChange
             );
-            receiverDevices.removeEventListener(
+            deviceManager.removeEventListener(
                 "receiverDeviceUpdated",
                 onReceiverChange
             );
         }
 
         // Ensure status manager is initialized
-        await receiverDevices.init();
+        await deviceManager.init();
 
         sharedSelector.open({
-            receiverDevices: receiverDevices.getDevices(),
+            receiverDevices: deviceManager.getDevices(),
             defaultMediaType,
             availableMediaTypes,
             appId: castInstance?.appId,

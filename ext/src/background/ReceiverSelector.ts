@@ -1,27 +1,38 @@
 "use strict";
 
-import logger from "../../lib/logger";
-import messaging, { Port, Message } from "../../messaging";
-import options from "../../lib/options";
+import logger from "../lib/logger";
+import messaging, { Port, Message } from "../messaging";
+import options from "../lib/options";
 
-import { TypedEventTarget } from "../../lib/TypedEventTarget";
-import { ReceiverDevice } from "../../types";
-import { SessionRequest } from "../../cast/sdk/classes";
-
+import { TypedEventTarget } from "../lib/TypedEventTarget";
+import { SessionRequest } from "../cast/sdk/classes";
 import {
-    ReceiverSelectionCast,
-    ReceiverSelectionStop,
+    ReceiverDevice,
+    ReceiverSelectionActionType,
     ReceiverSelectorMediaType
-} from "./index";
+} from "../types";
 
 const POPUP_URL = browser.runtime.getURL("ui/popup/index.html");
 
-export interface PageInfo {
+/** Info about sender page context. */
+export interface ReceiverSelectorPageInfo {
     url: string;
     tabId: number;
     frameId: number;
     sessionRequest?: SessionRequest;
 }
+
+export interface ReceiverSelectionCast {
+    actionType: ReceiverSelectionActionType.Cast;
+    receiverDevice: ReceiverDevice;
+    mediaType: ReceiverSelectorMediaType;
+    filePath?: string;
+}
+export interface ReceiverSelectionStop {
+    actionType: ReceiverSelectionActionType.Stop;
+    receiverDevice: ReceiverDevice;
+}
+export type ReceiverSelection = ReceiverSelectionCast | ReceiverSelectionStop;
 
 interface ReceiverSelectorEvents {
     selected: ReceiverSelectionCast;
@@ -29,7 +40,6 @@ interface ReceiverSelectorEvents {
     cancelled: void;
     stop: ReceiverSelectionStop;
 }
-
 /**
  * Manages the receiver selector popup window and communication with the
  * extension page hosted within.
@@ -38,7 +48,7 @@ export default class ReceiverSelector extends TypedEventTarget<ReceiverSelectorE
     /** Popup window ID. */
     private windowId?: number;
 
-    /** Message port to extension page within popup window. */
+    /** Message port to extension page. */
     private messagePort?: Port;
     private messagePortDisconnected?: boolean;
 
@@ -50,9 +60,7 @@ export default class ReceiverSelector extends TypedEventTarget<ReceiverSelectorE
     private wasReceiverSelected = false;
 
     private appId?: string;
-    private pageInfo?: PageInfo;
-
-    #isOpen = false;
+    private pageInfo?: ReceiverSelectorPageInfo;
 
     constructor() {
         super();
@@ -63,6 +71,7 @@ export default class ReceiverSelector extends TypedEventTarget<ReceiverSelectorE
         this.onWindowsFocusChanged = this.onWindowsFocusChanged.bind(this);
 
         browser.windows.onRemoved.addListener(this.onWindowsRemoved);
+        browser.windows.onFocusChanged.addListener(this.onWindowsFocusChanged);
 
         /**
          * Handle incoming message channel connection from popup
@@ -73,7 +82,7 @@ export default class ReceiverSelector extends TypedEventTarget<ReceiverSelectorE
 
     /** Is receiver selector window currently open. */
     get isOpen() {
-        return this.#isOpen;
+        return this.windowId !== undefined;
     }
 
     /**
@@ -84,7 +93,7 @@ export default class ReceiverSelector extends TypedEventTarget<ReceiverSelectorE
         defaultMediaType: ReceiverSelectorMediaType;
         availableMediaTypes: ReceiverSelectorMediaType;
         appId?: string;
-        pageInfo?: PageInfo;
+        pageInfo?: ReceiverSelectorPageInfo;
     }) {
         this.appId = opts.appId;
         this.pageInfo = opts.pageInfo;
@@ -139,15 +148,7 @@ export default class ReceiverSelector extends TypedEventTarget<ReceiverSelectorE
             ...popupSizePosition
         });
 
-        this.#isOpen = true;
         this.windowId = popup.id;
-
-        // Add focus listener
-        if (await options.get("receiverSelectorCloseIfFocusLost")) {
-            browser.windows.onFocusChanged.addListener(
-                this.onWindowsFocusChanged
-            );
-        }
     }
 
     /** Updates receiver devices displayed in the receiver selector. */
@@ -258,8 +259,6 @@ export default class ReceiverSelector extends TypedEventTarget<ReceiverSelectorE
             return;
         }
 
-        this.#isOpen = false;
-
         browser.windows.onRemoved.removeListener(this.onWindowsRemoved);
         browser.windows.onFocusChanged.removeListener(
             this.onWindowsFocusChanged
@@ -279,21 +278,18 @@ export default class ReceiverSelector extends TypedEventTarget<ReceiverSelectorE
     }
 
     /**
-     * Closes popup window if another browser window is brought
-     * into focus. Doesn't apply if no window is focused
-     * `WINDOW_ID_NONE` or if the popup window is re-focused.
+     * Closes popup window if another browser window is brought into
+     * focus. Doesn't apply if no window is focused `WINDOW_ID_NONE`
+     * or if the popup window is re-focused.
      */
-    private onWindowsFocusChanged(windowId: number) {
+    private async onWindowsFocusChanged(windowId: number) {
+        if (!this.windowId) return;
+
         if (
             windowId !== browser.windows.WINDOW_ID_NONE &&
             windowId !== this.windowId
         ) {
-            // Only run once
-            browser.windows.onFocusChanged.removeListener(
-                this.onWindowsFocusChanged
-            );
-
-            if (this.windowId) {
+            if (await options.get("receiverSelectorCloseIfFocusLost")) {
                 browser.windows.remove(this.windowId);
             }
         }

@@ -20,3 +20,15 @@ export interface ReceiverDevice {
     port: number;
     status?: ReceiverStatus;
 }
+
+export enum ReceiverSelectorMediaType {
+    None = 0,
+    App = 1,
+    Tab = 2,
+    Screen = 4,
+    File = 8
+}
+export enum ReceiverSelectionActionType {
+    Cast = 1,
+    Stop = 2
+}
