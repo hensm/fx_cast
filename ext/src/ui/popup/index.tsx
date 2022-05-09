@@ -325,7 +325,11 @@ class PopupApp extends Component<PopupAppProps, PopupAppState> {
             browser.menus.update(menuIdPopupCast, {
                 visible: true,
                 title: _("popupCastMenuTitle", device.friendlyName),
-                enabled: !this.state.isConnecting
+                enabled:
+                    // Not already connecting to a receiver
+                    !this.state.isConnecting &&
+                    // Selected media type available
+                    !!(this.state.availableMediaTypes & this.state.mediaType)
             });
 
             browser.menus.update(menuIdPopupStop, {
