@@ -30,6 +30,9 @@ let menuIdCastMedia: MenuId;
 let menuIdWhitelist: MenuId;
 let menuIdWhitelistRecommended: MenuId;
 
+export const menuIdPopupCast = "popup_cast";
+export const menuIdPopupStop = "popup_stop";
+
 /** Match patterns for the whitelist option menus. */
 const whitelistChildMenuPatterns = new Map<MenuId, string>();
 
@@ -42,7 +45,9 @@ export async function initMenus() {
     // Global "Cast..." menu item
     menuIdCast = browser.menus.create({
         contexts: ["browser_action", "page", "tools_menu"],
-        title: _("contextCast")
+        title: _("contextCast"),
+        documentUrlPatterns: ["http://*/*", "https://*/*"],
+        icons: { "16": "icons/icon.svg" } // browser_action context
     });
 
     // <video>/<audio> "Cast..." context menu item
@@ -69,6 +74,19 @@ export async function initMenus() {
     browser.menus.create({
         type: "separator",
         parentId: menuIdWhitelist
+    });
+
+    // Popup context menus
+    const popupUrlPattern = `${browser.runtime.getURL("ui/popup")}/*`;
+    browser.menus.create({
+        id: menuIdPopupCast,
+        title: _("popupCastButtonTitle"),
+        documentUrlPatterns: [popupUrlPattern]
+    });
+    browser.menus.create({
+        id: menuIdPopupStop,
+        title: _("popupStopButtonTitle"),
+        documentUrlPatterns: [popupUrlPattern]
     });
 
     browser.menus.onShown.addListener(onMenuShown);

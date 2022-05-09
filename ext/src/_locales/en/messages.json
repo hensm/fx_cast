@@ -73,9 +73,30 @@
             }
         }
     },
-    "popupStopButtonTitle": {
-        "message": "Stop",
-        "description": "Alternate action button text displayed instead of popupCastButtonTitle."
+
+    "popupCastMenuTitle": {
+        "message": "Cast to \"$deviceName$\"",
+        "description": "Menu text for cast item in context menu for receivers in receiver selector.",
+        "placeholders": {
+            "deviceName": {
+                "content": "$1",
+                "example": "Living Room TV"
+            }
+        }
+    },
+    "popupStopMenuTitle": {
+        "message": "Stop \"$appName$\" on \"$deviceName$\"",
+        "description": "Menu text for stop item in context menu for receivers in receiver selector.",
+        "placeholders": {
+            "appName": {
+                "content": "$1",
+                "example": "Netflix"
+            },
+            "deviceName": {
+                "content": "$2",
+                "example": "Living Room TV"
+            }
+        }
     },
 
     "contextCast": {

@@ -4,11 +4,13 @@
 import React, { Component } from "react";
 import ReactDOM from "react-dom";
 
+import { menuIdPopupCast, menuIdPopupStop } from "../../background/menus";
+
 import knownApps, { KnownApp } from "../../cast/knownApps";
 import options from "../../lib/options";
 
 import messaging, { Message, Port } from "../../messaging";
-import { getNextEllipsis } from "../../lib/utils";
+import { getNextEllipsis } from "../utils";
 import { RemoteMatchPattern } from "../../lib/matchPattern";
 
 import {
@@ -67,27 +69,40 @@ function hasRequiredCapabilities(
 
 interface PopupAppProps {}
 interface PopupAppState {
+    /** List of devices to show in receiver list. */
     receiverDevices: ReceiverDevice[];
-    mediaType: ReceiverSelectorMediaType;
-    availableMediaTypes: ReceiverSelectorMediaType;
-    isLoading: boolean;
 
-    filePath?: string;
+    /** Currently selected media type. */
+    mediaType: ReceiverSelectorMediaType;
+    /** Media types available to select. */
+    availableMediaTypes: ReceiverSelectorMediaType;
+
+    /** Sender app ID (if available). */
     appId?: string;
+    /** Page info (if launched from page context). */
     pageInfo?: ReceiverSelectorPageInfo;
 
+    /** App details (if matches known app). */
+    knownApp?: KnownApp;
+    /** Whether current page URL matches a whitelist pattern. */
+    isPageWhitelisted: boolean;
+
+    /** Whether casting to a device been initiated from this selector. */
+    isConnecting: boolean;
+
+    // Options
     mirroringEnabled: boolean;
     userAgentWhitelistEnabled: boolean;
     userAgentWhitelist: string[];
-
-    knownApp?: KnownApp;
-    isPageWhitelisted: boolean;
 }
 
 class PopupApp extends Component<PopupAppProps, PopupAppState> {
     private port?: Port;
-    private win?: browser.windows.Window;
-    private defaultMediaType?: ReceiverSelectorMediaType;
+    private browserWindow?: browser.windows.Window;
+
+    private resizeObserver = new ResizeObserver(() => {
+        this.fitWindowHeight();
+    });
 
     constructor(props: PopupAppProps) {
         super(props);
@@ -96,116 +111,85 @@ class PopupApp extends Component<PopupAppProps, PopupAppState> {
             receiverDevices: [],
             mediaType: ReceiverSelectorMediaType.App,
             availableMediaTypes: ReceiverSelectorMediaType.App,
-            isLoading: false,
+            isPageWhitelisted: false,
+            isConnecting: false,
             mirroringEnabled: false,
             userAgentWhitelistEnabled: true,
-            userAgentWhitelist: [],
-            isPageWhitelisted: false
+            userAgentWhitelist: []
         };
 
         // Store window ref
         browser.windows.getCurrent().then(win => {
-            this.win = win;
+            this.browserWindow = win;
         });
 
-        new ResizeObserver(() => {
-            this.updateWindowHeight();
-        }).observe(document.body);
-
+        this.onMessage = this.onMessage.bind(this);
         this.onAddToWhitelist = this.onAddToWhitelist.bind(this);
-        this.onSelectChange = this.onSelectChange.bind(this);
-        this.onCast = this.onCast.bind(this);
-        this.onStop = this.onStop.bind(this);
+        this.onReceiverCast = this.onReceiverCast.bind(this);
+        this.onReceiverStop = this.onReceiverStop.bind(this);
+
+        this.onContextMenu = this.onContextMenu.bind(this);
+        this.onMenuShown = this.onMenuShown.bind(this);
+        this.onMenuClicked = this.onMenuClicked.bind(this);
     }
 
-    public updateWindowHeight() {
-        if (this.win?.id === undefined) {
+    private onMessage(message: Message) {
+        switch (message.subject) {
+            case "popup:init":
+                this.setState({
+                    appId: message.data?.appId,
+                    pageInfo: message.data?.pageInfo
+                });
+                break;
+            case "popup:close":
+                window.close();
+                break;
+
+            case "popup:update": {
+                this.setState({
+                    /**
+                     * Filter receiver devices without the required
+                     * capabilities.
+                     */
+                    receiverDevices: message.data.receiverDevices.filter(
+                        receiverDevice => {
+                            return hasRequiredCapabilities(
+                                receiverDevice,
+                                this.state.pageInfo?.sessionRequest
+                                    ?.capabilities
+                            );
+                        }
+                    )
+                });
+
+                const { availableMediaTypes, defaultMediaType } = message.data;
+                if (
+                    availableMediaTypes !== undefined &&
+                    defaultMediaType !== undefined
+                ) {
+                    this.setState({
+                        availableMediaTypes,
+                        mediaType: defaultMediaType
+                    });
+                }
+
+                this.updateKnownApp();
+                break;
+            }
+        }
+    }
+
+    /** Resize browser window to fit content height. */
+    private fitWindowHeight() {
+        if (this.browserWindow?.id === undefined) {
             return;
         }
 
-        const frameHeight = window.outerHeight - window.innerHeight;
-        const windowHeight = document.body.clientHeight + frameHeight;
-
-        browser.windows.update(this.win.id, {
-            height: windowHeight
+        browser.windows.update(this.browserWindow.id, {
+            height:
+                document.body.clientHeight +
+                (window.outerHeight - window.innerHeight)
         });
-    }
-
-    public async componentDidMount() {
-        this.port = messaging.connect({ name: "popup" });
-
-        this.port.onMessage.addListener((message: Message) => {
-            switch (message.subject) {
-                case "popup:init": {
-                    this.setState({
-                        appId: message.data?.appId,
-                        pageInfo: message.data?.pageInfo
-                    });
-
-                    break;
-                }
-
-                case "popup:update": {
-                    const {
-                        receiverDevices,
-                        availableMediaTypes,
-                        defaultMediaType
-                    } = message.data;
-
-                    this.setState({
-                        /**
-                         * Filter receiver devices without the required
-                         * capabilities.
-                         */
-                        receiverDevices: receiverDevices.filter(
-                            receiverDevice => {
-                                return hasRequiredCapabilities(
-                                    receiverDevice,
-                                    this.state.pageInfo?.sessionRequest
-                                        ?.capabilities
-                                );
-                            }
-                        )
-                    });
-
-                    if (
-                        availableMediaTypes !== undefined &&
-                        defaultMediaType !== undefined
-                    ) {
-                        this.defaultMediaType = defaultMediaType;
-                        this.setState({
-                            availableMediaTypes,
-                            mediaType: defaultMediaType
-                        });
-                    }
-
-                    this.updateKnownApp();
-
-                    break;
-                }
-
-                case "popup:close": {
-                    window.close();
-                    break;
-                }
-            }
-        });
-
-        const opts = await options.getAll();
-
-        this.setState({
-            mirroringEnabled: opts.mirroringEnabled,
-            userAgentWhitelistEnabled: opts.userAgentWhitelistEnabled,
-            userAgentWhitelist: opts.userAgentWhitelist
-        });
-
-        this.updateKnownApp();
-    }
-
-    public componentDidUpdate() {
-        setTimeout(() => {
-            this.updateWindowHeight();
-        }, 1);
     }
 
     private updateKnownApp() {
@@ -213,19 +197,21 @@ class PopupApp extends Component<PopupAppProps, PopupAppState> {
             this.state.availableMediaTypes & ReceiverSelectorMediaType.App
         );
 
-        let knownApp: Nullable<KnownApp> = null;
+        let knownApp: KnownApp | undefined;
 
         /**
          * Check knownApps for an app with an ID matching the registered
          * app on the target page.
-         * Or if there isn't an registered app, check for an app with a
-         * match pattern matching the target page URL.
          */
         if (isAppMediaTypeAvailable && this.state.appId) {
             knownApp = knownApps[this.state.appId];
         } else if (this.state.pageInfo) {
             const pageUrl = this.state.pageInfo.url;
 
+            /**
+             * Or if there isn't an registered app, check for an app
+             * with a match pattern matching the target page URL.
+             */
             for (const [, app] of Object.entries(knownApps)) {
                 if (!app.matches) {
                     continue;
@@ -241,9 +227,7 @@ class PopupApp extends Component<PopupAppProps, PopupAppState> {
 
         let isPageWhitelisted = false;
 
-        /**
-         * Check if target page URL is whitelisted.
-         */
+        // Check if target page URL is whitelisted.
         if (this.state.pageInfo) {
             for (const patternString of this.state.userAgentWhitelist) {
                 const pattern = new RemoteMatchPattern(patternString);
@@ -254,29 +238,174 @@ class PopupApp extends Component<PopupAppProps, PopupAppState> {
             }
         }
 
-        this.setState({
-            knownApp: knownApp ?? undefined,
-            isPageWhitelisted
+        this.setState({ knownApp, isPageWhitelisted });
+    }
+
+    private async onAddToWhitelist(
+        app: KnownApp,
+        pageInfo: ReceiverSelectorPageInfo
+    ) {
+        if (!app.matches) {
+            return;
+        }
+
+        const whitelist = await options.get("userAgentWhitelist");
+        if (!whitelist.includes(app.matches)) {
+            whitelist.push(app.matches);
+            await options.set("userAgentWhitelist", whitelist);
+
+            await browser.tabs.reload(pageInfo.tabId);
+            window.close();
+        }
+    }
+
+    private onReceiverCast(receiverDevice: ReceiverDevice) {
+        this.setState({ isConnecting: true });
+
+        this.port?.postMessage({
+            subject: "receiverSelector:selected",
+            data: {
+                receiverDevice,
+                actionType: ReceiverSelectionActionType.Cast,
+                mediaType: this.state.mediaType
+            }
         });
     }
 
-    public render() {
-        /*
+    private onReceiverStop(receiverDevice: ReceiverDevice) {
+        this.port?.postMessage({
+            subject: "receiverSelector:stop",
+            data: {
+                receiverDevice,
+                actionType: ReceiverSelectionActionType.Stop
+            }
+        });
+    }
 
-        // TODO: Add file support back to popup
+    private onContextMenu(ev: MouseEvent) {
+        if (!(ev.target instanceof Element)) return;
 
-        let truncatedFileName: string;
-
-        if (this.state.filePath) {
-            const filePath = this.state.filePath;
-            const fileName = filePath.substring(filePath.lastIndexOf("/") + 1);
-
-            truncatedFileName = fileName.length > 12
-                ? `${fileName.substring(0, 12)}...`
-                : fileName;
+        const receiverElement = ev.target.closest(".receiver");
+        if (receiverElement) {
+            browser.menus.overrideContext({
+                showDefaults: false
+            });
         }
-        */
+    }
 
+    private getDeviceFromElement(target: Element) {
+        const receiverElement = target.closest(".receiver");
+        if (!receiverElement) return;
+
+        const receiverElementIndex = [
+            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+            ...receiverElement.parentElement!.children
+        ].indexOf(receiverElement);
+
+        // Match by index rendered receiver element to device array
+        if (receiverElementIndex > -1) {
+            return this.state.receiverDevices[receiverElementIndex];
+        }
+    }
+
+    /** Handle show events for receiver context menus. */
+    private onMenuShown(info: browser.menus._OnShownInfo) {
+        if (!info.targetElementId) return;
+        const target = browser.menus.getTargetElement(info.targetElementId);
+        if (!target) return;
+
+        const device = this.getDeviceFromElement(target);
+        if (!device) {
+            browser.menus.update(menuIdPopupCast, { visible: false });
+            browser.menus.update(menuIdPopupStop, { visible: false });
+        } else {
+            const app = device.status?.applications?.[0];
+            const isAppRunning = !!(app && !app.isIdleScreen);
+
+            browser.menus.update(menuIdPopupCast, {
+                visible: true,
+                title: _("popupCastMenuTitle", device.friendlyName),
+                enabled: !this.state.isConnecting
+            });
+
+            browser.menus.update(menuIdPopupStop, {
+                visible: isAppRunning,
+                title: isAppRunning
+                    ? _("popupStopMenuTitle", [
+                          app.displayName,
+                          device.friendlyName
+                      ])
+                    : ""
+            });
+        }
+
+        browser.menus.refresh();
+    }
+
+    /** Handle click events for receiver context menus. */
+    private onMenuClicked(info: browser.menus.OnClickData) {
+        if (
+            info.menuItemId !== menuIdPopupCast &&
+            info.menuItemId !== menuIdPopupStop
+        ) {
+            return;
+        }
+
+        if (!info.targetElementId) return;
+        const target = browser.menus.getTargetElement(info.targetElementId);
+        if (!target) return;
+
+        const device = this.getDeviceFromElement(target);
+        if (!device) return;
+
+        switch (info.menuItemId) {
+            case menuIdPopupCast:
+                this.onReceiverCast(device);
+                break;
+            case menuIdPopupStop:
+                this.onReceiverStop(device);
+                break;
+        }
+    }
+
+    public async componentDidMount() {
+        this.port = messaging.connect({ name: "popup" });
+        this.port.onMessage.addListener(this.onMessage);
+
+        // Start observing content size changes
+        this.resizeObserver.observe(document.body);
+
+        options.getAll().then(opts => {
+            this.setState({
+                mirroringEnabled: opts.mirroringEnabled,
+                userAgentWhitelistEnabled: opts.userAgentWhitelistEnabled,
+                userAgentWhitelist: opts.userAgentWhitelist
+            });
+        });
+
+        this.updateKnownApp();
+
+        window.addEventListener("contextmenu", this.onContextMenu);
+        browser.menus.onClicked.addListener(this.onMenuClicked);
+        browser.menus.onShown.addListener(this.onMenuShown);
+    }
+
+    public componentWillUnmount() {
+        this.port?.disconnect();
+        this.resizeObserver.disconnect();
+
+        window.removeEventListener("contextmenu", this.onContextMenu);
+        browser.menus.onClicked.removeListener(this.onMenuClicked);
+        browser.menus.onShown.removeListener(this.onMenuShown);
+    }
+
+    public componentDidUpdate() {
+        setTimeout(() => {
+            this.fitWindowHeight();
+        }, 1);
+    }
+
+    public render() {
         const isAppMediaTypeSelected =
             this.state.mediaType === ReceiverSelectorMediaType.App;
         const isTabMediaTypeSelected =
@@ -284,9 +413,6 @@ class PopupApp extends Component<PopupAppProps, PopupAppState> {
         const isScreenMediaTypeSelected =
             this.state.mediaType === ReceiverSelectorMediaType.Screen;
 
-        const isSelectedMediaTypeAvailable = !!(
-            this.state.availableMediaTypes & this.state.mediaType
-        );
         const isAppMediaTypeAvailable = !!(
             this.state.availableMediaTypes & ReceiverSelectorMediaType.App
         );
@@ -294,7 +420,7 @@ class PopupApp extends Component<PopupAppProps, PopupAppState> {
         return (
             <>
                 <div
-                    className="whitelist-suggest"
+                    className="whitelist-banner"
                     hidden={
                         // If we don't know the app
                         !this.state.knownApp ||
@@ -304,7 +430,10 @@ class PopupApp extends Component<PopupAppProps, PopupAppState> {
                         (this.state.userAgentWhitelistEnabled &&
                             this.state.isPageWhitelisted) ||
                         // If an app is already loaded on the page
-                        isAppMediaTypeAvailable
+                        !!(
+                            this.state.availableMediaTypes &
+                            ReceiverSelectorMediaType.App
+                        )
                     }
                 >
                     <img src="photon_info.svg" />
@@ -327,14 +456,19 @@ class PopupApp extends Component<PopupAppProps, PopupAppState> {
                         {_("popupWhitelistAddToWhitelist")}
                     </button>
                 </div>
-                <div className="media-select">
-                    <div className="media-select__label-cast">
+
+                <div className="media-type-select">
+                    <div className="media-type-select__label-cast">
                         {_("popupMediaSelectCastLabel")}
                     </div>
                     <div className="select-wrapper">
                         <select
-                            onChange={this.onSelectChange}
-                            className="media-select__dropdown"
+                            onChange={ev =>
+                                this.setState({
+                                    mediaType: parseInt(ev.target.value)
+                                })
+                            }
+                            className="media-type-select__dropdown"
                             disabled={
                                 this.state.availableMediaTypes ===
                                 ReceiverSelectorMediaType.None
@@ -379,211 +513,118 @@ class PopupApp extends Component<PopupAppProps, PopupAppState> {
                             )}
                         </select>
                     </div>
-                    <div className="media-select__label-to">
+                    <div className="media-type-select__label-to">
                         {_("popupMediaSelectToLabel")}
                     </div>
                 </div>
+
                 <ul className="receivers">
-                    {this.state.receiverDevices &&
-                    this.state.receiverDevices.length ? (
-                        this.state.receiverDevices.map((receiver, i) => (
-                            <ReceiverEntry
-                                receiverDevice={receiver}
-                                onCast={this.onCast}
-                                onStop={this.onStop}
-                                isLoading={this.state.isLoading}
-                                canCast={isSelectedMediaTypeAvailable}
-                                key={i}
-                            />
-                        ))
-                    ) : (
+                    {!this.state.receiverDevices.length ? (
                         <div className="receivers__not-found">
                             {_("popupNoReceiversFound")}
                         </div>
+                    ) : (
+                        this.state.receiverDevices.map((device, i) => (
+                            <Receiver
+                                details={device}
+                                isAnyConnecting={this.state.isConnecting}
+                                isMediaTypeAvailable={
+                                    !!(
+                                        this.state.availableMediaTypes &
+                                        this.state.mediaType
+                                    )
+                                }
+                                onCast={this.onReceiverCast}
+                                onStop={this.onReceiverStop}
+                                key={i}
+                            />
+                        ))
                     )}
                 </ul>
             </>
         );
     }
-
-    private async onAddToWhitelist(
-        app: KnownApp,
-        pageInfo: ReceiverSelectorPageInfo
-    ) {
-        if (!app.matches) {
-            return;
-        }
-
-        const whitelist = await options.get("userAgentWhitelist");
-        if (!whitelist.includes(app.matches)) {
-            whitelist.push(app.matches);
-            await options.set("userAgentWhitelist", whitelist);
-
-            await browser.tabs.reload(pageInfo.tabId);
-            window.close();
-        }
-    }
-
-    private onCast(receiverDevice: ReceiverDevice) {
-        this.setState({
-            isLoading: true
-        });
-
-        this.port?.postMessage({
-            subject: "receiverSelector:selected",
-            data: {
-                receiverDevice,
-                actionType: ReceiverSelectionActionType.Cast,
-                mediaType: this.state.mediaType,
-                filePath: this.state.filePath
-            }
-        });
-    }
-
-    private onStop(receiverDevice: ReceiverDevice) {
-        this.port?.postMessage({
-            subject: "receiverSelector:stop",
-            data: {
-                receiverDevice,
-                actionType: ReceiverSelectionActionType.Stop
-            }
-        });
-    }
-
-    private onSelectChange(ev: React.ChangeEvent<HTMLSelectElement>) {
-        const mediaType = parseInt(ev.target.value);
-
-        if (mediaType === ReceiverSelectorMediaType.File) {
-            const fileUrl = window.prompt();
-            if (fileUrl) {
-                this.setState({
-                    mediaType,
-                    filePath: fileUrl
-                });
-
-                return;
-            }
-
-            // Set media type to default if failed to set filePath
-            if (this.defaultMediaType) {
-                this.setState({
-                    mediaType: this.defaultMediaType
-                });
-            }
-        } else {
-            this.setState({
-                mediaType
-            });
-        }
-
-        this.setState({
-            filePath: undefined
-        });
-    }
 }
 
-interface ReceiverEntryProps {
-    receiverDevice: ReceiverDevice;
-    isLoading: boolean;
-    canCast: boolean;
+interface ReceiverProps {
+    details: ReceiverDevice;
+    isMediaTypeAvailable: boolean;
+    isAnyConnecting: boolean;
+
+    // Events
     onCast(receiverDevice: ReceiverDevice): void;
     onStop(receiverDevice: ReceiverDevice): void;
 }
-
-interface ReceiverEntryState {
-    ellipsis: string;
-    isLoading: boolean;
-    showAlternateAction: boolean;
+interface ReceiverState {
+    isConnecting: boolean;
+    connectingEllipsis: string;
 }
+class Receiver extends Component<ReceiverProps, ReceiverState> {
+    private ellipsisInterval?: number;
 
-class ReceiverEntry extends Component<ReceiverEntryProps, ReceiverEntryState> {
-    constructor(props: ReceiverEntryProps) {
+    constructor(props: ReceiverProps) {
         super(props);
 
         this.state = {
-            ellipsis: "",
-            isLoading: false,
-            showAlternateAction: false
+            isConnecting: false,
+            connectingEllipsis: ""
         };
-
-        const handleActionKeyEvents = (ev: KeyboardEvent) => {
-            if (ev.key === "Alt" || ev.key === "Shift") {
-                this.setState({
-                    // Only enable on keydown, otherwise disable
-                    showAlternateAction: ev.type === "keydown"
-                });
-            }
-        };
-
-        window.addEventListener("keydown", handleActionKeyEvents);
-        window.addEventListener("keyup", handleActionKeyEvents);
-
-        window.addEventListener("blur", () => {
-            this.setState({
-                showAlternateAction: false
-            });
-        });
 
         this.handleCast = this.handleCast.bind(this);
     }
 
-    public render() {
-        const { status } = this.props.receiverDevice;
-        const application = status?.applications?.[0];
+    private handleCast() {
+        if (!this.props.details.status) {
+            return;
+        }
+
+        this.ellipsisInterval = window.setInterval(() => {
+            this.setState(state => ({
+                connectingEllipsis: getNextEllipsis(state.connectingEllipsis)
+            }));
+        }, 500);
+
+        this.setState({ isConnecting: true });
+        this.props.onCast(this.props.details);
+    }
+
+    componentWillUnmount() {
+        window.clearInterval(this.ellipsisInterval);
+    }
+
+    render() {
+        const application = this.props.details.status?.applications?.[0];
 
         return (
             <li className="receiver">
                 <div className="receiver__name">
-                    {this.props.receiverDevice.friendlyName}
+                    {this.props.details.friendlyName}
                 </div>
                 <div className="receiver__address">
                     {application && !application.isIdleScreen
                         ? application.statusText
-                        : `${this.props.receiverDevice.host}:${this.props.receiverDevice.port}`}
+                        : `${this.props.details.host}:${this.props.details.port}`}
                 </div>
                 <button
                     className="button receiver__connect"
                     onClick={this.handleCast}
                     disabled={
-                        this.state.showAlternateAction
-                            ? !application || application.isIdleScreen
-                            : this.props.isLoading || !this.props.canCast
+                        this.props.isAnyConnecting ||
+                        this.state.isConnecting ||
+                        !this.props.isMediaTypeAvailable
                     }
                 >
-                    {this.state.isLoading
+                    {this.state.isConnecting
                         ? _(
                               "popupCastingButtonTitle",
-                              this.state.isLoading ? this.state.ellipsis : ""
+                              this.state.isConnecting
+                                  ? this.state.connectingEllipsis
+                                  : ""
                           )
-                        : this.state.showAlternateAction
-                        ? _("popupStopButtonTitle")
                         : _("popupCastButtonTitle")}
                 </button>
             </li>
         );
-    }
-
-    private handleCast() {
-        const { status } = this.props.receiverDevice;
-        if (!status) {
-            return;
-        }
-
-        if (this.state.showAlternateAction) {
-            this.props.onStop(this.props.receiverDevice);
-        } else {
-            this.props.onCast(this.props.receiverDevice);
-
-            this.setState({
-                isLoading: true
-            });
-
-            setInterval(() => {
-                this.setState(state => ({
-                    ellipsis: getNextEllipsis(state.ellipsis)
-                }));
-            }, 500);
-        }
     }
 }
 

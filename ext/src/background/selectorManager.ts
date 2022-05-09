@@ -126,12 +126,10 @@ async function getSelection(
         function onSelectorSelected(ev: CustomEvent<ReceiverSelectionCast>) {
             logger.info("Selected receiver", ev.detail);
 
-            removeListeners();
             resolve({
                 actionType: ReceiverSelectionActionType.Cast,
                 receiverDevice: ev.detail.receiverDevice,
-                mediaType: ev.detail.mediaType,
-                filePath: ev.detail.filePath
+                mediaType: ev.detail.mediaType
             });
         }
         function onSelectorStop(ev: CustomEvent<ReceiverSelectionStop>) {
@@ -139,7 +137,6 @@ async function getSelection(
 
             deviceManager.stopReceiverApp(ev.detail.receiverDevice.id);
 
-            removeListeners();
             resolve({
                 actionType: ReceiverSelectionActionType.Stop,
                 receiverDevice: ev.detail.receiverDevice
@@ -148,11 +145,9 @@ async function getSelection(
         function onSelectorCancelled() {
             logger.info("Cancelled receiver selection");
 
-            removeListeners();
             resolve(null);
         }
         function onSelectorError(ev: CustomEvent<string>) {
-            removeListeners();
             reject(ev.detail);
         }
 
@@ -160,6 +155,7 @@ async function getSelection(
         sharedSelector.addEventListener("stop", onSelectorStop);
         sharedSelector.addEventListener("cancelled", onSelectorCancelled);
         sharedSelector.addEventListener("error", onSelectorError);
+        sharedSelector.addEventListener("close", removeListeners);
 
         function removeListeners() {
             sharedSelector.removeEventListener("selected", onSelectorSelected);
@@ -169,6 +165,7 @@ async function getSelection(
                 onSelectorCancelled
             );
             sharedSelector.removeEventListener("error", onSelectorError);
+            sharedSelector.removeEventListener("close", removeListeners);
 
             deviceManager.removeEventListener(
                 "receiverDeviceUp",

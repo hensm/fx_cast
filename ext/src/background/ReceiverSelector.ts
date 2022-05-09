@@ -26,7 +26,6 @@ export interface ReceiverSelectionCast {
     actionType: ReceiverSelectionActionType.Cast;
     receiverDevice: ReceiverDevice;
     mediaType: ReceiverSelectorMediaType;
-    filePath?: string;
 }
 export interface ReceiverSelectionStop {
     actionType: ReceiverSelectionActionType.Stop;
@@ -39,6 +38,7 @@ interface ReceiverSelectorEvents {
     error: string;
     cancelled: void;
     stop: ReceiverSelectionStop;
+    close: void;
 }
 /**
  * Manages the receiver selector popup window and communication with the
@@ -267,6 +267,8 @@ export default class ReceiverSelector extends TypedEventTarget<ReceiverSelectorE
         if (!this.wasReceiverSelected) {
             this.dispatchEvent(new CustomEvent("cancelled"));
         }
+
+        this.dispatchEvent(new CustomEvent("close"));
 
         // Cleanup
         delete this.windowId;

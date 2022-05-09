@@ -41,11 +41,15 @@ Missing/outdated strings:
     -   `optionsBridgeCompatible`
     -   `optionsBridgeLikelyCompatible`
     -   `optionsBridgeIncompatible`
+    -   `popupCastMenuTitle`
+    -   `popupStopMenuTitle`
 
 -   `es`
 
     -   `popupWhitelistNotWhitelisted`
     -   `popupWhitelistAddToWhitelist`
+    -   `popupCastMenuTitle`
+    -   `popupStopMenuTitle`
 
 -   `nl`
 
@@ -63,10 +67,14 @@ Missing/outdated strings:
     -   `optionsBridgeCompatible`
     -   `optionsBridgeLikelyCompatible`
     -   `optionsBridgeIncompatible`
+    -   `popupCastMenuTitle`
+    -   `popupStopMenuTitle`
 
 -   `no`
     -   `popupWhitelistNotWhitelisted`
     -   `popupWhitelistAddToWhitelist`
+    -   `popupCastMenuTitle`
+    -   `popupStopMenuTitle`
 
 ### NSIS Installer Localization
 

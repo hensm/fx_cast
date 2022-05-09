@@ -1,8 +1,13 @@
 "use strict";
 
-import eventMessaging from "./eventMessaging";
-
 import messaging, { Message } from "../messaging";
+import { PageEventMessenger, ExtensionEventMessenger } from "./eventMessaging";
+
+// Create messengers manually instead of relying on getters
+const eventMessaging = {
+    page: new PageEventMessenger(),
+    extension: new ExtensionEventMessenger()
+};
 
 // Message port to background script
 export const backgroundPort = messaging.connect({ name: "cast" });
