@@ -1,10 +1,14 @@
+// @ts-check
 "use strict";
 
-const esbuild = require("esbuild");
 const fs = require("fs-extra");
 const path = require("path");
+
+const esbuild = require("esbuild");
 const minimist = require("minimist");
 const webExt = require("web-ext");
+
+const { copyFilesPlugin } = require("./lib/copyFilesPlugin.js");
 
 const BRIDGE_NAME = "fx_cast_bridge";
 const BRIDGE_VERSION = "0.2.0";
@@ -71,25 +75,34 @@ const buildOpts = {
 
     entryPoints: [
         // Main
-        `${srcPath}/background/background.ts`,
+        path.join(srcPath, "background/background.ts"),
         // Cast
-        `${srcPath}/cast/index.ts`,
-        `${srcPath}/cast/content.ts`,
-        `${srcPath}/cast/contentBridge.ts`,
+        path.join(srcPath, "cast/index.ts"),
+        path.join(srcPath, "cast/content.ts"),
+        path.join(srcPath, "cast/contentBridge.ts"),
         // Media sender
-        `${srcPath}/cast/senders/media/index.ts`,
+        path.join(srcPath, "cast/senders/media/index.ts"),
         // Mirroring sender
-        `${srcPath}/cast/senders/mirroring.ts`,
+        path.join(srcPath, "/cast/senders/mirroring.ts"),
         // UI
-        `${srcPath}/ui/popup/index.tsx`,
-        `${srcPath}/ui/options/index.tsx`
+        path.join(srcPath, "ui/popup/index.tsx"),
+        path.join(srcPath, "ui/options/index.tsx")
     ],
     define: {
         BRIDGE_NAME: `"${BRIDGE_NAME}"`,
         BRIDGE_VERSION: `"${BRIDGE_VERSION}"`,
         MIRRORING_APP_ID: `"${argv.mirroringAppId}"`
     },
-    plugins: [preactCompatPlugin]
+    plugins: [
+        preactCompatPlugin,
+
+        // Copy static files
+        copyFilesPlugin({
+            src: srcPath,
+            dest: outPath,
+            excludePattern: /^(manifest\.json|.*\.(ts|tsx|js|jsx))$/
+        })
+    ]
 };
 
 // Set production options
@@ -119,34 +132,6 @@ function onBuildResult(result) {
             : "script-src 'self' 'unsafe-eval'; object-src 'self'";
 
     fs.writeFileSync(`${outPath}/manifest.json`, JSON.stringify(manifest));
-
-    copy(srcPath, outPath, /^(manifest\.json|.*\.(ts|tsx|js|jsx))$/);
-}
-
-/**
- * Recursively copy directory contents.
- *
- * @param {string} src Source path
- * @param {string} dest Destination path
- * @param {RegExp} excludeRegex Match for file exclusion
- */
-function copy(src, dest, excludeRegex) {
-    if (!fs.existsSync(src)) return;
-
-    const stats = fs.statSync(src);
-    if (!stats.isDirectory()) {
-        const dirName = path.dirname(dest);
-        if (!fs.existsSync(dirName)) {
-            fs.mkdirSync(dirName, { recursive: true });
-        }
-        fs.copyFileSync(src, dest);
-        return;
-    }
-
-    for (const file of fs.readdirSync(src)) {
-        if (excludeRegex.test(file)) continue;
-        copy(path.join(src, file), path.join(dest, file), excludeRegex);
-    }
 }
 
 // Clean
