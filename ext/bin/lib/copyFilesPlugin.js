@@ -8,16 +8,21 @@ const fs = require("fs");
 const esbuild = require("esbuild");
 
 /**
- * Escape meta characters in a regular expression.
- *
- * @param {string} patternSource
- * @returns {string} Escaped expression source
+ * Walks file tree from a given root path.
+ * @param {string} rootPath
  */
-function escapeRegExp(patternSource) {
-    let metaChars = ".+*?()|[]{}^$\\";
-    return [...patternSource]
-        .map(c => (metaChars.includes(c) ? `\\${c}` : c))
-        .join("");
+function* walk(rootPath) {
+    const pathsToWalk = [rootPath];
+    while (pathsToWalk.length > 0) {
+        const currentPath = pathsToWalk.pop();
+        if (fs.statSync(currentPath).isFile()) {
+            yield currentPath;
+        } else {
+            for (const child of fs.readdirSync(currentPath)) {
+                pathsToWalk.push(path.join(currentPath, child));
+            }
+        }
+    }
 }
 
 /**
@@ -33,64 +38,45 @@ function escapeRegExp(patternSource) {
  * @type {(opts: CopyFilesPluginOpts) => esbuild.Plugin}
  */
 exports.copyFilesPlugin = opts => {
-    // Get matching file paths
-    const matchingFiles = (function getMatchingPaths(relPath = "") {
-        const fullPath = path.join(opts.src, relPath);
+    if (!fs.existsSync(opts.src)) {
+        throw new Error("copyFilesPlugin: src path not found!");
+    }
 
-        // Must exist
-        if (!fs.existsSync(fullPath)) return;
-        // Must not match exclude pattern
-        if (opts.excludePattern?.test(fullPath)) return;
-
-        if (fs.statSync(fullPath).isFile()) {
-            return [relPath];
+    const matchingPaths = [];
+    for (const path of walk(opts.src)) {
+        if (!opts.excludePattern?.test(path)) {
+            matchingPaths.push(path);
         }
-
-        /** @type string[] */
-        let files = [];
-        for (const entry of fs.readdirSync(fullPath)) {
-            const matchingFiles = getMatchingPaths(path.join(relPath, entry));
-            if (matchingFiles) {
-                files = files.concat(matchingFiles);
-            }
-        }
-        return files;
-    })();
+    }
 
     return {
         name: "copy-files",
         setup(build) {
             /** First run for the set of import paths in each build. */
             let isFirstRun = true;
-
-            build.onResolve(
-                {
-                    filter: new RegExp(`^${escapeRegExp(opts.src + path.sep)}`)
-                },
-                () => {
-                    /**
-                     * Attach watch files to first resolve result.
-                     * Presumably there is a much better way of doing
-                     * this?
-                     */
-                    if (isFirstRun) {
-                        isFirstRun = false;
-                        return {
-                            watchFiles: matchingFiles.map(file =>
-                                path.join(opts.src, file)
-                            )
-                        };
-                    }
+            build.onResolve({ filter: /.*/ }, () => {
+                /**
+                 * Attach watch files to first resolve result.
+                 * Presumably there is a much better way of doing
+                 * this?
+                 */
+                if (isFirstRun) {
+                    isFirstRun = false;
+                    return {
+                        watchFiles: matchingPaths
+                    };
                 }
-            );
+            });
 
             build.onEnd(() => {
                 isFirstRun = true;
 
                 // Copy any watched files that changed
-                for (const file of matchingFiles) {
-                    const srcPath = path.join(opts.src, file);
-                    const destPath = path.join(opts.dest, file);
+                for (const srcPath of matchingPaths) {
+                    const destPath = path.resolve(
+                        opts.dest,
+                        path.relative(opts.src, srcPath)
+                    );
 
                     // Ignore if source file is missing
                     if (!fs.existsSync(srcPath)) {
