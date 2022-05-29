@@ -243,47 +243,47 @@
         "message": "Sluit na het verliezen van de focus",
         "description": "Receiver selector close if focus lost option checkbox label."
     },
-    "optionsUserAgentWhitelistCategoryName": {
+    "optionsSiteWhitelistCategoryName": {
         "message": "Gebruikersagent - Whitelist",
         "description": "Options page whitelist category title."
     },
-    "optionsUserAgentWhitelistCategoryDescription": {
+    "optionsSiteWhitelistCategoryDescription": {
         "message": "Websites waarvan de gebruikersagent omwille van compatibiliteit moet worden ingesteld op Chrome. De patronen moeten geldig zijn.",
         "description": "Options page whitelist category description."
     },
-    "optionsUserAgentWhitelistEnabled": {
+    "optionsSiteWhitelistEnabled": {
         "message": "Whitelist ingeschakeld",
         "description": "Whitelist enabled checkbox label."
     },
-    "optionsUserAgentWhitelistContent": {
+    "optionsSiteWhitelistContent": {
         "message": "Patronen:",
         "description": "Match patterns editor widget label."
     },
-    "optionsUserAgentWhitelistBasicView": {
+    "optionsSiteWhitelistBasicView": {
         "message": "Basisweergave",
         "description": "Switch to basic view button title."
     },
-    "optionsUserAgentWhitelistRawView": {
+    "optionsSiteWhitelistRawView": {
         "message": "Ruwe weergave",
         "description": "Switch to raw view button title."
     },
-    "optionsUserAgentWhitelistSaveRaw": {
+    "optionsSiteWhitelistSaveRaw": {
         "message": "Ruwe weergave opslaan",
         "description": "Save raw view edits button title."
     },
-    "optionsUserAgentWhitelistAddItem": {
+    "optionsSiteWhitelistAddItem": {
         "message": "Voeg toe",
         "description": "Add new whitelist item button title."
     },
-    "optionsUserAgentWhitelistEditItem": {
+    "optionsSiteWhitelistEditItem": {
         "message": "Bewerken",
         "description": "Edit whitelist item button title. Displayed on each item."
     },
-    "optionsUserAgentWhitelistRemoveItem": {
+    "optionsSiteWhitelistRemoveItem": {
         "message": "Verwijderen",
         "description": "Remove whitelist item button title. Displayed on each item."
     },
-    "optionsUserAgentWhitelistInvalidMatchPattern": {
+    "optionsSiteWhitelistInvalidMatchPattern": {
         "message": "Ongeldig patroon $matchPattern$",
         "description": "Error displayed by input indicating an invalid match pattern.",
         "placeholders": {

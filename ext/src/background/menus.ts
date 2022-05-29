@@ -137,11 +137,11 @@ async function onMenuClicked(
             );
         }
 
-        const whitelist = await options.get("userAgentWhitelist");
-        if (!whitelist.includes(pattern)) {
+        const whitelist = await options.get("siteWhitelist");
+        if (!whitelist.find(item => item.pattern === pattern)) {
             // Add to whitelist and update options
-            whitelist.push(pattern);
-            await options.set("userAgentWhitelist", whitelist);
+            whitelist.push({ pattern });
+            await options.set("siteWhitelist", whitelist);
         }
 
         return;

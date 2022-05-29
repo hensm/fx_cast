@@ -22,6 +22,11 @@ type OnBeforeRequestDetails = Parameters<
     frameAncestors?: Array<{ url: string; frameId: number }>;
 };
 
+export interface WhitelistItemData {
+    pattern: string;
+    isUserAgentDisabled?: boolean;
+}
+
 const originUrlCache: string[] = [];
 
 let platform: string;
@@ -47,18 +52,18 @@ export async function initWhitelist() {
     }
 
     // Register on first run
-    await registerUserAgentWhitelist();
+    await registerSiteWhitelist();
 
     // Re-register when options change
     options.addEventListener("changed", ev => {
         const alteredOpts = ev.detail;
 
         if (
-            alteredOpts.includes("userAgentWhitelist") ||
-            alteredOpts.includes("userAgentWhitelistEnabled")
+            alteredOpts.includes("siteWhitelist") ||
+            alteredOpts.includes("siteWhitelistEnabled")
         ) {
-            unregisterUserAgentWhitelist();
-            registerUserAgentWhitelist();
+            unregisterSiteWhitelist();
+            registerSiteWhitelist();
         }
     });
 }
@@ -189,9 +194,8 @@ async function onBeforeCastSDKRequest(details: OnBeforeRequestDetails) {
     };
 }
 
-async function registerUserAgentWhitelist() {
-    const { userAgentWhitelist, userAgentWhitelistEnabled } =
-        await options.getAll();
+async function registerSiteWhitelist() {
+    const { siteWhitelist, siteWhitelistEnabled } = await options.getAll();
 
     browser.webRequest.onBeforeRequest.addListener(
         onBeforeCastSDKRequest,
@@ -199,13 +203,18 @@ async function registerUserAgentWhitelist() {
         ["blocking"]
     );
 
-    if (!userAgentWhitelistEnabled || !userAgentWhitelist.length) {
+    if (!siteWhitelistEnabled || !siteWhitelist.length) {
         return;
     }
 
     browser.webRequest.onBeforeSendHeaders.addListener(
         onWhitelistedBeforeSendHeaders,
-        { urls: userAgentWhitelist },
+        {
+            // Filter for items with UA enabled
+            urls: siteWhitelist.flatMap(item =>
+                !item.isUserAgentDisabled ? [item.pattern] : []
+            )
+        },
         ["blocking", "requestHeaders"]
     );
 
@@ -216,7 +225,7 @@ async function registerUserAgentWhitelist() {
     );
 }
 
-function unregisterUserAgentWhitelist() {
+function unregisterSiteWhitelist() {
     originUrlCache.length = 0;
 
     browser.webRequest.onBeforeSendHeaders.removeListener(

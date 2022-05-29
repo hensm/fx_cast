@@ -16,7 +16,6 @@ export default {
     mirroringAppId: MIRRORING_APP_ID,
     receiverSelectorCloseIfFocusLost: true,
     receiverSelectorWaitForConnection: true,
-    userAgentWhitelistEnabled: true,
-    userAgentWhitelistRestrictedEnabled: true,
-    userAgentWhitelist: ["https://www.netflix.com/*"]
+    siteWhitelistEnabled: true,
+    siteWhitelist: [{ pattern: "https://www.netflix.com/*" }]
 } as Options;

@@ -5,14 +5,14 @@ import React, { Component } from "react";
 import ReactDOM from "react-dom";
 
 import defaultOptions from "../../defaultOptions";
+import type { WhitelistItemData } from "../../background/whitelist";
 
 import Bridge from "./Bridge";
-import EditableList from "./EditableList";
+import Whitelist from "./Whitelist";
 
 import bridge, { BridgeInfo, BridgeTimedOutError } from "../../lib/bridge";
 import logger from "../../lib/logger";
 import options, { Options } from "../../lib/options";
-import { REMOTE_MATCH_PATTERN_REGEX } from "../../lib/matchPattern";
 
 const _ = browser.i18n.getMessage;
 
@@ -77,9 +77,6 @@ class OptionsApp extends Component<OptionsAppProps, OptionsAppState> {
         this.handleFormChange = this.handleFormChange.bind(this);
         this.handleInputChange = this.handleInputChange.bind(this);
         this.handleWhitelistChange = this.handleWhitelistChange.bind(this);
-
-        this.getWhitelistItemPatternError =
-            this.getWhitelistItemPatternError.bind(this);
     }
 
     public async componentDidMount() {
@@ -333,77 +330,43 @@ class OptionsApp extends Component<OptionsAppProps, OptionsAppState> {
 
                     <fieldset className="category">
                         <legend className="category__name">
-                            <h2>
-                                {_("optionsUserAgentWhitelistCategoryName")}
-                            </h2>
+                            <h2>{_("optionsSiteWhitelistCategoryName")}</h2>
                         </legend>
                         <p className="category__description">
-                            {_("optionsUserAgentWhitelistCategoryDescription")}
+                            {_("optionsSiteWhitelistCategoryDescription")}
                         </p>
 
                         <label className="option option--inline">
                             <div className="option__control">
                                 <input
-                                    name="userAgentWhitelistEnabled"
+                                    name="siteWhitelistEnabled"
                                     type="checkbox"
                                     checked={
-                                        this.state.options
-                                            ?.userAgentWhitelistEnabled
+                                        this.state.options?.siteWhitelistEnabled
                                     }
                                     onChange={this.handleInputChange}
                                 />
                             </div>
                             <div className="option__label">
-                                {_("optionsUserAgentWhitelistEnabled")}
-                                <span className="option__recommended">
-                                    {_("optionsOptionRecommended")}
-                                </span>
-                            </div>
-                        </label>
-
-                        <label className="option option--inline">
-                            <div className="option__control">
-                                <input
-                                    name="userAgentWhitelistRestrictedEnabled"
-                                    type="checkbox"
-                                    checked={
-                                        this.state.options
-                                            ?.userAgentWhitelistRestrictedEnabled
-                                    }
-                                    onChange={this.handleInputChange}
-                                />
-                            </div>
-                            <div className="option__label">
-                                {_(
-                                    "optionsUserAgentWhitelistRestrictedEnabled"
-                                )}
+                                {_("optionsSiteWhitelistEnabled")}
                                 <span className="option__recommended">
                                     {_("optionsOptionRecommended")}
                                 </span>
                             </div>
                             <div className="option__description">
-                                {_(
-                                    "optionsUserAgentWhitelistRestrictedEnabledDescription"
-                                )}
+                                {_("optionsSiteWhitelistEnabledDescription")}
                             </div>
                         </label>
 
                         <div className="option">
                             <div className="option__label">
-                                {_("optionsUserAgentWhitelistContent")}
+                                {_("optionsSiteWhitelistContent")}
                             </div>
                             <div className="option__control">
                                 {this.state.options?.userAgentWhitelist && (
-                                    <EditableList
-                                        data={
-                                            this.state.options
-                                                .userAgentWhitelist
-                                        }
+                                    <Whitelist
+                                        items={this.state.options.siteWhitelist}
                                         onChange={this.handleWhitelistChange}
-                                        itemPattern={REMOTE_MATCH_PATTERN_REGEX}
-                                        itemPatternError={
-                                            this.getWhitelistItemPatternError
-                                        }
                                     />
                                 )}
                             </div>
@@ -485,22 +448,15 @@ class OptionsApp extends Component<OptionsAppProps, OptionsAppState> {
         });
     }
 
-    private handleWhitelistChange(whitelist: string[]) {
+    private handleWhitelistChange(whitelist: WhitelistItemData[]) {
         this.setState(currentState => {
             if (currentState.options) {
-                currentState.options.userAgentWhitelist = whitelist;
+                currentState.options.siteWhitelist = whitelist;
             }
 
             return currentState;
         });
     }
-
-    private getWhitelistItemPatternError(info: string): string {
-        return _("optionsUserAgentWhitelistInvalidMatchPattern", info);
-    }
 }
 
-
-ReactDOM.render(
-    <OptionsApp />
-  , document.querySelector("#root"));
+ReactDOM.render(<OptionsApp />, document.querySelector("#root"));

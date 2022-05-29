@@ -5,6 +5,8 @@ import React, { Component } from "react";
 import ReactDOM from "react-dom";
 
 import { menuIdPopupCast, menuIdPopupStop } from "../../background/menus";
+import type { ReceiverSelectorPageInfo } from "../../background/ReceiverSelector";
+import type { WhitelistItemData } from "../../background/whitelist";
 
 import knownApps, { KnownApp } from "../../cast/knownApps";
 import options from "../../lib/options";
@@ -20,7 +22,6 @@ import {
     ReceiverSelectorMediaType
 } from "../../types";
 
-import { ReceiverSelectorPageInfo } from "../../background/ReceiverSelector";
 import { Capability } from "../../cast/sdk/enums";
 
 const _ = browser.i18n.getMessage;
@@ -92,8 +93,8 @@ interface PopupAppState {
 
     // Options
     mirroringEnabled: boolean;
-    userAgentWhitelistEnabled: boolean;
-    userAgentWhitelist: string[];
+    siteWhitelistEnabled: boolean;
+    siteWhitelist: WhitelistItemData[];
 }
 
 class PopupApp extends Component<PopupAppProps, PopupAppState> {
@@ -114,8 +115,8 @@ class PopupApp extends Component<PopupAppProps, PopupAppState> {
             isPageWhitelisted: false,
             isConnecting: false,
             mirroringEnabled: false,
-            userAgentWhitelistEnabled: true,
-            userAgentWhitelist: []
+            siteWhitelistEnabled: true,
+            siteWhitelist: []
         };
 
         // Store window ref
@@ -229,8 +230,8 @@ class PopupApp extends Component<PopupAppProps, PopupAppState> {
 
         // Check if target page URL is whitelisted.
         if (this.state.pageInfo) {
-            for (const patternString of this.state.userAgentWhitelist) {
-                const pattern = new RemoteMatchPattern(patternString);
+            for (const item of this.state.siteWhitelist) {
+                const pattern = new RemoteMatchPattern(item.pattern);
                 if (pattern.matches(this.state.pageInfo.url)) {
                     isPageWhitelisted = true;
                     break;
@@ -249,10 +250,10 @@ class PopupApp extends Component<PopupAppProps, PopupAppState> {
             return;
         }
 
-        const whitelist = await options.get("userAgentWhitelist");
-        if (!whitelist.includes(app.matches)) {
-            whitelist.push(app.matches);
-            await options.set("userAgentWhitelist", whitelist);
+        const whitelist = await options.get("siteWhitelist");
+        if (!whitelist.find(item => item.pattern === app.matches)) {
+            whitelist.push({ pattern: app.matches });
+            await options.set("siteWhitelist", whitelist);
 
             await browser.tabs.reload(pageInfo.tabId);
             window.close();
@@ -382,8 +383,8 @@ class PopupApp extends Component<PopupAppProps, PopupAppState> {
         options.getAll().then(opts => {
             this.setState({
                 mirroringEnabled: opts.mirroringEnabled,
-                userAgentWhitelistEnabled: opts.userAgentWhitelistEnabled,
-                userAgentWhitelist: opts.userAgentWhitelist
+                siteWhitelistEnabled: opts.siteWhitelistEnabled,
+                siteWhitelist: opts.siteWhitelist
             });
         });
 
@@ -429,9 +430,9 @@ class PopupApp extends Component<PopupAppProps, PopupAppState> {
                         // If we don't know the app
                         !this.state.knownApp ||
                         // If the whitelist is disabled
-                        !this.state.userAgentWhitelistEnabled ||
+                        !this.state.siteWhitelistEnabled ||
                         // If the whitelist is enabled, and the page is whitelisted
-                        (this.state.userAgentWhitelistEnabled &&
+                        (this.state.siteWhitelistEnabled &&
                             this.state.isPageWhitelisted) ||
                         // If an app is already loaded on the page
                         !!(

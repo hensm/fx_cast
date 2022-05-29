@@ -1,6 +1,7 @@
 "use strict";
 
 import defaultOptions from "../defaultOptions";
+import type { WhitelistItemData } from "../background/whitelist";
 
 import logger from "./logger";
 
@@ -25,9 +26,8 @@ export interface Options {
     mirroringAppId: string;
     receiverSelectorCloseIfFocusLost: boolean;
     receiverSelectorWaitForConnection: boolean;
-    userAgentWhitelistEnabled: boolean;
-    userAgentWhitelistRestrictedEnabled: boolean;
-    userAgentWhitelist: string[];
+    siteWhitelistEnabled: boolean;
+    siteWhitelist: WhitelistItemData[];
 
     [key: string]: Options[keyof Options];
 }

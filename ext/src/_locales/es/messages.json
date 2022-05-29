@@ -275,55 +275,55 @@
         "description": "Receiver selector close if focus lost option checkbox label."
     },
 
-    "optionsUserAgentWhitelistCategoryName": {
+    "optionsSiteWhitelistCategoryName": {
         "message": "Lista blanca de agentes de usuario",
         "description": "Options page whitelist category title."
     },
-    "optionsUserAgentWhitelistCategoryDescription": {
+    "optionsSiteWhitelistCategoryDescription": {
         "message": "Sitios en los cuales reemplazar el agente de usuario con una versión de Chrome para compatibilidad. Deben ser patrones de coincidencia válidos.",
         "description": "Options page whitelist category description."
     },
-    "optionsUserAgentWhitelistEnabled": {
+    "optionsSiteWhitelistEnabled": {
         "message": "Activar lista blanca de sitios",
         "description": "Whitelist enabled checkbox label."
     },
-    "optionsUserAgentWhitelistRestrictedEnabled": {
+    "optionsSiteWhitelistRestrictedEnabled": {
         "message": "Activar modo restringido",
         "description": "Whitelist restricted mode enabled checkbox label."
     },
-    "optionsUserAgentWhitelistRestrictedEnabledDescription": {
+    "optionsSiteWhitelistRestrictedEnabledDescription": {
         "message": "También aplica restricciones de la lista blanca a sitios intentando cargar la funcionalidad de transmisión sin importar el agente de usuario actual.",
         "description": "Whitelist restricted mode enabled description."
     },
-    "optionsUserAgentWhitelistContent": {
+    "optionsSiteWhitelistContent": {
         "message": "Patrones de coincidencia:",
         "description": "Match patterns editor widget label."
     },
-    "optionsUserAgentWhitelistBasicView": {
+    "optionsSiteWhitelistBasicView": {
         "message": "Vista básica",
         "description": "Switch to basic view button title."
     },
-    "optionsUserAgentWhitelistRawView": {
+    "optionsSiteWhitelistRawView": {
         "message": "Vista en bruto",
         "description": "Switch to raw view button title."
     },
-    "optionsUserAgentWhitelistSaveRaw": {
+    "optionsSiteWhitelistSaveRaw": {
         "message": "Guardar archivo en bruto",
         "description": "Save raw view edits button title."
     },
-    "optionsUserAgentWhitelistAddItem": {
+    "optionsSiteWhitelistAddItem": {
         "message": "Añadir elemento",
         "description": "Add new whitelist item button title."
     },
-    "optionsUserAgentWhitelistEditItem": {
+    "optionsSiteWhitelistEditItem": {
         "message": "Editar",
         "description": "Edit whitelist item button title. Displayed on each item."
     },
-    "optionsUserAgentWhitelistRemoveItem": {
+    "optionsSiteWhitelistRemoveItem": {
         "message": "Eliminar",
         "description": "Remove whitelist item button title. Displayed on each item."
     },
-    "optionsUserAgentWhitelistInvalidMatchPattern": {
+    "optionsSiteWhitelistInvalidMatchPattern": {
         "message": "Patrón de coincidencia $matchPattern$ inválido",
         "description": "Error displayed by input indicating an invalid match pattern.",
         "placeholders": {

@@ -316,7 +316,7 @@ button.ghost:not(:hover) {
 }
 
 
-.editable-list {
+.whitelist {
     background-color: var(--box-background);
     border: 1px solid var(--border-color);
     color: var(--box-color);
@@ -324,22 +324,18 @@ button.ghost:not(:hover) {
     padding: 5px;
 }
 
-.editable-list__view-actions {
+.whitelist__view-actions {
     display: flex;
     justify-content: end;
 }
 
-.editable-list__save-raw-button {
-    margin-inline-end: 5px;
-}
-
-.editable-list hr {
+.whitelist hr {
     border: initial;
     border-top: 1px solid var(--border-color);
     margin: 5px 0;
 }
 
-.editable-list__items {
+.whitelist__items {
     display: flex;
     flex-direction: column;
     margin: initial;
@@ -348,22 +344,22 @@ button.ghost:not(:hover) {
     width: calc(100% + 10px);
 }
 
-.editable-list__item {
+.whitelist__item {
     align-items: center;
     display: flex;
     height: 34px;
     padding: 0 5px;
 }
 
-.editable-list__item:nth-child(odd) {
+.whitelist__item:nth-child(odd) {
     background-color: rgba(0, 0, 0, 0.05);
 }
 
-.editable-list__item--selected {
+.whitelist__item--selected {
     background-color: var(--blue-50-a30) !important;
 }
 
-.editable-list__title {
+.whitelist__title {
     flex: 1;
     font-family: monospace;
     overflow: hidden;
@@ -372,28 +368,24 @@ button.ghost:not(:hover) {
     white-space: nowrap;
 }
 
-.editable-list__item:not(.editable-list__item--selected) > .editable-list__title {
+.whitelist__item:not(.whitelist__item--selected) > .whitelist__title {
     padding: 0 8px;
 }
 
-.editable-list__title + button {
+.whitelist__title + button {
     margin-inline-end: 5px;
 }
 
-.editable-list__edit-field {
+.whitelist__input-pattern {
     font: inherit;
     margin-inline-end: 1em;
     width: -moz-available;
 }
 
-.editable-list__raw-view {
-    max-height: 300px;
-    overflow-y: auto;
-    resize: vertical;
-    width: 100%;
+.whitelist__user-agent {
+    margin-inline-end: 5px;
 }
-
-.editable-list__add-button {
+.whitelist__add-button {
     margin-inline-end: auto;
 }
 
@@ -410,7 +402,7 @@ button.ghost:not(:hover) {
 
 
 @media (prefers-color-scheme: dark) {
-    .editable-list__item:nth-child(odd) {
+    .whitelist__item:nth-child(odd) {
         background-color: rgba(255, 255, 255, 0.05);
     }
 }

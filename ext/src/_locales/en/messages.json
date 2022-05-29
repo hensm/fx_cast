@@ -302,55 +302,55 @@
         "description": "Receiver selector close if focus lost option checkbox label."
     },
 
-    "optionsUserAgentWhitelistCategoryName": {
-        "message": "User agent whitelist",
+    "optionsSiteWhitelistCategoryName": {
+        "message": "Site whitelist",
         "description": "Options page whitelist category title."
     },
-    "optionsUserAgentWhitelistCategoryDescription": {
-        "message": "Sites for which to replace the user agent with a Chrome version for compatibility. Must be valid match patterns.",
+    "optionsSiteWhitelistCategoryDescription": {
+        "message": "Site where cast functionality will be enabled and the user agent string will be replaced with a Chrome version for compatibility.",
         "description": "Options page whitelist category description."
     },
-    "optionsUserAgentWhitelistEnabled": {
+    "optionsSiteWhitelistEnabled": {
         "message": "Enable site whitelist",
         "description": "Whitelist enabled checkbox label."
     },
-    "optionsUserAgentWhitelistRestrictedEnabled": {
-        "message": "Enable restricted mode",
-        "description": "Whitelist restricted mode enabled checkbox label."
-    },
-    "optionsUserAgentWhitelistRestrictedEnabledDescription": {
-        "message": "Also apply whitelist restrictions to sites attempting to load cast functionality regardless of the current user agent.",
+    "optionsSiteWhitelistEnabledDescription": {
+        "message": "Disabling this option will enable cast functionality on any site, but the user agent string will not be replaced.",
         "description": "Whitelist restricted mode enabled description."
     },
-    "optionsUserAgentWhitelistContent": {
+    "optionsSiteWhitelistContent": {
         "message": "Match patterns:",
         "description": "Match patterns editor widget label."
     },
-    "optionsUserAgentWhitelistBasicView": {
+    "optionsSiteWhitelistBasicView": {
         "message": "Basic View",
         "description": "Switch to basic view button title."
     },
-    "optionsUserAgentWhitelistRawView": {
+    "optionsSiteWhitelistRawView": {
         "message": "Raw View",
         "description": "Switch to raw view button title."
     },
-    "optionsUserAgentWhitelistSaveRaw": {
+    "optionsSiteWhitelistSaveRaw": {
         "message": "Save Raw",
         "description": "Save raw view edits button title."
     },
-    "optionsUserAgentWhitelistAddItem": {
+    "optionsSiteWhitelistAddItem": {
         "message": "Add Item",
         "description": "Add new whitelist item button title."
     },
-    "optionsUserAgentWhitelistEditItem": {
+    "optionsSiteWhitelistUserAgent": {
+        "message": "Enable UA",
+        "description": "Whitelist item user agent checkbox title."
+    },
+    "optionsSiteWhitelistEditItem": {
         "message": "Edit",
         "description": "Edit whitelist item button title. Displayed on each item."
     },
-    "optionsUserAgentWhitelistRemoveItem": {
+    "optionsSiteWhitelistRemoveItem": {
         "message": "Remove",
         "description": "Remove whitelist item button title. Displayed on each item."
     },
-    "optionsUserAgentWhitelistInvalidMatchPattern": {
+    "optionsSiteWhitelistInvalidMatchPattern": {
         "message": "Invalid match pattern $matchPattern$",
         "description": "Error displayed by input indicating an invalid match pattern.",
         "placeholders": {

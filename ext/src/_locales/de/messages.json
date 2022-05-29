@@ -259,55 +259,55 @@
         "description": "Receiver selector close if focus lost option checkbox label."
     },
 
-    "optionsUserAgentWhitelistCategoryName": {
+    "optionsSiteWhitelistCategoryName": {
         "message": "Useragent-Whitelist",
         "description": "Options page whitelist category title."
     },
-    "optionsUserAgentWhitelistCategoryDescription": {
+    "optionsSiteWhitelistCategoryDescription": {
         "message": "Seiten auf denen der Useragent aus Kompatibilitätsgründen mit einer Chrome-Version ersetzt wird. Suchmuster müssen gültig sein.",
         "description": "Options page whitelist category description."
     },
-    "optionsUserAgentWhitelistEnabled": {
+    "optionsSiteWhitelistEnabled": {
         "message": "Webseiten-Whitelist aktivieren",
         "description": "Whitelist enabled checkbox label."
     },
-    "optionsUserAgentWhitelistRestrictedEnabled": {
+    "optionsSiteWhitelistRestrictedEnabled": {
         "message": "Eingeschränkten Modus aktivieren",
         "description": "Whitelist restricted mode enabled checkbox label."
     },
-    "optionsUserAgentWhitelistRestrictedEnabledDescription": {
+    "optionsSiteWhitelistRestrictedEnabledDescription": {
         "message": "Whitelist-Einschränkungen auch auf Seiten anwenden, die unabhängig vom aktuellen Useragent versuchen Stream-Funktionen zu laden.",
         "description": "Whitelist restricted mode enabled description."
     },
-    "optionsUserAgentWhitelistContent": {
+    "optionsSiteWhitelistContent": {
         "message": "Suchmuster:",
         "description": "Match patterns editor widget label."
     },
-    "optionsUserAgentWhitelistBasicView": {
+    "optionsSiteWhitelistBasicView": {
         "message": "Einfache Ansicht",
         "description": "Switch to basic view button title."
     },
-    "optionsUserAgentWhitelistRawView": {
+    "optionsSiteWhitelistRawView": {
         "message": "Rohdatenansicht",
         "description": "Switch to raw view button title."
     },
-    "optionsUserAgentWhitelistSaveRaw": {
+    "optionsSiteWhitelistSaveRaw": {
         "message": "Rohdaten speichern",
         "description": "Save raw view edits button title."
     },
-    "optionsUserAgentWhitelistAddItem": {
+    "optionsSiteWhitelistAddItem": {
         "message": "Eintrag hinzufügen",
         "description": "Add new whitelist item button title."
     },
-    "optionsUserAgentWhitelistEditItem": {
+    "optionsSiteWhitelistEditItem": {
         "message": "Bearbeiten",
         "description": "Edit whitelist item button title. Displayed on each item."
     },
-    "optionsUserAgentWhitelistRemoveItem": {
+    "optionsSiteWhitelistRemoveItem": {
         "message": "Entfernen",
         "description": "Remove whitelist item button title. Displayed on each item."
     },
-    "optionsUserAgentWhitelistInvalidMatchPattern": {
+    "optionsSiteWhitelistInvalidMatchPattern": {
         "message": "Ungültiges Suchmuster $matchPattern$",
         "description": "Error displayed by input indicating an invalid match pattern.",
         "placeholders": {

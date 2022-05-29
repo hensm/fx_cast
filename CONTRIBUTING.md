@@ -35,17 +35,43 @@ Missing/outdated strings:
     -   `optionsMirroringCategoryDescription`
     -   `optionsMirroringEnabled`
     -   `optionsMirroringAppId`
-    -   `popupWhitelistNotWhitelisted`
-    -   `popupWhitelistAddToWhitelist`
-    -   `popupMediaTypeAppNotFound`
     -   `optionsBridgeCompatible`
     -   `optionsBridgeLikelyCompatible`
     -   `optionsBridgeIncompatible`
+    -   `optionsSiteWhitelistCategoryName`
+    -   `optionsSiteWhitelistCategoryDescription`
+    -   `optionsSiteWhitelistEnabled`
+    -   `optionsSiteWhitelistEnabledDescription`
+    -   `optionsSiteWhitelistContent`
+    -   `optionsSiteWhitelistBasicView`
+    -   `optionsSiteWhitelistRawView`
+    -   `optionsSiteWhitelistSaveRaw`
+    -   `optionsSiteWhitelistAddItem`
+    -   `optionsSiteWhitelistUserAgent`
+    -   `optionsSiteWhitelistEditItem`
+    -   `optionsSiteWhitelistRemoveItem`
+    -   `optionsSiteWhitelistInvalidMatchPattern`
+    -   `popupWhitelistNotWhitelisted`
+    -   `popupWhitelistAddToWhitelist`
+    -   `popupMediaTypeAppNotFound`
     -   `popupCastMenuTitle`
     -   `popupStopMenuTitle`
 
 -   `es`
 
+    -   `optionsSiteWhitelistCategoryName`
+    -   `optionsSiteWhitelistCategoryDescription`
+    -   `optionsSiteWhitelistEnabled`
+    -   `optionsSiteWhitelistEnabledDescription`
+    -   `optionsSiteWhitelistContent`
+    -   `optionsSiteWhitelistBasicView`
+    -   `optionsSiteWhitelistRawView`
+    -   `optionsSiteWhitelistSaveRaw`
+    -   `optionsSiteWhitelistAddItem`
+    -   `optionsSiteWhitelistUserAgent`
+    -   `optionsSiteWhitelistEditItem`
+    -   `optionsSiteWhitelistRemoveItem`
+    -   `optionsSiteWhitelistInvalidMatchPattern`
     -   `popupWhitelistNotWhitelisted`
     -   `popupWhitelistAddToWhitelist`
     -   `popupCastMenuTitle`
@@ -54,23 +80,47 @@ Missing/outdated strings:
 -   `nl`
 
     -   `optionsBridgeBackupEnabled`
-    -   `optionsUserAgentWhitelistRestrictedEnabled`
-    -   `optionsUserAgentWhitelistRestrictedEnabledDescription`
+    -   `optionsBridgeCompatible`
+    -   `optionsBridgeLikelyCompatible`
+    -   `optionsBridgeIncompatible`
     -   `optionsOptionRecommended`
     -   `optionsMirroringCategoryName`
     -   `optionsMirroringCategoryDescription`
     -   `optionsMirroringEnabled`
     -   `optionsMirroringAppId`
+    -   `optionsSiteWhitelistCategoryName`
+    -   `optionsSiteWhitelistCategoryDescription`
+    -   `optionsSiteWhitelistEnabled`
+    -   `optionsSiteWhitelistEnabledDescription`
+    -   `optionsSiteWhitelistContent`
+    -   `optionsSiteWhitelistBasicView`
+    -   `optionsSiteWhitelistRawView`
+    -   `optionsSiteWhitelistSaveRaw`
+    -   `optionsSiteWhitelistAddItem`
+    -   `optionsSiteWhitelistUserAgent`
+    -   `optionsSiteWhitelistEditItem`
+    -   `optionsSiteWhitelistRemoveItem`
+    -   `optionsSiteWhitelistInvalidMatchPattern`
     -   `popupWhitelistNotWhitelisted`
     -   `popupWhitelistAddToWhitelist`
     -   `popupMediaTypeAppNotFound`
-    -   `optionsBridgeCompatible`
-    -   `optionsBridgeLikelyCompatible`
-    -   `optionsBridgeIncompatible`
     -   `popupCastMenuTitle`
     -   `popupStopMenuTitle`
 
 -   `no`
+    -   `optionsSiteWhitelistCategoryName`
+    -   `optionsSiteWhitelistCategoryDescription`
+    -   `optionsSiteWhitelistEnabled`
+    -   `optionsSiteWhitelistEnabledDescription`
+    -   `optionsSiteWhitelistContent`
+    -   `optionsSiteWhitelistBasicView`
+    -   `optionsSiteWhitelistRawView`
+    -   `optionsSiteWhitelistSaveRaw`
+    -   `optionsSiteWhitelistAddItem`
+    -   `optionsSiteWhitelistUserAgent`
+    -   `optionsSiteWhitelistEditItem`
+    -   `optionsSiteWhitelistRemoveItem`
+    -   `optionsSiteWhitelistInvalidMatchPattern`
     -   `popupWhitelistNotWhitelisted`
     -   `popupWhitelistAddToWhitelist`
     -   `popupCastMenuTitle`

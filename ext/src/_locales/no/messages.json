@@ -263,55 +263,55 @@
         "description": "Receiver selector close if focus lost option checkbox label."
     },
 
-    "optionsUserAgentWhitelistCategoryName": {
+    "optionsSiteWhitelistCategoryName": {
         "message": "Brukeragent whitelist",
         "description": "Options page whitelist category title."
     },
-    "optionsUserAgentWhitelistCategoryDescription": {
+    "optionsSiteWhitelistCategoryDescription": {
         "message": "Sider hvor man kan erstatte brukeragent med en Chrome-versjon for kompatibilitet. Må være et gjenkjennbart mønster.",
         "description": "Options page whitelist category description."
     },
-    "optionsUserAgentWhitelistEnabled": {
+    "optionsSiteWhitelistEnabled": {
         "message": "Skru på whitelist",
         "description": "Whitelist enabled checkbox label."
     },
-    "optionsUserAgentWhitelistRestrictedEnabled": {
+    "optionsSiteWhitelistRestrictedEnabled": {
         "message": "Skru på ",
         "description": "Whitelist restricted mode enabled checkbox label."
     },
-    "optionsUserAgentWhitelistRestrictedEnabledDescription": {
+    "optionsSiteWhitelistRestrictedEnabledDescription": {
         "message": "Legg også til whitelist-begrensninger til side smo prøvde å laste cast-funksjonalitet uavhengig av nåværende brukeragent.",
         "description": "Whitelist restricted mode enabled description."
     },
-    "optionsUserAgentWhitelistContent": {
+    "optionsSiteWhitelistContent": {
         "message": "Match mønster",
         "description": "Match patterns editor widget label."
     },
-    "optionsUserAgentWhitelistBasicView": {
+    "optionsSiteWhitelistBasicView": {
         "message": "Standard visning",
         "description": "Switch to basic view button title."
     },
-    "optionsUserAgentWhitelistRawView": {
+    "optionsSiteWhitelistRawView": {
         "message": "Rå visning",
         "description": "Switch to raw view button title."
     },
-    "optionsUserAgentWhitelistSaveRaw": {
+    "optionsSiteWhitelistSaveRaw": {
         "message": "Lagre rå",
         "description": "Save raw view edits button title."
     },
-    "optionsUserAgentWhitelistAddItem": {
+    "optionsSiteWhitelistAddItem": {
         "message": "Legg til",
         "description": "Add new whitelist item button title."
     },
-    "optionsUserAgentWhitelistEditItem": {
+    "optionsSiteWhitelistEditItem": {
         "message": "Rediger",
         "description": "Edit whitelist item button title. Displayed on each item."
     },
-    "optionsUserAgentWhitelistRemoveItem": {
+    "optionsSiteWhitelistRemoveItem": {
         "message": "Fjern",
         "description": "Remove whitelist item button title. Displayed on each item."
     },
-    "optionsUserAgentWhitelistInvalidMatchPattern": {
+    "optionsSiteWhitelistInvalidMatchPattern": {
         "message": "Ugyldig mønster $matchPattern$",
         "description": "Error displayed by input indicating an invalid match pattern.",
         "placeholders": {
