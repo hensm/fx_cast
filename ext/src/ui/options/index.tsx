@@ -363,7 +363,7 @@ class OptionsApp extends Component<OptionsAppProps, OptionsAppState> {
                                 {_("optionsSiteWhitelistContent")}
                             </div>
                             <div className="option__control">
-                                {this.state.options?.userAgentWhitelist && (
+                                {this.state.options?.siteWhitelist && (
                                     <Whitelist
                                         items={this.state.options.siteWhitelist}
                                         onChange={this.handleWhitelistChange}

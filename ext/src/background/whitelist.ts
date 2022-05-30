@@ -153,8 +153,8 @@ async function onBeforeCastSDKRequest(details: OnBeforeRequestDetails) {
         return {};
     }
 
-    // Check against whitelist if restricted mode is enabled
-    if (await options.get("userAgentWhitelistRestrictedEnabled")) {
+    // Check against whitelist if enabled
+    if (await options.get("siteWhitelistEnabled")) {
         if (!details?.frameAncestors?.length) {
             if (!originUrlCache.includes(details.originUrl)) {
                 return {};
