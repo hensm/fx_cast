@@ -1,9 +1,10 @@
 {
-    "extends": "../tsconfig"
-  , "compilerOptions": {
-        "jsx": "react"
-      , "lib": [ "ESNext", "DOM", "DOM.Iterable" ]
-      , "moduleResolution": "node"
-      , "sourceMap": true
+    "extends": "../tsconfig",
+    "compilerOptions": {
+        "jsx": "react",
+        "lib": ["ESNext", "DOM", "DOM.Iterable"],
+        "moduleResolution": "node",
+        "sourceMap": true,
+        "module": "esnext"
     }
 }
