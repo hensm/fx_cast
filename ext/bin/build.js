@@ -6,6 +6,8 @@ const path = require("path");
 
 const esbuild = require("esbuild");
 const minimist = require("minimist");
+const sveltePlugin = require("esbuild-svelte");
+const sveltePreprocess = require("svelte-preprocess");
 const webExt = require("web-ext");
 
 const { copyFilesPlugin } = require("./lib/copyFilesPlugin.js");
@@ -86,7 +88,7 @@ const buildOpts = {
         path.join(srcPath, "/cast/senders/mirroring.ts"),
         // UI
         path.join(srcPath, "ui/popup/index.tsx"),
-        path.join(srcPath, "ui/options/index.tsx")
+        path.join(srcPath, "ui/options/index.ts")
     ],
     define: {
         BRIDGE_NAME: `"${BRIDGE_NAME}"`,
@@ -95,12 +97,17 @@ const buildOpts = {
     },
     plugins: [
         preactCompatPlugin,
+        // @ts-ignore
+        sveltePlugin({
+            // @ts-ignore
+            preprocess: sveltePreprocess()
+        }),
 
         // Copy static files
         copyFilesPlugin({
             src: srcPath,
             dest: outPath,
-            excludePattern: /^(manifest\.json|.*\.(ts|tsx|js|jsx))$/
+            excludePattern: /^(manifest\.json|.*\.(ts|tsx|js|jsx|svelte))$/
         })
     ]
 };
@@ -117,7 +124,7 @@ if (argv.mode === "production") {
  * @param {esbuild.BuildResult} result
  */
 function onBuildResult(result) {
-    if (result.errors.length) {
+    if (result?.errors.length) {
         console.error("Build error!");
         return;
     }

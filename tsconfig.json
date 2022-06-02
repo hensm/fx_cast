@@ -1,12 +1,13 @@
 {
     "compilerOptions": {
-        "esModuleInterop": true
-      , "module": "commonjs"
-      , "noImplicitAny": true
-      , "noUnusedParameters": true
-      , "removeComments": true
-      , "resolveJsonModule": true
-      , "target": "es6"
-      , "strict": true
-    }
+        "esModuleInterop": true,
+        "module": "commonjs",
+        "noImplicitAny": true,
+        "noUnusedParameters": true,
+        "removeComments": true,
+        "resolveJsonModule": true,
+        "target": "es6",
+        "strict": true
+    },
+    "exclude": ["node_modules/**/*", "dist/**/*"]
 }

@@ -347,8 +347,9 @@ button.ghost:not(:hover) {
 .whitelist__item {
     align-items: center;
     display: flex;
+    gap: 5px;
     height: 34px;
-    padding: 0 5px;
+    padding: 0 10px;
 }
 
 .whitelist__item:nth-child(odd) {
@@ -368,23 +369,11 @@ button.ghost:not(:hover) {
     white-space: nowrap;
 }
 
-.whitelist__item:not(.whitelist__item--selected) > .whitelist__title {
-    padding: 0 8px;
-}
-
-.whitelist__title + button {
-    margin-inline-end: 5px;
-}
-
 .whitelist__input-pattern {
     font: inherit;
-    margin-inline-end: 1em;
     width: -moz-available;
 }
 
-.whitelist__user-agent {
-    margin-inline-end: 5px;
-}
 .whitelist__add-button {
     margin-inline-end: auto;
 }

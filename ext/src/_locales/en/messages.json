@@ -339,7 +339,7 @@
         "description": "Add new whitelist item button title."
     },
     "optionsSiteWhitelistUserAgent": {
-        "message": "Enable UA",
+        "message": "Disable UA",
         "description": "Whitelist item user agent checkbox title."
     },
     "optionsSiteWhitelistEditItem": {
@@ -350,15 +350,9 @@
         "message": "Remove",
         "description": "Remove whitelist item button title. Displayed on each item."
     },
-    "optionsSiteWhitelistInvalidMatchPattern": {
-        "message": "Invalid match pattern $matchPattern$",
-        "description": "Error displayed by input indicating an invalid match pattern.",
-        "placeholders": {
-            "matchPattern": {
-                "content": "$1",
-                "example": "http://example"
-            }
-        }
+    "optionsSiteWhitelistInvalidDuplicatePattern": {
+        "message": "Match pattern already exists!",
+        "description": "Error displayed by input indicating a duplicate match pattern."
     },
 
     "optionsMirroringCategoryName": {
