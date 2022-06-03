@@ -154,7 +154,6 @@
                     message.data.availableMediaTypes !== undefined &&
                     message.data.defaultMediaType !== undefined
                 ) {
-                    console.log(message);
                     availableMediaTypes = message.data.availableMediaTypes;
 
                     if (availableMediaTypes & message.data.defaultMediaType) {
@@ -330,11 +329,8 @@
     }
 
     function onReceiverCast(receiverDevice: ReceiverDevice) {
-        console.log(receiverDevice);
         isConnecting = true;
         connectingId = receiverDevice.id;
-
-        console.log(port);
 
         port?.postMessage({
             subject: "receiverSelector:selected",

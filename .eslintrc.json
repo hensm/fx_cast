@@ -1,7 +1,7 @@
 {
     "root": true,
     "parser": "@typescript-eslint/parser",
-    "plugins": ["@typescript-eslint"],
+    "plugins": ["@typescript-eslint", "svelte3"],
     "extends": ["eslint:recommended", "prettier"],
     "rules": {
         "no-useless-escape": "off",
@@ -16,7 +16,9 @@
             }
         ]
     },
-
+    "parserOptions": {
+        "extraFileExtensions": ".svelte"
+    },
     "overrides": [
         {
             "files": ["*/bin/**/*.js"],
@@ -25,7 +27,14 @@
             }
         },
         {
-            "files": ["**/*.ts", "**/*.tsx"],
+            "files": ["ext/**/*.svelte"],
+            "processor": "svelte3/svelte3",
+            "rules": {
+                "no-undef": "off"
+            }
+        },
+        {
+            "files": ["**/*.ts"],
             "extends": "plugin:@typescript-eslint/recommended",
             "rules": {
                 "@typescript-eslint/no-empty-interface": "off",
@@ -41,8 +50,12 @@
                     {
                         "allowedNames": ["this_"]
                     }
-                ]
+                ],
+                "no-undef": "off"
             }
         }
-    ]
+    ],
+    "settings": {
+        "svelte3/typescript": true
+    }
 }

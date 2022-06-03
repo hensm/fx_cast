@@ -18,19 +18,21 @@
         "install-manifest": "cd app && npm run install-manifest",
         "remove-manifest": "cd app && npm run remove-manifest",
         "lint": "npm run lint:app && npm run lint:ext",
-        "lint:app": "eslint app/src --ext .ts,.tsx",
-        "lint:ext": "eslint ext/src --ext .ts,.tsx"
+        "lint:app": "eslint app/src --ext .ts,.js",
+        "lint:ext": "eslint ext/src --ext .ts,.js,.svelte"
     },
     "devDependencies": {
         "@typescript-eslint/eslint-plugin": "^5.14.0",
         "@typescript-eslint/parser": "^5.14.0",
-        "eslint": "^8.10.0",
+        "eslint": "^8.16.0",
         "eslint-config-prettier": "^8.5.0",
+        "eslint-plugin-svelte3": "^4.0.0",
         "fs-extra": "^10.0.1",
         "glob": "^7.2.0",
         "jasmine-console-reporter": "^3.1.0",
         "minimist": "^1.2.5",
         "prettier": "^2.5.1",
+        "prettier-plugin-svelte": "^2.7.0",
         "selenium-webdriver": "^4.1.1",
         "typescript": "^4.6.2",
         "ws": "^8.5.0"

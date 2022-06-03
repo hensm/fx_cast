@@ -1,5 +1,5 @@
 <script lang="ts">
-    import { afterUpdate, beforeUpdate, onMount } from "svelte";
+    import { afterUpdate, onMount } from "svelte";
 
     import Bridge from "./Bridge.svelte";
     import Whitelist from "./Whitelist.svelte";
