@@ -8,12 +8,10 @@
     },
     "devDependencies": {
         "@types/firefox-webext-browser": "^94.0.1",
-        "@types/react": "^18.0.6",
         "@types/react-dom": "^18.0.2",
         "@types/semver": "^7.3.9",
         "@types/uuid": "^8.3.4",
         "esbuild": "^0.14.38",
-        "preact": "^10.7.1",
         "semver": "^7.3.7",
         "ts-loader": "^9.2.8",
         "typescript": "^4.6.3",
