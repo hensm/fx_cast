@@ -3,9 +3,6 @@
 
     import LoadingIndicator from "../LoadingIndicator.svelte";
 
-    import { ReceiverSelectorPageInfo } from "../../background/ReceiverSelector";
-    import { menuIdPopupCast, menuIdPopupStop } from "../../background/menus";
-
     import messaging, { Message, Port } from "../../messaging";
     import options, { Options } from "../../lib/options";
     import { RemoteMatchPattern } from "../../lib/matchPattern";
@@ -13,7 +10,8 @@
     import {
         ReceiverDevice,
         ReceiverSelectionActionType,
-        ReceiverSelectorMediaType
+        ReceiverSelectorMediaType,
+        ReceiverSelectorPageInfo
     } from "../../types";
 
     import knownApps, { KnownApp } from "../../cast/knownApps";
@@ -272,13 +270,13 @@
 
         const device = getDeviceFromElement(target);
         if (!device) {
-            browser.menus.update(menuIdPopupCast, { visible: false });
-            browser.menus.update(menuIdPopupStop, { visible: false });
+            browser.menus.update("popup_cast", { visible: false });
+            browser.menus.update("popup_stop", { visible: false });
         } else {
             const app = device.status?.applications?.[0];
             const isAppRunning = !!(app && !app.isIdleScreen);
 
-            browser.menus.update(menuIdPopupCast, {
+            browser.menus.update("popup_cast", {
                 visible: true,
                 title: _("popupCastMenuTitle", device.friendlyName),
                 enabled:
@@ -288,7 +286,7 @@
                     isMediaTypeAvailable
             });
 
-            browser.menus.update(menuIdPopupStop, {
+            browser.menus.update("popup_stop", {
                 visible: isAppRunning,
                 title: isAppRunning
                     ? _("popupStopMenuTitle", [
@@ -305,8 +303,8 @@
     /** Handle click events for receiver context menus. */
     function onMenuClicked(info: browser.menus.OnClickData) {
         if (
-            info.menuItemId !== menuIdPopupCast &&
-            info.menuItemId !== menuIdPopupStop
+            info.menuItemId !== "popup_cast" &&
+            info.menuItemId !== "popup_stop"
         ) {
             return;
         }
@@ -319,10 +317,10 @@
         if (!device) return;
 
         switch (info.menuItemId) {
-            case menuIdPopupCast:
+            case "popup_cast":
                 onReceiverCast(device);
                 break;
-            case menuIdPopupStop:
+            case "popup_stop":
                 onReceiverStop(device);
                 break;
         }

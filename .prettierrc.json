@@ -2,6 +2,5 @@
     "arrowParens": "avoid",
     "tabWidth": 4,
     "trailingComma": "none",
-    "quoteProps": "consistent",
-    "plugins": ["prettier-plugin-svelte"]
+    "quoteProps": "consistent"
 }

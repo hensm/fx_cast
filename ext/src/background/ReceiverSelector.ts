@@ -5,22 +5,14 @@ import messaging, { Port, Message } from "../messaging";
 import options from "../lib/options";
 
 import { TypedEventTarget } from "../lib/TypedEventTarget";
-import { SessionRequest } from "../cast/sdk/classes";
 import {
     ReceiverDevice,
     ReceiverSelectionActionType,
-    ReceiverSelectorMediaType
+    ReceiverSelectorMediaType,
+    ReceiverSelectorPageInfo
 } from "../types";
 
 const POPUP_URL = browser.runtime.getURL("ui/popup/index.html");
-
-/** Info about sender page context. */
-export interface ReceiverSelectorPageInfo {
-    url: string;
-    tabId: number;
-    frameId: number;
-    sessionRequest?: SessionRequest;
-}
 
 export interface ReceiverSelectionCast {
     actionType: ReceiverSelectionActionType.Cast;

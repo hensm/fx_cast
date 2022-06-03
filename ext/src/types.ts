@@ -1,5 +1,6 @@
 "use strict";
 
+import { SessionRequest } from "./cast/sdk/classes";
 import { ReceiverStatus } from "./cast/sdk/types";
 
 export enum ReceiverDeviceCapabilities {
@@ -31,4 +32,12 @@ export enum ReceiverSelectorMediaType {
 export enum ReceiverSelectionActionType {
     Cast = 1,
     Stop = 2
+}
+
+/** Info about sender page context. */
+export interface ReceiverSelectorPageInfo {
+    url: string;
+    tabId: number;
+    frameId: number;
+    sessionRequest?: SessionRequest;
 }
