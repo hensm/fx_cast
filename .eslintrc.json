@@ -21,7 +21,7 @@
     },
     "overrides": [
         {
-            "files": ["*/bin/**/*.js"],
+            "files": ["**/*.js"],
             "env": {
                 "node": true
             }
@@ -34,10 +34,10 @@
             }
         },
         {
-            "files": ["**/*.ts"],
+            "files": ["**/*.ts", "ext/**/*.svelte"],
             "extends": "plugin:@typescript-eslint/recommended",
             "rules": {
-                "@typescript-eslint/no-empty-interface": "off",
+                "@typescript-eslint/no-empty-interface": "error",
                 "@typescript-eslint/no-explicit-any": "off",
                 "@typescript-eslint/explicit-module-boundary-types": "off",
                 "@typescript-eslint/no-unused-vars": [
@@ -50,8 +50,7 @@
                     {
                         "allowedNames": ["this_"]
                     }
-                ],
-                "no-undef": "off"
+                ]
             }
         }
     ],
