@@ -2,11 +2,12 @@
     import semver from "semver";
     import { onMount } from "svelte";
 
+    import LoadingIndicator from "../LoadingIndicator.svelte";
+
     import bridge, { BridgeInfo, BridgeTimedOutError } from "../../lib/bridge";
     import logger from "../../lib/logger";
 
     import { Options } from "../../lib/options";
-    import { getNextEllipsis } from "../utils";
 
     const _ = browser.i18n.getMessage;
 
@@ -68,8 +69,6 @@
     let isCheckingUpdate = false;
     let isUpdateAvailable = false;
 
-    let checkUpdateEllipsis = "";
-
     interface GitHubRelease {
         url: string;
         tag_name: string;
@@ -83,10 +82,6 @@
     async function checkUpdate() {
         isCheckingUpdate = true;
 
-        const checkUpdateTimeout = window.setInterval(() => {
-            checkUpdateEllipsis = getNextEllipsis(checkUpdateEllipsis);
-        }, 500);
-
         let releases: GitHubRelease[];
         try {
             releases = await fetch(
@@ -96,8 +91,6 @@
             isCheckingUpdate = false;
             updateStatus = _("optionsBridgeUpdateStatusError");
             return;
-        } finally {
-            window.clearTimeout(checkUpdateTimeout);
         }
 
         // Ensure valid response
@@ -278,7 +271,8 @@
                     on:click={checkUpdate}
                 >
                     {#if isCheckingUpdate}
-                        {_("optionsBridgeUpdateChecking", checkUpdateEllipsis)}
+                        {_("optionsBridgeUpdateChecking", "")}<LoadingIndicator
+                        />
                     {:else}
                         {_("optionsBridgeUpdateCheck")}
                     {/if}

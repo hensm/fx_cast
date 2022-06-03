@@ -47,24 +47,6 @@ const unpackedPath = path.join(distPath, "unpacked");
 
 const outPath = argv.package ? unpackedPath : distPath;
 
-/** @type esbuild.Plugin */
-const preactCompatPlugin = {
-    /**
-     * Handle react/react-dom preact compat modules.
-     */
-    name: "preact-compat",
-    setup(build) {
-        const preactPath = path.resolve(
-            __dirname,
-            "../node_modules/preact/compat/dist/compat.module.js"
-        );
-
-        build.onResolve({ filter: /^(react|react-dom)$/ }, () => ({
-            path: preactPath
-        }));
-    }
-};
-
 /** @type esbuild.BuildOptions */
 const buildOpts = {
     bundle: true,
@@ -87,7 +69,7 @@ const buildOpts = {
         // Mirroring sender
         path.join(srcPath, "/cast/senders/mirroring.ts"),
         // UI
-        path.join(srcPath, "ui/popup/index.tsx"),
+        path.join(srcPath, "ui/popup/index.ts"),
         path.join(srcPath, "ui/options/index.ts")
     ],
     define: {
@@ -96,7 +78,6 @@ const buildOpts = {
         MIRRORING_APP_ID: `"${argv.mirroringAppId}"`
     },
     plugins: [
-        preactCompatPlugin,
         // @ts-ignore
         sveltePlugin({
             // @ts-ignore
@@ -107,7 +88,7 @@ const buildOpts = {
         copyFilesPlugin({
             src: srcPath,
             dest: outPath,
-            excludePattern: /^(manifest\.json|.*\.(ts|tsx|js|jsx|svelte))$/
+            excludePattern: /^(manifest\.json|.*\.(ts|js|svelte))$/
         })
     ]
 };
