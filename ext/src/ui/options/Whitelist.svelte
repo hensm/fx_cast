@@ -12,12 +12,10 @@
     export let items: WhitelistItemData[];
 
     let isEditing = false;
+    let isEditingValid = false;
     let editingIndex: number;
     let editingInput: HTMLInputElement;
     let editingValue: string;
-
-    $: isEditingValid =
-        isEditing && REMOTE_MATCH_PATTERN_REGEX.test(editingValue);
 
     async function beginEditing(index: number) {
         if (isEditing) return;
@@ -33,7 +31,7 @@
         editingInput.select();
     }
     function finishEditing() {
-        if (!isEditing || !editingInput.validity.valid) return;
+        if (!isEditing || !isEditingValid) return;
 
         isEditing = false;
         items[editingIndex].pattern = editingValue;
@@ -50,7 +48,7 @@
                 : ""
         );
 
-        isEditingValid = editingInput.checkValidity();
+        isEditingValid = editingInput.validity.valid;
     }
 
     function addItem() {
