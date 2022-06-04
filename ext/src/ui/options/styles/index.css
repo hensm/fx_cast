@@ -352,7 +352,7 @@ button.ghost:not(:hover) {
     padding: 0 10px;
 }
 
-.whitelist__item:nth-child(odd) {
+.whitelist__item:nth-child(even) {
     background-color: rgba(0, 0, 0, 0.05);
 }
 
@@ -391,7 +391,7 @@ button.ghost:not(:hover) {
 
 
 @media (prefers-color-scheme: dark) {
-    .whitelist__item:nth-child(odd) {
+    .whitelist__item:nth-child(even) {
         background-color: rgba(255, 255, 255, 0.05);
     }
 }

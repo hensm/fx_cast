@@ -4,8 +4,6 @@
     import { WhitelistItemData } from "../../background/whitelist";
     import { REMOTE_MATCH_PATTERN_REGEX } from "../../lib/matchPattern";
 
-    void REMOTE_MATCH_PATTERN_REGEX;
-
     const _ = browser.i18n.getMessage;
 
     /** Whitelist items to display. */
@@ -37,7 +35,36 @@
         items[editingIndex].pattern = editingValue;
     }
 
-    function checkEditValidity() {
+    async function onEditKeydown(ev: KeyboardEvent) {
+        key: switch (ev.key) {
+            // Finish editing on enter
+            case "Enter":
+                finishEditing();
+                break;
+
+            // Cancel editing (or adding new item) on escape
+            case "Escape": {
+                const originalValue = items[editingIndex];
+                switch (originalValue.pattern) {
+                    case "":
+                        removeItem(editingIndex);
+                        break key;
+                    case editingValue:
+                        finishEditing();
+                        break key;
+                }
+
+                editingValue = originalValue.pattern;
+                await tick();
+                isEditingValid = editingInput.validity.valid;
+                editingInput.select();
+
+                break;
+            }
+        }
+    }
+
+    function onEditInput() {
         editingInput.setCustomValidity(
             // Has duplicate pattern
             items.some(
@@ -86,10 +113,9 @@
                             required
                             bind:this={editingInput}
                             bind:value={editingValue}
-                            on:input={checkEditValidity}
+                            on:input={onEditInput}
+                            on:keydown={onEditKeydown}
                             on:blur={finishEditing}
-                            on:keypress={ev =>
-                                ev.key === "Enter" && finishEditing()}
                         />
                     {:else}
                         {item.pattern}
