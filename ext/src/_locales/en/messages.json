@@ -307,7 +307,7 @@
         "description": "Options page whitelist category title."
     },
     "optionsSiteWhitelistCategoryDescription": {
-        "message": "Site where cast functionality will be enabled and the user agent string will be replaced with a Chrome version for compatibility.",
+        "message": "Sites where cast functionality will be enabled and the user agent string will be replaced with a Chrome version for compatibility.",
         "description": "Options page whitelist category description."
     },
     "optionsSiteWhitelistEnabled": {
