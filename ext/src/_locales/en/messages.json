@@ -354,6 +354,10 @@
         "message": "Match pattern already exists!",
         "description": "Error displayed by input indicating a duplicate match pattern."
     },
+    "optionsSiteWhitelistKnownAppsCustomApp": {
+        "message": "Custom",
+        "description": "Default <option> for knownApps <select>."
+    },
 
     "optionsMirroringCategoryName": {
         "message": "Screen/tab casting",

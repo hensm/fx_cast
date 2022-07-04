@@ -264,7 +264,8 @@ button.ghost:not(:hover) {
 }
 
 .option--inline {
-    align-items: center;
+    align-items: baseline;
+    column-gap: 4px;
     display: grid;
     grid-column-start: 2;
     grid-template-columns: min-content 1fr;
@@ -325,7 +326,9 @@ button.ghost:not(:hover) {
 }
 
 .whitelist__view-actions {
+    align-items: center;
     display: flex;
+    gap: 5px;
     justify-content: end;
 }
 
@@ -361,12 +364,20 @@ button.ghost:not(:hover) {
 }
 
 .whitelist__title {
+    display: flex;
     flex: 1;
+    min-width: 0;
+    padding: 4px;
+    white-space: nowrap;
+}
+
+.whitelist__known-app {
+    opacity: 0.5;
+}
+.whitelist__pattern {
     font-family: monospace;
     overflow: hidden;
-    padding: 4px;
     text-overflow: ellipsis;
-    white-space: nowrap;
 }
 
 .whitelist__input-pattern {

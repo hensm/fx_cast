@@ -1,6 +1,7 @@
 <script lang="ts">
     import { tick } from "svelte";
 
+    import knownApps, { KnownApp } from "../../cast/knownApps";
     import { WhitelistItemData } from "../../background/whitelist";
     import { REMOTE_MATCH_PATTERN_REGEX } from "../../lib/matchPattern";
 
@@ -14,6 +15,9 @@
     let editingIndex: number;
     let editingInput: HTMLInputElement;
     let editingValue: string;
+
+    const knownAppsValues = Object.values(knownApps);
+    let knownAppToAdd: Nullable<KnownApp> = null;
 
     async function beginEditing(index: number) {
         if (isEditing) return;
@@ -80,8 +84,14 @@
 
     function addItem() {
         if (isEditing) return;
-        items = [...items, { pattern: "" }];
-        beginEditing(items.length - 1);
+
+        if (knownAppToAdd?.matches) {
+            items = [...items, { pattern: knownAppToAdd.matches }];
+            knownAppToAdd = null;
+        } else {
+            items = [...items, { pattern: "" }];
+            beginEditing(items.length - 1);
+        }
     }
     function removeItem(index: number) {
         if (isEditing) {
@@ -118,7 +128,17 @@
                             on:blur={finishEditing}
                         />
                     {:else}
-                        {item.pattern}
+                        {@const knownApp = knownAppsValues.find(
+                            app => app.matches === item.pattern
+                        )}
+                        <div class="whitelist__pattern">
+                            {item.pattern}
+                        </div>
+                        {#if knownApp}
+                            <div class="whitelist__known-app">
+                                &nbsp;({knownApp.name})
+                            </div>
+                        {/if}
                     {/if}
                 </div>
 
@@ -157,6 +177,24 @@
     <hr />
 
     <div class="whitelist__view-actions">
+        <div class="select-wrapper">
+            <select bind:value={knownAppToAdd}>
+                <option value={null}>
+                    {_("optionsSiteWhitelistKnownAppsCustomApp")}
+                </option>
+                {#each knownAppsValues as knownApp}
+                    {@const isExisting = !!items.find(
+                        item => item.pattern === knownApp.matches
+                    )}
+
+                    {#if knownApp.matches && knownApp.name !== _("popupMediaTypeAppMedia") && !isExisting}
+                        <option value={knownApp}>
+                            {knownApp.name}
+                        </option>
+                    {/if}
+                {/each}
+            </select>
+        </div>
         <button
             class="whitelist__add-button ghost"
             title={_("optionsSiteWhitelistAddItem")}

@@ -52,8 +52,7 @@
 button,
 input,
 textarea,
-select,
-.select-wrapper {
+select {
     border: 1px solid transparent;
     border-radius: 2px;
 }
