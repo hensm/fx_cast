@@ -29,6 +29,8 @@
         0 0 0 4px var(--yellow-60-a30);
     --field-box-shadow-error: 0 0 0 1px var(--red-60),
         0 0 0 4px var(--red-60-a30);
+
+    color-scheme: light dark;
 }
 
 @media (prefers-color-scheme: dark) {
