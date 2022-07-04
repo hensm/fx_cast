@@ -150,6 +150,9 @@ button:default:hover:active {
     top: 0;
     width: var(--arrow-width);
 }
+.select-wrapper--disabled::after {
+    opacity: 0.25;
+}
 select {
     -moz-appearance: none;
     padding-right: calc(8px + var(--arrow-width));

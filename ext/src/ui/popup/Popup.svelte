@@ -368,7 +368,11 @@
     <div class="media-type-select__label-cast">
         {_("popupMediaSelectCastLabel")}
     </div>
-    <div class="select-wrapper">
+    <div
+        class="select-wrapper"
+        class:select-wrapper--disabled={availableMediaTypes ===
+            ReceiverSelectorMediaType.None}
+    >
         <select
             class="media-type-select__dropdown"
             bind:value={mediaType}
