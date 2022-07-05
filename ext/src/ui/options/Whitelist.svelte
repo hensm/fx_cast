@@ -16,8 +16,15 @@
     let editingInput: HTMLInputElement;
     let editingValue: string;
 
-    const knownAppsValues = Object.values(knownApps);
     let knownAppToAdd: Nullable<KnownApp> = null;
+    $: filteredKnownApps = Object.values(knownApps).filter(app => {
+        // If no pattern or name matches default media sender
+        if (!app.matches || app.name === _("popupMediaTypeAppMedia")) {
+            return false;
+        }
+        // Filter if pattern already in whitelist
+        return !items.find(item => item.pattern === app.matches);
+    });
 
     async function beginEditing(index: number) {
         if (isEditing) return;
@@ -128,7 +135,7 @@
                             on:blur={finishEditing}
                         />
                     {:else}
-                        {@const knownApp = knownAppsValues.find(
+                        {@const knownApp = Object.values(knownApps).find(
                             app => app.matches === item.pattern
                         )}
                         <div class="whitelist__pattern">
@@ -182,16 +189,10 @@
                 <option value={null}>
                     {_("optionsSiteWhitelistKnownAppsCustomApp")}
                 </option>
-                {#each knownAppsValues as knownApp}
-                    {@const isExisting = !!items.find(
-                        item => item.pattern === knownApp.matches
-                    )}
-
-                    {#if knownApp.matches && knownApp.name !== _("popupMediaTypeAppMedia") && !isExisting}
-                        <option value={knownApp}>
-                            {knownApp.name}
-                        </option>
-                    {/if}
+                {#each filteredKnownApps as knownApp}
+                    <option value={knownApp}>
+                        {knownApp.name}
+                    </option>
                 {/each}
             </select>
         </div>
