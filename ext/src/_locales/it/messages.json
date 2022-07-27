@@ -1,0 +1,168 @@
+{
+    "extensionDescription": {
+        "message": "Fornisce il supporto a web app Chromecast (come Netflix o BBC iPlayer), video HTML5 e condivisione tab/schermo. ",
+        "description": "Description of the extension shown in the add-ons manager."
+    },
+    "popupWhitelistNotWhitelisted": {
+        "message": "$appName$ non è nella Whitelist",
+        "description": "Receiver selector whitelist suggestion banner label.",
+        "placeholders": {
+            "appName": {
+                "content": "$1",
+                "example": "Netflix"
+            }
+        }
+    },
+    "popupWhitelistAddToWhitelist": {
+        "message": "Aggiungi alla Whitelist",
+        "description": "Receiver selector whitelist suggestion banner button label."
+    },
+    "popupMediaTypeApp": {
+        "message": "l'app del sito corrente",
+        "description": "Receiver selector media type <option> text for current site's sender application."
+    },
+    "popupMediaTypeAppNotFound": {
+        "message": "l'app del sito corrente (non trovato)",
+        "description": "Receiver selector media type <option> text for current site's sender application if none found."
+    },
+    "popupMediaTypeAppMedia": {
+        "message": "questo media ",
+        "description": "Receiver selector media type <option> text for media casting."
+    },
+    "popupMediaTypeTab": {
+        "message": "Tab",
+        "description": "Receiver selector media type <option> text for current tab."
+    },
+    "popupMediaTypeScreen": {
+        "message": "Schermo",
+        "description": "Receiver selector media type <option> text for screen."
+    },
+    "popupMediaSelectCastLabel": {
+        "message": "Cast",
+        "description": "(Cast) <select> to:"
+    },
+    "popupMediaSelectToLabel": {
+        "message": "a:",
+        "description": "Cast <select> (to:)"
+    },
+    "popupNoReceiversFound": {
+        "message": "Nessun ricevitore trovato",
+        "description": "Message displayed in the receiver selector if there are no available receivers."
+    },
+    "popupCastButtonTitle": {
+        "message": "Cast",
+        "description": "Button text for each receiver entry in the receiver selector."
+    },
+    "popupCastMenuTitle": {
+        "message": "Cast a \"$deviceName$\"",
+        "description": "Menu text for cast item in context menu for receivers in receiver selector.",
+        "placeholders": {
+            "deviceName": {
+                "content": "$1",
+                "example": "Living Room TV"
+            }
+        }
+    },
+    "popupStopMenuTitle": {
+        "message": "Stop \"$appName$\" su \"$deviceName$\"",
+        "description": "Menu text for stop item in context menu for receivers in receiver selector.",
+        "placeholders": {
+            "appName": {
+                "content": "$1",
+                "example": "Netflix"
+            },
+            "deviceName": {
+                "content": "$2",
+                "example": "Living Room TV"
+            }
+        }
+    },
+    "contextAddToWhitelist": {
+        "message": "Aggiungi alla Whitelist",
+        "description": "Top-level whitelist context menu item title."
+    },
+    "contextAddToWhitelistRecommended": {
+        "message": "Aggiungi $matchPattern$ (Raccomandato)",
+        "description": "Context menu item title for recomended match pattern.",
+        "placeholders": {
+            "matchPattern": {
+                "content": "$1",
+                "example": "https://example.com/*"
+            }
+        }
+    },
+    "contextAddToWhitelistAdvancedAdd": {
+        "message": "Aggiungi $matchPattern$",
+        "description": "Context menu item title for all other match patterns.",
+        "placeholders": {
+            "matchPattern": {
+                "content": "$1",
+                "example": "*://*.example.com/*"
+            }
+        }
+    },
+    "optionsBridgeLoading": {
+        "message": "Caricamento info bridge...",
+        "description": "Loading placeholder text for bridge section on options page."
+    },
+    "optionsBridgeFoundStatusTitle": {
+        "message": "Bridge trovato",
+        "description": "Bridge OK status title text."
+    },
+    "optionsBridgeIssueStatusTitle": {
+        "message": "Problema con il bridge",
+        "description": "Bridge error status title text."
+    },
+    "optionsBridgeNotFoundStatusTitle": {
+        "message": "Bridge non trovato",
+        "description": "Bridge missing status title text."
+    },
+    "optionsBridgeNotFoundStatusText": {
+        "message": "Prova a scaricare e installare l'ultima versione.",
+        "description": "Bridge not found additional description text"
+    },
+    "optionsBridgeStatsName": {
+        "message": "Nome:",
+        "description": "Bridge stats name row title."
+    },
+    "optionsBridgeStatsVersion": {
+        "message": "Versione:",
+        "description": "Bridge stats version row title."
+    },
+    "optionsBridgeStatsRecommendedAction": {
+        "message": "Azione raccomandata:",
+        "description": "Bridge stats recommended action row title."
+    },
+    "optionsBridgeCompatible": {
+        "message": "Compatibile:",
+        "description": "Compatibility status is definitely compatible."
+    },
+    "optionsBridgeLikelyCompatible": {
+        "message": "Probabilmente compatibile:",
+        "description": "Compatibility status is probably compatible."
+    },
+    "optionsBridgeIncompatible": {
+        "message": "Incompatibile:",
+        "description": "Compatibility status is definitely incompatible."
+    },
+    "optionsBridgeNoAction": {
+        "message": "Nessuna azione richiesta:",
+        "description": "Recommended action for when both bridge and extension versions are compatible or likely compatible."
+    },
+    "optionsBridgeUpdateStatusNoUpdates": {
+        "message": "Nessun aggiornamento disponibile",
+        "description": "Update status if no updates are found."
+    },
+    "optionsBridgeUpdateStatusError": {
+        "message": "Errore durante la ricerca degli aggiornamenti",
+        "description": "Update status if an error was encountered checking for updates."
+    },
+    "optionsBridgeUpdateAvailable": {
+        "message": "Aggiornamento disponibile:",
+        "description": "Update status if an update was found."
+    },
+    "optionsBridgeUpdate": {
+        "message": "Aggiorna ora...",
+        "description": "Update now button title. Ellipsis indicates additional information as it triggers an update window popup."
+    }
+}

@@ -27,104 +27,156 @@ Compatibility reports are always helpful. They're tracked in a separate reposito
 Either fork and edit the messages files manually or to easily add/edit localizations, use the web-ext-translator tool:
 https://lusito.github.io/web-ext-translator/?gh=https://github.com/hensm/fx_cast/
 
-Missing/outdated strings:
+<details>
+    <summary>Missing/outdated strings:</summary>
 
--   `de`
+- `de`
 
-    -   `optionsMirroringCategoryName`
-    -   `optionsMirroringCategoryDescription`
-    -   `optionsMirroringEnabled`
-    -   `optionsMirroringAppId`
-    -   `optionsBridgeCompatible`
-    -   `optionsBridgeLikelyCompatible`
-    -   `optionsBridgeIncompatible`
-    -   `optionsSiteWhitelistCategoryName`
-    -   `optionsSiteWhitelistCategoryDescription`
-    -   `optionsSiteWhitelistEnabled`
-    -   `optionsSiteWhitelistEnabledDescription`
-    -   `optionsSiteWhitelistContent`
-    -   `optionsSiteWhitelistBasicView`
-    -   `optionsSiteWhitelistRawView`
-    -   `optionsSiteWhitelistSaveRaw`
-    -   `optionsSiteWhitelistAddItem`
-    -   `optionsSiteWhitelistUserAgent`
-    -   `optionsSiteWhitelistEditItem`
-    -   `optionsSiteWhitelistRemoveItem`
-    -   `optionsSiteWhitelistInvalidMatchPattern`
-    -   `popupWhitelistNotWhitelisted`
-    -   `popupWhitelistAddToWhitelist`
-    -   `popupMediaTypeAppNotFound`
-    -   `popupCastMenuTitle`
-    -   `popupStopMenuTitle`
+    - `optionsMirroringCategoryName`
+    - `optionsMirroringCategoryDescription`
+    - `optionsMirroringEnabled`
+    - `optionsMirroringAppId`
+    - `optionsBridgeCompatible`
+    - `optionsBridgeLikelyCompatible`
+    - `optionsBridgeIncompatible`
+    - `optionsSiteWhitelistCategoryName`
+    - `optionsSiteWhitelistCategoryDescription`
+    - `optionsSiteWhitelistEnabled`
+    - `optionsSiteWhitelistEnabledDescription`
+    - `optionsSiteWhitelistContent`
+    - `optionsSiteWhitelistBasicView`
+    - `optionsSiteWhitelistRawView`
+    - `optionsSiteWhitelistSaveRaw`
+    - `optionsSiteWhitelistAddItem`
+    - `optionsSiteWhitelistUserAgent`
+    - `optionsSiteWhitelistEditItem`
+    - `optionsSiteWhitelistRemoveItem`
+    - `optionsSiteWhitelistInvalidMatchPattern`
+    - `popupWhitelistNotWhitelisted`
+    - `popupWhitelistAddToWhitelist`
+    - `popupMediaTypeAppNotFound`
+    - `popupCastMenuTitle`
+    - `popupStopMenuTitle`
 
--   `es`
+- `es`
 
-    -   `optionsSiteWhitelistCategoryName`
-    -   `optionsSiteWhitelistCategoryDescription`
-    -   `optionsSiteWhitelistEnabled`
-    -   `optionsSiteWhitelistEnabledDescription`
-    -   `optionsSiteWhitelistContent`
-    -   `optionsSiteWhitelistBasicView`
-    -   `optionsSiteWhitelistRawView`
-    -   `optionsSiteWhitelistSaveRaw`
-    -   `optionsSiteWhitelistAddItem`
-    -   `optionsSiteWhitelistUserAgent`
-    -   `optionsSiteWhitelistEditItem`
-    -   `optionsSiteWhitelistRemoveItem`
-    -   `optionsSiteWhitelistInvalidMatchPattern`
-    -   `popupWhitelistNotWhitelisted`
-    -   `popupWhitelistAddToWhitelist`
-    -   `popupCastMenuTitle`
-    -   `popupStopMenuTitle`
+    - `optionsSiteWhitelistCategoryName`
+    - `optionsSiteWhitelistCategoryDescription`
+    - `optionsSiteWhitelistEnabled`
+    - `optionsSiteWhitelistEnabledDescription`
+    - `optionsSiteWhitelistContent`
+    - `optionsSiteWhitelistBasicView`
+    - `optionsSiteWhitelistRawView`
+    - `optionsSiteWhitelistSaveRaw`
+    - `optionsSiteWhitelistAddItem`
+    - `optionsSiteWhitelistUserAgent`
+    - `optionsSiteWhitelistEditItem`
+    - `optionsSiteWhitelistRemoveItem`
+    - `optionsSiteWhitelistInvalidMatchPattern`
+    - `popupWhitelistNotWhitelisted`
+    - `popupWhitelistAddToWhitelist`
+    - `popupCastMenuTitle`
+    - `popupStopMenuTitle`
 
--   `nl`
+- `nl`
 
-    -   `optionsBridgeBackupEnabled`
-    -   `optionsBridgeCompatible`
-    -   `optionsBridgeLikelyCompatible`
-    -   `optionsBridgeIncompatible`
-    -   `optionsOptionRecommended`
-    -   `optionsMirroringCategoryName`
-    -   `optionsMirroringCategoryDescription`
-    -   `optionsMirroringEnabled`
-    -   `optionsMirroringAppId`
-    -   `optionsSiteWhitelistCategoryName`
-    -   `optionsSiteWhitelistCategoryDescription`
-    -   `optionsSiteWhitelistEnabled`
-    -   `optionsSiteWhitelistEnabledDescription`
-    -   `optionsSiteWhitelistContent`
-    -   `optionsSiteWhitelistBasicView`
-    -   `optionsSiteWhitelistRawView`
-    -   `optionsSiteWhitelistSaveRaw`
-    -   `optionsSiteWhitelistAddItem`
-    -   `optionsSiteWhitelistUserAgent`
-    -   `optionsSiteWhitelistEditItem`
-    -   `optionsSiteWhitelistRemoveItem`
-    -   `optionsSiteWhitelistInvalidMatchPattern`
-    -   `popupWhitelistNotWhitelisted`
-    -   `popupWhitelistAddToWhitelist`
-    -   `popupMediaTypeAppNotFound`
-    -   `popupCastMenuTitle`
-    -   `popupStopMenuTitle`
+    - `optionsBridgeBackupEnabled`
+    - `optionsBridgeCompatible`
+    - `optionsBridgeLikelyCompatible`
+    - `optionsBridgeIncompatible`
+    - `optionsOptionRecommended`
+    - `optionsMirroringCategoryName`
+    - `optionsMirroringCategoryDescription`
+    - `optionsMirroringEnabled`
+    - `optionsMirroringAppId`
+    - `optionsSiteWhitelistCategoryName`
+    - `optionsSiteWhitelistCategoryDescription`
+    - `optionsSiteWhitelistEnabled`
+    - `optionsSiteWhitelistEnabledDescription`
+    - `optionsSiteWhitelistContent`
+    - `optionsSiteWhitelistBasicView`
+    - `optionsSiteWhitelistRawView`
+    - `optionsSiteWhitelistSaveRaw`
+    - `optionsSiteWhitelistAddItem`
+    - `optionsSiteWhitelistUserAgent`
+    - `optionsSiteWhitelistEditItem`
+    - `optionsSiteWhitelistRemoveItem`
+    - `optionsSiteWhitelistInvalidMatchPattern`
+    - `popupWhitelistNotWhitelisted`
+    - `popupWhitelistAddToWhitelist`
+    - `popupMediaTypeAppNotFound`
+    - `popupCastMenuTitle`
+    - `popupStopMenuTitle`
 
--   `no`
-    -   `optionsSiteWhitelistCategoryName`
-    -   `optionsSiteWhitelistCategoryDescription`
-    -   `optionsSiteWhitelistEnabled`
-    -   `optionsSiteWhitelistEnabledDescription`
-    -   `optionsSiteWhitelistContent`
-    -   `optionsSiteWhitelistBasicView`
-    -   `optionsSiteWhitelistRawView`
-    -   `optionsSiteWhitelistSaveRaw`
-    -   `optionsSiteWhitelistAddItem`
-    -   `optionsSiteWhitelistUserAgent`
-    -   `optionsSiteWhitelistEditItem`
-    -   `optionsSiteWhitelistRemoveItem`
-    -   `optionsSiteWhitelistInvalidMatchPattern`
-    -   `popupWhitelistNotWhitelisted`
-    -   `popupWhitelistAddToWhitelist`
-    -   `popupCastMenuTitle`
-    -   `popupStopMenuTitle`
+- `no`
+    - `optionsSiteWhitelistCategoryName`
+    - `optionsSiteWhitelistCategoryDescription`
+    - `optionsSiteWhitelistEnabled`
+    - `optionsSiteWhitelistEnabledDescription`
+    - `optionsSiteWhitelistContent`
+    - `optionsSiteWhitelistBasicView`
+    - `optionsSiteWhitelistRawView`
+    - `optionsSiteWhitelistSaveRaw`
+    - `optionsSiteWhitelistAddItem`
+    - `optionsSiteWhitelistUserAgent`
+    - `optionsSiteWhitelistEditItem`
+    - `optionsSiteWhitelistRemoveItem`
+    - `optionsSiteWhitelistInvalidMatchPattern`
+    - `popupWhitelistNotWhitelisted`
+    - `popupWhitelistAddToWhitelist`
+    - `popupCastMenuTitle`
+    - `popupStopMenuTitle`
+
+- `it`
+    - `popupMediaTypeFile`
+    - `popupCastingButtonTitle`
+    - `optionsBridgeOlderAction`
+    - `optionsBridgeNewerAction`
+    - `optionsBridgeUpdateCheck`
+    - `optionsBridgeUpdateChecking`
+    - `optionsBridgeBackupEnabled`
+    - `optionsBridgeBackupEnabledDescription`
+    - `optionsMediaCategoryName`
+    - `optionsMediaCategoryDescription`
+    - `optionsMediaCategoryDescription`
+    - `optionsMediaEnabled`
+    - `optionsMediaSyncElement`
+    - `optionsMediaSyncElementDescription`
+    - `optionsMediaStopOnUnload`
+    - `optionsLocalMediaCategoryName`
+    - `optionsLocalMediaCategoryDescription`
+    - `optionsLocalMediaEnabled`
+    - `optionsLocalMediaServerPort`
+    - `optionsReceiverSelectorCategoryName`
+    - `optionsReceiverSelectorCategoryDescription`
+    - `optionsReceiverSelectorWaitForConnection`
+    - `optionsReceiverSelectorWaitForConnectionDescription`
+    - `optionsReceiverSelectorCloseIfFocusLost`
+    - `optionsSiteWhitelistCategoryName`
+    - `optionsSiteWhitelistCategoryDescription`
+    - `optionsSiteWhitelistEnabled`
+    - `optionsSiteWhitelistEnabledDescription`
+    - `optionsSiteWhitelistContent`
+    - `optionsSiteWhitelistBasicView`
+    - `optionsSiteWhitelistRawView`
+    - `optionsSiteWhitelistSaveRaw`
+    - `optionsSiteWhitelistAddItem`
+    - `optionsSiteWhitelistUserAgent`
+    - `optionsSiteWhitelistEditItem`
+    - `optionsSiteWhitelistRemoveItem`
+    - `optionsSiteWhitelistInvalidDuplicatePattern`
+    - `optionsSiteWhitelistKnownAppsCustomApp`
+    - `optionsMirroringCategoryName`
+    - `optionsMirroringCategoryDescription`
+    - `optionsMirroringEnabled`
+    - `optionsMirroringAppId`
+    - `optionsMirroringAppIdDescription`
+    - `optionsOptionRecommended`
+    - `optionsReset`
+    - `optionsSave`
+    - `optionsSaved`
+
+</details>
 
 ### NSIS Installer Localization
 
