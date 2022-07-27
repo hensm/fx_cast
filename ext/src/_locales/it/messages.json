@@ -129,6 +129,10 @@
         "message": "Versione:",
         "description": "Bridge stats version row title."
     },
+    "optionsBridgeStatsCompatibility": {
+        "message": "Compatibilità:",
+        "description": "Bridge stats compatibility row title."
+    },
     "optionsBridgeStatsRecommendedAction": {
         "message": "Azione raccomandata:",
         "description": "Bridge stats recommended action row title."
@@ -145,9 +149,31 @@
         "message": "Incompatibile:",
         "description": "Compatibility status is definitely incompatible."
     },
+    "optionsBridgeOlderAction": {
+        "message": "Versione Bridge più vecchia di quella richiesta, prova ad aggiornare il Bridge all'ultima versione",
+        "description": "Recommended action for when the installed bridge version is older than the installed extension version."
+    },
+    "optionsBridgeNewerAction": {
+        "message": "Versione Bridge più nuova di quella richiesta, prova ad aggiornare l'estensione all'ultima versione",
+        "description": "Recommended action for when the installed bridge version is newer than the installed extension version."
+    },
     "optionsBridgeNoAction": {
         "message": "Nessuna azione richiesta:",
         "description": "Recommended action for when both bridge and extension versions are compatible or likely compatible."
+    },
+    "optionsBridgeUpdateCheck": {
+        "message": "Verifica aggiornamenti",
+        "description": "Update check button title."
+    },
+    "optionsBridgeUpdateChecking": {
+        "message": "Verifica aggiornamenti in corso$ellipsis$",
+        "description": "Update check button title while in progress. Ellipsis cycles (. → .. → ...) as loading indicator.",
+        "placeholders": {
+            "ellipsis": {
+                "content": "$1",
+                "example": ".."
+            }
+        }
     },
     "optionsBridgeUpdateStatusNoUpdates": {
         "message": "Nessun aggiornamento disponibile",
@@ -164,5 +190,98 @@
     "optionsBridgeUpdate": {
         "message": "Aggiorna ora...",
         "description": "Update now button title. Ellipsis indicates additional information as it triggers an update window popup."
+    },
+    "optionsBridgeBackupEnabled": {
+        "message": "Abilita connessione demone di backup su $hostPort$",
+        "description": "Backup daemon checkbox label. Host/port inputs are inserted inline at the hostPort substitution.",
+        "placeholders": {
+            "hostPort": {
+                "content": "$1"
+            }
+        }
+    },
+    "optionsBridgeBackupEnabledDescription": {
+        "message": "Se la normale connessione al Bridge fallisce, prova a connettersi al Bridge in modalità demone",
+        "description": "Backup daemon checkbox description."
+    },
+    "optionsLocalMediaServerPort": {
+        "message": "Porta server HTTP:",
+        "description": "HTTP server port input label."
+    },
+    "optionsReceiverSelectorCategoryName": {
+        "message": "Selettore ricevitore",
+        "description": "Options page receiver selector category title."
+    },
+    "optionsReceiverSelectorCategoryDescription": {
+        "message": "Interfaccia selezione dispositivo ricevitore.",
+        "description": "Options page receiver selector category description."
+    },
+    "optionsReceiverSelectorWaitForConnection": {
+        "message": "In attesa di connessione",
+        "description": "Receiver selector wait for connection option checkbox label."
+    },
+    "optionsReceiverSelectorWaitForConnectionDescription": {
+        "message": "Mantieni il selettore del ricevitore finché la connessione non è stata stabilita o la connessione fallisce",
+        "description": "Receiver selector wait for connection option description."
+    },
+    "optionsReceiverSelectorCloseIfFocusLost": {
+        "message": "Chiudi alla perdita del focus",
+        "description": "Receiver selector close if focus lost option checkbox label."
+    },
+    "optionsSiteWhitelistCategoryName": {
+        "message": "Siti nella whitelist",
+        "description": "Options page whitelist category title."
+    },
+    "optionsSiteWhitelistCategoryDescription": {
+        "message": "I siti in cui verrà abilitata la funzionalità casting e verrà sostituita la stringa user agent con una versione per Chrome per compatibilità",
+        "description": "Options page whitelist category description."
+    },
+    "optionsSiteWhitelistEnabled": {
+        "message": "Abilita whitelist siti",
+        "description": "Whitelist enabled checkbox label."
+    },
+    "optionsSiteWhitelistEnabledDescription": {
+        "message": "Disabilitando questa opzione la funzionalità di casting verrà abilitata su qualsiasi sito, ma la string user agent non verrà sostituita.",
+        "description": "Whitelist restricted mode enabled description."
+    },
+    "optionsSiteWhitelistAddItem": {
+        "message": "Aggiungi elemento",
+        "description": "Add new whitelist item button title."
+    },
+    "optionsSiteWhitelistEditItem": {
+        "message": "Modifica",
+        "description": "Edit whitelist item button title. Displayed on each item."
+    },
+    "optionsSiteWhitelistRemoveItem": {
+        "message": "Rimuovi",
+        "description": "Remove whitelist item button title. Displayed on each item."
+    },
+    "optionsSiteWhitelistKnownAppsCustomApp": {
+        "message": "Personalizzato",
+        "description": "Default <option> for knownApps <select>."
+    },
+    "optionsMirroringCategoryName": {
+        "message": "Casting schermo/tab",
+        "description": "Options page mirroring category name."
+    },
+    "optionsMirroringEnabled": {
+        "message": "Abilita schermo/tab casting (experimental)",
+        "description": "Mirroring enabled checkbox label."
+    },
+    "optionsOptionRecommended": {
+        "message": "raccomandato",
+        "description": "Badge next to option label indicating boolean option is recommended enabled."
+    },
+    "optionsReset": {
+        "message": "Ripristina Predefiniti",
+        "description": "Restore default options button label."
+    },
+    "optionsSave": {
+        "message": "Salva",
+        "description": "Save options button label."
+    },
+    "optionsSaved": {
+        "message": "Salvato!",
+        "description": "Status text displayed by save button once options have been successfully saved."
     }
 }

@@ -130,12 +130,6 @@ https://lusito.github.io/web-ext-translator/?gh=https://github.com/hensm/fx_cast
 - `it`
     - `popupMediaTypeFile`
     - `popupCastingButtonTitle`
-    - `optionsBridgeOlderAction`
-    - `optionsBridgeNewerAction`
-    - `optionsBridgeUpdateCheck`
-    - `optionsBridgeUpdateChecking`
-    - `optionsBridgeBackupEnabled`
-    - `optionsBridgeBackupEnabledDescription`
     - `optionsMediaCategoryName`
     - `optionsMediaCategoryDescription`
     - `optionsMediaCategoryDescription`
@@ -146,35 +140,12 @@ https://lusito.github.io/web-ext-translator/?gh=https://github.com/hensm/fx_cast
     - `optionsLocalMediaCategoryName`
     - `optionsLocalMediaCategoryDescription`
     - `optionsLocalMediaEnabled`
-    - `optionsLocalMediaServerPort`
-    - `optionsReceiverSelectorCategoryName`
-    - `optionsReceiverSelectorCategoryDescription`
-    - `optionsReceiverSelectorWaitForConnection`
-    - `optionsReceiverSelectorWaitForConnectionDescription`
-    - `optionsReceiverSelectorCloseIfFocusLost`
-    - `optionsSiteWhitelistCategoryName`
-    - `optionsSiteWhitelistCategoryDescription`
-    - `optionsSiteWhitelistEnabled`
-    - `optionsSiteWhitelistEnabledDescription`
     - `optionsSiteWhitelistContent`
-    - `optionsSiteWhitelistBasicView`
-    - `optionsSiteWhitelistRawView`
-    - `optionsSiteWhitelistSaveRaw`
-    - `optionsSiteWhitelistAddItem`
     - `optionsSiteWhitelistUserAgent`
-    - `optionsSiteWhitelistEditItem`
-    - `optionsSiteWhitelistRemoveItem`
     - `optionsSiteWhitelistInvalidDuplicatePattern`
-    - `optionsSiteWhitelistKnownAppsCustomApp`
-    - `optionsMirroringCategoryName`
     - `optionsMirroringCategoryDescription`
-    - `optionsMirroringEnabled`
     - `optionsMirroringAppId`
     - `optionsMirroringAppIdDescription`
-    - `optionsOptionRecommended`
-    - `optionsReset`
-    - `optionsSave`
-    - `optionsSaved`
 
 </details>
 
