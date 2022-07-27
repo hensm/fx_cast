@@ -33,7 +33,7 @@ The bridge application is currently supported on Windows, macOS and Linux.
 ```sh
 $ sudo useradd --system fx_cast
 ```
-2. Create a service file in `/etc/systemd/fx_cast.service`:
+2. Create a service file in `/etc/systemd/system/fx_cast.service`:
 ```
 [Unit]
 Description=fx_cast daemon
