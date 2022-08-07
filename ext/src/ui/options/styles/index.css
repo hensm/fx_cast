@@ -20,10 +20,15 @@ body {
     font-size: 13px;
 }
 
-a              { color: var(--blue-40); }
-a:hover        { color: var(--blue-50); }
-a:hover:active { color: var(--blue-60); }
-
+a {
+    color: var(--blue-40);
+}
+a:hover {
+    color: var(--blue-50);
+}
+a:hover:active {
+    color: var(--blue-60);
+}
 
 button.ghost {
     width: 24px !important;
@@ -37,7 +42,6 @@ button.ghost {
 button.ghost:not(:hover) {
     background-color: initial;
 }
-
 
 #form {
     display: flex;
@@ -209,7 +213,6 @@ button.ghost:not(:hover) {
     width: 75px;
 }
 
-
 .category {
     border: initial;
     display: grid;
@@ -227,7 +230,6 @@ button.ghost:not(:hover) {
 #form > .category {
     border-bottom: 1px solid var(--border-color);
 }
-
 
 .category > hr {
     border: initial;
@@ -257,7 +259,6 @@ button.ghost:not(:hover) {
 .category .category {
     grid-column: span 2;
 }
-
 
 .option {
     display: contents;
@@ -315,7 +316,6 @@ button.ghost:not(:hover) {
     justify-self: flex-start;
     margin-inline-start: initial;
 }
-
 
 .whitelist {
     background-color: var(--box-background);
@@ -389,7 +389,6 @@ button.ghost:not(:hover) {
     margin-inline-end: auto;
 }
 
-
 .translator__tag {
     color: #0a84ff;
     display: inline-block;
@@ -400,6 +399,9 @@ button.ghost:not(:hover) {
     vertical-align: text-top;
 }
 
+.user-agent-string-custom {
+    width: -moz-available;
+}
 
 @media (prefers-color-scheme: dark) {
     .whitelist__item:nth-child(even) {

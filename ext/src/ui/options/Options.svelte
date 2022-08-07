@@ -10,14 +10,20 @@
     import options, { Options } from "../../lib/options";
     import defaultOptions from "../../defaultOptions";
 
+    import { getChromeUserAgent } from "../../lib/userAgents";
+
     const _ = browser.i18n.getMessage;
 
     let formElement: HTMLFormElement;
     let isFormValid = true;
     let showSavedIndicator = false;
 
+    let platform: string;
+
     let opts: Options | undefined;
     onMount(async () => {
+        platform = (await browser.runtime.getPlatformInfo()).os;
+
         opts = await options.getAll();
         options.addEventListener("changed", async () => {
             opts = await options.getAll();
@@ -274,6 +280,23 @@
                 </label>
                 <div class="option__description">
                     {_("optionsSiteWhitelistEnabledDescription")}
+                </div>
+            </div>
+
+            <div class="option">
+                <label class="option__label" for="siteWhitelistCustomUserAgent">
+                    {_("optionsSiteWhitelistCustomUserAgent")}
+                </label>
+                <div class="option__control">
+                    <input
+                        type="text"
+                        class="user-agent-string-custom"
+                        bind:value={opts.siteWhitelistCustomUserAgent}
+                        placeholder={getChromeUserAgent(platform)}
+                    />
+                    <div class="option__description">
+                        {_("optionsSiteWhitelistCustomUserAgentDescription")}
+                    </div>
                 </div>
             </div>
 

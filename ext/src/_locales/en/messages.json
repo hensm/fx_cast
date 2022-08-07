@@ -346,6 +346,14 @@
         "message": "Custom",
         "description": "Default <option> for knownApps <select>."
     },
+    "optionsSiteWhitelistCustomUserAgent": {
+        "message": "Custom user agent:",
+        "description": "Custom user agent option label."
+    },
+    "optionsSiteWhitelistCustomUserAgentDescription": {
+        "message": "If specified, a custom user agent string to use for whitelisted sites.",
+        "description": "Custom user agent option description."
+    },
 
     "optionsMirroringCategoryName": {
         "message": "Screen/tab casting",

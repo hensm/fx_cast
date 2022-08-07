@@ -1,7 +1,7 @@
 "use strict";
 
-import defaultOptions from "../defaultOptions";
-import type { WhitelistItemData } from "../background/whitelist";
+import defaultOptions, { Options } from "../defaultOptions";
+export { Options };
 
 import logger from "./logger";
 
@@ -11,26 +11,6 @@ import { TypedStorageArea } from "./TypedStorageArea";
 const storageArea = new TypedStorageArea<{
     options: Options;
 }>(browser.storage.sync);
-
-export interface Options {
-    bridgeApplicationName: string;
-    bridgeBackupEnabled: boolean;
-    bridgeBackupHost: string;
-    bridgeBackupPort: number;
-    mediaEnabled: boolean;
-    mediaSyncElement: boolean;
-    mediaStopOnUnload: boolean;
-    localMediaEnabled: boolean;
-    localMediaServerPort: number;
-    mirroringEnabled: boolean;
-    mirroringAppId: string;
-    receiverSelectorCloseIfFocusLost: boolean;
-    receiverSelectorWaitForConnection: boolean;
-    siteWhitelistEnabled: boolean;
-    siteWhitelist: WhitelistItemData[];
-
-    [key: string]: Options[keyof Options];
-}
 
 interface EventMap {
     changed: Array<keyof Options>;

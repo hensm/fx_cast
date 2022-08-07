@@ -1,6 +1,27 @@
 "use strict";
 
-import { Options } from "./lib/options";
+import type { WhitelistItemData } from "./background/whitelist";
+
+export interface Options {
+    bridgeApplicationName: string;
+    bridgeBackupEnabled: boolean;
+    bridgeBackupHost: string;
+    bridgeBackupPort: number;
+    mediaEnabled: boolean;
+    mediaSyncElement: boolean;
+    mediaStopOnUnload: boolean;
+    localMediaEnabled: boolean;
+    localMediaServerPort: number;
+    mirroringEnabled: boolean;
+    mirroringAppId: string;
+    receiverSelectorCloseIfFocusLost: boolean;
+    receiverSelectorWaitForConnection: boolean;
+    siteWhitelistEnabled: boolean;
+    siteWhitelist: WhitelistItemData[];
+    siteWhitelistCustomUserAgent: string;
+
+    [key: string]: Options[keyof Options];
+}
 
 export default {
     bridgeApplicationName: BRIDGE_NAME,
@@ -17,5 +38,6 @@ export default {
     receiverSelectorCloseIfFocusLost: true,
     receiverSelectorWaitForConnection: true,
     siteWhitelistEnabled: true,
-    siteWhitelist: [{ pattern: "https://www.netflix.com/*" }]
+    siteWhitelist: [{ pattern: "https://www.netflix.com/*" }],
+    siteWhitelistCustomUserAgent: ""
 } as Options;

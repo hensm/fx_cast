@@ -33,6 +33,8 @@ let platform: string;
 let chromeUserAgent: string | undefined;
 let chromeUserAgentHybrid: string | undefined;
 
+let customUserAgent: string | undefined;
+
 export async function initWhitelist() {
     logger.info("init (whitelist)");
 
@@ -41,6 +43,8 @@ export async function initWhitelist() {
         platform = (await browser.runtime.getPlatformInfo()).os;
         chromeUserAgent = getChromeUserAgent(platform);
         chromeUserAgentHybrid = getChromeUserAgent(platform, true);
+
+        customUserAgent = await options.get("siteWhitelistCustomUserAgent");
 
         /**
          * If a UA string can't be obtained, don't bother continuing
@@ -55,8 +59,12 @@ export async function initWhitelist() {
     await registerSiteWhitelist();
 
     // Re-register when options change
-    options.addEventListener("changed", ev => {
+    options.addEventListener("changed", async ev => {
         const alteredOpts = ev.detail;
+
+        if (alteredOpts.includes("siteWhitelistCustomUserAgent")) {
+            customUserAgent = await options.get("siteWhitelistCustomUserAgent");
+        }
 
         if (
             alteredOpts.includes("siteWhitelist") ||
@@ -92,9 +100,10 @@ async function onWhitelistedBeforeSendHeaders(
     for (const header of details.requestHeaders) {
         if (header.name === "User-Agent") {
             header.value =
-                host?.value === "www.youtube.com"
+                customUserAgent ||
+                (host?.value === "www.youtube.com"
                     ? chromeUserAgentHybrid
-                    : chromeUserAgent;
+                    : chromeUserAgent);
             break;
         }
     }
@@ -126,9 +135,10 @@ function onWhitelistedChildBeforeSendHeaders(
             for (const header of details.requestHeaders) {
                 if (header.name === "User-Agent") {
                     header.value =
-                        host?.value === "www.youtube.com"
+                        customUserAgent ||
+                        (host?.value === "www.youtube.com"
                             ? chromeUserAgentHybrid
-                            : chromeUserAgent;
+                            : chromeUserAgent);
                     break;
                 }
             }
