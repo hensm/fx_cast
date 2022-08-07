@@ -1,13 +1,13 @@
 "use strict";
 
-const PLATFORM_MAC = "Macintosh; Intel Mac OS X 10_15_2";
-const PLATFORM_MAC_HYBRID = "Macintosh; Intel Mac OS X 10.15; rv:72.0";
+const PLATFORM_MAC = "Macintosh; Intel Mac OS X 12_5";
+const PLATFORM_MAC_HYBRID = "Macintosh; Intel Mac OS X 12_5; rv:103.0";
 const PLATFORM_WIN = "Windows NT 10.0; Win64; x64";
 const PLATFORM_LINUX = "X11; Linux x86_64";
 
 const UA_CHROME =
-    "AppleWebKit/537.36 (KHTML, like Gecko) Chrome/80.0.3987.87 Safari/537.36";
-const UA_HYBRID = "Chrome/80.0.3987.87 Gecko/20100101 Firefox/72.0";
+    "AppleWebKit/537.36 (KHTML, like Gecko) Chrome/104.0.0.0 Safari/537.36";
+const UA_HYBRID = "Chrome/104.0.0.0 Gecko/20100101 Firefox/103.0";
 
 export function getChromeUserAgent(platform: string, hybrid = false) {
     let platformComponent: string;
