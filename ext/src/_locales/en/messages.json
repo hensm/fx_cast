@@ -73,7 +73,10 @@
             }
         }
     },
-
+    "popupStopButtonTitle": {
+        "message": "Stop",
+        "description": "Alternate action button text displayed instead of popupCastButtonTitle."
+    },
     "popupCastMenuTitle": {
         "message": "Cast to \"$deviceName$\"",
         "description": "Menu text for cast item in context menu for receivers in receiver selector.",
