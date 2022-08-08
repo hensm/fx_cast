@@ -4,17 +4,22 @@
     import knownApps, { KnownApp } from "../../cast/knownApps";
     import { WhitelistItemData } from "../../background/whitelist";
     import { REMOTE_MATCH_PATTERN_REGEX } from "../../lib/matchPattern";
+    import { Options } from "../../lib/options";
 
     const _ = browser.i18n.getMessage;
 
     /** Whitelist items to display. */
     export let items: WhitelistItemData[];
+    export let opts: Options;
+    export let defaultUserAgent: Optional<string>;
 
     let isEditing = false;
     let isEditingValid = false;
     let editingIndex: number;
     let editingInput: HTMLInputElement;
     let editingValue: string;
+
+    let expandedItemIndices = new Set();
 
     let knownAppToAdd: Nullable<KnownApp> = null;
     $: filteredKnownApps = Object.values(knownApps).filter(app => {
@@ -115,13 +120,17 @@
     <ul class="whitelist__items">
         {#each items as item, i}
             {@const isEditingItem = isEditing && editingIndex === i}
+            {@const isItemExpanded = expandedItemIndices.has(i)}
 
             <li
                 class="whitelist__item"
                 class:whitelist__item--selected={isEditingItem}
-                on:dblclick={() => beginEditing(i)}
+                class:whitelist__item--expanded={isItemExpanded}
             >
-                <div class="whitelist__title">
+                <div
+                    class="whitelist__title"
+                    on:dblclick={() => beginEditing(i)}
+                >
                     {#if isEditingItem}
                         <input
                             type="text"
@@ -150,13 +159,6 @@
                 </div>
 
                 {#if !isEditingItem}
-                    <label class="whitelist__user-agent">
-                        <input
-                            type="checkbox"
-                            bind:checked={item.isUserAgentDisabled}
-                        />
-                        {_("optionsSiteWhitelistUserAgent")}
-                    </label>
                     <button
                         type="button"
                         class="whitelist__edit-button ghost"
@@ -177,6 +179,80 @@
                 >
                     <img src="assets/photon_delete.svg" alt="icon, remove" />
                 </button>
+
+                {#if !isEditingItem}
+                    <button
+                        type="button"
+                        class="whitelist__expand-button ghost"
+                        title={_("optionsSiteWhitelistRemoveItem")}
+                        on:click={() => {
+                            // Toggle expanded state
+                            if (isItemExpanded) {
+                                expandedItemIndices.delete(i);
+                            } else {
+                                expandedItemIndices.add(i);
+                            }
+                            expandedItemIndices = expandedItemIndices;
+                        }}
+                    >
+                        <img
+                            src="assets/{isItemExpanded
+                                ? 'photon_arrowhead_up.svg'
+                                : 'photon_arrowhead_down.svg'}"
+                            alt="icon, arrow down"
+                        />
+                    </button>
+
+                    {#if isItemExpanded}
+                        <div class="whitelist__expanded">
+                            <div class="option option--inline">
+                                <div class="option__control">
+                                    <input
+                                        id="isUserAgentDisabled-{i}"
+                                        type="checkbox"
+                                        bind:checked={item.isUserAgentDisabled}
+                                    />
+                                </div>
+                                <label
+                                    class="option__label"
+                                    for="isUserAgentDisabled-{i}"
+                                >
+                                    {_("optionsSiteWhitelistUserAgentDisabled")}
+                                </label>
+                                <div class="option__description">
+                                    {_(
+                                        "optionsSiteWhitelistUserAgentDisabledDescription"
+                                    )}
+                                </div>
+                            </div>
+
+                            <div class="option">
+                                <label
+                                    class="option__label"
+                                    for="customUserAgentString-{i}"
+                                >
+                                    {_(
+                                        "optionsSiteWhitelistSiteSpecificUserAgent"
+                                    )}
+                                </label>
+                                <div class="option__control">
+                                    <input
+                                        id="customUserAgentString-{i}"
+                                        type="text"
+                                        bind:value={item.customUserAgent}
+                                        placeholder={opts.siteWhitelistCustomUserAgent ||
+                                            defaultUserAgent}
+                                    />
+                                    <div class="option__description">
+                                        {_(
+                                            "optionsSiteWhitelistSiteSpecificUserAgentDescription"
+                                        )}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    {/if}
+                {/if}
             </li>
         {/each}
     </ul>

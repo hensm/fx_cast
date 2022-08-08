@@ -1,11 +1,11 @@
 :root {
-    --border-color: rgb(225, 225, 225);
+    --border-color: var(--grey-90-a20);
     --secondary-color: rgb(125, 125, 125);
 }
 
 @media (prefers-color-scheme: dark) {
     :root {
-        --border-color: var(--grey-50);
+        --border-color: var(--grey-10-a20);
         --secondary-color: var(--grey-10-a60);
     }
 }
@@ -223,10 +223,6 @@ button.ghost:not(:hover) {
     padding: 10px 0;
 }
 
-.category:disabled {
-    color: var(--secondary-color);
-}
-
 #form > .category {
     border-bottom: 1px solid var(--border-color);
 }
@@ -350,13 +346,13 @@ button.ghost:not(:hover) {
 .whitelist__item {
     align-items: center;
     display: flex;
-    gap: 5px;
-    height: 34px;
+    flex-wrap: wrap;
+    column-gap: 5px;
     padding: 0 10px;
 }
 
 .whitelist__item:nth-child(even) {
-    background-color: rgba(0, 0, 0, 0.05);
+    background-color: rgba(0, 0, 0, 0.1);
 }
 
 .whitelist__item--selected {
@@ -365,7 +361,9 @@ button.ghost:not(:hover) {
 
 .whitelist__title {
     display: flex;
+    align-items: center;
     flex: 1;
+    min-height: 34px;
     min-width: 0;
     padding: 4px;
     white-space: nowrap;
@@ -389,6 +387,16 @@ button.ghost:not(:hover) {
     margin-inline-end: auto;
 }
 
+.whitelist__expanded {
+    border-top: 1px solid var(--border-color);
+    display: grid;
+    grid-template-columns: 80px minmax(0, 1fr);
+    grid-column-gap: 10px;
+    grid-row-gap: 5px;
+    padding: 10px;
+    width: 100%;
+}
+
 .translator__tag {
     color: #0a84ff;
     display: inline-block;
@@ -399,7 +407,9 @@ button.ghost:not(:hover) {
     vertical-align: text-top;
 }
 
-#siteWhitelistCustomUserAgent {
+/* Option specific styles */
+#siteWhitelistCustomUserAgent,
+input[id^="customUserAgentString-"] {
     width: -moz-available;
 }
 

@@ -4,6 +4,7 @@ import logger from "../lib/logger";
 import options from "../lib/options";
 
 import { getChromeUserAgent } from "../lib/userAgents";
+import { RemoteMatchPattern } from "../lib/matchPattern";
 
 import {
     CAST_FRAMEWORK_LOADER_SCRIPT_URL,
@@ -25,6 +26,7 @@ type OnBeforeRequestDetails = Parameters<
 export interface WhitelistItemData {
     pattern: string;
     isUserAgentDisabled?: boolean;
+    customUserAgent?: string;
 }
 
 const originUrlCache: string[] = [];
@@ -33,6 +35,8 @@ let platform: string;
 let chromeUserAgent: string | undefined;
 let chromeUserAgentHybrid: string | undefined;
 
+let siteWhitelistEnabled = false;
+let siteWhitelist: Nullable<WhitelistItemData[]> = null;
 let customUserAgent: string | undefined;
 
 export async function initWhitelist() {
@@ -65,7 +69,6 @@ export async function initWhitelist() {
         if (alteredOpts.includes("siteWhitelistCustomUserAgent")) {
             customUserAgent = await options.get("siteWhitelistCustomUserAgent");
         }
-
         if (
             alteredOpts.includes("siteWhitelist") ||
             alteredOpts.includes("siteWhitelistEnabled")
@@ -74,6 +77,30 @@ export async function initWhitelist() {
             registerSiteWhitelist();
         }
     });
+}
+
+/**
+ * Returns the configured user agent matching the specified URL or
+ * undefined if the user agent is disabled.
+ */
+function getUserAgent(url: string, host?: string): Optional<string> {
+    if (!siteWhitelistEnabled || !siteWhitelist) return;
+
+    // Search site-specific user agents
+    const matchingItem = siteWhitelist.find(
+        item =>
+            item.customUserAgent &&
+            new RemoteMatchPattern(item.pattern).matches(url)
+    );
+    if (matchingItem) {
+        if (matchingItem.isUserAgentDisabled) return;
+        return matchingItem.customUserAgent;
+    }
+
+    return (
+        customUserAgent ||
+        (host === "www.youtube.com" ? chromeUserAgentHybrid : chromeUserAgent)
+    );
 }
 
 /**
@@ -99,11 +126,7 @@ async function onWhitelistedBeforeSendHeaders(
 
     for (const header of details.requestHeaders) {
         if (header.name === "User-Agent") {
-            header.value =
-                customUserAgent ||
-                (host?.value === "www.youtube.com"
-                    ? chromeUserAgentHybrid
-                    : chromeUserAgent);
+            header.value = getUserAgent(details.url, host?.value);
             break;
         }
     }
@@ -134,11 +157,7 @@ function onWhitelistedChildBeforeSendHeaders(
 
             for (const header of details.requestHeaders) {
                 if (header.name === "User-Agent") {
-                    header.value =
-                        customUserAgent ||
-                        (host?.value === "www.youtube.com"
-                            ? chromeUserAgentHybrid
-                            : chromeUserAgent);
+                    header.value = getUserAgent(details.url, host?.value);
                     break;
                 }
             }
@@ -205,7 +224,9 @@ async function onBeforeCastSDKRequest(details: OnBeforeRequestDetails) {
 }
 
 async function registerSiteWhitelist() {
-    const { siteWhitelist, siteWhitelistEnabled } = await options.getAll();
+    const opts = await options.getAll();
+    siteWhitelist = opts.siteWhitelist;
+    siteWhitelistEnabled = opts.siteWhitelistEnabled;
 
     browser.webRequest.onBeforeRequest.addListener(
         onBeforeCastSDKRequest,

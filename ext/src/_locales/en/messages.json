@@ -329,10 +329,6 @@
         "message": "Add Item",
         "description": "Add new whitelist item button title."
     },
-    "optionsSiteWhitelistUserAgent": {
-        "message": "Disable UA",
-        "description": "Whitelist item user agent checkbox title."
-    },
     "optionsSiteWhitelistEditItem": {
         "message": "Edit",
         "description": "Edit whitelist item button title. Displayed on each item."
@@ -350,12 +346,28 @@
         "description": "Default <option> for knownApps <select>."
     },
     "optionsSiteWhitelistCustomUserAgent": {
-        "message": "Custom user agent:",
+        "message": "User agent:",
         "description": "Custom user agent option label."
     },
     "optionsSiteWhitelistCustomUserAgentDescription": {
         "message": "If specified, a custom user agent string to use for whitelisted sites.",
         "description": "Custom user agent option description."
+    },
+    "optionsSiteWhitelistUserAgentDisabled": {
+        "message": "Disable user agent",
+        "description": "Whitelist item user agent disabled checkbox label."
+    },
+    "optionsSiteWhitelistUserAgentDisabledDescription": {
+        "message": "Entirely disable user agent replacement for sites matching this pattern.",
+        "description": "Whitelist item user agent disabled checkbox description."
+    },
+    "optionsSiteWhitelistSiteSpecificUserAgent": {
+        "message": "User agent:",
+        "description": "Whitelist item user agent option label."
+    },
+    "optionsSiteWhitelistSiteSpecificUserAgentDescription": {
+        "message": "If specified, a custom user agent string to use specifically for this sites matching this pattern.",
+        "description": "Whitelist item user agent option label."
     },
 
     "optionsMirroringCategoryName": {

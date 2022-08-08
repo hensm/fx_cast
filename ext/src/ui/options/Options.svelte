@@ -18,11 +18,12 @@
     let isFormValid = true;
     let isSavedIndicatorVisible = false;
 
-    let platform: string;
+    let defaultUserAgent: Optional<string>;
 
     let opts: Options | undefined;
     onMount(async () => {
-        platform = (await browser.runtime.getPlatformInfo()).os;
+        const platform = (await browser.runtime.getPlatformInfo()).os;
+        defaultUserAgent = getChromeUserAgent(platform);
 
         opts = await options.getAll();
         options.addEventListener("changed", async () => {
@@ -44,6 +45,9 @@
             for (const item of opts.siteWhitelist) {
                 if (item.isUserAgentDisabled === false) {
                     delete item.isUserAgentDisabled;
+                }
+                if (item.customUserAgent === "") {
+                    delete item.customUserAgent;
                 }
             }
 
@@ -68,7 +72,7 @@
     }
 </script>
 
-{#if opts && platform}
+{#if opts}
     <form
         id="form"
         bind:this={formElement}
@@ -281,7 +285,7 @@
                         id="siteWhitelistCustomUserAgent"
                         type="text"
                         bind:value={opts.siteWhitelistCustomUserAgent}
-                        placeholder={getChromeUserAgent(platform)}
+                        placeholder={defaultUserAgent}
                     />
                     <div class="option__description">
                         {_("optionsSiteWhitelistCustomUserAgentDescription")}
@@ -294,7 +298,11 @@
                     {_("optionsSiteWhitelistContent")}
                 </div>
                 <div class="option__control">
-                    <Whitelist bind:items={opts.siteWhitelist} />
+                    <Whitelist
+                        bind:items={opts.siteWhitelist}
+                        {opts}
+                        {defaultUserAgent}
+                    />
                 </div>
             </div>
         </fieldset>
