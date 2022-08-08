@@ -111,6 +111,9 @@
             isEditing = false;
         }
 
+        expandedItemIndices.delete(index);
+        expandedItemIndices = expandedItemIndices;
+
         items.splice(index, 1);
         items = items;
     }
@@ -184,7 +187,11 @@
                     <button
                         type="button"
                         class="whitelist__expand-button ghost"
-                        title={_("optionsSiteWhitelistExpandItem")}
+                        title={_(
+                            isItemExpanded
+                                ? "optionsSiteWhitelistItemHideOptions"
+                                : "optionsSiteWhitelistItemShowOptions"
+                        )}
                         on:click={() => {
                             // Toggle expanded state
                             if (isItemExpanded) {

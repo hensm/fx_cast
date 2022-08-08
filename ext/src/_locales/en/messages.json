@@ -337,9 +337,13 @@
         "message": "Remove",
         "description": "Tooltip text for whitelist item's remove button."
     },
-    "optionsSiteWhitelistExpandItem": {
+    "optionsSiteWhitelistItemShowOptions": {
         "message": "Show options",
-        "description": "Tooltip text for whitelist item's expand button."
+        "description": "Tooltip text for whitelist item's show options button."
+    },
+    "optionsSiteWhitelistItemHideOptions": {
+        "message": "Hide options",
+        "description": "Tooltip text for whitelist item's hide options button."
     },
     "optionsSiteWhitelistInvalidDuplicatePattern": {
         "message": "Match pattern already exists!",
