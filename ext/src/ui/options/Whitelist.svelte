@@ -184,7 +184,7 @@
                     <button
                         type="button"
                         class="whitelist__expand-button ghost"
-                        title={_("optionsSiteWhitelistRemoveItem")}
+                        title={_("optionsSiteWhitelistExpandItem")}
                         on:click={() => {
                             // Toggle expanded state
                             if (isItemExpanded) {

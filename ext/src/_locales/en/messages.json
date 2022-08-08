@@ -331,11 +331,15 @@
     },
     "optionsSiteWhitelistEditItem": {
         "message": "Edit",
-        "description": "Edit whitelist item button title. Displayed on each item."
+        "description": "Tooltip text for whitelist item's edit button."
     },
     "optionsSiteWhitelistRemoveItem": {
         "message": "Remove",
-        "description": "Remove whitelist item button title. Displayed on each item."
+        "description": "Tooltip text for whitelist item's remove button."
+    },
+    "optionsSiteWhitelistExpandItem": {
+        "message": "Show options",
+        "description": "Tooltip text for whitelist item's expand button."
     },
     "optionsSiteWhitelistInvalidDuplicatePattern": {
         "message": "Match pattern already exists!",
