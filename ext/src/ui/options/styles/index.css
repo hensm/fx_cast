@@ -394,11 +394,15 @@ button.ghost:not(:hover) {
 .whitelist__expanded {
     border-top: 1px solid var(--border-color);
     display: grid;
-    grid-template-columns: 80px minmax(0, 1fr);
+    grid-template-columns: max-content 1fr;
     grid-column-gap: 10px;
     grid-row-gap: 5px;
     padding: 10px;
     width: 100%;
+}
+
+.whitelist__expanded .option:not(.option--inline) .option__label {
+    max-width: 80px;
 }
 
 .translator__tag {
