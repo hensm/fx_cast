@@ -16,7 +16,7 @@
 
     let formElement: HTMLFormElement;
     let isFormValid = true;
-    let showSavedIndicator = false;
+    let isSavedIndicatorVisible = false;
 
     let platform: string;
 
@@ -37,11 +37,10 @@
     /** Saves options and show indicator. */
     async function onFormSubmit() {
         formElement.reportValidity();
+        if (!opts) return;
 
         try {
-            if (!opts) return;
-
-            // Remove unnecessary prop
+            // Remove implicit whitelist item props
             for (const item of opts.siteWhitelist) {
                 if (item.isUserAgentDisabled === false) {
                     delete item.isUserAgentDisabled;
@@ -51,9 +50,9 @@
             await options.setAll(opts);
 
             // 1s long saved indicator
-            showSavedIndicator = true;
+            isSavedIndicatorVisible = true;
             setTimeout(() => {
-                showSavedIndicator = false;
+                isSavedIndicatorVisible = false;
             }, 1000);
         } catch (err) {
             logger.error("Failed to save options!");
@@ -69,7 +68,7 @@
     }
 </script>
 
-{#if opts}
+{#if opts && platform}
     <form
         id="form"
         bind:this={formElement}
@@ -89,7 +88,6 @@
             <div class="option option--inline">
                 <div class="option__control">
                     <input
-                        name="mediaEnabled"
                         id="mediaEnabled"
                         type="checkbox"
                         bind:checked={opts.mediaEnabled}
@@ -103,7 +101,6 @@
             <div class="option option--inline">
                 <div class="option__control">
                     <input
-                        name="mediaSyncElement"
                         id="mediaSyncElement"
                         type="checkbox"
                         bind:checked={opts.mediaSyncElement}
@@ -120,7 +117,6 @@
             <div class="option option--inline">
                 <div class="option__control">
                     <input
-                        name="mediaStopOnUnload"
                         id="mediaStopOnUnload"
                         type="checkbox"
                         bind:checked={opts.mediaStopOnUnload}
@@ -136,7 +132,6 @@
             <div class="option option--inline">
                 <div class="option__control">
                     <input
-                        name="localMediaEnabled"
                         id="localMediaEnabled"
                         type="checkbox"
                         bind:checked={opts.localMediaEnabled}
@@ -156,7 +151,6 @@
                 </label>
                 <div class="option__control">
                     <input
-                        name="localMediaServerPort"
                         id="localMediaServerPort"
                         type="number"
                         required
@@ -179,7 +173,6 @@
             <div class="option option--inline">
                 <div class="option__control">
                     <input
-                        name="mirroringEnabled"
                         id="mirroringEnabled"
                         type="checkbox"
                         bind:checked={opts.mirroringEnabled}
@@ -196,7 +189,6 @@
                 </label>
                 <div class="option__control">
                     <input
-                        name="mirroringAppId"
                         id="mirroringAppId"
                         type="text"
                         required
@@ -220,7 +212,6 @@
             <div class="option option--inline">
                 <div class="option__control">
                     <input
-                        name="receiverSelectorWaitForConnection"
                         id="receiverSelectorWaitForConnection"
                         type="checkbox"
                         bind:checked={opts.receiverSelectorWaitForConnection}
@@ -240,7 +231,6 @@
             <div class="option option--inline">
                 <div class="option__control">
                     <input
-                        name="receiverSelectorCloseIfFocusLost"
                         id="receiverSelectorCloseIfFocusLost"
                         type="checkbox"
                         bind:checked={opts.receiverSelectorCloseIfFocusLost}
@@ -266,7 +256,6 @@
             <div class="option option--inline">
                 <div class="option__control">
                     <input
-                        name="siteWhitelistEnabled"
                         id="siteWhitelistEnabled"
                         type="checkbox"
                         bind:checked={opts.siteWhitelistEnabled}
@@ -289,8 +278,8 @@
                 </label>
                 <div class="option__control">
                     <input
+                        id="siteWhitelistCustomUserAgent"
                         type="text"
-                        class="user-agent-string-custom"
                         bind:value={opts.siteWhitelistCustomUserAgent}
                         placeholder={getChromeUserAgent(platform)}
                     />
@@ -311,7 +300,7 @@
         </fieldset>
 
         <div id="buttons">
-            {#if showSavedIndicator}
+            {#if isSavedIndicatorVisible}
                 <div id="status-line">
                     {_("optionsSaved")}
                 </div>

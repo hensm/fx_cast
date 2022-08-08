@@ -399,7 +399,7 @@ button.ghost:not(:hover) {
     vertical-align: text-top;
 }
 
-.user-agent-string-custom {
+#siteWhitelistCustomUserAgent {
     width: -moz-available;
 }
 
