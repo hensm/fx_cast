@@ -18,6 +18,7 @@ body {
     background: var(--box-background) !important;
     color: var(--box-color) !important;
     font-size: 13px;
+    overflow-y: hidden;
 }
 
 a {
