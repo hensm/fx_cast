@@ -366,7 +366,7 @@
         "description": "Whitelist item user agent option label."
     },
     "optionsSiteWhitelistSiteSpecificUserAgentDescription": {
-        "message": "If specified, a custom user agent string to use specifically for this sites matching this pattern.",
+        "message": "If specified, a custom user agent string to use specifically for sites matching this pattern.",
         "description": "Whitelist item user agent option label."
     },
 
