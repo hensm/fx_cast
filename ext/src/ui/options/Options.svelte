@@ -68,13 +68,19 @@
     }
 
     function resetForm() {
-        opts = JSON.parse(JSON.stringify(defaultOptions));
+        if (!opts) return;
+
+        opts = {
+            ...JSON.parse(JSON.stringify(defaultOptions)),
+            // Retain advanced options shown state
+            showAdvancedOptions: opts.showAdvancedOptions
+        };
     }
 </script>
 
 {#if opts}
     <form
-        id="form"
+        class="form"
         bind:this={formElement}
         on:input={onFormInput}
         on:submit|preventDefault={onFormSubmit}
@@ -102,21 +108,23 @@
                 </label>
             </div>
 
-            <div class="option option--inline">
-                <div class="option__control">
-                    <input
-                        id="mediaSyncElement"
-                        type="checkbox"
-                        bind:checked={opts.mediaSyncElement}
-                    />
+            {#if opts.showAdvancedOptions}
+                <div class="option option--inline">
+                    <div class="option__control">
+                        <input
+                            id="mediaSyncElement"
+                            type="checkbox"
+                            bind:checked={opts.mediaSyncElement}
+                        />
+                    </div>
+                    <label class="option__label" for="mediaSyncElement">
+                        {_("optionsMediaSyncElement")}
+                    </label>
+                    <div class="option__description">
+                        {_("optionsMediaSyncElementDescription")}
+                    </div>
                 </div>
-                <label class="option__label" for="mediaSyncElement">
-                    {_("optionsMediaSyncElement")}
-                </label>
-                <div class="option__description">
-                    {_("optionsMediaSyncElementDescription")}
-                </div>
-            </div>
+            {/if}
 
             <div class="option option--inline">
                 <div class="option__control">
@@ -166,88 +174,93 @@
             </div>
         </fieldset>
 
-        <fieldset class="category">
-            <legend class="category__name">
-                <h2>{_("optionsMirroringCategoryName")}</h2>
-            </legend>
-            <p class="category__description">
-                {_("optionsMirroringCategoryDescription")}
-            </p>
+        {#if opts.showAdvancedOptions}
+            <fieldset class="category">
+                <legend class="category__name">
+                    <h2>{_("optionsMirroringCategoryName")}</h2>
+                </legend>
+                <p class="category__description">
+                    {_("optionsMirroringCategoryDescription")}
+                </p>
 
-            <div class="option option--inline">
-                <div class="option__control">
-                    <input
-                        id="mirroringEnabled"
-                        type="checkbox"
-                        bind:checked={opts.mirroringEnabled}
-                    />
+                <div class="option option--inline">
+                    <div class="option__control">
+                        <input
+                            id="mirroringEnabled"
+                            type="checkbox"
+                            bind:checked={opts.mirroringEnabled}
+                        />
+                    </div>
+                    <label class="option__label" for="mirroringEnabled">
+                        {_("optionsMirroringEnabled")}
+                    </label>
                 </div>
-                <label class="option__label" for="mirroringEnabled">
-                    {_("optionsMirroringEnabled")}
-                </label>
-            </div>
-
-            <div class="option">
-                <label class="option__label" for="mirroringAppId">
-                    {_("optionsMirroringAppId")}
-                </label>
-                <div class="option__control">
-                    <input
-                        id="mirroringAppId"
-                        type="text"
-                        required
-                        bind:value={opts.mirroringAppId}
-                    />
-                    <div class="option__description">
-                        {_("optionsMirroringAppIdDescription")}
+                <div class="option">
+                    <label class="option__label" for="mirroringAppId">
+                        {_("optionsMirroringAppId")}
+                    </label>
+                    <div class="option__control">
+                        <input
+                            id="mirroringAppId"
+                            type="text"
+                            required
+                            bind:value={opts.mirroringAppId}
+                        />
+                        <div class="option__description">
+                            {_("optionsMirroringAppIdDescription")}
+                        </div>
                     </div>
                 </div>
-            </div>
-        </fieldset>
+            </fieldset>
+        {/if}
 
-        <fieldset class="category">
-            <legend class="category__name">
-                <h2>{_("optionsReceiverSelectorCategoryName")}</h2>
-            </legend>
-            <p class="category__description">
-                {_("optionsReceiverSelectorCategoryDescription")}
-            </p>
+        {#if opts.showAdvancedOptions}
+            <fieldset class="category">
+                <legend class="category__name">
+                    <h2>{_("optionsReceiverSelectorCategoryName")}</h2>
+                </legend>
+                <p class="category__description">
+                    {_("optionsReceiverSelectorCategoryDescription")}
+                </p>
 
-            <div class="option option--inline">
-                <div class="option__control">
-                    <input
-                        id="receiverSelectorWaitForConnection"
-                        type="checkbox"
-                        bind:checked={opts.receiverSelectorWaitForConnection}
-                    />
+                <div class="option option--inline">
+                    <div class="option__control">
+                        <input
+                            id="receiverSelectorWaitForConnection"
+                            type="checkbox"
+                            bind:checked={opts.receiverSelectorWaitForConnection}
+                        />
+                    </div>
+                    <label
+                        class="option__label"
+                        for="receiverSelectorWaitForConnection"
+                    >
+                        {_("optionsReceiverSelectorWaitForConnection")}
+                    </label>
+                    <div class="option__description">
+                        {_(
+                            "optionsReceiverSelectorWaitForConnectionDescription"
+                        )}
+                    </div>
                 </div>
-                <label
-                    class="option__label"
-                    for="receiverSelectorWaitForConnection"
-                >
-                    {_("optionsReceiverSelectorWaitForConnection")}
-                </label>
-                <div class="option__description">
-                    {_("optionsReceiverSelectorWaitForConnectionDescription")}
-                </div>
-            </div>
 
-            <div class="option option--inline">
-                <div class="option__control">
-                    <input
-                        id="receiverSelectorCloseIfFocusLost"
-                        type="checkbox"
-                        bind:checked={opts.receiverSelectorCloseIfFocusLost}
-                    />
+                <div class="option option--inline">
+                    <div class="option__control">
+                        <input
+                            id="receiverSelectorCloseIfFocusLost"
+                            type="checkbox"
+                            bind:checked={opts.receiverSelectorCloseIfFocusLost}
+                        />
+                    </div>
+                    <label
+                        class="option__label"
+                        for="receiverSelectorCloseIfFocusLost"
+                    >
+                        {_("optionsReceiverSelectorCloseIfFocusLost")}
+                    </label>
                 </div>
-                <label
-                    class="option__label"
-                    for="receiverSelectorCloseIfFocusLost"
-                >
-                    {_("optionsReceiverSelectorCloseIfFocusLost")}
-                </label>
-            </div>
-        </fieldset>
+            </fieldset>
+        {/if}
 
         <fieldset class="category">
             <legend class="category__name">
@@ -257,41 +270,48 @@
                 {_("optionsSiteWhitelistCategoryDescription")}
             </p>
 
-            <div class="option option--inline">
-                <div class="option__control">
-                    <input
-                        id="siteWhitelistEnabled"
-                        type="checkbox"
-                        bind:checked={opts.siteWhitelistEnabled}
-                    />
-                </div>
-                <label class="option__label" for="siteWhitelistEnabled">
-                    {_("optionsSiteWhitelistEnabled")}
-                    <span class="option__recommended">
-                        {_("optionsOptionRecommended")}
-                    </span>
-                </label>
-                <div class="option__description">
-                    {_("optionsSiteWhitelistEnabledDescription")}
-                </div>
-            </div>
-
-            <div class="option">
-                <label class="option__label" for="siteWhitelistCustomUserAgent">
-                    {_("optionsSiteWhitelistCustomUserAgent")}
-                </label>
-                <div class="option__control">
-                    <input
-                        id="siteWhitelistCustomUserAgent"
-                        type="text"
-                        bind:value={opts.siteWhitelistCustomUserAgent}
-                        placeholder={defaultUserAgent}
-                    />
+            {#if opts.showAdvancedOptions}
+                <div class="option option--inline">
+                    <div class="option__control">
+                        <input
+                            id="siteWhitelistEnabled"
+                            type="checkbox"
+                            bind:checked={opts.siteWhitelistEnabled}
+                        />
+                    </div>
+                    <label class="option__label" for="siteWhitelistEnabled">
+                        {_("optionsSiteWhitelistEnabled")}
+                        <span class="option__recommended">
+                            {_("optionsOptionRecommended")}
+                        </span>
+                    </label>
                     <div class="option__description">
-                        {_("optionsSiteWhitelistCustomUserAgentDescription")}
+                        {_("optionsSiteWhitelistEnabledDescription")}
                     </div>
                 </div>
-            </div>
+
+                <div class="option">
+                    <label
+                        class="option__label"
+                        for="siteWhitelistCustomUserAgent"
+                    >
+                        {_("optionsSiteWhitelistCustomUserAgent")}
+                    </label>
+                    <div class="option__control">
+                        <input
+                            id="siteWhitelistCustomUserAgent"
+                            type="text"
+                            bind:value={opts.siteWhitelistCustomUserAgent}
+                            placeholder={defaultUserAgent}
+                        />
+                        <div class="option__description">
+                            {_(
+                                "optionsSiteWhitelistCustomUserAgentDescription"
+                            )}
+                        </div>
+                    </div>
+                </div>
+            {/if}
 
             <div class="option">
                 <div class="option__label">
@@ -307,19 +327,34 @@
             </div>
         </fieldset>
 
-        <div id="buttons">
-            {#if isSavedIndicatorVisible}
-                <div id="status-line">
-                    {_("optionsSaved")}
+        <div class="form__footer">
+            <div class="option option--inline">
+                <div class="option__control">
+                    <input
+                        id="showAdvancedOptions"
+                        type="checkbox"
+                        bind:checked={opts.showAdvancedOptions}
+                    />
                 </div>
-            {/if}
+                <label class="option__label" for="showAdvancedOptions">
+                    {_("optionsShowAdvancedOptions")}
+                </label>
+            </div>
 
-            <button on:click={resetForm} type="button">
-                {_("optionsReset")}
-            </button>
-            <button type="submit" default disabled={!isFormValid}>
-                {_("optionsSave")}
-            </button>
+            <div class="form__buttons">
+                {#if isSavedIndicatorVisible}
+                    <div class="form__status-line">
+                        {_("optionsSaved")}
+                    </div>
+                {/if}
+
+                <button on:click={resetForm} type="button">
+                    {_("optionsReset")}
+                </button>
+                <button type="submit" default disabled={!isFormValid}>
+                    {_("optionsSave")}
+                </button>
+            </div>
         </div>
     </form>
 {/if}

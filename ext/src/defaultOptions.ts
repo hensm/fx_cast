@@ -19,6 +19,7 @@ export interface Options {
     siteWhitelistEnabled: boolean;
     siteWhitelist: WhitelistItemData[];
     siteWhitelistCustomUserAgent: string;
+    showAdvancedOptions: boolean;
 
     [key: string]: Options[keyof Options];
 }
@@ -39,5 +40,6 @@ export default {
     receiverSelectorWaitForConnection: true,
     siteWhitelistEnabled: true,
     siteWhitelist: [{ pattern: "https://www.netflix.com/*" }],
-    siteWhitelistCustomUserAgent: ""
+    siteWhitelistCustomUserAgent: "",
+    showAdvancedOptions: false
 } as Options;

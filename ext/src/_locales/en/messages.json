@@ -415,5 +415,9 @@
     "optionsSaved": {
         "message": "Saved!",
         "description": "Status text displayed by save button once options have been successfully saved."
+    },
+    "optionsShowAdvancedOptions": {
+        "message": "Show advanced options",
+        "description": "Show advanced options checkbox label."
     }
 }

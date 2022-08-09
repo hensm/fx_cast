@@ -183,7 +183,7 @@
                     <img src="assets/photon_delete.svg" alt="icon, remove" />
                 </button>
 
-                {#if !isEditingItem}
+                {#if !isEditingItem && opts.showAdvancedOptions}
                     <button
                         type="button"
                         class="whitelist__expand-button ghost"

@@ -48,23 +48,25 @@ button.ghost:not(:hover) {
     background-color: initial;
 }
 
-#form {
+.form {
     display: flex;
     flex-direction: column;
 }
 
-#buttons {
-    display: flex;
+.form__footer {
     align-items: center;
-    align-self: flex-end;
-    margin-block-start: 20px;
+    display: flex;
+    margin-top: 20px;
 }
 
-#buttons > :not(:last-child) {
-    margin-inline-end: 5px;
+.form__buttons {
+    align-items: center;
+    display: flex;
+    gap: 5px;
+    margin-inline-start: auto;
 }
 
-#status-line {
+.form__status-line {
     color: var(--secondary-color);
 }
 
@@ -228,7 +230,7 @@ button.ghost:not(:hover) {
     padding: 10px 0;
 }
 
-#form > .category {
+.form > .category {
     border-bottom: 1px solid var(--border-color);
 }
 
