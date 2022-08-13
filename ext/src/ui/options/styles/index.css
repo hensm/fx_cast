@@ -99,16 +99,10 @@ button.ghost:not(:hover) {
 .bridge__info {
     display: flex;
     padding-inline-start: 25px;
+    position: relative;
 }
 
-.bridge__status {
-    align-items: center;
-    display: flex;
-    flex-direction: column;
-    margin-inline-end: 25px;
-}
-
-.bridge__info--not-found {
+.bridge__info--error {
     padding-inline-end: 25px;
 }
 .bridge__info--found .bridge__status {
@@ -116,13 +110,36 @@ button.ghost:not(:hover) {
     padding-inline-end: 25px;
 }
 
-.bridge__info--timed-out .bridge__status {
-    display: flex;
-    flex-direction: row;
-    gap: 20px;
+.bridge__info--error .bridge__status {
+    display: grid;
+    grid-template-columns: min-content 1fr;
+    grid-template-rows: min-content 1fr;
+    grid-template-areas:
+        "status-icon status-title"
+        "status-icon status-text";
+    gap: 5px 20px;
 }
-.bridge__info--timed-out .bridge__status-title {
-    font-size: 1.75em;
+.bridge__info--found .bridge__status-icon {
+    margin-block-end: 5px;
+}
+.bridge__info--error .bridge__status-icon {
+    grid-area: status-icon;
+}
+.bridge__info--error .bridge__status-title {
+    grid-area: status-title;
+    white-space: normal;
+}
+.bridge__info--error .bridge__status-text {
+    grid-area: status-text;
+    margin-top: initial;
+    align-self: start;
+}
+
+.bridge__status {
+    align-items: center;
+    display: flex;
+    flex-direction: column;
+    margin-inline-end: 25px;
 }
 
 .bridge__status-title {
@@ -138,31 +155,6 @@ button.ghost:not(:hover) {
     font-size: 1.15em;
     text-align: center;
 }
-
-.bridge__info--not-found .bridge__status {
-    display: grid;
-    grid-template-columns: min-content 1fr;
-    grid-template-rows: min-content min-content;
-    grid-template-areas:
-        "status-icon status-title"
-        "status-icon status-text";
-}
-.bridge__info--found .bridge__status-icon {
-    margin-block-end: 5px;
-}
-.bridge__info--not-found .bridge__status-icon {
-    grid-area: status-icon;
-    margin-inline-end: 10px;
-}
-.bridge__info--not-found .bridge__status-title {
-    grid-area: status-title;
-    white-space: normal;
-}
-.bridge__info--not-found .bridge__status-text {
-    grid-area: status-text;
-    margin-top: initial;
-}
-
 .bridge__stats {
     border-collapse: collapse;
     border-spacing: 0;
@@ -174,6 +166,12 @@ button.ghost:not(:hover) {
     text-align: end;
     vertical-align: top;
     white-space: nowrap;
+}
+
+.bridge__refresh {
+    position: absolute;
+    right: 0;
+    top: 0;
 }
 
 .bridge__options {
@@ -215,9 +213,13 @@ button.ghost:not(:hover) {
 .bridge__backup-host {
     width: 125px;
 }
-
 .bridge__backup-port {
     width: 75px;
+}
+.bridge__backup-password {
+    display: block;
+    margin-left: 20px;
+    margin-top: 5px;
 }
 
 .category {
@@ -422,6 +424,9 @@ button.ghost:not(:hover) {
 #siteWhitelistCustomUserAgent,
 input[id^="customUserAgentString-"] {
     width: -moz-available;
+}
+#bridgeBackupPassword {
+    margin-inline-start: 5px;
 }
 
 @media (prefers-color-scheme: dark) {

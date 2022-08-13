@@ -7,6 +7,7 @@ export interface Options {
     bridgeBackupEnabled: boolean;
     bridgeBackupHost: string;
     bridgeBackupPort: number;
+    bridgeBackupPassword: string;
     mediaEnabled: boolean;
     mediaSyncElement: boolean;
     mediaStopOnUnload: boolean;
@@ -29,6 +30,7 @@ export default {
     bridgeBackupEnabled: false,
     bridgeBackupHost: "localhost",
     bridgeBackupPort: 9556,
+    bridgeBackupPassword: "",
     mediaEnabled: true,
     mediaSyncElement: false,
     mediaStopOnUnload: false,

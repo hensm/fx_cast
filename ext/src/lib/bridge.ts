@@ -44,6 +44,7 @@ export interface BridgeInfo {
 
 export class BridgeConnectionError extends Error {}
 export class BridgeTimedOutError extends Error {}
+export class BridgeAuthenticationError extends Error {}
 
 /**
  * Creates a temporary bridge to query the version info,
@@ -73,10 +74,14 @@ const getInfo = () =>
                 { subject: "bridge:/getInfo", data: version }
             );
         } catch (err) {
-            logger.error("Bridge connection failed.");
-            reject(new BridgeConnectionError());
-            clearTimeout(bridgeTimeoutId);
+            if (err === 401) {
+                reject(new BridgeAuthenticationError());
+            } else {
+                logger.error("Bridge connection failed.");
+                reject(new BridgeConnectionError());
+            }
 
+            clearTimeout(bridgeTimeoutId);
             return;
         }
 

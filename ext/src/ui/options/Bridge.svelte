@@ -4,7 +4,11 @@
 
     import LoadingIndicator from "../LoadingIndicator.svelte";
 
-    import bridge, { BridgeInfo, BridgeTimedOutError } from "../../lib/bridge";
+    import bridge, {
+        BridgeInfo,
+        BridgeTimedOutError,
+        BridgeAuthenticationError
+    } from "../../lib/bridge";
     import logger from "../../lib/logger";
 
     import { Options } from "../../lib/options";
@@ -14,42 +18,54 @@
     export let opts: Options;
 
     let bridgeInfo: Nullable<BridgeInfo> = null;
+    let bridgeInfoError: Nullable<Error> = null;
     let isLoadingInfo = true;
-    let isLoadingInfoTimedOut = false;
 
     // Status
-    let infoClass = "bridge__info";
     let statusIcon: string;
     let statusTitle: string;
     let statusText: Nullable<string> = null;
 
-    onMount(async () => {
+    async function checkBridgeStatus() {
+        // Reset state
+        bridgeInfo = null;
+        bridgeInfoError = null;
+        isLoadingInfo = true;
+        statusText = null;
+
         try {
             bridgeInfo = await bridge.getInfo();
         } catch (err) {
             logger.error("Failed to fetch bridge/platform info.");
-            if (err instanceof BridgeTimedOutError) {
-                isLoadingInfoTimedOut = true;
+            if (err instanceof Error) {
+                bridgeInfoError = err;
             }
         }
 
         isLoadingInfo = false;
 
-        infoClass += ` ${
-            !bridgeInfo
-                ? isLoadingInfoTimedOut
-                    ? "bridge__info--timed-out"
-                    : "bridge__info--not-found"
-                : "bridge__info--found"
-        }`;
-
         if (!bridgeInfo) {
-            statusIcon = "assets/icons8-cancel-120.png";
-            statusTitle = _("optionsBridgeNotFoundStatusTitle");
-            statusText = _("optionsBridgeNotFoundStatusText");
-        } else if (isLoadingInfoTimedOut) {
-            statusIcon = "assets/icons8-warn-120.png";
-            statusTitle = _("optionsBridgeIssueStatusTitle");
+            if (
+                bridgeInfoError instanceof BridgeTimedOutError ||
+                bridgeInfoError instanceof BridgeAuthenticationError
+            ) {
+                statusIcon = "assets/icons8-warn-120.png";
+                statusTitle = _("optionsBridgeIssueStatusTitle");
+
+                if (bridgeInfoError instanceof BridgeTimedOutError) {
+                    statusText = _("optionsBridgeIssueStatusTextTimedOut");
+                } else if (
+                    bridgeInfoError instanceof BridgeAuthenticationError
+                ) {
+                    statusText = _(
+                        "optionsBridgeIssueStatusTextAuthentication"
+                    );
+                }
+            } else {
+                statusIcon = "assets/icons8-cancel-120.png";
+                statusTitle = _("optionsBridgeNotFoundStatusTitle");
+                statusText = _("optionsBridgeNotFoundStatusText");
+            }
         } else {
             if (bridgeInfo.isVersionCompatible) {
                 statusIcon = "assets/icons8-ok-120.png";
@@ -59,6 +75,10 @@
                 statusTitle = _("optionsBridgeIssueStatusTitle");
             }
         }
+    }
+
+    onMount(() => {
+        checkBridgeStatus();
     });
 
     // Updates
@@ -155,7 +175,11 @@
             <progress />
         </div>
     {:else}
-        <div class={infoClass}>
+        <div
+            class="bridge__info"
+            class:bridge__info--found={!!bridgeInfo}
+            class:bridge__info--error={!bridgeInfo}
+        >
             <div class="bridge__status">
                 <img
                     class="bridge__status-icon"
@@ -168,6 +192,15 @@
                 {#if statusText}
                     <p class="bridge__status-text">{statusText}</p>
                 {/if}
+
+                <button
+                    type="button"
+                    class="ghost bridge__refresh"
+                    title={_("optionsBridgeRefresh")}
+                    on:click={checkBridgeStatus}
+                >
+                    <img src="assets/photon_refresh.svg" alt="icon, refresh" />
+                </button>
             </div>
 
             {#if bridgeInfo}
@@ -209,44 +242,59 @@
                 </table>
             {/if}
         </div>
+    {/if}
 
-        <div class="bridge__options">
-            <div class="option option--inline">
-                <div class="option__control">
-                    <input
-                        name="bridgeBackupEnabled"
-                        id="bridgeBackupEnabled"
-                        type="checkbox"
-                        bind:checked={opts.bridgeBackupEnabled}
-                    />
-                </div>
-                <label class="option__label" for="bridgeBackupEnabled">
-                    {backupMessageStart}
-                    <input
-                        class="bridge__backup-host"
-                        name="bridgeBackupHost"
-                        type="text"
-                        required
-                        bind:value={opts.bridgeBackupHost}
-                    />
-                    :
-                    <input
-                        class="bridge__backup-port"
-                        name="bridgeBackupPort"
-                        type="number"
-                        required
-                        min="1025"
-                        max="65535"
-                        bind:value={opts.bridgeBackupPort}
-                    />
-                    {backupMessageEnd}
-                </label>
-                <div class="option__description">
-                    {_("optionsBridgeBackupEnabledDescription")}
-                </div>
+    <div class="bridge__options">
+        <div class="option option--inline">
+            <div class="option__control">
+                <input
+                    name="bridgeBackupEnabled"
+                    id="bridgeBackupEnabled"
+                    type="checkbox"
+                    bind:checked={opts.bridgeBackupEnabled}
+                />
+            </div>
+            <label class="option__label" for="bridgeBackupEnabled">
+                {backupMessageStart}
+                <input
+                    class="bridge__backup-host"
+                    name="bridgeBackupHost"
+                    type="text"
+                    required
+                    bind:value={opts.bridgeBackupHost}
+                />
+                :
+                <input
+                    class="bridge__backup-port"
+                    name="bridgeBackupPort"
+                    type="number"
+                    required
+                    min="1025"
+                    max="65535"
+                    bind:value={opts.bridgeBackupPort}
+                />
+                {backupMessageEnd}
+
+                {#if opts.showAdvancedOptions}
+                    <label class="bridge__backup-password">
+                        {_("optionsBridgeBackupPassword")}
+
+                        <input
+                            id="bridgeBackupPassword"
+                            placeholder="Password"
+                            type="password"
+                            bind:value={opts.bridgeBackupPassword}
+                        />
+                    </label>
+                {/if}
+            </label>
+            <div class="option__description">
+                {_("optionsBridgeBackupEnabledDescription")}
             </div>
         </div>
+    </div>
 
+    {#if !isLoadingInfo}
         <div class="bridge__update-info">
             {#if isUpdateAvailable}
                 <div class="bridge__update">

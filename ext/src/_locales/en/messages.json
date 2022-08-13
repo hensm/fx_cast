@@ -144,6 +144,14 @@
         "message": "Bridge issue",
         "description": "Bridge error status title text."
     },
+    "optionsBridgeIssueStatusTextTimedOut": {
+        "message": "Connection timed out.",
+        "description": "Bridge timed out issue additional description text."
+    },
+    "optionsBridgeIssueStatusTextAuthentication": {
+        "message": "Failed to authenticate connection.",
+        "description": "Bridge authentication issue additional description text."
+    },
     "optionsBridgeNotFoundStatusTitle": {
         "message": "Bridge not found",
         "description": "Bridge missing status title text."
@@ -197,6 +205,10 @@
         "message": "No action needed.",
         "description": "Recommended action for when both bridge and extension versions are compatible or likely compatible."
     },
+    "optionsBridgeRefresh": {
+        "message": "Refresh bridge status",
+        "description": "Bridge status refresh button title."
+    },
     "optionsBridgeUpdateCheck": {
         "message": "Check for Updates",
         "description": "Update check button title."
@@ -240,6 +252,10 @@
     "optionsBridgeBackupEnabledDescription": {
         "message": "If the regular bridge connection fails, attempt to connect to a bridge running in daemon mode.",
         "description": "Backup daemon checkbox description."
+    },
+    "optionsBridgeBackupPassword": {
+        "message": "...with password:",
+        "description": "Daemon password option label."
     },
 
     "optionsMediaCategoryName": {

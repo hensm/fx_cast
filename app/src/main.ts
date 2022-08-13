@@ -6,7 +6,7 @@ import { __applicationVersion } from "../package.json";
 
 const argv = minimist(process.argv.slice(2), {
     boolean: ["daemon", "help", "version"],
-    string: ["__name", "port"],
+    string: ["__name", "port", "password"],
     alias: {
         d: "daemon",
         h: "help",
@@ -36,6 +36,11 @@ Options:
                    options.
   -p, --port       Set port number for WebSocket server. This must match the
                    port set in the extension options.
+  --password       Set an optional password for the WebSocket server. This must
+                   match the password set in the extension options.
+                   WARNING: This password is intended only as a basic access
+                   control measure and is transmitted in plain text even over
+                   remote connections!
 `
     );
 } else if (argv.daemon) {
@@ -46,7 +51,7 @@ Options:
     }
 
     import("./daemon").then(daemon => {
-        daemon.init(port);
+        daemon.init(port, argv.password);
     });
 } else {
     import("./bridge");

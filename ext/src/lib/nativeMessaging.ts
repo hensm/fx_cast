@@ -97,8 +97,12 @@ function connectNative(application: string): Port {
     };
 
     port.onDisconnect.addListener(async () => {
-        const { bridgeBackupEnabled, bridgeBackupHost, bridgeBackupPort } =
-            await options.getAll();
+        const {
+            bridgeBackupEnabled,
+            bridgeBackupHost,
+            bridgeBackupPort,
+            bridgeBackupPassword
+        } = await options.getAll();
 
         if (!bridgeBackupEnabled) {
             portObject.error = {
@@ -117,9 +121,12 @@ function connectNative(application: string): Port {
         if (port.error && !isNativeHostStatusKnown) {
             isNativeHostStatusKnown = true;
 
-            socket = new WebSocket(
-                `ws://${bridgeBackupHost}:${bridgeBackupPort}`
-            );
+            const url = new URL(`ws://${bridgeBackupHost}:${bridgeBackupPort}`);
+            if (bridgeBackupPassword) {
+                url.searchParams.append("password", bridgeBackupPassword);
+            }
+
+            socket = new WebSocket(url.href);
 
             socket.addEventListener("open", () => {
                 // Send all messages in queue
@@ -167,8 +174,12 @@ async function sendNativeMessage(application: string, message: Message) {
     try {
         return await browser.runtime.sendNativeMessage(application, message);
     } catch {
-        const { bridgeBackupEnabled, bridgeBackupHost, bridgeBackupPort } =
-            await options.getAll();
+        const {
+            bridgeBackupEnabled,
+            bridgeBackupHost,
+            bridgeBackupPort,
+            bridgeBackupPassword
+        } = await options.getAll();
 
         if (!bridgeBackupEnabled) {
             throw logger.error(
@@ -176,10 +187,24 @@ async function sendNativeMessage(application: string, message: Message) {
             );
         }
 
-        return await new Promise((resolve, reject) => {
-            const ws = new WebSocket(
-                `ws://${bridgeBackupHost}:${bridgeBackupPort}`
+        const url = new URL(`http://${bridgeBackupHost}:${bridgeBackupPort}`);
+        if (bridgeBackupPassword) {
+            url.searchParams.append("password", bridgeBackupPassword);
+        }
+
+        const res = await fetch(url.href);
+        if (res.status === 401) {
+            logger.error(
+                "Bridge daemon connection failed due to authentication error."
             );
+
+            throw 401;
+        }
+
+        url.protocol = "ws";
+
+        return await new Promise((resolve, reject) => {
+            const ws = new WebSocket(url.href);
 
             ws.addEventListener("open", () => {
                 ws.send(JSON.stringify(message));
@@ -191,7 +216,7 @@ async function sendNativeMessage(application: string, message: Message) {
             });
 
             ws.addEventListener("error", () => {
-                logger.error("No bridge application found.");
+                logger.error("Bridge daemon connection error.");
                 reject();
             });
         });
