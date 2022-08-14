@@ -8,108 +8,95 @@ import { Message, Port } from "../messaging";
 type DisconnectListener = (port: Port) => void;
 type MessageListener = (message: Message) => void;
 
-function connectNative(application: string): Port {
-    /**
-     * In order to preserve the synchronous API, messages are
-     * queued before either the native messaging host or the
-     * WebSocket connection is ready to send data.
-     */
-    let messageQueue: object[] = [];
+/**
+ * Create backup server URL from configured options.
+ */
+async function getBackupServerUrl() {
+    const { bridgeBackupHost, bridgeBackupPort, bridgeBackupPassword } =
+        await options.getAll();
 
-    /**
-     * Set once the native messaging host is known to be either
-     * present/missing. Determines whether messages go to the
-     * message queue.
-     */
-    let isNativeHostStatusKnown = false;
+    const url = new URL(`ws://${bridgeBackupHost}:${bridgeBackupPort}`);
+    if (bridgeBackupPassword) {
+        url.searchParams.append("password", bridgeBackupPassword);
+    }
 
-    const port = browser.runtime.connectNative(application);
+    return url;
+}
 
-    let socket: WebSocket;
+/**
+ * `browser.runtime.connectNative()` wrapper.
+ */
+export function connectNative(application: string): Port {
+    /** Whether native host or backup is ready for messages. */
+    let isNativeHostReady = false;
 
-    const onDisconnectListeners = new Set<DisconnectListener>();
-    const onMessageListeners = new Set<MessageListener>();
+    let backupSocket: Nullable<WebSocket> = null;
+    let backupMessageQueue: Message[] = [];
 
-    // Port proxy API
+    // Make initial connection to native host
+    const port = browser.runtime.connectNative(application); //
+
+    const messageListeners = new Set<MessageListener>();
+    const disconnectListeners = new Set<DisconnectListener>();
+
     const portObject: Port = {
         name: "",
 
         onDisconnect: {
             addListener(cb: DisconnectListener) {
-                onDisconnectListeners.add(cb);
+                disconnectListeners.add(cb);
             },
             removeListener(cb: DisconnectListener) {
-                onDisconnectListeners.delete(cb);
+                disconnectListeners.delete(cb);
             },
             hasListener(cb: DisconnectListener) {
-                return onDisconnectListeners.has(cb);
+                return disconnectListeners.has(cb);
             },
             hasListeners() {
-                return onDisconnectListeners.size > 0;
+                return disconnectListeners.size > 0;
             }
         },
         onMessage: {
             addListener(cb: MessageListener) {
-                onMessageListeners.add(cb);
+                messageListeners.add(cb);
             },
             removeListener(cb: MessageListener) {
-                onMessageListeners.delete(cb);
+                messageListeners.delete(cb);
             },
             hasListener(cb: MessageListener) {
-                return onMessageListeners.has(cb);
+                return messageListeners.has(cb);
             },
             hasListeners() {
-                return onMessageListeners.size > 0;
+                return messageListeners.size > 0;
             }
         },
 
         disconnect() {
-            if (socket) {
-                socket.close();
+            if (backupSocket) {
+                backupSocket.close();
             } else {
                 port.disconnect();
             }
         },
 
         postMessage(message) {
-            if (socket) {
-                switch (socket.readyState) {
-                    case WebSocket.CONNECTING: {
-                        // Queue message  until WebSocket is ready
-                        messageQueue.push(message);
-                        break;
-                    }
-
-                    case WebSocket.OPEN: {
-                        socket.send(JSON.stringify(message));
-                        break;
-                    }
-                }
-            } else {
-                if (!isNativeHostStatusKnown) {
-                    // Queue message until native messaging host is ready
-                    messageQueue.push(message);
-                }
-
-                port.postMessage(message);
+            if (!isNativeHostReady) {
+                // Queue messages until ready
+                backupMessageQueue.push(message);
+            } else if (backupSocket) {
+                backupSocket.send(JSON.stringify(message));
+                return;
             }
+
+            port.postMessage(message);
         }
     };
 
     port.onDisconnect.addListener(async () => {
-        const {
-            bridgeBackupEnabled,
-            bridgeBackupHost,
-            bridgeBackupPort,
-            bridgeBackupPassword
-        } = await options.getAll();
-
+        const bridgeBackupEnabled = await options.get("bridgeBackupEnabled");
         if (!bridgeBackupEnabled) {
-            portObject.error = {
-                message: ""
-            };
-
-            for (const listener of onDisconnectListeners) {
+            portObject.error = { message: "" };
+            for (const listener of disconnectListeners) {
                 listener(portObject);
             }
 
@@ -118,38 +105,35 @@ function connectNative(application: string): Port {
             );
         }
 
-        if (port.error && !isNativeHostStatusKnown) {
-            isNativeHostStatusKnown = true;
+        /**
+         * If port disconnected because of an error and native host
+         * status had not already been resolved.
+         */
+        if (port.error && !isNativeHostReady) {
+            backupSocket = new WebSocket(await getBackupServerUrl());
 
-            const url = new URL(`ws://${bridgeBackupHost}:${bridgeBackupPort}`);
-            if (bridgeBackupPassword) {
-                url.searchParams.append("password", bridgeBackupPassword);
-            }
+            backupSocket.addEventListener("open", () => {
+                isNativeHostReady = true;
 
-            socket = new WebSocket(url.href);
-
-            socket.addEventListener("open", () => {
                 // Send all messages in queue
-                while (messageQueue.length) {
-                    const message = messageQueue.pop();
-                    socket.send(JSON.stringify(message));
+                while (backupMessageQueue.length) {
+                    backupSocket?.send(
+                        JSON.stringify(backupMessageQueue.shift())
+                    );
                 }
             });
-
-            socket.addEventListener("message", ev => {
-                for (const listener of onMessageListeners) {
+            backupSocket.addEventListener("message", ev => {
+                for (const listener of messageListeners) {
                     listener(JSON.parse(ev.data));
                 }
             });
-
-            socket.addEventListener("close", ev => {
+            backupSocket.addEventListener("close", ev => {
+                // If not a normal closure, set error message
                 if (ev.code !== 1000) {
-                    portObject.error = {
-                        message: ev.reason
-                    };
+                    portObject.error = { message: ev.reason };
                 }
 
-                for (const listener of onDisconnectListeners) {
+                for (const listener of disconnectListeners) {
                     listener(portObject);
                 }
             });
@@ -157,12 +141,12 @@ function connectNative(application: string): Port {
     });
 
     port.onMessage.addListener((message: Message) => {
-        if (!isNativeHostStatusKnown) {
-            isNativeHostStatusKnown = true;
-            messageQueue = [];
+        if (!isNativeHostReady) {
+            isNativeHostReady = true;
+            backupMessageQueue = [];
         }
 
-        for (const listener of onMessageListeners) {
+        for (const listener of messageListeners) {
             listener(message);
         }
     });
@@ -170,30 +154,27 @@ function connectNative(application: string): Port {
     return portObject;
 }
 
-async function sendNativeMessage(application: string, message: Message) {
+/**
+ * `browser.runtime.sendNativeMessage()` wrapper.
+ */
+export async function sendNativeMessage(application: string, message: Message) {
     try {
         return await browser.runtime.sendNativeMessage(application, message);
     } catch {
-        const {
-            bridgeBackupEnabled,
-            bridgeBackupHost,
-            bridgeBackupPort,
-            bridgeBackupPassword
-        } = await options.getAll();
-
+        const bridgeBackupEnabled = await options.get("bridgeBackupEnabled");
         if (!bridgeBackupEnabled) {
             throw logger.error(
                 "Bridge connection failed and backup not enabled."
             );
         }
 
-        const url = new URL(`http://${bridgeBackupHost}:${bridgeBackupPort}`);
-        if (bridgeBackupPassword) {
-            url.searchParams.append("password", bridgeBackupPassword);
-        }
+        const backupServerUrl = await getBackupServerUrl();
 
-        const res = await fetch(url.href);
-        if (res.status === 401) {
+        const backupServerHttpUrl = new URL(backupServerUrl);
+        backupServerHttpUrl.protocol = "http";
+
+        // Send HTTP request to check authentication
+        if ((await fetch(backupServerHttpUrl)).status === 401) {
             logger.error(
                 "Bridge daemon connection failed due to authentication error."
             );
@@ -201,29 +182,20 @@ async function sendNativeMessage(application: string, message: Message) {
             throw 401;
         }
 
-        url.protocol = "ws";
-
         return await new Promise((resolve, reject) => {
-            const ws = new WebSocket(url.href);
+            const backupSocket = new WebSocket(backupServerUrl);
 
-            ws.addEventListener("open", () => {
-                ws.send(JSON.stringify(message));
+            backupSocket.addEventListener("open", () => {
+                backupSocket.send(JSON.stringify(message));
             });
-
-            ws.addEventListener("message", ev => {
-                ws.close();
+            backupSocket.addEventListener("message", ev => {
+                backupSocket.close();
                 resolve(JSON.parse(ev.data));
             });
-
-            ws.addEventListener("error", () => {
+            backupSocket.addEventListener("error", () => {
                 logger.error("Bridge daemon connection error.");
                 reject();
             });
         });
     }
 }
-
-export default {
-    connectNative,
-    sendNativeMessage
-};

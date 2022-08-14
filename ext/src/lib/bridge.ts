@@ -4,7 +4,7 @@ import semver from "semver";
 
 import logger from "./logger";
 import { Port } from "../messaging";
-import nativeMessaging from "./nativeMessaging";
+import * as nativeMessaging from "./nativeMessaging";
 import options from "./options";
 
 export const BRIDGE_TIMEOUT = 5000;
