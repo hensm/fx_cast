@@ -19,14 +19,13 @@ const EXTENSION_ID = "fx_cast@matt.tf";
 
 // Command line args
 const argv = minimist(process.argv.slice(2), {
-    boolean: ["usePkg", "package", "skipNativeBuilds"],
+    boolean: ["usePkg", "package"],
     string: ["arch", "packageType"],
     default: {
         arch: os.arch(),
         package: false,
         // Linux package type (deb/rpm)
-        packageType: "deb",
-        skipNativeBuilds: false
+        packageType: "deb"
     }
 });
 
@@ -486,11 +485,7 @@ function packageLinuxRpm(
  * script (packaging/win/installer.nsi). Requires the
  * makensis command line utility.
  */
-function packageWin32(
-    arch,
-    platformExecutableName,
-    platformExecutablePath
-) {
+function packageWin32(arch, platformExecutableName, platformExecutablePath) {
     const outputName = `${meta.__applicationName}-${meta.__applicationVersion}-${arch}.exe`;
 
     const scriptPath = path.join(__dirname, "../packaging/win/installer.nsi");
