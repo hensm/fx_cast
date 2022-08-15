@@ -14,7 +14,7 @@ const esbuild = require("esbuild");
 function* walk(rootPath) {
     const pathsToWalk = [rootPath];
     while (pathsToWalk.length > 0) {
-        const currentPath = pathsToWalk.pop();
+        const currentPath = /** @type {string} */ (pathsToWalk.pop());
         if (fs.statSync(currentPath).isFile()) {
             yield currentPath;
         } else {

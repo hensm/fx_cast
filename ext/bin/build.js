@@ -102,7 +102,7 @@ if (argv.mode === "production") {
 /**
  * Handle build results.
  *
- * @param {esbuild.BuildResult} result
+ * @param {esbuild.BuildResult | null} result
  */
 function onBuildResult(result) {
     if (result?.errors.length) {
