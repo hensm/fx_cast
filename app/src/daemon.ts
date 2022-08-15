@@ -29,7 +29,12 @@ export function init(port: number, serverPassword?: string) {
         messageStream._read = () => {};
 
         socket.on("message", (message: string) => {
-            messageStream.push(JSON.parse(message));
+            try {
+                messageStream.push(JSON.parse(message));
+            } catch (err) {
+                // Catch parse errors and close socket
+                socket.close();
+            }
         });
 
         /**
