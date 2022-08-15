@@ -71,34 +71,40 @@ export function init(port: number, serverPassword?: string) {
     }
 
     server.on("upgrade", (req, socket, head) => {
+        /**
+         * Only accept authenticated WebSocket requests from extension
+         * origins.
+         */
         if (
-            // Only accept WebSocket requests from extension origins
-            !req.headers.origin?.startsWith("moz-extension://") ||
-            !authenticate(req)
+            req.headers.origin?.startsWith("moz-extension://") &&
+            authenticate(req)
         ) {
-            socket.write("HTTP/1.1 401 Unauthorized\r\n\r\n");
-            socket.destroy();
+            wss.handleUpgrade(req, socket, head, ws => {
+                wss.emit("connection", ws, req);
+            });
+
             return;
         }
 
-        wss.handleUpgrade(req, socket, head, ws => {
-            wss.emit("connection", ws, req);
-        });
+        socket.write("HTTP/1.1 401 Unauthorized\r\n\r\n");
+        socket.destroy();
     });
 
     /**
-     * JS WebSocket API does not allow access to connection errors, so
-     * provide an endpoint for feedback on invalid authentication.
+     * Browser WebSocket API does not allow access to connection errors,
+     * so provide an endpoint for feedback on invalid authentication.
      */
     server.on("request", (req, res) => {
-        if (!authenticate(req)) {
-            res.writeHead(401);
-            res.end();
-
+        /**
+         * Requests from extensions have their origin header stripped,
+         * so block all requests with origin headers.
+         */
+        if ("origin" in req.headers) {
+            req.destroy();
             return;
         }
 
-        res.writeHead(200);
+        res.writeHead(authenticate(req) ? 200 : 401);
         res.end();
     });
 
