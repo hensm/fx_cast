@@ -8,7 +8,13 @@ import { Readable } from "stream";
 
 import { DecodeTransform, EncodeTransform } from "./transforms";
 
-export function init(port: number, serverPassword?: string) {
+interface DaemonOpts {
+    host: string;
+    port: number;
+    password: string;
+}
+
+export function init(opts: DaemonOpts) {
     const server = http.createServer();
     const wss = new WebSocket.Server({ noServer: true });
 
@@ -65,14 +71,14 @@ export function init(port: number, serverPassword?: string) {
      * server password specified in launch options.
      */
     function authenticate(req: IncomingMessage) {
-        if (!serverPassword) return true;
+        if (!opts.password) return true;
 
         const password = new URL(
             req.url!,
             `http://${req.headers.host}`
         ).searchParams.get("password");
 
-        return password === serverPassword;
+        return password === opts.password;
     }
 
     server.on("upgrade", (req, socket, head) => {
@@ -113,5 +119,5 @@ export function init(port: number, serverPassword?: string) {
         res.end();
     });
 
-    server.listen(port);
+    server.listen({ port: opts.port, host: opts.host });
 }

@@ -15,7 +15,16 @@ async function getBackupServerUrl() {
     const { bridgeBackupHost, bridgeBackupPort, bridgeBackupPassword } =
         await options.getAll();
 
-    const url = new URL(`ws://${bridgeBackupHost}:${bridgeBackupPort}`);
+    const url = new URL(
+        `ws://${
+            // Handle IPv6 address formatting
+            bridgeBackupHost.includes(":")
+                ? `[${bridgeBackupHost}]`
+                : bridgeBackupHost
+        }`
+    );
+    url.port = bridgeBackupPort.toString();
+
     if (bridgeBackupPassword) {
         url.searchParams.append("password", bridgeBackupPassword);
     }
