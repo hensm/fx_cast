@@ -20,39 +20,28 @@ const EXTENSION_ID = "fx_cast@matt.tf";
 // Command line args
 const argv = minimist(process.argv.slice(2), {
     boolean: ["usePkg", "package"],
-    string: ["arch", "packageType"],
+    string: ["arch", "packageType", "nodeVersion"],
     default: {
         arch: os.arch(),
         package: false,
         // Linux package type (deb/rpm)
-        packageType: "deb"
+        packageType: "deb",
+        nodeVersion: "16"
     }
 });
 
-const supportedTargets = [
-    "win-x64",
-    "win-x86",
-    "macos-x64",
-    "macos-arm64",
-    "linux-x64"
-];
+const supportedTargets = {
+    win32: ["x86", "x64"],
+    darwin: ["x64", "arm64"],
+    linux: ["x64"]
+};
+if (!supportedTargets[process.platform]?.includes(argv.arch)) {
+    console.error(
+        `Error: Unsupported target! (${
+            paths.pkgPlatformMap[process.platform]
+        }-${argv.arch})`
+    );
 
-const supportedPlatforms = [];
-const supportedArchs = [];
-
-for (const target of supportedTargets) {
-    const [platform, arch] = target.split("-");
-
-    supportedPlatforms.push(platform);
-    supportedArchs.push(arch);
-}
-
-if (!supportedPlatforms.includes(paths.pkgPlatformMap[process.platform])) {
-    console.error("Unsupported target platform");
-    process.exit(1);
-}
-if (!supportedArchs.includes(argv.arch)) {
-    console.error("Unsupported target arch");
     process.exit(1);
 }
 
@@ -131,7 +120,9 @@ async function build() {
         await pkg.exec([
             path.join(BUILD_PATH, "src"),
             "--target",
-            `node16-${paths.pkgPlatformMap[process.platform]}-${argv.arch}`,
+            `node${argv.nodeVersion}-${
+                paths.pkgPlatformMap[process.platform]
+            }-${argv.arch}`,
             "--output",
             path.join(BUILD_PATH, executableName)
         ]);
@@ -251,11 +242,6 @@ async function packageApp(platform, arch) {
             }
 
             break;
-        }
-
-        default: {
-            console.error("Unsupported target platform");
-            process.exit(1);
         }
     }
 }
@@ -519,6 +505,6 @@ function packageWin32(arch, platformExecutableName, platformExecutablePath) {
 }
 
 build().catch(e => {
-    console.error("Build failed", e);
+    console.error("Error: Build failed!", e);
     process.exit(1);
 });

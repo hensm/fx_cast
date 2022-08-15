@@ -72,8 +72,6 @@ Whitelisted sites should then display a cast button as in Chrome, provided they'
 * Native build tools (see [here](https://github.com/nodejs/node-gyp#installation))
 * Bonjour/Avahi (on Windows/Linux respectively)
 
-Cross-compiling native dependencies may be possible, but isn't tested or supported. Build script options are provided for building/packaging on other platforms, but assume they won't work. Packaging on Linux for other Linux package formats should work fine.
-
 ### Installing dependencies
 
 #### Windows:
