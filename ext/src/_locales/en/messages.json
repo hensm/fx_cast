@@ -393,6 +393,14 @@
         "message": "If specified, a custom user agent string to use specifically for sites matching this pattern.",
         "description": "Whitelist item user agent option label."
     },
+    "optionsSiteWhitelistItemEnabled": {
+        "message": "Enable whitelist item",
+        "description": "Whitelist item enabled checkbox title."
+    },
+    "optionsSiteWhitelistItemPattern": {
+        "message": "Match pattern",
+        "description": "Whitelist item pattern edit input title."
+    },
 
     "optionsMirroringCategoryName": {
         "message": "Screen/tab casting",

@@ -98,10 +98,13 @@
         if (isEditing) return;
 
         if (knownAppToAdd?.matches) {
-            items = [...items, { pattern: knownAppToAdd.matches }];
+            items = [
+                ...items,
+                { pattern: knownAppToAdd.matches, isEnabled: true }
+            ];
             knownAppToAdd = null;
         } else {
-            items = [...items, { pattern: "" }];
+            items = [...items, { pattern: "", isEnabled: true }];
             beginEditing(items.length - 1);
         }
     }
@@ -129,7 +132,17 @@
                 class="whitelist__item"
                 class:whitelist__item--selected={isEditingItem}
                 class:whitelist__item--expanded={isItemExpanded}
+                class:whitelist__item--disabled={!item.isEnabled}
+                class:whitelist__item--editing={isEditingItem}
             >
+                {#if !isEditingItem}
+                    <input
+                        type="checkbox"
+                        title={_("optionsSiteWhitelistItemEnabled")}
+                        bind:checked={item.isEnabled}
+                    />
+                {/if}
+
                 <div
                     class="whitelist__title"
                     on:dblclick={() => beginEditing(i)}
@@ -140,6 +153,7 @@
                             class="whitelist__input-pattern"
                             pattern={REMOTE_MATCH_PATTERN_REGEX.source}
                             required
+                            title={_("optionsSiteWhitelistItemPattern")}
                             bind:this={editingInput}
                             bind:value={editingValue}
                             on:input={onEditInput}

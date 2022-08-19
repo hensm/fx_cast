@@ -137,7 +137,7 @@ async function onMenuClicked(
         const whitelist = await options.get("siteWhitelist");
         if (!whitelist.find(item => item.pattern === pattern)) {
             // Add to whitelist and update options
-            whitelist.push({ pattern });
+            whitelist.push({ pattern, isEnabled: true });
             await options.set("siteWhitelist", whitelist);
         }
 

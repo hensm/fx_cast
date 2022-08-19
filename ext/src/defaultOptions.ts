@@ -41,7 +41,7 @@ export default {
     receiverSelectorCloseIfFocusLost: true,
     receiverSelectorWaitForConnection: true,
     siteWhitelistEnabled: true,
-    siteWhitelist: [{ pattern: "https://www.netflix.com/*" }],
+    siteWhitelist: [{ pattern: "https://www.netflix.com/*", isEnabled: true }],
     siteWhitelistCustomUserAgent: "",
     showAdvancedOptions: false
 } as Options;

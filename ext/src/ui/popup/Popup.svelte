@@ -228,7 +228,7 @@
 
         const whitelist = await options.get("siteWhitelist");
         if (!whitelist.find(item => item.pattern === app.matches)) {
-            whitelist.push({ pattern: app.matches });
+            whitelist.push({ pattern: app.matches, isEnabled: true });
             await options.set("siteWhitelist", whitelist);
 
             await browser.tabs.reload(pageInfo.tabId);

@@ -25,11 +25,12 @@ type OnBeforeRequestDetails = Parameters<
 
 export interface WhitelistItemData {
     pattern: string;
+    isEnabled: boolean;
     isUserAgentDisabled?: boolean;
     customUserAgent?: string;
 }
 
-const originUrlCache: string[] = [];
+let matchPatterns: RemoteMatchPattern[] = [];
 
 let platform: string;
 let chromeUserAgent: string | undefined;
@@ -47,31 +48,25 @@ export async function initWhitelist() {
         platform = (await browser.runtime.getPlatformInfo()).os;
         chromeUserAgent = getChromeUserAgent(platform);
         chromeUserAgentHybrid = getChromeUserAgent(platform, true);
-
-        customUserAgent = await options.get("siteWhitelistCustomUserAgent");
-
-        /**
-         * If a UA string can't be obtained, don't bother continuing
-         * extension initialization
-         */
         if (!chromeUserAgent) {
             throw logger.error("Failed to get Chrome UA string");
         }
+
+        customUserAgent = await options.get("siteWhitelistCustomUserAgent");
     }
 
     // Register on first run
     await registerSiteWhitelist();
 
-    // Re-register when options change
     options.addEventListener("changed", async ev => {
-        const alteredOpts = ev.detail;
-
-        if (alteredOpts.includes("siteWhitelistCustomUserAgent")) {
+        // Update custom UA on change
+        if (ev.detail.includes("siteWhitelistCustomUserAgent")) {
             customUserAgent = await options.get("siteWhitelistCustomUserAgent");
         }
+        // Re-register whitelist on change
         if (
-            alteredOpts.includes("siteWhitelist") ||
-            alteredOpts.includes("siteWhitelistEnabled")
+            ev.detail.includes("siteWhitelist") ||
+            ev.detail.includes("siteWhitelistEnabled")
         ) {
             unregisterSiteWhitelist();
             registerSiteWhitelist();
@@ -93,7 +88,7 @@ function getUserAgent(url: string, host?: string): Optional<string> {
             new RemoteMatchPattern(item.pattern).matches(url)
     );
     if (matchingItem) {
-        if (matchingItem.isUserAgentDisabled) return;
+        if (!matchingItem.isEnabled || matchingItem.isUserAgentDisabled) return;
         return matchingItem.customUserAgent;
     }
 
@@ -104,10 +99,9 @@ function getUserAgent(url: string, host?: string): Optional<string> {
 }
 
 /**
- * Web apps usually only load the sender library and
- * provide cast functionality if the browser is detected
- * as Chrome, so we should rewrite the User-Agent header
- * to reflect this on whitelisted sites.
+ * Override User-Agent header for requests to whitelisted URLs. Sites
+ * with Chromecast support will usually only load the Cast SDK if they
+ * detect a Chrome user agent string.
  */
 async function onWhitelistedBeforeSendHeaders(
     details: OnBeforeSendHeadersDetails
@@ -116,10 +110,6 @@ async function onWhitelistedBeforeSendHeaders(
         throw logger.error(
             "OnBeforeSendHeaders handler details missing requestHeaders."
         );
-    }
-
-    if (details.originUrl && !originUrlCache.includes(details.originUrl)) {
-        originUrlCache.push(details.originUrl);
     }
 
     const host = details.requestHeaders.find(header => header.name === "Host");
@@ -137,10 +127,9 @@ async function onWhitelistedBeforeSendHeaders(
 }
 
 /**
- * Requests from within child frames should also adopt
- * the modified User-Agent header to support embedded
- * players on other origins (like CDN domains) when the
- * main site is whitelisted.
+ * Override User-Agent header for requests from child frames of
+ * whitelisted URLs to support embedded players on other origins (e.g.
+ * CDN domains).
  */
 function onWhitelistedChildBeforeSendHeaders(
     details: OnBeforeSendHeadersDetails
@@ -150,55 +139,54 @@ function onWhitelistedChildBeforeSendHeaders(
     }
 
     for (const ancestor of details.frameAncestors) {
-        if (originUrlCache.includes(ancestor.url)) {
-            const host = details.requestHeaders.find(
-                header => header.name === "Host"
-            );
-
-            for (const header of details.requestHeaders) {
-                if (header.name === "User-Agent") {
-                    header.value = getUserAgent(details.url, host?.value);
-                    break;
-                }
-            }
-
-            return {
-                requestHeaders: details.requestHeaders
-            };
+        // If no matching patterns
+        if (!matchPatterns.some(pattern => pattern.matches(ancestor.url))) {
+            continue;
         }
+
+        // Override User-Agent header
+        const requestHeaders = details.requestHeaders;
+        for (const header of requestHeaders) {
+            if (header.name === "User-Agent") {
+                const host = requestHeaders.find(
+                    header => header.name === "Host"
+                );
+                header.value = getUserAgent(details.url, host?.value);
+                break;
+            }
+        }
+
+        return { requestHeaders };
     }
 }
 
 /**
- * Sender applications load a cast_sender.js script that
- * functions as a loader for the internal chrome-extension:
- * hosted script.
- *
- * We can redirect this and inject our own script to setup
- * the API.
+ * Handle requests to cast_sender.js SDK loader script and redirect to
+ * the extension's implementation.
  */
 async function onBeforeCastSDKRequest(details: OnBeforeRequestDetails) {
     if (!details.originUrl || details.tabId === -1) {
         return {};
     }
 
-    // Check against whitelist if enabled
+    // Test against whitelist if enabled
     if (await options.get("siteWhitelistEnabled")) {
-        if (!details?.frameAncestors?.length) {
-            if (!originUrlCache.includes(details.originUrl)) {
-                return {};
-            }
-        } else {
-            let hasMatchingAncestor = false;
-            for (const ancestor of details.frameAncestors) {
-                if (originUrlCache.includes(ancestor.url)) {
-                    hasMatchingAncestor = true;
-                }
-            }
+        /**
+         * Frame ancestor URLs (if present) or origin URL that the SDK
+         * is loaded from.
+         */
+        const urls = [
+            ...(details.frameAncestors?.map(ancestor => ancestor.url) ?? []),
+            details.originUrl
+        ];
 
-            if (!hasMatchingAncestor) {
-                return {};
-            }
+        // Allow request if no whitelist matches
+        if (
+            !urls.some(url =>
+                matchPatterns.some(pattern => pattern.matches(url))
+            )
+        ) {
+            return {};
         }
     }
 
@@ -228,12 +216,18 @@ async function registerSiteWhitelist() {
     siteWhitelist = opts.siteWhitelist;
     siteWhitelistEnabled = opts.siteWhitelistEnabled;
 
+    // Parse match patterns once
+    matchPatterns = siteWhitelist.map(
+        item => new RemoteMatchPattern(item.pattern)
+    );
+
     browser.webRequest.onBeforeRequest.addListener(
         onBeforeCastSDKRequest,
         { urls: [CAST_LOADER_SCRIPT_URL, CAST_FRAMEWORK_LOADER_SCRIPT_URL] },
         ["blocking"]
     );
 
+    // Skip whitelist request listeners if disabled or empty
     if (!siteWhitelistEnabled || !siteWhitelist.length) {
         return;
     }
@@ -243,7 +237,9 @@ async function registerSiteWhitelist() {
         {
             // Filter for items with UA enabled
             urls: siteWhitelist.flatMap(item =>
-                !item.isUserAgentDisabled ? [item.pattern] : []
+                item.isEnabled && !item.isUserAgentDisabled
+                    ? [item.pattern]
+                    : []
             )
         },
         ["blocking", "requestHeaders"]
@@ -257,8 +253,6 @@ async function registerSiteWhitelist() {
 }
 
 function unregisterSiteWhitelist() {
-    originUrlCache.length = 0;
-
     browser.webRequest.onBeforeSendHeaders.removeListener(
         onWhitelistedBeforeSendHeaders
     );

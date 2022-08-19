@@ -367,6 +367,9 @@ button.ghost:not(:hover) {
 .whitelist__item--selected {
     background-color: var(--blue-50-a30) !important;
 }
+.whitelist__item--disabled:not(.whitelist__item--editing) .whitelist__title {
+    opacity: 0.65;
+}
 
 .whitelist__title {
     display: flex;
