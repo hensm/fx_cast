@@ -6,7 +6,7 @@ import { handleCastMessage } from "./components/cast";
 import { startDiscovery, stopDiscovery } from "./components/discovery";
 import { startMediaServer, stopMediaServer } from "./components/mediaServer";
 
-import { __applicationVersion } from "../../package.json";
+import { applicationVersion } from "../../config.json";
 
 process.on("SIGTERM", () => {
     stopDiscovery();
@@ -24,7 +24,7 @@ messaging.on("message", (message: Message) => {
     switch (message.subject) {
         case "bridge:getInfo":
         case "bridge:/getInfo": {
-            messaging.send(__applicationVersion);
+            messaging.send(applicationVersion);
             break;
         }
 

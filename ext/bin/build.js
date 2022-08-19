@@ -1,45 +1,50 @@
 // @ts-check
-"use strict";
 
-const fs = require("fs-extra");
-const path = require("path");
+import fs from "fs-extra";
+import path from "path";
+import url from "url";
 
-const esbuild = require("esbuild");
-const minimist = require("minimist");
-const sveltePlugin = require("esbuild-svelte");
-const sveltePreprocess = require("svelte-preprocess");
-const webExt = require("web-ext");
+import esbuild from "esbuild";
+import sveltePlugin from "esbuild-svelte";
+import sveltePreprocess from "svelte-preprocess";
+import yargs from "yargs";
+import webExt from "web-ext";
 
-const { copyFilesPlugin } = require("./lib/copyFilesPlugin.js");
+import copyFilesPlugin from "./lib/copyFilesPlugin.js";
 
 const BRIDGE_NAME = "fx_cast_bridge";
 const BRIDGE_VERSION = "0.2.0";
 
 const MIRRORING_APP_ID = "19A6F4AE";
 
-const argv = minimist(process.argv.slice(2), {
-    boolean: ["package", "watch"],
-    string: ["mirroringAppId", "mode"],
-    default: {
-        package: false,
-        watch: false,
-        mirroringAppId: MIRRORING_APP_ID,
-        mode: "development"
-    }
-});
-
-if (argv.package && argv.watch) {
-    console.error("Cannot package whilst watching files.");
-    process.exit(1);
-}
+const argv = yargs()
+    .help()
+    .version(false)
+    .option("watch", {
+        describe: "Rebuild on changes",
+        type: "boolean"
+    })
+    .option("package", {
+        describe: "Package with web-ext",
+        type: "boolean",
+        conflicts: "watch"
+    })
+    .option("mode", {
+        describe: "Set build mode",
+        choices: ["development", "production"],
+        default: "development"
+    })
+    .parseSync(process.argv);
 
 // If packaging, use production mode
 if (argv.package) {
     argv.mode = "production";
 }
 
+const __dirname = path.dirname(url.fileURLToPath(import.meta.url));
+
 // Paths
-const rootPath = path.resolve(__dirname, "../");
+const rootPath = path.join(__dirname, "../");
 const srcPath = path.join(rootPath, "src");
 
 const distPath = path.join(rootPath, "../dist/ext/");
@@ -75,7 +80,7 @@ const buildOpts = {
     define: {
         BRIDGE_NAME: `"${BRIDGE_NAME}"`,
         BRIDGE_VERSION: `"${BRIDGE_VERSION}"`,
-        MIRRORING_APP_ID: `"${argv.mirroringAppId}"`
+        MIRRORING_APP_ID: `"${MIRRORING_APP_ID}"`
     },
     plugins: [
         // @ts-ignore

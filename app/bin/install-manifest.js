@@ -1,69 +1,77 @@
-const fs = require("fs-extra");
-const os = require("os");
-const path = require("path");
-const minimist = require("minimist");
+// @ts-check
 
-const paths = require("./lib/paths");
+import fs from "fs-extra";
+import os from "os";
+import path from "path";
+import { spawnSync } from "child_process";
 
-const argv = minimist(process.argv.slice(2), {
-    boolean: ["remove"],
-    default: {
-        remove: false
-    }
-});
+import yargs from "yargs";
 
-const CURRENT_MANIFEST_PATH = path.join(paths.DIST_PATH, paths.MANIFEST_NAME);
+import * as paths from "./lib/paths.js";
 
-if (!fs.existsSync(CURRENT_MANIFEST_PATH) && !argv.remove) {
-    console.error("No manifest in dist/app/ to install.");
+const argv = yargs()
+    .help()
+    .version(false)
+    .option("remove", {
+        describe: "Uninstall manifest",
+        type: "boolean"
+    })
+    .parseSync(process.argv);
+
+// Path to newly-built manifest
+const newManifestPath = path.join(paths.DIST_PATH, paths.MANIFEST_NAME);
+if (!fs.existsSync(newManifestPath) && !argv.remove) {
+    console.error("Error: No manifest to install!");
     process.exit(1);
 }
 
-const platform = os.platform();
-const arch = os.arch();
+console.info(`${argv.remove ? "Uninstalling" : "Installing"} manifest... `);
 
+const platform = os.platform();
 switch (platform) {
+    // File-based manifests
     case "darwin":
     case "linux": {
-        // Manifest location within home directory
-        const destination = path.join(
+        // User-specific manifest within home directory
+        const manifestDirectory = path.join(
             os.homedir(),
             platform === "linux"
-                ? ".mozilla/native-messaging-hosts/"
-                : paths.getManifestPath(platform, arch)
+                ? ".mozilla/native-messaging-hosts"
+                : paths.getManifestDirectory(platform, os.arch())
         );
+
+        const manifestPath = path.join(manifestDirectory, paths.MANIFEST_NAME);
 
         if (argv.remove) {
-            fs.remove(path.join(destination, paths.MANIFEST_NAME));
-            break;
+            // Uninstall manifest
+            fs.rmSync(manifestPath);
+        } else {
+            // Install manifest
+            fs.mkdirSync(manifestDirectory, { recursive: true });
+            fs.copyFileSync(newManifestPath, manifestPath);
         }
-
-        // Install manifest
-        fs.ensureDirSync(destination);
-        fs.copyFileSync(
-            CURRENT_MANIFEST_PATH,
-            path.join(destination, paths.MANIFEST_NAME)
-        );
 
         break;
     }
 
     case "win32": {
-        const { Registry } = require("rage-edit");
-        const REGISTRY_PATH = `HKCU\\SOFTWARE\\Mozilla\\NativeMessagingHosts\\${paths.REGISTRY_KEY}`;
+        const registryKey = `HKCU\\SOFTWARE\\Mozilla\\NativeMessagingHosts\\${paths.REGISTRY_KEY}`;
 
-        if (argv.remove) {
-            Registry.delete(REGISTRY_PATH);
-            break;
-        }
-
-        Registry.set(REGISTRY_PATH, "", CURRENT_MANIFEST_PATH, "REG_SZ");
+        // Call reg command
+        spawnSync(
+            argv.remove
+                ? `reg delete ${registryKey} /f`
+                : `reg add ${registryKey} /ve /d "${newManifestPath}" /f`,
+            {
+                shell: true,
+                stdio: [process.stdin, process.stdout, process.stderr]
+            }
+        );
 
         break;
     }
 
-    default: {
-        console.error("Sorry, this installer does not yet support your OS");
+    default:
+        console.error("Error: Unsupported platform!");
         process.exit(1);
-    }
 }

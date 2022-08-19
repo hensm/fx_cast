@@ -19,10 +19,9 @@ The bridge application is currently supported on Windows, macOS and Linux.
 
 **Note**: These packages are maintained by third parties and support likely will not be provided for any issues specific to these packages.
 
-- **Arch Linux (AUR)**
-  - `fx_cast` — https://aur.archlinux.org/packages/fx_cast
-  - `fx_cast-bin` — https://aur.archlinux.org/packages/fx_cast-bin
-
+-   **Arch Linux (AUR)**
+    -   `fx_cast` — https://aur.archlinux.org/packages/fx_cast
+    -   `fx_cast-bin` — https://aur.archlinux.org/packages/fx_cast-bin
 
 ### Daemon Configuration
 
@@ -30,10 +29,13 @@ The bridge application is currently supported on Windows, macOS and Linux.
     <summary>Daemon configuration (systemd)</summary>
 
 1. Create a new `fx_cast` user:
+
 ```sh
 $ sudo useradd --system fx_cast
 ```
+
 2. Create a service file in `/etc/systemd/system/fx_cast.service`:
+
 ```
 [Unit]
 Description=fx_cast daemon
@@ -46,12 +48,14 @@ Restart=always
 [Install]
 WantedBy=multi-user.target
 ```
+
 3. Enable the service:
+
 ```sh
 $ sudo systemctl enable --now fx_cast
 ```
-</details>
 
+</details>
 
 ## Usage
 
@@ -68,36 +72,43 @@ Whitelisted sites should then display a cast button as in Chrome, provided they'
 ## Building
 
 ### Requirements
-* Node.js v16.x.x
-* Native build tools (see [here](https://github.com/nodejs/node-gyp#installation))
-* Bonjour/Avahi (on Windows/Linux respectively)
+
+-   Node.js v16.x.x
+-   Native build tools (see [here](https://github.com/nodejs/node-gyp#installation))
+-   Bonjour/Avahi (on Windows/Linux respectively)
 
 ### Installing dependencies
 
 #### Windows:
-* [Bonjour SDK for Windows](https://developer.apple.com/download/more/?=Bonjour%20SDK%20for%20Windows)
-* [NSIS](https://nsis.sourceforge.io/Download)
+
+-   [Bonjour SDK for Windows](https://developer.apple.com/download/more/?=Bonjour%20SDK%20for%20Windows)
+-   [NSIS](https://nsis.sourceforge.io/Download)
 
 #### Debian / Ubuntu:
-````sh
+
+```sh
 $ sudo apt install libavahi-compat-libdnssd-dev dpkg rpm
-````
+```
+
 Runtime packages: `avahi-daemon`.
 
 #### Fedora:
-````sh
+
+```sh
 $ sudo dnf install avahi-compat-libdns_sd-devel dpkg rpm-build
-````
+```
+
 Runtime packages: `avahi`, `nss-mdns`.
 
 #### Arch Linux:
-````sh
+
+```sh
 $ sudo pacman -S avahi dpkg rpm-tools
-````
+```
 
 ### Instructions
 
-````sh
+```sh
 $ git clone https://github.com/hensm/fx_cast.git
 $ cd fx_cast
 $ npm install
@@ -108,61 +119,68 @@ $ npm run build
 # install. Call `remove-manifest` to restore previous state.
 $ npm run install-manifest
 $ npm run remove-manifest
-````
+```
 
 This will build the ext and app, outputting to `dist/`:
 
-- `dist/app/`  
-   ... contains the built bridge with launcher script and manifest (with the path pointing that script). The `install-manifest` npm script copies this manifest to the proper location (or adds its current location to the registry on Windows).
-- `dist/ext/`  
-    ... contains the unpacked extension.
+-   `dist/app/`  
+     ... contains the built bridge with launcher script and manifest (with the path pointing that script). The `install-manifest` npm script copies this manifest to the proper location (or adds its current location to the registry on Windows).
+-   `dist/ext/`  
+     ... contains the unpacked extension.
 
 Watching ext changes:
 
-````sh
+```sh
 $ npm run watch:ext
-````
+```
 
 Launch Firefox with built extension (run in separate terminal):
 
-````sh
+```sh
 $ npm run start:ext
-````
+```
 
 #### 32-bit on Windows
 
 Building a 32-bit version is only supported for Windows. If you're building from a 64-bit system, you'll also need to rebuild any native dependencies as 32-bit.
 
-````sh
+```sh
 $ npm clean-install --prefix ./app --arch=ia32  # If on a 64-bit system
 
 # If building without packaging
-$ npm run build:app -- -- --arch=x86 --usePkg
+$ npm run build:app -- -- --arch=x86 --use-pkg
 
 # If packaging
 $ npm run package:app -- -- --arch=x86
-````
+```
 
 ### Build scripts
 
 Extension build script (`build:ext`) arguments:
 
-- `--package`  
-    Should package with web-ext.
-- `--watch`  
-    Should run webpack in watch mode.
-- `--mirroringAppId` `"<appID>"`  
-    Provide an alternative default mirroring receiver app ID.
-- `--mode` `"production"`, `"development"`  
-    Run webpack in a different mode. Defaults to `"development"` unless combined with `--package`.
+-   `--watch`  
+     Rebuild on changes. Incompatible with `--package`.
+-   `--package`  
+     Package with web-ext.
+-   `--mode` `"development"`, `"production"`  
+     Sets build mode. Defaults to `development` unless packaging.
 
 Bridge build script (`build:app`) arguments:
-- `--usePkg`  
-    Creates a single executable instead of a compiled JavaScript files and a launcher script.
-- `--package`  
+
+-   `--package`  
     Builds and creates installer packages for distribution.
-- `--arch` `"x64"`,`"x86"`  
-    Select platform arch to build for. Defaults to current platform arch.
+-   `--package-type` `"deb"`, `"rpm"`  
+     Linux installer package type.
+-   `--use-pkg`  
+     Create single binary with pkg.
+-   `--arch` `"x64"`, `"x86"`, `"arm64"`  
+     Select platform arch to build for. Defaults to current arch.
+
+    | Platform  | Supported Architectures |
+    | --------- | ----------------------- |
+    | `Windows` | `x86`, `x64`            |
+    | `macOS`   | `x64`, `arm64`          |
+    | `Linux`   | `x64`                   |
 
 ### Packaging
 
@@ -172,10 +190,10 @@ Build and package extension and bridge application for current platform:
 $ npm run package
 ```
 
-- `dist/app/`  
-    ... contains the installer package: `fx_cast_bridge-<version>-<arch>.(pkg|deb|rpm|exe)`
-- `dist/ext/`  
-    ... contains the built extension archive: `fx_cast-<version>.xpi`.
+-   `dist/app/`  
+     ... contains the installer package: `fx_cast_bridge-<version>-<arch>.(pkg|deb|rpm|exe)`
+-   `dist/ext/`  
+     ... contains the built extension archive: `fx_cast-<version>.xpi`.
 
 Packaging examples:
 
@@ -184,15 +202,9 @@ $ npm run package:ext # Packaging extension
 $ npm run package:app # Packaging bridge application
 
 # Linux platforms
-$ npm run package:app -- -- --packageType=deb
-$ npm run package:app -- -- --packageType=rpm
+$ npm run package:app -- -- --package-type=deb
+$ npm run package:app -- -- --package-type=rpm
 ```
-
-Bridge package script arguments (includes the build script arguments):
-
-- `--packageType` `"deb"`,`"rpm"`  
-    Select the package type. Defaults to `deb`. Only relevant when building for Linux.
-
 
 ### Testing
 
@@ -212,24 +224,25 @@ $ npm test
 $ SELENIUM_BROWSER=chrome npm test
 ```
 
-
 ## Video Demos
 
-These are somewhat outdated now, but show the basic function of the extension:  
+These are somewhat outdated now, but show the basic function of the extension:
+
 [<img width="200" src="https://img.youtube.com/vi/Ex9dWKYguEE/0.jpg" alt="fx_cast Netflix" />](https://www.youtube.com/watch?v=Ex9dWKYguEE)
 [<img width="200" src="https://img.youtube.com/vi/16r8lQKeEX8/0.jpg" alt="fx_cast HTML5" />](https://www.youtube.com/watch?v=16r8lQKeEX8)
 
-
 ## Credit
-- [electron-chromecast](https://github.com/GPMDP/electron-chromecast)[^electron]
-- Icons by [icons8](https://icons8.com/):
-  - `ext/src/ui/options/assets/icons8-cancel-120.png`
-  - `ext/src/ui/options/assets/icons8-ok-120.png`
-  - `ext/src/ui/options/assets/icons8-warn-120.png`
 
+-   [electron-chromecast](https://github.com/GPMDP/electron-chromecast)[^electron]
+-   Icons by [icons8](https://icons8.com/):
+    -   `ext/src/ui/options/assets/icons8-cancel-120.png`
+    -   `ext/src/ui/options/assets/icons8-ok-120.png`
+    -   `ext/src/ui/options/assets/icons8-warn-120.png`
 
 ## Donations
+
 ### PayPal
+
 <p style="float: left">
     <a href="https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=3Z2FTMSG976WN&source=url">
         <img src="https://www.paypal.com/en_US/i/btn/btn_donateCC_LG.gif" alt="Donate with PayPal button" align="middle">
@@ -237,9 +250,6 @@ These are somewhat outdated now, but show the basic function of the extension:
     <img alt="Donate with PayPal" src="https://i.imgur.com/oisL6Eo.png" align="middle">
 </p>
 
-[^arch]:
-    By default, Arch does not configure Avahi to resolve `.local` hostnames via the name service switch (NSS), and the underlying mdns module used by this project relies on [`getaddrinfo`](https://en.wikipedia.org/wiki/Getaddrinfo) to resolve these hostnames correctly.
-[^cast_app]:
-    Some sites may only function properly when initiating casting from the in-page player buttons.
-[^electron]:
-    Since it seems to be causing confusion, this project does not use electron. The electron-chromecast library was only used as a reference for the initial implementation of the API.
+[^arch]: By default, Arch does not configure Avahi to resolve `.local` hostnames via the name service switch (NSS), and the underlying mdns module used by this project relies on [`getaddrinfo`](https://en.wikipedia.org/wiki/Getaddrinfo) to resolve these hostnames correctly.
+[^cast_app]: Some sites may only function properly when initiating casting from the in-page player buttons.
+[^electron]: Since it seems to be causing confusion, this project does not use electron. The electron-chromecast library was only used as a reference for the initial implementation of the API.

@@ -6,24 +6,28 @@ import WebSocket from "ws";
 import { spawn } from "child_process";
 import { Readable } from "stream";
 
-import { DecodeTransform, EncodeTransform } from "./transforms";
+import { DecodeTransform, EncodeTransform } from "./transforms.js";
 
 interface DaemonOpts {
     host: string;
     port: number;
-    password: string;
+    password?: string;
 }
 
 export function init(opts: DaemonOpts) {
     const server = http.createServer();
     const wss = new WebSocket.Server({ noServer: true });
 
-    process.stdout.write("Starting WebSocket server... ");
+    process.stdout.write(
+        `Starting WebSocket server at ws://${
+            opts.host.includes(":") ? `[${opts.host}]` : opts.host
+        }:${opts.port}... `
+    );
 
     server.on("listening", () => {
         process.stdout.write("Done!\n");
     });
-    wss.on("error", err => {
+    server.on("error", err => {
         console.error("Failed!");
         console.error(err.message);
     });

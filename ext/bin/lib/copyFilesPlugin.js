@@ -1,11 +1,11 @@
 // @ts-check
 "use strict";
 
-const path = require("path");
-const fs = require("fs");
+import path from "path";
+import fs from "fs";
 
 // eslint-disable-next-line no-unused-vars
-const esbuild = require("esbuild");
+import esbuild from "esbuild";
 
 /**
  * Walks file tree from a given root path.
@@ -37,17 +37,14 @@ function* walk(rootPath) {
  *
  * @type {(opts: CopyFilesPluginOpts) => esbuild.Plugin}
  */
-exports.copyFilesPlugin = opts => {
+export default opts => {
     if (!fs.existsSync(opts.src)) {
         throw new Error("copyFilesPlugin: src path not found!");
     }
 
-    const matchingPaths = [];
-    for (const path of walk(opts.src)) {
-        if (!opts.excludePattern?.test(path)) {
-            matchingPaths.push(path);
-        }
-    }
+    const matchingPaths = [...walk(opts.src)].filter(
+        path => !opts.excludePattern?.test(path)
+    );
 
     return {
         name: "copy-files",

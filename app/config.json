@@ -1,0 +1,9 @@
+{
+    "author": "Matt Hensman <m@matt.tf>",
+    "homepageUrl": "https://hensm.github.io/fx_cast",
+    "applicationName": "fx_cast_bridge",
+    "applicationVersion": "0.2.0",
+    "applicationDirectoryName": "fx_cast",
+    "applicationExecutableName": "fx_cast_bridge",
+    "extensionId": "fx_cast@matt.tf"
+}

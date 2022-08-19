@@ -1,10 +1,7 @@
 {
-    "extends": "../tsconfig"
-  , "include": [
-        "./src/**/*"
-      , "./@types/**/*"
-    ]
-  , "compilerOptions": {
-        "lib": [ "ES2020.String", "DOM" ]
+    "extends": "../tsconfig",
+    "include": ["./src/**/*", "./@types/**/*"],
+    "compilerOptions": {
+        "lib": ["ES2020.String", "DOM"]
     }
 }

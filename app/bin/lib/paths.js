@@ -1,85 +1,98 @@
-"use strict";
+// @ts-check
 
-const path = require("path");
+import path from "path";
+import url from "url";
 
-const {
-    __applicationName,
-    __applicationDirectoryName,
-    __applicationExecutableName
-} = require("../../package.json");
+import config from "../../config.json" assert { type: "json" };
 
+const __dirname = path.dirname(url.fileURLToPath(import.meta.url));
 const rootPath = path.join(__dirname, "../../../");
 
-exports.DIST_PATH = path.join(rootPath, "dist/app");
-exports.LICENSE_PATH = path.join(rootPath, "LICENSE");
+export const DIST_PATH = path.join(rootPath, "dist/app");
+export const LICENSE_PATH = path.join(rootPath, "LICENSE");
 
-exports.REGISTRY_KEY = __applicationName;
+export const REGISTRY_KEY = config.applicationName;
 
-exports.pkgPlatformMap = {
+export const pkgPlatformMap = {
     win32: "win",
     darwin: "macos",
     linux: "linux"
 };
 
-exports.MANIFEST_NAME = `${__applicationName}.json`;
+export const MANIFEST_NAME = `${config.applicationName}.json`;
 
-exports.getExecutableName = platform => {
+/**
+ * @param {string} platform
+ * @returns {string}
+ */
+export function getExecutableName(platform) {
     switch (platform) {
         case "win32":
-            return `${__applicationExecutableName}.exe`;
+            return `${config.applicationExecutableName}.exe`;
         case "darwin":
         case "linux":
-            return __applicationExecutableName;
+            return config.applicationExecutableName;
     }
-};
 
-exports.getExecutablePath = (platform, arch) => {
-    const EXECUTABLE_PATH_WIN32_X64 = `C:\\Program Files\\${__applicationDirectoryName}\\`;
-    const EXECUTABLE_PATH_WIN32_X86 = `C:\\Program Files (x86)\\${__applicationDirectoryName}\\`;
-    const EXECUTABLE_PATH_DARWIN = `/Library/Application Support/${__applicationDirectoryName}/`;
-    const EXECUTABLE_PATH_LINUX = `/opt/${__applicationDirectoryName}/`;
+    throw new Error("No executable name for specified platform!");
+}
+
+/**
+ * @param {string} platform
+ * @param {string} arch
+ * @returns {string}
+ */
+export function getExecutableDirectory(platform, arch) {
+    const EXECUTABLE_DIR_WIN32_X64 = `C:\\Program Files\\${config.applicationDirectoryName}\\`;
+    const EXECUTABLE_DIR_WIN32_X86 = `C:\\Program Files (x86)\\${config.applicationDirectoryName}\\`;
+    const EXECUTABLE_DIR_DARWIN = `/Library/Application Support/${config.applicationDirectoryName}/`;
+    const EXECUTABLE_DIR_LINUX = `/opt/${config.applicationDirectoryName}/`;
 
     switch (platform) {
         case "win32":
             switch (arch) {
                 case "x86":
-                    return EXECUTABLE_PATH_WIN32_X86;
+                    return EXECUTABLE_DIR_WIN32_X86;
                 case "x64":
-                    return EXECUTABLE_PATH_WIN32_X64;
+                    return EXECUTABLE_DIR_WIN32_X64;
             }
             break;
         case "darwin":
-            return EXECUTABLE_PATH_DARWIN;
+            return EXECUTABLE_DIR_DARWIN;
         case "linux":
-            return EXECUTABLE_PATH_LINUX;
+            return EXECUTABLE_DIR_LINUX;
     }
-};
 
-exports.getManifestPath = (platform, arch, linuxPackageType) => {
-    const MANIFEST_PATH_DARWIN =
+    throw new Error("No executable directory for specified platform!");
+}
+
+/**
+ * @param {string} platform
+ * @param {string} arch
+ * @param {string} [linuxPackageType]
+ * @returns {string}
+ */
+export function getManifestDirectory(platform, arch, linuxPackageType) {
+    const MANIFEST_DIR_DARWIN =
         "/Library/Application Support/Mozilla/NativeMessagingHosts/";
-    const MANIFEST_PATH_LINUX_DEB = "/usr/lib/mozilla/native-messaging-hosts/";
-    const MANIFEST_PATH_LINUX_RPM =
-        "/usr/lib64/mozilla/native-messaging-hosts/";
+    const MANIFEST_DIR_LINUX_DEB = "/usr/lib/mozilla/native-messaging-hosts/";
+    const MANIFEST_DIR_LINUX_RPM = "/usr/lib64/mozilla/native-messaging-hosts/";
 
     switch (platform) {
         case "win32":
-            switch (arch) {
-                case "x86":
-                case "x64":
-                    return exports.getExecutablePath(platform, arch);
-            }
-            break;
+            return getExecutableDirectory(platform, arch);
         case "darwin":
-            return MANIFEST_PATH_DARWIN;
+            return MANIFEST_DIR_DARWIN;
         case "linux":
             switch (linuxPackageType) {
                 case "deb":
-                    return MANIFEST_PATH_LINUX_DEB;
+                    return MANIFEST_DIR_LINUX_DEB;
                 case "rpm":
-                    return MANIFEST_PATH_LINUX_RPM;
+                    return MANIFEST_DIR_LINUX_RPM;
             }
 
             break;
     }
-};
+
+    throw new Error("No manifest directory for specified platform!");
+}

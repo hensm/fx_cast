@@ -1,7 +1,4 @@
 {
-    "author": "Matt Hensman <m@matt.tf>",
-    "homepage": "https://hensm.github.io/fx_cast",
-    "bugs": "https://github.com/hensm/fx_cast",
     "scripts": {
         "postinstall": "npm run postinstall:app && npm run postinstall:ext",
         "postinstall:app": "cd app && npm install",
@@ -30,7 +27,6 @@
         "fs-extra": "^10.0.1",
         "glob": "^7.2.0",
         "jasmine-console-reporter": "^3.1.0",
-        "minimist": "^1.2.5",
         "prettier": "^2.5.1",
         "prettier-plugin-svelte": "^2.7.0",
         "selenium-webdriver": "^4.1.1",

@@ -1,34 +1,44 @@
-"use strict";
+// @ts-check
 
-const fs = require("fs-extra");
-const os = require("os");
-const path = require("path");
+import fs from "fs-extra";
+import os from "os";
+import path from "path";
+import url from "url";
+import { spawnSync } from "child_process";
 
-const minimist = require("minimist");
-const mustache = require("mustache");
-const pkg = require("pkg");
+import mustache from "mustache";
+import pkg from "pkg";
+import yargs from "yargs";
 
-const { spawnSync } = require("child_process");
+import config from "../config.json" assert { type: "json" };
+import * as paths from "./lib/paths.js";
 
-const meta = require("../package.json");
-const paths = require("./lib/paths");
-
-const { author, homepage } = require("../../package.json");
-
-const EXTENSION_ID = "fx_cast@matt.tf";
-
-// Command line args
-const argv = minimist(process.argv.slice(2), {
-    boolean: ["usePkg", "package"],
-    string: ["arch", "packageType", "nodeVersion"],
-    default: {
-        arch: os.arch(),
-        package: false,
-        // Linux package type (deb/rpm)
-        packageType: "deb",
-        nodeVersion: "16"
-    }
-});
+const argv = await yargs()
+    .help()
+    .version(false)
+    .option("package", {
+        describe: "Create installer package",
+        type: "boolean"
+    })
+    .option("package-type", {
+        describe: "Linux package type",
+        choices: ["deb", "rpm"],
+        default: "deb"
+    })
+    .option("use-pkg", {
+        describe: "Create single binary with pkg",
+        type: "boolean"
+    })
+    .option("arch", {
+        describe: "Set build architecture",
+        default: os.arch()
+    })
+    .option("node-version", {
+        describe: "Node.js version to target",
+        default: "16"
+    })
+    .conflicts("use-pkg", "package")
+    .parse(process.argv);
 
 const supportedTargets = {
     win32: ["x86", "x64"],
@@ -45,6 +55,8 @@ if (!supportedTargets[process.platform]?.includes(argv.arch)) {
     process.exit(1);
 }
 
+const __dirname = path.dirname(url.fileURLToPath(import.meta.url));
+
 const ROOT_PATH = path.join(__dirname, "..");
 const BUILD_PATH = path.join(ROOT_PATH, "build");
 
@@ -57,10 +69,10 @@ const spawnOptions = {
  * Shouldn't exist, but cleanup and re-create any existing
  * build directories, just in case.
  */
-fs.removeSync(BUILD_PATH);
-fs.removeSync(paths.DIST_PATH, { recursive: true });
-fs.ensureDirSync(BUILD_PATH);
-fs.ensureDirSync(paths.DIST_PATH, { recursive: true });
+fs.rmSync(BUILD_PATH, { force: true, recursive: true });
+fs.rmSync(paths.DIST_PATH, { force: true, recursive: true });
+fs.mkdirSync(BUILD_PATH, { recursive: true });
+fs.mkdirSync(paths.DIST_PATH, { recursive: true });
 
 const MDNS_BINDING_PATH = path.join(
     __dirname,
@@ -81,10 +93,10 @@ async function build() {
      * https://mdn.io/Native_manifests#Native_messaging_manifests
      */
     const manifest = {
-        name: meta.__applicationName,
+        name: config.applicationName,
         description: "",
         type: "stdio",
-        allowed_extensions: [EXTENSION_ID]
+        allowed_extensions: [config.extensionId]
     };
 
     /**
@@ -105,7 +117,7 @@ async function build() {
         };
 
         const executableName = paths.getExecutableName(process.platform);
-        const executablePath = paths.getExecutablePath(
+        const executablePath = paths.getExecutableDirectory(
             process.platform,
             argv.arch
         );
@@ -132,7 +144,7 @@ async function build() {
             path.join(BUILD_PATH, MDNS_BINDING_NAME)
         );
 
-        fs.removeSync(path.join(BUILD_PATH, "src"));
+        fs.rmSync(path.join(BUILD_PATH, "src"));
 
         manifest.path =
             !argv.package && argv.usePkg
@@ -141,7 +153,7 @@ async function build() {
     } else {
         let launcherPath = path.join(
             BUILD_PATH,
-            meta.__applicationExecutableName
+            config.applicationExecutableName
         );
         const modulesDir = path.join(ROOT_PATH, "node_modules");
 
@@ -209,36 +221,42 @@ NODE_PATH="${modulesDir}" node $(dirname $0)/src/main.js --__name $(basename $0)
     }
 
     // Remove build directory
-    fs.removeSync(BUILD_PATH);
+    fs.rmSync(BUILD_PATH, { force: true, recursive: true });
 }
 
 /**
  * Takes a platform and returns the path of the created
  * installer package.
+ *
+ * @param {string} platform
+ * @param {string} arch
  */
 async function packageApp(platform, arch) {
-    const packageFunctionArgs = [
+    /** @type {[ string, string, string, string ]} */
+    const packageFnArgs = [
         arch,
-        // platformExecutableName
-        paths.getExecutableName(platform, arch),
-        // platformExecutablePath
-        paths.getExecutablePath(platform, arch),
-        // platformManifestPath
-        paths.getManifestPath(platform, arch, argv.packageType)
+        paths.getExecutableName(platform),
+        paths.getExecutableDirectory(platform, arch),
+        paths.getManifestDirectory(platform, arch, argv.packageType)
     ];
 
     switch (platform) {
         case "win32":
-            return packageWin32(...packageFunctionArgs);
+            // Pass without manifest
+            return packageWin32(
+                packageFnArgs[0],
+                packageFnArgs[1],
+                packageFnArgs[2]
+            );
         case "darwin":
-            return packageDarwin(...packageFunctionArgs);
+            return packageDarwin(...packageFnArgs);
 
         case "linux": {
             switch (argv.packageType) {
                 case "deb":
-                    return packageLinuxDeb(...packageFunctionArgs);
+                    return packageLinuxDeb(...packageFnArgs);
                 case "rpm":
-                    return packageLinuxRpm(...packageFunctionArgs);
+                    return packageLinuxRpm(...packageFnArgs);
             }
 
             break;
@@ -258,52 +276,63 @@ async function packageApp(platform, arch) {
  *
  * Requires the pkgbuild and productbuild command line
  * utilities. Only possible on macOS.
+ *
+ * @param {string} arch
+ * @param {string} platformExecutableName
+ * @param {string} platformExecutableDirectory
+ * @param {string} platformManifestDirectory
  */
 function packageDarwin(
     arch,
     platformExecutableName,
-    platformExecutablePath,
-    platformManifestPath
+    platformExecutableDirectory,
+    platformManifestDirectory
 ) {
-    const outputName = `${meta.__applicationName}-${meta.__applicationVersion}-${arch}.pkg`;
-    const componentName = `${meta.__applicationName}_component.pkg`;
+    const outputName = `${config.applicationName}-${config.applicationVersion}-${arch}.pkg`;
+    const componentName = `${config.applicationName}_component.pkg`;
 
     const packagingDir = path.join(__dirname, "../packaging/mac/");
     const packagingOutputDir = path.join(BUILD_PATH, "packaging");
 
     // Create pkgbuild root
     const rootPath = path.join(BUILD_PATH, "root");
-    const rootExecutablePath = path.join(rootPath, platformExecutablePath);
-    const rootManifestPath = path.join(rootPath, platformManifestPath);
+    const rootExecutableDirectory = path.join(
+        rootPath,
+        platformExecutableDirectory
+    );
+    const rootManifestDirectory = path.join(
+        rootPath,
+        platformManifestDirectory
+    );
 
     // Create install locations
-    fs.ensureDirSync(rootExecutablePath, { recursive: true });
-    fs.ensureDirSync(rootManifestPath, { recursive: true });
+    fs.mkdirSync(rootExecutableDirectory, { recursive: true });
+    fs.mkdirSync(rootManifestDirectory, { recursive: true });
 
     // Move files to root
     fs.moveSync(
         path.join(BUILD_PATH, platformExecutableName),
-        path.join(rootExecutablePath, platformExecutableName)
+        path.join(rootExecutableDirectory, platformExecutableName)
     );
     fs.moveSync(
         path.join(BUILD_PATH, MDNS_BINDING_NAME),
-        path.join(rootExecutablePath, MDNS_BINDING_NAME)
+        path.join(rootExecutableDirectory, MDNS_BINDING_NAME)
     );
     fs.moveSync(
         path.join(BUILD_PATH, paths.MANIFEST_NAME),
-        path.join(rootManifestPath, paths.MANIFEST_NAME)
+        path.join(rootManifestDirectory, paths.MANIFEST_NAME)
     );
 
     // Copy static files to be processed
     fs.copySync(packagingDir, packagingOutputDir);
 
     const view = {
-        applicationName: meta.__applicationName,
+        applicationName: config.applicationName,
         manifestName: paths.MANIFEST_NAME,
         componentName,
-        packageId: `tf.matt.${meta.__applicationName}`,
-        executablePath: platformExecutablePath,
-        manifestPath: platformManifestPath
+        packageId: `tf.matt.${config.applicationName}`,
+        executablePath: platformExecutableDirectory,
+        manifestPath: platformManifestDirectory
     };
 
     // Template paths
@@ -321,8 +350,8 @@ function packageDarwin(
     // Build component package
     spawnSync(
         `pkgbuild --root ${rootPath} \
-                  --identifier "tf.matt.${meta.__applicationName}" \
-                  --version "${meta.__applicationVersion}" \
+                  --identifier "tf.matt.${config.applicationName}" \
+                  --version "${config.applicationVersion}" \
                   --scripts ${path.join(packagingOutputDir, "scripts")} \
                   ${path.join(BUILD_PATH, componentName)}`,
         spawnOptions
@@ -350,35 +379,46 @@ function packageDarwin(
  * (packaging/linux/deb/DEBIAN/control) to root, then builds
  * package from root.
  * Requires the dpkg-deb command line utility.
+ *
+ * @param {string} arch
+ * @param {string} platformExecutableName
+ * @param {string} platformExecutableDirectory
+ * @param {string} platformManifestDirectory
  */
 function packageLinuxDeb(
     arch,
     platformExecutableName,
-    platformExecutablePath,
-    platformManifestPath
+    platformExecutableDirectory,
+    platformManifestDirectory
 ) {
-    const outputName = `${meta.__applicationName}-${meta.__applicationVersion}-${arch}.deb`;
+    const outputName = `${config.applicationName}-${config.applicationVersion}-${arch}.deb`;
 
     // Create root
     const rootPath = path.join(BUILD_PATH, "root");
-    const rootExecutablePath = path.join(rootPath, platformExecutablePath);
-    const rootManifestPath = path.join(rootPath, platformManifestPath);
+    const rootExecutableDirectory = path.join(
+        rootPath,
+        platformExecutableDirectory
+    );
+    const rootManifestDirectory = path.join(
+        rootPath,
+        platformManifestDirectory
+    );
 
-    fs.ensureDirSync(rootExecutablePath, { recursive: true });
-    fs.ensureDirSync(rootManifestPath, { recursive: true });
+    fs.mkdirSync(rootExecutableDirectory, { recursive: true });
+    fs.mkdirSync(rootManifestDirectory, { recursive: true });
 
     // Move files to root
     fs.moveSync(
         path.join(BUILD_PATH, platformExecutableName),
-        path.join(rootExecutablePath, platformExecutableName)
+        path.join(rootExecutableDirectory, platformExecutableName)
     );
     fs.moveSync(
         path.join(BUILD_PATH, MDNS_BINDING_NAME),
-        path.join(rootExecutablePath, MDNS_BINDING_NAME)
+        path.join(rootExecutableDirectory, MDNS_BINDING_NAME)
     );
     fs.moveSync(
         path.join(BUILD_PATH, paths.MANIFEST_NAME),
-        path.join(rootManifestPath, paths.MANIFEST_NAME)
+        path.join(rootManifestDirectory, paths.MANIFEST_NAME)
     );
 
     const controlDir = path.join(__dirname, "../packaging/linux/deb/DEBIAN/");
@@ -390,10 +430,10 @@ function packageLinuxDeb(
 
     const view = {
         // Debian package names can't contain underscores
-        packageName: meta.__applicationName.replace(/_/g, "-"),
-        applicationName: meta.__applicationName,
-        applicationVersion: meta.__applicationVersion,
-        author
+        packageName: config.applicationName.replace(/_/g, "-"),
+        applicationName: config.applicationName,
+        applicationVersion: config.applicationVersion,
+        author: config.author
     };
 
     // Do templating on control file
@@ -418,14 +458,19 @@ function packageLinuxDeb(
  * Templates and uses the spec file
  * (packaging/linux/rpm/package.spec) to build the package.
  * Requires the rpmbuild command line utility.
+ *
+ * @param {string} arch
+ * @param {string} platformExecutableName
+ * @param {string} platformExecutableDirectory
+ * @param {string} platformManifestDirectory
  */
 function packageLinuxRpm(
     arch,
     platformExecutableName,
-    platformExecutablePath,
-    platformManifestPath
+    platformExecutableDirectory,
+    platformManifestDirectory
 ) {
-    const outputName = `${meta.__applicationName}-${meta.__applicationVersion}-${arch}.rpm`;
+    const outputName = `${config.applicationName}-${config.applicationVersion}-${arch}.rpm`;
 
     const specPath = path.join(
         __dirname,
@@ -435,11 +480,11 @@ function packageLinuxRpm(
     const specOutputPath = path.join(BUILD_PATH, path.basename(specPath));
 
     const view = {
-        packageName: meta.__applicationName,
-        applicationName: meta.__applicationName,
-        applicationVersion: meta.__applicationVersion,
-        executablePath: platformExecutablePath,
-        manifestPath: platformManifestPath,
+        packageName: config.applicationName,
+        applicationName: config.applicationName,
+        applicationVersion: config.applicationVersion,
+        executablePath: platformExecutableDirectory,
+        manifestPath: platformManifestDirectory,
         executableName: platformExecutableName,
         manifestName: paths.MANIFEST_NAME,
         bindingName: MDNS_BINDING_NAME
@@ -470,18 +515,26 @@ function packageLinuxRpm(
  * Uses NSIS to create a GUI installer with an installer
  * script (packaging/win/installer.nsi). Requires the
  * makensis command line utility.
+ *
+ * @param {string} arch
+ * @param {string} platformExecutableName
+ * @param {string} platformExecutableDirectory
  */
-function packageWin32(arch, platformExecutableName, platformExecutablePath) {
-    const outputName = `${meta.__applicationName}-${meta.__applicationVersion}-${arch}.exe`;
+function packageWin32(
+    arch,
+    platformExecutableName,
+    platformExecutableDirectory
+) {
+    const outputName = `${config.applicationName}-${config.applicationVersion}-${arch}.exe`;
 
     const scriptPath = path.join(__dirname, "../packaging/win/installer.nsi");
     const scriptOutputPath = path.join(BUILD_PATH, path.basename(scriptPath));
 
     const view = {
-        applicationName: meta.__applicationName,
-        applicationVersion: meta.__applicationVersion,
+        applicationName: config.applicationName,
+        applicationVersion: config.applicationVersion,
         executableName: platformExecutableName,
-        executablePath: platformExecutablePath,
+        executablePath: platformExecutableDirectory,
         manifestName: paths.MANIFEST_NAME,
         bindingName: MDNS_BINDING_NAME,
         winRegistryKey: paths.REGISTRY_KEY,
@@ -489,8 +542,8 @@ function packageWin32(arch, platformExecutableName, platformExecutablePath) {
         licensePath: paths.LICENSE_PATH,
 
         // Uninstaller keys
-        registryPublisher: author,
-        registryUrlInfoAbout: homepage
+        registryPublisher: config.author,
+        registryUrlInfoAbout: config.homepageUrl
     };
 
     // Write templated script to build dir
