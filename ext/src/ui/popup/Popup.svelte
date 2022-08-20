@@ -1,8 +1,6 @@
 <script lang="ts">
     import { afterUpdate, onMount, tick } from "svelte";
 
-    import LoadingIndicator from "../LoadingIndicator.svelte";
-
     import messaging, { Message, Port } from "../../messaging";
     import options, { Options } from "../../lib/options";
     import { RemoteMatchPattern } from "../../lib/matchPattern";
@@ -16,11 +14,11 @@
 
     import knownApps, { KnownApp } from "../../cast/knownApps";
     import { hasRequiredCapabilities } from "../../cast/utils";
+    
+    import Receiver from "./Receiver.svelte";
+    import deviceStore from "./deviceStore";
 
     const _ = browser.i18n.getMessage;
-
-    /** List of devices to show in receiver list. */
-    let receiverDevices: ReceiverDevice[] = [];
 
     /** Currently selected media type. */
     let mediaType = ReceiverSelectorMediaType.App;
@@ -40,7 +38,6 @@
 
     /** Whether casting to a device been initiated from this selector. */
     let isConnecting = false;
-    let connectingId: Nullable<string> = null;
 
     /** Extension options */
     let opts: Nullable<Options> = null;
@@ -106,6 +103,8 @@
 
         updateKnownApp();
 
+        resizeObserver.observe(document.documentElement);
+
         window.addEventListener("contextmenu", onContextMenu);
         browser.menus.onClicked.addListener(onMenuClicked);
         browser.menus.onShown.addListener(onMenuShown);
@@ -141,7 +140,7 @@
                  * Filter receiver devices without the required
                  * capabilities.
                  */
-                receiverDevices = message.data.receiverDevices.filter(device =>
+                $deviceStore = message.data.receiverDevices.filter(device =>
                     hasRequiredCapabilities(
                         device,
                         pageInfo?.sessionRequest?.capabilities
@@ -258,7 +257,7 @@
 
         // Match by index rendered receiver element to device array
         if (receiverElementIndex > -1) {
-            return receiverDevices[receiverElementIndex];
+            return $deviceStore[receiverElementIndex];
         }
     }
 
@@ -328,7 +327,6 @@
 
     function onReceiverCast(receiverDevice: ReceiverDevice) {
         isConnecting = true;
-        connectingId = receiverDevice.id;
 
         port?.postMessage({
             subject: "receiverSelector:selected",
@@ -410,40 +408,20 @@
     </div>
 </div>
 
-<ul class="receivers">
-    {#if !receiverDevices.length}
-        <div class="receivers__not-found">
+<ul class="receiver-list">
+    {#if !$deviceStore.length}
+        <div class="receiver-list__not-found">
             {_("popupNoReceiversFound")}
         </div>
     {:else}
-        {#each receiverDevices as device}
-            {@const application = device.status?.applications?.[0]}
-            {@const isDeviceConnecting =
-                isConnecting && connectingId === device.id}
-
-            <li class="receiver">
-                <div class="receiver__name">
-                    {device.friendlyName}
-                </div>
-                <div class="receiver__address">
-                    {application && !application.isIdleScreen
-                        ? application.statusText
-                        : `${device.host}:${device.port}`}
-                </div>
-                <button
-                    class="button receiver__connect"
-                    on:click={() => onReceiverCast(device)}
-                    disabled={isConnecting ||
-                        isDeviceConnecting ||
-                        !isMediaTypeAvailable}
-                >
-                    {#if isDeviceConnecting}
-                        {_("popupCastingButtonTitle", "")}<LoadingIndicator />
-                    {:else}
-                        {_("popupCastButtonTitle")}
-                    {/if}
-                </button>
-            </li>
+        {#each $deviceStore as device}
+            <Receiver
+                {device}
+                {isMediaTypeAvailable}
+                isAnyConnecting={isConnecting}
+                on:cast={ev => onReceiverCast(ev.detail.device)}
+                on:stop={ev => onReceiverStop(ev.detail.device)}
+            />
         {/each}
     {/if}
 </ul>

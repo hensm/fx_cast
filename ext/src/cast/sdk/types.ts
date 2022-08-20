@@ -23,7 +23,7 @@ export interface MediaStatus {
     items?: QueueItem[];
     currentTime: number;
     supportedMediaCommands: number;
-    repeatMode: RepeatMode;
+    repeatMode?: RepeatMode;
     volume: Volume;
     customData: unknown;
 }

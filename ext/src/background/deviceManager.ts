@@ -6,7 +6,8 @@ import { TypedEventTarget } from "../lib/TypedEventTarget";
 
 import { Message, Port } from "../messaging";
 import { ReceiverDevice } from "../types";
-import { ReceiverStatus } from "../cast/sdk/types";
+import { MediaStatus, ReceiverStatus } from "../cast/sdk/types";
+import { PlayerState } from "../cast/sdk/media/enums";
 
 interface EventMap {
     receiverDeviceUp: { deviceInfo: ReceiverDevice };
@@ -14,6 +15,10 @@ interface EventMap {
     receiverDeviceUpdated: {
         deviceId: string;
         status: ReceiverStatus;
+    };
+    receiverDeviceMediaUpdated: {
+        deviceId: string;
+        status: MediaStatus;
     };
 }
 
@@ -111,29 +116,28 @@ export default new (class extends TypedEventTarget<EventMap> {
 
             case "main:receiverDeviceStatusUpdated": {
                 const { deviceId, status } = message.data;
-                const receiverDevice = this.receiverDevices.get(deviceId);
-                if (!receiverDevice) {
-                    break;
-                }
+                const device = this.receiverDevices.get(deviceId);
+                if (!device) break;
 
-                if (receiverDevice.status) {
-                    receiverDevice.status.isActiveInput = status.isActiveInput;
-                    receiverDevice.status.isStandBy = status.isStandBy;
-                    receiverDevice.status.volume = status.volume;
-
-                    if (status.applications) {
-                        receiverDevice.status.applications =
-                            status.applications;
+                if (device.status) {
+                    // Clear media status when app changes
+                    if (
+                        status.applications?.[0].appId !==
+                        device.status.applications?.[0].appId
+                    ) {
+                        delete device.mediaStatus;
                     }
+
+                    device.status = { ...device.status, ...status };
                 } else {
-                    receiverDevice.status = status;
+                    device.status = status;
                 }
 
                 this.dispatchEvent(
                     new CustomEvent("receiverDeviceUpdated", {
                         detail: {
                             deviceId,
-                            status: receiverDevice.status
+                            status: device.status
                         }
                     })
                 );
@@ -142,6 +146,28 @@ export default new (class extends TypedEventTarget<EventMap> {
             }
 
             case "main:receiverDeviceMediaStatusUpdated": {
+                const { deviceId, status } = message.data;
+                const device = this.receiverDevices.get(deviceId);
+                if (!device) break;
+
+                if (device.mediaStatus) {
+                    device.mediaStatus = { ...device.mediaStatus, ...status };
+                    if (status.playerState === PlayerState.IDLE) {
+                        delete device.mediaStatus.media;
+                    }
+                } else {
+                    device.mediaStatus = status;
+                }
+
+                this.dispatchEvent(
+                    new CustomEvent("receiverDeviceMediaUpdated", {
+                        detail: {
+                            deviceId,
+                            status: device.mediaStatus
+                        }
+                    })
+                );
+
                 break;
             }
         }

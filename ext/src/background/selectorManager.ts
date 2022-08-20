@@ -122,6 +122,10 @@ async function getSelection(
             "receiverDeviceUpdated",
             onReceiverChange
         );
+        deviceManager.addEventListener(
+            "receiverDeviceMediaUpdated",
+            onReceiverChange
+        );
 
         function onSelectorSelected(ev: CustomEvent<ReceiverSelectionCast>) {
             logger.info("Selected receiver", ev.detail);
@@ -177,6 +181,10 @@ async function getSelection(
             );
             deviceManager.removeEventListener(
                 "receiverDeviceUpdated",
+                onReceiverChange
+            );
+            deviceManager.removeEventListener(
+                "receiverDeviceMediaUpdated",
                 onReceiverChange
             );
         }

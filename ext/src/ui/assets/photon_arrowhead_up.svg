@@ -3,11 +3,14 @@
    - file, You can obtain one at http://mozilla.org/MPL/2.0/. -->
 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16">
     <style>
+        path {
+            fill: rgba(12, 12, 13, .8);
+        }
         @media (prefers-color-scheme: dark) {
             path {
                 fill: rgba(249, 249, 250, .8);
             }
         }
     </style>
-   <path fill="rgba(12, 12, 13, .8)" d="M13 11a1 1 0 0 1-.707-.293L8 6.414l-4.293 4.293a1 1 0 0 1-1.414-1.414l5-5a1 1 0 0 1 1.414 0l5 5A1 1 0 0 1 13 11z"></path>
+    <path d="M13 11a1 1 0 0 1-.707-.293L8 6.414l-4.293 4.293a1 1 0 0 1-1.414-1.414l5-5a1 1 0 0 1 1.414 0l5 5A1 1 0 0 1 13 11z"></path>
 </svg>
