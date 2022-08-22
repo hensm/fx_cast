@@ -1,9 +1,11 @@
 body {
+    --font-size: 13px;
     background: var(--box-background);
     color: var(--box-color);
     margin: initial;
     font: message-box;
-    font-size: 13px;
+    font-size: var(--font-size);
+    overflow: hidden;
 }
 
 [hidden] {
@@ -60,6 +62,7 @@ body {
     list-style: none;
     margin: initial;
     padding: 0 1em;
+    padding-bottom: 0.25em;
 }
 
 .receiver-list__not-found {
@@ -114,28 +117,49 @@ body {
 }
 
 .media {
-    --button-size: 30px;
     --track-size: 5px;
     --thumb-size: 13px;
 
-    align-items: center;
     display: flex;
-    flex-wrap: wrap;
-    gap: 5px;
+    flex-direction: column;
     margin-top: 10px;
-    padding: 0 10px;
+    width: 100%;
+}
+
+.media__metadata,
+.media__controls {
+    padding: 5px 10px;
 }
 
 .media__metadata {
     display: flex;
     flex-direction: column;
 }
+
 .media__title {
-    font-size: 1.1em;
     font-weight: 600;
 }
 .media__subtitle {
     color: var(--secondary-color);
+}
+.media__title,
+.media__subtitle {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.media__controls {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+    margin-top: auto;
+}
+
+.media__controls button,
+.media__cc-button {
+    height: 30px;
+    width: 30px;
 }
 
 .media__progress {
@@ -145,12 +169,28 @@ body {
     width: 100%;
 }
 
-.media__mute-button {
-    margin-inline-start: auto;
-}
-
 .media__progress-bar {
     flex: 1;
+}
+
+.media__cc-button {
+    background-image: url("../icons/cc-on.svg");
+    background-repeat: no-repeat;
+    background-position: center center;
+    border: initial;
+    font-size: 0;
+}
+.media__cc-button--off {
+    background-image: url("../icons/cc-off.svg");
+}
+.media__cc-button > option {
+    font-size: var(--font-size);
+}
+
+.media__volume {
+    display: flex;
+    gap: inherit;
+    margin-inline-start: auto;
 }
 .media__volume-slider {
     max-width: 100px;

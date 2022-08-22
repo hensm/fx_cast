@@ -1,7 +1,13 @@
 <script lang="ts">
     import { createEventDispatcher, onMount } from "svelte";
 
-    import { PlayerState } from "../../cast/sdk/media/enums";
+    import { Image } from "../../cast/sdk/classes";
+    import {
+        MetadataType,
+        PlayerState,
+        TrackType
+    } from "../../cast/sdk/media/enums";
+    import { _MediaCommand } from "../../cast/sdk/types";
     import { ReceiverDevice } from "../../types";
 
     import LoadingIndicator from "../LoadingIndicator.svelte";
@@ -14,8 +20,7 @@
         stop: { device: ReceiverDevice };
     }>();
 
-    /**
-     * Whether there are sessions being established for any receiver. */
+    /** Whether there are sessions being established for any receiver. */
     export let isAnyConnecting: boolean;
     /** Whether the selected media type is available for this receiver. */
     export let isMediaTypeAvailable: boolean;
@@ -39,6 +44,69 @@
             lastUpdateTime = Date.now();
         }
     });
+
+    let mediaTitle: Optional<string>;
+    let mediaSubtitle: Optional<string>;
+    let mediaImage: Optional<Image>;
+
+    // Choose subset of metadata depending on metadata type
+    $: {
+        const metadata = mediaStatus?.media?.metadata;
+
+        mediaTitle = metadata?.title;
+        mediaImage = metadata?.images?.[0];
+        mediaSubtitle = undefined;
+
+        if (metadata) {
+            switch (metadata.metadataType) {
+                case MetadataType.AUDIOBOOK_CHAPTER:
+                    if (metadata.bookTitle) {
+                        metadata.title = metadata.bookTitle;
+                    }
+                    metadata.subtitle = metadata.chapterTitle;
+                    break;
+                case MetadataType.MUSIC_TRACK:
+                    mediaSubtitle = metadata.artist;
+                    break;
+                case MetadataType.TV_SHOW:
+                    if (metadata.seriesTitle) {
+                        mediaTitle = metadata.seriesTitle;
+                        mediaSubtitle = metadata.title;
+                    }
+                    break;
+
+                case MetadataType.MOVIE:
+                case MetadataType.GENERIC:
+                    mediaSubtitle = metadata.subtitle;
+            }
+        }
+    }
+
+    const languageNames = new Intl.DisplayNames(
+        [browser.i18n.getUILanguage()],
+        { type: "language" }
+    );
+
+    // Subtitle/caption tracks
+    $: textTracks = mediaStatus?.media?.tracks
+        ?.filter(track => track.type === TrackType.TEXT)
+        .map(track => {
+            /**
+             * If track has no name, but does have a language, get a
+             * display name for the language.
+             */
+            if (!track.name && track.language) {
+                try {
+                    const displayName = languageNames.of(track.language);
+                    if (displayName) {
+                        track.name = displayName;
+                    }
+                    // eslint-disable-next-line no-empty
+                } catch (err) {}
+            }
+
+            return track;
+        });
 
     // Update estimated time every second
     let currentTime = 0;
@@ -131,7 +199,7 @@
     >
         <img
             src={`../assets/${
-                isExpanded
+                mediaStatus && isExpanded
                     ? "photon_arrowhead_up.svg"
                     : "photon_arrowhead_down.svg"
             }`}
@@ -142,77 +210,136 @@
     {#if isExpanded}
         <div class="receiver__expanded">
             {#if mediaStatus}
-                <div class="media">
-                    {#if mediaStatus.media?.metadata?.title}
-                        {@const metadata = mediaStatus.media.metadata}
-
+                <div class="media" style:--media-image="url({mediaImage?.url})">
+                    {#if mediaTitle}
                         <div class="media__metadata">
-                            <div class="media__title">
-                                {metadata.title}
+                            <div class="media__title" title={mediaTitle}>
+                                {mediaTitle}
                             </div>
-                            {#if "subtitle" in metadata}
+                            {#if mediaSubtitle}
                                 <div class="media__subtitle">
-                                    {metadata.subtitle}
+                                    {mediaSubtitle}
                                 </div>
                             {/if}
                         </div>
                     {/if}
-                    <div class="media__progress">
-                        {#if mediaStatus.media}
-                            <span class="media__start"
-                                >{formatTime(currentTime)}</span
-                            >
-                            <input
-                                type="range"
-                                class="media__progress-bar"
-                                max={mediaStatus.media.duration ?? currentTime}
-                                value={currentTime}
-                            />
-                            <span class="media__end">
-                                {#if mediaStatus.media.duration}
-                                    -{formatTime(
-                                        mediaStatus.media?.duration -
-                                            currentTime
-                                    )}
-                                {:else}
-                                    -{formatTime(currentTime)}
-                                {/if}
-                            </span>
-                        {:else}
-                            <progress />
+
+                    <div class="media__controls">
+                        <div class="media__progress">
+                            {#if mediaStatus.media}
+                                <span class="media__start"
+                                    >{formatTime(currentTime)}</span
+                                >
+                                <input
+                                    type="range"
+                                    class="media__progress-bar"
+                                    max={mediaStatus.media.duration ??
+                                        currentTime}
+                                    value={currentTime}
+                                />
+                                <span class="media__end">
+                                    {#if mediaStatus.media.duration}
+                                        -{formatTime(
+                                            mediaStatus.media?.duration -
+                                                currentTime
+                                        )}
+                                    {:else}
+                                        -{formatTime(currentTime)}
+                                    {/if}
+                                </span>
+                            {:else}
+                                <progress />
+                            {/if}
+                        </div>
+
+                        {#if mediaStatus.supportedMediaCommands & _MediaCommand.QUEUE_PREV}
+                            <button class="media__previous-button ghost">
+                                <img
+                                    src="icons/previous.svg"
+                                    alt="icon, previous"
+                                />
+                            </button>
                         {/if}
-                    </div>
+                        {#if mediaStatus.supportedMediaCommands & _MediaCommand.SEEK}
+                            <button class="media__backward-button ghost">
+                                <img
+                                    src="icons/backward.svg"
+                                    alt="icon, backward"
+                                />
+                            </button>
+                        {/if}
 
-                    <button class="media__play-button ghost">
-                        <img
-                            src={`icons/${
-                                mediaStatus.playerState === PlayerState.PAUSED
-                                    ? "play.svg"
-                                    : "pause.svg"
-                            }`}
-                            alt="icon, play"
-                        />
-                    </button>
-
-                    {#if device.status?.volume}
-                        <button class="media__mute-button ghost">
+                        <button class="media__play-button ghost">
                             <img
-                                src="icons/{device.status?.volume.muted
-                                    ? 'audio-muted.svg'
-                                    : 'audio.svg'}"
-                                alt="icon, audio"
+                                src={`icons/${
+                                    mediaStatus.playerState ===
+                                    PlayerState.PAUSED
+                                        ? "play.svg"
+                                        : "pause.svg"
+                                }`}
+                                alt="icon, play"
                             />
                         </button>
-                        <input
-                            type="range"
-                            class="media__volume-slider"
-                            step="any"
-                            max={1}
-                            value={device.status.volume.muted
-                                ? 0
-                                : device.status.volume.level}
-                        />
-                    {/if}
+
+                        {#if mediaStatus.supportedMediaCommands & _MediaCommand.SEEK}
+                            <button class="media__forward-button ghost">
+                                <img
+                                    src="icons/forward.svg"
+                                    alt="icon, forward"
+                                />
+                            </button>
+                        {/if}
+                        {#if mediaStatus.supportedMediaCommands & _MediaCommand.QUEUE_NEXT}
+                            <button class="media__next-button ghost">
+                                <img src="icons/next.svg" alt="icon, next" />
+                            </button>
+                        {/if}
+
+                        {#if textTracks?.length && mediaStatus.supportedMediaCommands & _MediaCommand.EDIT_TRACKS}
+                            {@const activeTextTrack =
+                                mediaStatus.activeTrackIds?.find(trackId =>
+                                    textTracks?.find(
+                                        track => track.trackId === trackId
+                                    )
+                                )}
+
+                            <select
+                                class="media__cc-button ghost"
+                                class:media__cc-button--off={activeTextTrack ===
+                                    undefined}
+                                value={activeTextTrack}
+                            >
+                                <option value={undefined}>Off</option>
+                                {#each textTracks as track}
+                                    <option value={track.trackId}>
+                                        {track.name ?? track.trackId}
+                                    </option>
+                                {/each}
+                            </select>
+                        {/if}
+
+                        {#if device.status?.volume}
+                            <div class="media__volume">
+                                <button class="media__mute-button ghost">
+                                    <img
+                                        src="icons/{device.status?.volume.muted
+                                            ? 'audio-muted.svg'
+                                            : 'audio.svg'}"
+                                        alt="icon, audio"
+                                    />
+                                </button>
+                                <input
+                                    type="range"
+                                    class="media__volume-slider"
+                                    step="any"
+                                    max={1}
+                                    value={device.status.volume.muted
+                                        ? 0
+                                        : device.status.volume.level}
+                                />
+                            </div>
+                        {/if}
+                    </div>
                 </div>
             {/if}
         </div>

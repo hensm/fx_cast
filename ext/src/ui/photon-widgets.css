@@ -72,24 +72,24 @@ select {
     background-color: var(--button-background);
     color: var(--button-color);
 }
-button:not(:disabled):hover,
-select:not(:disabled):hover {
+button:not(:disabled):hover {
     background-color: var(--button-background-hover);
 }
-button:not(:disabled):active,
-select:not(:disabled):hover:active {
+button:not(:disabled):active {
     background-color: var(--button-background-active);
 }
 
 input,
-textarea {
+textarea,
+select {
     background-color: var(--field-background);
     border: 1px solid var(--field-border-color);
     color: var(--field-color);
 }
 
 input:hover,
-textarea:hover {
+textarea:hover,
+select:hover {
     border-color: var(--field-border-color-hover);
 }
 
@@ -146,7 +146,7 @@ button:default:hover:active {
     background-color: var(--button-background-primary-active);
 }
 
-button.ghost {
+.ghost {
     width: 24px !important;
     height: 24px !important;
     padding: initial;
@@ -155,7 +155,8 @@ button.ghost {
     justify-content: center;
 }
 
-button.ghost:not(:hover) {
+.ghost:not(:hover),
+.ghost:disabled {
     background-color: initial;
 }
 

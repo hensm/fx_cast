@@ -15,6 +15,8 @@ import {
 } from "./media/enums";
 
 export interface MediaStatus {
+    activeTrackIds?: number[];
+    currentItemId?: number;
     mediaSessionId: number;
     media?: MediaInfo;
     playbackRate: number;
@@ -64,6 +66,23 @@ export interface CastSessionCreatedDetails extends CastSessionUpdatedDetails {
     receiverFriendlyName: string;
     senderApps: SenderApplication[];
     transportId: string;
+}
+
+/** supportedMediaCommands bitflag returned in MEDIA_STATUS messages */
+export enum _MediaCommand {
+    PAUSE = 1,
+    SEEK = 2,
+    STREAM_VOLUME = 4,
+    STREAM_MUTE = 8,
+    QUEUE_NEXT = 64,
+    QUEUE_PREV = 128,
+    QUEUE_SHUFFLE = 256,
+    QUEUE_SKIP_AD = 512,
+    QUEUE_REPEAT_ALL = 1024,
+    QUEUE_REPEAT_ONE = 2048,
+    QUEUE_REPEAT = 3072,
+    EDIT_TRACKS = 4096,
+    PLAYBACK_RATE = 8192
 }
 
 interface ReqBase {

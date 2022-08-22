@@ -1,0 +1,16 @@
+<!-- This Source Code Form is subject to the terms of the Mozilla Public
+   - License, v. 2.0. If a copy of the MPL was not distributed with this
+   - file, You can obtain one at http://mozilla.org/MPL/2.0/. -->
+<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16">
+    <style>
+        path {
+            fill: rgba(12, 12, 13, .8);
+        }
+        @media (prefers-color-scheme: dark) {
+            path {
+                fill: rgba(249, 249, 250, .8);
+            }
+        }
+    </style>
+    <path d="M13.502 12.005c0 .55-.444.995-1 .995-.552 0-1-.456-1-.995v-8.01c0-.55.444-.995 1-.995.552 0 1 .456 1 .995zm-10.498 0c0 .55.386.753.857.46l6.284-3.93c.473-.295.47-.776 0-1.07l-6.287-3.93c-.474-.296-.858-.08-.858.46v8.01z" />
+</svg>

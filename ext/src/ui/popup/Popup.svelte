@@ -14,7 +14,7 @@
 
     import knownApps, { KnownApp } from "../../cast/knownApps";
     import { hasRequiredCapabilities } from "../../cast/utils";
-    
+
     import Receiver from "./Receiver.svelte";
     import deviceStore from "./deviceStore";
 
@@ -61,6 +61,8 @@
     let port: Nullable<Port> = null;
     let browserWindow: Nullable<browser.windows.Window> = null;
     let resizeObserver = new ResizeObserver(() => fitWindowHeight());
+
+    window.addEventListener("resize", fitWindowHeight);
 
     onMount(async () => {
         port = messaging.connect({ name: "popup" });
@@ -168,9 +170,11 @@
     function fitWindowHeight() {
         if (browserWindow?.id === undefined) return;
         browser.windows.update(browserWindow.id, {
-            height:
-                document.body.clientHeight +
-                (window.outerHeight - window.innerHeight)
+            height: Math.ceil(
+                (document.body.clientHeight +
+                    (window.outerHeight - window.innerHeight)) *
+                    window.devicePixelRatio
+            )
         });
     }
 

@@ -19,7 +19,8 @@ import {
     MediaStatus,
     ReceiverMediaMessage,
     SenderMediaMessage,
-    SenderMessage
+    SenderMessage,
+    _MediaCommand
 } from "./types";
 
 import { SessionStatus } from "./enums";
@@ -28,16 +29,6 @@ import { Image, Receiver, SenderApplication } from "./classes";
 import { MediaCommand } from "./media/enums";
 import { LoadRequest, QueueLoadRequest, QueueItem } from "./media/classes";
 import Media, { NS_MEDIA } from "./media/Media";
-
-/** supportedMediaCommands bitflag returned in MEDIA_STATUS messages */
-enum _MediaCommand {
-    PAUSE = 1,
-    SEEK = 2,
-    STREAM_VOLUME = 4,
-    STREAM_MUTE = 8,
-    QUEUE_NEXT = 64,
-    QUEUE_PREV = 128
-}
 
 /**
  * Takes a media object and a media status object and merges the status
