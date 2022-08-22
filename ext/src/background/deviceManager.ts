@@ -6,7 +6,12 @@ import { TypedEventTarget } from "../lib/TypedEventTarget";
 
 import { Message, Port } from "../messaging";
 import { ReceiverDevice } from "../types";
-import { MediaStatus, ReceiverStatus } from "../cast/sdk/types";
+import {
+    MediaStatus,
+    ReceiverStatus,
+    SenderMediaMessage,
+    SenderMessage
+} from "../cast/sdk/types";
 import { PlayerState } from "../cast/sdk/media/enums";
 
 interface EventMap {
@@ -82,6 +87,48 @@ export default new (class extends TypedEventTarget<EventMap> {
                 data: { receiverDevice }
             });
         }
+    }
+
+    sendReceiverMessage(deviceId: string, message: SenderMessage) {
+        if (!this.bridgePort) {
+            logger.error(
+                "Failed to send receiver message (no bridge connection)"
+            );
+            return;
+        }
+
+        const device = this.receiverDevices.get(deviceId);
+        if (!device) {
+            logger.error(
+                "Failed to send receiver message (could not find device)"
+            );
+            return;
+        }
+
+        this.bridgePort?.postMessage({
+            subject: "bridge:sendReceiverMessage",
+            data: { deviceId, message }
+        });
+    }
+
+    sendMediaMessage(deviceId: string, message: SenderMediaMessage) {
+        if (!this.bridgePort) {
+            logger.error("Failed to send media message (no bridge connection)");
+            return;
+        }
+
+        const device = this.receiverDevices.get(deviceId);
+        if (!device) {
+            logger.error(
+                "Failed to send media message (could not find device)"
+            );
+            return;
+        }
+
+        this.bridgePort?.postMessage({
+            subject: "bridge:sendMediaMessage",
+            data: { deviceId, message }
+        });
     }
 
     private onBridgeMessage = (message: Message) => {

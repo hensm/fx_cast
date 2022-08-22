@@ -420,6 +420,7 @@
     {:else}
         {#each $deviceStore as device}
             <Receiver
+                {port}
                 {device}
                 {isMediaTypeAvailable}
                 isAnyConnecting={isConnecting}

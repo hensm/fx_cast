@@ -6,7 +6,9 @@ import { BridgeInfo } from "./lib/bridge";
 import {
     ReceiverSelection,
     ReceiverSelectionCast,
-    ReceiverSelectionStop
+    ReceiverSelectionStop,
+    ReceiverSelectorMediaMessage,
+    ReceiverSelectorReceiverMessage
 } from "./background/receiverSelector";
 
 import {
@@ -14,6 +16,7 @@ import {
     CastSessionUpdatedDetails,
     MediaStatus,
     ReceiverStatus,
+    SenderMediaMessage,
     SenderMessage
 } from "./cast/sdk/types";
 import { SessionRequest } from "./cast/sdk/classes";
@@ -55,6 +58,8 @@ type ExtMessageDefinitions = {
 
     "receiverSelector:selected": ReceiverSelection;
     "receiverSelector:stop": ReceiverSelection;
+    "receiverSelector:receiverMessage": ReceiverSelectorReceiverMessage;
+    "receiverSelector:mediaMessage": ReceiverSelectorMediaMessage;
 
     "main:selectReceiver": {
         sessionRequest: SessionRequest;
@@ -126,6 +131,23 @@ type AppMessageDefinitions = {
     "main:receiverDeviceMediaStatusUpdated": {
         deviceId: string;
         status: MediaStatus;
+    };
+
+    /**
+     * Sent to the bridge when non-session related receiver messages
+     * need to be sent (e.g. volume control, application stop, etc...).
+     */
+    "bridge:sendReceiverMessage": {
+        deviceId: string;
+        message: SenderMessage;
+    };
+    /**
+     * Sent to the bridge when the receiver selector media UI is used
+     * to control media playback.
+     */
+    "bridge:sendMediaMessage": {
+        deviceId: string;
+        message: SenderMediaMessage;
     };
 
     /**

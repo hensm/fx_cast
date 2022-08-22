@@ -5,6 +5,7 @@ import messaging, { Port, Message } from "../messaging";
 import options from "../lib/options";
 
 import { TypedEventTarget } from "../lib/TypedEventTarget";
+import { SenderMediaMessage, SenderMessage } from "../cast/sdk/types";
 import {
     ReceiverDevice,
     ReceiverSelectionActionType,
@@ -25,13 +26,25 @@ export interface ReceiverSelectionStop {
 }
 export type ReceiverSelection = ReceiverSelectionCast | ReceiverSelectionStop;
 
+export interface ReceiverSelectorReceiverMessage {
+    deviceId: string;
+    message: SenderMessage;
+}
+export interface ReceiverSelectorMediaMessage {
+    deviceId: string;
+    message: SenderMediaMessage;
+}
+
 interface ReceiverSelectorEvents {
     selected: ReceiverSelectionCast;
     error: string;
     cancelled: void;
     stop: ReceiverSelectionStop;
     close: void;
+    receiverMessage: ReceiverSelectorReceiverMessage;
+    mediaMessage: ReceiverSelectorMediaMessage;
 }
+
 /**
  * Manages the receiver selector popup window and communication with the
  * extension page hosted within.
@@ -100,7 +113,7 @@ export default class ReceiverSelector extends TypedEventTarget<ReceiverSelectorE
         this.availableMediaTypes = opts.availableMediaTypes;
 
         const popupSizePosition = {
-            width: 350,
+            width: 400,
             height: 200,
             left: 100,
             top: 100
@@ -238,6 +251,21 @@ export default class ReceiverSelector extends TypedEventTarget<ReceiverSelectorE
 
                 break;
             }
+
+            case "receiverSelector:receiverMessage":
+                this.dispatchEvent(
+                    new CustomEvent("receiverMessage", {
+                        detail: message.data
+                    })
+                );
+                break;
+            case "receiverSelector:mediaMessage":
+                this.dispatchEvent(
+                    new CustomEvent("mediaMessage", {
+                        detail: message.data
+                    })
+                );
+                break;
         }
     }
 

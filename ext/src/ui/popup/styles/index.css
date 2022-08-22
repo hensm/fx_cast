@@ -151,15 +151,15 @@ body {
 
 .media__controls {
     display: flex;
-    flex-wrap: wrap;
+    flex-direction: column;
     gap: 5px;
     margin-top: auto;
 }
 
 .media__controls button,
 .media__cc-button {
-    height: 30px;
-    width: 30px;
+    min-height: 28px;
+    min-width: 28px;
 }
 
 .media__progress {
@@ -173,6 +173,12 @@ body {
     flex: 1;
 }
 
+.media__buttons {
+    align-items: center;
+    display: flex;
+    gap: inherit;
+}
+
 .media__cc-button {
     background-image: url("../icons/cc-on.svg");
     background-repeat: no-repeat;
@@ -180,20 +186,32 @@ body {
     border: initial;
     font-size: 0;
 }
+.media__cc-button:hover {
+    background-color: var(--button-background-hover);
+}
+.media__cc-button:active {
+    background-color: var(--button-background-active);
+}
 .media__cc-button--off {
     background-image: url("../icons/cc-off.svg");
 }
 .media__cc-button > option {
     font-size: var(--font-size);
 }
+.media__cc-button > option {
+    background-color: var(--box-background);
+}
 
 .media__volume {
+    align-items: center;
     display: flex;
     gap: inherit;
     margin-inline-start: auto;
+    min-width: 0;
 }
 .media__volume-slider {
     max-width: 100px;
+    min-width: 0;
 }
 
 .media__volume-slider,
