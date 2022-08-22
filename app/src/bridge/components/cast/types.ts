@@ -357,11 +357,13 @@ export type SenderMediaMessage =
           type: "MEDIA_GET_STATUS";
           mediaSessionId?: number;
           customData?: unknown;
+          requestId: number;
       }
     | {
           type: "GET_STATUS";
           mediaSessionId?: number;
           customData?: unknown;
+          requestId: number;
       }
     | (MediaReqBase & { type: "STOP" })
     | (MediaReqBase & { type: "MEDIA_SET_VOLUME"; volume: Volume })

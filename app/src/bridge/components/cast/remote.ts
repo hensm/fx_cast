@@ -76,7 +76,8 @@ export default class Remote extends CastClient {
 
             this.transportClient.connect(this.host).then(() => {
                 this.transportClient?.sendMediaMessage({
-                    type: "GET_STATUS"
+                    type: "GET_STATUS",
+                    requestId: 0
                 });
             });
 
