@@ -10,6 +10,8 @@
         TrackType
     } from "../../cast/sdk/media/enums";
 
+    const _ = browser.i18n.getMessage;
+
     import deviceStore from "./deviceStore";
 
     const dispatch = createEventDispatcher<{
@@ -173,6 +175,7 @@
                     class="slider media__progress-bar"
                     class:slider--indeterminate={status.playerState ===
                         PlayerState.BUFFERING}
+                    aria-label={_("popupMediaSeek")}
                     max={status.media.duration ?? currentTime}
                     value={currentTime}
                     on:change={ev =>
@@ -196,6 +199,7 @@
             {#if status.supportedMediaCommands & _MediaCommand.QUEUE_PREV}
                 <button
                     class="media__previous-button ghost"
+                    title={_("popupMediaSkipPrevious")}
                     on:click={() => dispatch("previous")}
                 >
                     <img src="icons/previous.svg" alt="icon, previous" />
@@ -204,6 +208,7 @@
             {#if status.supportedMediaCommands & _MediaCommand.SEEK}
                 <button
                     class="media__backward-button ghost"
+                    title={_("popupMediaSeekBackward")}
                     disabled={!isPlayingOrPaused}
                     on:click={() =>
                         dispatch("seek", { position: currentTime - 5 })}
@@ -214,6 +219,10 @@
 
             <button
                 class="media__play-button ghost"
+                title={isPlayingOrPaused &&
+                status.playerState === PlayerState.PLAYING
+                    ? _("popupMediaPause")
+                    : _("popupMediaPlay")}
                 disabled={!isPlayingOrPaused}
                 on:click={() => dispatch("togglePlayback")}
             >
@@ -232,6 +241,7 @@
                 <button
                     class="media__forward-button ghost"
                     disabled={!isPlayingOrPaused}
+                    title={_("popupMediaSeekForward")}
                     on:click={() =>
                         dispatch("seek", { position: currentTime + 5 })}
                 >
@@ -241,6 +251,7 @@
             {#if status.supportedMediaCommands & _MediaCommand.QUEUE_NEXT}
                 <button
                     class="media__next-button ghost"
+                    title={_("popupMediaSkipNext")}
                     on:click={() => dispatch("next")}
                 >
                     <img src="icons/next.svg" alt="icon, next" />
@@ -257,6 +268,7 @@
                     class="media__cc-button ghost"
                     class:media__cc-button--off={activeTextTrackId ===
                         undefined}
+                    title={_("popupMediaSubtitlesClosedCaptions")}
                     value={activeTextTrackId}
                     on:change={ev => {
                         if (!status.activeTrackIds) return;
@@ -273,7 +285,9 @@
                         dispatch("trackChanged", { activeTrackIds });
                     }}
                 >
-                    <option value={undefined}>Off</option>
+                    <option value={undefined}>
+                        {_("popupMediaSubtitlesClosedCaptionsOff")}
+                    </option>
                     {#each textTracks as track}
                         <option value={track.trackId}>
                             {track.name ?? track.trackId}
@@ -283,18 +297,34 @@
             {/if}
 
             {#if device.status?.volume}
+                {@const volume = device.status?.volume}
+                {@const isMuted = volume.muted || volume.level === 0}
+
                 <div class="media__volume">
                     <button
                         class="media__mute-button ghost"
+                        disabled={!("muted" in volume)}
+                        title={isMuted
+                            ? _("popupMediaUnmute")
+                            : _("popupMediaMute")}
                         on:click={() => {
-                            if (!device.status?.volume) return;
-                            dispatch("volumeChanged", {
-                                muted: !device.status.volume.muted
-                            });
+                            /**
+                             * If not muted and volume is at 0, max out
+                             * volume instead of flipping mute value.
+                             */
+                            if (!volume.muted && volume.level === 0) {
+                                dispatch("volumeChanged", {
+                                    level: 1
+                                });
+                            } else {
+                                dispatch("volumeChanged", {
+                                    muted: !volume.muted
+                                });
+                            }
                         }}
                     >
                         <img
-                            src="icons/{device.status?.volume.muted
+                            src="icons/{isMuted
                                 ? 'audio-muted.svg'
                                 : 'audio.svg'}"
                             alt="icon, audio"
@@ -303,11 +333,11 @@
                     <input
                         type="range"
                         class="slider media__volume-slider"
+                        aria-label={_("popupMediaVolume")}
+                        disabled={!("level" in volume)}
                         step="0.05"
                         max={1}
-                        value={device.status.volume.muted
-                            ? 0
-                            : device.status.volume.level}
+                        value={volume.muted ? 0 : volume.level}
                         on:change={ev => {
                             dispatch("volumeChanged", {
                                 level: ev.currentTarget.valueAsNumber
