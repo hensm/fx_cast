@@ -284,7 +284,7 @@ export interface MediaStatus {
     playerState: PlayerState;
     idleReason?: IdleReason;
     items?: QueueItem[];
-    currentTime: number;
+    currentTime: Nullable<number>;
     supportedMediaCommands: number;
     repeatMode: RepeatMode;
     volume: Volume;

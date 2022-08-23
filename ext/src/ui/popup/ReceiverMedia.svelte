@@ -103,7 +103,7 @@
     });
 
     // Update estimated time every second
-    let currentTime = status.currentTime;
+    let currentTime = getEstimatedTime();
     onMount(() => {
         window.setInterval(() => {
             if (currentTime !== getEstimatedTime()) {
@@ -117,7 +117,8 @@
      * update.
      */
     function getEstimatedTime() {
-        if (!status) return 0;
+        if (!status.currentTime) return 0;
+
         if (status.playerState === PlayerState.PLAYING && lastUpdateTime) {
             let estimatedTime =
                 status.currentTime + (Date.now() - lastUpdateTime) / 1000;
