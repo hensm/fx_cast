@@ -165,10 +165,14 @@
     <div class="media__controls">
         <div class="media__progress">
             {#if status.media}
-                <span class="media__start">{formatTime(currentTime)}</span>
+                <span class="media__current-time">
+                    {formatTime(currentTime)}
+                </span>
                 <input
                     type="range"
-                    class="media__progress-bar"
+                    class="slider media__progress-bar"
+                    class:slider--indeterminate={status.playerState ===
+                        PlayerState.BUFFERING}
                     max={status.media.duration ?? currentTime}
                     value={currentTime}
                     on:change={ev =>
@@ -176,7 +180,7 @@
                             position: ev.currentTarget.valueAsNumber
                         })}
                 />
-                <span class="media__end">
+                <span class="media__remaining-time">
                     {#if status.media.duration}
                         -{formatTime(status.media?.duration - currentTime)}
                     {:else}
@@ -184,7 +188,7 @@
                     {/if}
                 </span>
             {:else}
-                <progress />
+                <progress class="slider media__progress-bar" />
             {/if}
         </div>
 
@@ -215,7 +219,8 @@
             >
                 <img
                     src={`icons/${
-                        status.playerState === PlayerState.PLAYING
+                        status.playerState === PlayerState.PLAYING ||
+                        status.playerState === PlayerState.BUFFERING
                             ? "pause.svg"
                             : "play.svg"
                     }`}
@@ -289,7 +294,7 @@
                     </button>
                     <input
                         type="range"
-                        class="media__volume-slider"
+                        class="slider media__volume-slider"
                         step="0.05"
                         max={1}
                         value={device.status.volume.muted
