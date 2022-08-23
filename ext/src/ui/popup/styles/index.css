@@ -159,14 +159,14 @@ body {
     min-width: 28px;
 }
 
-.media__progress {
+.media__seek {
     align-items: center;
     display: flex;
     gap: 5px;
     min-height: 24px;
     width: 100%;
 }
-.media__progress-bar {
+.media__seek-bar {
     flex: 1;
 }
 
@@ -174,7 +174,7 @@ body {
 .media__remaining-time {
     font-variant-numeric: tabular-nums;
     text-align: center;
-    width: 5ch;
+    min-width: 5ch;
 }
 
 .media__buttons {

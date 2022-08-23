@@ -30,6 +30,8 @@
         status.playerState === PlayerState.PLAYING ||
         status.playerState === PlayerState.PAUSED;
 
+    $: hasNoDuration = isPlayingOrPaused && !status.media?.duration;
+
     let mediaTitle: Optional<string>;
     let mediaSubtitle: Optional<string>;
     let mediaImage: Optional<Image>;
@@ -166,35 +168,42 @@
     {/if}
 
     <div class="media__controls">
-        <div class="media__progress">
-            {#if status.media}
+        <!-- Seek bar -->
+        {#if !hasNoDuration && status.media}
+            <div class="media__seek">
                 <span class="media__current-time">
                     {formatTime(currentTime)}
                 </span>
-                <input
-                    type="range"
-                    class="slider media__progress-bar"
-                    class:slider--indeterminate={status.playerState ===
-                        PlayerState.BUFFERING}
-                    aria-label={_("popupMediaSeek")}
-                    max={status.media.duration ?? currentTime}
-                    value={currentTime}
-                    on:change={ev =>
-                        dispatch("seek", {
-                            position: ev.currentTarget.valueAsNumber
-                        })}
-                />
-                <span class="media__remaining-time">
-                    {#if status.media.duration}
+                {#if status.supportedMediaCommands & _MediaCommand.SEEK}
+                    <input
+                        type="range"
+                        class="slider media__seek-bar"
+                        class:slider--indeterminate={status.playerState ===
+                            PlayerState.BUFFERING}
+                        aria-label={_("popupMediaSeek")}
+                        max={status.media.duration ?? currentTime}
+                        value={currentTime}
+                        on:change={ev =>
+                            dispatch("seek", {
+                                position: ev.currentTarget.valueAsNumber
+                            })}
+                    />
+                {:else}
+                    <progress
+                        class="slider media__seek-bar"
+                        class:slider--indeterminate={status.playerState ===
+                            PlayerState.BUFFERING}
+                        max={status.media.duration ?? currentTime}
+                        value={currentTime}
+                    />
+                {/if}
+                {#if status.media.duration}
+                    <span class="media__remaining-time">
                         -{formatTime(status.media?.duration - currentTime)}
-                    {:else}
-                        -{formatTime(currentTime)}
-                    {/if}
-                </span>
-            {:else}
-                <progress class="slider media__progress-bar" />
-            {/if}
-        </div>
+                    </span>
+                {/if}
+            </div>
+        {/if}
 
         <div class="media__buttons">
             {#if status.supportedMediaCommands & _MediaCommand.QUEUE_PREV}
@@ -297,6 +306,14 @@
                         </option>
                     {/each}
                 </select>
+            {/if}
+
+            <!-- Current time for unseekable live streams since seek bar
+                 is unnecessary -->
+            {#if hasNoDuration}
+                <span class="media__current-time">
+                    {formatTime(currentTime)}
+                </span>
             {/if}
 
             {#if device.status?.volume}
