@@ -110,21 +110,13 @@
 
     <button
         type="button"
-        class="ghost"
+        class="receiver__expand-button ghost"
+        class:receiver__expand-button--expanded={isExpanded}
         disabled={!mediaStatus}
         on:click={() => {
             isExpanded = !isExpanded;
         }}
-    >
-        <img
-            src={`../assets/${
-                mediaStatus && isExpanded
-                    ? "photon_arrowhead_up.svg"
-                    : "photon_arrowhead_down.svg"
-            }`}
-            alt="icon, arrow down"
-        />
-    </button>
+    />
 
     {#if isExpanded}
         <div class="receiver__expanded">

@@ -77,7 +77,7 @@ body {
     align-items: center;
     display: flex;
     flex-wrap: wrap;
-    gap: 5px;
+    gap: 10px;
     padding: 0.75em 0;
     position: relative;
 }
@@ -89,6 +89,7 @@ body {
     display: flex;
     flex: 1;
     flex-direction: column;
+    min-width: 0;
 }
 
 .receiver__name,
@@ -111,6 +112,13 @@ body {
     min-width: 80px;
 }
 
+.receiver__expand-button {
+    background-image: url("../../assets/photon_arrowhead_down.svg");
+}
+.receiver__expand-button--expanded {
+    background-image: url("../../assets/photon_arrowhead_up.svg");
+}
+
 .receiver__expanded {
     display: flex;
     width: 100%;
@@ -119,7 +127,6 @@ body {
 .media {
     display: flex;
     flex-direction: column;
-    margin-top: 10px;
     width: 100%;
 }
 
@@ -153,12 +160,6 @@ body {
     margin-top: auto;
 }
 
-.media__controls button,
-.media__cc-button {
-    min-height: 28px;
-    min-width: 28px;
-}
-
 .media__seek {
     align-items: center;
     display: flex;
@@ -183,27 +184,57 @@ body {
     gap: inherit;
 }
 
-.media__cc-button {
+.media__button {
+    min-height: 28px;
+    min-width: 28px;
+}
+
+.media__button--play {
+    background-image: url("../icons/play.svg");
+}
+.media__button--pause {
+    background-image: url("../icons/pause.svg");
+}
+
+.media__button--previous {
+    background-image: url("../icons/previous.svg");
+}
+.media__button--backward {
+    background-image: url("../icons/backward.svg");
+}
+.media__button--forward {
+    background-image: url("../icons/forward.svg");
+}
+.media__button--next {
+    background-image: url("../icons/next.svg");
+}
+
+.media__button--cc {
     background-image: url("../icons/cc-on.svg");
-    background-repeat: no-repeat;
-    background-position: center center;
     border: initial;
     font-size: 0;
 }
-.media__cc-button:hover {
+.media__button--cc:hover {
     background-color: var(--button-background-hover);
 }
-.media__cc-button:active {
+.media__button--cc:active {
     background-color: var(--button-background-active);
 }
-.media__cc-button--off {
+.media__button--cc--off {
     background-image: url("../icons/cc-off.svg");
 }
-.media__cc-button > option {
+.media__button--cc > option {
     font-size: var(--font-size);
 }
-.media__cc-button > option {
+.media__button--cc > option {
     background-color: var(--box-background);
+}
+
+.media__button--mute {
+    background-image: url("../icons/audio.svg");
+}
+.media__button--unmute {
+    background-image: url("../icons/audio-muted.svg");
 }
 
 .media__volume {

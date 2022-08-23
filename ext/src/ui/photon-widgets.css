@@ -147,12 +147,14 @@ button:default:hover:active {
 }
 
 .ghost {
-    width: 24px !important;
-    height: 24px !important;
-    padding: initial;
-    display: flex;
     align-items: center;
+    background-position: center center;
+    background-repeat: no-repeat;
+    display: flex;
+    height: 24px !important;
     justify-content: center;
+    padding: initial;
+    width: 24px !important;
 }
 
 .ghost:not(:hover),

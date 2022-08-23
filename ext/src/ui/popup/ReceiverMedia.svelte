@@ -208,66 +208,53 @@
         <div class="media__buttons">
             {#if status.supportedMediaCommands & _MediaCommand.QUEUE_PREV}
                 <button
-                    class="media__previous-button ghost"
+                    class="media__button media__button--previous ghost"
                     title={_("popupMediaSkipPrevious")}
                     on:click={() => dispatch("previous")}
-                >
-                    <img src="icons/previous.svg" alt="icon, previous" />
-                </button>
+                />
             {/if}
             {#if status.supportedMediaCommands & _MediaCommand.SEEK}
                 <button
-                    class="media__backward-button ghost"
+                    class="media__button media__button--backward ghost"
                     title={_("popupMediaSeekBackward")}
                     disabled={!isPlayingOrPaused}
                     on:click={() =>
                         dispatch("seek", { position: currentTime - 5 })}
-                >
-                    <img src="icons/backward.svg" alt="icon, backward" />
-                </button>
+                />
             {/if}
 
             {#if status.supportedMediaCommands & _MediaCommand.PAUSE}
                 <button
-                    class="media__play-button ghost"
+                    class={`media__button ghost ${
+                        status.playerState === PlayerState.PLAYING ||
+                        status.playerState === PlayerState.BUFFERING
+                            ? "media__button--pause"
+                            : "media__button--play"
+                    }`}
                     title={isPlayingOrPaused &&
                     status.playerState === PlayerState.PLAYING
                         ? _("popupMediaPause")
                         : _("popupMediaPlay")}
                     disabled={!isPlayingOrPaused}
                     on:click={() => dispatch("togglePlayback")}
-                >
-                    <img
-                        src={`icons/${
-                            status.playerState === PlayerState.PLAYING ||
-                            status.playerState === PlayerState.BUFFERING
-                                ? "pause.svg"
-                                : "play.svg"
-                        }`}
-                        alt="icon, play"
-                    />
-                </button>
+                />
             {/if}
 
             {#if status.supportedMediaCommands & _MediaCommand.SEEK}
                 <button
-                    class="media__forward-button ghost"
+                    class="media__button media__button--forward ghost"
                     disabled={!isPlayingOrPaused}
                     title={_("popupMediaSeekForward")}
                     on:click={() =>
                         dispatch("seek", { position: currentTime + 5 })}
-                >
-                    <img src="icons/forward.svg" alt="icon, forward" />
-                </button>
+                />
             {/if}
             {#if status.supportedMediaCommands & _MediaCommand.QUEUE_NEXT}
                 <button
-                    class="media__next-button ghost"
+                    class="media__button media__button--next ghost"
                     title={_("popupMediaSkipNext")}
                     on:click={() => dispatch("next")}
-                >
-                    <img src="icons/next.svg" alt="icon, next" />
-                </button>
+                />
             {/if}
 
             {#if textTracks?.length && status.supportedMediaCommands & _MediaCommand.EDIT_TRACKS}
@@ -277,7 +264,7 @@
                 )}
 
                 <select
-                    class="media__cc-button ghost"
+                    class="media__button media__cc-button ghost"
                     class:media__cc-button--off={activeTextTrackId ===
                         undefined}
                     title={_("popupMediaSubtitlesClosedCaptions")}
@@ -322,7 +309,11 @@
 
                 <div class="media__volume">
                     <button
-                        class="media__mute-button ghost"
+                        class={`media__button ghost ${
+                            isMuted
+                                ? "media__button--unmute"
+                                : "media__button--mute"
+                        }`}
                         disabled={!("muted" in volume)}
                         title={isMuted
                             ? _("popupMediaUnmute")
@@ -342,14 +333,7 @@
                                 });
                             }
                         }}
-                    >
-                        <img
-                            src="icons/{isMuted
-                                ? 'audio-muted.svg'
-                                : 'audio.svg'}"
-                            alt="icon, audio"
-                        />
-                    </button>
+                    />
                     <input
                         type="range"
                         class="slider media__volume-slider"
