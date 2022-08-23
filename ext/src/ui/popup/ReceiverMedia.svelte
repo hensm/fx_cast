@@ -218,25 +218,27 @@
                 </button>
             {/if}
 
-            <button
-                class="media__play-button ghost"
-                title={isPlayingOrPaused &&
-                status.playerState === PlayerState.PLAYING
-                    ? _("popupMediaPause")
-                    : _("popupMediaPlay")}
-                disabled={!isPlayingOrPaused}
-                on:click={() => dispatch("togglePlayback")}
-            >
-                <img
-                    src={`icons/${
-                        status.playerState === PlayerState.PLAYING ||
-                        status.playerState === PlayerState.BUFFERING
-                            ? "pause.svg"
-                            : "play.svg"
-                    }`}
-                    alt="icon, play"
-                />
-            </button>
+            {#if status.supportedMediaCommands & _MediaCommand.PAUSE}
+                <button
+                    class="media__play-button ghost"
+                    title={isPlayingOrPaused &&
+                    status.playerState === PlayerState.PLAYING
+                        ? _("popupMediaPause")
+                        : _("popupMediaPlay")}
+                    disabled={!isPlayingOrPaused}
+                    on:click={() => dispatch("togglePlayback")}
+                >
+                    <img
+                        src={`icons/${
+                            status.playerState === PlayerState.PLAYING ||
+                            status.playerState === PlayerState.BUFFERING
+                                ? "pause.svg"
+                                : "play.svg"
+                        }`}
+                        alt="icon, play"
+                    />
+                </button>
+            {/if}
 
             {#if status.supportedMediaCommands & _MediaCommand.SEEK}
                 <button
