@@ -284,7 +284,15 @@
 
             {#if device.status?.volume}
                 <div class="media__volume">
-                    <button class="media__mute-button ghost">
+                    <button
+                        class="media__mute-button ghost"
+                        on:click={() => {
+                            if (!device.status?.volume) return;
+                            dispatch("volumeChanged", {
+                                muted: !device.status.volume.muted
+                            });
+                        }}
+                    >
                         <img
                             src="icons/{device.status?.volume.muted
                                 ? 'audio-muted.svg'
