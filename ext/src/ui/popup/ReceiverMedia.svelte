@@ -31,6 +31,9 @@
         status.playerState === PlayerState.PLAYING ||
         status.playerState === PlayerState.PAUSED;
 
+    $: hasDuration = status.media?.duration && status.media?.duration > 0;
+    $: isLive = status.supportedMediaCommands & _MediaCommand.SEEK;
+
     let mediaTitle: Optional<string>;
     let mediaSubtitle: Optional<string>;
     let mediaImage: Optional<Image>;
@@ -152,8 +155,8 @@
 
         let ret = "";
         if (hours) ret += `${hours}:`;
-        ret += `${date.getUTCMinutes()}:`;
-        ret += `${date.getUTCSeconds()}`.padStart(2, "0");
+        ret += `${date.getUTCMinutes().toString().padStart(2, "0")}:`;
+        ret += date.getUTCSeconds().toString().padStart(2, "0");
         return ret;
     }
 </script>
@@ -174,7 +177,7 @@
 
     <div class="media__controls">
         <!-- Seek bar -->
-        {#if status.media && status.media?.duration}
+        {#if status.media && status.media?.duration && hasDuration && isLive}
             <div class="media__seek">
                 {#if status.media?.streamType === StreamType.LIVE}
                     <span class="media__live">
@@ -184,34 +187,22 @@
                 <span class="media__current-time">
                     {formatTime(currentTime)}
                 </span>
-                {#if status.supportedMediaCommands & _MediaCommand.SEEK}
-                    <input
-                        type="range"
-                        class="slider media__seek-bar"
-                        class:slider--indeterminate={status.playerState ===
-                            PlayerState.BUFFERING}
-                        aria-label={_("popupMediaSeek")}
-                        max={status.media.duration ?? currentTime}
-                        value={currentTime}
-                        on:change={ev =>
-                            dispatch("seek", {
-                                position: ev.currentTarget.valueAsNumber
-                            })}
-                    />
-                {:else}
-                    <progress
-                        class="slider media__seek-bar"
-                        class:slider--indeterminate={status.playerState ===
-                            PlayerState.BUFFERING}
-                        max={status.media.duration ?? currentTime}
-                        value={currentTime}
-                    />
-                {/if}
-                {#if status.media.duration}
-                    <span class="media__remaining-time">
-                        -{formatTime(status.media?.duration - currentTime)}
-                    </span>
-                {/if}
+                <input
+                    type="range"
+                    class="slider media__seek-bar"
+                    class:slider--indeterminate={status.playerState ===
+                        PlayerState.BUFFERING}
+                    aria-label={_("popupMediaSeek")}
+                    max={status.media.duration ?? currentTime}
+                    value={currentTime}
+                    on:change={ev =>
+                        dispatch("seek", {
+                            position: ev.currentTarget.valueAsNumber
+                        })}
+                />
+                <span class="media__remaining-time">
+                    -{formatTime(status.media?.duration - currentTime)}
+                </span>
             </div>
         {/if}
 
@@ -305,16 +296,9 @@
                 </select>
             {/if}
 
-            <!-- Current time for unseekable live streams since seek bar
-                 is unnecessary -->
-            {#if isPlayingOrPaused && !status.media?.duration}
-                {#if status.media?.streamType === StreamType.LIVE}
-                    <span class="media__live">
-                        {_("popupMediaLive")}
-                    </span>
-                {/if}
-                <span class="media__current-time">
-                    {formatTime(currentTime)}
+            {#if !(status.supportedMediaCommands & _MediaCommand.SEEK) && isLive}
+                <span class="media__live">
+                    {_("popupMediaLive")}
                 </span>
             {/if}
 
