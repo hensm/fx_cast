@@ -172,8 +172,7 @@
         browser.windows.update(browserWindow.id, {
             height: Math.ceil(
                 (document.body.clientHeight +
-                    (window.outerHeight - window.innerHeight)) *
-                    window.devicePixelRatio
+                    (window.outerHeight - window.innerHeight))
             )
         });
     }
