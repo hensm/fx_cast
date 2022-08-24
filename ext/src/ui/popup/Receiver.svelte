@@ -81,7 +81,14 @@
             {device.friendlyName}
         </div>
         {#if application && !application.isIdleScreen}
-            <div class="receiver__status">{application.statusText}</div>
+            <div class="receiver__status">
+                <span class="receiver__app-name">
+                    {application.displayName}
+                </span>
+                {#if application.statusText !== application.displayName}
+                    · {application.statusText}
+                {/if}
+            </div>
         {/if}
     </div>
     {#if application && !application.isIdleScreen}

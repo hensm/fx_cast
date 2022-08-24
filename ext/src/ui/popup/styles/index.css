@@ -105,6 +105,10 @@ body {
 .receiver__status {
     color: var(--secondary-color);
 }
+.receiver__app-name {
+    font-weight: 600;
+}
+
 .receiver__cast-button,
 .receiver__stop-button {
     align-self: center;
