@@ -163,7 +163,7 @@ body {
 .media__seek {
     align-items: center;
     display: flex;
-    gap: 5px;
+    gap: 10px;
     min-height: 24px;
     width: 100%;
 }
@@ -176,6 +176,17 @@ body {
     font-variant-numeric: tabular-nums;
     text-align: center;
     min-width: 5ch;
+}
+
+.media__live {
+    background: var(--box-color);
+    border-radius: 4px;
+    color: var(--box-background);
+    font-size: 0.85em;
+    font-weight: bold;
+    opacity: 0.75;
+    padding: 2px 4px;
+    text-transform: uppercase;
 }
 
 .media__buttons {

@@ -149,6 +149,10 @@
         "message": "Unmute",
         "description": "Media controls volume slider accessibility label."
     },
+    "popupMediaLive": {
+        "message": "Live",
+        "description": "Media controls label displayed for live streams."
+    },
 
     "contextCast": {
         "message": "Cast...",

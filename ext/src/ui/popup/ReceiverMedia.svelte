@@ -7,6 +7,7 @@
     import {
         MetadataType,
         PlayerState,
+        StreamType,
         TrackType
     } from "../../cast/sdk/media/enums";
 
@@ -29,8 +30,6 @@
     $: isPlayingOrPaused =
         status.playerState === PlayerState.PLAYING ||
         status.playerState === PlayerState.PAUSED;
-
-    $: hasNoDuration = isPlayingOrPaused && !status.media?.duration;
 
     let mediaTitle: Optional<string>;
     let mediaSubtitle: Optional<string>;
@@ -97,15 +96,17 @@
 
     // Keep track of update times for currentTime estimations
     let lastUpdateTime = 0;
+    // Update estimated time every second
+    let currentTime = getEstimatedTime();
+
     deviceStore.subscribe(devices => {
         const newDevice = devices.find(newDevice => newDevice.id === device.id);
         if (newDevice?.mediaStatus?.currentTime) {
             lastUpdateTime = Date.now();
+            currentTime = newDevice.mediaStatus.currentTime;
         }
     });
 
-    // Update estimated time every second
-    let currentTime = getEstimatedTime();
     onMount(() => {
         window.setInterval(() => {
             if (currentTime !== getEstimatedTime()) {
@@ -169,8 +170,13 @@
 
     <div class="media__controls">
         <!-- Seek bar -->
-        {#if !hasNoDuration && status.media}
+        {#if status.media && status.media?.duration}
             <div class="media__seek">
+                {#if status.media?.streamType === StreamType.LIVE}
+                    <span class="media__live">
+                        {_("popupMediaLive")}
+                    </span>
+                {/if}
                 <span class="media__current-time">
                     {formatTime(currentTime)}
                 </span>
@@ -297,7 +303,12 @@
 
             <!-- Current time for unseekable live streams since seek bar
                  is unnecessary -->
-            {#if hasNoDuration}
+            {#if isPlayingOrPaused && !status.media?.duration}
+                {#if status.media?.streamType === StreamType.LIVE}
+                    <span class="media__live">
+                        {_("popupMediaLive")}
+                    </span>
+                {/if}
                 <span class="media__current-time">
                     {formatTime(currentTime)}
                 </span>
