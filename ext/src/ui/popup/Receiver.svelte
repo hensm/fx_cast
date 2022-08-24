@@ -23,6 +23,8 @@
     export let isAnyConnecting: boolean;
     /** Whether the selected media type is available for this receiver. */
     export let isMediaTypeAvailable: boolean;
+    /** Whether any media types are available for this receiver. */
+    export let isAnyMediaTypeAvailable: boolean;
 
     /** Receiver device to display. */
     export let device: ReceiverDevice;
@@ -98,7 +100,7 @@
         >
             {_("popupStopButtonTitle")}
         </button>
-    {:else}
+    {:else if isAnyMediaTypeAvailable}
         <button
             class="receiver__cast-button"
             disabled={isConnecting || isAnyConnecting || !isMediaTypeAvailable}

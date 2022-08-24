@@ -171,8 +171,8 @@
         if (browserWindow?.id === undefined) return;
         browser.windows.update(browserWindow.id, {
             height: Math.ceil(
-                (document.body.clientHeight +
-                    (window.outerHeight - window.innerHeight))
+                document.body.clientHeight +
+                    (window.outerHeight - window.innerHeight)
             )
         });
     }
@@ -417,6 +417,8 @@
                 {port}
                 {device}
                 {isMediaTypeAvailable}
+                isAnyMediaTypeAvailable={availableMediaTypes !==
+                    ReceiverSelectorMediaType.None}
                 isAnyConnecting={isConnecting}
                 on:cast={ev => onReceiverCast(ev.detail.device)}
                 on:stop={ev => onReceiverStop(ev.detail.device)}
