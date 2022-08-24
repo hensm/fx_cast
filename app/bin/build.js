@@ -10,7 +10,7 @@ import mustache from "mustache";
 import pkg from "pkg";
 import yargs from "yargs";
 
-import config from "../config.json" assert { type: "json" };
+import config from "./lib/config.js";
 import * as paths from "./lib/paths.js";
 
 const argv = await yargs()

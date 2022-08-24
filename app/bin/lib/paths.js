@@ -3,7 +3,7 @@
 import path from "path";
 import url from "url";
 
-import config from "../../config.json" assert { type: "json" };
+import config from "./config.js";
 
 const __dirname = path.dirname(url.fileURLToPath(import.meta.url));
 const rootPath = path.join(__dirname, "../../../");
