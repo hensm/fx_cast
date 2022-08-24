@@ -166,19 +166,13 @@ export default new (class extends TypedEventTarget<EventMap> {
                 const device = this.receiverDevices.get(deviceId);
                 if (!device) break;
 
-                if (device.status) {
-                    // Clear media status when app changes
-                    if (
-                        status.applications?.[0].appId !==
-                        device.status.applications?.[0].appId
-                    ) {
-                        delete device.mediaStatus;
-                    }
-
-                    device.status = { ...device.status, ...status };
-                } else {
-                    device.status = status;
+                // Clear media status when app status changes
+                const application = status.applications?.[0];
+                if (!application || application.isIdleScreen) {
+                    delete device.mediaStatus;
                 }
+
+                device.status = status;
 
                 this.dispatchEvent(
                     new CustomEvent("receiverDeviceUpdated", {
