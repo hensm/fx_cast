@@ -85,7 +85,10 @@ messaging.on("message", (message: Message) => {
                     });
 
                     if (shouldWatchStatus) {
-                        remotes.get(deviceId)?.disconnect();
+                        if (remotes.has(deviceId)) {
+                            remotes.get(deviceId)?.disconnect();
+                            remotes.delete(deviceId);
+                        }
                     }
                 }
             });
