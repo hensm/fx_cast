@@ -112,6 +112,7 @@
         type="button"
         class="receiver__expand-button ghost"
         class:receiver__expand-button--expanded={isExpanded}
+        title={_("popupShowDetailsTitle")}
         disabled={!mediaStatus}
         on:click={() => {
             isExpanded = !isExpanded;

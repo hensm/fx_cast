@@ -101,6 +101,10 @@
             }
         }
     },
+    "popupShowDetailsTitle": {
+        "message": "Show details",
+        "description": "Receiver device expand button title."
+    },
     "popupMediaPlay": {
         "message": "Play",
         "description": "Media controls play button title."
