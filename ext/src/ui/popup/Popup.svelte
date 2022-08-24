@@ -366,51 +366,46 @@
     </button>
 </div>
 
-<div class="media-type-select">
-    <div class="media-type-select__label-cast">
-        {_("popupMediaSelectCastLabel")}
-    </div>
-    <div
-        class="select-wrapper"
-        class:select-wrapper--disabled={availableMediaTypes ===
-            ReceiverSelectorMediaType.None}
-    >
-        <select
-            class="media-type-select__dropdown"
-            bind:value={mediaType}
-            disabled={availableMediaTypes === ReceiverSelectorMediaType.None}
-        >
-            <option
-                value={ReceiverSelectorMediaType.App}
-                disabled={!isAppMediaTypeAvailable}
-            >
-                {knownApp?.name ?? _("popupMediaTypeApp")}
-            </option>
+{#if availableMediaTypes !== ReceiverSelectorMediaType.None}
+    <div class="media-type-select">
+        <div class="media-type-select__label-cast">
+            {_("popupMediaSelectCastLabel")}
+        </div>
+        <div class="select-wrapper">
+            <select class="media-type-select__dropdown" bind:value={mediaType}>
+                <option
+                    value={ReceiverSelectorMediaType.App}
+                    disabled={!isAppMediaTypeAvailable}
+                >
+                    {knownApp?.name ?? _("popupMediaTypeApp")}
+                </option>
 
-            {#if opts?.mirroringEnabled}
-                <option
-                    value={ReceiverSelectorMediaType.Tab}
-                    disabled={!(
-                        availableMediaTypes & ReceiverSelectorMediaType.Tab
-                    )}
-                >
-                    {_("popupMediaTypeTab")}
-                </option>
-                <option
-                    value={ReceiverSelectorMediaType.Screen}
-                    disabled={!(
-                        availableMediaTypes & ReceiverSelectorMediaType.Screen
-                    )}
-                >
-                    {_("popupMediaTypeScreen")}
-                </option>
-            {/if}
-        </select>
+                {#if opts?.mirroringEnabled}
+                    <option
+                        value={ReceiverSelectorMediaType.Tab}
+                        disabled={!(
+                            availableMediaTypes & ReceiverSelectorMediaType.Tab
+                        )}
+                    >
+                        {_("popupMediaTypeTab")}
+                    </option>
+                    <option
+                        value={ReceiverSelectorMediaType.Screen}
+                        disabled={!(
+                            availableMediaTypes &
+                            ReceiverSelectorMediaType.Screen
+                        )}
+                    >
+                        {_("popupMediaTypeScreen")}
+                    </option>
+                {/if}
+            </select>
+        </div>
+        <div class="media-type-select__label-to">
+            {_("popupMediaSelectToLabel")}
+        </div>
     </div>
-    <div class="media-type-select__label-to">
-        {_("popupMediaSelectToLabel")}
-    </div>
-</div>
+{/if}
 
 <ul class="receiver-list">
     {#if !$deviceStore.length}
