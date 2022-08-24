@@ -96,7 +96,6 @@
 
     // Keep track of update times for currentTime estimations
     let lastUpdateTime = 0;
-    // Update estimated time every second
     let currentTime = getEstimatedTime();
 
     deviceStore.subscribe(devices => {
@@ -107,12 +106,17 @@
         }
     });
 
+    // Update estimated time every second
     onMount(() => {
-        window.setInterval(() => {
+        const intervalId = window.setInterval(() => {
             if (currentTime !== getEstimatedTime()) {
                 currentTime = getEstimatedTime();
             }
         }, 1000);
+
+        return () => {
+            window.clearInterval(intervalId);
+        };
     });
 
     /**
@@ -214,14 +218,14 @@
         <div class="media__buttons">
             {#if status.supportedMediaCommands & _MediaCommand.QUEUE_PREV}
                 <button
-                    class="media__button media__button--previous ghost"
+                    class="media__previous-button ghost"
                     title={_("popupMediaSkipPrevious")}
                     on:click={() => dispatch("previous")}
                 />
             {/if}
             {#if status.supportedMediaCommands & _MediaCommand.SEEK}
                 <button
-                    class="media__button media__button--backward ghost"
+                    class="media__backward-button ghost"
                     title={_("popupMediaSeekBackward")}
                     disabled={!isPlayingOrPaused}
                     on:click={() =>
@@ -231,11 +235,11 @@
 
             {#if status.supportedMediaCommands & _MediaCommand.PAUSE}
                 <button
-                    class={`media__button ghost ${
+                    class={`ghost ${
                         status.playerState === PlayerState.PLAYING ||
                         status.playerState === PlayerState.BUFFERING
-                            ? "media__button--pause"
-                            : "media__button--play"
+                            ? "media__pause-button"
+                            : "media__play-button"
                     }`}
                     title={isPlayingOrPaused &&
                     status.playerState === PlayerState.PLAYING
@@ -248,7 +252,7 @@
 
             {#if status.supportedMediaCommands & _MediaCommand.SEEK}
                 <button
-                    class="media__button media__button--forward ghost"
+                    class="media__forward-button ghost"
                     disabled={!isPlayingOrPaused}
                     title={_("popupMediaSeekForward")}
                     on:click={() =>
@@ -257,7 +261,7 @@
             {/if}
             {#if status.supportedMediaCommands & _MediaCommand.QUEUE_NEXT}
                 <button
-                    class="media__button media__button--next ghost"
+                    class="media__next-button ghost"
                     title={_("popupMediaSkipNext")}
                     on:click={() => dispatch("next")}
                 />
@@ -270,7 +274,7 @@
                 )}
 
                 <select
-                    class="media__button media__cc-button ghost"
+                    class="media__cc-button ghost"
                     class:media__cc-button--off={activeTextTrackId ===
                         undefined}
                     title={_("popupMediaSubtitlesClosedCaptions")}
@@ -320,11 +324,8 @@
 
                 <div class="media__volume">
                     <button
-                        class={`media__button ghost ${
-                            isMuted
-                                ? "media__button--unmute"
-                                : "media__button--mute"
-                        }`}
+                        class="media__mute-button ghost"
+                        class:media__mute-button--muted={isMuted}
                         disabled={!("muted" in volume)}
                         title={isMuted
                             ? _("popupMediaUnmute")

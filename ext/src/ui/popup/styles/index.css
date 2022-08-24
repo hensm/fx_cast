@@ -199,56 +199,56 @@ body {
     gap: inherit;
 }
 
-.media__button {
+.media__buttons .ghost {
     min-height: 28px;
     min-width: 28px;
 }
 
-.media__button--play {
+.media__play-button {
     background-image: url("../icons/play.svg");
 }
-.media__button--pause {
+.media__pause-button {
     background-image: url("../icons/pause.svg");
 }
 
-.media__button--previous {
+.media__previous-button {
     background-image: url("../icons/previous.svg");
 }
-.media__button--backward {
+.media__backward-button {
     background-image: url("../icons/backward.svg");
 }
-.media__button--forward {
+.media__forward-button {
     background-image: url("../icons/forward.svg");
 }
-.media__button--next {
+.media__next-button {
     background-image: url("../icons/next.svg");
 }
 
-.media__button--cc {
+.media__cc-button {
     background-image: url("../icons/cc-on.svg");
     border: initial;
     font-size: 0;
 }
-.media__button--cc:hover {
+.media__cc-button:hover {
     background-color: var(--button-background-hover);
 }
-.media__button--cc:active {
+.media__cc-button:active {
     background-color: var(--button-background-active);
 }
-.media__button--cc--off {
+.media__cc-button--off {
     background-image: url("../icons/cc-off.svg");
 }
-.media__button--cc > option {
+.media__cc-button > option {
     font-size: var(--font-size);
 }
-.media__button--cc > option {
+.media__cc-button > option {
     background-color: var(--box-background);
 }
 
-.media__button--mute {
+.media__mute-button {
     background-image: url("../icons/audio.svg");
 }
-.media__button--unmute {
+.media__mute-button--muted {
     background-image: url("../icons/audio-muted.svg");
 }
 
