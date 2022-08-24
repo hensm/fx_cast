@@ -185,23 +185,12 @@ export default class {
                     receiver //            receiver
                 );
 
+                session.namespaces = status.namespaces;
                 session.senderApps = status.senderApps;
+                session.statusText = status.statusText;
                 session.transportId = status.transportId;
 
                 this.#sessions.set(session.sessionId, session);
-            }
-            // eslint-disable-next-line no-fallthrough
-            case "cast:sessionUpdated": {
-                const status = message.data;
-                const session = this.#sessions.get(status.sessionId);
-                if (!session) {
-                    logger.error(`Session not found (${status.sessionId})`);
-                    return;
-                }
-
-                session.statusText = status.statusText;
-                session.namespaces = status.namespaces;
-                session.receiver.volume = status.volume;
 
                 /**
                  * If session created via requestSession, the success
@@ -215,6 +204,28 @@ export default class {
                     this.#requestSessionErrorCallback = undefined;
                 } else {
                     this.#apiConfig?.sessionListener(session);
+                }
+
+                break;
+            }
+
+            case "cast:sessionUpdated": {
+                const status = message.data;
+                const session = this.#sessions.get(status.sessionId);
+                if (!session) {
+                    logger.error(`Session not found (${status.sessionId})`);
+                    break;
+                }
+
+                session.statusText = status.statusText;
+                session.namespaces = status.namespaces;
+                session.receiver.volume = status.volume;
+
+                const updateListeners = session?._updateListeners;
+                if (updateListeners) {
+                    for (const listener of updateListeners) {
+                        listener(session.status !== SessionStatus.STOPPED);
+                    }
                 }
 
                 break;
