@@ -101,6 +101,62 @@
             }
         }
     },
+    "popupShowDetailsTitle": {
+        "message": "Show details",
+        "description": "Receiver device expand button title."
+    },
+    "popupMediaPlay": {
+        "message": "Play",
+        "description": "Media controls play button title."
+    },
+    "popupMediaPause": {
+        "message": "Pause",
+        "description": "Media controls pause button title."
+    },
+    "popupMediaSkipPrevious": {
+        "message": "Skip previous",
+        "description": "Media controls skip previous button title."
+    },
+    "popupMediaSkipNext": {
+        "message": "Skip next",
+        "description": "Media controls skip next button title."
+    },
+    "popupMediaSeek": {
+        "message": "Seek position",
+        "description": "Media controls seek bar accessibility label."
+    },
+    "popupMediaSeekBackward": {
+        "message": "Seek backwards",
+        "description": "Media controls seek backward button title."
+    },
+    "popupMediaSeekForward": {
+        "message": "Seek forwards",
+        "description": "Media controls seek forward button title."
+    },
+    "popupMediaSubtitlesClosedCaptions": {
+        "message": "Subtitles/closed captions",
+        "description": "Media controls subtitles/cc button title."
+    },
+    "popupMediaSubtitlesClosedCaptionsOff": {
+        "message": "Off",
+        "description": "Media controls subtitles/cc button title."
+    },
+    "popupMediaMute": {
+        "message": "Mute",
+        "description": "Media controls mute button title."
+    },
+    "popupMediaUnmute": {
+        "message": "Unmute",
+        "description": "Media controls unmute button title."
+    },
+    "popupMediaVolume": {
+        "message": "Unmute",
+        "description": "Media controls volume slider accessibility label."
+    },
+    "popupMediaLive": {
+        "message": "Live",
+        "description": "Media controls label displayed for live streams."
+    },
 
     "contextCast": {
         "message": "Cast...",

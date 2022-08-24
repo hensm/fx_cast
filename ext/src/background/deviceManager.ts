@@ -6,7 +6,13 @@ import { TypedEventTarget } from "../lib/TypedEventTarget";
 
 import { Message, Port } from "../messaging";
 import { ReceiverDevice } from "../types";
-import { ReceiverStatus } from "../cast/sdk/types";
+import {
+    MediaStatus,
+    ReceiverStatus,
+    SenderMediaMessage,
+    SenderMessage
+} from "../cast/sdk/types";
+import { PlayerState } from "../cast/sdk/media/enums";
 
 interface EventMap {
     receiverDeviceUp: { deviceInfo: ReceiverDevice };
@@ -14,6 +20,10 @@ interface EventMap {
     receiverDeviceUpdated: {
         deviceId: string;
         status: ReceiverStatus;
+    };
+    receiverDeviceMediaUpdated: {
+        deviceId: string;
+        status: MediaStatus;
     };
 }
 
@@ -79,6 +89,48 @@ export default new (class extends TypedEventTarget<EventMap> {
         }
     }
 
+    sendReceiverMessage(deviceId: string, message: SenderMessage) {
+        if (!this.bridgePort) {
+            logger.error(
+                "Failed to send receiver message (no bridge connection)"
+            );
+            return;
+        }
+
+        const device = this.receiverDevices.get(deviceId);
+        if (!device) {
+            logger.error(
+                "Failed to send receiver message (could not find device)"
+            );
+            return;
+        }
+
+        this.bridgePort?.postMessage({
+            subject: "bridge:sendReceiverMessage",
+            data: { deviceId, message }
+        });
+    }
+
+    sendMediaMessage(deviceId: string, message: SenderMediaMessage) {
+        if (!this.bridgePort) {
+            logger.error("Failed to send media message (no bridge connection)");
+            return;
+        }
+
+        const device = this.receiverDevices.get(deviceId);
+        if (!device) {
+            logger.error(
+                "Failed to send media message (could not find device)"
+            );
+            return;
+        }
+
+        this.bridgePort?.postMessage({
+            subject: "bridge:sendMediaMessage",
+            data: { deviceId, message }
+        });
+    }
+
     private onBridgeMessage = (message: Message) => {
         switch (message.subject) {
             case "main:receiverDeviceUp": {
@@ -111,29 +163,22 @@ export default new (class extends TypedEventTarget<EventMap> {
 
             case "main:receiverDeviceStatusUpdated": {
                 const { deviceId, status } = message.data;
-                const receiverDevice = this.receiverDevices.get(deviceId);
-                if (!receiverDevice) {
-                    break;
+                const device = this.receiverDevices.get(deviceId);
+                if (!device) break;
+
+                // Clear media status when app status changes
+                const application = status.applications?.[0];
+                if (!application || application.isIdleScreen) {
+                    delete device.mediaStatus;
                 }
 
-                if (receiverDevice.status) {
-                    receiverDevice.status.isActiveInput = status.isActiveInput;
-                    receiverDevice.status.isStandBy = status.isStandBy;
-                    receiverDevice.status.volume = status.volume;
-
-                    if (status.applications) {
-                        receiverDevice.status.applications =
-                            status.applications;
-                    }
-                } else {
-                    receiverDevice.status = status;
-                }
+                device.status = status;
 
                 this.dispatchEvent(
                     new CustomEvent("receiverDeviceUpdated", {
                         detail: {
                             deviceId,
-                            status: receiverDevice.status
+                            status: device.status
                         }
                     })
                 );
@@ -142,6 +187,28 @@ export default new (class extends TypedEventTarget<EventMap> {
             }
 
             case "main:receiverDeviceMediaStatusUpdated": {
+                const { deviceId, status } = message.data;
+                const device = this.receiverDevices.get(deviceId);
+                if (!device) break;
+
+                if (device.mediaStatus) {
+                    device.mediaStatus = { ...device.mediaStatus, ...status };
+                    if (status.playerState === PlayerState.IDLE) {
+                        delete device.mediaStatus.media;
+                    }
+                } else {
+                    device.mediaStatus = status;
+                }
+
+                this.dispatchEvent(
+                    new CustomEvent("receiverDeviceMediaUpdated", {
+                        detail: {
+                            deviceId,
+                            status: device.mediaStatus
+                        }
+                    })
+                );
+
                 break;
             }
         }

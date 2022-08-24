@@ -1,7 +1,7 @@
 "use strict";
 
 import { SessionRequest } from "./cast/sdk/classes";
-import { ReceiverStatus } from "./cast/sdk/types";
+import { MediaStatus, ReceiverStatus } from "./cast/sdk/types";
 
 export enum ReceiverDeviceCapabilities {
     NONE = 0,
@@ -20,6 +20,7 @@ export interface ReceiverDevice {
     host: string;
     port: number;
     status?: ReceiverStatus;
+    mediaStatus?: MediaStatus;
 }
 
 export enum ReceiverSelectorMediaType {

@@ -3,15 +3,20 @@
 import messaging, { Message } from "./messaging";
 
 import { handleCastMessage } from "./components/cast";
-import { startDiscovery, stopDiscovery } from "./components/discovery";
+import Discovery from "./components/cast/discovery";
+import Remote from "./components/cast/remote";
+
 import { startMediaServer, stopMediaServer } from "./components/mediaServer";
 
 import { applicationVersion } from "../../config.json";
 
 process.on("SIGTERM", () => {
-    stopDiscovery();
+    discovery?.stop();
     stopMediaServer();
 });
+
+let discovery: Discovery | null = null;
+const remotes = new Map<string, Remote>();
 
 /**
  * Handle incoming messages from the extension and forward
@@ -29,7 +34,75 @@ messaging.on("message", (message: Message) => {
         }
 
         case "bridge:startDiscovery": {
-            startDiscovery(message.data);
+            const { shouldWatchStatus } = message.data;
+
+            discovery = new Discovery({
+                onDeviceFound(device) {
+                    messaging.sendMessage({
+                        subject: "main:receiverDeviceUp",
+                        data: {
+                            deviceId: device.id,
+                            deviceInfo: device
+                        }
+                    });
+
+                    if (shouldWatchStatus) {
+                        remotes.set(
+                            device.id,
+                            new Remote(device.host, {
+                                // RECEIVER_STATUS
+                                onReceiverStatusUpdate(status) {
+                                    messaging.sendMessage({
+                                        subject:
+                                            "main:receiverDeviceStatusUpdated",
+                                        data: {
+                                            deviceId: device.id,
+                                            status
+                                        }
+                                    });
+                                },
+                                // MEDIA_STATUS
+                                onMediaStatusUpdate(status) {
+                                    if (!status) return;
+
+                                    messaging.sendMessage({
+                                        subject:
+                                            "main:receiverDeviceMediaStatusUpdated",
+                                        data: {
+                                            deviceId: device.id,
+                                            status
+                                        }
+                                    });
+                                }
+                            })
+                        );
+                    }
+                },
+                onDeviceDown(deviceId) {
+                    messaging.sendMessage({
+                        subject: "main:receiverDeviceDown",
+                        data: { deviceId }
+                    });
+
+                    if (shouldWatchStatus) {
+                        remotes.get(deviceId)?.disconnect();
+                    }
+                }
+            });
+
+            discovery.start();
+
+            break;
+        }
+
+        case "bridge:sendReceiverMessage": {
+            const { deviceId, message: receiverMessage } = message.data;
+            remotes.get(deviceId)?.sendReceiverMessage(receiverMessage);
+            break;
+        }
+        case "bridge:sendMediaMessage": {
+            const { deviceId, message: mediaMessage } = message.data;
+            remotes.get(deviceId)?.sendMediaMessage(mediaMessage);
             break;
         }
 

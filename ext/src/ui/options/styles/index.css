@@ -1,15 +1,3 @@
-:root {
-    --border-color: var(--grey-90-a20);
-    --secondary-color: rgb(125, 125, 125);
-}
-
-@media (prefers-color-scheme: dark) {
-    :root {
-        --border-color: var(--grey-10-a20);
-        --secondary-color: var(--grey-10-a60);
-    }
-}
-
 #root {
     padding: 20px 10px;
 }
@@ -33,19 +21,6 @@ a:hover:active {
 
 input:placeholder-shown {
     text-overflow: ellipsis;
-}
-
-button.ghost {
-    width: 24px !important;
-    height: 24px !important;
-    padding: initial;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-button.ghost:not(:hover) {
-    background-color: initial;
 }
 
 .form {

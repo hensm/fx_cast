@@ -1,8 +1,6 @@
 <script lang="ts">
     import { afterUpdate, onMount, tick } from "svelte";
 
-    import LoadingIndicator from "../LoadingIndicator.svelte";
-
     import messaging, { Message, Port } from "../../messaging";
     import options, { Options } from "../../lib/options";
     import { RemoteMatchPattern } from "../../lib/matchPattern";
@@ -17,10 +15,10 @@
     import knownApps, { KnownApp } from "../../cast/knownApps";
     import { hasRequiredCapabilities } from "../../cast/utils";
 
-    const _ = browser.i18n.getMessage;
+    import Receiver from "./Receiver.svelte";
+    import deviceStore from "./deviceStore";
 
-    /** List of devices to show in receiver list. */
-    let receiverDevices: ReceiverDevice[] = [];
+    const _ = browser.i18n.getMessage;
 
     /** Currently selected media type. */
     let mediaType = ReceiverSelectorMediaType.App;
@@ -40,7 +38,6 @@
 
     /** Whether casting to a device been initiated from this selector. */
     let isConnecting = false;
-    let connectingId: Nullable<string> = null;
 
     /** Extension options */
     let opts: Nullable<Options> = null;
@@ -64,6 +61,8 @@
     let port: Nullable<Port> = null;
     let browserWindow: Nullable<browser.windows.Window> = null;
     let resizeObserver = new ResizeObserver(() => fitWindowHeight());
+
+    window.addEventListener("resize", fitWindowHeight);
 
     onMount(async () => {
         port = messaging.connect({ name: "popup" });
@@ -106,6 +105,8 @@
 
         updateKnownApp();
 
+        resizeObserver.observe(document.documentElement);
+
         window.addEventListener("contextmenu", onContextMenu);
         browser.menus.onClicked.addListener(onMenuClicked);
         browser.menus.onShown.addListener(onMenuShown);
@@ -141,7 +142,7 @@
                  * Filter receiver devices without the required
                  * capabilities.
                  */
-                receiverDevices = message.data.receiverDevices.filter(device =>
+                $deviceStore = message.data.receiverDevices.filter(device =>
                     hasRequiredCapabilities(
                         device,
                         pageInfo?.sessionRequest?.capabilities
@@ -169,9 +170,11 @@
     function fitWindowHeight() {
         if (browserWindow?.id === undefined) return;
         browser.windows.update(browserWindow.id, {
-            height:
-                document.body.clientHeight +
-                (window.outerHeight - window.innerHeight)
+            height: Math.ceil(
+                (document.body.clientHeight +
+                    (window.outerHeight - window.innerHeight)) *
+                    window.devicePixelRatio
+            )
         });
     }
 
@@ -258,7 +261,7 @@
 
         // Match by index rendered receiver element to device array
         if (receiverElementIndex > -1) {
-            return receiverDevices[receiverElementIndex];
+            return $deviceStore[receiverElementIndex];
         }
     }
 
@@ -328,7 +331,6 @@
 
     function onReceiverCast(receiverDevice: ReceiverDevice) {
         isConnecting = true;
-        connectingId = receiverDevice.id;
 
         port?.postMessage({
             subject: "receiverSelector:selected",
@@ -364,86 +366,62 @@
     </button>
 </div>
 
-<div class="media-type-select">
-    <div class="media-type-select__label-cast">
-        {_("popupMediaSelectCastLabel")}
-    </div>
-    <div
-        class="select-wrapper"
-        class:select-wrapper--disabled={availableMediaTypes ===
-            ReceiverSelectorMediaType.None}
-    >
-        <select
-            class="media-type-select__dropdown"
-            bind:value={mediaType}
-            disabled={availableMediaTypes === ReceiverSelectorMediaType.None}
-        >
-            <option
-                value={ReceiverSelectorMediaType.App}
-                disabled={!isAppMediaTypeAvailable}
-            >
-                {knownApp?.name ?? _("popupMediaTypeApp")}
-            </option>
-
-            {#if opts?.mirroringEnabled}
+{#if availableMediaTypes !== ReceiverSelectorMediaType.None}
+    <div class="media-type-select">
+        <div class="media-type-select__label-cast">
+            {_("popupMediaSelectCastLabel")}
+        </div>
+        <div class="select-wrapper">
+            <select class="media-type-select__dropdown" bind:value={mediaType}>
                 <option
-                    value={ReceiverSelectorMediaType.Tab}
-                    disabled={!(
-                        availableMediaTypes & ReceiverSelectorMediaType.Tab
-                    )}
+                    value={ReceiverSelectorMediaType.App}
+                    disabled={!isAppMediaTypeAvailable}
                 >
-                    {_("popupMediaTypeTab")}
+                    {knownApp?.name ?? _("popupMediaTypeApp")}
                 </option>
-                <option
-                    value={ReceiverSelectorMediaType.Screen}
-                    disabled={!(
-                        availableMediaTypes & ReceiverSelectorMediaType.Screen
-                    )}
-                >
-                    {_("popupMediaTypeScreen")}
-                </option>
-            {/if}
-        </select>
-    </div>
-    <div class="media-type-select__label-to">
-        {_("popupMediaSelectToLabel")}
-    </div>
-</div>
 
-<ul class="receivers">
-    {#if !receiverDevices.length}
-        <div class="receivers__not-found">
+                {#if opts?.mirroringEnabled}
+                    <option
+                        value={ReceiverSelectorMediaType.Tab}
+                        disabled={!(
+                            availableMediaTypes & ReceiverSelectorMediaType.Tab
+                        )}
+                    >
+                        {_("popupMediaTypeTab")}
+                    </option>
+                    <option
+                        value={ReceiverSelectorMediaType.Screen}
+                        disabled={!(
+                            availableMediaTypes &
+                            ReceiverSelectorMediaType.Screen
+                        )}
+                    >
+                        {_("popupMediaTypeScreen")}
+                    </option>
+                {/if}
+            </select>
+        </div>
+        <div class="media-type-select__label-to">
+            {_("popupMediaSelectToLabel")}
+        </div>
+    </div>
+{/if}
+
+<ul class="receiver-list">
+    {#if !$deviceStore.length}
+        <div class="receiver-list__not-found">
             {_("popupNoReceiversFound")}
         </div>
     {:else}
-        {#each receiverDevices as device}
-            {@const application = device.status?.applications?.[0]}
-            {@const isDeviceConnecting =
-                isConnecting && connectingId === device.id}
-
-            <li class="receiver">
-                <div class="receiver__name">
-                    {device.friendlyName}
-                </div>
-                <div class="receiver__address">
-                    {application && !application.isIdleScreen
-                        ? application.statusText
-                        : `${device.host}:${device.port}`}
-                </div>
-                <button
-                    class="button receiver__connect"
-                    on:click={() => onReceiverCast(device)}
-                    disabled={isConnecting ||
-                        isDeviceConnecting ||
-                        !isMediaTypeAvailable}
-                >
-                    {#if isDeviceConnecting}
-                        {_("popupCastingButtonTitle", "")}<LoadingIndicator />
-                    {:else}
-                        {_("popupCastButtonTitle")}
-                    {/if}
-                </button>
-            </li>
+        {#each $deviceStore as device}
+            <Receiver
+                {port}
+                {device}
+                {isMediaTypeAvailable}
+                isAnyConnecting={isConnecting}
+                on:cast={ev => onReceiverCast(ev.detail.device)}
+                on:stop={ev => onReceiverStop(ev.detail.device)}
+            />
         {/each}
     {/if}
 </ul>

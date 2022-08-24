@@ -7,6 +7,7 @@ import { DecodeTransform, EncodeTransform } from "../transforms";
 import {
     MediaStatus,
     ReceiverStatus,
+    SenderMediaMessage,
     SenderMessage
 } from "./components/cast/types";
 
@@ -69,6 +70,23 @@ type MessageDefinitions = {
     "main:receiverDeviceMediaStatusUpdated": {
         deviceId: string;
         status: MediaStatus;
+    };
+
+    /**
+     * Sent to the bridge when non-session related receiver messages
+     * need to be sent (e.g. volume control, application stop, etc...).
+     */
+    "bridge:sendReceiverMessage": {
+        deviceId: string;
+        message: SenderMessage;
+    };
+    /**
+     * Sent to the bridge when the receiver selector media UI is used
+     * to control media playback.
+     */
+    "bridge:sendMediaMessage": {
+        deviceId: string;
+        message: SenderMediaMessage;
     };
 
     /**

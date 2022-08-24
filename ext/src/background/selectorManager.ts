@@ -12,7 +12,9 @@ import deviceManager from "./deviceManager";
 import ReceiverSelector, {
     ReceiverSelection,
     ReceiverSelectionCast,
-    ReceiverSelectionStop
+    ReceiverSelectionStop,
+    ReceiverSelectorMediaMessage,
+    ReceiverSelectorReceiverMessage
 } from "./ReceiverSelector";
 
 import {
@@ -122,6 +124,10 @@ async function getSelection(
             "receiverDeviceUpdated",
             onReceiverChange
         );
+        deviceManager.addEventListener(
+            "receiverDeviceMediaUpdated",
+            onReceiverChange
+        );
 
         function onSelectorSelected(ev: CustomEvent<ReceiverSelectionCast>) {
             logger.info("Selected receiver", ev.detail);
@@ -150,11 +156,27 @@ async function getSelection(
         function onSelectorError(ev: CustomEvent<string>) {
             reject(ev.detail);
         }
+        function onReceiverMessage(
+            ev: CustomEvent<ReceiverSelectorReceiverMessage>
+        ) {
+            deviceManager.sendReceiverMessage(
+                ev.detail.deviceId,
+                ev.detail.message
+            );
+        }
+        function onMediaMessage(ev: CustomEvent<ReceiverSelectorMediaMessage>) {
+            deviceManager.sendMediaMessage(
+                ev.detail.deviceId,
+                ev.detail.message
+            );
+        }
 
         sharedSelector.addEventListener("selected", onSelectorSelected);
         sharedSelector.addEventListener("stop", onSelectorStop);
         sharedSelector.addEventListener("cancelled", onSelectorCancelled);
         sharedSelector.addEventListener("error", onSelectorError);
+        sharedSelector.addEventListener("receiverMessage", onReceiverMessage);
+        sharedSelector.addEventListener("mediaMessage", onMediaMessage);
         sharedSelector.addEventListener("close", removeListeners);
 
         function removeListeners() {
@@ -165,6 +187,11 @@ async function getSelection(
                 onSelectorCancelled
             );
             sharedSelector.removeEventListener("error", onSelectorError);
+            sharedSelector.removeEventListener(
+                "receiverMessage",
+                onReceiverMessage
+            );
+            sharedSelector.removeEventListener("mediaMessage", onMediaMessage);
             sharedSelector.removeEventListener("close", removeListeners);
 
             deviceManager.removeEventListener(
@@ -177,6 +204,10 @@ async function getSelection(
             );
             deviceManager.removeEventListener(
                 "receiverDeviceUpdated",
+                onReceiverChange
+            );
+            deviceManager.removeEventListener(
+                "receiverDeviceMediaUpdated",
                 onReceiverChange
             );
         }

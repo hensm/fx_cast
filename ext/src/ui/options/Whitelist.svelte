@@ -19,7 +19,7 @@
     let editingInput: HTMLInputElement;
     let editingValue: string;
 
-    let expandedItemIndices = new Set();
+    let expandedItemIndices = new Set<number>();
 
     let knownAppToAdd: Nullable<KnownApp> = null;
     $: filteredKnownApps = Object.values(knownApps).filter(app => {
@@ -217,7 +217,7 @@
                         }}
                     >
                         <img
-                            src="assets/{isItemExpanded
+                            src="../assets/{isItemExpanded
                                 ? 'photon_arrowhead_up.svg'
                                 : 'photon_arrowhead_down.svg'}"
                             alt="icon, arrow down"

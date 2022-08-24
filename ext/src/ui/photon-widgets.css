@@ -30,6 +30,9 @@
     --field-box-shadow-error: 0 0 0 1px var(--red-60),
         0 0 0 4px var(--red-60-a30);
 
+    --border-color: var(--grey-90-a20);
+    --secondary-color: rgb(125, 125, 125);
+
     color-scheme: light dark;
 }
 
@@ -46,7 +49,14 @@
         --field-placeholder-color: var(--grey-30);
         --field-border-color: var(--grey-10-a20);
         --field-border-color-hover: var(--grey-10-a30);
+
+        --border-color: var(--grey-10-a20);
+        --secondary-color: var(--grey-10-a60);
     }
+}
+
+* {
+    box-sizing: border-box;
 }
 
 button,
@@ -62,34 +72,40 @@ select {
     background-color: var(--button-background);
     color: var(--button-color);
 }
-button:not(:disabled):hover,
-select:not(:disabled):hover {
+button:not(:disabled):hover {
     background-color: var(--button-background-hover);
 }
-button:not(:disabled):active,
-select:not(:disabled):hover:active {
+button:not(:disabled):active {
     background-color: var(--button-background-active);
 }
 
 input,
-textarea {
+textarea,
+select {
     background-color: var(--field-background);
     border: 1px solid var(--field-border-color);
     color: var(--field-color);
 }
 
 input:hover,
-textarea:hover {
+textarea:hover,
+select:hover {
     border-color: var(--field-border-color-hover);
 }
 
-:-moz-any(button, input, textarea, select):focus {
+button:focus-visible,
+input:focus-visible,
+textarea:focus-visible,
+select:focus-visible {
     border-color: var(--focus-border-color) !important;
     box-shadow: var(--focus-box-shadow);
     outline: initial;
 }
 
-:-moz-any(button, input, textarea, select):focus::-moz-focus-inner {
+button::-moz-focus-inner,
+input::-moz-focus-inner,
+textarea::-moz-focus-inner,
+select::-moz-focus-inner {
     border: initial;
 }
 
@@ -130,6 +146,22 @@ button:default:hover:active {
     background-color: var(--button-background-primary-active);
 }
 
+.ghost {
+    align-items: center;
+    background-position: center center;
+    background-repeat: no-repeat;
+    display: flex;
+    height: 24px !important;
+    justify-content: center;
+    padding: initial;
+    width: 24px !important;
+}
+
+.ghost:not(:hover),
+.ghost:disabled {
+    background-color: initial;
+}
+
 .select-wrapper {
     --arrow-width: 16px;
     position: relative;
@@ -137,12 +169,16 @@ button:default:hover:active {
 }
 .select-wrapper::after {
     align-items: center;
-    content: "▼";
-    opacity: 0.5;
+    background-image: url("assets/photon_arrowhead_down.svg");
+    background-position: center center;
+    background-repeat: no-repeat;
+    background-size: 80%;
+    content: "";
     display: flex;
     height: 100%;
-    margin-right: 4px;
     justify-content: center;
+    margin-right: 4px;
+    opacity: 0.5;
     pointer-events: none;
     position: absolute;
     right: 0;

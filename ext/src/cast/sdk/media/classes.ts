@@ -15,16 +15,6 @@ import {
     UserAction
 } from "./enums";
 
-export class AudiobookChapterMediaMetadata {
-    bookTitle?: string;
-    chapterNumber?: number;
-    chapterTitle?: string;
-    images?: Image[];
-    subtitle?: string;
-    title?: string;
-    type = MetadataType.AUDIOBOOK_CHAPTER;
-}
-
 export class AudiobookContainerMetadata {
     authors?: string[];
     narrators?: string[];
@@ -71,7 +61,7 @@ export class BreakStatus {
 export class ContainerMetadata {
     containerDuration?: number;
     containerImages?: Image[];
-    sections?: MediaMetadata[];
+    sections?: Metadata[];
     title?: string;
 
     constructor(
@@ -86,16 +76,6 @@ export class EditTracksInfoRequest {
         public activeTrackIds: Nullable<number[]> = null,
         public textTrackStyle: Nullable<string> = null
     ) {}
-}
-
-export class GenericMediaMetadata {
-    images?: Image[];
-    metadataType = MetadataType.GENERIC;
-    releaseDate?: string;
-    releaseYear?: number;
-    subtitle?: string;
-    title?: string;
-    type = MetadataType.GENERIC;
 }
 
 export class GetStatusRequest {
@@ -129,6 +109,7 @@ export class LoadRequest {
 }
 
 export type Metadata =
+    | AudiobookChapterMediaMetadata
     | GenericMediaMetadata
     | MovieMediaMetadata
     | MusicTrackMediaMetadata
@@ -156,33 +137,60 @@ export class MediaInfo {
     constructor(public contentId: string, public contentType: string) {}
 }
 
-export class MediaMetadata {
+export abstract class MediaMetadata<T extends MetadataType> {
     queueItemId?: number;
     sectionDuration?: number;
     sectionStartAbsoluteTime?: number;
     sectionStartTimeInContainer?: number;
     sectionStartTimeInMedia?: number;
-    type: MetadataType;
-    metadataType: MetadataType;
+    type: T;
+    metadataType: T;
 
-    constructor(type: MetadataType) {
+    constructor(type: T) {
         this.type = type;
         this.metadataType = type;
     }
 }
 
-export class MovieMediaMetadata {
+export class AudiobookChapterMediaMetadata extends MediaMetadata<MetadataType.AUDIOBOOK_CHAPTER> {
+    bookTitle?: string;
+    chapterNumber?: number;
+    chapterTitle?: string;
     images?: Image[];
-    metadataType = MetadataType.MOVIE;
+    subtitle?: string;
+    title?: string;
+
+    constructor() {
+        super(MetadataType.AUDIOBOOK_CHAPTER);
+    }
+}
+
+export class GenericMediaMetadata extends MediaMetadata<MetadataType.GENERIC> {
+    images?: Image[];
+    releaseDate?: string;
+    releaseYear?: number;
+    subtitle?: string;
+    title?: string;
+
+    constructor() {
+        super(MetadataType.GENERIC);
+    }
+}
+
+export class MovieMediaMetadata extends MediaMetadata<MetadataType.MOVIE> {
+    images?: Image[];
     releaseDate?: string;
     releaseYear?: number;
     studio?: string;
     subtitle?: string;
     title?: string;
-    type = MetadataType.MOVIE;
+
+    constructor() {
+        super(MetadataType.MOVIE);
+    }
 }
 
-export class MusicTrackMediaMetadata {
+export class MusicTrackMediaMetadata extends MediaMetadata<MetadataType.MUSIC_TRACK> {
     albumArtist?: string;
     albumName?: string;
     artist?: string;
@@ -190,20 +198,18 @@ export class MusicTrackMediaMetadata {
     composer?: string;
     discNumber?: number;
     images?: Image[];
-    metadataType = MetadataType.MUSIC_TRACK;
     releaseDate?: string;
     releaseYear?: number;
     songName?: string;
     title?: string;
     trackNumber?: number;
-    type = MetadataType.MUSIC_TRACK;
+
+    constructor() {
+        super(MetadataType.MUSIC_TRACK);
+    }
 }
 
-export class PauseRequest {
-    customData: unknown = null;
-}
-
-export class PhotoMediaMetadata {
+export class PhotoMediaMetadata extends MediaMetadata<MetadataType.PHOTO> {
     artist?: string;
     creationDateTime?: string;
     height?: number;
@@ -211,10 +217,33 @@ export class PhotoMediaMetadata {
     latitude?: number;
     location?: string;
     longitude?: number;
-    metadataType = MetadataType.PHOTO;
     title?: string;
-    type = MetadataType.PHOTO;
     width?: number;
+
+    constructor() {
+        super(MetadataType.PHOTO);
+    }
+}
+
+export class TvShowMediaMetadata extends MediaMetadata<MetadataType.TV_SHOW> {
+    episode?: number;
+    episodeNumber?: number;
+    episodeTitle?: string;
+    images?: Image[];
+    originalAirdate?: string;
+    releaseYear?: number;
+    season?: number;
+    seasonNumber?: number;
+    seriesTitle?: string;
+    title?: string;
+
+    constructor() {
+        super(MetadataType.TV_SHOW);
+    }
+}
+
+export class PauseRequest {
+    customData: unknown = null;
 }
 
 export class PlayRequest {
@@ -337,21 +366,6 @@ export class Track {
     trackContentType: Nullable<string> = null;
 
     constructor(public trackId: number, public type: TrackType) {}
-}
-
-export class TvShowMediaMetadata {
-    episode?: number;
-    episodeNumber?: number;
-    episodeTitle?: string;
-    images?: Image[];
-    metadataType: number = MetadataType.TV_SHOW;
-    originalAirdate?: string;
-    releaseYear?: number;
-    season?: number;
-    seasonNumber?: number;
-    seriesTitle?: string;
-    title?: string;
-    type = MetadataType.TV_SHOW;
 }
 
 export class UserActionState {

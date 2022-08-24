@@ -284,7 +284,7 @@ export interface MediaStatus {
     playerState: PlayerState;
     idleReason?: IdleReason;
     items?: QueueItem[];
-    currentTime: number;
+    currentTime: Nullable<number>;
     supportedMediaCommands: number;
     repeatMode: RepeatMode;
     volume: Volume;
@@ -357,11 +357,13 @@ export type SenderMediaMessage =
           type: "MEDIA_GET_STATUS";
           mediaSessionId?: number;
           customData?: unknown;
+          requestId: number;
       }
     | {
           type: "GET_STATUS";
           mediaSessionId?: number;
           customData?: unknown;
+          requestId: number;
       }
     | (MediaReqBase & { type: "STOP" })
     | (MediaReqBase & { type: "MEDIA_SET_VOLUME"; volume: Volume })
@@ -369,24 +371,24 @@ export type SenderMediaMessage =
     | (MediaReqBase & { type: "SET_PLAYBACK_RATE"; playbackRate: number })
     | (ReqBase & {
           type: "LOAD";
-          activeTrackIds: Nullable<number[]>;
+          activeTrackIds?: Nullable<number[]>;
           atvCredentials?: string;
           atvCredentialsType?: string;
-          autoplay: Nullable<boolean>;
-          currentTime: Nullable<number>;
+          autoplay?: Nullable<boolean>;
+          currentTime?: Nullable<number>;
           customData?: unknown;
           media: MediaInformation;
-          sessionId: Nullable<string>;
+          sessionId?: Nullable<string>;
       })
     | (MediaReqBase & {
           type: "SEEK";
-          resumeState: Nullable<ResumeState>;
-          currentTime: Nullable<number>;
+          resumeState?: Nullable<ResumeState>;
+          currentTime?: Nullable<number>;
       })
     | (MediaReqBase & {
           type: "EDIT_TRACKS_INFO";
-          activeTrackIds: Nullable<number[]>;
-          textTrackStyle: Nullable<string>;
+          activeTrackIds?: Nullable<number[]>;
+          textTrackStyle?: Nullable<string>;
       })
     // QueueLoadRequest
     | (MediaReqBase & {
@@ -394,46 +396,46 @@ export type SenderMediaMessage =
           items: QueueItem[];
           startIndex: number;
           repeatMode: string;
-          sessionId: Nullable<string>;
+          sessionId?: Nullable<string>;
       })
     // QueueInsertItemsRequest
     | (MediaReqBase & {
           type: "QUEUE_INSERT";
           items: QueueItem[];
-          insertBefore: Nullable<number>;
-          sessionId: Nullable<string>;
+          insertBefore?: Nullable<number>;
+          sessionId?: Nullable<string>;
       })
     // QueueUpdateItemsRequest
     | (MediaReqBase & {
           type: "QUEUE_UPDATE";
           items: QueueItem[];
-          sessionId: Nullable<string>;
+          sessionId?: Nullable<string>;
       })
     // QueueJumpRequest
     | (MediaReqBase & {
           type: "QUEUE_UPDATE";
-          jump: Nullable<number>;
-          currentItemId: Nullable<number>;
-          sessionId: Nullable<string>;
+          jump?: Nullable<number>;
+          currentItemId?: Nullable<number>;
+          sessionId?: Nullable<string>;
       })
     // QueueRemoveItemsRequest
     | (MediaReqBase & {
           type: "QUEUE_REMOVE";
           itemIds: number[];
-          sessionId: Nullable<string>;
+          sessionId?: Nullable<string>;
       })
     // QueueReorderItemsRequest
     | (MediaReqBase & {
           type: "QUEUE_REORDER";
           itemIds: number[];
-          insertBefore: Nullable<number>;
-          sessionId: Nullable<string>;
+          insertBefore?: Nullable<number>;
+          sessionId?: Nullable<string>;
       })
     // QueueSetPropertiesRequest
     | (MediaReqBase & {
           type: "QUEUE_UPDATE";
-          repeatMode: Nullable<string>;
-          sessionId: Nullable<string>;
+          repeatMode?: Nullable<string>;
+          sessionId?: Nullable<string>;
       });
 
 export type ReceiverMediaMessage =

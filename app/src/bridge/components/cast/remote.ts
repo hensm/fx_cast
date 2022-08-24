@@ -43,6 +43,10 @@ export default class Remote extends CastClient {
         this.transportClient?.disconnect();
     }
 
+    sendMediaMessage(message: SenderMediaMessage) {
+        this.transportClient?.sendMediaMessage(message);
+    }
+
     /**
      * Handle `NS_RECEIVER` messages from the receiver device.
      * On initial connection, a `GET_STATUS` message is sent that
@@ -76,7 +80,8 @@ export default class Remote extends CastClient {
 
             this.transportClient.connect(this.host).then(() => {
                 this.transportClient?.sendMediaMessage({
-                    type: "GET_STATUS"
+                    type: "GET_STATUS",
+                    requestId: 0
                 });
             });
 
