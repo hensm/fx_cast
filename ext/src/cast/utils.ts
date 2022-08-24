@@ -27,3 +27,22 @@ export function hasRequiredCapabilities(
         }
     });
 }
+
+interface GetEstimatedTimeOpts {
+    currentTime: number;
+    lastUpdateTime: number;
+    duration?: Nullable<number>;
+}
+export function getEstimatedTime(opts: GetEstimatedTimeOpts) {
+    let estimatedTime =
+        opts.currentTime + (Date.now() - opts.lastUpdateTime) / 1000;
+
+    // Enforce valid range
+    if (estimatedTime < 0) {
+        estimatedTime = 0;
+    } else if (opts.duration && estimatedTime > opts.duration) {
+        estimatedTime = opts.duration;
+    }
+
+    return estimatedTime;
+}

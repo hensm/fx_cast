@@ -14,6 +14,7 @@
     const _ = browser.i18n.getMessage;
 
     import deviceStore from "./deviceStore";
+    import { getEstimatedTime } from "../../cast/utils";
 
     const dispatch = createEventDispatcher<{
         togglePlayback: void;
@@ -99,7 +100,7 @@
 
     // Keep track of update times for currentTime estimations
     let lastUpdateTime = 0;
-    let currentTime = getEstimatedTime();
+    let currentTime = getEstimatedMediaTime();
 
     deviceStore.subscribe(devices => {
         const newDevice = devices.find(newDevice => newDevice.id === device.id);
@@ -112,8 +113,8 @@
     // Update estimated time every second
     onMount(() => {
         const intervalId = window.setInterval(() => {
-            if (currentTime !== getEstimatedTime()) {
-                currentTime = getEstimatedTime();
+            if (currentTime !== getEstimatedMediaTime()) {
+                currentTime = getEstimatedMediaTime();
             }
         }, 1000);
 
@@ -126,23 +127,15 @@
      * Estimates the current playback position based on the last status
      * update.
      */
-    function getEstimatedTime() {
-        if (!status.currentTime) return 0;
+    function getEstimatedMediaTime() {
+        if (!status.currentTime || !lastUpdateTime) return 0;
 
-        if (status.playerState === PlayerState.PLAYING && lastUpdateTime) {
-            let estimatedTime =
-                status.currentTime + (Date.now() - lastUpdateTime) / 1000;
-
-            if (estimatedTime < 0) {
-                estimatedTime = 0;
-            } else if (
-                status.media?.duration &&
-                estimatedTime > status.media.duration
-            ) {
-                estimatedTime = status.media.duration;
-            }
-
-            return estimatedTime;
+        if (status.playerState === PlayerState.PLAYING) {
+            return getEstimatedTime({
+                currentTime: status.currentTime,
+                lastUpdateTime,
+                duration: status.media?.duration
+            });
         }
 
         return status.currentTime;

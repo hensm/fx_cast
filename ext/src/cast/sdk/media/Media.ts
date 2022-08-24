@@ -32,6 +32,7 @@ import { ErrorCode } from "../enums";
 
 import { ErrorCallback, SuccessCallback, UpdateListener } from "../../types";
 import { SenderMediaMessage } from "../types";
+import { getEstimatedTime } from "../../utils";
 
 export const NS_MEDIA = "urn:x-cast:com.google.cast.media";
 
@@ -92,45 +93,67 @@ export default class Media {
             .catch(errorCallback);
     }
 
+    /**
+     * Estimates the current break clip position based on the last
+     * information reported by the receiver.
+     */
     getEstimatedBreakClipTime() {
-        logger.info("STUB :: Media#getEstimatedBreakClipTime");
+        if (!this.breakStatus?.currentBreakClipTime) return;
+
+        const currentBreakClip = this.media?.breakClips?.find(
+            breakClip => breakClip.id === this.breakStatus?.breakClipId
+        );
+        if (!currentBreakClip) return;
+
+        return getEstimatedTime({
+            currentTime: this.breakStatus.currentBreakClipTime,
+            lastUpdateTime: this._lastUpdateTime,
+            duration: currentBreakClip.duration
+        });
     }
+
+    /**
+     * Estimates the current break position based on the last
+     * information reported by the receiver.
+     */
     getEstimatedBreakTime() {
-        logger.info("STUB :: Media#getEstimatedBreakTime");
+        if (!this.breakStatus?.currentBreakTime) return;
+
+        const currentBreak = this.media?.breaks?.find(
+            break_ => break_.id === this.breakStatus?.breakId
+        );
+        if (!currentBreak) return;
+
+        return getEstimatedTime({
+            currentTime: this.breakStatus.currentBreakTime,
+            lastUpdateTime: this._lastUpdateTime,
+            duration: currentBreak.duration
+        });
     }
+
     getEstimatedLiveSeekableRange() {
         logger.info("STUB :: Media#getEstimatedLiveSeekableRange");
     }
 
     /**
-     * Estimate the current playback position based on the last
-     * time reported by the receiver and the current playback
-     * rate.
+     * Estimates the current playback position based on the last
+     * information reported by the receiver.
      */
     getEstimatedTime(): number {
         if (this.playerState === PlayerState.PLAYING && this._lastUpdateTime) {
-            let estimatedTime =
-                this.currentTime + (Date.now() - this._lastUpdateTime) / 1000;
-
-            // Enforce valid range
-            if (estimatedTime < 0) {
-                estimatedTime = 0;
-            } else if (
-                this.media?.duration &&
-                estimatedTime > this.media.duration
-            ) {
-                estimatedTime = this.media.duration;
-            }
-
-            return estimatedTime;
+            return getEstimatedTime({
+                currentTime: this.currentTime,
+                lastUpdateTime: this._lastUpdateTime,
+                duration: this.media?.duration
+            });
         }
 
         return this.currentTime;
     }
 
     /**
-     * Request media status from the receiver application. This
-     * will also trigger any added media update listeners.
+     * Request media status from the receiver application. This will
+     * also trigger any added media update listeners.
      */
     getStatus(
         getStatusRequest = new GetStatusRequest(),
