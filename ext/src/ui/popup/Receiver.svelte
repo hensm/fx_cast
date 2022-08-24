@@ -126,54 +126,52 @@
         }}
     />
 
-    {#if isExpanded}
+    {#if isExpanded && mediaStatus}
         <div class="receiver__expanded">
-            {#if mediaStatus}
-                <ReceiverMedia
-                    status={mediaStatus}
-                    {device}
-                    on:togglePlayback={() => {
-                        switch (mediaStatus?.playerState) {
-                            case PlayerState.PLAYING:
-                                sendMediaMessage({ type: "PAUSE" });
-                                break;
-                            case PlayerState.PAUSED:
-                                sendMediaMessage({ type: "PLAY" });
-                                break;
-                        }
-                    }}
-                    on:previous={() => {
-                        sendMediaMessage({
-                            type: "QUEUE_UPDATE",
-                            jump: -1
-                        });
-                    }}
-                    on:next={() => {
-                        sendMediaMessage({
-                            type: "QUEUE_UPDATE",
-                            jump: 1
-                        });
-                    }}
-                    on:seek={ev => {
-                        sendMediaMessage({
-                            type: "SEEK",
-                            currentTime: ev.detail.position
-                        });
-                    }}
-                    on:trackChanged={ev => {
-                        sendMediaMessage({
-                            type: "EDIT_TRACKS_INFO",
-                            activeTrackIds: ev.detail.activeTrackIds
-                        });
-                    }}
-                    on:volumeChanged={ev => {
-                        sendReceiverMessage({
-                            type: "SET_VOLUME",
-                            volume: ev.detail
-                        });
-                    }}
-                />
-            {/if}
+            <ReceiverMedia
+                status={mediaStatus}
+                {device}
+                on:togglePlayback={() => {
+                    switch (mediaStatus?.playerState) {
+                        case PlayerState.PLAYING:
+                            sendMediaMessage({ type: "PAUSE" });
+                            break;
+                        case PlayerState.PAUSED:
+                            sendMediaMessage({ type: "PLAY" });
+                            break;
+                    }
+                }}
+                on:previous={() => {
+                    sendMediaMessage({
+                        type: "QUEUE_UPDATE",
+                        jump: -1
+                    });
+                }}
+                on:next={() => {
+                    sendMediaMessage({
+                        type: "QUEUE_UPDATE",
+                        jump: 1
+                    });
+                }}
+                on:seek={ev => {
+                    sendMediaMessage({
+                        type: "SEEK",
+                        currentTime: ev.detail.position
+                    });
+                }}
+                on:trackChanged={ev => {
+                    sendMediaMessage({
+                        type: "EDIT_TRACKS_INFO",
+                        activeTrackIds: ev.detail.activeTrackIds
+                    });
+                }}
+                on:volumeChanged={ev => {
+                    sendReceiverMessage({
+                        type: "SET_VOLUME",
+                        volume: ev.detail
+                    });
+                }}
+            />
         </div>
     {/if}
 </li>
