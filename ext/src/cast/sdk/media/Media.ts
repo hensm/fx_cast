@@ -140,7 +140,7 @@ export default class Media {
      * information reported by the receiver.
      */
     getEstimatedTime(): number {
-        if (this.playerState === PlayerState.PLAYING && this._lastUpdateTime) {
+        if (this.playerState === PlayerState.PLAYING) {
             return getEstimatedTime({
                 currentTime: this.currentTime,
                 lastUpdateTime: this._lastUpdateTime,

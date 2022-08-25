@@ -28,6 +28,24 @@ export function hasRequiredCapabilities(
     });
 }
 
+export function convertCapabilitiesFlags(flags: ReceiverDeviceCapabilities) {
+    // Convert capabilities bitflag to string array
+    const capabilities: Capability[] = [];
+    if (flags & ReceiverDeviceCapabilities.VIDEO_OUT)
+        capabilities.push(Capability.VIDEO_OUT);
+    if (flags & ReceiverDeviceCapabilities.VIDEO_IN)
+        capabilities.push(Capability.VIDEO_IN);
+    if (flags & ReceiverDeviceCapabilities.AUDIO_OUT)
+        capabilities.push(Capability.AUDIO_OUT);
+    if (flags & ReceiverDeviceCapabilities.AUDIO_IN)
+        capabilities.push(Capability.AUDIO_IN);
+
+    if (flags & ReceiverDeviceCapabilities.MULTIZONE_GROUP)
+        capabilities.push(Capability.MULTIZONE_GROUP);
+
+    return capabilities;
+}
+
 interface GetEstimatedTimeOpts {
     currentTime: number;
     lastUpdateTime: number;

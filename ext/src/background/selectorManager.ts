@@ -4,6 +4,7 @@ import options from "../lib/options";
 import logger from "../lib/logger";
 
 import { getMediaTypesForPageUrl } from "../lib/utils";
+import { BaseConfig, baseConfigStorage, getAppTag } from "../cast/googleapi";
 import { SessionRequest } from "../cast/sdk/classes";
 
 import castManager from "./castManager";
@@ -21,6 +22,16 @@ import {
     ReceiverSelectionActionType,
     ReceiverSelectorMediaType
 } from "../types";
+
+let baseConfig: BaseConfig;
+baseConfigStorage
+    .get("baseConfig")
+    .then(value => {
+        baseConfig = value.baseConfig;
+    })
+    .catch(() => {
+        logger.error("Failed to get Chromecast base config!");
+    });
 
 let sharedSelector: ReceiverSelector;
 async function getSelector() {
@@ -215,6 +226,12 @@ async function getSelection(
         // Ensure status manager is initialized
         await deviceManager.init();
 
+        let isRequestAppAudioCompatible: Optional<boolean>;
+        if (castInstance?.appId) {
+            const appTag = getAppTag(baseConfig, castInstance.appId);
+            isRequestAppAudioCompatible = appTag?.supports_audio_only;
+        }
+
         sharedSelector.open({
             receiverDevices: deviceManager.getDevices(),
             defaultMediaType,
@@ -226,7 +243,8 @@ async function getSelection(
                       url: pageUrl,
                       tabId: contextTabId,
                       frameId: contextFrameId,
-                      sessionRequest: selectionOpts?.sessionRequest
+                      sessionRequest: selectionOpts?.sessionRequest,
+                      isRequestAppAudioCompatible
                   }
                 : undefined
         });

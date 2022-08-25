@@ -41,4 +41,5 @@ export interface ReceiverSelectorPageInfo {
     tabId: number;
     frameId: number;
     sessionRequest?: SessionRequest;
+    isRequestAppAudioCompatible?: boolean;
 }

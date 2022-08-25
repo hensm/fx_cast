@@ -2,10 +2,11 @@
 
 import logger from "../../lib/logger";
 
-import { ReceiverDevice, ReceiverDeviceCapabilities } from "../../types";
-import { ErrorCallback, SuccessCallback } from "../types";
-
+import { Message } from "../../messaging";
 import eventMessaging from "../eventMessaging";
+
+import { ReceiverDevice } from "../../types";
+import { ErrorCallback, SuccessCallback } from "../types";
 
 import {
     AutoJoinPolicy,
@@ -38,7 +39,7 @@ import {
 import Session from "./Session";
 
 import media from "./media";
-import { Message } from "../../messaging";
+import { convertCapabilitiesFlags } from "../utils";
 
 type ReceiverActionListener = (
     receiver: Receiver,
@@ -51,23 +52,11 @@ type RequestSessionSuccessCallback = (session: Session) => void;
  * Create `chrome.cast.Receiver` object from receiver device info.
  */
 function createReceiver(device: ReceiverDevice) {
-    // Convert capabilities bitflag to string array
-    const capabilities: Capability[] = [];
-    if (device.capabilities & ReceiverDeviceCapabilities.VIDEO_OUT) {
-        capabilities.push(Capability.VIDEO_OUT);
-    } else if (device.capabilities & ReceiverDeviceCapabilities.VIDEO_IN) {
-        capabilities.push(Capability.VIDEO_IN);
-    } else if (device.capabilities & ReceiverDeviceCapabilities.AUDIO_OUT) {
-        capabilities.push(Capability.AUDIO_OUT);
-    } else if (device.capabilities & ReceiverDeviceCapabilities.AUDIO_IN) {
-        capabilities.push(Capability.AUDIO_IN);
-    } else if (
-        device.capabilities & ReceiverDeviceCapabilities.MULTIZONE_GROUP
-    ) {
-        capabilities.push(Capability.MULTIZONE_GROUP);
-    }
-
-    const receiver = new Receiver(device.id, device.friendlyName, capabilities);
+    const receiver = new Receiver(
+        device.id,
+        device.friendlyName,
+        convertCapabilitiesFlags(device.capabilities)
+    );
 
     // Currently only supports CAST receivers
     receiver.receiverType = ReceiverType.CAST;
@@ -178,11 +167,11 @@ export default class {
                 );
 
                 const session = new Session(
-                    status.sessionId, //   sessionId
-                    status.appId, //       appId
-                    status.displayName, // displayName
-                    status.appImages, //   appImages
-                    receiver //            receiver
+                    status.sessionId,
+                    status.appId,
+                    status.displayName,
+                    status.appImages,
+                    receiver
                 );
 
                 session.namespaces = status.namespaces;
@@ -221,11 +210,8 @@ export default class {
                 session.namespaces = status.namespaces;
                 session.receiver.volume = status.volume;
 
-                const updateListeners = session?._updateListeners;
-                if (updateListeners) {
-                    for (const listener of updateListeners) {
-                        listener(session.status !== SessionStatus.STOPPED);
-                    }
+                for (const listener of session._updateListeners) {
+                    listener(session.status !== SessionStatus.STOPPED);
                 }
 
                 break;
@@ -236,12 +222,8 @@ export default class {
                 const session = this.#sessions.get(sessionId);
                 if (session) {
                     session.status = SessionStatus.STOPPED;
-
-                    const updateListeners = session?._updateListeners;
-                    if (updateListeners) {
-                        for (const listener of updateListeners) {
-                            listener(false);
-                        }
+                    for (const listener of session._updateListeners) {
+                        listener(false);
                     }
                 }
 
@@ -252,9 +234,7 @@ export default class {
                 const { sessionId, namespace, messageData } = message.data;
                 const session = this.#sessions.get(sessionId);
                 if (session) {
-                    const _messageListeners = session._messageListeners;
-                    const listeners = _messageListeners.get(namespace);
-
+                    const listeners = session._messageListeners.get(namespace);
                     if (listeners) {
                         for (const listener of listeners) {
                             listener(namespace, messageData);

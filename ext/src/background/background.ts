@@ -11,6 +11,7 @@ import selectorManager from "./selectorManager";
 
 import { initMenus } from "./menus";
 import { initWhitelist } from "./whitelist";
+import { baseConfigStorage, fetchBaseConfig } from "../cast/googleapi";
 
 const _ = browser.i18n.getMessage;
 
@@ -81,6 +82,31 @@ async function notifyBridgeCompat() {
     }
 }
 
+/**
+ * Updates locally-stored base config data if never downloaded or since
+ * expired.
+ */
+async function cacheBaseConfig() {
+    const { baseConfigUpdated } = await baseConfigStorage.get(
+        "baseConfigUpdated"
+    );
+
+    // If never updated or updated more than 48 hours ago
+    if (
+        !baseConfigUpdated ||
+        (Date.now() - baseConfigUpdated) / 1000 >= 172800
+    ) {
+        logger.info("Fetching updated Chromecast base config...");
+        const baseConfig = await fetchBaseConfig();
+        if (baseConfig) {
+            await baseConfigStorage.set({
+                baseConfig,
+                baseConfigUpdated: Date.now()
+            });
+        }
+    }
+}
+
 let isInitialized = false;
 
 async function init() {
@@ -130,4 +156,5 @@ async function init() {
     });
 }
 
+cacheBaseConfig();
 init();

@@ -7,6 +7,7 @@
 
     import {
         ReceiverDevice,
+        ReceiverDeviceCapabilities,
         ReceiverSelectionActionType,
         ReceiverSelectorMediaType,
         ReceiverSelectorPageInfo
@@ -57,6 +58,25 @@
         !isPageWhitelisted &&
         // If an app is not already loaded on the page
         !(availableMediaTypes & ReceiverSelectorMediaType.App);
+
+    /**
+     * Checks if device is compatible with the requested app and
+     * capabilities.
+     */
+    function isDeviceCompatible(device: ReceiverDevice) {
+        // If device is audio-only, check app's audio support flag
+        if (
+            !(device.capabilities & ReceiverDeviceCapabilities.VIDEO_OUT) &&
+            pageInfo?.isRequestAppAudioCompatible === false
+        ) {
+            return false;
+        }
+
+        return hasRequiredCapabilities(
+            device,
+            pageInfo?.sessionRequest?.capabilities
+        );
+    }
 
     let port: Nullable<Port> = null;
     let browserWindow: Nullable<browser.windows.Window> = null;
@@ -138,17 +158,6 @@
                 break;
 
             case "popup:update": {
-                /**
-                 * Filter receiver devices without the required
-                 * capabilities.
-                 */
-                $deviceStore = message.data.receiverDevices.filter(device =>
-                    hasRequiredCapabilities(
-                        device,
-                        pageInfo?.sessionRequest?.capabilities
-                    )
-                );
-
                 if (
                     message.data.availableMediaTypes !== undefined &&
                     message.data.defaultMediaType !== undefined
@@ -161,6 +170,9 @@
                 }
 
                 updateKnownApp();
+
+                $deviceStore = message.data.receiverDevices;
+
                 break;
             }
         }
@@ -418,7 +430,7 @@
                 {device}
                 {isMediaTypeAvailable}
                 isAnyMediaTypeAvailable={availableMediaTypes !==
-                    ReceiverSelectorMediaType.None}
+                    ReceiverSelectorMediaType.None && isDeviceCompatible(device)}
                 isAnyConnecting={isConnecting}
                 on:cast={ev => onReceiverCast(ev.detail.device)}
                 on:stop={ev => onReceiverStop(ev.detail.device)}
