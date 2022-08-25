@@ -4,14 +4,14 @@ import { TypedEmitter } from "tiny-typed-emitter";
 
 import { DecodeTransform, EncodeTransform } from "../transforms";
 
-import {
+import type {
     MediaStatus,
     ReceiverStatus,
     SenderMediaMessage,
     SenderMessage
 } from "./components/cast/types";
 
-import {
+import type {
     ReceiverDevice,
     CastSessionCreatedDetails,
     CastSessionUpdatedDetails

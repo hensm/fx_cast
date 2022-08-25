@@ -3,7 +3,7 @@
 import semver from "semver";
 
 import logger from "./logger";
-import { Port } from "../messaging";
+import type { Port } from "../messaging";
 import * as nativeMessaging from "./nativeMessaging";
 import options from "./options";
 

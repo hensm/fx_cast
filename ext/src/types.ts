@@ -1,7 +1,7 @@
 "use strict";
 
-import { SessionRequest } from "./cast/sdk/classes";
-import { MediaStatus, ReceiverStatus } from "./cast/sdk/types";
+import type { SessionRequest } from "./cast/sdk/classes";
+import type { MediaStatus, ReceiverStatus } from "./cast/sdk/types";
 
 export enum ReceiverDeviceCapabilities {
     NONE = 0,

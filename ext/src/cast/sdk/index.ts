@@ -2,11 +2,11 @@
 
 import logger from "../../lib/logger";
 
-import { Message } from "../../messaging";
+import type { Message } from "../../messaging";
 import eventMessaging from "../eventMessaging";
 
-import { ReceiverDevice } from "../../types";
-import { ErrorCallback, SuccessCallback } from "../types";
+import type { ReceiverDevice } from "../../types";
+import type { ErrorCallback, SuccessCallback } from "../types";
 
 import {
     AutoJoinPolicy,

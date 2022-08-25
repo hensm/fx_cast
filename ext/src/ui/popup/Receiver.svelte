@@ -1,11 +1,14 @@
 <script lang="ts">
     import { createEventDispatcher, onMount } from "svelte";
 
-    import { PlayerState } from "../../cast/sdk/media/enums";
-    import { SenderMediaMessage, SenderMessage } from "../../cast/sdk/types";
-    import { ReceiverDevice } from "../../types";
+    import type { ReceiverDevice } from "../../types";
+    import type { Port } from "../../messaging";
 
-    import { Port } from "../../messaging";
+    import { PlayerState } from "../../cast/sdk/media/enums";
+    import type {
+        SenderMediaMessage,
+        SenderMessage
+    } from "../../cast/sdk/types";
 
     import LoadingIndicator from "../LoadingIndicator.svelte";
     import ReceiverMedia from "./ReceiverMedia.svelte";

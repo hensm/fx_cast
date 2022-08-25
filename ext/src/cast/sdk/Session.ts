@@ -6,7 +6,7 @@ import logger from "../../lib/logger";
 
 import eventMessaging from "../eventMessaging";
 
-import {
+import type {
     ErrorCallback,
     LoadSuccessCallback,
     MediaListener,
@@ -24,10 +24,10 @@ import {
 } from "./types";
 
 import { SessionStatus } from "./enums";
-import { Image, Receiver, SenderApplication } from "./classes";
+import type { Image, Receiver, SenderApplication } from "./classes";
 
 import { MediaCommand } from "./media/enums";
-import { LoadRequest, QueueLoadRequest, QueueItem } from "./media/classes";
+import type { LoadRequest, QueueLoadRequest, QueueItem } from "./media/classes";
 import Media, { NS_MEDIA } from "./media/Media";
 
 /**

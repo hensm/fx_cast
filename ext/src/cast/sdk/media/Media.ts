@@ -30,8 +30,12 @@ import {
 import { PlayerState, RepeatMode } from "./enums";
 import { ErrorCode } from "../enums";
 
-import { ErrorCallback, SuccessCallback, UpdateListener } from "../../types";
-import { SenderMediaMessage } from "../types";
+import type {
+    ErrorCallback,
+    SuccessCallback,
+    UpdateListener
+} from "../../types";
+import type { SenderMediaMessage } from "../types";
 import { getEstimatedTime } from "../../utils";
 
 export const NS_MEDIA = "urn:x-cast:com.google.cast.media";

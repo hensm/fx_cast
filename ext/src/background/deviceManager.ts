@@ -4,9 +4,10 @@ import bridge from "../lib/bridge";
 import logger from "../lib/logger";
 import { TypedEventTarget } from "../lib/TypedEventTarget";
 
-import { Message, Port } from "../messaging";
-import { ReceiverDevice } from "../types";
-import {
+import type { Message, Port } from "../messaging";
+import type { ReceiverDevice } from "../types";
+
+import type {
     MediaStatus,
     ReceiverStatus,
     SenderMediaMessage,

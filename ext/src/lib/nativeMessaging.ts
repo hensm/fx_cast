@@ -3,7 +3,7 @@
 import logger from "./logger";
 import options from "./options";
 
-import { Message, Port } from "../messaging";
+import type { Message, Port } from "../messaging";
 
 type DisconnectListener = (port: Port) => void;
 type MessageListener = (message: Message) => void;

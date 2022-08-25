@@ -4,8 +4,8 @@ import logger from "../../../lib/logger";
 import options from "../../../lib/options";
 import cast, { ensureInit } from "../../export";
 
-import { Message } from "../../../messaging";
-import { ReceiverDevice } from "../../../types";
+import type { Message } from "../../../messaging";
+import type { ReceiverDevice } from "../../../types";
 
 import type Session from "../../sdk/Session";
 import type Media from "../../sdk/media/Media";

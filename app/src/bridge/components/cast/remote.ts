@@ -2,7 +2,7 @@
 
 import CastClient from "./client";
 
-import {
+import type {
     MediaStatus,
     ReceiverMessage,
     ReceiverMediaMessage,

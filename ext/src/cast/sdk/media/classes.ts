@@ -1,6 +1,6 @@
 "use strict";
 
-import { Image, Volume } from "../classes";
+import type { Image, Volume } from "../classes";
 
 import {
     ContainerType,

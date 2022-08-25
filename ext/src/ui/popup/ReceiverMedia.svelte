@@ -1,20 +1,21 @@
 <script lang="ts">
     import { createEventDispatcher, onMount } from "svelte";
 
-    import { ReceiverDevice } from "../../types";
+    import type { ReceiverDevice } from "../../types";
+
     import { MediaStatus, _MediaCommand } from "../../cast/sdk/types";
-    import { Image, Volume } from "../../cast/sdk/classes";
+    import type { Image, Volume } from "../../cast/sdk/classes";
     import {
         MetadataType,
         PlayerState,
         StreamType,
         TrackType
     } from "../../cast/sdk/media/enums";
+    import { getEstimatedTime } from "../../cast/utils";
 
     const _ = browser.i18n.getMessage;
 
     import deviceStore from "./deviceStore";
-    import { getEstimatedTime } from "../../cast/utils";
 
     const dispatch = createEventDispatcher<{
         togglePlayback: void;

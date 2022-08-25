@@ -1,7 +1,7 @@
 "use strict";
 
 import logger from "../lib/logger";
-import { Message } from "../messaging";
+import type { Message } from "../messaging";
 
 type EventMessengerListener = (message: Message) => void;
 

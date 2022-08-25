@@ -1,6 +1,6 @@
 "use strict";
 
-import Session from "./Session";
+import type Session from "./Session";
 
 import {
     AutoJoinPolicy,

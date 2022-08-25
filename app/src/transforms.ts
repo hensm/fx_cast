@@ -1,7 +1,7 @@
 "use strict";
 
 import { Transform, TransformCallback } from "stream";
-import { Message } from "./bridge/messaging";
+import type { Message } from "./bridge/messaging";
 
 type ResponseHandlerFunction = (message: Message) => Promise<unknown>;
 

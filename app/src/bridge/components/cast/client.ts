@@ -2,7 +2,7 @@
 
 import { Channel, Client } from "castv2";
 
-import { ReceiverMessage, SenderMessage } from "./types";
+import type { ReceiverMessage, SenderMessage } from "./types";
 
 export const NS_CONNECTION = "urn:x-cast:com.google.cast.tp.connection";
 export const NS_HEARTBEAT = "urn:x-cast:com.google.cast.tp.heartbeat";

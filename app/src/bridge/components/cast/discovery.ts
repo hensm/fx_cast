@@ -2,7 +2,7 @@
 
 import mdns from "mdns";
 
-import { ReceiverDevice } from "../../messagingTypes";
+import type { ReceiverDevice } from "../../messagingTypes";
 
 /**
  * Chromecast TXT record

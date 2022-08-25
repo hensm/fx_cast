@@ -1,9 +1,9 @@
 "use strict";
 
-import { Message } from "../messaging";
+import type { Message } from "../messaging";
 
-import { BridgeInfo } from "../lib/bridge";
-import { TypedMessagePort } from "../lib/TypedMessagePort";
+import type { BridgeInfo } from "../lib/bridge";
+import type { TypedMessagePort } from "../lib/TypedMessagePort";
 
 import CastSDK from "./sdk";
 

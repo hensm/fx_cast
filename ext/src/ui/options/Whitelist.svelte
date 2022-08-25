@@ -1,10 +1,12 @@
 <script lang="ts">
     import { tick } from "svelte";
 
-    import knownApps, { KnownApp } from "../../cast/knownApps";
-    import { WhitelistItemData } from "../../background/whitelist";
+    import type { WhitelistItemData } from "../../background/whitelist";
+
     import { REMOTE_MATCH_PATTERN_REGEX } from "../../lib/matchPattern";
-    import { Options } from "../../lib/options";
+    import type { Options } from "../../lib/options";
+
+    import knownApps, { KnownApp } from "../../cast/knownApps";
 
     const _ = browser.i18n.getMessage;
 

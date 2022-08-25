@@ -1,11 +1,11 @@
 "use strict";
 
-import { Channel } from "castv2";
+import type { Channel } from "castv2";
 
 import messaging from "../../messaging";
 
-import { ReceiverDevice } from "../../messagingTypes";
-import { ReceiverMessage } from "./types";
+import type { ReceiverDevice } from "../../messagingTypes";
+import type { ReceiverMessage } from "./types";
 
 import CastClient, { NS_CONNECTION, NS_HEARTBEAT } from "./client";
 

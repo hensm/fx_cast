@@ -1,9 +1,9 @@
 "use strict";
 
-import { TypedPort } from "./lib/TypedPort";
-import { BridgeInfo } from "./lib/bridge";
+import type { TypedPort } from "./lib/TypedPort";
+import type { BridgeInfo } from "./lib/bridge";
 
-import {
+import type {
     ReceiverSelection,
     ReceiverSelectionCast,
     ReceiverSelectionStop,
@@ -11,7 +11,7 @@ import {
     ReceiverSelectorReceiverMessage
 } from "./background/receiverSelector";
 
-import {
+import type {
     CastSessionCreatedDetails,
     CastSessionUpdatedDetails,
     MediaStatus,
@@ -19,9 +19,9 @@ import {
     SenderMediaMessage,
     SenderMessage
 } from "./cast/sdk/types";
-import { SessionRequest } from "./cast/sdk/classes";
+import type { SessionRequest } from "./cast/sdk/classes";
 
-import { ReceiverDevice, ReceiverSelectorMediaType } from "./types";
+import type { ReceiverDevice, ReceiverSelectorMediaType } from "./types";
 
 /**
  * Messages are JSON objects with a `subject` string key and a

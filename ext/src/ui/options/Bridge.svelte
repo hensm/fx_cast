@@ -11,7 +11,7 @@
     } from "../../lib/bridge";
     import logger from "../../lib/logger";
 
-    import { Options } from "../../lib/options";
+    import type { Options } from "../../lib/options";
 
     const _ = browser.i18n.getMessage;
 

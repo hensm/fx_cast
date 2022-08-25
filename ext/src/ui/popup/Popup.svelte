@@ -430,7 +430,8 @@
                 {device}
                 {isMediaTypeAvailable}
                 isAnyMediaTypeAvailable={availableMediaTypes !==
-                    ReceiverSelectorMediaType.None && isDeviceCompatible(device)}
+                    ReceiverSelectorMediaType.None &&
+                    isDeviceCompatible(device)}
                 isAnyConnecting={isConnecting}
                 on:cast={ev => onReceiverCast(ev.detail.device)}
                 on:stop={ev => onReceiverStop(ev.detail.device)}
