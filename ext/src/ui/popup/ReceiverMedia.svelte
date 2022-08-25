@@ -33,7 +33,8 @@
         status.playerState === PlayerState.PAUSED;
 
     $: hasDuration = status.media?.duration && status.media?.duration > 0;
-    $: isLive = status.supportedMediaCommands & _MediaCommand.SEEK;
+    $: isSeekable = status.supportedMediaCommands & _MediaCommand.SEEK;
+    $: isLive = status.media?.streamType === StreamType.LIVE;
 
     let mediaTitle: Optional<string>;
     let mediaSubtitle: Optional<string>;
@@ -170,9 +171,9 @@
 
     <div class="media__controls">
         <!-- Seek bar -->
-        {#if status.media && status.media?.duration && hasDuration && isLive}
+        {#if status.media && status.media?.duration && hasDuration && isSeekable}
             <div class="media__seek">
-                {#if status.media?.streamType === StreamType.LIVE}
+                {#if isLive}
                     <span class="media__live">
                         {_("popupMediaLive")}
                     </span>
@@ -289,7 +290,7 @@
                 </select>
             {/if}
 
-            {#if !(status.supportedMediaCommands & _MediaCommand.SEEK) && isLive}
+            {#if isLive && !isSeekable}
                 <span class="media__live">
                     {_("popupMediaLive")}
                 </span>
