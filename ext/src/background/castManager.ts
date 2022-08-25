@@ -11,10 +11,8 @@ import {
     ReceiverSelectorMediaType
 } from "../types";
 
-import { ReceiverSelection } from "./ReceiverSelector";
-
 import deviceManager from "./deviceManager";
-import selectorManager from "./selectorManager";
+import ReceiverSelector, { ReceiverSelection } from "./ReceiverSelector";
 
 type AnyPort = Port | MessagePort;
 
@@ -225,7 +223,7 @@ export default new (class {
                 }
 
                 try {
-                    const selection = await selectorManager.getSelection(
+                    const selection = await ReceiverSelector.getSelection(
                         instance.contentTabId,
                         instance.contentFrameId,
                         { sessionRequest: message.data.sessionRequest }
@@ -297,7 +295,7 @@ export default new (class {
              * same one that caused the session creation.
              */
             case "main:closeReceiverSelector": {
-                const selector = await selectorManager.getSelector();
+                const selector = ReceiverSelector.shared;
                 const shouldClose = await options.get(
                     "receiverSelectorWaitForConnection"
                 );

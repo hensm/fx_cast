@@ -9,9 +9,7 @@ import {
     ReceiverSelectorMediaType
 } from "../types";
 
-import { ReceiverSelection } from "./ReceiverSelector";
-
-import selectorManager from "./selectorManager";
+import ReceiverSelector, { ReceiverSelection } from "./ReceiverSelector";
 import castManager from "./castManager";
 
 const _ = browser.i18n.getMessage;
@@ -157,10 +155,12 @@ async function onMenuClicked(
 
         let selection: Nullable<ReceiverSelection> = null;
         try {
-            selection = await selectorManager.getSelection(
+            selection = await ReceiverSelector.getSelection(
                 tab.id,
                 info.frameId,
-                { withMediaSender: castMediaMenuClicked }
+                {
+                    withMediaSender: castMediaMenuClicked
+                }
             );
         } catch (err) {
             logger.error("Failed to get receiver selection (cast menu)", err);

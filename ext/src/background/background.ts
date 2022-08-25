@@ -7,11 +7,11 @@ import bridge, { BridgeInfo } from "../lib/bridge";
 
 import castManager from "./castManager";
 import deviceManager from "./deviceManager";
-import selectorManager from "./selectorManager";
+import ReceiverSelector from "./ReceiverSelector";
 
 import { initMenus } from "./menus";
 import { initWhitelist } from "./whitelist";
-import { baseConfigStorage, fetchBaseConfig } from "../cast/googleapi";
+import { baseConfigStorage, fetchBaseConfig } from "../cast/googleApi";
 
 const _ = browser.i18n.getMessage;
 
@@ -145,7 +145,7 @@ async function init() {
             return;
         }
 
-        const selection = await selectorManager.getSelection(tab.id);
+        const selection = await ReceiverSelector.getSelection(tab.id);
         if (selection) {
             castManager.loadSender({
                 tabId: tab.id,
