@@ -16,13 +16,13 @@ import type {
 import { PlayerState } from "../cast/sdk/media/enums";
 
 interface EventMap {
-    receiverDeviceUp: { deviceInfo: ReceiverDevice };
-    receiverDeviceDown: { deviceId: string };
-    receiverDeviceUpdated: {
+    deviceUp: { deviceInfo: ReceiverDevice };
+    deviceDown: { deviceId: string };
+    deviceUpdated: {
         deviceId: string;
         status: ReceiverStatus;
     };
-    receiverDeviceMediaUpdated: {
+    deviceMediaUpdated: {
         deviceId: string;
         status: MediaStatus;
     };
@@ -139,7 +139,7 @@ export default new (class extends TypedEventTarget<EventMap> {
 
                 this.receiverDevices.set(deviceId, deviceInfo);
                 this.dispatchEvent(
-                    new CustomEvent("receiverDeviceUp", {
+                    new CustomEvent("deviceUp", {
                         detail: { deviceInfo }
                     })
                 );
@@ -154,7 +154,7 @@ export default new (class extends TypedEventTarget<EventMap> {
                     this.receiverDevices.delete(deviceId);
                 }
                 this.dispatchEvent(
-                    new CustomEvent("receiverDeviceDown", {
+                    new CustomEvent("deviceDown", {
                         detail: { deviceId: deviceId }
                     })
                 );
@@ -176,7 +176,7 @@ export default new (class extends TypedEventTarget<EventMap> {
                 device.status = status;
 
                 this.dispatchEvent(
-                    new CustomEvent("receiverDeviceUpdated", {
+                    new CustomEvent("deviceUpdated", {
                         detail: {
                             deviceId,
                             status: device.status
@@ -202,7 +202,7 @@ export default new (class extends TypedEventTarget<EventMap> {
                 }
 
                 this.dispatchEvent(
-                    new CustomEvent("receiverDeviceMediaUpdated", {
+                    new CustomEvent("deviceMediaUpdated", {
                         detail: {
                             deviceId,
                             status: device.mediaStatus
@@ -218,7 +218,7 @@ export default new (class extends TypedEventTarget<EventMap> {
     private onBridgeDisconnect = () => {
         // Notify listeners of device availablility
         for (const [, receiverDevice] of this.receiverDevices) {
-            const event = new CustomEvent("receiverDeviceDown", {
+            const event = new CustomEvent("deviceDown", {
                 detail: { deviceId: receiverDevice.id }
             });
 

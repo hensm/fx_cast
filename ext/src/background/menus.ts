@@ -4,10 +4,7 @@ import logger from "../lib/logger";
 import options from "../lib/options";
 import { stringify } from "../lib/utils";
 
-import {
-    ReceiverSelectionActionType,
-    ReceiverSelectorMediaType
-} from "../types";
+import { ReceiverSelectorMediaType } from "../types";
 
 import ReceiverSelector, { ReceiverSelection } from "./ReceiverSelector";
 import castManager from "./castManager";
@@ -167,12 +164,7 @@ async function onMenuClicked(
             return;
         }
         // Invalid selection result
-        if (
-            !selection ||
-            selection.actionType !== ReceiverSelectionActionType.Cast
-        ) {
-            return;
-        }
+        if (!selection) return;
 
         if (castMenuClicked) {
             castManager.loadSender({

@@ -30,11 +30,6 @@ export enum ReceiverSelectorMediaType {
     Screen = 4,
     File = 8
 }
-export enum ReceiverSelectionActionType {
-    Cast = 1,
-    Stop = 2
-}
-
 /** Info about sender page context. */
 export interface ReceiverSelectorPageInfo {
     url: string;

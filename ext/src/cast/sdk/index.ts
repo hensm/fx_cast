@@ -316,26 +316,6 @@ export default class {
                 break;
             }
 
-            case "cast:selectReceiver/stopped": {
-                const { receiverDevice } = message.data;
-
-                logger.info("Stopped receiver");
-
-                if (this.#sessionRequest) {
-                    this.#sessionRequest = undefined;
-
-                    for (const listener of this.#receiverActionListeners) {
-                        listener(
-                            // TODO: Use existing receiver object?
-                            createReceiver(receiverDevice),
-                            ReceiverAction.STOP
-                        );
-                    }
-                }
-
-                break;
-            }
-
             // Popup closed before session established
             case "cast:selectReceiver/cancelled": {
                 if (this.#sessionRequest) {
@@ -344,6 +324,17 @@ export default class {
                     this.#requestSessionErrorCallback?.(
                         new Error_(ErrorCode.CANCEL)
                     );
+                }
+
+                break;
+            }
+
+            case "cast:receiverStoppedAction": {
+                const device = this.#receiverDevices.get(message.data.deviceId);
+                if (!device) break;
+
+                for (const actionListener of this.#receiverActionListeners) {
+                    actionListener(createReceiver(device), ReceiverAction.STOP);
                 }
 
                 break;

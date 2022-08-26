@@ -8,7 +8,6 @@
     import {
         ReceiverDevice,
         ReceiverDeviceCapabilities,
-        ReceiverSelectionActionType,
         ReceiverSelectorMediaType,
         ReceiverSelectorPageInfo
     } from "../../types";
@@ -347,7 +346,6 @@
             subject: "receiverSelector:selected",
             data: {
                 receiverDevice,
-                actionType: ReceiverSelectionActionType.Cast,
                 mediaType
             }
         });
@@ -355,11 +353,16 @@
 
     function onReceiverStop(receiverDevice: ReceiverDevice) {
         port?.postMessage({
-            subject: "receiverSelector:stop",
+            subject: "receiverSelector:receiverMessage",
             data: {
-                receiverDevice,
-                actionType: ReceiverSelectionActionType.Stop
+                deviceId: receiverDevice.id,
+                message: { requestId: 0, type: "STOP" }
             }
+        });
+
+        port?.postMessage({
+            subject: "receiverSelector:stop",
+            data: { deviceId: receiverDevice.id }
         });
     }
 </script>

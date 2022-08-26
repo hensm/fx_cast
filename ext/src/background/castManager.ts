@@ -6,10 +6,7 @@ import messaging, { Message, Port } from "../messaging";
 import options from "../lib/options";
 import { stringify } from "../lib/utils";
 
-import {
-    ReceiverSelectionActionType,
-    ReceiverSelectorMediaType
-} from "../types";
+import { ReceiverSelectorMediaType } from "../types";
 
 import deviceManager from "./deviceManager";
 import ReceiverSelector, { ReceiverSelection } from "./ReceiverSelector";
@@ -22,6 +19,12 @@ export interface CastInstance {
     contentTabId?: number;
     contentFrameId?: number;
     appId?: string;
+    session?: CastSession;
+}
+
+interface CastSession {
+    sessionId: string;
+    deviceId: string;
 }
 
 /** Keeps track of cast API instances and provides bridge messaging. */
@@ -37,7 +40,7 @@ export default new (class {
         });
 
         // Forward receiver eventes to cast instances
-        deviceManager.addEventListener("receiverDeviceUp", ev => {
+        deviceManager.addEventListener("deviceUp", ev => {
             for (const instance of this.activeInstances) {
                 instance.contentPort.postMessage({
                     subject: "cast:receiverDeviceUp",
@@ -45,7 +48,7 @@ export default new (class {
                 });
             }
         });
-        deviceManager.addEventListener("receiverDeviceDown", ev => {
+        deviceManager.addEventListener("deviceDown", ev => {
             for (const instance of this.activeInstances) {
                 instance.contentPort.postMessage({
                     subject: "cast:receiverDeviceDown",
@@ -68,6 +71,12 @@ export default new (class {
 
                 return instance;
             }
+        }
+    }
+
+    public getInstanceByDeviceId(deviceId: string) {
+        for (const instance of this.activeInstances) {
+            if (instance.session?.deviceId === deviceId) return instance;
         }
     }
 
@@ -106,7 +115,7 @@ export default new (class {
 
         // bridge -> content
         instance.bridgePort.onMessage.addListener(message => {
-            contentPort.postMessage(message);
+            this.handleBridgeMessage(instance, message);
         });
 
         // content -> (any)
@@ -160,7 +169,7 @@ export default new (class {
         };
         // bridge -> content
         const onBridgePortMessage = (message: Message) => {
-            contentPort.postMessage(message);
+            this.handleBridgeMessage(instance, message);
         };
 
         const onDisconnect = () => {
@@ -180,6 +189,23 @@ export default new (class {
         contentPort.onMessage.addListener(onContentPortMessage);
 
         return instance;
+    }
+
+    private async handleBridgeMessage(
+        instance: CastInstance,
+        message: Message
+    ) {
+        // Intercept messages to store relevant info
+        switch (message.subject) {
+            case "cast:sessionCreated":
+                instance.session = {
+                    deviceId: message.data.receiverId,
+                    sessionId: message.data.sessionId
+                };
+                break;
+        }
+
+        instance.contentPort.postMessage(message);
     }
 
     /**
@@ -238,48 +264,29 @@ export default new (class {
                         break;
                     }
 
-                    switch (selection.actionType) {
-                        case ReceiverSelectionActionType.Cast: {
-                            /**
-                             * If the media type returned from the
-                             * selector has been changed, we need to
-                             * cancel the current sender and switch it
-                             * out for the right one.
-                             */
-                            if (
-                                selection.mediaType !==
-                                ReceiverSelectorMediaType.App
-                            ) {
-                                instance.contentPort.postMessage({
-                                    subject: "cast:selectReceiver/cancelled"
-                                });
+                    /**
+                     * If the media type returned from the selector has
+                     * been changed, we need to cancel the current
+                     * sender and switch it out for the right one.
+                     */
+                    if (selection.mediaType !== ReceiverSelectorMediaType.App) {
+                        instance.contentPort.postMessage({
+                            subject: "cast:selectReceiver/cancelled"
+                        });
 
-                                this.loadSender({
-                                    tabId: instance.contentTabId,
-                                    frameId: instance.contentFrameId,
-                                    selection
-                                });
+                        this.loadSender({
+                            tabId: instance.contentTabId,
+                            frameId: instance.contentFrameId,
+                            selection
+                        });
 
-                                break;
-                            }
-
-                            instance.contentPort.postMessage({
-                                subject: "cast:selectReceiver/selected",
-                                data: selection
-                            });
-
-                            break;
-                        }
-
-                        case ReceiverSelectionActionType.Stop: {
-                            instance.contentPort.postMessage({
-                                subject: "cast:selectReceiver/stopped",
-                                data: selection
-                            });
-
-                            break;
-                        }
+                        break;
                     }
+
+                    instance.contentPort.postMessage({
+                        subject: "cast:selectReceiver/selected",
+                        data: selection
+                    });
                 } catch (err) {
                     // TODO: Report errors properly
                     instance.contentPort.postMessage({
@@ -295,7 +302,7 @@ export default new (class {
              * same one that caused the session creation.
              */
             case "main:closeReceiverSelector": {
-                const selector = ReceiverSelector.shared;
+                const selector = ReceiverSelector.sharedInstance;
                 const shouldClose = await options.get(
                     "receiverSelectorWaitForConnection"
                 );
@@ -320,10 +327,6 @@ export default new (class {
     }) {
         // Cancelled
         if (!opts.selection) {
-            return;
-        }
-
-        if (opts.selection.actionType !== ReceiverSelectionActionType.Cast) {
             return;
         }
 

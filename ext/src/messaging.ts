@@ -5,8 +5,6 @@ import type { BridgeInfo } from "./lib/bridge";
 
 import type {
     ReceiverSelection,
-    ReceiverSelectionCast,
-    ReceiverSelectionStop,
     ReceiverSelectorMediaMessage,
     ReceiverSelectorReceiverMessage
 } from "./background/receiverSelector";
@@ -57,16 +55,16 @@ type ExtMessageDefinitions = {
     "popup:close": undefined;
 
     "receiverSelector:selected": ReceiverSelection;
-    "receiverSelector:stop": ReceiverSelection;
+    "receiverSelector:stop": { deviceId: string };
     "receiverSelector:receiverMessage": ReceiverSelectorReceiverMessage;
     "receiverSelector:mediaMessage": ReceiverSelectorMediaMessage;
 
     "main:selectReceiver": {
         sessionRequest: SessionRequest;
     };
-    "cast:selectReceiver/selected": ReceiverSelectionCast;
-    "cast:selectReceiver/stopped": ReceiverSelectionStop;
+    "cast:selectReceiver/selected": ReceiverSelection;
     "cast:selectReceiver/cancelled": undefined;
+    "cast:receiverStoppedAction": { deviceId: string };
 
     "main:closeReceiverSelector": undefined;
 
@@ -74,7 +72,7 @@ type ExtMessageDefinitions = {
     "cast:initialized": BridgeInfo;
 
     "cast:receiverDeviceUp": { receiverDevice: ReceiverDevice };
-    "cast:receiverDeviceDown": { receiverDeviceId: ReceiverDevice["id"] };
+    "cast:receiverDeviceDown": { receiverDeviceId: string };
     "cast:launchApp": { receiverDevice: ReceiverDevice };
 };
 

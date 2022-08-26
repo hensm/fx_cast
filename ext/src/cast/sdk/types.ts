@@ -92,7 +92,7 @@ interface ReqBase {
 // NS: urn:x-cast:com.google.cast.receiver
 export type SenderMessage =
     | (ReqBase & { type: "LAUNCH"; appId: string })
-    | (ReqBase & { type: "STOP"; sessionId: string })
+    | (ReqBase & { type: "STOP"; sessionId?: string })
     | (ReqBase & { type: "GET_STATUS" })
     | (ReqBase & { type: "GET_APP_AVAILABILITY"; appId: string[] })
     | (ReqBase & { type: "SET_VOLUME"; volume: Partial<Volume> });

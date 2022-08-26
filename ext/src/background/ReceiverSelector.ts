@@ -8,7 +8,6 @@ import { getMediaTypesForPageUrl } from "../lib/utils";
 
 import {
     ReceiverDevice,
-    ReceiverSelectionActionType,
     ReceiverSelectorMediaType,
     ReceiverSelectorPageInfo
 } from "../types";
@@ -22,16 +21,10 @@ import type { SenderMediaMessage, SenderMessage } from "../cast/sdk/types";
 
 const POPUP_URL = browser.runtime.getURL("ui/popup/index.html");
 
-export interface ReceiverSelectionCast {
-    actionType: ReceiverSelectionActionType.Cast;
+export interface ReceiverSelection {
     receiverDevice: ReceiverDevice;
     mediaType: ReceiverSelectorMediaType;
 }
-export interface ReceiverSelectionStop {
-    actionType: ReceiverSelectionActionType.Stop;
-    receiverDevice: ReceiverDevice;
-}
-export type ReceiverSelection = ReceiverSelectionCast | ReceiverSelectionStop;
 
 export interface ReceiverSelectorReceiverMessage {
     deviceId: string;
@@ -43,24 +36,16 @@ export interface ReceiverSelectorMediaMessage {
 }
 
 interface ReceiverSelectorEvents {
-    selected: ReceiverSelectionCast;
-    error: string;
+    selected: ReceiverSelection;
     cancelled: void;
-    stop: ReceiverSelectionStop;
+    stop: { deviceId: string };
+    error: string;
     close: void;
     receiverMessage: ReceiverSelectorReceiverMessage;
     mediaMessage: ReceiverSelectorMediaMessage;
 }
 
 let baseConfig: BaseConfig;
-baseConfigStorage
-    .get("baseConfig")
-    .then(value => {
-        baseConfig = value.baseConfig;
-    })
-    .catch(() => {
-        logger.error("Failed to get Chromecast base config!");
-    });
 
 /**
  * Manages the receiver selector popup window and communication with the
@@ -248,39 +233,27 @@ export default class ReceiverSelector extends TypedEventTarget<ReceiverSelectorE
     /** Handles messages from the popup extension page. */
     private onPopupMessage(message: Message) {
         switch (message.subject) {
-            case "receiverSelector:selected": {
+            case "receiverSelector:selected":
                 this.wasReceiverSelected = true;
                 this.dispatchEvent(
-                    new CustomEvent("selected", {
-                        detail: message.data
-                    })
+                    new CustomEvent("selected", { detail: message.data })
                 );
-
                 break;
-            }
 
-            case "receiverSelector:stop": {
+            case "receiverSelector:stop":
                 this.dispatchEvent(
-                    new CustomEvent("stop", {
-                        detail: message.data
-                    })
+                    new CustomEvent("stop", { detail: message.data })
                 );
-
                 break;
-            }
 
             case "receiverSelector:receiverMessage":
                 this.dispatchEvent(
-                    new CustomEvent("receiverMessage", {
-                        detail: message.data
-                    })
+                    new CustomEvent("receiverMessage", { detail: message.data })
                 );
                 break;
             case "receiverSelector:mediaMessage":
                 this.dispatchEvent(
-                    new CustomEvent("mediaMessage", {
-                        detail: message.data
-                    })
+                    new CustomEvent("mediaMessage", { detail: message.data })
                 );
                 break;
         }
@@ -307,13 +280,7 @@ export default class ReceiverSelector extends TypedEventTarget<ReceiverSelectorE
 
         this.dispatchEvent(new CustomEvent("close"));
 
-        // Cleanup
         delete this.windowId;
-        delete this.messagePort;
-        delete this.receiverDevices;
-        delete this.defaultMediaType;
-        delete this.availableMediaTypes;
-        this.wasReceiverSelected = false;
     }
 
     /**
@@ -334,7 +301,7 @@ export default class ReceiverSelector extends TypedEventTarget<ReceiverSelectorE
         }
     }
 
-    static shared = new ReceiverSelector();
+    static sharedInstance = new ReceiverSelector();
 
     /**
      * Opens a receiver selector with the specified default/available media
@@ -346,7 +313,7 @@ export default class ReceiverSelector extends TypedEventTarget<ReceiverSelectorE
      *   - Resolves to null if the selection is cancelled.
      *   - Rejects if the selection fails.
      */
-    static getSelection(
+    static async getSelection(
         contextTabId: number,
         contextFrameId = 0,
         selectionOpts?: {
@@ -354,213 +321,110 @@ export default class ReceiverSelector extends TypedEventTarget<ReceiverSelectorE
             withMediaSender?: boolean;
         }
     ): Promise<ReceiverSelection | null> {
+        let castInstance = castManager.getInstance(
+            contextTabId,
+            contextFrameId
+        );
+        /**
+         * If the current context is running the mirroring app, pretend
+         * it doesn't exist because it shouldn't be launched like this.
+         */
+        if (castInstance?.appId === (await options.get("mirroringAppId"))) {
+            castInstance = undefined;
+        }
+
+        let defaultMediaType = ReceiverSelectorMediaType.Tab;
+        let availableMediaTypes = ReceiverSelectorMediaType.None;
+
+        let pageUrl: string | undefined;
+        try {
+            pageUrl = (
+                await browser.webNavigation.getFrame({
+                    tabId: contextTabId,
+                    frameId: contextFrameId
+                })
+            ).url;
+
+            availableMediaTypes = getMediaTypesForPageUrl(pageUrl);
+        } catch {
+            logger.error(
+                "Failed to locate frame, falling back to default available media types."
+            );
+        }
+
+        // Enable app media type if sender application is present
+        if (castInstance || selectionOpts?.withMediaSender) {
+            defaultMediaType = ReceiverSelectorMediaType.App;
+            availableMediaTypes |= ReceiverSelectorMediaType.App;
+        }
+
+        const opts = await options.getAll();
+
+        // Disable mirroring media types if mirroring is not enabled
+        if (!opts.mirroringEnabled) {
+            availableMediaTypes &= ~(
+                ReceiverSelectorMediaType.Tab | ReceiverSelectorMediaType.Screen
+            );
+        }
+
+        // Remove file media type if local media is not enabled
+        if (!opts.mediaEnabled || !opts.localMediaEnabled) {
+            availableMediaTypes &= ~ReceiverSelectorMediaType.File;
+        }
+
+        // Ensure status manager is initialized
+        await deviceManager.init();
+
+        let isRequestAppAudioCompatible: Optional<boolean>;
+        if (castInstance?.appId) {
+            if (!baseConfig) {
+                try {
+                    baseConfig = (await baseConfigStorage.get("baseConfig"))
+                        .baseConfig;
+                } catch (err) {
+                    throw logger.error("Failed to get Chromecast base config!");
+                }
+            }
+
+            isRequestAppAudioCompatible = getAppTag(
+                baseConfig,
+                castInstance.appId
+            )?.supports_audio_only;
+        }
+
         return new Promise(async (resolve, reject) => {
-            let castInstance = castManager.getInstance(
-                contextTabId,
-                contextFrameId
-            );
-
-            /**
-             * If the current context is running the mirroring app, pretend
-             * it doesn't exist because it shouldn't be launched like this.
-             */
-            if (castInstance?.appId === (await options.get("mirroringAppId"))) {
-                castInstance = undefined;
-            }
-
-            let defaultMediaType = ReceiverSelectorMediaType.Tab;
-            let availableMediaTypes = ReceiverSelectorMediaType.None;
-
-            let pageUrl: string | undefined;
-            try {
-                pageUrl = (
-                    await browser.webNavigation.getFrame({
-                        tabId: contextTabId,
-                        frameId: contextFrameId
-                    })
-                ).url;
-
-                availableMediaTypes = getMediaTypesForPageUrl(pageUrl);
-            } catch {
-                logger.error(
-                    "Failed to locate frame, falling back to default available media types."
-                );
-            }
-
-            // Enable app media type if sender application is present
-            if (castInstance || selectionOpts?.withMediaSender) {
-                defaultMediaType = ReceiverSelectorMediaType.App;
-                availableMediaTypes |= ReceiverSelectorMediaType.App;
-            }
-
-            const opts = await options.getAll();
-
-            // Disable mirroring media types if mirroring is not enabled
-            if (!opts.mirroringEnabled) {
-                availableMediaTypes &= ~(
-                    ReceiverSelectorMediaType.Tab |
-                    ReceiverSelectorMediaType.Screen
-                );
-            }
-
-            // Remove file media type if local media is not enabled
-            if (!opts.mediaEnabled || !opts.localMediaEnabled) {
-                availableMediaTypes &= ~ReceiverSelectorMediaType.File;
-            }
-
             // Close an existing open selector
-            if (ReceiverSelector.shared && ReceiverSelector.shared.isOpen) {
-                ReceiverSelector.shared.close();
+            if (ReceiverSelector.sharedInstance.isOpen) {
+                await ReceiverSelector.sharedInstance.close();
             }
 
-            // Get a new selector for each selection
-            ReceiverSelector.shared = new ReceiverSelector();
+            const selector = createSelector();
+            ReceiverSelector.sharedInstance = selector;
 
-            function onReceiverChange() {
-                ReceiverSelector.shared.update(deviceManager.getDevices());
-            }
+            // Handle selected return value
+            const onSelected = (ev: CustomEvent<ReceiverSelection>) =>
+                resolve(ev.detail);
+            selector.addEventListener("selected", onSelected);
 
-            deviceManager.addEventListener(
-                "receiverDeviceUp",
-                onReceiverChange
+            // Handle cancelled return value
+            const onCancelled = () => resolve(null);
+            selector.addEventListener("cancelled", onCancelled);
+
+            const onError = (ev: CustomEvent<string>) => reject(ev.detail);
+            selector.addEventListener("error", onError);
+
+            // Cleanup listeners
+            selector.addEventListener(
+                "close",
+                () => {
+                    selector.removeEventListener("selected", onSelected);
+                    selector.removeEventListener("cancelled", onCancelled);
+                    selector.removeEventListener("error", onError);
+                },
+                { once: true }
             );
-            deviceManager.addEventListener(
-                "receiverDeviceDown",
-                onReceiverChange
-            );
-            deviceManager.addEventListener(
-                "receiverDeviceUpdated",
-                onReceiverChange
-            );
-            deviceManager.addEventListener(
-                "receiverDeviceMediaUpdated",
-                onReceiverChange
-            );
 
-            function onSelectorSelected(
-                ev: CustomEvent<ReceiverSelectionCast>
-            ) {
-                logger.info("Selected receiver", ev.detail);
-
-                resolve({
-                    actionType: ReceiverSelectionActionType.Cast,
-                    receiverDevice: ev.detail.receiverDevice,
-                    mediaType: ev.detail.mediaType
-                });
-            }
-            function onSelectorStop(ev: CustomEvent<ReceiverSelectionStop>) {
-                logger.info("Stopping receiver app...", ev.detail);
-
-                deviceManager.stopReceiverApp(ev.detail.receiverDevice.id);
-
-                resolve({
-                    actionType: ReceiverSelectionActionType.Stop,
-                    receiverDevice: ev.detail.receiverDevice
-                });
-            }
-            function onSelectorCancelled() {
-                logger.info("Cancelled receiver selection");
-
-                resolve(null);
-            }
-            function onSelectorError(ev: CustomEvent<string>) {
-                reject(ev.detail);
-            }
-            function onReceiverMessage(
-                ev: CustomEvent<ReceiverSelectorReceiverMessage>
-            ) {
-                deviceManager.sendReceiverMessage(
-                    ev.detail.deviceId,
-                    ev.detail.message
-                );
-            }
-            function onMediaMessage(
-                ev: CustomEvent<ReceiverSelectorMediaMessage>
-            ) {
-                deviceManager.sendMediaMessage(
-                    ev.detail.deviceId,
-                    ev.detail.message
-                );
-            }
-
-            ReceiverSelector.shared.addEventListener(
-                "selected",
-                onSelectorSelected
-            );
-            ReceiverSelector.shared.addEventListener("stop", onSelectorStop);
-            ReceiverSelector.shared.addEventListener(
-                "cancelled",
-                onSelectorCancelled
-            );
-            ReceiverSelector.shared.addEventListener("error", onSelectorError);
-            ReceiverSelector.shared.addEventListener(
-                "receiverMessage",
-                onReceiverMessage
-            );
-            ReceiverSelector.shared.addEventListener(
-                "mediaMessage",
-                onMediaMessage
-            );
-            ReceiverSelector.shared.addEventListener("close", removeListeners);
-
-            function removeListeners() {
-                ReceiverSelector.shared.removeEventListener(
-                    "selected",
-                    onSelectorSelected
-                );
-                ReceiverSelector.shared.removeEventListener(
-                    "stop",
-                    onSelectorStop
-                );
-                ReceiverSelector.shared.removeEventListener(
-                    "cancelled",
-                    onSelectorCancelled
-                );
-                ReceiverSelector.shared.removeEventListener(
-                    "error",
-                    onSelectorError
-                );
-                ReceiverSelector.shared.removeEventListener(
-                    "receiverMessage",
-                    onReceiverMessage
-                );
-                ReceiverSelector.shared.removeEventListener(
-                    "mediaMessage",
-                    onMediaMessage
-                );
-                ReceiverSelector.shared.removeEventListener(
-                    "close",
-                    removeListeners
-                );
-
-                deviceManager.removeEventListener(
-                    "receiverDeviceUp",
-                    onReceiverChange
-                );
-                deviceManager.removeEventListener(
-                    "receiverDeviceDown",
-                    onReceiverChange
-                );
-                deviceManager.removeEventListener(
-                    "receiverDeviceUpdated",
-                    onReceiverChange
-                );
-                deviceManager.removeEventListener(
-                    "receiverDeviceMediaUpdated",
-                    onReceiverChange
-                );
-            }
-
-            // Ensure status manager is initialized
-            await deviceManager.init();
-
-            let isRequestAppAudioCompatible: Optional<boolean>;
-            if (castInstance?.appId) {
-                const appTag = getAppTag(baseConfig, castInstance.appId);
-                isRequestAppAudioCompatible = appTag?.supports_audio_only;
-            }
-
-            ReceiverSelector.shared.open({
+            selector.open({
                 receiverDevices: deviceManager.getDevices(),
                 defaultMediaType,
                 availableMediaTypes,
@@ -578,4 +442,75 @@ export default class ReceiverSelector extends TypedEventTarget<ReceiverSelectorE
             });
         });
     }
+}
+
+/**
+ * Creates new ReceiverSelector object and adds listeners for
+ * updates/messages.
+ */
+function createSelector() {
+    // Get a new selector for each selection
+    const selector = new ReceiverSelector();
+    ReceiverSelector.sharedInstance = selector;
+
+    /**
+     * Sends message to cast instance to trigger stopped receiver action
+     * (if applicable).
+     */
+    const onStop = (ev: CustomEvent<{ deviceId: string }>) => {
+        const castInstance = castManager.getInstanceByDeviceId(
+            ev.detail.deviceId
+        );
+        if (!castInstance) return;
+
+        castInstance.contentPort.postMessage({
+            subject: "cast:receiverStoppedAction",
+            data: { deviceId: ev.detail.deviceId }
+        });
+    };
+    selector.addEventListener("stop", onStop);
+
+    // Forward receiver messages
+    const onReceiverMessage = (
+        ev: CustomEvent<ReceiverSelectorReceiverMessage>
+    ) =>
+        deviceManager.sendReceiverMessage(
+            ev.detail.deviceId,
+            ev.detail.message
+        );
+    selector.addEventListener("receiverMessage", onReceiverMessage);
+
+    // Forward media messages
+    const onMediaMessage = (ev: CustomEvent<ReceiverSelectorMediaMessage>) =>
+        deviceManager.sendMediaMessage(ev.detail.deviceId, ev.detail.message);
+    selector.addEventListener("mediaMessage", onMediaMessage);
+
+    // Update selector data whenever devices change/update
+    const onDeviceChange = () => selector.update(deviceManager.getDevices());
+
+    deviceManager.addEventListener("deviceUp", onDeviceChange);
+    deviceManager.addEventListener("deviceDown", onDeviceChange);
+    deviceManager.addEventListener("deviceUpdated", onDeviceChange);
+    deviceManager.addEventListener("deviceMediaUpdated", onDeviceChange);
+
+    // Cleanup listeners
+    selector.addEventListener(
+        "close",
+        () => {
+            deviceManager.removeEventListener("deviceUp", onDeviceChange);
+            deviceManager.removeEventListener("deviceDown", onDeviceChange);
+            deviceManager.removeEventListener("deviceUpdated", onDeviceChange);
+            deviceManager.removeEventListener(
+                "deviceMediaUpdated",
+                onDeviceChange
+            );
+
+            selector.removeEventListener("stop", onStop);
+            selector.removeEventListener("receiverMessage", onReceiverMessage);
+            selector.removeEventListener("mediaMessage", onMediaMessage);
+        },
+        { once: true }
+    );
+
+    return selector;
 }
