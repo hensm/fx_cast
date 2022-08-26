@@ -49,7 +49,7 @@ eventMessaging.page.addListener(async message => {
             // Call page script/framework API script's init function
             const initFn = _window.__onGCastApiAvailable;
             if (initFn && typeof initFn === "function") {
-                initFn(message.data.isVersionCompatible);
+                initFn(message.data.isAvailable);
             }
 
             break;

@@ -152,10 +152,6 @@
                 pageInfo = message.data.pageInfo;
                 break;
 
-            case "popup:close":
-                window.close();
-                break;
-
             case "popup:update": {
                 if (
                     message.data.availableMediaTypes !== undefined &&

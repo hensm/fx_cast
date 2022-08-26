@@ -67,7 +67,8 @@ export default class ReceiverSelector extends TypedEventTarget<ReceiverSelectorE
     private wasReceiverSelected = false;
 
     private appId?: string;
-    private pageInfo?: ReceiverSelectorPageInfo;
+
+    pageInfo?: ReceiverSelectorPageInfo;
 
     constructor() {
         super();

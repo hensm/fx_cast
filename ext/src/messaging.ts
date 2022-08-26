@@ -1,7 +1,6 @@
 "use strict";
 
 import type { TypedPort } from "./lib/TypedPort";
-import type { BridgeInfo } from "./lib/bridge";
 
 import type {
     ReceiverSelection,
@@ -39,6 +38,7 @@ import type { ReceiverDevice, ReceiverSelectorMediaType } from "./types";
  * components.
  */
 type ExtMessageDefinitions = {
+    /** Initial data to send to selector popup. */
     "popup:init": {
         appId?: string;
         pageInfo?: {
@@ -47,30 +47,49 @@ type ExtMessageDefinitions = {
             frameId: number;
         };
     };
+    /** Updates selector popup with new data. */
     "popup:update": {
         receiverDevices: ReceiverDevice[];
         defaultMediaType?: ReceiverSelectorMediaType;
         availableMediaTypes?: ReceiverSelectorMediaType;
     };
-    "popup:close": undefined;
 
+    /**
+     * Sent from the selector popup when a receiver has been
+     * selected.
+     */
     "main:receiverSelected": ReceiverSelection;
+    /**
+     * Sent from the selector popup when a receiver has been
+     * stopped. Used to provide cast API receiver action updates.
+     */
     "main:receiverStopped": { deviceId: string };
+    /** Allows the selector popup to send cast NS_RECEIVER messages. */
     "main:sendReceiverMessage": ReceiverSelectorReceiverMessage;
+    /** Allows the selector popup to send cast NS_MEDIA messages. */
     "main:sendMediaMessage": ReceiverSelectorMediaMessage;
 
+    /**
+     * Sent from the cast API to trigger receiver selection on session
+     * request.
+     */
     "main:selectReceiver": {
         sessionRequest: SessionRequest;
     };
+    /** Return message to the cast API when a receiver is selected. */
     "cast:selectReceiver/selected": ReceiverSelection;
+    /** Return message to the cast API when a selection is cancelled. */
     "cast:selectReceiver/cancelled": undefined;
 
+    /** Sent to the cast API when a receiver app is stopped. */
     "cast:receiverStoppedAction": { deviceId: string };
 
-    "main:closeReceiverSelector": undefined;
-
+    /**
+     * Tells the cast manager to provide the cast API instance with
+     * receiver data.
+     */
     "main:initializeCast": { appId: string };
-    "cast:initialized": BridgeInfo;
+    "cast:initialized": { isAvailable: boolean };
 
     "cast:receiverDeviceUp": { receiverDevice: ReceiverDevice };
     "cast:receiverDeviceDown": { receiverDeviceId: string };

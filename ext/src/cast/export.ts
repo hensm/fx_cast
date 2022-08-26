@@ -97,9 +97,7 @@ export function ensureInit(): Promise<TypedMessagePort<Message>> {
         function handleIncomingMessageToCast(message: Message) {
             switch (message.subject) {
                 case "cast:initialized": {
-                    initializedBridgeInfo = message.data;
-
-                    if (initializedBridgeInfo.isVersionCompatible) {
+                    if (message.data.isAvailable) {
                         resolve(initializedBackgroundPort);
                     } else {
                         reject();

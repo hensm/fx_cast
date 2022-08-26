@@ -93,7 +93,7 @@ export default new (class {
 
         instance.contentPort.postMessage({
             subject: "cast:initialized",
-            data: await bridge.getInfo()
+            data: { isAvailable: (await bridge.getInfo()).isVersionCompatible }
         });
 
         return instance;
@@ -197,12 +197,26 @@ export default new (class {
     ) {
         // Intercept messages to store relevant info
         switch (message.subject) {
-            case "cast:sessionCreated":
+            case "cast:sessionCreated": {
+                // Close after session is created
+                const selector = ReceiverSelector.sharedInstance;
+                if (
+                    selector.isOpen &&
+                    // If selector context is the same as the instance context
+                    selector.pageInfo?.tabId === instance.contentTabId &&
+                    selector.pageInfo?.frameId === instance.contentFrameId &&
+                    // If selector is supposed to close
+                    (await options.get("receiverSelectorWaitForConnection"))
+                ) {
+                    selector.close();
+                }
+
                 instance.session = {
                     deviceId: message.data.receiverId,
                     sessionId: message.data.sessionId
                 };
                 break;
+            }
         }
 
         instance.contentPort.postMessage(message);
@@ -292,23 +306,6 @@ export default new (class {
                     instance.contentPort.postMessage({
                         subject: "cast:selectReceiver/cancelled"
                     });
-                }
-
-                break;
-            }
-
-            /**
-             * TODO: If we're closing a selector, make sure it's the
-             * same one that caused the session creation.
-             */
-            case "main:closeReceiverSelector": {
-                const selector = ReceiverSelector.sharedInstance;
-                const shouldClose = await options.get(
-                    "receiverSelectorWaitForConnection"
-                );
-
-                if (selector.isOpen && shouldClose) {
-                    selector.close();
                 }
 
                 break;

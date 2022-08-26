@@ -143,11 +143,6 @@ export default class {
              * and data needed to create cast API objects is sent.
              */
             case "cast:sessionCreated": {
-                // Notify background to close UI
-                eventMessaging.page.sendMessage({
-                    subject: "main:closeReceiverSelector"
-                });
-
                 const status = message.data;
                 const receiverDevice = this.#receiverDevices.get(
                     status.receiverId
