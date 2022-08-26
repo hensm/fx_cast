@@ -49,7 +49,7 @@
         };
 
         port?.postMessage({
-            subject: "receiverSelector:receiverMessage",
+            subject: "main:sendReceiverMessage",
             data: { deviceId: device.id, message }
         });
     }
@@ -68,7 +68,7 @@
         };
 
         port?.postMessage({
-            subject: "receiverSelector:mediaMessage",
+            subject: "main:sendMediaMessage",
             data: { deviceId: device.id, message }
         });
     }

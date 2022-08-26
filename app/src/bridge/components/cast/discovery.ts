@@ -48,8 +48,8 @@ export default class Discovery {
 
     constructor(opts: DiscoveryOptions) {
         /**
-         * When a service is found, gather device info from service object and
-         * TXT record, then send a `main:receiverDeviceUp` message.
+         * When a service is found, gather device info from service
+         * object and TXT record, then send a `main:deviceUp` message.
          */
         this.browser.on("serviceUp", service => {
             // Filter invalid results
@@ -69,7 +69,7 @@ export default class Discovery {
         });
 
         /**
-         * When a service is lost, send a `main:receiverDeviceDown` message with
+         * When a service is lost, send a `main:deviceDown` message with
          * the service name as the `deviceId`.
          */
         this.browser.on("serviceDown", service => {

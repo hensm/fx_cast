@@ -233,25 +233,25 @@ export default class ReceiverSelector extends TypedEventTarget<ReceiverSelectorE
     /** Handles messages from the popup extension page. */
     private onPopupMessage(message: Message) {
         switch (message.subject) {
-            case "receiverSelector:selected":
+            case "main:receiverSelected":
                 this.wasReceiverSelected = true;
                 this.dispatchEvent(
                     new CustomEvent("selected", { detail: message.data })
                 );
                 break;
 
-            case "receiverSelector:stop":
+            case "main:receiverStopped":
                 this.dispatchEvent(
                     new CustomEvent("stop", { detail: message.data })
                 );
                 break;
 
-            case "receiverSelector:receiverMessage":
+            case "main:sendReceiverMessage":
                 this.dispatchEvent(
                     new CustomEvent("receiverMessage", { detail: message.data })
                 );
                 break;
-            case "receiverSelector:mediaMessage":
+            case "main:sendMediaMessage":
                 this.dispatchEvent(
                     new CustomEvent("mediaMessage", { detail: message.data })
                 );

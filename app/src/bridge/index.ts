@@ -39,7 +39,7 @@ messaging.on("message", (message: Message) => {
             discovery = new Discovery({
                 onDeviceFound(device) {
                     messaging.sendMessage({
-                        subject: "main:receiverDeviceUp",
+                        subject: "main:deviceUp",
                         data: {
                             deviceId: device.id,
                             deviceInfo: device
@@ -80,7 +80,7 @@ messaging.on("message", (message: Message) => {
                 },
                 onDeviceDown(deviceId) {
                     messaging.sendMessage({
-                        subject: "main:receiverDeviceDown",
+                        subject: "main:deviceDown",
                         data: { deviceId }
                     });
 

@@ -134,7 +134,7 @@ export default new (class extends TypedEventTarget<EventMap> {
 
     private onBridgeMessage = (message: Message) => {
         switch (message.subject) {
-            case "main:receiverDeviceUp": {
+            case "main:deviceUp": {
                 const { deviceId, deviceInfo } = message.data;
 
                 this.receiverDevices.set(deviceId, deviceInfo);
@@ -147,7 +147,7 @@ export default new (class extends TypedEventTarget<EventMap> {
                 break;
             }
 
-            case "main:receiverDeviceDown": {
+            case "main:deviceDown": {
                 const { deviceId } = message.data;
 
                 if (this.receiverDevices.has(deviceId)) {

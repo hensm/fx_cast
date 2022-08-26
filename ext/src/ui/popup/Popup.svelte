@@ -343,7 +343,7 @@
         isConnecting = true;
 
         port?.postMessage({
-            subject: "receiverSelector:selected",
+            subject: "main:receiverSelected",
             data: {
                 receiverDevice,
                 mediaType
@@ -353,7 +353,7 @@
 
     function onReceiverStop(receiverDevice: ReceiverDevice) {
         port?.postMessage({
-            subject: "receiverSelector:receiverMessage",
+            subject: "main:sendReceiverMessage",
             data: {
                 deviceId: receiverDevice.id,
                 message: { requestId: 0, type: "STOP" }
@@ -361,7 +361,7 @@
         });
 
         port?.postMessage({
-            subject: "receiverSelector:stop",
+            subject: "main:receiverStopped",
             data: { deviceId: receiverDevice.id }
         });
     }

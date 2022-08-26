@@ -54,16 +54,17 @@ type ExtMessageDefinitions = {
     };
     "popup:close": undefined;
 
-    "receiverSelector:selected": ReceiverSelection;
-    "receiverSelector:stop": { deviceId: string };
-    "receiverSelector:receiverMessage": ReceiverSelectorReceiverMessage;
-    "receiverSelector:mediaMessage": ReceiverSelectorMediaMessage;
+    "main:receiverSelected": ReceiverSelection;
+    "main:receiverStopped": { deviceId: string };
+    "main:sendReceiverMessage": ReceiverSelectorReceiverMessage;
+    "main:sendMediaMessage": ReceiverSelectorMediaMessage;
 
     "main:selectReceiver": {
         sessionRequest: SessionRequest;
     };
     "cast:selectReceiver/selected": ReceiverSelection;
     "cast:selectReceiver/cancelled": undefined;
+
     "cast:receiverStoppedAction": { deviceId: string };
 
     "main:closeReceiverSelector": undefined;
@@ -107,12 +108,12 @@ type AppMessageDefinitions = {
      * Sent to extension from the bridge whenever a receiver device is
      * found.
      */
-    "main:receiverDeviceUp": { deviceId: string; deviceInfo: ReceiverDevice };
+    "main:deviceUp": { deviceId: string; deviceInfo: ReceiverDevice };
     /**
      * Sent to extension from the bridge whenever a previously found
      * receiver device is lost.
      */
-    "main:receiverDeviceDown": { deviceId: string };
+    "main:deviceDown": { deviceId: string };
 
     /**
      * Sent to the extension from the bridge whenever a
