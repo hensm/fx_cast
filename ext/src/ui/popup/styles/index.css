@@ -78,6 +78,7 @@ body {
     display: flex;
     flex-wrap: wrap;
     gap: 10px;
+    min-height: 50px;
     padding: 0.75em 0;
     position: relative;
 }

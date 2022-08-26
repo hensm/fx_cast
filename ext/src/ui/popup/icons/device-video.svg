@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
+    <style>
+        path, circle {
+            fill: rgba(12, 12, 13, .8);
+        }
+        @media (prefers-color-scheme: dark) {
+            path, circle {
+                fill: rgba(249, 249, 250, .8);
+            }
+        }
+    </style>
+    <path d="M4 4a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h6v1H7a1 1 0 0 0-1 1 1 1 0 0 0 1 1h10a1 1 0 0 0 1-1 1 1 0 0 0-1-1h-3v-1h6a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2Zm1 2h14a1 1 0 0 1 1 1v8a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1Z" />
+</svg>

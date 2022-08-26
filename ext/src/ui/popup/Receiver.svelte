@@ -1,7 +1,7 @@
 <script lang="ts">
     import { createEventDispatcher, onMount } from "svelte";
 
-    import type { ReceiverDevice } from "../../types";
+    import { ReceiverDevice, ReceiverDeviceCapabilities } from "../../types";
     import type { Port } from "../../messaging";
 
     import { PlayerState } from "../../cast/sdk/media/enums";
@@ -81,6 +81,15 @@
 </script>
 
 <li class="receiver">
+    <img
+        class="receiver__icon"
+        src="icons/{device.capabilities & ReceiverDeviceCapabilities.VIDEO_OUT
+            ? 'device-video.svg'
+            : 'device-audio.svg'}"
+        alt=""
+        height="24"
+        width="24"
+    />
     <div class="receiver__details">
         <div class="receiver__name">
             {device.friendlyName}
