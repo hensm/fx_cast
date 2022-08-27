@@ -184,9 +184,7 @@
                         title={_("optionsSiteWhitelistEditItem")}
                         disabled={isEditing && !isEditingValid}
                         on:click={() => beginEditing(i)}
-                    >
-                        <img src="assets/photon_edit.svg" alt="icon, edit" />
-                    </button>
+                    />
                 {/if}
 
                 <button
@@ -195,9 +193,7 @@
                     title={_("optionsSiteWhitelistRemoveItem")}
                     disabled={isEditing && !isEditingItem && !isEditingValid}
                     on:click={() => removeItem(i)}
-                >
-                    <img src="assets/photon_delete.svg" alt="icon, remove" />
-                </button>
+                />
 
                 {#if !isEditingItem && opts.showAdvancedOptions}
                     <button
@@ -217,14 +213,7 @@
                             }
                             expandedItemIndices = expandedItemIndices;
                         }}
-                    >
-                        <img
-                            src="../assets/{isItemExpanded
-                                ? 'photon_arrowhead_up.svg'
-                                : 'photon_arrowhead_down.svg'}"
-                            alt="icon, arrow down"
-                        />
-                    </button>
+                    />
 
                     {#if isItemExpanded}
                         <div class="whitelist__expanded">
@@ -300,8 +289,6 @@
             title={_("optionsSiteWhitelistAddItem")}
             on:click={addItem}
             type="button"
-        >
-            <img src="assets/photon_new.svg" alt="icon, add" />
-        </button>
+        />
     </div>
 </div>

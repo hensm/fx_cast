@@ -144,6 +144,7 @@ input:placeholder-shown {
 }
 
 .bridge__refresh {
+    background-image: url("../assets/photon_refresh.svg");
     position: absolute;
     right: 0;
     top: 0;
@@ -370,7 +371,20 @@ input:placeholder-shown {
     width: -moz-available;
 }
 
+.whitelist__edit-button {
+    background-image: url("../assets/photon_edit.svg");
+}
+.whitelist__remove-button {
+    background-image: url("../assets/photon_delete.svg");
+}
+.whitelist__expand-button {
+    background-image: url("../../assets/photon_arrowhead_down.svg");
+}
+.whitelist__item--expanded .whitelist__expand-button {
+    background-image: url("../../assets/photon_arrowhead_up.svg");
+}
 .whitelist__add-button {
+    background-image: url("../assets/photon_new.svg");
     margin-inline-end: auto;
 }
 

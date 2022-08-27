@@ -198,9 +198,7 @@
                     class="ghost bridge__refresh"
                     title={_("optionsBridgeRefresh")}
                     on:click={checkBridgeStatus}
-                >
-                    <img src="assets/photon_refresh.svg" alt="icon, refresh" />
-                </button>
+                />
             </div>
 
             {#if bridgeInfo}
