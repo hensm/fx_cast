@@ -1,5 +1,5 @@
 <script lang="ts">
-    import { afterUpdate, onMount, tick } from "svelte";
+    import { afterUpdate, onDestroy, onMount, tick } from "svelte";
 
     import messaging, { Message, Port } from "../../messaging";
     import options, { Options } from "../../lib/options";
@@ -131,15 +131,15 @@
         window.addEventListener("contextmenu", onContextMenu);
         browser.menus.onClicked.addListener(onMenuClicked);
         browser.menus.onShown.addListener(onMenuShown);
+    });
 
-        return () => {
-            port?.disconnect();
-            resizeObserver.disconnect();
+    onDestroy(() => {
+        port?.disconnect();
+        resizeObserver.disconnect();
 
-            window.addEventListener("contextmenu", onContextMenu);
-            browser.menus.onClicked.removeListener(onMenuClicked);
-            browser.menus.onShown.removeListener(onMenuShown);
-        };
+        window.removeEventListener("contextmenu", onContextMenu);
+        browser.menus.onClicked.removeListener(onMenuClicked);
+        browser.menus.onShown.removeListener(onMenuShown);
     });
 
     afterUpdate(async () => {

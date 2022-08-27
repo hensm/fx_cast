@@ -12,5 +12,8 @@ browser.runtime.getPlatformInfo().then(platformInfo => {
 
 const target = document.getElementById("root");
 if (target) {
-    new Popup({ target });
+    const popup = new Popup({ target });
+    window.addEventListener("unload", () => {
+        popup.$destroy();
+    });
 }
