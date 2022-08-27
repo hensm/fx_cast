@@ -22,23 +22,16 @@ export default {
         name: "BBC iPlayer",
         matches: "https://www.bbc.co.uk/iplayer*"
     },
-    "03977A48": {
-        name: "BBC Sounds",
-        matches: "https://www.bbc.co.uk/sounds/*"
-    },
-    "AA666EDD": { name: "Crunchyroll", matches: "https://crunchyroll.com/*" },
-    "10AAD887": { name: "All 4", matches: "https://www.channel4.com/*" },
     "B3DCF968": { name: "Twitch", matches: "https://www.twitch.tv/*" },
     "B88B034A": {
         name: "Dailymotion",
         matches: "https://www.dailymotion.com/*"
     },
     "C3DE6BC2": { name: "Disney+", matches: "https://www.disneyplus.com/*" },
+    "B143C57E": { name: "SoundCloud", matches: "https://soundcloud.com/*" },
 
     // Misc
-    "17608BC8": { name: "Prime Video" },
     "9AC194DC": { name: "Plex" },
-    "CD7B9F59": { name: "Global Player Live" },
 
     "CC1AD845": { name: _("popupMediaTypeAppMedia") }
 } as Record<string, KnownApp>;
