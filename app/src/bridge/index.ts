@@ -10,9 +10,11 @@ import { startMediaServer, stopMediaServer } from "./components/mediaServer";
 
 import { applicationVersion } from "../../config.json";
 
-process.on("SIGTERM", () => {
+process.on("SIGTERM", async () => {
     discovery?.stop();
-    stopMediaServer();
+    await stopMediaServer();
+
+    process.exit(1);
 });
 
 let discovery: Discovery | null = null;

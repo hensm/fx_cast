@@ -185,9 +185,9 @@ export function stopMediaServer() {
             mediaServer.close(err => {
                 if (err) {
                     reject();
+                } else {
+                    resolve();
                 }
-
-                resolve();
             });
 
             mediaServer = undefined;
