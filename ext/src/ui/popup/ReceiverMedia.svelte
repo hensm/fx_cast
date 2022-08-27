@@ -15,8 +15,6 @@
 
     const _ = browser.i18n.getMessage;
 
-    import deviceStore from "./deviceStore";
-
     const dispatch = createEventDispatcher<{
         togglePlayback: void;
         seek: { position: number };
@@ -104,13 +102,10 @@
     let lastUpdateTime = 0;
     let currentTime = getEstimatedMediaTime();
 
-    deviceStore.subscribe(devices => {
-        const newDevice = devices.find(newDevice => newDevice.id === device.id);
-        if (newDevice?.mediaStatus?.currentTime) {
-            lastUpdateTime = Date.now();
-            currentTime = newDevice.mediaStatus.currentTime;
-        }
-    });
+    $: if (device.mediaStatus?.currentTime) {
+        lastUpdateTime = 0;
+        currentTime = device.mediaStatus.currentTime;
+    }
 
     // Update estimated time every second
     onMount(() => {

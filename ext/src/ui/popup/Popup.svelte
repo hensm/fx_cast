@@ -16,7 +16,6 @@
     import { hasRequiredCapabilities } from "../../cast/utils";
 
     import Receiver from "./Receiver.svelte";
-    import deviceStore from "./deviceStore";
 
     const _ = browser.i18n.getMessage;
 
@@ -24,6 +23,9 @@
     let mediaType = ReceiverSelectorMediaType.App;
     /** Media types available to select. */
     let availableMediaTypes = ReceiverSelectorMediaType.App;
+
+    /** Devices to display. */
+    let devices: ReceiverDevice[] = [];
 
     /** Sender app ID (if available). */
     let appId: Optional<string>;
@@ -166,7 +168,7 @@
 
                 updateKnownApp();
 
-                $deviceStore = message.data.receiverDevices;
+                devices = message.data.receiverDevices;
 
                 break;
             }
@@ -267,7 +269,7 @@
 
         // Match by index rendered receiver element to device array
         if (receiverElementIndex > -1) {
-            return $deviceStore[receiverElementIndex];
+            return devices[receiverElementIndex];
         }
     }
 
@@ -418,12 +420,12 @@
 {/if}
 
 <ul class="receiver-list">
-    {#if !$deviceStore.length}
+    {#if !devices.length}
         <div class="receiver-list__not-found">
             {_("popupNoReceiversFound")}
         </div>
     {:else}
-        {#each $deviceStore as device}
+        {#each devices as device}
             <Receiver
                 {port}
                 {device}

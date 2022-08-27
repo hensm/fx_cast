@@ -132,7 +132,7 @@
     <button
         type="button"
         class="receiver__expand-button ghost"
-        class:receiver__expand-button--expanded={isExpanded}
+        class:receiver__expand-button--expanded={isExpanded && mediaStatus}
         title={_("popupShowDetailsTitle")}
         disabled={!mediaStatus}
         on:click={() => {
