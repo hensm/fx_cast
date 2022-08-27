@@ -103,7 +103,7 @@
     let currentTime = getEstimatedMediaTime();
 
     $: if (device.mediaStatus?.currentTime) {
-        lastUpdateTime = 0;
+        lastUpdateTime = Date.now();
         currentTime = device.mediaStatus.currentTime;
     }
 

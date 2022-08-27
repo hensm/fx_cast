@@ -37,7 +37,13 @@
     /** Current media status (if available) */
     $: mediaStatus = device.mediaStatus;
 
+    /** Whether media controls are shown. */
     let isExpanded = false;
+    $: if (!device.mediaStatus) {
+        isExpanded = false;
+    }
+
+    /** Whether a session request is in progress for this receiver.. */
     let isConnecting = false;
 
     function sendReceiverMessage(
