@@ -155,16 +155,14 @@ export default class Session {
                         );
 
                         this.media.push(media);
+                        updateMedia(media, mediaStatus);
                         this.#loadMediaSuccessCallback?.(media);
+                    } else {
+                        updateMedia(media, mediaStatus);
+                        for (const listener of media._updateListeners) {
+                            listener(true);
+                        }
                     }
-
-                    updateMedia(media, mediaStatus);
-
-                    for (const listener of media._updateListeners) {
-                        listener(true);
-                    }
-
-                    break;
                 }
             }
         }
