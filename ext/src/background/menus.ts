@@ -9,6 +9,8 @@ import { ReceiverSelectorMediaType } from "../types";
 import ReceiverSelector, { ReceiverSelection } from "./ReceiverSelector";
 import castManager from "./castManager";
 
+import * as menuIds from "../menuIds";
+
 const _ = browser.i18n.getMessage;
 
 const URL_PATTERN_HTTP = "http://*/*";
@@ -69,16 +71,51 @@ export async function initMenus() {
     });
 
     // Popup context menus
-    const popupUrlPattern = `${browser.runtime.getURL("ui/popup")}/*`;
-    browser.menus.create({
-        id: "popup_cast",
-        title: _("popupCastButtonTitle"),
-        documentUrlPatterns: [popupUrlPattern]
+    const createPopupMenu = (props: browser.menus._CreateCreateProperties) =>
+        browser.menus.create({
+            visible: false,
+            documentUrlPatterns: [`${browser.runtime.getURL("ui/popup")}/*`],
+            ...props
+        });
+
+    createPopupMenu({
+        id: menuIds.POPUP_MEDIA_PLAY_PAUSE,
+        title: _("popupMediaPlay")
     });
-    browser.menus.create({
-        id: "popup_stop",
-        title: _("popupStopButtonTitle"),
-        documentUrlPatterns: [popupUrlPattern]
+    createPopupMenu({
+        id: menuIds.POPUP_MEDIA_MUTE,
+        type: "checkbox",
+        title: _("popupMediaMute")
+    });
+    createPopupMenu({
+        id: menuIds.POPUP_MEDIA_SKIP_PREVIOUS,
+        title: _("popupMediaSkipPrevious")
+    });
+    createPopupMenu({
+        id: menuIds.POPUP_MEDIA_SKIP_NEXT,
+        title: _("popupMediaSkipNext")
+    });
+    createPopupMenu({
+        id: menuIds.POPUP_MEDIA_CC,
+        title: _("popupMediaSubtitlesCaptions")
+    });
+    createPopupMenu({
+        id: menuIds.POPUP_MEDIA_CC_OFF,
+        parentId: menuIds.POPUP_MEDIA_CC,
+        type: "radio",
+        title: _("popupMediaSubtitlesCaptionsOff")
+    });
+
+    createPopupMenu({ id: menuIds.POPUP_MEDIA_SEPARATOR, type: "separator" });
+
+    createPopupMenu({
+        id: menuIds.POPUP_CAST,
+        title: _("popupCastButtonTitle"),
+        icons: { 16: "icons/icon.svg" }
+    });
+    createPopupMenu({
+        id: menuIds.POPUP_STOP,
+        title: _("popupStopButtonTitle")
     });
 
     browser.menus.onShown.addListener(onMenuShown);

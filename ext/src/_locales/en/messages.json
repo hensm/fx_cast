@@ -78,7 +78,7 @@
         "description": "Alternate action button text displayed instead of popupCastButtonTitle."
     },
     "popupCastMenuTitle": {
-        "message": "Cast to \"$deviceName$\"",
+        "message": "Cast to $deviceName$",
         "description": "Menu text for cast item in context menu for receivers in receiver selector.",
         "placeholders": {
             "deviceName": {
@@ -88,7 +88,7 @@
         }
     },
     "popupStopMenuTitle": {
-        "message": "Stop \"$appName$\" on \"$deviceName$\"",
+        "message": "Stop \"$appName$\" on $deviceName$",
         "description": "Menu text for stop item in context menu for receivers in receiver selector.",
         "placeholders": {
             "appName": {
@@ -133,11 +133,11 @@
         "message": "Seek forwards",
         "description": "Media controls seek forward button title."
     },
-    "popupMediaSubtitlesClosedCaptions": {
-        "message": "Subtitles/closed captions",
+    "popupMediaSubtitlesCaptions": {
+        "message": "Subtitles/captions",
         "description": "Media controls subtitles/cc button title."
     },
-    "popupMediaSubtitlesClosedCaptionsOff": {
+    "popupMediaSubtitlesCaptionsOff": {
         "message": "Off",
         "description": "Media controls subtitles/cc button title."
     },

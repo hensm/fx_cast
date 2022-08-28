@@ -5,6 +5,8 @@
     import options, { Options } from "../../lib/options";
     import { RemoteMatchPattern } from "../../lib/matchPattern";
 
+    import { receiverMenuIds } from "../../menuIds";
+
     import {
         ReceiverDevice,
         ReceiverDeviceCapabilities,
@@ -128,8 +130,6 @@
 
         resizeObserver.observe(document.documentElement);
 
-        window.addEventListener("contextmenu", onContextMenu);
-        browser.menus.onClicked.addListener(onMenuClicked);
         browser.menus.onShown.addListener(onMenuShown);
     });
 
@@ -137,8 +137,6 @@
         port?.disconnect();
         resizeObserver.disconnect();
 
-        window.removeEventListener("contextmenu", onContextMenu);
-        browser.menus.onClicked.removeListener(onMenuClicked);
         browser.menus.onShown.removeListener(onMenuShown);
     });
 
@@ -247,93 +245,27 @@
         }
     }
 
-    function onContextMenu(ev: MouseEvent) {
-        if (!(ev.target instanceof Element)) return;
-
-        const receiverElement = ev.target.closest(".receiver");
-        if (receiverElement) {
-            browser.menus.overrideContext({
-                showDefaults: false
-            });
-        }
-    }
-
-    function getDeviceFromElement(target: Element) {
-        const receiverElement = target.closest(".receiver");
-        if (!receiverElement) return;
-
-        const receiverElementIndex = [
-            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-            ...receiverElement.parentElement!.children
-        ].indexOf(receiverElement);
-
-        // Match by index rendered receiver element to device array
-        if (receiverElementIndex > -1) {
-            return devices[receiverElementIndex];
-        }
-    }
+    /** Device ID associated with the last receiver menu that was shown. */
+    let lastMenuShownDeviceId: string;
 
     /** Handle show events for receiver context menus. */
     function onMenuShown(info: browser.menus._OnShownInfo) {
-        if (!info.targetElementId) return;
-        const target = browser.menus.getTargetElement(info.targetElementId);
-        if (!target) return;
-
-        const device = getDeviceFromElement(target);
-        if (!device) {
-            browser.menus.update("popup_cast", { visible: false });
-            browser.menus.update("popup_stop", { visible: false });
-        } else {
-            const app = device.status?.applications?.[0];
-            const isAppRunning = !!(app && !app.isIdleScreen);
-
-            browser.menus.update("popup_cast", {
-                visible: true,
-                title: _("popupCastMenuTitle", device.friendlyName),
-                enabled:
-                    // Not already connecting to a receiver
-                    !isConnecting &&
-                    // Selected media type available
-                    isMediaTypeAvailable
-            });
-
-            browser.menus.update("popup_stop", {
-                visible: isAppRunning,
-                title: isAppRunning
-                    ? _("popupStopMenuTitle", [
-                          app.displayName,
-                          device.friendlyName
-                      ])
-                    : ""
-            });
-        }
-
-        browser.menus.refresh();
-    }
-
-    /** Handle click events for receiver context menus. */
-    function onMenuClicked(info: browser.menus.OnClickData) {
-        if (
-            info.menuItemId !== "popup_cast" &&
-            info.menuItemId !== "popup_stop"
-        ) {
-            return;
-        }
+        // Only handle menu events on this page
+        if (info.pageUrl !== window.location.href) return;
 
         if (!info.targetElementId) return;
-        const target = browser.menus.getTargetElement(info.targetElementId);
-        if (!target) return;
+        const targetElement = browser.menus.getTargetElement(
+            info.targetElementId
+        );
+        if (!targetElement) return;
 
-        const device = getDeviceFromElement(target);
-        if (!device) return;
+        const receiverElement = targetElement.closest(".receiver");
+        if (!receiverElement) {
+            for (const menuId of receiverMenuIds) {
+                browser.menus.update(menuId, { visible: false });
+            }
 
-        switch (info.menuItemId) {
-            case "popup_cast":
-                onReceiverCast(device);
-                break;
-            case "popup_stop":
-                onReceiverStop(device);
-                break;
+            browser.menus.refresh();
         }
     }
 
@@ -434,6 +366,7 @@
                     ReceiverSelectorMediaType.None &&
                     isDeviceCompatible(device)}
                 isAnyConnecting={isConnecting}
+                bind:lastMenuShownDeviceId
                 on:cast={ev => onReceiverCast(ev.detail.device)}
                 on:stop={ev => onReceiverStop(ev.detail.device)}
             />

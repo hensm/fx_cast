@@ -8,9 +8,9 @@
     import {
         MetadataType,
         PlayerState,
-        StreamType,
-        TrackType
+        StreamType
     } from "../../cast/sdk/media/enums";
+    import type { Track } from "../../cast/sdk/media/classes";
     import { getEstimatedTime } from "../../cast/utils";
 
     const _ = browser.i18n.getMessage;
@@ -26,6 +26,7 @@
 
     export let status: MediaStatus;
     export let device: ReceiverDevice;
+    export let textTracks: Track[] = [];
 
     $: isPlayingOrPaused =
         status.playerState === PlayerState.PLAYING ||
@@ -71,32 +72,6 @@
             }
         }
     }
-
-    const languageNames = new Intl.DisplayNames(
-        [browser.i18n.getUILanguage()],
-        { type: "language" }
-    );
-
-    // Subtitle/caption tracks
-    $: textTracks = status?.media?.tracks
-        ?.filter(track => track.type === TrackType.TEXT)
-        .map(track => {
-            /**
-             * If track has no name, but does have a language, get a
-             * display name for the language.
-             */
-            if (!track.name && track.language) {
-                try {
-                    const displayName = languageNames.of(track.language);
-                    if (displayName) {
-                        track.name = displayName;
-                    }
-                    // eslint-disable-next-line no-empty
-                } catch (err) {}
-            }
-
-            return track;
-        });
 
     // Keep track of update times for currentTime estimations
     let lastUpdateTime = 0;
@@ -258,7 +233,7 @@
                     class="media__cc-button ghost"
                     class:media__cc-button--off={activeTextTrackId ===
                         undefined}
-                    title={_("popupMediaSubtitlesClosedCaptions")}
+                    title={_("popupMediaSubtitlesCaptions")}
                     value={activeTextTrackId}
                     on:change={ev => {
                         if (!status.activeTrackIds) return;
@@ -276,7 +251,7 @@
                     }}
                 >
                     <option value={undefined}>
-                        {_("popupMediaSubtitlesClosedCaptionsOff")}
+                        {_("popupMediaSubtitlesCaptionsOff")}
                     </option>
                     {#each textTracks as track}
                         <option value={track.trackId}>
