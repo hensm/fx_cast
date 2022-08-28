@@ -138,6 +138,14 @@ export default new (class extends TypedEventTarget<EventMap> {
                 const { deviceId, deviceInfo } = message.data;
 
                 this.receiverDevices.set(deviceId, deviceInfo);
+
+                // Sort devices by friendly name
+                this.receiverDevices = new Map(
+                    [...this.receiverDevices].sort(([, deviceA], [, deviceB]) =>
+                        deviceA.friendlyName.localeCompare(deviceB.friendlyName)
+                    )
+                );
+
                 this.dispatchEvent(
                     new CustomEvent("deviceUp", {
                         detail: { deviceInfo }
