@@ -5,7 +5,6 @@ import logger from "../../lib/logger";
 import type { Message } from "../../messaging";
 import eventMessaging from "../eventMessaging";
 
-import type { ReceiverDevice } from "../../types";
 import type { ErrorCallback, SuccessCallback } from "../types";
 
 import {
@@ -39,7 +38,6 @@ import {
 import Session from "./Session";
 
 import media from "./media";
-import { convertCapabilitiesFlags } from "../utils";
 
 type ReceiverActionListener = (
     receiver: Receiver,
@@ -48,34 +46,20 @@ type ReceiverActionListener = (
 
 type RequestSessionSuccessCallback = (session: Session) => void;
 
-/**
- * Create `chrome.cast.Receiver` object from receiver device info.
- */
-function createReceiver(device: ReceiverDevice) {
-    const receiver = new Receiver(
-        device.id,
-        device.friendlyName,
-        convertCapabilitiesFlags(device.capabilities)
-    );
-
-    // Currently only supports CAST receivers
-    receiver.receiverType = ReceiverType.CAST;
-
-    return receiver;
-}
-
 /** Cast SDK root class */
 export default class {
-    #receiverDevices = new Map<string, ReceiverDevice>();
-
     #apiConfig?: ApiConfig;
     #sessionRequest?: SessionRequest;
 
     #requestSessionSuccessCallback?: RequestSessionSuccessCallback;
     #requestSessionErrorCallback?: ErrorCallback;
 
+    #initializeSuccessCallback?: SuccessCallback;
+
     #sessions = new Map<string, Session>();
     #receiverActionListeners = new Set<ReceiverActionListener>();
+
+    #receiverAvailability = ReceiverAvailability.UNAVAILABLE;
 
     // Enums
     AutoJoinPolicy = AutoJoinPolicy;
@@ -114,29 +98,15 @@ export default class {
         eventMessaging.page.addListener(this.#onMessage.bind(this));
     }
 
-    #sendSessionRequest(
-        sessionRequest: SessionRequest,
-        receiverDevice: ReceiverDevice
-    ) {
-        for (const listener of this.#receiverActionListeners) {
-            listener(createReceiver(receiverDevice), ReceiverAction.CAST);
-        }
-
-        eventMessaging.page.sendMessage({
-            subject: "bridge:createCastSession",
-            data: {
-                appId: sessionRequest.appId,
-                receiverDevice: receiverDevice
-            }
-        });
-    }
-
     #onMessage(message: Message) {
         switch (message.subject) {
-            case "cast:initialized": {
+            case "cast:initialized":
+                this.#initializeSuccessCallback?.();
+                this.#apiConfig?.receiverListener(this.#receiverAvailability);
+
                 this.isAvailable = true;
+
                 break;
-            }
 
             /**
              * Once the bridge detects a session creation, session info
@@ -144,19 +114,9 @@ export default class {
              */
             case "cast:sessionCreated": {
                 const status = message.data;
-                const receiverDevice = this.#receiverDevices.get(
-                    status.receiverId
-                );
-                if (!receiverDevice) {
-                    logger.error(
-                        `Could not find receiver device "${status.receiverFriendlyName}" (${status.receiverId})`
-                    );
-                    break;
-                }
 
-                const receiver = createReceiver(receiverDevice);
-                receiver.volume = status.volume;
-                receiver.displayStatus = new ReceiverDisplayStatus(
+                status.receiver.volume = status.volume;
+                status.receiver.displayStatus = new ReceiverDisplayStatus(
                     status.statusText,
                     status.appImages
                 );
@@ -166,7 +126,7 @@ export default class {
                     status.appId,
                     status.displayName,
                     status.appImages,
-                    receiver
+                    status.receiver
                 );
 
                 session.namespaces = status.namespaces;
@@ -178,9 +138,9 @@ export default class {
 
                 /**
                  * If session created via requestSession, the success
-                 * callback will be set, otherwise the session was created
-                 * by the extension and the session listener should be
-                 * called instead.
+                 * callback will be set, otherwise the session was
+                 * created by the extension and the session listener
+                 * should be called instead.
                  */
                 if (this.#requestSessionSuccessCallback) {
                     this.#requestSessionSuccessCallback(session);
@@ -263,49 +223,15 @@ export default class {
                 break;
             }
 
-            case "cast:receiverDeviceUp": {
-                const { receiverDevice } = message.data;
-                if (this.#receiverDevices.has(receiverDevice.id)) {
-                    break;
-                }
+            case "cast:updateReceiverAvailability": {
+                const availability = message.data.isAvailable
+                    ? ReceiverAvailability.AVAILABLE
+                    : ReceiverAvailability.UNAVAILABLE;
 
-                this.#receiverDevices.set(receiverDevice.id, receiverDevice);
-
-                if (this.#apiConfig) {
-                    // Notify listeners of new cast destination
-                    this.#apiConfig.receiverListener(
-                        ReceiverAvailability.AVAILABLE
-                    );
-                }
-
-                break;
-            }
-
-            case "cast:receiverDeviceDown": {
-                const { receiverDeviceId } = message.data;
-
-                this.#receiverDevices.delete(receiverDeviceId);
-
-                if (this.#receiverDevices.size === 0) {
-                    if (this.#apiConfig) {
-                        this.#apiConfig.receiverListener(
-                            ReceiverAvailability.UNAVAILABLE
-                        );
-                    }
-                }
-
-                break;
-            }
-
-            case "cast:selectReceiver/selected": {
-                logger.info("Selected receiver");
-
-                if (this.#sessionRequest) {
-                    this.#sendSessionRequest(
-                        this.#sessionRequest,
-                        message.data.receiverDevice
-                    );
-                    this.#sessionRequest = undefined;
+                // If availability has changed, call receiver listeners
+                if (availability !== this.#receiverAvailability) {
+                    this.#receiverAvailability = availability;
+                    this.#apiConfig?.receiverListener(availability);
                 }
 
                 break;
@@ -324,32 +250,10 @@ export default class {
                 break;
             }
 
-            case "cast:receiverStoppedAction": {
-                const device = this.#receiverDevices.get(message.data.deviceId);
-                if (!device) break;
-
+            case "cast:sendReceiverAction": {
                 for (const actionListener of this.#receiverActionListeners) {
-                    actionListener(createReceiver(device), ReceiverAction.STOP);
+                    actionListener(message.data.receiver, message.data.action);
                 }
-
-                break;
-            }
-
-            // Session request initiated via receiver selector
-            case "cast:launchApp": {
-                if (this.#sessionRequest) {
-                    logger.error("Session request already in progress.");
-                    break;
-                }
-                if (!this.#apiConfig?.sessionRequest) {
-                    logger.error("Session request not found!");
-                    break;
-                }
-
-                this.#sendSessionRequest(
-                    this.#apiConfig.sessionRequest,
-                    message.data.receiverDevice
-                );
 
                 break;
             }
@@ -371,25 +275,20 @@ export default class {
 
         this.#apiConfig = apiConfig;
 
+        if (successCallback) {
+            this.#initializeSuccessCallback = successCallback;
+        }
+
         eventMessaging.page.sendMessage({
             subject: "main:initializeCast",
-            data: { appId: this.#apiConfig.sessionRequest.appId }
+            data: { apiConfig: this.#apiConfig }
         });
-
-        successCallback?.();
-
-        this.#apiConfig.receiverListener(
-            this.#receiverDevices.size
-                ? ReceiverAvailability.AVAILABLE
-                : ReceiverAvailability.UNAVAILABLE
-        );
     }
 
     requestSession(
         successCallback: RequestSessionSuccessCallback,
         errorCallback: ErrorCallback,
-        newSessionRequest?: SessionRequest,
-        receiverDevice?: ReceiverDevice
+        newSessionRequest?: SessionRequest
     ) {
         logger.info("cast.requestSession");
 
@@ -410,40 +309,23 @@ export default class {
             return;
         }
 
-        // No receivers available
-        if (!this.#receiverDevices.size) {
+        if (this.#receiverAvailability === ReceiverAvailability.UNAVAILABLE) {
             errorCallback?.(new Error_(ErrorCode.RECEIVER_UNAVAILABLE));
             return;
         }
 
-        /**
-         * Store session request for use in return message from
-         * receiver selection.
-         */
+        // Store used session request
         this.#sessionRequest =
             newSessionRequest ?? this.#apiConfig.sessionRequest;
 
         this.#requestSessionSuccessCallback = successCallback;
         this.#requestSessionErrorCallback = errorCallback;
 
-        /**
-         * If a receiver was provided, skip the receiver selector
-         * process.
-         */
-        if (receiverDevice) {
-            if (
-                receiverDevice?.id &&
-                this.#receiverDevices.has(receiverDevice.id)
-            ) {
-                this.#sendSessionRequest(this.#sessionRequest, receiverDevice);
-            }
-        } else {
-            // Open receiver selector UI
-            eventMessaging.page.sendMessage({
-                subject: "main:selectReceiver",
-                data: { sessionRequest: this.#sessionRequest }
-            });
-        }
+        // Open receiver selector UI
+        eventMessaging.page.sendMessage({
+            subject: "main:selectReceiver",
+            data: { sessionRequest: this.#sessionRequest }
+        });
     }
 
     requestSessionById(_sessionId: string): void {

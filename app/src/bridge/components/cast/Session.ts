@@ -73,7 +73,7 @@ export default class Session extends CastClient {
                         this.onSessionCreated?.(this.sessionId);
 
                         messaging.sendMessage({
-                            subject: "cast:sessionCreated",
+                            subject: "main:castSessionCreated",
                             data: {
                                 sessionId: this.sessionId,
                                 statusText: application.statusText,
@@ -103,7 +103,7 @@ export default class Session extends CastClient {
                 }
 
                 messaging.sendMessage({
-                    subject: "cast:sessionUpdated",
+                    subject: "main:castSessionUpdated",
                     data: {
                         sessionId: this.sessionId,
                         statusText: application.statusText,
