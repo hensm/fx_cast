@@ -110,8 +110,8 @@ type MessageDefinitions = {
      * updates. Updated details is a mutable subset of session details
      * otherwise fixed on creation.
      */
-    "cast:sessionCreated": CastSessionCreatedDetails;
-    "cast:sessionUpdated": CastSessionUpdatedDetails;
+    "main:castSessionCreated": CastSessionCreatedDetails;
+    "main:castSessionUpdated": CastSessionUpdatedDetails;
     /**
      * Sent to cast API instances whenever a session is stopped.
      */

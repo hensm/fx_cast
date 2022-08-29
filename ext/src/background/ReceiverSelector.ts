@@ -16,8 +16,10 @@ import deviceManager from "./deviceManager";
 import castManager from "./castManager";
 
 import { BaseConfig, baseConfigStorage, getAppTag } from "../cast/googleApi";
-import type { SessionRequest } from "../cast/sdk/classes";
 import type { SenderMediaMessage, SenderMessage } from "../cast/sdk/types";
+import type { SessionRequest } from "../cast/sdk/classes";
+import { ReceiverAction } from "../cast/sdk/enums";
+import { createReceiver } from "../cast/utils";
 
 const POPUP_URL = browser.runtime.getURL("ui/popup/index.html");
 
@@ -330,7 +332,10 @@ export default class ReceiverSelector extends TypedEventTarget<ReceiverSelectorE
          * If the current context is running the mirroring app, pretend
          * it doesn't exist because it shouldn't be launched like this.
          */
-        if (castInstance?.appId === (await options.get("mirroringAppId"))) {
+        if (
+            castInstance?.apiConfig?.sessionRequest.appId ===
+            (await options.get("mirroringAppId"))
+        ) {
             castInstance = undefined;
         }
 
@@ -377,7 +382,7 @@ export default class ReceiverSelector extends TypedEventTarget<ReceiverSelectorE
         await deviceManager.init();
 
         let isRequestAppAudioCompatible: Optional<boolean>;
-        if (castInstance?.appId) {
+        if (castInstance?.apiConfig?.sessionRequest.appId) {
             if (!baseConfig) {
                 try {
                     baseConfig = (await baseConfigStorage.get("baseConfig"))
@@ -389,7 +394,7 @@ export default class ReceiverSelector extends TypedEventTarget<ReceiverSelectorE
 
             isRequestAppAudioCompatible = getAppTag(
                 baseConfig,
-                castInstance.appId
+                castInstance.apiConfig?.sessionRequest.appId
             )?.supports_audio_only;
         }
 
@@ -429,7 +434,7 @@ export default class ReceiverSelector extends TypedEventTarget<ReceiverSelectorE
                 receiverDevices: deviceManager.getDevices(),
                 defaultMediaType,
                 availableMediaTypes,
-                appId: castInstance?.appId,
+                appId: castInstance?.apiConfig?.sessionRequest.appId,
                 // Create page info
                 pageInfo: pageUrl
                     ? {
@@ -464,9 +469,15 @@ function createSelector() {
         );
         if (!castInstance) return;
 
+        const device = deviceManager.getDeviceById(ev.detail.deviceId);
+        if (!device) return;
+
         castInstance.contentPort.postMessage({
-            subject: "cast:receiverStoppedAction",
-            data: { deviceId: ev.detail.deviceId }
+            subject: "cast:sendReceiverAction",
+            data: {
+                receiver: createReceiver(device),
+                action: ReceiverAction.STOP
+            }
         });
     };
     selector.addEventListener("stop", onStop);

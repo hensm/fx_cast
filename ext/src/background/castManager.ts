@@ -8,6 +8,10 @@ import { stringify } from "../lib/utils";
 
 import { ReceiverSelectorMediaType } from "../types";
 
+import type { ApiConfig } from "../cast/sdk/classes";
+import { ReceiverAction } from "../cast/sdk/enums";
+import { createReceiver } from "../cast/utils";
+
 import deviceManager from "./deviceManager";
 import ReceiverSelector, { ReceiverSelection } from "./ReceiverSelector";
 
@@ -18,7 +22,10 @@ export interface CastInstance {
     contentPort: AnyPort;
     contentTabId?: number;
     contentFrameId?: number;
-    appId?: string;
+
+    /** ApiConfig provided on initialization. */
+    apiConfig?: ApiConfig;
+    /** Established session details. */
     session?: CastSession;
 }
 
@@ -39,23 +46,23 @@ export default new (class {
             }
         });
 
-        // Forward receiver eventes to cast instances
-        deviceManager.addEventListener("deviceUp", ev => {
+        // Pass receiver availability updates to cast API.
+        const updateReceiverAvailability = () => {
+            const isAvailable = deviceManager.getDevices().length > 0;
+
             for (const instance of this.activeInstances) {
                 instance.contentPort.postMessage({
-                    subject: "cast:receiverDeviceUp",
-                    data: { receiverDevice: ev.detail.deviceInfo }
+                    subject: "cast:updateReceiverAvailability",
+                    data: { isAvailable }
                 });
             }
-        });
-        deviceManager.addEventListener("deviceDown", ev => {
-            for (const instance of this.activeInstances) {
-                instance.contentPort.postMessage({
-                    subject: "cast:receiverDeviceDown",
-                    data: { receiverDeviceId: ev.detail.deviceId }
-                });
-            }
-        });
+        };
+
+        deviceManager.addEventListener("deviceUp", updateReceiverAvailability);
+        deviceManager.addEventListener(
+            "deviceDown",
+            updateReceiverAvailability
+        );
     }
 
     /**
@@ -197,7 +204,7 @@ export default new (class {
     ) {
         // Intercept messages to store relevant info
         switch (message.subject) {
-            case "cast:sessionCreated": {
+            case "main:castSessionCreated": {
                 // Close after session is created
                 const selector = ReceiverSelector.sharedInstance;
                 if (
@@ -211,12 +218,38 @@ export default new (class {
                     selector.close();
                 }
 
+                const { receiverId: deviceId } = message.data;
+
                 instance.session = {
-                    deviceId: message.data.receiverId,
+                    deviceId,
                     sessionId: message.data.sessionId
                 };
+
+                const device = deviceManager.getDeviceById(deviceId);
+                if (!device) {
+                    logger.error(
+                        "[on main:castSessionCreated]: Could not find device with ID:",
+                        deviceId
+                    );
+                    break;
+                }
+
+                instance.contentPort.postMessage({
+                    subject: "cast:sessionCreated",
+                    data: {
+                        ...message.data,
+                        receiver: createReceiver(device)
+                    }
+                });
+
                 break;
             }
+
+            case "main:castSessionUpdated":
+                instance.contentPort.postMessage({
+                    subject: "cast:sessionUpdated",
+                    data: message.data
+                });
         }
 
         instance.contentPort.postMessage(message);
@@ -239,14 +272,14 @@ export default new (class {
         switch (message.subject) {
             // Cast API has been initialized
             case "main:initializeCast": {
-                instance.appId = message.data.appId;
+                instance.apiConfig = message.data.apiConfig;
 
-                for (const receiverDevice of deviceManager.getDevices()) {
-                    instance.contentPort.postMessage({
-                        subject: "cast:receiverDeviceUp",
-                        data: { receiverDevice }
-                    });
-                }
+                instance.contentPort.postMessage({
+                    subject: "cast:updateReceiverAvailability",
+                    data: {
+                        isAvailable: deviceManager.getDevices().length > 0
+                    }
+                });
 
                 break;
             }
@@ -262,11 +295,13 @@ export default new (class {
                     );
                 }
 
+                const { sessionRequest } = message.data;
+
                 try {
                     const selection = await ReceiverSelector.getSelection(
                         instance.contentTabId,
                         instance.contentFrameId,
-                        { sessionRequest: message.data.sessionRequest }
+                        { sessionRequest }
                     );
 
                     // Handle cancellation
@@ -297,9 +332,12 @@ export default new (class {
                         break;
                     }
 
-                    instance.contentPort.postMessage({
-                        subject: "cast:selectReceiver/selected",
-                        data: selection
+                    instance.bridgePort.postMessage({
+                        subject: "bridge:createCastSession",
+                        data: {
+                            appId: sessionRequest.appId,
+                            receiverDevice: selection.receiverDevice
+                        }
                     });
                 } catch (err) {
                     // TODO: Report errors properly
@@ -336,9 +374,24 @@ export default new (class {
                     );
                 }
 
+                if (!instance.apiConfig?.sessionRequest.appId) {
+                    throw logger.error("Invalid session request");
+                }
+
                 instance.contentPort.postMessage({
-                    subject: "cast:launchApp",
-                    data: { receiverDevice: opts.selection.receiverDevice }
+                    subject: "cast:sendReceiverAction",
+                    data: {
+                        receiver: createReceiver(opts.selection.receiverDevice),
+                        action: ReceiverAction.CAST
+                    }
+                });
+
+                instance.bridgePort.postMessage({
+                    subject: "bridge:createCastSession",
+                    data: {
+                        appId: instance.apiConfig?.sessionRequest.appId,
+                        receiverDevice: opts.selection.receiverDevice
+                    }
                 });
 
                 break;

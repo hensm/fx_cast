@@ -16,9 +16,10 @@ import type {
     SenderMediaMessage,
     SenderMessage
 } from "./cast/sdk/types";
-import type { SessionRequest } from "./cast/sdk/classes";
+import type { ApiConfig, Receiver, SessionRequest } from "./cast/sdk/classes";
 
 import type { ReceiverDevice, ReceiverSelectorMediaType } from "./types";
+import type { ReceiverAction } from "./cast/sdk/enums";
 
 /**
  * Messages are JSON objects with a `subject` string key and a
@@ -76,24 +77,26 @@ type ExtMessageDefinitions = {
     "main:selectReceiver": {
         sessionRequest: SessionRequest;
     };
-    /** Return message to the cast API when a receiver is selected. */
-    "cast:selectReceiver/selected": ReceiverSelection;
     /** Return message to the cast API when a selection is cancelled. */
     "cast:selectReceiver/cancelled": undefined;
 
-    /** Sent to the cast API when a receiver app is stopped. */
-    "cast:receiverStoppedAction": { deviceId: string };
+    /**
+     * Sent to the cast API when a session is requested or stopped via
+     * the extension UI.
+     */
+    "cast:sendReceiverAction": { receiver: Receiver; action: ReceiverAction };
 
     /**
      * Tells the cast manager to provide the cast API instance with
      * receiver data.
      */
-    "main:initializeCast": { appId: string };
+    "main:initializeCast": { apiConfig: ApiConfig };
     "cast:initialized": { isAvailable: boolean };
 
-    "cast:receiverDeviceUp": { receiverDevice: ReceiverDevice };
-    "cast:receiverDeviceDown": { receiverDeviceId: string };
-    "cast:launchApp": { receiverDevice: ReceiverDevice };
+    "cast:sessionCreated": CastSessionCreatedDetails & { receiver: Receiver };
+    "cast:sessionUpdated": CastSessionUpdatedDetails;
+
+    "cast:updateReceiverAvailability": { isAvailable: boolean };
 };
 
 /**
@@ -189,8 +192,9 @@ type AppMessageDefinitions = {
      * updates. Updated details is a mutable subset of session details
      * otherwise fixed on creation.
      */
-    "cast:sessionCreated": CastSessionCreatedDetails;
-    "cast:sessionUpdated": CastSessionUpdatedDetails;
+    "main:castSessionCreated": CastSessionCreatedDetails;
+    "main:castSessionUpdated": CastSessionUpdatedDetails;
+
     /**
      * Sent to cast API instances whenever a session is stopped.
      */

@@ -1,5 +1,6 @@
 import { ReceiverDevice, ReceiverDeviceCapabilities } from "../types";
-import { Capability } from "./sdk/enums";
+import { Receiver } from "./sdk/classes";
+import { Capability, ReceiverType } from "./sdk/enums";
 
 /**
  * Check receiver device capabilities bitflags against array of
@@ -63,4 +64,20 @@ export function getEstimatedTime(opts: GetEstimatedTimeOpts) {
     }
 
     return estimatedTime;
+}
+
+/**
+ * Create `chrome.cast.Receiver` object from receiver device info.
+ */
+export function createReceiver(device: ReceiverDevice) {
+    const receiver = new Receiver(
+        device.id,
+        device.friendlyName,
+        convertCapabilitiesFlags(device.capabilities)
+    );
+
+    // Currently only supports CAST receivers
+    receiver.receiverType = ReceiverType.CAST;
+
+    return receiver;
 }

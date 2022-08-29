@@ -30,8 +30,8 @@ interface EventMap {
 
 export default new (class extends TypedEventTarget<EventMap> {
     /**
-     * Map of receiver device IDs to devices. Updated as
-     * receiverDevice messages are received from the bridge.
+     * Map of receiver device IDs to devices. Updated as receiverDevice
+     * messages are received from the bridge.
      */
     private receiverDevices = new Map<string, ReceiverDevice>();
 
@@ -43,8 +43,8 @@ export default new (class extends TypedEventTarget<EventMap> {
     }
 
     /**
-     * Initialize (or re-initialize) a bridge connection to
-     * start dispatching events.
+     * Initializes (or re-initializes) a bridge connection to start
+     * dispatching events.
      */
     async refresh() {
         this.bridgePort?.disconnect();
@@ -63,33 +63,16 @@ export default new (class extends TypedEventTarget<EventMap> {
         });
     }
 
-    /**
-     * Get a list of receiver devices
-     */
+    /** Gets a list of receiver devices. */
     getDevices() {
         return Array.from(this.receiverDevices.values());
     }
-
-    /**
-     * Stops a receiver app running on a given device.
-     */
-    stopReceiverApp(receiverDeviceId: string) {
-        if (!this.bridgePort) {
-            logger.error(
-                "Failed to stop receiver device, no bridge connection"
-            );
-            return;
-        }
-
-        const receiverDevice = this.receiverDevices.get(receiverDeviceId);
-        if (receiverDevice) {
-            this.bridgePort.postMessage({
-                subject: "bridge:stopCastSession",
-                data: { receiverDevice }
-            });
-        }
+    /** Gets a device by ID. */
+    getDeviceById(deviceId: string) {
+        return this.receiverDevices.get(deviceId);
     }
 
+    /** Sends an NS_RECEIVER message to a given device. */
     sendReceiverMessage(deviceId: string, message: SenderMessage) {
         if (!this.bridgePort) {
             logger.error(
@@ -112,6 +95,7 @@ export default new (class extends TypedEventTarget<EventMap> {
         });
     }
 
+    /** Sends an NS_MEDIA message to a given device. */
     sendMediaMessage(deviceId: string, message: SenderMediaMessage) {
         if (!this.bridgePort) {
             logger.error("Failed to send media message (no bridge connection)");
