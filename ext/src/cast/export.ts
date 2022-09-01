@@ -2,7 +2,8 @@
 "use strict";
 
 import type { TypedMessagePort } from "../lib/TypedMessagePort";
-import type { Message } from "../messaging";
+import messaging, { Message } from "../messaging";
+import type { ReceiverDevice } from "../types";
 
 import pageMessenging from "./pageMessenging";
 import CastSDK from "./sdk";
@@ -14,17 +15,23 @@ let existingInstance = new CastSDK();
 
 export default existingInstance;
 
+interface EnsureInitOpts {
+    contextTabId?: number;
+    /** Skip receiver selection. */
+    receiverDevice?: ReceiverDevice;
+}
+
 /**
  * To support exporting the API from a module, we need to retain the
  * MessageChannel-based pageMessaging layer despite not crossing any
  * context boundaries.
  *
  * The ensureInit function creates a messaging connection to the
- * castManager, hooks it up to the pageMessaging layer and also provides
- * a messaging port so consumers of this module can communicate with the
- * castManager.
+ * cast manager, hooks it up to the pageMessaging layer and also
+ * provides a messaging port so consumers of this module can communicate
+ * with the cast manager.
  */
-export function ensureInit(contextTabId?: number): Promise<CastPort> {
+export function ensureInit(opts: EnsureInitOpts): Promise<CastPort> {
     return new Promise(async (resolve, reject) => {
         // If already initialized
         if (existingPort) {
@@ -43,26 +50,26 @@ export function ensureInit(contextTabId?: number): Promise<CastPort> {
             );
 
             /**
-             * port1 will handle castManager messages.
+             * port1 will handle cast manager messages.
              * port2 will handle cast instance messages.
              */
             const { port1: managerPort, port2: instancePort } =
                 new MessageChannel();
 
             /**
-             * Provide castManager with a port to send messages to
+             * Provide cast manager with a port to send messages to
              * cast instance.
              */
-            if (contextTabId) {
+            if (opts.contextTabId) {
                 await castManager.createInstance(instancePort, {
-                    tabId: contextTabId,
+                    tabId: opts.contextTabId,
                     frameId: 0
                 });
             } else {
                 await castManager.createInstance(instancePort);
             }
 
-            // castManager -> cast instance
+            // cast manager -> cast instance
             managerPort.addEventListener("message", ev => {
                 const message = ev.data as Message;
                 if (message.subject === "cast:instanceCreated") {
@@ -77,30 +84,67 @@ export function ensureInit(contextTabId?: number): Promise<CastPort> {
             });
             managerPort.start();
 
-            // Cast instance -> castManager
+            // Cast instance -> cast manager
             pageMessenging.extension.addListener(message => {
+                // Skip receiver selection
+                if (opts.receiverDevice) {
+                    message = rewriteTrustedRequestSession(
+                        message,
+                        opts.receiverDevice
+                    );
+                }
+
                 managerPort.postMessage(message);
             });
         } else {
-            // Let contentBridge hook up pageMessaging
-            const { managerPort: backgroundPort } = await import(
-                "./contentBridge"
-            );
-            existingPort = pageMessenging.page.messagePort;
+            const managerPort = messaging.connect({ name: "trusted-cast" });
 
-            backgroundPort.onMessage.addListener(function onManagerMessage(
-                message: Message
-            ) {
+            // Cast manager -> cast instance
+            managerPort.onMessage.addListener(message => {
                 if (message.subject === "cast:instanceCreated") {
                     if (message.data.isAvailable) {
                         resolve(pageMessenging.page.messagePort);
                     } else {
                         reject();
                     }
-
-                    backgroundPort.onMessage.removeListener(onManagerMessage);
                 }
+
+                pageMessenging.extension.sendMessage(message);
             });
+
+            // Cast instance -> cast manager
+            pageMessenging.extension.addListener(message => {
+                // Skip receiver selection
+                if (opts.receiverDevice) {
+                    message = rewriteTrustedRequestSession(
+                        message,
+                        opts.receiverDevice
+                    );
+                }
+
+                managerPort.postMessage(message);
+            });
+
+            managerPort.onDisconnect.addListener(() => {
+                pageMessenging.extension.close();
+            });
+
+            existingPort = pageMessenging.page.messagePort;
         }
     });
+}
+
+/**
+ * If a receiver device was passed to `ensureInit`, messages to the cast
+ * manager will be passed through this function and the receiver device
+ * will be added to the message payload. This tells the cast manager to
+ * skip receiver selection when requesting a session.
+ */
+function rewriteTrustedRequestSession(
+    message: Message,
+    receiverDevice: ReceiverDevice
+) {
+    if (message.subject !== "main:requestSession") return message;
+    message.data.receiverDevice = receiverDevice;
+    return message;
 }

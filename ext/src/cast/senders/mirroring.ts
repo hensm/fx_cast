@@ -1,199 +1,220 @@
 "use strict";
 
 import options from "../../lib/options";
-import cast, { ensureInit } from "../export";
+import { Logger } from "../../lib/logger";
 
 import { ReceiverDevice, ReceiverSelectorMediaType } from "../../types";
 
 import type Session from "../sdk/Session";
+import cast, { ensureInit } from "../export";
+import type { ReceiverAvailability } from "../sdk/enums";
 
-// Variables passed from background
-const {
-    selectedMedia,
-    selectedReceiver
-}: {
-    selectedMedia: ReceiverSelectorMediaType;
-    selectedReceiver: ReceiverDevice;
-} = window as any;
+const logger = new Logger("fx_cast [mirroring sender]");
 
-const FX_CAST_RECEIVER_APP_NAMESPACE = "urn:x-cast:fx_cast";
+const NS_FX_CAST = "urn:x-cast:fx_cast";
 
-let session: Session;
-let wasSessionRequested = false;
+type MirroringAppMessage =
+    | { subject: "peerConnectionOffer"; data: RTCSessionDescriptionInit }
+    | { subject: "peerConnectionAnswer"; data: RTCSessionDescriptionInit }
+    | { subject: "iceCandidate"; data: RTCIceCandidateInit }
+    | { subject: "close" };
 
-let peerConnection: RTCPeerConnection;
+type MirroringMediaType =
+    | ReceiverSelectorMediaType.Tab
+    | ReceiverSelectorMediaType.Screen;
 
-/**
- * Sends a message to the fx_cast app running on the
- * receiver device.
- */
-function sendAppMessage(subject: string, data: unknown) {
-    if (!session) {
-        return;
-    }
-
-    session.sendMessage(FX_CAST_RECEIVER_APP_NAMESPACE, {
-        subject,
-        data
-    });
+interface MirroringSenderOpts {
+    mirroringMediaType: MirroringMediaType;
+    contextTabId?: number;
+    receiverDevice?: ReceiverDevice;
 }
 
-window.addEventListener("beforeunload", () => {
-    sendAppMessage("close", null);
-});
+class MirroringSender {
+    private mirroringMediaType: MirroringMediaType;
+    private contextTabId?: number;
+    private receiverDevice?: ReceiverDevice;
 
-async function onRequestSessionSuccess(newSession: Session) {
-    cast.logMessage("onRequestSessionSuccess");
+    private session?: Session;
+    private wasSessionRequested = false;
 
-    session = newSession;
-    session.addMessageListener(
-        FX_CAST_RECEIVER_APP_NAMESPACE,
-        async (_namespace, message) => {
-            const { subject, data } = JSON.parse(message);
+    private peerConnection?: RTCPeerConnection;
 
-            switch (subject) {
-                case "peerConnectionAnswer": {
-                    peerConnection.setRemoteDescription(data);
-                    break;
-                }
-                case "iceCandidate": {
-                    peerConnection.addIceCandidate(data);
-                    break;
-                }
-            }
+    constructor(opts: MirroringSenderOpts) {
+        this.mirroringMediaType = opts.mirroringMediaType;
+        this.contextTabId = opts.contextTabId;
+        this.receiverDevice = opts.receiverDevice;
+
+        this.init();
+    }
+
+    private async init() {
+        try {
+            ensureInit({
+                contextTabId: this.contextTabId,
+                receiverDevice: this.receiverDevice
+            });
+        } catch (err) {
+            logger.error("Failed to initialize cast API", err);
         }
-    );
 
-    peerConnection = new RTCPeerConnection();
-    peerConnection.addEventListener("icecandidate", ev => {
-        sendAppMessage("iceCandidate", ev.candidate);
-    });
+        const mirroringAppId = await options.get("mirroringAppId");
+        const sessionRequest = new cast.SessionRequest(mirroringAppId);
 
-    switch (selectedMedia) {
-        case ReceiverSelectorMediaType.Tab: {
-            const canvas = document.createElement("canvas");
-            const ctx = canvas.getContext("2d");
+        const apiConfig = new cast.ApiConfig(
+            sessionRequest,
+            this.sessionListener,
+            this.receiverListener
+        );
 
-            // Shouldn't be possible
-            if (!ctx) {
-                break;
+        cast.initialize(apiConfig);
+    }
+
+    private sessionListener() {
+        // Unused
+    }
+    private receiverListener = (availability: ReceiverAvailability) => {
+        if (this.wasSessionRequested) return;
+        this.wasSessionRequested = true;
+
+        if (availability === cast.ReceiverAvailability.AVAILABLE) {
+            cast.requestSession(
+                session => {
+                    this.session = session;
+                    this.createMirroringConnection();
+                },
+                err => {
+                    logger.error("Session request failed", err);
+                }
+            );
+        }
+    };
+
+    private sendMirroringAppMessage(message: MirroringAppMessage) {
+        if (!this.session) return;
+        this.session.sendMessage(NS_FX_CAST, message);
+    }
+
+    private async createMirroringConnection() {
+        this.session?.addMessageListener(NS_FX_CAST, async (_ns, message) => {
+            const parsedMessage = JSON.parse(message) as MirroringAppMessage;
+            switch (parsedMessage.subject) {
+                case "peerConnectionAnswer":
+                    this.peerConnection?.setRemoteDescription(
+                        parsedMessage.data
+                    );
+                    break;
+                case "iceCandidate":
+                    this.peerConnection?.addIceCandidate(parsedMessage.data);
+                    break;
             }
+        });
 
-            // Set initial size
+        this.peerConnection = new RTCPeerConnection();
+        this.peerConnection.addEventListener("icecandidate", ev => {
+            if (!ev.candidate) return;
+            this.sendMirroringAppMessage({
+                subject: "iceCandidate",
+                data: ev.candidate
+            });
+        });
+
+        switch (this.mirroringMediaType) {
+            case ReceiverSelectorMediaType.Tab:
+                this.peerConnection.addStream(this.getTabStream());
+                break;
+            case ReceiverSelectorMediaType.Screen:
+                this.peerConnection.addStream(await this.getScreenStream());
+                break;
+        }
+
+        const offer = await this.peerConnection.createOffer();
+        await this.peerConnection.setLocalDescription(offer);
+
+        this.sendMirroringAppMessage({
+            subject: "peerConnectionOffer",
+            data: offer
+        });
+    }
+
+    private getTabStream() {
+        const canvas = document.createElement("canvas");
+        const ctx = canvas.getContext("2d");
+        if (!ctx) {
+            throw logger.error("Failed to get tab canvas context!");
+        }
+
+        // Set initial size
+        canvas.width = window.innerWidth * window.devicePixelRatio;
+        canvas.height = window.innerHeight * window.devicePixelRatio;
+        ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
+
+        // Resize canvas whenever the window resizes
+        window.addEventListener("resize", () => {
             canvas.width = window.innerWidth * window.devicePixelRatio;
             canvas.height = window.innerHeight * window.devicePixelRatio;
+            ctx.setTransform(1, 0, 0, 1, 0, 0);
             ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
+        });
 
-            // Resize canvas whenever the window resizes
-            window.addEventListener("resize", () => {
-                canvas.width = window.innerWidth * window.devicePixelRatio;
-                canvas.height = window.innerHeight * window.devicePixelRatio;
-                ctx.setTransform(1, 0, 0, 1, 0, 0);
-                ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
-            });
+        const drawFlags =
+            ctx.DRAWWINDOW_DRAW_CARET |
+            ctx.DRAWWINDOW_DRAW_VIEW |
+            ctx.DRAWWINDOW_ASYNC_DECODE_IMAGES |
+            ctx.DRAWWINDOW_USE_WIDGET_LAYERS;
 
-            const drawFlags =
-                ctx.DRAWWINDOW_DRAW_CARET |
-                ctx.DRAWWINDOW_DRAW_VIEW |
-                ctx.DRAWWINDOW_ASYNC_DECODE_IMAGES |
-                ctx.DRAWWINDOW_USE_WIDGET_LAYERS;
+        let lastFrame: DOMHighResTimeStamp;
+        window.requestAnimationFrame(function draw(now: DOMHighResTimeStamp) {
+            if (!lastFrame) {
+                lastFrame = now;
+            }
 
-            let lastFrame: DOMHighResTimeStamp;
-            window.requestAnimationFrame(function draw(
-                now: DOMHighResTimeStamp
-            ) {
-                if (!lastFrame) {
-                    lastFrame = now;
-                }
+            if (now - lastFrame > 1000 / 30) {
+                ctx.drawWindow(
+                    window, // window
+                    0,
+                    0, // x, y
+                    canvas.width, // w
+                    canvas.height, // h
+                    "white", // bgColor
+                    drawFlags
+                ); // flags
 
-                if (now - lastFrame > 1000 / 30) {
-                    ctx.drawWindow(
-                        window, // window
-                        0,
-                        0, // x, y
-                        canvas.width, // w
-                        canvas.height, // h
-                        "white", // bgColor
-                        drawFlags
-                    ); // flags
+                lastFrame = now;
+            }
 
-                    lastFrame = now;
-                }
+            window.requestAnimationFrame(draw);
+        });
 
-                window.requestAnimationFrame(draw);
-            });
-
-            /**
-             * Capture video stream from canvas and feed into the RTC
-             * connection.
-             */
-            peerConnection.addStream(canvas.captureStream());
-
-            break;
-        }
-
-        case ReceiverSelectorMediaType.Screen: {
-            const stream = await navigator.mediaDevices.getDisplayMedia({
-                video: { cursor: "motion" },
-                audio: false
-            });
-
-            peerConnection.addStream(stream);
-
-            break;
-        }
+        return canvas.captureStream();
     }
 
-    // Create SDP offer and set locally
-    const offer = await peerConnection.createOffer();
-    await peerConnection.setLocalDescription(offer);
-
-    // Send local offer to receiver app
-    sendAppMessage("peerConnectionOffer", offer);
-}
-
-function receiverListener(availability: string) {
-    cast.logMessage("receiverListener");
-
-    if (wasSessionRequested) {
-        return;
-    }
-
-    if (availability === cast.ReceiverAvailability.AVAILABLE) {
-        wasSessionRequested = true;
-        cast.requestSession(
-            onRequestSessionSuccess,
-            onRequestSessionError,
-            undefined,
-            selectedReceiver
-        );
+    private getScreenStream() {
+        return new Promise<MediaStream>(resolve => {
+            window.addEventListener(
+                "click",
+                () => {
+                    resolve(
+                        navigator.mediaDevices.getDisplayMedia({
+                            video: { cursor: "motion" },
+                            audio: false
+                        })
+                    );
+                },
+                { once: true }
+            );
+        });
     }
 }
 
-function onRequestSessionError() {
-    cast.logMessage("onRequestSessionError");
-}
-function sessionListener() {
-    cast.logMessage("sessionListener");
-}
-function onInitializeSuccess() {
-    cast.logMessage("onInitializeSuccess");
-}
-function onInitializeError() {
-    cast.logMessage("onInitializeError");
-}
+/**
+ * If loaded as a content script, opts are stored on the window object.
+ */
+if (window.location.protocol !== "moz-extension:") {
+    const window_ = window as any;
 
-ensureInit().then(async () => {
-    const mirroringAppId = await options.get("mirroringAppId");
-    const sessionRequest = new cast.SessionRequest(mirroringAppId);
-
-    const apiConfig = new cast.ApiConfig(
-        sessionRequest,
-        sessionListener,
-        receiverListener,
-        undefined,
-        undefined
-    );
-
-    cast.initialize(apiConfig, onInitializeSuccess, onInitializeError);
-});
+    new MirroringSender({
+        mirroringMediaType: window_.mirroringMediaType,
+        contextTabId: window_.contextTabId,
+        receiverDevice: window_.receiverDevice
+    });
+}

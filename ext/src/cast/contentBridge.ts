@@ -1,8 +1,8 @@
 import messaging, { Message } from "../messaging";
 import pageMessenging from "./pageMessenging";
 
-// Message port to background script
-export const managerPort = messaging.connect({ name: "cast" });
+// Message port to cast manager in background script
+const managerPort = messaging.connect({ name: "cast" });
 
 const forwardToPage = (message: Message) => {
     pageMessenging.extension.sendMessage(message);

@@ -57,6 +57,8 @@ For an instance created for an extension script:
     - If **content/extension page**: The `contentBridge.ts` script is imported as a module, with the usual side-effects of creating a messaging connection to the Cast Manager and hooking up page messaging (as described for page script instances).
 3. Listeners are added for the `cast:instanceCreated` message, so that the `ensureInit` function can resolve its promise and provide a Cast Manager port after initialization.
 
+Extension sender apps are considered to be trusted by the cast manager and are granted additional privileges. They can bypass the receiver selection step when requesting a session by providing a receiver device when initialising the SDK via `ensureInit`.
+
 #### All contexts
 
 The process now continues identically for all contexts:

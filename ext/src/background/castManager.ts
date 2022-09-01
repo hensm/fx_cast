@@ -47,6 +47,9 @@ export interface CastInstance {
     contentPort: AnyPort;
     contentContext?: ContentContext;
 
+    /** From an extension-source, grants additional permissions. */
+    isTrusted: boolean;
+
     /** ApiConfig provided on initialization. */
     apiConfig?: ApiConfig;
     /** Established session details. */
@@ -58,10 +61,12 @@ async function createCastInstance(opts: {
     bridgePort?: Port;
     contentPort: AnyPort;
     contentContext?: { tabId: number; frameId?: number };
+    isTrusted?: boolean;
 }) {
     const instance: CastInstance = {
         bridgePort: opts.bridgePort ?? (await bridge.connect()),
-        contentPort: opts.contentPort
+        contentPort: opts.contentPort,
+        isTrusted: opts.isTrusted ?? false
     };
 
     /**
@@ -113,6 +118,9 @@ const castManager = new (class {
         messaging.onConnect.addListener(async port => {
             if (port.name === "cast") {
                 this.createInstance(port);
+            } else if (port.name === "trusted-cast") {
+                // Create trusted instance
+                this.createInstance(port, undefined, true);
             }
         });
 
@@ -161,10 +169,14 @@ const castManager = new (class {
      * Creates a cast instance with a given port and connects messaging
      * correctly depending on the type of port.
      */
-    async createInstance(port: AnyPort, contentContext?: ContentContext) {
+    async createInstance(
+        port: AnyPort,
+        contentContext?: ContentContext,
+        isTrusted?: boolean
+    ) {
         const instance = await (port instanceof MessagePort
             ? this.createInstanceFromBackground(port, contentContext)
-            : this.createInstanceFromContent(port));
+            : this.createInstanceFromContent(port, isTrusted));
 
         this.activeInstances.add(instance);
 
@@ -184,7 +196,8 @@ const castManager = new (class {
         const instance = await createCastInstance({
             bridgePort: await bridge.connect(),
             contentPort,
-            contentContext
+            contentContext,
+            isTrusted: true
         });
 
         // Ensure only one instance per context
@@ -221,7 +234,8 @@ const castManager = new (class {
      * Creates a cast instance with a WebExtension `Port` content port.
      */
     private async createInstanceFromContent(
-        contentPort: Port
+        contentPort: Port,
+        isTrusted?: boolean
     ): Promise<CastInstance> {
         if (
             contentPort.sender?.tab?.id === undefined ||
@@ -246,7 +260,7 @@ const castManager = new (class {
             }
         }
 
-        const instance = await createCastInstance({ contentPort });
+        const instance = await createCastInstance({ contentPort, isTrusted });
 
         // cast instance -> (any)
         const onContentPortMessage = (message: Message) => {
@@ -362,7 +376,27 @@ const castManager = new (class {
 
             // User has triggered receiver selection via the cast API
             case "main:requestSession": {
-                const { sessionRequest } = message.data;
+                const { sessionRequest, receiverDevice } = message.data;
+
+                // Handle trusted instance receiver selection bypass
+                if (receiverDevice) {
+                    if (!instance.isTrusted) {
+                        logger.error(
+                            "Cast instance not trusted to bypass receiver selection!"
+                        );
+                        break;
+                    }
+
+                    instance.bridgePort.postMessage({
+                        subject: "bridge:createCastSession",
+                        data: {
+                            appId: sessionRequest.appId,
+                            receiverDevice
+                        }
+                    });
+
+                    break;
+                }
 
                 try {
                     const selection = await getReceiverSelection({
@@ -485,8 +519,9 @@ const castManager = new (class {
             case ReceiverSelectorMediaType.Screen:
                 await browser.tabs.executeScript(contentContext.tabId, {
                     code: stringify`
-                        window.selectedMedia = ${selection.mediaType};
-                        window.selectedReceiver = ${selection.receiverDevice};
+                        window.mirroringMediaType = ${selection.mediaType};
+                        window.receiverDevice = ${selection.receiverDevice};
+                        window.contextTabId = ${contentContext.tabId};
                     `,
                     frameId: contentContext.frameId
                 });

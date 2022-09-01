@@ -86,6 +86,8 @@ type ExtMessageDefinitions = {
      */
     "main:requestSession": {
         sessionRequest: SessionRequest;
+        /** Skip receiver selection (allowed for trusted instances only). */
+        receiverDevice?: ReceiverDevice;
     };
     /** Return message to the cast API when a selection is cancelled. */
     "cast:sessionRequestCancelled": undefined;

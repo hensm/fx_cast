@@ -30,6 +30,8 @@ export default class MediaSender {
     private isLocalMedia = false;
     private isLocalMediaEnabled = false;
 
+    private wasSessionRequested = false;
+
     // Cast API objects
     private session?: Session;
     private media?: Media;
@@ -49,7 +51,7 @@ export default class MediaSender {
 
     private async init() {
         try {
-            this.port = await ensureInit(this.contextTabId);
+            this.port = await ensureInit({ contextTabId: this.contextTabId });
         } catch (err) {
             logger.error("Failed to initialize cast API", err);
         }
@@ -96,12 +98,12 @@ export default class MediaSender {
         // Unused
     }
     private receiverListener(availability: ReceiverAvailability) {
-        // Already have session
-        if (this.session) return;
+        if (this.wasSessionRequested) return;
+        this.wasSessionRequested = false;
 
         if (availability === cast.ReceiverAvailability.AVAILABLE) {
             cast.requestSession(
-                (session: Session) => {
+                session => {
                     this.session = session;
                     this.loadMedia();
                 },
