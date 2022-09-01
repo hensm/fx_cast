@@ -5,9 +5,10 @@ import { Logger } from "../../lib/logger";
 
 import { ReceiverDevice, ReceiverSelectorMediaType } from "../../types";
 
-import type Session from "../sdk/Session";
-import cast, { ensureInit } from "../export";
 import type { ReceiverAvailability } from "../sdk/enums";
+import type Session from "../sdk/Session";
+
+import cast, { ensureInit } from "../export";
 
 const logger = new Logger("fx_cast [mirroring sender]");
 
@@ -49,7 +50,7 @@ class MirroringSender {
 
     private async init() {
         try {
-            ensureInit({
+            await ensureInit({
                 contextTabId: this.contextTabId,
                 receiverDevice: this.receiverDevice
             });

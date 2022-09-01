@@ -67,19 +67,37 @@
      * Checks if device is compatible with the requested app and
      * capabilities.
      */
-    function isDeviceCompatible(device: ReceiverDevice) {
-        // If device is audio-only, check app's audio support flag
-        if (
-            !(device.capabilities & ReceiverDeviceCapabilities.VIDEO_OUT) &&
-            appInfo?.isRequestAppAudioCompatible === false
-        ) {
-            return false;
+    function isDeviceCompatible(
+        mediaType: ReceiverSelectorMediaType,
+        device: ReceiverDevice
+    ) {
+        switch (mediaType) {
+            case ReceiverSelectorMediaType.App:
+                // If device is audio-only, check app's audio support flag
+                if (
+                    !(
+                        device.capabilities &
+                        ReceiverDeviceCapabilities.VIDEO_OUT
+                    ) &&
+                    appInfo?.isRequestAppAudioCompatible === false
+                ) {
+                    return false;
+                }
+
+                return hasRequiredCapabilities(
+                    device,
+                    appInfo?.sessionRequest?.capabilities
+                );
+
+            /** Mirroring requires video output capability. */
+            case ReceiverSelectorMediaType.Tab:
+            case ReceiverSelectorMediaType.Screen:
+                return !!(
+                    device.capabilities & ReceiverDeviceCapabilities.VIDEO_OUT
+                );
         }
 
-        return hasRequiredCapabilities(
-            device,
-            appInfo?.sessionRequest?.capabilities
-        );
+        return false;
     }
 
     let port: Nullable<Port> = null;
@@ -365,7 +383,7 @@
                 {isMediaTypeAvailable}
                 isAnyMediaTypeAvailable={availableMediaTypes !==
                     ReceiverSelectorMediaType.None &&
-                    isDeviceCompatible(device)}
+                    isDeviceCompatible(mediaType, device)}
                 isAnyConnecting={isConnecting}
                 bind:lastMenuShownDeviceId
                 on:cast={ev => onReceiverCast(ev.detail.device)}

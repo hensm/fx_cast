@@ -5,10 +5,10 @@ import type { Message } from "../../messaging";
 
 // Cast types
 import { Capability, ReceiverAvailability } from "../sdk/enums";
+import { Media, PlayerState } from "../sdk/media";
 import type Session from "../sdk/Session";
 
 import cast, { ensureInit, CastPort } from "../export";
-import { Media, PlayerState } from "../sdk/media";
 
 const logger = new Logger("fx_cast [media sender]");
 

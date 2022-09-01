@@ -20,6 +20,7 @@ import {
 
 import type { ApiConfig } from "../cast/sdk/classes";
 import { ReceiverAction } from "../cast/sdk/enums";
+import { DEFAULT_MEDIA_RECEIVER_APP_ID } from "../cast/sdk/media";
 import { createReceiver } from "../cast/utils";
 
 import deviceManager from "./deviceManager";
@@ -301,10 +302,10 @@ const castManager = new (class {
                 if (
                     receiverSelector?.isOpen &&
                     // If selector context is the same as the instance context
-                    receiverSelector.pageInfo?.tabId ===
-                        instance.contentContext?.tabId &&
-                    receiverSelector.pageInfo?.frameId ===
-                        instance.contentContext?.frameId &&
+                    isSameContext(
+                        receiverSelector.pageInfo,
+                        instance.contentContext
+                    ) &&
                     // If selector is supposed to close
                     (await options.get("receiverSelectorWaitForConnection"))
                 ) {
@@ -566,17 +567,48 @@ async function getReceiverSelection(selectionOpts: {
     let availableMediaTypes = ReceiverSelectorMediaType.None;
 
     // Default frame ID
-    if (!selectionOpts.frameId) selectionOpts.frameId = 0;
+    if (selectionOpts.frameId === undefined) selectionOpts.frameId = 0;
 
     // Fallback to instance context
-    if (!selectionOpts.tabId && selectionOpts.castInstance?.contentContext) {
+    if (
+        selectionOpts.tabId === undefined &&
+        selectionOpts.castInstance?.contentContext
+    ) {
         selectionOpts.tabId = selectionOpts.castInstance.contentContext.tabId;
         selectionOpts.frameId =
             selectionOpts.castInstance.contentContext.frameId;
     }
 
+    const opts = await options.getAll();
+
+    /**
+     * If context supplied, but no instance, check for an instance at
+     * that context.
+     */
+    if (
+        !selectionOpts.castInstance &&
+        selectionOpts.tabId !== undefined &&
+        selectionOpts.frameId !== undefined
+    ) {
+        const contextInstance = castManager.getInstanceAt(
+            selectionOpts.tabId,
+            selectionOpts.frameId
+        );
+        /**
+         * If the app in that context is the extension mirroring app or
+         * the default receiver, just ignore it.
+         */
+        const contextAppId = contextInstance?.apiConfig?.sessionRequest.appId;
+        if (
+            contextAppId !== opts.mirroringAppId &&
+            contextAppId !== DEFAULT_MEDIA_RECEIVER_APP_ID
+        ) {
+            selectionOpts.castInstance = contextInstance;
+        }
+    }
+
     let pageInfo: Optional<ReceiverSelectorPageInfo>;
-    if (selectionOpts.tabId) {
+    if (selectionOpts.tabId !== undefined) {
         try {
             pageInfo = {
                 tabId: selectionOpts.tabId,
@@ -602,8 +634,6 @@ async function getReceiverSelection(selectionOpts: {
         defaultMediaType = ReceiverSelectorMediaType.App;
         availableMediaTypes |= ReceiverSelectorMediaType.App;
     }
-
-    const opts = await options.getAll();
 
     // Disable mirroring media types if mirroring is not enabled
     if (!opts.mirroringEnabled) {
