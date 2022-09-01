@@ -230,6 +230,14 @@
             case menuIds.POPUP_MEDIA_SKIP_NEXT:
                 handleMediaSkipNext();
                 break;
+
+            case menuIds.POPUP_CAST:
+                isConnecting = true;
+                dispatch("cast", { device });
+                break;
+            case menuIds.POPUP_STOP:
+                dispatch("stop", { device });
+                break;
         }
 
         // Handle caption submenu items
