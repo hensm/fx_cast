@@ -54,10 +54,10 @@ For an instance created for an extension script:
 2. The extension script calls the exported `ensureInit` async function.
    Depending on the extension script context:
     - If **background**: The Cast Manager is called directly, registering a new cast instance, providing it with a port for a newly-created message channel (since extension messaging is only supported between contexts). Page messaging is hooked up such that messages from the SDK are sent to the Cast Manager through this channel and vice versa.
-    - If **content/extension page**: The `contentBridge.ts` script is imported as a module, with the usual side-effects of creating a messaging connection to the Cast Manager and hooking up page messaging (as described for page script instances).
+    - If **content/extension page**: Much like with `contentBridge.ts`, a messaging channel is created to the Cast Manager and page messaging is hooked up (as described for page script instances).
 3. Listeners are added for the `cast:instanceCreated` message, so that the `ensureInit` function can resolve its promise and provide a Cast Manager port after initialization.
 
-Extension sender apps are considered to be trusted by the cast manager and are granted additional privileges. They can bypass the receiver selection step when requesting a session by providing a receiver device when initialising the SDK via `ensureInit`.
+Extension sender apps are considered to be trusted by the Cast Manager and are granted additional privileges. They can bypass the receiver selection step when requesting a session by providing a receiver device when initialising the SDK via `ensureInit`.
 
 #### All contexts
 
