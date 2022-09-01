@@ -43,8 +43,8 @@ For an instance created for a page script SDK:
 1. The [`contentInitial.ts`](./ext/src/cast/contentInitial.ts) content script is run at document start and handles some compatibility issues that can't be addressed via extension APIs (like SDK scripts directly loaded from `chrome-extension://` URLs).
 2. The page loads the SDK via the usual Google-hosted `cast_sender.js` loader script.
 3. The extension intercepts this script load, injects the [`contentBridge.ts`](./ext/src/cast/contentBridge.ts) script that creates a messaging connection to the Cast Manager (via extension messaging) that registers an instance for that context, and waits for a page messaging connection to forward messages through (as described [here](#communication)). The initial request is then transparently redirected to the extension-hosted SDK page script at [`src/cast/content.ts`](./src/cast/content.ts).
-4. The SDK page script then creates the SDK objects ([`window.chrome.cast`](https://developers.google.com/cast/docs/reference/web_sender/chrome.cast)), handles loading the Framework API (if requested) and adds a page messaging listener for `cast:intitialized` events.
-5. The Cast Manager sends a `cast:initialized` message to the SDK, which then calls the app's initialization handler ([`window.__onGCastApiAvailable`](https://developers.google.com/cast/docs/web_sender/integrate#initialization)).
+4. The SDK page script then creates the SDK objects ([`window.chrome.cast`](https://developers.google.com/cast/docs/reference/web_sender/chrome.cast)), handles loading the Framework API (if requested) and adds a page messaging listener for `cast:instanceCreated` events.
+5. The Cast Manager sends a `cast:instanceCreated` message to the SDK, which then calls the sender app's entry handler ([`window.__onGCastApiAvailable`](https://developers.google.com/cast/docs/web_sender/integrate#initialization)).
 
 #### Extension script
 
@@ -55,14 +55,15 @@ For an instance created for an extension script:
    Depending on the extension script context:
     - If **background**: The Cast Manager is called directly, registering a new cast instance, providing it with a port for a newly-created message channel (since extension messaging is only supported between contexts). Page messaging is hooked up such that messages from the SDK are sent to the Cast Manager through this channel and vice versa.
     - If **content/extension page**: The `contentBridge.ts` script is imported as a module, with the usual side-effects of creating a messaging connection to the Cast Manager and hooking up page messaging (as described for page script instances).
-3. Listeners are added for the `cast:initialized` message, so that the `ensureInit` function can resolve its promise and provide a Cast Manager port after initialization.
+3. Listeners are added for the `cast:instanceCreated` message, so that the `ensureInit` function can resolve its promise and provide a Cast Manager port after initialization.
 
 #### All contexts
 
 The process now continues identically for all contexts:
 
-1. The page's now-active sender app calls the [`chrome.cast.initialize`](https://developers.google.com/cast/docs/reference/web_sender/chrome.cast#.initialize) API function, sending a `main:initializeCast` message to the Cast Manager, providing it with the [`chrome.cast.ApiConfig`](https://developers.google.com/cast/docs/reference/web_sender/chrome.cast.ApiConfig) data and prompting a receiver availability update.
-2. The page is now free to request a session if receivers are available.
+1. The page's now-active sender app calls the [`chrome.cast.initialize`](https://developers.google.com/cast/docs/reference/web_sender/chrome.cast#.initialize) API function, sending a `main:initializeCastSdk` message to the Cast Manager, providing it with the [`chrome.cast.ApiConfig`](https://developers.google.com/cast/docs/reference/web_sender/chrome.cast.ApiConfig) data and prompting a receiver availability update.
+2. The SDK handles the first `cast:receiverAvailabilityUpdated` message as an response to the `main:initializeCastSdk` message and calls the appropriate app callbacks.
+3. The page is now free to request a session if receivers are available.
 
 ### Sessions
 

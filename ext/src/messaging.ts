@@ -66,10 +66,19 @@ type ExtMessageDefinitions = {
      * stopped. Used to provide cast API receiver action updates.
      */
     "main:receiverStopped": { deviceId: string };
-    /** Allows the selector popup to send cast NS_RECEIVER messages. */
-    "main:sendReceiverMessage": ReceiverSelectorReceiverMessage;
-    /** Allows the selector popup to send cast NS_MEDIA messages. */
-    "main:sendMediaMessage": ReceiverSelectorMediaMessage;
+
+    /**
+     * Tells the cast manager to provide the cast API instance with
+     * receiver data.
+     */
+    "main:initializeCastSdk": { apiConfig: ApiConfig };
+    "cast:initialized": { isAvailable: boolean };
+
+    /**
+     * Sent to the cast API when a session is requested or stopped via
+     * the extension UI.
+     */
+    "cast:receiverAction": { receiver: Receiver; action: ReceiverAction };
 
     /**
      * Sent from the cast API to trigger receiver selection on session
@@ -81,23 +90,16 @@ type ExtMessageDefinitions = {
     /** Return message to the cast API when a selection is cancelled. */
     "cast:sessionRequestCancelled": undefined;
 
-    /**
-     * Sent to the cast API when a session is requested or stopped via
-     * the extension UI.
-     */
-    "cast:receiverAction": { receiver: Receiver; action: ReceiverAction };
-
-    /**
-     * Tells the cast manager to provide the cast API instance with
-     * receiver data.
-     */
-    "main:initializeCast": { apiConfig: ApiConfig };
-    "cast:initialized": { isAvailable: boolean };
+    "cast:instanceCreated": { isAvailable: boolean };
+    "cast:receiverAvailabilityUpdated": { isAvailable: boolean };
 
     "cast:sessionCreated": CastSessionCreatedDetails & { receiver: Receiver };
     "cast:sessionUpdated": CastSessionUpdatedDetails;
 
-    "cast:receiverAvailabilityUpdated": { isAvailable: boolean };
+    /** Allows the selector popup to send cast NS_RECEIVER messages. */
+    "main:sendReceiverMessage": ReceiverSelectorReceiverMessage;
+    /** Allows the selector popup to send cast NS_MEDIA messages. */
+    "main:sendMediaMessage": ReceiverSelectorMediaMessage;
 };
 
 /**
