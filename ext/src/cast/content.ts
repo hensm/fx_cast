@@ -32,7 +32,7 @@ if (document.currentScript) {
 
 pageMessenging.page.addListener(async message => {
     switch (message.subject) {
-        case "cast:initialized": {
+        case "cast:instanceCreated": {
             // If framework API is loading, wait until completed
             await frameworkScriptPromise;
 

@@ -65,7 +65,7 @@ export function ensureInit(contextTabId?: number): Promise<CastPort> {
             // castManager -> cast instance
             managerPort.addEventListener("message", ev => {
                 const message = ev.data as Message;
-                if (message.subject === "cast:initialized") {
+                if (message.subject === "cast:instanceCreated") {
                     if (message.data.isAvailable) {
                         resolve(existingPort);
                     } else {
@@ -91,7 +91,7 @@ export function ensureInit(contextTabId?: number): Promise<CastPort> {
             backgroundPort.onMessage.addListener(function onManagerMessage(
                 message: Message
             ) {
-                if (message.subject === "cast:initialized") {
+                if (message.subject === "cast:instanceCreated") {
                     if (message.data.isAvailable) {
                         resolve(pageMessenging.page.messagePort);
                     } else {

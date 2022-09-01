@@ -169,7 +169,7 @@ const castManager = new (class {
         this.activeInstances.add(instance);
 
         instance.contentPort.postMessage({
-            subject: "cast:initialized",
+            subject: "cast:instanceCreated",
             data: { isAvailable: (await bridge.getInfo()).isVersionCompatible }
         });
 
@@ -349,7 +349,7 @@ const castManager = new (class {
         }
 
         switch (message.subject) {
-            case "main:initializeCast":
+            case "main:initializeCastSdk":
                 instance.apiConfig = message.data.apiConfig;
                 instance.contentPort.postMessage({
                     subject: "cast:receiverAvailabilityUpdated",

@@ -54,8 +54,10 @@ export default class {
     #apiConfig?: ApiConfig;
     #sessionRequest?: SessionRequest;
 
+    #isInitialized = false;
+
     /** Current receiver availability. */
-    #receiverAvailability = ReceiverAvailability.UNAVAILABLE;
+    #receiverAvailability?: ReceiverAvailability;
 
     #initializeSuccessCallback?: () => void;
 
@@ -105,10 +107,37 @@ export default class {
 
     #onMessage(message: Message) {
         switch (message.subject) {
-            case "cast:initialized":
+            case "cast:instanceCreated":
                 this.isAvailable = true;
-                this.#initializeSuccessCallback?.();
-                this.#apiConfig?.receiverListener(this.#receiverAvailability);
+                break;
+
+            case "cast:receiverAvailabilityUpdated": {
+                /**
+                 * The first availability update happens after
+                 * initialize is called.
+                 */
+                if (!this.#isInitialized) {
+                    this.#isInitialized = true;
+                    this.#initializeSuccessCallback?.();
+                }
+
+                const availability = message.data.isAvailable
+                    ? ReceiverAvailability.AVAILABLE
+                    : ReceiverAvailability.UNAVAILABLE;
+
+                // If availability has changed, call receiver listeners
+                if (availability !== this.#receiverAvailability) {
+                    this.#receiverAvailability = availability;
+                    this.#apiConfig?.receiverListener(availability);
+                }
+
+                break;
+            }
+
+            case "cast:receiverAction":
+                for (const actionListener of this.#receiverActionListeners) {
+                    actionListener(message.data.receiver, message.data.action);
+                }
                 break;
 
             // Popup closed before session established
@@ -127,6 +156,7 @@ export default class {
              * and data needed to create cast API objects is sent.
              */
             case "cast:sessionCreated": {
+                this.#sessionRequest = undefined;
                 const status = message.data;
 
                 status.receiver.volume = status.volume;
@@ -248,26 +278,6 @@ export default class {
 
                 break;
             }
-
-            case "cast:receiverAvailabilityUpdated": {
-                const availability = message.data.isAvailable
-                    ? ReceiverAvailability.AVAILABLE
-                    : ReceiverAvailability.UNAVAILABLE;
-
-                // If availability has changed, call receiver listeners
-                if (availability !== this.#receiverAvailability) {
-                    this.#receiverAvailability = availability;
-                    this.#apiConfig?.receiverListener(availability);
-                }
-
-                break;
-            }
-
-            case "cast:receiverAction":
-                for (const actionListener of this.#receiverActionListeners) {
-                    actionListener(message.data.receiver, message.data.action);
-                }
-                break;
         }
     }
 
@@ -291,7 +301,7 @@ export default class {
         }
 
         pageMessenging.page.sendMessage({
-            subject: "main:initializeCast",
+            subject: "main:initializeCastSdk",
             data: { apiConfig: this.#apiConfig }
         });
     }
