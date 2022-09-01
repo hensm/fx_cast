@@ -6,6 +6,7 @@ import {
     AutoJoinPolicy,
     Capability,
     DefaultActionPolicy,
+    ErrorCode,
     ReceiverAvailability,
     ReceiverType,
     VolumeControlType
@@ -35,7 +36,7 @@ export class DialRequest {
 
 export class Error {
     constructor(
-        public code: string,
+        public code: ErrorCode,
         public description: Nullable<string> = null,
         public details: unknown = null
     ) {}

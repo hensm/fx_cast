@@ -33,9 +33,14 @@ import {
     Volume
 } from "./classes";
 
-import Session from "./Session";
+import Session, {
+    createSession,
+    SessionMessageListeners,
+    SessionSendMessageCallbacks,
+    SessionUpdateListeners
+} from "./Session";
 
-import media from "./media";
+import * as media from "./media";
 
 type ReceiverActionListener = (
     receiver: Receiver,
@@ -49,6 +54,7 @@ export default class {
     #apiConfig?: ApiConfig;
     #sessionRequest?: SessionRequest;
 
+    /** Current receiver availability. */
     #receiverAvailability = ReceiverAvailability.UNAVAILABLE;
 
     #initializeSuccessCallback?: () => void;
@@ -87,7 +93,7 @@ export default class {
     Volume = Volume;
     Session = Session;
 
-    media = media;
+    media = { ...media };
 
     VERSION = [1, 2];
     isAvailable = false;
@@ -101,10 +107,19 @@ export default class {
         switch (message.subject) {
             case "cast:initialized":
                 this.isAvailable = true;
-
                 this.#initializeSuccessCallback?.();
                 this.#apiConfig?.receiverListener(this.#receiverAvailability);
+                break;
 
+            // Popup closed before session established
+            case "cast:sessionRequestCancelled":
+                if (this.#sessionRequest) {
+                    this.#sessionRequest = undefined;
+
+                    this.#requestSessionErrorCallback?.(
+                        new CastError(ErrorCode.CANCEL)
+                    );
+                }
                 break;
 
             /**
@@ -120,13 +135,13 @@ export default class {
                     status.appImages
                 );
 
-                const session = new Session(
+                const session = createSession([
                     status.sessionId,
                     status.appId,
                     status.displayName,
                     status.appImages,
                     status.receiver
-                );
+                ]);
 
                 session.namespaces = status.namespaces;
                 session.senderApps = status.senderApps;
@@ -164,8 +179,11 @@ export default class {
                 session.namespaces = status.namespaces;
                 session.receiver.volume = status.volume;
 
-                for (const listener of session._updateListeners) {
-                    listener(session.status !== SessionStatus.STOPPED);
+                const updateListeners = SessionUpdateListeners.get(session);
+                if (updateListeners) {
+                    for (const listener of updateListeners) {
+                        listener(session.status !== SessionStatus.STOPPED);
+                    }
                 }
 
                 break;
@@ -176,8 +194,12 @@ export default class {
                 const session = this.#sessions.get(sessionId);
                 if (session) {
                     session.status = SessionStatus.STOPPED;
-                    for (const listener of session._updateListeners) {
-                        listener(false);
+
+                    const updateListeners = SessionUpdateListeners.get(session);
+                    if (updateListeners) {
+                        for (const listener of updateListeners) {
+                            listener(false);
+                        }
                     }
                 }
 
@@ -188,7 +210,8 @@ export default class {
                 const { sessionId, namespace, messageData } = message.data;
                 const session = this.#sessions.get(sessionId);
                 if (session) {
-                    const listeners = session._messageListeners.get(namespace);
+                    const listeners =
+                        SessionMessageListeners.get(session)?.get(namespace);
                     if (listeners) {
                         for (const listener of listeners) {
                             listener(namespace, messageData);
@@ -207,12 +230,16 @@ export default class {
                     break;
                 }
 
-                const callbacks = session._sendMessageCallbacks.get(messageId);
-                if (callbacks) {
-                    const [successCallback, errorCallback] = callbacks;
+                const sendMessageCallback =
+                    SessionSendMessageCallbacks.get(session)?.get(messageId);
+                if (sendMessageCallback) {
+                    const [successCallback, errorCallback] =
+                        sendMessageCallback;
 
                     if (error) {
-                        errorCallback?.(new CastError(error));
+                        errorCallback?.(
+                            new CastError(ErrorCode.CHANNEL_ERROR, error)
+                        );
                         return;
                     }
 
@@ -236,26 +263,11 @@ export default class {
                 break;
             }
 
-            // Popup closed before session established
-            case "cast:sessionRequestCancelled": {
-                if (this.#sessionRequest) {
-                    this.#sessionRequest = undefined;
-
-                    this.#requestSessionErrorCallback?.(
-                        new CastError(ErrorCode.CANCEL)
-                    );
-                }
-
-                break;
-            }
-
-            case "cast:receiverAction": {
+            case "cast:receiverAction":
                 for (const actionListener of this.#receiverActionListeners) {
                     actionListener(message.data.receiver, message.data.action);
                 }
-
                 break;
-            }
         }
     }
 

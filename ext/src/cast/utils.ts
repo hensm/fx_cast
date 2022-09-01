@@ -1,6 +1,8 @@
 import { ReceiverDevice, ReceiverDeviceCapabilities } from "../types";
 import { Receiver } from "./sdk/classes";
 import { Capability, ReceiverType } from "./sdk/enums";
+import { MediaCommand } from "./sdk/media/enums";
+import { _MediaCommand } from "./sdk/types";
 
 /**
  * Check receiver device capabilities bitflags against array of
@@ -29,8 +31,8 @@ export function hasRequiredCapabilities(
     });
 }
 
+/** Convert capabilities bitflags to string array. */
 export function convertCapabilitiesFlags(flags: ReceiverDeviceCapabilities) {
-    // Convert capabilities bitflag to string array
     const capabilities: Capability[] = [];
     if (flags & ReceiverDeviceCapabilities.VIDEO_OUT)
         capabilities.push(Capability.VIDEO_OUT);
@@ -45,6 +47,26 @@ export function convertCapabilitiesFlags(flags: ReceiverDeviceCapabilities) {
         capabilities.push(Capability.MULTIZONE_GROUP);
 
     return capabilities;
+}
+
+/** Convert media commands bitflags to string array. */
+export function convertSupportedMediaCommandsFlags(flags: _MediaCommand) {
+    const supportedMediaCommands: string[] = [];
+    if (flags & _MediaCommand.PAUSE) {
+        supportedMediaCommands.push(MediaCommand.PAUSE);
+    } else if (flags & _MediaCommand.SEEK) {
+        supportedMediaCommands.push(MediaCommand.SEEK);
+    } else if (flags & _MediaCommand.STREAM_VOLUME) {
+        supportedMediaCommands.push(MediaCommand.STREAM_VOLUME);
+    } else if (flags & _MediaCommand.STREAM_MUTE) {
+        supportedMediaCommands.push(MediaCommand.STREAM_MUTE);
+    } else if (flags & _MediaCommand.QUEUE_NEXT) {
+        supportedMediaCommands.push("queue_next");
+    } else if (flags & _MediaCommand.QUEUE_PREV) {
+        supportedMediaCommands.push("queue_prev");
+    }
+
+    return supportedMediaCommands;
 }
 
 interface GetEstimatedTimeOpts {
