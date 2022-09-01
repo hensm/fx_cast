@@ -2,9 +2,15 @@
 
 import { v4 as uuid } from "uuid";
 
-import logger from "../../../lib/logger";
+import { Logger } from "../../../lib/logger";
+const logger = new Logger("fx_cast [sdk :: cast.Media]");
+
+import { getEstimatedTime } from "../../utils";
+import type { SenderMediaMessage } from "../types";
 
 import { Volume, Error as CastError } from "../classes";
+import { ErrorCode } from "../enums";
+
 import {
     BreakStatus,
     EditTracksInfoRequest,
@@ -26,23 +32,52 @@ import {
     VideoInformation,
     VolumeRequest
 } from "./classes";
-
 import { PlayerState, RepeatMode } from "./enums";
-import { ErrorCode } from "../enums";
-
-import type { SenderMediaMessage } from "../types";
-import { getEstimatedTime } from "../../utils";
 
 export const NS_MEDIA = "urn:x-cast:com.google.cast.media";
+
+type MediaMessageCallback = (
+    message: DistributiveOmit<SenderMediaMessage, "requestId">
+) => Promise<void>;
+
+const MediaMessageCallbacks = new WeakMap<Media, MediaMessageCallback>();
+export const MediaUpdateListeners = new WeakMap<Media, Set<UpdateListener>>();
+export const MediaLastUpdateTimes = new WeakMap<Media, number>();
+
+/** Creates a Media object and initializes private data. */
+export function createMedia(
+    mediaArgs: ConstructorParameters<typeof Media>,
+    mediaMessageCallback: MediaMessageCallback
+) {
+    const media = new Media(...mediaArgs);
+    MediaMessageCallbacks.set(media, mediaMessageCallback);
+    MediaUpdateListeners.set(media, new Set());
+    MediaLastUpdateTimes.set(media, 0);
+
+    return media;
+}
 
 type UpdateListener = (isAlive: boolean) => void;
 
 export default class Media {
     #id = uuid();
 
-    // Timestamp of last status update
-    _lastUpdateTime = 0;
-    _updateListeners = new Set<UpdateListener>();
+    get #updateListeners() {
+        const updateListeners = MediaUpdateListeners.get(this);
+        if (!updateListeners)
+            throw logger.error("Missing media update listeners!");
+        return updateListeners;
+    }
+    get #mediaMessageCallback() {
+        const callback = MediaMessageCallbacks.get(this);
+        if (!callback) throw logger.error("Missing media message callback!");
+        return callback;
+    }
+    get #lastUpdateTime() {
+        const lastUpdateTime = MediaLastUpdateTimes.get(this);
+        if (!lastUpdateTime) throw logger.error("Missing last update time!");
+        return lastUpdateTime;
+    }
 
     activeTrackIds: Nullable<number[]> = null;
     breakStatus?: BreakStatus;
@@ -65,19 +100,13 @@ export default class Media {
     preloadedItemId: Nullable<number> = null;
     queueData?: QueueData;
 
-    constructor(
-        public sessionId: string,
-        public mediaSessionId: number,
-        public _sendMediaMessage: (
-            message: DistributiveOmit<SenderMediaMessage, "requestId">
-        ) => Promise<void>
-    ) {}
+    constructor(public sessionId: string, public mediaSessionId: number) {}
 
     addUpdateListener(listener: UpdateListener) {
-        this._updateListeners.add(listener);
+        this.#updateListeners?.add(listener);
     }
     removeUpdateListener(listener: UpdateListener) {
-        this._updateListeners.delete(listener);
+        this.#updateListeners?.delete(listener);
     }
 
     editTracksInfo(
@@ -85,7 +114,7 @@ export default class Media {
         successCallback?: () => void,
         errorCallback?: (err: CastError) => void
     ) {
-        this._sendMediaMessage({
+        this.#mediaMessageCallback?.({
             ...editTracksInfoRequest,
             type: "EDIT_TRACKS_INFO",
             mediaSessionId: this.mediaSessionId
@@ -108,7 +137,7 @@ export default class Media {
 
         return getEstimatedTime({
             currentTime: this.breakStatus.currentBreakClipTime,
-            lastUpdateTime: this._lastUpdateTime,
+            lastUpdateTime: this.#lastUpdateTime,
             duration: currentBreakClip.duration
         });
     }
@@ -127,7 +156,7 @@ export default class Media {
 
         return getEstimatedTime({
             currentTime: this.breakStatus.currentBreakTime,
-            lastUpdateTime: this._lastUpdateTime,
+            lastUpdateTime: this.#lastUpdateTime,
             duration: currentBreak.duration
         });
     }
@@ -144,7 +173,7 @@ export default class Media {
         if (this.playerState === PlayerState.PLAYING) {
             return getEstimatedTime({
                 currentTime: this.currentTime,
-                lastUpdateTime: this._lastUpdateTime,
+                lastUpdateTime: this.#lastUpdateTime,
                 duration: this.media?.duration
             });
         }
@@ -161,7 +190,7 @@ export default class Media {
         successCallback?: () => void,
         errorCallback?: (err: CastError) => void
     ) {
-        this._sendMediaMessage({
+        this.#mediaMessageCallback?.({
             ...getStatusRequest,
             type: "MEDIA_GET_STATUS",
             mediaSessionId: this.mediaSessionId
@@ -175,7 +204,7 @@ export default class Media {
         successCallback?: () => void,
         errorCallback?: (err: CastError) => void
     ) {
-        this._sendMediaMessage({
+        this.#mediaMessageCallback?.({
             ...pauseRequest,
             type: "PAUSE",
             mediaSessionId: this.mediaSessionId
@@ -189,7 +218,7 @@ export default class Media {
         successCallback?: () => void,
         errorCallback?: (err: CastError) => void
     ) {
-        this._sendMediaMessage({
+        this.#mediaMessageCallback?.({
             ...playRequest,
             type: "PLAY",
             mediaSessionId: this.mediaSessionId
@@ -203,7 +232,7 @@ export default class Media {
         successCallback?: () => void,
         errorCallback?: (err: CastError) => void
     ) {
-        this._sendMediaMessage({
+        this.#mediaMessageCallback?.({
             ...new QueueInsertItemsRequest([item]),
             type: "QUEUE_INSERT",
             sessionId: this.sessionId,
@@ -218,7 +247,7 @@ export default class Media {
         successCallback?: () => void,
         errorCallback?: (err: CastError) => void
     ) {
-        this._sendMediaMessage({
+        this.#mediaMessageCallback?.({
             ...queueInsertItemsRequest,
             type: "QUEUE_INSERT",
             sessionId: this.sessionId,
@@ -237,7 +266,7 @@ export default class Media {
             const jumpRequest = new QueueJumpRequest();
             jumpRequest.currentItemId = itemId;
 
-            this._sendMediaMessage({
+            this.#mediaMessageCallback?.({
                 ...jumpRequest,
                 type: "QUEUE_UPDATE",
                 sessionId: this.sessionId,
@@ -283,7 +312,7 @@ export default class Media {
                 reorderItemsRequest.insertBefore = existingItem.itemId;
             }
 
-            this._sendMediaMessage({
+            this.#mediaMessageCallback?.({
                 ...reorderItemsRequest,
                 type: "QUEUE_REORDER",
                 sessionId: this.sessionId,
@@ -301,7 +330,7 @@ export default class Media {
         const jumpRequest = new QueueJumpRequest();
         jumpRequest.jump = 1;
 
-        this._sendMediaMessage({
+        this.#mediaMessageCallback?.({
             ...jumpRequest,
             type: "QUEUE_UPDATE",
             sessionId: this.sessionId,
@@ -318,7 +347,7 @@ export default class Media {
         const jumpRequest = new QueueJumpRequest();
         jumpRequest.jump = -1;
 
-        this._sendMediaMessage({
+        this.#mediaMessageCallback?.({
             ...jumpRequest,
             type: "QUEUE_UPDATE",
             sessionId: this.sessionId,
@@ -348,7 +377,7 @@ export default class Media {
         successCallback?: () => void,
         errorCallback?: (err: CastError) => void
     ) {
-        this._sendMediaMessage({
+        this.#mediaMessageCallback?.({
             ...queueRemoveItemsRequest,
 
             mediaSessionId: this.mediaSessionId,
@@ -364,7 +393,7 @@ export default class Media {
         successCallback?: () => void,
         errorCallback?: (err: CastError) => void
     ) {
-        this._sendMediaMessage({
+        this.#mediaMessageCallback?.({
             ...queueReorderItemsRequest,
 
             mediaSessionId: this.mediaSessionId,
@@ -383,7 +412,7 @@ export default class Media {
         const setPropertiesRequest = new QueueSetPropertiesRequest();
         setPropertiesRequest.repeatMode = repeatMode;
 
-        this._sendMediaMessage({
+        this.#mediaMessageCallback?.({
             ...setPropertiesRequest,
             type: "QUEUE_UPDATE",
             sessionId: this.sessionId,
@@ -398,7 +427,7 @@ export default class Media {
         successCallback?: () => void,
         errorCallback?: (err: CastError) => void
     ) {
-        this._sendMediaMessage({
+        this.#mediaMessageCallback?.({
             ...queueUpdateItemsRequest,
             type: "QUEUE_UPDATE",
             sessionId: this.sessionId,
@@ -413,7 +442,7 @@ export default class Media {
         successCallback?: () => void,
         errorCallback?: (err: CastError) => void
     ) {
-        this._sendMediaMessage({
+        this.#mediaMessageCallback?.({
             ...seekRequest,
             type: "SEEK",
             mediaSessionId: this.mediaSessionId
@@ -427,7 +456,7 @@ export default class Media {
         successCallback?: () => void,
         errorCallback?: (err: CastError) => void
     ) {
-        this._sendMediaMessage({
+        this.#mediaMessageCallback?.({
             ...volumeRequest,
             type: "MEDIA_SET_VOLUME",
             mediaSessionId: this.mediaSessionId
@@ -445,7 +474,7 @@ export default class Media {
             stopRequest = new StopRequest();
         }
 
-        this._sendMediaMessage({
+        this.#mediaMessageCallback?.({
             ...stopRequest,
             type: "STOP",
             mediaSessionId: this.mediaSessionId

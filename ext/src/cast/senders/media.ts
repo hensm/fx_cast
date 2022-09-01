@@ -14,7 +14,7 @@ const logger = new Logger("fx_cast [media sender]");
 interface MediaSenderOpts {
     mediaUrl: string;
     contextTabId?: number;
-    targetElementId?: number;
+    mediaElement?: HTMLMediaElement;
 }
 
 export default class MediaSender {
@@ -23,6 +23,7 @@ export default class MediaSender {
     private mediaUrl: string;
     private contextTabId?: number;
 
+    /** Target media element if loaded as a content script. */
     private mediaElement?: HTMLMediaElement;
 
     private isLocalMedia = false;
@@ -34,12 +35,7 @@ export default class MediaSender {
     constructor(opts: MediaSenderOpts) {
         this.mediaUrl = opts.mediaUrl;
         this.contextTabId = opts.contextTabId;
-
-        if (opts.targetElementId) {
-            this.mediaElement = browser.menus.getTargetElement(
-                opts.targetElementId
-            ) as HTMLMediaElement;
-        }
+        this.mediaElement = opts.mediaElement;
 
         this.init();
     }
@@ -79,7 +75,7 @@ export default class MediaSender {
             ),
             undefined,
             err => {
-                logger.error("Failed to initialize cast API", err);
+                logger.error("Failed to initialize cast SDK", err);
             }
         );
     }
@@ -270,10 +266,21 @@ export default class MediaSender {
     }
 }
 
+/**
+ * If loaded as a content script, opts are stored on the window object.
+ */
 if (window.location.protocol !== "moz-extension:") {
     const window_ = window as any;
+
+    let mediaElement: Optional<HTMLMediaElement>;
+    if (window_.targetElementId) {
+        mediaElement = browser.menus.getTargetElement(
+            window_.targetElementId
+        ) as HTMLMediaElement;
+    }
+
     new MediaSender({
         mediaUrl: window_.mediaUrl,
-        targetElementId: window_.targetElementId
+        mediaElement
     });
 }

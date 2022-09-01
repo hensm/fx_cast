@@ -5,13 +5,13 @@ import { v4 as uuid } from "uuid";
 import logger from "../../lib/logger";
 
 import eventMessaging from "../pageMessenging";
+import { convertSupportedMediaCommandsFlags } from "../utils";
 
-import {
+import type {
     MediaStatus,
     ReceiverMediaMessage,
     SenderMediaMessage,
-    SenderMessage,
-    _MediaCommand
+    SenderMessage
 } from "./types";
 
 import { SessionStatus } from "./enums";
@@ -22,9 +22,13 @@ import type {
     SenderApplication
 } from "./classes";
 
-import { MediaCommand } from "./media/enums";
 import type { LoadRequest, QueueLoadRequest, QueueItem } from "./media/classes";
-import Media, { NS_MEDIA } from "./media/Media";
+import Media, {
+    createMedia,
+    MediaLastUpdateTimes,
+    MediaUpdateListeners,
+    NS_MEDIA
+} from "./media/Media";
 
 /**
  * Takes a media object and a media status object and merges the status
@@ -32,7 +36,7 @@ import Media, { NS_MEDIA } from "./media/Media";
  */
 function updateMedia(media: Media, status: MediaStatus) {
     if (status.currentTime) {
-        media._lastUpdateTime = Date.now();
+        MediaLastUpdateTimes.set(media, Date.now());
     }
 
     // Copy basic props
@@ -46,23 +50,9 @@ function updateMedia(media: Media, status: MediaStatus) {
     if (status.repeatMode) media.repeatMode = status.repeatMode;
     if (status.volume) media.volume = status.volume;
 
-    // Convert supportedMediaCommands bitflags to string array
-    const supportedMediaCommands: string[] = [];
-    if (status.supportedMediaCommands & _MediaCommand.PAUSE) {
-        supportedMediaCommands.push(MediaCommand.PAUSE);
-    } else if (status.supportedMediaCommands & _MediaCommand.SEEK) {
-        supportedMediaCommands.push(MediaCommand.SEEK);
-    } else if (status.supportedMediaCommands & _MediaCommand.STREAM_VOLUME) {
-        supportedMediaCommands.push(MediaCommand.STREAM_VOLUME);
-    } else if (status.supportedMediaCommands & _MediaCommand.STREAM_MUTE) {
-        supportedMediaCommands.push(MediaCommand.STREAM_MUTE);
-    } else if (status.supportedMediaCommands & _MediaCommand.QUEUE_NEXT) {
-        supportedMediaCommands.push("queue_next");
-    } else if (status.supportedMediaCommands & _MediaCommand.QUEUE_PREV) {
-        supportedMediaCommands.push("queue_prev");
-    }
-
-    media.supportedMediaCommands = supportedMediaCommands;
+    media.supportedMediaCommands = convertSupportedMediaCommandsFlags(
+        status.supportedMediaCommands
+    );
 
     // Update queue state
     if (status.items) {
@@ -97,21 +87,57 @@ function updateMedia(media: Media, status: MediaStatus) {
     }
 }
 
+export const SessionMessageListeners = new WeakMap<
+    Session,
+    Map<string, Set<MessageListener>>
+>();
+export const SessionUpdateListeners = new WeakMap<
+    Session,
+    Set<UpdateListener>
+>();
+export const SessionSendMessageCallbacks = new WeakMap<
+    Session,
+    Map<string, SendMessageCallback>
+>();
+
+/** Creates a Session object and initializes private data. */
+export function createSession(
+    sessionArgs: ConstructorParameters<typeof Session>
+) {
+    const session = new Session(...sessionArgs);
+    SessionUpdateListeners.set(session, new Set());
+    SessionSendMessageCallbacks.set(session, new Map());
+
+    return session;
+}
+
 type MessageListener = (namespace: string, message: string) => void;
 type UpdateListener = (isAlive: boolean) => void;
+type SendMessageCallback = [(() => void)?, ((err: CastError) => void)?];
 
 export default class Session {
     #loadMediaRequest?: LoadRequest;
     #loadMediaSuccessCallback?: (media: Media) => void;
     #loadMediaErrorCallback?: (err: CastError) => void;
 
-    _messageListeners = new Map<string, Set<MessageListener>>();
-    _updateListeners = new Set<UpdateListener>();
-
-    _sendMessageCallbacks = new Map<
-        string,
-        [(() => void)?, ((err: CastError) => void)?]
-    >();
+    get #messageListeners() {
+        const messageListeners = SessionMessageListeners.get(this);
+        if (!messageListeners)
+            throw logger.error("Missing session message listeners!");
+        return messageListeners;
+    }
+    get #updateListeners() {
+        const updateListeners = SessionUpdateListeners.get(this);
+        if (!updateListeners)
+            throw logger.error("Missing session update listeners!");
+        return updateListeners;
+    }
+    get #sendMessageCallbacks() {
+        const sendMessageCallback = SessionSendMessageCallbacks.get(this);
+        if (!sendMessageCallback)
+            throw logger.error("Missing session sendMessage callback!");
+        return sendMessageCallback;
+    }
 
     media: Media[] = [];
     namespaces: Array<{ name: string }> = [];
@@ -129,6 +155,7 @@ export default class Session {
     ) {
         this.transportId = sessionId || "";
 
+        SessionMessageListeners.set(this, new Map());
         this.addMessageListener(NS_MEDIA, this.#mediaMessageListener);
     }
 
@@ -147,9 +174,8 @@ export default class Session {
 
                     // Handle Media creation
                     if (!media) {
-                        media = new Media(
-                            this.sessionId,
-                            mediaStatus.mediaSessionId,
+                        media = createMedia(
+                            [this.sessionId, mediaStatus.mediaSessionId],
                             this.#sendMediaMessage
                         );
 
@@ -158,8 +184,11 @@ export default class Session {
                         this.#loadMediaSuccessCallback?.(media);
                     } else {
                         updateMedia(media, mediaStatus);
-                        for (const listener of media._updateListeners) {
-                            listener(true);
+                        const updateListeners = MediaUpdateListeners.get(media);
+                        if (updateListeners) {
+                            for (const listener of updateListeners) {
+                                listener(true);
+                            }
                         }
                     }
                 }
@@ -198,7 +227,7 @@ export default class Session {
                 }
             });
 
-            this._sendMessageCallbacks.set(messageId, [resolve, reject]);
+            this.#sendMessageCallbacks.set(messageId, [resolve, reject]);
         });
     };
 
@@ -210,21 +239,21 @@ export default class Session {
     }
 
     addMessageListener(namespace: string, listener: MessageListener) {
-        if (!this._messageListeners.has(namespace)) {
-            this._messageListeners.set(namespace, new Set());
+        if (!this.#messageListeners.has(namespace)) {
+            this.#messageListeners.set(namespace, new Set());
         }
 
-        this._messageListeners.get(namespace)?.add(listener);
+        this.#messageListeners.get(namespace)?.add(listener);
     }
     removeMessageListener(namespace: string, listener: MessageListener) {
-        this._messageListeners.get(namespace)?.delete(listener);
+        this.#messageListeners.get(namespace)?.delete(listener);
     }
 
     addUpdateListener(listener: UpdateListener) {
-        this._updateListeners.add(listener);
+        this.#updateListeners.add(listener);
     }
     removeUpdateListener(listener: UpdateListener) {
-        this._updateListeners.delete(listener);
+        this.#updateListeners.delete(listener);
     }
 
     leave(
@@ -272,7 +301,7 @@ export default class Session {
             }
         });
 
-        this._sendMessageCallbacks.set(messageId, [
+        this.#sendMessageCallbacks.set(messageId, [
             successCallback,
             errorCallback
         ]);
