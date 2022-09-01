@@ -8,6 +8,7 @@ import { Capability, ReceiverAvailability } from "../sdk/enums";
 import type Session from "../sdk/Session";
 
 import cast, { ensureInit, CastPort } from "../export";
+import { Media, PlayerState } from "../sdk/media";
 
 const logger = new Logger("fx_cast [media sender]");
 
@@ -31,6 +32,7 @@ export default class MediaSender {
 
     // Cast API objects
     private session?: Session;
+    private media?: Media;
 
     constructor(opts: MediaSenderOpts) {
         this.mediaUrl = opts.mediaUrl;
@@ -51,6 +53,16 @@ export default class MediaSender {
         } catch (err) {
             logger.error("Failed to initialize cast API", err);
         }
+
+        window.addEventListener("beforeunload", async () => {
+            if (await options.get("mediaStopOnUnload")) {
+                this.port?.postMessage({
+                    subject: "bridge:stopMediaServer"
+                });
+
+                this.session?.stop();
+            }
+        });
 
         this.isLocalMedia = this.mediaUrl.startsWith("file://");
         this.isLocalMediaEnabled = await options.get("localMediaEnabled");
@@ -124,12 +136,14 @@ export default class MediaSender {
         const mediaInfo = new cast.media.MediaInfo(mediaUrl.href, "");
         mediaInfo.metadata = new cast.media.GenericMediaMetadata();
         mediaInfo.metadata.title = mediaTitle;
+        mediaInfo.tracks = [];
 
         const activeTrackIds: number[] = [];
 
-        mediaInfo.tracks = subtitleUrls.map((url, index) => {
+        let trackIndex = 0;
+        for (const url of subtitleUrls) {
             const track = new cast.media.Track(
-                index,
+                trackIndex++,
                 cast.media.TrackType.TEXT
             );
             track.name = url.pathname;
@@ -137,8 +151,8 @@ export default class MediaSender {
             track.trackContentType = "text/vtt";
             track.subtype = cast.media.TextTrackType.SUBTITLES;
 
-            return track;
-        });
+            mediaInfo.tracks.push(track);
+        }
 
         if (this.mediaElement instanceof HTMLMediaElement) {
             if (this.mediaElement instanceof HTMLVideoElement) {
@@ -218,7 +232,68 @@ export default class MediaSender {
         loadRequest.autoplay = true;
         loadRequest.activeTrackIds = activeTrackIds;
 
-        this.session?.loadMedia(loadRequest);
+        this.session?.loadMedia(loadRequest, async media => {
+            this.media = media;
+
+            if (
+                (await options.get("mediaSyncElement")) &&
+                this.mediaElement instanceof HTMLMediaElement
+            ) {
+                this.addMediaElementListeners(this.mediaElement);
+            }
+        });
+    }
+
+    private addMediaElementListeners(mediaElement: HTMLMediaElement) {
+        this.session?.addUpdateListener(isAlive => {
+            if (!isAlive) return;
+
+            // Update volume level
+            const volume = this.session?.receiver.volume;
+            if (!volume) return;
+
+            if (
+                volume?.level !== null &&
+                volume.level !== mediaElement.volume
+            ) {
+                mediaElement.volume = volume.level;
+            }
+            // Update muted state
+            if (volume?.muted !== null && volume.muted !== mediaElement.muted) {
+                mediaElement.muted = volume.muted;
+            }
+        });
+
+        this.media?.addUpdateListener(isAlive => {
+            if (!isAlive || !this.media) return;
+
+            /**
+             * If media element time and estimated time are off by more
+             * than two seconds, set the media element time to the
+             * estimated time.
+             */
+            const estimatedTime = this.media.getEstimatedTime();
+            if (Math.abs(mediaElement.currentTime - estimatedTime) > 2) {
+                mediaElement.currentTime = estimatedTime;
+            }
+
+            const mediaElementPlayerState = mediaElement.paused
+                ? PlayerState.PAUSED
+                : PlayerState.PLAYING;
+
+            if (mediaElementPlayerState !== this.media.playerState) {
+                switch (this.media.playerState) {
+                    case PlayerState.PLAYING:
+                        mediaElement.play();
+                        break;
+                    case PlayerState.PAUSED:
+                    case PlayerState.BUFFERING:
+                    case PlayerState.IDLE:
+                        mediaElement.pause();
+                        break;
+                }
+            }
+        });
     }
 
     private startMediaServer(
