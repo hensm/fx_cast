@@ -1,6 +1,6 @@
 "use strict";
 
-import logger from "../../lib/logger";
+import { Logger } from "../../lib/logger";
 
 import type { Message } from "../../messaging";
 import pageMessenging from "../pageMessenging";
@@ -41,6 +41,8 @@ import Session, {
 } from "./Session";
 
 import * as media from "./media";
+
+const logger = new Logger("fx_cast [sdk]");
 
 type ReceiverActionListener = (
     receiver: Receiver,
@@ -381,7 +383,7 @@ export default class {
     }
 
     logMessage(message: string) {
-        logger.info("cast.logMessage", message);
+        logger.info("(logMessage)", message);
     }
 
     precache(_data: string) {

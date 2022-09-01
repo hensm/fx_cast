@@ -3,8 +3,6 @@
 import { v4 as uuid } from "uuid";
 
 import { Logger } from "../../../lib/logger";
-const logger = new Logger("fx_cast [sdk :: cast.Media]");
-
 import { getEstimatedTime } from "../../utils";
 import type { SenderMediaMessage } from "../types";
 
@@ -33,6 +31,8 @@ import {
     VolumeRequest
 } from "./classes";
 import { PlayerState, RepeatMode } from "./enums";
+
+const logger = new Logger("fx_cast [sdk :: cast.Media]");
 
 export const NS_MEDIA = "urn:x-cast:com.google.cast.media";
 

@@ -2,7 +2,7 @@
 
 import { v4 as uuid } from "uuid";
 
-import logger from "../../lib/logger";
+import { Logger } from "../../lib/logger";
 
 import eventMessaging from "../pageMessenging";
 import { convertSupportedMediaCommandsFlags } from "../utils";
@@ -29,6 +29,8 @@ import Media, {
     MediaUpdateListeners,
     NS_MEDIA
 } from "./media/Media";
+
+const logger = new Logger("fx_cast [sdk :: cast.Session]");
 
 /**
  * Takes a media object and a media status object and merges the status
