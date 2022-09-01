@@ -75,7 +75,8 @@ export default class Media {
     }
     get #lastUpdateTime() {
         const lastUpdateTime = MediaLastUpdateTimes.get(this);
-        if (!lastUpdateTime) throw logger.error("Missing last update time!");
+        if (lastUpdateTime === undefined)
+            throw logger.error("Missing last update time!");
         return lastUpdateTime;
     }
 
