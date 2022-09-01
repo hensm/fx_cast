@@ -3,9 +3,7 @@
 import logger from "../../lib/logger";
 
 import type { Message } from "../../messaging";
-import eventMessaging from "../eventMessaging";
-
-import type { ErrorCallback, SuccessCallback } from "../types";
+import pageMessenging from "../pageMessenging";
 
 import {
     AutoJoinPolicy,
@@ -25,7 +23,7 @@ import {
     ApiConfig,
     CredentialsData,
     DialRequest,
-    Error as Error_,
+    Error as CastError,
     Image,
     Receiver,
     ReceiverDisplayStatus,
@@ -51,15 +49,16 @@ export default class {
     #apiConfig?: ApiConfig;
     #sessionRequest?: SessionRequest;
 
+    #receiverAvailability = ReceiverAvailability.UNAVAILABLE;
+
+    #initializeSuccessCallback?: () => void;
+
     #requestSessionSuccessCallback?: RequestSessionSuccessCallback;
-    #requestSessionErrorCallback?: ErrorCallback;
+    #requestSessionErrorCallback?: (err: CastError) => void;
 
-    #initializeSuccessCallback?: SuccessCallback;
-
-    #sessions = new Map<string, Session>();
     #receiverActionListeners = new Set<ReceiverActionListener>();
 
-    #receiverAvailability = ReceiverAvailability.UNAVAILABLE;
+    #sessions = new Map<string, Session>();
 
     // Enums
     AutoJoinPolicy = AutoJoinPolicy;
@@ -78,7 +77,7 @@ export default class {
     ApiConfig = ApiConfig;
     CredentialsData = CredentialsData;
     DialRequest = DialRequest;
-    Error = Error_;
+    Error = CastError;
     Image = Image;
     Receiver = Receiver;
     ReceiverDisplayStatus = ReceiverDisplayStatus;
@@ -95,16 +94,16 @@ export default class {
     timeout = new Timeout();
 
     constructor() {
-        eventMessaging.page.addListener(this.#onMessage.bind(this));
+        pageMessenging.page.addListener(this.#onMessage.bind(this));
     }
 
     #onMessage(message: Message) {
         switch (message.subject) {
             case "cast:initialized":
+                this.isAvailable = true;
+
                 this.#initializeSuccessCallback?.();
                 this.#apiConfig?.receiverListener(this.#receiverAvailability);
-
-                this.isAvailable = true;
 
                 break;
 
@@ -185,7 +184,7 @@ export default class {
                 break;
             }
 
-            case "cast:receivedSessionMessage": {
+            case "cast:sessionMessageReceived": {
                 const { sessionId, namespace, messageData } = message.data;
                 const session = this.#sessions.get(sessionId);
                 if (session) {
@@ -213,7 +212,7 @@ export default class {
                     const [successCallback, errorCallback] = callbacks;
 
                     if (error) {
-                        errorCallback?.(new Error_(error));
+                        errorCallback?.(new CastError(error));
                         return;
                     }
 
@@ -223,7 +222,7 @@ export default class {
                 break;
             }
 
-            case "cast:updateReceiverAvailability": {
+            case "cast:receiverAvailabilityUpdated": {
                 const availability = message.data.isAvailable
                     ? ReceiverAvailability.AVAILABLE
                     : ReceiverAvailability.UNAVAILABLE;
@@ -238,19 +237,19 @@ export default class {
             }
 
             // Popup closed before session established
-            case "cast:selectReceiver/cancelled": {
+            case "cast:sessionRequestCancelled": {
                 if (this.#sessionRequest) {
                     this.#sessionRequest = undefined;
 
                     this.#requestSessionErrorCallback?.(
-                        new Error_(ErrorCode.CANCEL)
+                        new CastError(ErrorCode.CANCEL)
                     );
                 }
 
                 break;
             }
 
-            case "cast:sendReceiverAction": {
+            case "cast:receiverAction": {
                 for (const actionListener of this.#receiverActionListeners) {
                     actionListener(message.data.receiver, message.data.action);
                 }
@@ -262,14 +261,14 @@ export default class {
 
     initialize(
         apiConfig: ApiConfig,
-        successCallback?: SuccessCallback,
-        errorCallback?: ErrorCallback
+        successCallback?: () => void,
+        errorCallback?: (err: CastError) => void
     ) {
         logger.info("cast.initialize");
 
         // Already initialized
         if (this.#apiConfig) {
-            errorCallback?.(new Error_(ErrorCode.INVALID_PARAMETER));
+            errorCallback?.(new CastError(ErrorCode.INVALID_PARAMETER));
             return;
         }
 
@@ -279,7 +278,7 @@ export default class {
             this.#initializeSuccessCallback = successCallback;
         }
 
-        eventMessaging.page.sendMessage({
+        pageMessenging.page.sendMessage({
             subject: "main:initializeCast",
             data: { apiConfig: this.#apiConfig }
         });
@@ -287,21 +286,21 @@ export default class {
 
     requestSession(
         successCallback: RequestSessionSuccessCallback,
-        errorCallback: ErrorCallback,
+        errorCallback: (err: CastError) => void,
         newSessionRequest?: SessionRequest
     ) {
         logger.info("cast.requestSession");
 
         // Not yet initialized
         if (!this.#apiConfig) {
-            errorCallback?.(new Error_(ErrorCode.API_NOT_INITIALIZED));
+            errorCallback?.(new CastError(ErrorCode.API_NOT_INITIALIZED));
             return;
         }
 
         // Already requesting session
         if (this.#sessionRequest) {
             errorCallback?.(
-                new Error_(
+                new CastError(
                     ErrorCode.INVALID_PARAMETER,
                     "Session request already in progress."
                 )
@@ -310,7 +309,7 @@ export default class {
         }
 
         if (this.#receiverAvailability === ReceiverAvailability.UNAVAILABLE) {
-            errorCallback?.(new Error_(ErrorCode.RECEIVER_UNAVAILABLE));
+            errorCallback?.(new CastError(ErrorCode.RECEIVER_UNAVAILABLE));
             return;
         }
 
@@ -322,8 +321,8 @@ export default class {
         this.#requestSessionErrorCallback = errorCallback;
 
         // Open receiver selector UI
-        eventMessaging.page.sendMessage({
-            subject: "main:selectReceiver",
+        pageMessenging.page.sendMessage({
+            subject: "main:requestSession",
             data: { sessionRequest: this.#sessionRequest }
         });
     }
@@ -334,8 +333,8 @@ export default class {
 
     setCustomReceivers(
         _receivers: Receiver[],
-        _successCallback?: SuccessCallback,
-        _errorCallback?: ErrorCallback
+        _successCallback?: () => void,
+        _errorCallback?: (err: CastError) => void
     ): void {
         logger.info("STUB :: cast.setCustomReceivers");
     }

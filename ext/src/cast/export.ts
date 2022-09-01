@@ -1,111 +1,106 @@
+/* eslint-disable @typescript-eslint/no-namespace */
 "use strict";
 
+import type { TypedMessagePort } from "../lib/TypedMessagePort";
 import type { Message } from "../messaging";
 
-import type { BridgeInfo } from "../lib/bridge";
-import type { TypedMessagePort } from "../lib/TypedMessagePort";
-
+import pageMessenging from "./pageMessenging";
 import CastSDK from "./sdk";
 
-import { PageEventMessenger, ExtensionEventMessenger } from "./eventMessaging";
+export type CastPort = TypedMessagePort<Message>;
 
-// Create messengers manually instead of relying on getters
-const eventMessaging = {
-    page: new PageEventMessenger(),
-    extension: new ExtensionEventMessenger()
-};
+let existingPort: CastPort;
+let existingInstance = new CastSDK();
 
-let initializedBridgeInfo: BridgeInfo;
-let initializedBackgroundPort: MessagePort;
+export default existingInstance;
 
 /**
- * To support exporting an API from a module, we need to
- * retain the event-based message passing despite not
- * actually crossing any context boundaries. The cast instance
- * listens for and emits these messages, and changing that
- * behavior is too messy.
+ * To support exporting the API from a module, we need to retain the
+ * MessageChannel-based pageMessaging layer despite not crossing any
+ * context boundaries.
+ *
+ * The ensureInit function creates a messaging connection to the
+ * castManager, hooks it up to the pageMessaging layer and also provides
+ * a messaging port so consumers of this module can communicate with the
+ * castManager.
  */
-export function ensureInit(): Promise<TypedMessagePort<Message>> {
+export function ensureInit(contextTabId?: number): Promise<CastPort> {
     return new Promise(async (resolve, reject) => {
-        // If already initialized, just return existing bridge info
-        if (initializedBridgeInfo) {
-            if (initializedBridgeInfo.isVersionCompatible) {
-                resolve(initializedBackgroundPort);
-            } else {
-                reject();
-            }
-
-            return;
+        // If already initialized
+        if (existingPort) {
+            existingPort.close();
+            existingInstance = new CastSDK();
         }
 
-        const channel = new MessageChannel();
-        initializedBackgroundPort = channel.port1;
-
         /**
-         * If the module is imported into a background script
-         * context, the location will be the internal extension URL,
-         * whereas in a content script, it will be the content page
-         * URL.
+         * If imported into a background script context, the location
+         * will be the internal extension URL, whereas in a content
+         * script, it will be the content page URL.
          */
         if (window.location.protocol === "moz-extension:") {
             const { default: castManager } = await import(
                 "../background/castManager"
             );
 
-            // port2 will post bridge messages to port 1
-            await castManager.init();
-            await castManager.createInstance(channel.port2);
-
-            // bridge -> cast instance
-            channel.port1.onmessage = ev => {
-                const message = ev.data as Message;
-
-                // Send message to cast instance
-                eventMessaging.extension.sendMessage(message);
-                handleIncomingMessageToCast(message);
-            };
-
-            // cast instance -> bridge
-            eventMessaging.extension.addListener(message =>
-                channel.port1.postMessage(message)
-            );
-        } else {
             /**
-             * Import reference to message port created by contentBridge.
-             * Creation of the port triggers side-effects in the
-             * background script.
+             * port1 will handle castManager messages.
+             * port2 will handle cast instance messages.
              */
-            const { backgroundPort } = await import("./contentBridge");
+            const { port1: managerPort, port2: instancePort } =
+                new MessageChannel();
 
-            // backgroundPort -> channel.port2
-            backgroundPort.onMessage.addListener((message: Message) => {
-                channel.port2.postMessage(message);
-            });
+            /**
+             * Provide castManager with a port to send messages to
+             * cast instance.
+             */
+            if (contextTabId) {
+                await castManager.createInstance(instancePort, {
+                    tabId: contextTabId,
+                    frameId: 0
+                });
+            } else {
+                await castManager.createInstance(instancePort);
+            }
 
-            // channel.port2 -> backgroundPort
-            channel.port2.onmessage = ev => {
+            // castManager -> cast instance
+            managerPort.addEventListener("message", ev => {
                 const message = ev.data as Message;
-                backgroundPort.postMessage(message);
-            };
-
-            // Handle cast messages
-            eventMessaging.page.addListener(message =>
-                handleIncomingMessageToCast(message)
-            );
-        }
-
-        function handleIncomingMessageToCast(message: Message) {
-            switch (message.subject) {
-                case "cast:initialized": {
+                if (message.subject === "cast:initialized") {
                     if (message.data.isAvailable) {
-                        resolve(initializedBackgroundPort);
+                        resolve(existingPort);
                     } else {
                         reject();
                     }
                 }
-            }
+
+                pageMessenging.extension.sendMessage(message);
+            });
+            managerPort.start();
+
+            // Cast instance -> castManager
+            pageMessenging.extension.addListener(message => {
+                managerPort.postMessage(message);
+            });
+        } else {
+            // Let contentBridge hook up pageMessaging
+            const { managerPort: backgroundPort } = await import(
+                "./contentBridge"
+            );
+            existingPort = pageMessenging.page.messagePort;
+
+            backgroundPort.onMessage.addListener(function onManagerMessage(
+                message: Message
+            ) {
+                if (message.subject === "cast:initialized") {
+                    if (message.data.isAvailable) {
+                        resolve(pageMessenging.page.messagePort);
+                    } else {
+                        reject();
+                    }
+
+                    backgroundPort.onMessage.removeListener(onManagerMessage);
+                }
+            });
         }
     });
 }
-
-export default new CastSDK();

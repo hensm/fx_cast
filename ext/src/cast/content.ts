@@ -1,42 +1,48 @@
-"use strict";
-
-import { CAST_LOADER_SCRIPT_URL, CAST_SCRIPT_URLS } from "./endpoints";
-
-const _window = window.wrappedJSObject as any;
-
-_window.chrome = cloneInto({}, window);
-
 /**
- * YouTube won't load the cast SDK unless it thinks the
- * presentation API exists.
+ * Cast Sender SDK page script loaded in place of remote cast_sender
+ * script. Handles API object creation and initializes sender apps.
  */
-if (window.location.host === "www.youtube.com") {
-    _window.navigator.presentation = cloneInto({}, window);
+
+import logger from "../lib/logger";
+import { loadScript } from "../lib/utils";
+
+import pageMessenging from "./pageMessenging";
+import CastSDK from "./sdk";
+import { CAST_FRAMEWORK_SCRIPT_URL } from "./urls";
+
+// Create page-accessible API object
+window.chrome.cast = new CastSDK();
+
+let frameworkScriptPromise: Promise<HTMLScriptElement> | undefined;
+
+// Load remote CAF script if requested in script URL params.
+if (document.currentScript) {
+    const currentScript = document.currentScript as HTMLScriptElement;
+    const currentScriptParams = new URLSearchParams(
+        new URL(currentScript.src).search
+    );
+
+    if (currentScriptParams.get("loadCastFramework") === "1") {
+        frameworkScriptPromise = loadScript(CAST_FRAMEWORK_SCRIPT_URL);
+        frameworkScriptPromise.catch(() => {
+            logger.error("Failed to load CAF script!");
+        });
+    }
 }
 
-/**
- * Replace the src property setter on <script> elements to
- * intercept the new value.
- *
- * If it matches one of Chrome's cast extension sender script
- * URLs, replace it with the standard API URL, the request for
- * which is handled in the main script.
- */
-const desc = Reflect.getOwnPropertyDescriptor(
-    HTMLScriptElement.prototype.wrappedJSObject,
-    "src"
-);
+pageMessenging.page.addListener(async message => {
+    switch (message.subject) {
+        case "cast:initialized": {
+            // If framework API is loading, wait until completed
+            await frameworkScriptPromise;
 
-Reflect.defineProperty(HTMLScriptElement.prototype.wrappedJSObject, "src", {
-    configurable: true,
-    enumerable: true,
-    get: desc?.get,
+            // Call page script/framework API script's init function
+            const initFn = window.__onGCastApiAvailable;
+            if (initFn && typeof initFn === "function") {
+                initFn(message.data.isAvailable);
+            }
 
-    set: exportFunction(function (this: HTMLScriptElement, value: string) {
-        if (CAST_SCRIPT_URLS.includes(value)) {
-            return desc?.set?.call(this, CAST_LOADER_SCRIPT_URL);
+            break;
         }
-
-        return desc?.set?.call(this, value);
-    }, window)
+    }
 });

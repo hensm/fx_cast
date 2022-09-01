@@ -27,14 +27,17 @@ export enum ReceiverSelectorMediaType {
     None = 0,
     App = 1,
     Tab = 2,
-    Screen = 4,
-    File = 8
+    Screen = 4
 }
+
+export interface ReceiverSelectorAppInfo {
+    sessionRequest: SessionRequest;
+    isRequestAppAudioCompatible?: boolean;
+}
+
 /** Info about sender page context. */
 export interface ReceiverSelectorPageInfo {
     url: string;
     tabId: number;
     frameId: number;
-    sessionRequest?: SessionRequest;
-    isRequestAppAudioCompatible?: boolean;
 }

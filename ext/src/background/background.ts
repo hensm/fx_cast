@@ -7,11 +7,10 @@ import bridge, { BridgeInfo } from "../lib/bridge";
 
 import castManager from "./castManager";
 import deviceManager from "./deviceManager";
-import ReceiverSelector from "./ReceiverSelector";
 
 import { initMenus } from "./menus";
 import { initWhitelist } from "./whitelist";
-import { baseConfigStorage, fetchBaseConfig } from "../cast/googleApi";
+import { baseConfigStorage, fetchBaseConfig } from "../lib/chromecastConfigApi";
 
 const _ = browser.i18n.getMessage;
 
@@ -133,26 +132,13 @@ async function init() {
     await initMenus();
     await initWhitelist();
 
-    /**
-     * When the browser action is clicked, open a receiver selector and
-     * load a sender for the response. The mirroring sender is loaded
-     * into the current tab at the
-     * top-level frame.
-     */
     browser.browserAction.onClicked.addListener(async tab => {
         if (tab.id === undefined) {
             logger.error("Tab ID not found in browser action handler.");
             return;
         }
 
-        const selection = await ReceiverSelector.getSelection(tab.id);
-        if (selection) {
-            castManager.loadSender({
-                tabId: tab.id,
-                frameId: 0,
-                selection
-            });
-        }
+        castManager.triggerCast(tab.id);
     });
 }
 

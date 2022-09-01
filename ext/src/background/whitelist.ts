@@ -9,7 +9,7 @@ import { RemoteMatchPattern } from "../lib/matchPattern";
 import {
     CAST_FRAMEWORK_LOADER_SCRIPT_URL,
     CAST_LOADER_SCRIPT_URL
-} from "../cast/endpoints";
+} from "../cast/urls";
 
 // Missing on @types/firefox-webext-browser
 type OnBeforeSendHeadersDetails = Parameters<
@@ -207,7 +207,7 @@ async function onBeforeCastSDKRequest(details: OnBeforeRequestDetails) {
     });
 
     return {
-        redirectUrl: browser.runtime.getURL("cast/index.js")
+        redirectUrl: browser.runtime.getURL("cast/content.js")
     };
 }
 
@@ -250,6 +250,13 @@ async function registerSiteWhitelist() {
         { urls: ["<all_urls>"] },
         ["blocking", "requestHeaders"]
     );
+
+    browser.contentScripts.register({
+        matches: siteWhitelist.map(item => item.pattern),
+        js: [{ file: "cast/contentInitial.js" }],
+        runAt: "document_start",
+        allFrames: true
+    });
 }
 
 function unregisterSiteWhitelist() {

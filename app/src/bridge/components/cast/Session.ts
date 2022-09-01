@@ -140,7 +140,7 @@ export default class Session extends CastClient {
                 messageData = JSON.stringify(messageData);
 
                 messaging.sendMessage({
-                    subject: "cast:receivedSessionMessage",
+                    subject: "cast:sessionMessageReceived",
                     data: {
                         sessionId: this.sessionId,
                         namespace,

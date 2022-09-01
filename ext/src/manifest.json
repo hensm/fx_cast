@@ -28,15 +28,6 @@
         "scripts": ["background/background.js"]
     },
 
-    "content_scripts": [
-        {
-            "all_frames": true,
-            "js": ["cast/content.js"],
-            "matches": ["<all_urls>"],
-            "run_at": "document_start"
-        }
-    ],
-
     "default_locale": "en",
 
     "icons": {
@@ -62,5 +53,5 @@
         "webRequestBlocking",
         "<all_urls>"
     ],
-    "web_accessible_resources": ["cast/index.js"]
+    "web_accessible_resources": ["cast/content.js"]
 }
