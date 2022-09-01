@@ -18,7 +18,12 @@ import type {
 } from "./cast/sdk/types";
 import type { ApiConfig, Receiver, SessionRequest } from "./cast/sdk/classes";
 
-import type { ReceiverDevice, ReceiverSelectorMediaType } from "./types";
+import type {
+    ReceiverDevice,
+    ReceiverSelectorAppInfo,
+    ReceiverSelectorMediaType,
+    ReceiverSelectorPageInfo
+} from "./types";
 import type { ReceiverAction } from "./cast/sdk/enums";
 
 /**
@@ -41,12 +46,8 @@ import type { ReceiverAction } from "./cast/sdk/enums";
 type ExtMessageDefinitions = {
     /** Initial data to send to selector popup. */
     "popup:init": {
-        appId?: string;
-        pageInfo?: {
-            url: string;
-            tabId: number;
-            frameId: number;
-        };
+        appInfo?: ReceiverSelectorAppInfo;
+        pageInfo?: ReceiverSelectorPageInfo;
     };
     /** Updates selector popup with new data. */
     "popup:update": {
@@ -74,17 +75,17 @@ type ExtMessageDefinitions = {
      * Sent from the cast API to trigger receiver selection on session
      * request.
      */
-    "main:selectReceiver": {
+    "main:requestSession": {
         sessionRequest: SessionRequest;
     };
     /** Return message to the cast API when a selection is cancelled. */
-    "cast:selectReceiver/cancelled": undefined;
+    "cast:sessionRequestCancelled": undefined;
 
     /**
      * Sent to the cast API when a session is requested or stopped via
      * the extension UI.
      */
-    "cast:sendReceiverAction": { receiver: Receiver; action: ReceiverAction };
+    "cast:receiverAction": { receiver: Receiver; action: ReceiverAction };
 
     /**
      * Tells the cast manager to provide the cast API instance with
@@ -96,7 +97,7 @@ type ExtMessageDefinitions = {
     "cast:sessionCreated": CastSessionCreatedDetails & { receiver: Receiver };
     "cast:sessionUpdated": CastSessionUpdatedDetails;
 
-    "cast:updateReceiverAvailability": { isAvailable: boolean };
+    "cast:receiverAvailabilityUpdated": { isAvailable: boolean };
 };
 
 /**
@@ -227,7 +228,7 @@ type AppMessageDefinitions = {
      * Sent to cast API instance from bridge when session message
      * received from a receiver device.
      */
-    "cast:receivedSessionMessage": {
+    "cast:sessionMessageReceived": {
         sessionId: string;
         namespace: string;
         messageData: string;

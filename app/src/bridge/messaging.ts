@@ -144,7 +144,7 @@ type MessageDefinitions = {
      * Sent to cast API instance from bridge when session message
      * received from a receiver device.
      */
-    "cast:receivedSessionMessage": {
+    "cast:sessionMessageReceived": {
         sessionId: string;
         namespace: string;
         messageData: string;

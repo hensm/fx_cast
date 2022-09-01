@@ -4,12 +4,9 @@ import logger from "../lib/logger";
 import options from "../lib/options";
 import { stringify } from "../lib/utils";
 
-import { ReceiverSelectorMediaType } from "../types";
-
-import ReceiverSelector, { ReceiverSelection } from "./ReceiverSelector";
-import castManager from "./castManager";
-
 import * as menuIds from "../menuIds";
+
+import castManager from "./castManager";
 
 const _ = browser.i18n.getMessage;
 
@@ -176,49 +173,21 @@ async function onMenuClicked(
         return;
     }
 
-    // Handle cast menus
-    const castMenuClicked = info.menuItemId === menuIdCast;
-    const castMediaMenuClicked = info.menuItemId === menuIdCastMedia;
-    if (castMenuClicked || castMediaMenuClicked) {
-        if (tab?.id === undefined) {
-            throw logger.error("Menu handler tab ID not found.");
-        }
-        if (!info.pageUrl) {
-            throw logger.error("Menu handler page URL not found.");
+    if (tab?.id === undefined) {
+        logger.error("Menu handler tab ID not found.");
+        return;
+    }
+
+    switch (info.menuItemId) {
+        case menuIdCast: {
+            castManager.triggerCast(tab.id, info.frameId);
+            break;
         }
 
-        let selection: Nullable<ReceiverSelection> = null;
-        try {
-            selection = await ReceiverSelector.getSelection(
-                tab.id,
-                info.frameId,
-                {
-                    withMediaSender: castMediaMenuClicked
-                }
-            );
-        } catch (err) {
-            logger.error("Failed to get receiver selection (cast menu)", err);
-            return;
-        }
-        // Invalid selection result
-        if (!selection) return;
-
-        if (castMenuClicked) {
-            castManager.loadSender({
-                tabId: tab.id,
-                frameId: info.frameId,
-                selection
-            });
-        } else if (castMediaMenuClicked) {
-            /**
-             * If the selected media type is App, that refers to
-             * the media sender in this context, so load media
-             * sender.
-             */
-            if (selection.mediaType === ReceiverSelectorMediaType.App) {
+        case menuIdCastMedia:
+            if (info.srcUrl) {
                 await browser.tabs.executeScript(tab.id, {
                     code: stringify`
-                            window.receiver = ${selection.receiverDevice};
                             window.mediaUrl = ${info.srcUrl};
                             window.targetElementId = ${info.targetElementId};
                         `,
@@ -226,18 +195,11 @@ async function onMenuClicked(
                 });
 
                 await browser.tabs.executeScript(tab.id, {
-                    file: "cast/senders/media/index.js",
+                    file: "cast/senders/media.js",
                     frameId: info.frameId
                 });
-            } else {
-                // Handle other responses
-                castManager.loadSender({
-                    tabId: tab.id,
-                    frameId: info.frameId,
-                    selection
-                });
             }
-        }
+            break;
     }
 }
 

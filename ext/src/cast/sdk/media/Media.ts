@@ -1,10 +1,10 @@
 "use strict";
 
-import { v1 as uuid } from "uuid";
+import { v4 as uuid } from "uuid";
 
 import logger from "../../../lib/logger";
 
-import { Volume, Error as _Error } from "../classes";
+import { Volume, Error as CastError } from "../classes";
 import {
     BreakStatus,
     EditTracksInfoRequest,
@@ -30,15 +30,12 @@ import {
 import { PlayerState, RepeatMode } from "./enums";
 import { ErrorCode } from "../enums";
 
-import type {
-    ErrorCallback,
-    SuccessCallback,
-    UpdateListener
-} from "../../types";
 import type { SenderMediaMessage } from "../types";
 import { getEstimatedTime } from "../../utils";
 
 export const NS_MEDIA = "urn:x-cast:com.google.cast.media";
+
+type UpdateListener = (isAlive: boolean) => void;
 
 export default class Media {
     #id = uuid();
@@ -85,8 +82,8 @@ export default class Media {
 
     editTracksInfo(
         editTracksInfoRequest: EditTracksInfoRequest,
-        successCallback?: SuccessCallback,
-        errorCallback?: ErrorCallback
+        successCallback?: () => void,
+        errorCallback?: (err: CastError) => void
     ) {
         this._sendMediaMessage({
             ...editTracksInfoRequest,
@@ -161,8 +158,8 @@ export default class Media {
      */
     getStatus(
         getStatusRequest = new GetStatusRequest(),
-        successCallback?: SuccessCallback,
-        errorCallback?: ErrorCallback
+        successCallback?: () => void,
+        errorCallback?: (err: CastError) => void
     ) {
         this._sendMediaMessage({
             ...getStatusRequest,
@@ -175,8 +172,8 @@ export default class Media {
 
     pause(
         pauseRequest = new PauseRequest(),
-        successCallback?: SuccessCallback,
-        errorCallback?: ErrorCallback
+        successCallback?: () => void,
+        errorCallback?: (err: CastError) => void
     ) {
         this._sendMediaMessage({
             ...pauseRequest,
@@ -189,8 +186,8 @@ export default class Media {
 
     play(
         playRequest = new PlayRequest(),
-        successCallback?: SuccessCallback,
-        errorCallback?: ErrorCallback
+        successCallback?: () => void,
+        errorCallback?: (err: CastError) => void
     ) {
         this._sendMediaMessage({
             ...playRequest,
@@ -203,8 +200,8 @@ export default class Media {
 
     queueAppendItem(
         item: QueueItem,
-        successCallback?: SuccessCallback,
-        errorCallback?: ErrorCallback
+        successCallback?: () => void,
+        errorCallback?: (err: CastError) => void
     ) {
         this._sendMediaMessage({
             ...new QueueInsertItemsRequest([item]),
@@ -218,8 +215,8 @@ export default class Media {
 
     queueInsertItems(
         queueInsertItemsRequest: QueueInsertItemsRequest,
-        successCallback?: SuccessCallback,
-        errorCallback?: ErrorCallback
+        successCallback?: () => void,
+        errorCallback?: (err: CastError) => void
     ) {
         this._sendMediaMessage({
             ...queueInsertItemsRequest,
@@ -233,8 +230,8 @@ export default class Media {
 
     queueJumpToItem(
         itemId: number,
-        successCallback?: SuccessCallback,
-        errorCallback?: ErrorCallback
+        successCallback?: () => void,
+        errorCallback?: (err: CastError) => void
     ) {
         if (this.items?.find(item => item.itemId === itemId)) {
             const jumpRequest = new QueueJumpRequest();
@@ -254,8 +251,8 @@ export default class Media {
     queueMoveItemToNewIndex(
         itemId: number,
         newIndex: number,
-        successCallback?: SuccessCallback,
-        errorCallback?: ErrorCallback
+        successCallback?: () => void,
+        errorCallback?: (err: CastError) => void
     ) {
         // Return early if not in queue
         if (!this.items) {
@@ -268,7 +265,7 @@ export default class Media {
             // New index must not be negative
             if (newIndex < 0) {
                 if (errorCallback) {
-                    errorCallback(new _Error(ErrorCode.INVALID_PARAMETER));
+                    errorCallback(new CastError(ErrorCode.INVALID_PARAMETER));
                 }
             } else if (newIndex == itemIndex) {
                 if (successCallback) {
@@ -298,8 +295,8 @@ export default class Media {
     }
 
     queueNext(
-        successCallback?: SuccessCallback,
-        errorCallback?: ErrorCallback
+        successCallback?: () => void,
+        errorCallback?: (err: CastError) => void
     ) {
         const jumpRequest = new QueueJumpRequest();
         jumpRequest.jump = 1;
@@ -315,8 +312,8 @@ export default class Media {
     }
 
     queuePrev(
-        successCallback?: SuccessCallback,
-        errorCallback?: ErrorCallback
+        successCallback?: () => void,
+        errorCallback?: (err: CastError) => void
     ) {
         const jumpRequest = new QueueJumpRequest();
         jumpRequest.jump = -1;
@@ -333,8 +330,8 @@ export default class Media {
 
     queueRemoveItem(
         itemId: number,
-        successCallback?: SuccessCallback,
-        errorCallback?: ErrorCallback
+        successCallback?: () => void,
+        errorCallback?: (err: CastError) => void
     ) {
         const item = this.items?.find(item => item.itemId === itemId);
         if (item) {
@@ -348,8 +345,8 @@ export default class Media {
 
     queueRemoveItems(
         queueRemoveItemsRequest: QueueRemoveItemsRequest,
-        successCallback?: SuccessCallback,
-        errorCallback?: ErrorCallback
+        successCallback?: () => void,
+        errorCallback?: (err: CastError) => void
     ) {
         this._sendMediaMessage({
             ...queueRemoveItemsRequest,
@@ -364,8 +361,8 @@ export default class Media {
 
     queueReorderItems(
         queueReorderItemsRequest: QueueReorderItemsRequest,
-        successCallback?: SuccessCallback,
-        errorCallback?: ErrorCallback
+        successCallback?: () => void,
+        errorCallback?: (err: CastError) => void
     ) {
         this._sendMediaMessage({
             ...queueReorderItemsRequest,
@@ -380,8 +377,8 @@ export default class Media {
 
     queueSetRepeatMode(
         repeatMode: string,
-        successCallback?: SuccessCallback,
-        errorCallback?: ErrorCallback
+        successCallback?: () => void,
+        errorCallback?: (err: CastError) => void
     ) {
         const setPropertiesRequest = new QueueSetPropertiesRequest();
         setPropertiesRequest.repeatMode = repeatMode;
@@ -398,8 +395,8 @@ export default class Media {
 
     queueUpdateItems(
         queueUpdateItemsRequest: QueueUpdateItemsRequest,
-        successCallback?: SuccessCallback,
-        errorCallback?: ErrorCallback
+        successCallback?: () => void,
+        errorCallback?: (err: CastError) => void
     ) {
         this._sendMediaMessage({
             ...queueUpdateItemsRequest,
@@ -413,8 +410,8 @@ export default class Media {
 
     seek(
         seekRequest: SeekRequest,
-        successCallback?: SuccessCallback,
-        errorCallback?: ErrorCallback
+        successCallback?: () => void,
+        errorCallback?: (err: CastError) => void
     ) {
         this._sendMediaMessage({
             ...seekRequest,
@@ -427,8 +424,8 @@ export default class Media {
 
     setVolume(
         volumeRequest: VolumeRequest,
-        successCallback?: SuccessCallback,
-        errorCallback?: ErrorCallback
+        successCallback?: () => void,
+        errorCallback?: (err: CastError) => void
     ) {
         this._sendMediaMessage({
             ...volumeRequest,
@@ -441,8 +438,8 @@ export default class Media {
 
     stop(
         stopRequest?: StopRequest,
-        successCallback?: SuccessCallback,
-        errorCallback?: ErrorCallback
+        successCallback?: () => void,
+        errorCallback?: (err: CastError) => void
     ) {
         if (!stopRequest) {
             stopRequest = new StopRequest();

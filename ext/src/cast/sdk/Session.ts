@@ -4,16 +4,7 @@ import { v4 as uuid } from "uuid";
 
 import logger from "../../lib/logger";
 
-import eventMessaging from "../eventMessaging";
-
-import type {
-    ErrorCallback,
-    LoadSuccessCallback,
-    MediaListener,
-    MessageListener,
-    SuccessCallback,
-    UpdateListener
-} from "../types";
+import eventMessaging from "../pageMessenging";
 
 import {
     MediaStatus,
@@ -24,7 +15,12 @@ import {
 } from "./types";
 
 import { SessionStatus } from "./enums";
-import type { Image, Receiver, SenderApplication } from "./classes";
+import type {
+    Error as CastError,
+    Image,
+    Receiver,
+    SenderApplication
+} from "./classes";
 
 import { MediaCommand } from "./media/enums";
 import type { LoadRequest, QueueLoadRequest, QueueItem } from "./media/classes";
@@ -101,17 +97,20 @@ function updateMedia(media: Media, status: MediaStatus) {
     }
 }
 
+type MessageListener = (namespace: string, message: string) => void;
+type UpdateListener = (isAlive: boolean) => void;
+
 export default class Session {
-    #loadMediaSuccessCallback?: (media: Media) => void;
-    #loadMediaErrorCallback?: ErrorCallback;
     #loadMediaRequest?: LoadRequest;
+    #loadMediaSuccessCallback?: (media: Media) => void;
+    #loadMediaErrorCallback?: (err: CastError) => void;
 
     _messageListeners = new Map<string, Set<MessageListener>>();
     _updateListeners = new Set<UpdateListener>();
 
     _sendMessageCallbacks = new Map<
         string,
-        [SuccessCallback?, ErrorCallback?]
+        [(() => void)?, ((err: CastError) => void)?]
     >();
 
     media: Media[] = [];
@@ -203,10 +202,10 @@ export default class Session {
         });
     };
 
-    addMediaListener(_mediaListener: MediaListener) {
+    addMediaListener(_mediaListener: (media: Media) => void) {
         logger.info("STUB :: Session#addMediaListener");
     }
-    removeMediaListener(_mediaListener: MediaListener) {
+    removeMediaListener(_mediaListener: (media: Media) => void) {
         logger.info("STUB :: Session#removeMediaListener");
     }
 
@@ -228,14 +227,17 @@ export default class Session {
         this._updateListeners.delete(listener);
     }
 
-    leave(_successCallback?: SuccessCallback, _errorCallback?: ErrorCallback) {
+    leave(
+        _successCallback?: () => void,
+        _errorCallback?: (err: CastError) => void
+    ) {
         logger.info("STUB :: Session#leave");
     }
 
     loadMedia(
         loadRequest: LoadRequest,
-        successCallback?: LoadSuccessCallback,
-        errorCallback?: ErrorCallback
+        successCallback?: (media: Media) => void,
+        errorCallback?: (err: CastError) => void
     ) {
         this.#loadMediaSuccessCallback = successCallback;
         this.#loadMediaErrorCallback = errorCallback;
@@ -246,8 +248,8 @@ export default class Session {
 
     queueLoad(
         _queueLoadRequest: QueueLoadRequest,
-        _successCallback?: LoadSuccessCallback,
-        _errorCallback?: ErrorCallback
+        _successCallback?: (media: Media) => void,
+        _errorCallback?: (err: CastError) => void
     ) {
         logger.info("STUB :: Session#queueLoad");
     }
@@ -255,8 +257,8 @@ export default class Session {
     sendMessage(
         namespace: string,
         message: object | string,
-        successCallback?: SuccessCallback,
-        errorCallback?: ErrorCallback
+        successCallback?: () => void,
+        errorCallback?: (err: CastError) => void
     ) {
         const messageId = uuid();
 
@@ -278,8 +280,8 @@ export default class Session {
 
     setReceiverMuted(
         muted: boolean,
-        successCallback?: SuccessCallback,
-        errorCallback?: ErrorCallback
+        successCallback?: () => void,
+        errorCallback?: (err: CastError) => void
     ) {
         this.#sendReceiverMessage({ type: "SET_VOLUME", volume: { muted } })
             .then(successCallback)
@@ -288,8 +290,8 @@ export default class Session {
 
     setReceiverVolumeLevel(
         newLevel: number,
-        successCallback?: SuccessCallback,
-        errorCallback?: ErrorCallback
+        successCallback?: () => void,
+        errorCallback?: (err: CastError) => void
     ) {
         this.#sendReceiverMessage({
             type: "SET_VOLUME",
@@ -299,7 +301,10 @@ export default class Session {
             .catch(errorCallback);
     }
 
-    stop(successCallback?: SuccessCallback, errorCallback?: ErrorCallback) {
+    stop(
+        successCallback?: () => void,
+        errorCallback?: (err: CastError) => void
+    ) {
         this.#sendReceiverMessage({ type: "STOP", sessionId: this.sessionId })
             .then(successCallback)
             .catch(errorCallback);

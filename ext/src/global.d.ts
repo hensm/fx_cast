@@ -11,11 +11,6 @@ declare type DistributiveOmit<T, K extends keyof any> = T extends any
     ? Omit<T, K>
     : never;
 
-declare interface Object {
-    // eslint-disable-next-line @typescript-eslint/ban-types
-    wrappedJSObject: Object;
-}
-
 declare interface CanvasRenderingContext2D {
     DRAWWINDOW_DRAW_CARET: 0x01;
     DRAWWINDOW_DO_NOT_FLUSH: 0x02;

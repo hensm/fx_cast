@@ -1,5 +1,5 @@
-import logger from "../lib/logger";
-import { TypedStorageArea } from "../lib/TypedStorageArea";
+import logger from "./logger";
+import { TypedStorageArea } from "./TypedStorageArea";
 
 const ENDPOINT = "https://clients3.google.com/cast/chromecast/device";
 

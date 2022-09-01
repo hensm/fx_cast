@@ -6,6 +6,7 @@ import {
     AutoJoinPolicy,
     Capability,
     DefaultActionPolicy,
+    ReceiverAvailability,
     ReceiverType,
     VolumeControlType
 } from "./enums";
@@ -14,7 +15,7 @@ export class ApiConfig {
     constructor(
         public sessionRequest: SessionRequest,
         public sessionListener: (session: Session) => void,
-        public receiverListener: (availability: string) => void,
+        public receiverListener: (availability: ReceiverAvailability) => void,
 
         public autoJoinPolicy: string = AutoJoinPolicy.TAB_AND_ORIGIN_SCOPED,
         public defaultActionPolicy: string = DefaultActionPolicy.CREATE_SESSION

@@ -10,6 +10,7 @@
     import {
         ReceiverDevice,
         ReceiverDeviceCapabilities,
+        ReceiverSelectorAppInfo,
         ReceiverSelectorMediaType,
         ReceiverSelectorPageInfo
     } from "../../types";
@@ -29,8 +30,8 @@
     /** Devices to display. */
     let devices: ReceiverDevice[] = [];
 
-    /** Sender app ID (if available). */
-    let appId: Optional<string>;
+    /** Sender app info (if available). */
+    let appInfo: Optional<ReceiverSelectorAppInfo>;
     /** Page info (if launched from page context). */
     let pageInfo: Optional<ReceiverSelectorPageInfo>;
 
@@ -70,14 +71,14 @@
         // If device is audio-only, check app's audio support flag
         if (
             !(device.capabilities & ReceiverDeviceCapabilities.VIDEO_OUT) &&
-            pageInfo?.isRequestAppAudioCompatible === false
+            appInfo?.isRequestAppAudioCompatible === false
         ) {
             return false;
         }
 
         return hasRequiredCapabilities(
             device,
-            pageInfo?.sessionRequest?.capabilities
+            appInfo?.sessionRequest?.capabilities
         );
     }
 
@@ -148,7 +149,7 @@
     function onMessage(message: Message) {
         switch (message.subject) {
             case "popup:init":
-                appId = message.data.appId;
+                appInfo = message.data.appInfo;
                 pageInfo = message.data.pageInfo;
                 break;
 
@@ -191,8 +192,8 @@
          * Check knownApps for an app with an ID matching the registered
          * app on the target page.
          */
-        if (isAppMediaTypeAvailable && appId) {
-            newKnownApp = knownApps[appId];
+        if (isAppMediaTypeAvailable && appInfo?.sessionRequest.appId) {
+            newKnownApp = knownApps[appInfo.sessionRequest.appId];
         } else if (pageInfo) {
             const pageUrl = pageInfo.url;
 
