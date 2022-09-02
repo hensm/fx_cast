@@ -10,11 +10,15 @@ type MessageListener = (message: Message) => void;
  * Create backup server URL from configured options.
  */
 async function getBackupServerUrl() {
-    const { bridgeBackupHost, bridgeBackupPort, bridgeBackupPassword } =
-        await options.getAll();
+    const {
+        bridgeBackupHost,
+        bridgeBackupPort,
+        bridgeBackupSecure,
+        bridgeBackupPassword
+    } = await options.getAll();
 
     const url = new URL(
-        `ws://${
+        `${bridgeBackupSecure ? "wss" : "ws"}://${
             // Handle IPv6 address formatting
             bridgeBackupHost.includes(":")
                 ? `[${bridgeBackupHost}]`
@@ -168,7 +172,9 @@ export async function sendNativeMessage(application: string, message: Message) {
     try {
         return await browser.runtime.sendNativeMessage(application, message);
     } catch {
-        const bridgeBackupEnabled = await options.get("bridgeBackupEnabled");
+        const { bridgeBackupEnabled, bridgeBackupSecure } =
+            await options.getAll();
+
         if (!bridgeBackupEnabled) {
             throw logger.error(
                 "Bridge connection failed and backup not enabled."
@@ -178,7 +184,7 @@ export async function sendNativeMessage(application: string, message: Message) {
         const backupServerUrl = await getBackupServerUrl();
 
         const backupServerHttpUrl = new URL(backupServerUrl);
-        backupServerHttpUrl.protocol = "http";
+        backupServerHttpUrl.protocol = bridgeBackupSecure ? "https" : "http";
 
         // Send HTTP request to check authentication
         if ((await fetch(backupServerHttpUrl)).status === 401) {

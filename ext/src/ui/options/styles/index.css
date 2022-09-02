@@ -208,6 +208,10 @@ input:placeholder-shown {
     padding: 10px 0;
 }
 
+.bridge__options > .category {
+    grid-template-columns: 100px minmax(0, 1fr);
+}
+
 .form > .category {
     border-bottom: 1px solid var(--border-color);
 }
@@ -272,6 +276,11 @@ input:placeholder-shown {
 .option__label {
     text-align: right;
     display: inline-block;
+}
+
+.category:disabled .option__label,
+.category:disabled .option__description {
+    opacity: 0.65;
 }
 
 .option__recommended {

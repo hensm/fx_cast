@@ -309,8 +309,12 @@
         "message": "If the regular bridge connection fails, attempt to connect to a bridge running in daemon mode.",
         "description": "Backup daemon checkbox description."
     },
+    "optionsBridgeBackupSecure": {
+        "message": "Use a secure daemon connection",
+        "description": "Daemon secure option checkbox label."
+    },
     "optionsBridgeBackupPassword": {
-        "message": "...with password:",
+        "message": "Password:",
         "description": "Daemon password option label."
     },
 

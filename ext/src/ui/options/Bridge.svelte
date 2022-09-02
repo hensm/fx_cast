@@ -272,24 +272,41 @@
                     bind:value={opts.bridgeBackupPort}
                 />
                 {backupMessageEnd}
+            </label>
+            <div class="option__description">
+                {_("optionsBridgeBackupEnabledDescription")}
+            </div>
+        </div>
 
-                {#if opts.showAdvancedOptions}
-                    <label class="bridge__backup-password">
+        {#if opts.showAdvancedOptions}
+            <fieldset class="category" disabled={!opts.bridgeBackupEnabled}>
+                <div class="option option--inline">
+                    <div class="option__control">
+                        <input
+                            id="bridgeBackupSecure"
+                            type="checkbox"
+                            bind:checked={opts.bridgeBackupSecure}
+                        />
+                    </div>
+                    <label class="option__label" for="bridgeBackupSecure">
+                        {_("optionsBridgeBackupSecure")}
+                    </label>
+                </div>
+                <div class="option">
+                    <label class="option__label" for="bridgeBackupPassword">
                         {_("optionsBridgeBackupPassword")}
-
+                    </label>
+                    <div class="option__control">
                         <input
                             id="bridgeBackupPassword"
                             placeholder="Password"
                             type="password"
                             bind:value={opts.bridgeBackupPassword}
                         />
-                    </label>
-                {/if}
-            </label>
-            <div class="option__description">
-                {_("optionsBridgeBackupEnabledDescription")}
-            </div>
-        </div>
+                    </div>
+                </div>
+            </fieldset>
+        {/if}
     </div>
 
     {#if !isLoadingInfo}

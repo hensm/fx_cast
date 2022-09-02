@@ -1,34 +1,30 @@
-import http, { IncomingMessage } from "http";
-import WebSocket from "ws";
-
+import http from "http";
+import https from "https";
 import { spawn } from "child_process";
 import { Readable } from "stream";
 
+import WebSocket from "ws";
+
 import { DecodeTransform, EncodeTransform } from "./transforms.js";
 
-interface DaemonOpts {
+export interface DaemonOpts {
     host: string;
     port: number;
     password?: string;
+    secure?: boolean;
+    key?: Buffer;
+    cert?: Buffer;
 }
 
 export function init(opts: DaemonOpts) {
-    const server = http.createServer();
+    const server = !opts.secure
+        ? http.createServer()
+        : https.createServer({
+              key: opts.key,
+              cert: opts.cert
+          });
+
     const wss = new WebSocket.Server({ noServer: true });
-
-    process.stdout.write(
-        `Starting WebSocket server at ws://${
-            opts.host.includes(":") ? `[${opts.host}]` : opts.host
-        }:${opts.port}... `
-    );
-
-    server.on("listening", () => {
-        process.stdout.write("Done!\n");
-    });
-    server.on("error", err => {
-        console.error("Failed!");
-        console.error(err.message);
-    });
 
     wss.on("connection", socket => {
         // Stream for incoming WebSocket messages
@@ -72,7 +68,7 @@ export function init(opts: DaemonOpts) {
      * Authenticates requests by checking password URL param against
      * server password specified in launch options.
      */
-    function authenticate(req: IncomingMessage) {
+    function authenticate(req: http.IncomingMessage) {
         if (!opts.password) return true;
 
         const password = new URL(
@@ -121,5 +117,17 @@ export function init(opts: DaemonOpts) {
         res.end();
     });
 
-    server.listen({ port: opts.port, host: opts.host });
+    process.stdout.write(
+        `Starting WebSocket server at ${opts.secure ? "wss" : "ws"}://${
+            opts.host.includes(":") ? `[${opts.host}]` : opts.host
+        }:${opts.port}... `
+    );
+    server.listen({ port: opts.port, host: opts.host }, () => {
+        process.stdout.write("Done!\n");
+    });
+
+    server.on("error", err => {
+        console.error("Failed!");
+        console.error(err.message);
+    });
 }
