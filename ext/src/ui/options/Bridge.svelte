@@ -279,7 +279,10 @@
         </div>
 
         {#if opts.showAdvancedOptions}
-            <fieldset class="category" disabled={!opts.bridgeBackupEnabled}>
+            <fieldset
+                class="bridge__daemon-options"
+                disabled={!opts.bridgeBackupEnabled}
+            >
                 <div class="option option--inline">
                     <div class="option__control">
                         <input
@@ -291,6 +294,9 @@
                     <label class="option__label" for="bridgeBackupSecure">
                         {_("optionsBridgeBackupSecure")}
                     </label>
+                    <div class="option__description">
+                        {_("optionsBridgeBackupSecureDescription")}
+                    </div>
                 </div>
                 <div class="option">
                     <label class="option__label" for="bridgeBackupPassword">
@@ -303,6 +309,9 @@
                             type="password"
                             bind:value={opts.bridgeBackupPassword}
                         />
+                        <div class="option__description">
+                            {_("optionsBridgeBackupPasswordDescription")}
+                        </div>
                     </div>
                 </div>
             </fieldset>

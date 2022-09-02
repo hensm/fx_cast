@@ -310,12 +310,20 @@
         "description": "Backup daemon checkbox description."
     },
     "optionsBridgeBackupSecure": {
-        "message": "Use a secure daemon connection",
+        "message": "Use a secure connection",
         "description": "Daemon secure option checkbox label."
+    },
+    "optionsBridgeBackupSecureDescription": {
+        "message": "Connects to the daemon via HTTPS instead of HTTP. Requires additional configuration.",
+        "description": "Daemon secure option description."
     },
     "optionsBridgeBackupPassword": {
         "message": "Password:",
         "description": "Daemon password option label."
+    },
+    "optionsBridgeBackupPasswordDescription": {
+        "message": "The optional password configured for the daemon connections.",
+        "description": "Daemon password option description."
     },
 
     "optionsMediaCategoryName": {

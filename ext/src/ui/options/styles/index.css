@@ -153,6 +153,18 @@ input:placeholder-shown {
 .bridge__options {
     margin-top: 30px;
 }
+.bridge__daemon-options {
+    column-gap: 10px;
+    border: initial;
+    display: flex;
+    flex-direction: column;
+    row-gap: 5px;
+    margin-left: 20px;
+}
+.bridge__daemon-options > .option:not(.option--inline) {
+    display: flex;
+    gap: inherit;
+}
 
 .bridge__update-info {
     align-items: center;
@@ -182,8 +194,8 @@ input:placeholder-shown {
 
 .bridge__backup-host,
 .bridge__backup-port {
-    margin-left: 0.5em;
-    margin-right: 0.5em;
+    margin-left: 2px;
+    margin-right: 2px;
 }
 
 .bridge__backup-host {
@@ -201,15 +213,11 @@ input:placeholder-shown {
 .category {
     border: initial;
     display: grid;
-    grid-template-columns: 150px minmax(0, 1fr);
+    grid-template-columns: 120px minmax(0, 1fr);
     grid-column-gap: 10px;
     grid-row-gap: 5px;
     margin: initial;
     padding: 10px 0;
-}
-
-.bridge__options > .category {
-    grid-template-columns: 100px minmax(0, 1fr);
 }
 
 .form > .category {
@@ -278,8 +286,8 @@ input:placeholder-shown {
     display: inline-block;
 }
 
-.category:disabled .option__label,
-.category:disabled .option__description {
+fieldset:disabled .option__label,
+fieldset:disabled .option__description {
     opacity: 0.65;
 }
 
@@ -297,7 +305,7 @@ input:placeholder-shown {
     font-size: smaller;
     grid-column: span 2;
     margin: 5px 0;
-    max-width: 45ch;
+    max-width: 60ch;
 }
 
 .option > input,
@@ -425,9 +433,6 @@ input:placeholder-shown {
 #siteWhitelistCustomUserAgent,
 input[id^="customUserAgentString-"] {
     width: -moz-available;
-}
-#bridgeBackupPassword {
-    margin-inline-start: 5px;
 }
 
 @media (prefers-color-scheme: dark) {
