@@ -49,7 +49,8 @@ type ExtMessageDefinitions = {
     };
     /** Updates selector popup with new data. */
     "popup:update": {
-        receiverDevices: ReceiverDevice[];
+        devices: ReceiverDevice[];
+        connectedSessionIds?: string[];
         defaultMediaType?: ReceiverSelectorMediaType;
         availableMediaTypes?: ReceiverSelectorMediaType;
     };

@@ -29,6 +29,8 @@
 
     /** Devices to display. */
     let devices: ReceiverDevice[] = [];
+    /** IDs of sessions connected by this extension. */
+    let connectedSessionIds: string[] = [];
 
     /** Sender app info (if available). */
     let appInfo: Optional<ReceiverSelectorAppInfo>;
@@ -172,6 +174,8 @@
                 break;
 
             case "popup:update": {
+                updateKnownApp();
+
                 if (
                     message.data.availableMediaTypes !== undefined &&
                     message.data.defaultMediaType !== undefined
@@ -183,9 +187,11 @@
                     }
                 }
 
-                updateKnownApp();
+                devices = message.data.devices;
 
-                devices = message.data.receiverDevices;
+                if (message.data.connectedSessionIds) {
+                    connectedSessionIds = message.data.connectedSessionIds;
+                }
 
                 break;
             }
@@ -288,30 +294,27 @@
         }
     }
 
-    function onReceiverCast(receiverDevice: ReceiverDevice) {
+    function onReceiverCast(device: ReceiverDevice) {
         isConnecting = true;
 
         port?.postMessage({
             subject: "main:receiverSelected",
-            data: {
-                receiverDevice,
-                mediaType
-            }
+            data: { device, mediaType }
         });
     }
 
-    function onReceiverStop(receiverDevice: ReceiverDevice) {
+    function onReceiverStop(device: ReceiverDevice) {
         port?.postMessage({
             subject: "main:sendReceiverMessage",
             data: {
-                deviceId: receiverDevice.id,
+                deviceId: device.id,
                 message: { requestId: 0, type: "STOP" }
             }
         });
 
         port?.postMessage({
             subject: "main:receiverStopped",
-            data: { deviceId: receiverDevice.id }
+            data: { deviceId: device.id }
         });
     }
 </script>
@@ -378,8 +381,10 @@
     {:else}
         {#each devices as device}
             <Receiver
+                {opts}
                 {port}
                 {device}
+                {connectedSessionIds}
                 {isMediaTypeAvailable}
                 isAnyMediaTypeAvailable={availableMediaTypes !==
                     ReceiverSelectorMediaType.None &&

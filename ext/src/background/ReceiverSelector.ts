@@ -14,7 +14,7 @@ import type {
 const POPUP_URL = browser.runtime.getURL("ui/popup/index.html");
 
 export interface ReceiverSelection {
-    receiverDevice: ReceiverDevice;
+    device: ReceiverDevice;
     mediaType: ReceiverSelectorMediaType;
 }
 
@@ -49,7 +49,7 @@ export default class ReceiverSelector extends TypedEventTarget<ReceiverSelectorE
     private messagePort?: Port;
     private messagePortDisconnected?: boolean;
 
-    private receiverDevices?: ReceiverDevice[];
+    private devices?: ReceiverDevice[];
 
     private defaultMediaType?: ReceiverSelectorMediaType;
     private availableMediaTypes?: ReceiverSelectorMediaType;
@@ -86,7 +86,7 @@ export default class ReceiverSelector extends TypedEventTarget<ReceiverSelectorE
      * Creates and opens a receiver selector window.
      */
     public async open(opts: {
-        receiverDevices: ReceiverDevice[];
+        devices: ReceiverDevice[];
         defaultMediaType: ReceiverSelectorMediaType;
         availableMediaTypes: ReceiverSelectorMediaType;
         appInfo?: ReceiverSelectorAppInfo;
@@ -100,7 +100,7 @@ export default class ReceiverSelector extends TypedEventTarget<ReceiverSelectorE
             await browser.windows.remove(this.windowId);
         }
 
-        this.receiverDevices = opts.receiverDevices;
+        this.devices = opts.devices;
         this.defaultMediaType = opts.defaultMediaType;
         this.availableMediaTypes = opts.availableMediaTypes;
 
@@ -149,13 +149,11 @@ export default class ReceiverSelector extends TypedEventTarget<ReceiverSelectorE
     }
 
     /** Updates receiver devices displayed in the receiver selector. */
-    public update(receiverDevices: ReceiverDevice[]) {
-        this.receiverDevices = receiverDevices;
+    public update(devices: ReceiverDevice[], connectedSessionIds: string[]) {
+        this.devices = devices;
         this.messagePort?.postMessage({
             subject: "popup:update",
-            data: {
-                receiverDevices: this.receiverDevices
-            }
+            data: { devices, connectedSessionIds }
         });
     }
 
@@ -191,7 +189,7 @@ export default class ReceiverSelector extends TypedEventTarget<ReceiverSelectorE
         });
 
         if (
-            this.receiverDevices === undefined ||
+            this.devices === undefined ||
             this.defaultMediaType === undefined ||
             this.availableMediaTypes === undefined
         ) {
@@ -214,7 +212,7 @@ export default class ReceiverSelector extends TypedEventTarget<ReceiverSelectorE
         this.messagePort.postMessage({
             subject: "popup:update",
             data: {
-                receiverDevices: this.receiverDevices,
+                devices: this.devices,
                 defaultMediaType: this.defaultMediaType,
                 availableMediaTypes: this.availableMediaTypes
             }

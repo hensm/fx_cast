@@ -108,10 +108,10 @@ function isSameContext(ctx1?: ContentContext, ctx2?: ContentContext) {
 let baseConfig: BaseConfig;
 let receiverSelector: Optional<ReceiverSelector>;
 
+const activeInstances = new Set<CastInstance>();
+
 /** Keeps track of cast API instances and provides bridge messaging. */
 const castManager = new (class {
-    private activeInstances = new Set<CastInstance>();
-
     async init() {
         // Handle incoming instance connections
         messaging.onConnect.addListener(async port => {
@@ -127,7 +127,7 @@ const castManager = new (class {
         const updateReceiverAvailability = () => {
             const isAvailable = deviceManager.getDevices().length > 0;
 
-            for (const instance of this.activeInstances) {
+            for (const instance of activeInstances) {
                 instance.contentPort.postMessage({
                     subject: "cast:receiverAvailabilityUpdated",
                     data: { isAvailable }
@@ -146,7 +146,7 @@ const castManager = new (class {
      * Finds a cast instance at the given tab (and optionally frame) ID.
      */
     getInstanceAt(tabId: number, frameId?: number) {
-        for (const instance of this.activeInstances) {
+        for (const instance of activeInstances) {
             if (instance.contentContext?.tabId === tabId) {
                 // If frame ID doesn't match go to next instance
                 if (frameId && instance.contentContext.frameId !== frameId) {
@@ -159,7 +159,7 @@ const castManager = new (class {
     }
 
     getInstanceByDeviceId(deviceId: string) {
-        for (const instance of this.activeInstances) {
+        for (const instance of activeInstances) {
             if (instance.session?.deviceId === deviceId) return instance;
         }
     }
@@ -177,7 +177,7 @@ const castManager = new (class {
             ? this.createInstanceFromBackground(port, contentContext)
             : this.createInstanceFromContent(port, isTrusted));
 
-        this.activeInstances.add(instance);
+        activeInstances.add(instance);
 
         instance.contentPort.postMessage({
             subject: "cast:instanceCreated",
@@ -201,10 +201,10 @@ const castManager = new (class {
 
         // Ensure only one instance per context
         if (contentContext) {
-            for (const instance of this.activeInstances) {
+            for (const instance of activeInstances) {
                 if (isSameContext(instance.contentContext, contentContext)) {
                     instance.bridgePort.disconnect();
-                    this.activeInstances.delete(instance);
+                    activeInstances.delete(instance);
                     break;
                 }
             }
@@ -212,7 +212,7 @@ const castManager = new (class {
 
         instance.bridgePort.onDisconnect.addListener(() => {
             contentPort.close();
-            this.activeInstances.delete(instance);
+            activeInstances.delete(instance);
         });
 
         // bridge -> cast instance
@@ -246,7 +246,7 @@ const castManager = new (class {
         }
 
         // Ensure only one instance per context
-        for (const instance of this.activeInstances) {
+        for (const instance of activeInstances) {
             if (
                 isSameContext(
                     instance.contentContext,
@@ -277,7 +277,7 @@ const castManager = new (class {
             instance.bridgePort.disconnect();
             contentPort.disconnect();
 
-            this.activeInstances.delete(instance);
+            activeInstances.delete(instance);
         };
 
         instance.bridgePort.onDisconnect.addListener(onDisconnect);
@@ -433,7 +433,7 @@ const castManager = new (class {
                         subject: "bridge:createCastSession",
                         data: {
                             appId: sessionRequest.appId,
-                            receiverDevice: selection.receiverDevice
+                            receiverDevice: selection.device
                         }
                     });
                 } catch (err) {
@@ -498,7 +498,7 @@ const castManager = new (class {
                 instance.contentPort.postMessage({
                     subject: "cast:receiverAction",
                     data: {
-                        receiver: createReceiver(selection.receiverDevice),
+                        receiver: createReceiver(selection.device),
                         action: ReceiverAction.CAST
                     }
                 });
@@ -507,7 +507,7 @@ const castManager = new (class {
                     subject: "bridge:createCastSession",
                     data: {
                         appId: instance.apiConfig?.sessionRequest.appId,
-                        receiverDevice: selection.receiverDevice
+                        receiverDevice: selection.device
                     }
                 });
 
@@ -519,7 +519,7 @@ const castManager = new (class {
                 await browser.tabs.executeScript(contentContext.tabId, {
                     code: stringify`
                         window.mirroringMediaType = ${selection.mediaType};
-                        window.receiverDevice = ${selection.receiverDevice};
+                        window.receiverDevice = ${selection.device};
                         window.contextTabId = ${contentContext.tabId};
                     `,
                     frameId: contentContext.frameId
@@ -695,7 +695,7 @@ async function getReceiverSelection(selectionOpts: {
         );
 
         receiverSelector.open({
-            receiverDevices: deviceManager.getDevices(),
+            devices: deviceManager.getDevices(),
             defaultMediaType,
             availableMediaTypes,
             appInfo,
@@ -751,7 +751,16 @@ function createSelector() {
     selector.addEventListener("mediaMessage", onMediaMessage);
 
     // Update selector data whenever devices change/update
-    const onDeviceChange = () => selector.update(deviceManager.getDevices());
+    const onDeviceChange = () => {
+        const connectedSessionIds: string[] = [];
+        for (const instance of activeInstances) {
+            if (instance.session) {
+                connectedSessionIds.push(instance.session.sessionId);
+            }
+        }
+
+        selector.update(deviceManager.getDevices(), connectedSessionIds);
+    };
 
     deviceManager.addEventListener("deviceUp", onDeviceChange);
     deviceManager.addEventListener("deviceDown", onDeviceChange);

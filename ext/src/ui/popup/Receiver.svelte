@@ -1,6 +1,8 @@
 <script lang="ts">
     import { createEventDispatcher, onMount } from "svelte";
 
+    import type { Options } from "../../lib/options";
+
     import { ReceiverDevice, ReceiverDeviceCapabilities } from "../../types";
     import type { Port } from "../../messaging";
 
@@ -33,8 +35,11 @@
     /** Whether any media types are available for this receiver. */
     export let isAnyMediaTypeAvailable: boolean;
 
-    /** Receiver device to display. */
+    /** Device to display. */
     export let device: ReceiverDevice;
+    export let connectedSessionIds: string[];
+
+    export let opts: Nullable<Options>;
 
     /** Current receiver application (if available) */
     $: application = device.status?.applications?.[0];
@@ -79,8 +84,20 @@
 
     /** Whether media controls are shown. */
     let isExpanded = false;
+    let isExpandedUserModified = false;
+
+    // Unexpand if media status disappears
     $: if (!device.mediaStatus) {
         isExpanded = false;
+    } else if (
+        // If app is running
+        application?.appId &&
+        // And user hasn't manually changed the expanded state
+        !isExpandedUserModified &&
+        // And auto-expansion is enabled
+        opts?.receiverSelectorExpandActive
+    ) {
+        isExpanded = connectedSessionIds.includes(application?.transportId);
     }
 
     /** Whether a session request is in progress for this receiver.. */
@@ -429,6 +446,7 @@
         disabled={!mediaStatus}
         on:click={() => {
             isExpanded = !isExpanded;
+            isExpandedUserModified = true;
         }}
     />
 

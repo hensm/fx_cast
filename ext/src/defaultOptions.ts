@@ -16,6 +16,7 @@ export interface Options {
     mirroringAppId: string;
     receiverSelectorCloseIfFocusLost: boolean;
     receiverSelectorWaitForConnection: boolean;
+    receiverSelectorExpandActive: boolean;
     siteWhitelistEnabled: boolean;
     siteWhitelist: WhitelistItemData[];
     siteWhitelistCustomUserAgent: string;
@@ -40,6 +41,7 @@ export default {
     mirroringAppId: MIRRORING_APP_ID,
     receiverSelectorCloseIfFocusLost: true,
     receiverSelectorWaitForConnection: true,
+    receiverSelectorExpandActive: true,
     siteWhitelistEnabled: true,
     siteWhitelist: [{ pattern: "https://www.netflix.com/*", isEnabled: true }],
     siteWhitelistCustomUserAgent: "",

@@ -388,6 +388,10 @@
         "message": "Close after losing focus",
         "description": "Receiver selector close if focus lost option checkbox label."
     },
+    "optionsReceiverSelectorExpandActive": {
+        "message": "Expand media controls for connected devices",
+        "description": "Receiver selector expand active checkbox label."
+    },
 
     "optionsSiteWhitelistCategoryName": {
         "message": "Site whitelist",

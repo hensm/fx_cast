@@ -259,6 +259,22 @@
                         {_("optionsReceiverSelectorCloseIfFocusLost")}
                     </label>
                 </div>
+
+                <div class="option option--inline">
+                    <div class="option__control">
+                        <input
+                            id="receiverSelectorExpandActive"
+                            type="checkbox"
+                            bind:checked={opts.receiverSelectorExpandActive}
+                        />
+                    </div>
+                    <label
+                        class="option__label"
+                        for="receiverSelectorExpandActive"
+                    >
+                        {_("optionsReceiverSelectorExpandActive")}
+                    </label>
+                </div>
             </fieldset>
         {/if}
 
