@@ -1,5 +1,3 @@
-"use strict";
-
 import { TypedEmitter } from "tiny-typed-emitter";
 
 import { DecodeTransform, EncodeTransform } from "../transforms";

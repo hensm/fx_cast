@@ -1,5 +1,3 @@
-"use strict";
-
 export enum AutoJoinPolicy {
     TAB_AND_ORIGIN_SCOPED = "tab_and_origin_scoped",
     ORIGIN_SCOPED = "origin_scoped",

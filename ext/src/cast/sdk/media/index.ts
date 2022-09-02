@@ -1,5 +1,3 @@
-"use strict";
-
 export * from "./enums";
 export * from "./classes";
 

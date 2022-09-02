@@ -1,5 +1,3 @@
-"use strict";
-
 export interface Image {
     url: string;
     height: Nullable<number>;

@@ -1,5 +1,3 @@
-"use strict";
-
 import mdns from "mdns";
 
 import type { ReceiverDevice } from "../../messagingTypes";

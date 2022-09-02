@@ -1,5 +1,3 @@
-"use strict";
-
 import logger from "../lib/logger";
 import messaging, { Port, Message } from "../messaging";
 import options from "../lib/options";

@@ -1,5 +1,3 @@
-"use strict";
-
 import type { TypedPort } from "./lib/TypedPort";
 
 import type {

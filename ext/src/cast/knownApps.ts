@@ -1,5 +1,3 @@
-"use strict";
-
 const _ = browser.i18n.getMessage;
 
 export interface KnownApp {

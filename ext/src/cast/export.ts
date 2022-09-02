@@ -1,6 +1,3 @@
-/* eslint-disable @typescript-eslint/no-namespace */
-"use strict";
-
 import type { TypedMessagePort } from "../lib/TypedMessagePort";
 import messaging, { Message } from "../messaging";
 import type { ReceiverDevice } from "../types";

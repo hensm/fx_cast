@@ -1,5 +1,3 @@
-"use strict";
-
 export class Logger {
     constructor(private prefix: string) {}
 

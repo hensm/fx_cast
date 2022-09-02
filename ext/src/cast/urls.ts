@@ -1,5 +1,3 @@
-"use strict";
-
 /**
  * Cast Chrome Sender SDK loader script.
  *

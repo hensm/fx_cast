@@ -1,5 +1,3 @@
-"use strict";
-
 import Options from "./Options.svelte";
 
 // macOS styles

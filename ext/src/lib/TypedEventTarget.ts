@@ -1,5 +1,3 @@
-"use strict";
-
 interface TypedEvents {
     [key: string]: any;
 }

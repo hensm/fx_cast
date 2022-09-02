@@ -1,5 +1,3 @@
-"use strict";
-
 import { Transform, TransformCallback } from "stream";
 import type { Message } from "./bridge/messaging";
 

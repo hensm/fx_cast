@@ -1,5 +1,3 @@
-"use strict";
-
 import options from "../../lib/options";
 import { Logger } from "../../lib/logger";
 

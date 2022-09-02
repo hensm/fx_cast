@@ -1,5 +1,3 @@
-"use strict";
-
 export enum ContainerType {
     GENERIC_CONTAINER,
     AUDIOBOOK_CONTAINER

@@ -1,5 +1,3 @@
-"use strict";
-
 import messaging, { Message } from "./messaging";
 
 import { handleCastMessage } from "./components/cast";

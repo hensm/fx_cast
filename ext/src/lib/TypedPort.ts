@@ -1,5 +1,3 @@
-"use strict";
-
 /**
  * Provides a typed interface to runtime.Port objects.
  */

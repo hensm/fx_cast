@@ -1,5 +1,3 @@
-"use strict";
-
 import type { SessionRequest } from "./cast/sdk/classes";
 import type { MediaStatus, ReceiverStatus } from "./cast/sdk/types";
 

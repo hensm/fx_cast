@@ -1,5 +1,3 @@
-"use strict";
-
 import CastClient from "./client";
 
 import type {

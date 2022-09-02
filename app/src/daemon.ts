@@ -1,5 +1,3 @@
-"use strict";
-
 import http, { IncomingMessage } from "http";
 import WebSocket from "ws";
 

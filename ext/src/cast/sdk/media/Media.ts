@@ -1,5 +1,3 @@
-"use strict";
-
 import { v4 as uuid } from "uuid";
 
 import { Logger } from "../../../lib/logger";

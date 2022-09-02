@@ -1,5 +1,3 @@
-"use strict";
-
 import semver from "semver";
 
 import logger from "./logger";

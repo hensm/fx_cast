@@ -1,5 +1,3 @@
-"use strict";
-
 /**
  * Allows typed access to a StorageArea.
  *

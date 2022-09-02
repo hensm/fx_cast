@@ -1,5 +1,3 @@
-"use strict";
-
 const WILDCARD_SCHEMES = ["http", "https", "ws", "wss"];
 
 export const REMOTE_MATCH_PATTERN_REGEX =

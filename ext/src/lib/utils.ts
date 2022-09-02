@@ -1,5 +1,3 @@
-"use strict";
-
 import { ReceiverSelectorMediaType } from "../types";
 
 export function getNextEllipsis(ellipsis: string): string {

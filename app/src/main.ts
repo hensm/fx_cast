@@ -1,5 +1,3 @@
-"use strict";
-
 import yargs from "yargs";
 import { applicationName, applicationVersion } from "../config.json";
 

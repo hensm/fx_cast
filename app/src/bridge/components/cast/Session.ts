@@ -1,5 +1,3 @@
-"use strict";
-
 import type { Channel } from "castv2";
 
 import messaging from "../../messaging";

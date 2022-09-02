@@ -1,5 +1,3 @@
-"use strict";
-
 import { Logger } from "../../lib/logger";
 
 import type { Message } from "../../messaging";

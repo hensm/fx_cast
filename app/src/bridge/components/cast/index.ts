@@ -1,5 +1,3 @@
-"use strict";
-
 import messaging, { Message } from "../../messaging";
 
 import Session from "./Session";

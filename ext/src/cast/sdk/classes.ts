@@ -1,5 +1,3 @@
-"use strict";
-
 import type Session from "./Session";
 
 import {

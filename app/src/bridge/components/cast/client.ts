@@ -1,5 +1,3 @@
-"use strict";
-
 import { Channel, Client } from "castv2";
 
 import type { ReceiverMessage, SenderMessage } from "./types";

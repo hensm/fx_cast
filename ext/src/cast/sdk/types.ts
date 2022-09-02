@@ -1,5 +1,3 @@
-"use strict";
-
 /**
  * Keep in sync with bridge types at:
  *   app/src/bridge/components/cast/types.ts

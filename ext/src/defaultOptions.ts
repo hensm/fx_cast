@@ -1,5 +1,3 @@
-"use strict";
-
 import type { WhitelistItemData } from "./background/whitelist";
 
 export interface Options {

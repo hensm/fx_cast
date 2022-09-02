@@ -1,5 +1,3 @@
-"use strict";
-
 import bridge from "../lib/bridge";
 import logger from "../lib/logger";
 import { TypedEventTarget } from "../lib/TypedEventTarget";

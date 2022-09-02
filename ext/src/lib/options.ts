@@ -1,5 +1,3 @@
-"use strict";
-
 import defaultOptions, { Options } from "../defaultOptions";
 export { Options };
 

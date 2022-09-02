@@ -1,5 +1,3 @@
-"use strict";
-
 const PLATFORM_MAC = "Macintosh; Intel Mac OS X 12_5";
 const PLATFORM_MAC_HYBRID = "Macintosh; Intel Mac OS X 12_5; rv:103.0";
 const PLATFORM_WIN = "Windows NT 10.0; Win64; x64";
