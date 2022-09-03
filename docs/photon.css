@@ -3,50 +3,30 @@
     --shadow-20: 0 2px 8px rgba(12, 12, 13, 0.1);
     --shadow-30: 0 4px 16px rgba(12, 12, 13, 0.1);
 
-    --__photon__focus_box-shadow:
-            0 0 0 1px #0a84ff inset
-          , 0 0 0 1px #0a84ff
-          , 0 0 0 4px rgba(10, 132, 255, 0.3);
+    --__photon__focus_box-shadow: 0 0 0 1px #0a84ff inset, 0 0 0 1px #0a84ff,
+        0 0 0 4px rgba(10, 132, 255, 0.3);
 
-
-    --__photon__link_color: var(--blue-60);
-    --__photon__link_color_hover: var(--blue-60);
-    --__photon__link_color_active: var(--blue-70);
-
-    --__photon__card_background: var(--white-100);
-    --__photon__card_border: 5px solid transparent;
-    --__photon__card_border-color_hover: var(--grey-30);
-    --__photon__card_border-radius: 4px;
-    --__photon__card_box-shadow: var(--shadow-10);
-
-    --__photon__button_background: var(--grey-90-a10);
-    --__photon__button_background_hover: var(--grey-90-a20);
-    --__photon__button_background_active: var(--grey-90-a30);
-    --__photon__button_background_primary: var(--blue-60);
-    --__photon__button_background_primary_hover: var(--blue-70);
-    --__photon__button_background_primary_active: var(--blue-80);
-    --__photon__button_background_ghost: transparent;
-    --__photon__button_background_ghost_hover: var(--grey-90-a10);
-    --__photon__button_background_ghost_active: var(--grey-90-a20);
-    --__photon__button_color: var(--grey-90);
-    --__photon__button_color_primary: var(--white-100);
-    --__photon__button_color_ghost: var(--grey-90-a80);
-}
-
-:root.theme-dark {
     --__photon__link_color: var(--blue-50);
     --__photon__link_color_hover: var(--blue-50);
     --__photon__link_color_active: var(--blue-60);
 
     --__photon__card_background: #202023;
+    --__photon__card_border: 5px solid transparent;
     --__photon__card_border-color_hover: var(--grey-60);
+    --__photon__card_border-radius: 4px;
+    --__photon__card_box-shadow: var(--shadow-10);
 
     --__photon__button_background: var(--grey-10-a10);
     --__photon__button_background_hover: rgba(249, 249, 250, 0.15);
     --__photon__button_background_active: rgba(249, 249, 250, 0.2);
+    --__photon__button_background_primary: var(--blue-60);
+    --__photon__button_background_primary_hover: var(--blue-70);
+    --__photon__button_background_primary_active: var(--blue-80);
+    --__photon__button_background_ghost: transparent;
     --__photon__button_background_ghost_hover: rgba(249, 249, 250, 0.1);
     --__photon__button_background_ghost_active: rgba(249, 249, 250, 0.15);
     --__photon__button_color: var(--white-100);
+    --__photon__button_color_primary: var(--white-100);
     --__photon__button_color_ghost: var(--grey-10-a80);
 }
 
@@ -65,7 +45,7 @@ a:not(.button):hover {
 a:not(.button):hover:active {
     color: var(--__photon__link_color_active);
 }
-a:not(.button):focus {
+a:not(.button):focus-visible {
     box-shadow: var(--__photon__focus_box-shadow);
 }
 
@@ -84,7 +64,6 @@ a:not(.button):focus {
 .card[open] {
     border-color: var(--__photon__card_border-color_hover);
 }
-
 
 /* ------------------------ */
 /* -------- Buttons ------- */
@@ -143,21 +122,16 @@ a:not(.button):focus {
     padding: 0 16px;
 }
 
-.button:not(
-        .button--micro):not(
-        .button--puffy):not(
-        .button--ghost) {
+.button:not(.button--micro):not(.button--puffy):not(.button--ghost) {
     min-width: 132px;
 }
-
 
 /* Behaviours */
 .button:disabled,
 .button[disabled] {
     opacity: 0.4;
 }
-.button:focus,
-.button:focus-within {
+.button:focus-visible {
     box-shadow: var(--__photon__focus_box-shadow);
 }
 .button::-moz-focus-inner {
@@ -191,20 +165,19 @@ a:not(.button):focus {
     background-color: var(--__photon__button_background_ghost_active);
 }
 
-
-
 /* ------------------------ */
 /* ------ Typography ------ */
 /* ------------------------ */
 
-.display {}
+.display {
+}
 .display--20 {
     font-size: 36px;
     font-weight: 200;
 }
 
-
-.title {}
+.title {
+}
 .title--40,
 .title--30 {
     font-weight: 300;
@@ -215,19 +188,35 @@ a:not(.button):focus {
     font-weight: 500;
 }
 
-.title--40 { font-size: 28px; }
-.title--30 { font-size: 22px; }
-.title--20 { font-size: 17px; }
-.title--10 { font-size: 13px; }
+.title--40 {
+    font-size: 28px;
+}
+.title--30 {
+    font-size: 22px;
+}
+.title--20 {
+    font-size: 17px;
+}
+.title--10 {
+    font-size: 13px;
+}
 
+.body {
+    font-weight: 400;
+}
+.body > em {
+    font-weight: 700;
+}
 
-.body      { font-weight: 400; }
-.body > em { font-weight: 700; }
-
-.body--30 { font-size: 17px; }
-.body--20 { font-size: 15px; }
-.body--10 { font-size: 13px; }
-
+.body--30 {
+    font-size: 17px;
+}
+.body--20 {
+    font-size: 15px;
+}
+.body--10 {
+    font-size: 13px;
+}
 
 .caption {
     color: GrayText;
@@ -237,7 +226,12 @@ a:not(.button):focus {
     font-weight: 700;
 }
 
-.caption--30 { font-size: 15px; }
-.caption--20 { font-size: 13px; }
-.caption--10 { font-size: 11px; }
-
+.caption--30 {
+    font-size: 15px;
+}
+.caption--20 {
+    font-size: 13px;
+}
+.caption--10 {
+    font-size: 11px;
+}
