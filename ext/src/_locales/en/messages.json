@@ -8,6 +8,14 @@
         "description": "Description of the extension shown in the add-ons manager."
     },
 
+    "popupBridgeErrorBanner": {
+        "message": "There is a problem with the bridge!",
+        "description": "Bridge error banner message."
+    },
+    "popupBridgeErrorBannerOptions": {
+        "message": "More Information",
+        "description": "Bridge error banner button label."
+    },
     "popupWhitelistNotWhitelisted": {
         "message": "$appName$ is not whitelisted",
         "description": "Receiver selector whitelist suggestion banner label.",

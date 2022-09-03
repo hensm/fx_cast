@@ -46,6 +46,7 @@ type ExtMessageDefinitions = {
     "popup:init": {
         appInfo?: ReceiverSelectorAppInfo;
         pageInfo?: ReceiverSelectorPageInfo;
+        isBridgeCompatible: boolean;
     };
     /** Updates selector popup with new data. */
     "popup:update": {

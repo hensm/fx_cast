@@ -710,7 +710,9 @@ async function getReceiverSelection(selectionOpts: {
  */
 function createSelector() {
     // Get a new selector for each selection
-    const selector = new ReceiverSelector();
+    const selector = new ReceiverSelector(
+        deviceManager.getBridgeInfo()?.isVersionCompatible ?? false
+    );
 
     /**
      * Sends message to cast instance to trigger stopped receiver action

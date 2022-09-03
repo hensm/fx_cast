@@ -1,4 +1,4 @@
-import bridge from "../lib/bridge";
+import bridge, { BridgeInfo } from "../lib/bridge";
 import logger from "../lib/logger";
 import { TypedEventTarget } from "../lib/TypedEventTarget";
 
@@ -34,6 +34,7 @@ export default new (class extends TypedEventTarget<EventMap> {
     private receiverDevices = new Map<string, ReceiverDevice>();
 
     private bridgePort?: Port;
+    private bridgeInfo?: BridgeInfo;
     async init() {
         if (!this.bridgePort) {
             await this.refresh();
@@ -48,17 +49,28 @@ export default new (class extends TypedEventTarget<EventMap> {
         this.bridgePort?.disconnect();
         this.receiverDevices.clear();
 
-        this.bridgePort = await bridge.connect();
-        this.bridgePort.onMessage.addListener(this.onBridgeMessage);
-        this.bridgePort.onDisconnect.addListener(this.onBridgeDisconnect);
+        try {
+            this.bridgeInfo = await bridge.getInfo();
+            // eslint-disable-next-line no-empty
+        } catch {}
 
-        this.bridgePort.postMessage({
-            subject: "bridge:startDiscovery",
-            data: {
-                // Also send back status messages
-                shouldWatchStatus: true
-            }
-        });
+        if (this.bridgeInfo?.isVersionCompatible) {
+            this.bridgePort = await bridge.connect();
+            this.bridgePort.onMessage.addListener(this.onBridgeMessage);
+            this.bridgePort.onDisconnect.addListener(this.onBridgeDisconnect);
+
+            this.bridgePort.postMessage({
+                subject: "bridge:startDiscovery",
+                data: {
+                    // Also send back status messages
+                    shouldWatchStatus: true
+                }
+            });
+        }
+    }
+
+    getBridgeInfo() {
+        return this.bridgeInfo;
     }
 
     /** Gets a list of receiver devices. */

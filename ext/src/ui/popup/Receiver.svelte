@@ -91,13 +91,13 @@
         isExpanded = false;
     } else if (
         // If app is running
-        application?.appId &&
+        application &&
         // And user hasn't manually changed the expanded state
         !isExpandedUserModified &&
         // And auto-expansion is enabled
         opts?.receiverSelectorExpandActive
     ) {
-        isExpanded = connectedSessionIds.includes(application?.transportId);
+        isExpanded = connectedSessionIds.includes(application.transportId);
     }
 
     /** Whether a session request is in progress for this receiver.. */

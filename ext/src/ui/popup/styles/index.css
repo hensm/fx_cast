@@ -1,3 +1,12 @@
+#root {
+    height: 100%;
+}
+
+#root {
+    display: flex;
+    flex-direction: column;
+}
+
 body {
     --font-size: 13px;
     background: var(--box-background);
@@ -12,7 +21,7 @@ body {
     display: none !important;
 }
 
-.whitelist-banner {
+.banner {
     align-items: center;
     background-color: var(--blue-50-a30);
     border-bottom: 1px solid rgba(0, 0, 0, 0.25);
@@ -21,18 +30,34 @@ body {
     gap: 0.5em;
     padding: 0.5em 0.75em;
 }
-.whitelist-banner > button {
+.banner > button {
     --button-background: hsla(0, 0%, 50%, 0.3);
     --button-background-hover: hsla(0, 0%, 30%, 0.3);
     --button-background-active: hsla(0, 0%, 10%, 0.3);
     margin-left: auto;
 }
 
+.banner--warn {
+    background-color: var(--red-60-a30);
+}
+
+.banner::before {
+    content: "";
+    height: 16px;
+    width: 16px;
+}
+.banner--info::before {
+    background-image: url("../../assets/photon_info.svg");
+}
+.banner--warn::before {
+    background-image: url("../../assets/photon_warning.svg");
+}
+
 @media (prefers-color-scheme: dark) {
-    .whitelist-banner {
+    .banner {
         border-bottom: 1px solid rgba(255, 255, 255, 0.25);
     }
-    .whitelist-banner > button {
+    .banner > button {
         --button-background: hsla(0, 0%, 50%, 0.3);
         --button-background-hover: hsla(0, 0%, 70%, 0.3);
         --button-background-active: hsla(0, 0%, 90%, 0.3);

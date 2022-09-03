@@ -59,7 +59,7 @@ export default class ReceiverSelector extends TypedEventTarget<ReceiverSelectorE
     appInfo?: ReceiverSelectorAppInfo;
     pageInfo?: ReceiverSelectorPageInfo;
 
-    constructor() {
+    constructor(private isBridgeCompatible: boolean) {
         super();
 
         this.onConnect = this.onConnect.bind(this);
@@ -205,7 +205,8 @@ export default class ReceiverSelector extends TypedEventTarget<ReceiverSelectorE
             subject: "popup:init",
             data: {
                 appInfo: this.appInfo,
-                pageInfo: this.pageInfo
+                pageInfo: this.pageInfo,
+                isBridgeCompatible: this.isBridgeCompatible
             }
         });
 

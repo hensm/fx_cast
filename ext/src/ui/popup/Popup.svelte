@@ -27,6 +27,9 @@
     /** Media types available to select. */
     let availableMediaTypes = ReceiverSelectorMediaType.App;
 
+    /** Whether to show bridge warning banner. */
+    let isBridgeCompatible = true;
+
     /** Devices to display. */
     let devices: ReceiverDevice[] = [];
     /** IDs of sessions connected by this extension. */
@@ -171,6 +174,7 @@
             case "popup:init":
                 appInfo = message.data.appInfo;
                 pageInfo = message.data.pageInfo;
+                isBridgeCompatible = message.data.isBridgeCompatible;
                 break;
 
             case "popup:update": {
@@ -319,18 +323,32 @@
     }
 </script>
 
-<div class="whitelist-banner" hidden={!shouldSuggestWhitelist}>
-    <img src="photon_info.svg" alt="icon, info" />
-    {_("popupWhitelistNotWhitelisted", knownApp?.name)}
-    <button
-        on:click={() => {
-            if (!knownApp || !pageInfo) return;
-            addToWhitelist(knownApp, pageInfo);
-        }}
-    >
-        {_("popupWhitelistAddToWhitelist")}
-    </button>
-</div>
+{#if !isBridgeCompatible}
+    <div class="banner banner--warn">
+        {_("popupBridgeErrorBanner")}
+        <button
+            on:click={() => {
+                browser.runtime.openOptionsPage();
+            }}
+        >
+            {_("popupBridgeErrorBannerOptions")}
+        </button>
+    </div>
+{/if}
+
+{#if shouldSuggestWhitelist}
+    <div class="banner banner--info">
+        {_("popupWhitelistNotWhitelisted", knownApp?.name)}
+        <button
+            on:click={() => {
+                if (!knownApp || !pageInfo) return;
+                addToWhitelist(knownApp, pageInfo);
+            }}
+        >
+            {_("popupWhitelistAddToWhitelist")}
+        </button>
+    </div>
+{/if}
 
 {#if availableMediaTypes !== ReceiverSelectorMediaType.None}
     <div class="media-type-select">
