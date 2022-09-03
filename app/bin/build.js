@@ -144,7 +144,10 @@ async function build() {
             path.join(BUILD_PATH, MDNS_BINDING_NAME)
         );
 
-        fs.rmSync(path.join(BUILD_PATH, "src"));
+        fs.rmSync(path.join(BUILD_PATH, "src"), {
+            recursive: true,
+            force: true
+        });
 
         manifest.path =
             !argv.package && argv.usePkg
