@@ -174,10 +174,11 @@
             case "popup:init":
                 appInfo = message.data.appInfo;
                 pageInfo = message.data.pageInfo;
-                isBridgeCompatible = message.data.isBridgeCompatible;
                 break;
 
             case "popup:update": {
+                isBridgeCompatible = message.data.isBridgeCompatible;
+
                 updateKnownApp();
 
                 if (

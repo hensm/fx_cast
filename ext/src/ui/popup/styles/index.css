@@ -92,6 +92,7 @@ body {
 
 .receiver-list__not-found {
     align-items: center;
+    color: var(--secondary-color);
     display: flex;
     height: 50px;
     justify-content: center;

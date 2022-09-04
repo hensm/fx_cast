@@ -761,7 +761,11 @@ function createSelector() {
             }
         }
 
-        selector.update(deviceManager.getDevices(), connectedSessionIds);
+        selector.update(
+            deviceManager.getDevices(),
+            deviceManager.getBridgeInfo()?.isVersionCompatible ?? false,
+            connectedSessionIds
+        );
     };
 
     deviceManager.addEventListener("deviceUp", onDeviceChange);

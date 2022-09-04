@@ -47,7 +47,6 @@ export default new (class extends TypedEventTarget<EventMap> {
      */
     async refresh() {
         this.bridgePort?.disconnect();
-        this.receiverDevices.clear();
 
         try {
             this.bridgeInfo = await bridge.getInfo();
@@ -218,20 +217,28 @@ export default new (class extends TypedEventTarget<EventMap> {
     };
 
     private onBridgeDisconnect = () => {
+        const deviceIds = [...this.receiverDevices.keys()];
+
+        delete this.bridgeInfo;
+        this.receiverDevices.clear();
+
         // Notify listeners of device availablility
-        for (const [, receiverDevice] of this.receiverDevices) {
+        for (const deviceId of deviceIds) {
             const event = new CustomEvent("deviceDown", {
-                detail: { deviceId: receiverDevice.id }
+                detail: { deviceId }
             });
 
             this.dispatchEvent(event);
         }
 
-        this.receiverDevices.clear();
-
-        // Re-initialize after 10 seconds
+        /**
+         * Reconnect 10 seconds after disconnect if not already
+         * reconnected (like immediately after a refresh).
+         */
         window.setTimeout(() => {
-            this.refresh();
+            if (!this.bridgeInfo) {
+                this.refresh();
+            }
         }, 10000);
     };
 })();

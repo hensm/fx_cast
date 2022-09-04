@@ -10,8 +10,9 @@
         BridgeAuthenticationError
     } from "../../lib/bridge";
     import logger from "../../lib/logger";
-
     import type { Options } from "../../lib/options";
+
+    import messaging from "../../messaging";
 
     const _ = browser.i18n.getMessage;
 
@@ -26,12 +27,14 @@
     let statusTitle: string;
     let statusText: Nullable<string> = null;
 
-    async function checkBridgeStatus() {
+    async function refreshBridgeStatus() {
         // Reset state
         bridgeInfo = null;
         bridgeInfoError = null;
         isLoadingInfo = true;
         statusText = null;
+
+        messaging.sendMessage({ subject: "main:refreshDeviceManager" });
 
         try {
             bridgeInfo = await bridge.getInfo();
@@ -78,7 +81,7 @@
     }
 
     onMount(() => {
-        checkBridgeStatus();
+        refreshBridgeStatus();
     });
 
     // Updates
@@ -197,7 +200,7 @@
                     type="button"
                     class="ghost bridge__refresh"
                     title={_("optionsBridgeRefresh")}
-                    on:click={checkBridgeStatus}
+                    on:click={refreshBridgeStatus}
                 />
             </div>
 

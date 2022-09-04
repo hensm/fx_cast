@@ -46,11 +46,11 @@ type ExtMessageDefinitions = {
     "popup:init": {
         appInfo?: ReceiverSelectorAppInfo;
         pageInfo?: ReceiverSelectorPageInfo;
-        isBridgeCompatible: boolean;
     };
     /** Updates selector popup with new data. */
     "popup:update": {
         devices: ReceiverDevice[];
+        isBridgeCompatible: boolean;
         connectedSessionIds?: string[];
         defaultMediaType?: ReceiverSelectorMediaType;
         availableMediaTypes?: ReceiverSelectorMediaType;
@@ -102,6 +102,12 @@ type ExtMessageDefinitions = {
     "main:sendReceiverMessage": ReceiverSelectorReceiverMessage;
     /** Allows the selector popup to send cast NS_MEDIA messages. */
     "main:sendMediaMessage": ReceiverSelectorMediaMessage;
+
+    /**
+     * Tells the device manager to clear its device list and re-connect
+     * to the bridge.
+     */
+    "main:refreshDeviceManager": void;
 };
 
 /**
@@ -319,21 +325,23 @@ export default new (class Messenger {
         return browser.tabs.connect(tabId, connectInfo) as Port;
     }
 
-    onConnect = {
-        addListener(cb: (port: Port) => void) {
-            browser.runtime.onConnect.addListener(
-                cb as (port: browser.runtime.Port) => void
-            );
-        },
-        removeListener(cb: (port: Port) => void) {
-            browser.runtime.onConnect.removeListener(
-                cb as (port: browser.runtime.Port) => void
-            );
-        },
-        hasListener(cb: (port: Port) => void) {
-            return browser.runtime.onConnect.hasListener(
-                cb as (port: browser.runtime.Port) => void
-            );
-        }
-    };
+    sendMessage(
+        message: Message,
+        options?: browser.runtime._SendMessageOptions
+    ): Promise<any>;
+    sendMessage(
+        extensionId: string,
+        options?: browser.runtime._SendMessageOptions
+    ): Promise<any>;
+    sendMessage(
+        messageOrExtensionId: string | Message,
+        options?: browser.runtime._SendMessageOptions
+    ) {
+        return browser.runtime.sendMessage(messageOrExtensionId, options);
+    }
+
+    onConnect = browser.runtime.onConnect as WebExtEvent<(port: Port) => void>;
+    onMessage = browser.runtime.onMessage as WebExtEvent<
+        (message: Message, sender: browser.runtime.MessageSender) => void
+    >;
 })();

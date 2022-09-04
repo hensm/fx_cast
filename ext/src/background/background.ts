@@ -1,14 +1,16 @@
-import defaultOptions from "../defaultOptions";
 import logger from "../lib/logger";
 import options from "../lib/options";
 import bridge, { BridgeInfo } from "../lib/bridge";
+import { baseConfigStorage, fetchBaseConfig } from "../lib/chromecastConfigApi";
+
+import defaultOptions from "../defaultOptions";
+import messaging from "../messaging";
 
 import castManager from "./castManager";
 import deviceManager from "./deviceManager";
 
 import { initMenus } from "./menus";
 import { initWhitelist } from "./whitelist";
-import { baseConfigStorage, fetchBaseConfig } from "../lib/chromecastConfigApi";
 
 const _ = browser.i18n.getMessage;
 
@@ -129,6 +131,14 @@ async function init() {
 
     await initMenus();
     await initWhitelist();
+
+    messaging.onMessage.addListener(message => {
+        switch (message.subject) {
+            case "main:refreshDeviceManager":
+                deviceManager.refresh();
+                break;
+        }
+    });
 
     browser.browserAction.onClicked.addListener(async tab => {
         if (tab.id === undefined) {

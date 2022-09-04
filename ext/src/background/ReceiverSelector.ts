@@ -149,11 +149,15 @@ export default class ReceiverSelector extends TypedEventTarget<ReceiverSelectorE
     }
 
     /** Updates receiver devices displayed in the receiver selector. */
-    public update(devices: ReceiverDevice[], connectedSessionIds: string[]) {
+    public update(
+        devices: ReceiverDevice[],
+        isBridgeCompatible: boolean,
+        connectedSessionIds: string[]
+    ) {
         this.devices = devices;
         this.messagePort?.postMessage({
             subject: "popup:update",
-            data: { devices, connectedSessionIds }
+            data: { devices, isBridgeCompatible, connectedSessionIds }
         });
     }
 
@@ -205,8 +209,7 @@ export default class ReceiverSelector extends TypedEventTarget<ReceiverSelectorE
             subject: "popup:init",
             data: {
                 appInfo: this.appInfo,
-                pageInfo: this.pageInfo,
-                isBridgeCompatible: this.isBridgeCompatible
+                pageInfo: this.pageInfo
             }
         });
 
@@ -214,6 +217,7 @@ export default class ReceiverSelector extends TypedEventTarget<ReceiverSelectorE
             subject: "popup:update",
             data: {
                 devices: this.devices,
+                isBridgeCompatible: this.isBridgeCompatible,
                 defaultMediaType: this.defaultMediaType,
                 availableMediaTypes: this.availableMediaTypes
             }
