@@ -1,4 +1,5 @@
 import fs from "fs";
+import path from "path";
 
 import yargs from "yargs";
 
@@ -13,6 +14,7 @@ const argv = yargs()
     .alias("help", "h")
     .version(`v${applicationVersion}`)
     .alias("version", "v")
+    .config("config", parseConfig)
     .option("daemon", {
         alias: "d",
         describe: `Launch in daemon mode. This starts a WebSocket server that \
@@ -79,6 +81,27 @@ HTTPS server.`,
         return true;
     })
     .parseSync(process.argv);
+
+/** Reads and parses yargs config file. */
+function parseConfig(configPath: string) {
+    let config: any;
+    try {
+        config = JSON.parse(fs.readFileSync(configPath, { encoding: "utf-8" }));
+    } catch (err) {
+        throw new Error(`Failed to parse config file!`);
+    }
+
+    // Resolve key/cert paths relative to config
+    const configDirName = path.dirname(configPath);
+    if (typeof config["key-file"] === "string") {
+        config["key-file"] = path.resolve(configDirName, config["key-file"]);
+    }
+    if (typeof config["cert-file"] === "string") {
+        config["cert-file"] = path.resolve(configDirName, config["cert-file"]);
+    }
+
+    return config;
+}
 
 if (argv.daemon) {
     import("./daemon").then(daemon => {
