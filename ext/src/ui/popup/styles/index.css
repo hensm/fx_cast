@@ -212,16 +212,16 @@ body {
     border-radius: 2px;
     display: flex;
     grid-area: seek-bar;
-    height: 20px;
     justify-self: start;
     left: var(--seek-hover-position);
-    padding: 0 5px;
+    padding: 2px 5px;
+    padding-bottom: 3px;
     pointer-events: none;
     position: relative;
     transform: translate(
         -50%,
         calc(
-            -60% - (var(--slider-track-height) / 2) - var(--tooltip-arrow-height)
+            -50% - 1px - (var(--slider-track-height) / 2) - var(--tooltip-arrow-height)
         )
     );
     user-select: none;
@@ -340,11 +340,13 @@ body {
 }
 
 .slider {
+    background: initial;
     appearance: none;
     border: initial;
     margin: initial;
     outline: none;
     padding: initial;
+    z-index: 1;
 }
 
 .slider:not(:focus-visible) {

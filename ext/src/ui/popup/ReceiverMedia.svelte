@@ -144,6 +144,7 @@
 
         return {
             destroy() {
+                seekHoverPosition = null;
                 node.removeEventListener("mousemove", onMouseMove);
                 node.removeEventListener("mouseleave", onMouseLeave);
             }
