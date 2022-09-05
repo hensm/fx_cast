@@ -381,7 +381,7 @@
         "description": "Options page receiver selector category title."
     },
     "optionsReceiverSelectorCategoryDescription": {
-        "message": "Receiver device selection interface.",
+        "message": "Receiver device selection UI.",
         "description": "Options page receiver selector category description."
     },
     "optionsReceiverSelectorWaitForConnection": {
@@ -397,7 +397,7 @@
         "description": "Receiver selector close if focus lost option checkbox label."
     },
     "optionsReceiverSelectorExpandActive": {
-        "message": "Expand media controls for connected devices",
+        "message": "Auto-expand media controls for connected devices",
         "description": "Receiver selector expand active checkbox label."
     },
 
