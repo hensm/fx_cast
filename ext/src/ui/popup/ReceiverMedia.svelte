@@ -124,6 +124,31 @@
         ret += date.getUTCSeconds().toString().padStart(2, "0");
         return ret;
     }
+
+    let seekHoverPosition: Nullable<number> = null;
+    function onSeekMouseMove(node: HTMLInputElement) {
+        if (node.type !== "range") {
+            throw new Error("Wrong type of input!");
+        }
+
+        function onMouseMove(ev: MouseEvent) {
+            const clientRect = node.getBoundingClientRect();
+            seekHoverPosition =
+                ((ev.clientX - clientRect.left) / clientRect.width) * 100;
+        }
+
+        const onMouseLeave = () => (seekHoverPosition = null);
+
+        node.addEventListener("mousemove", onMouseMove);
+        node.addEventListener("mouseleave", onMouseLeave);
+
+        return {
+            destroy() {
+                node.removeEventListener("mousemove", onMouseMove);
+                node.removeEventListener("mouseleave", onMouseLeave);
+            }
+        };
+    }
 </script>
 
 <div class="media" style:--media-image="url({mediaImage?.url})">
@@ -160,13 +185,38 @@
                     aria-label={_("popupMediaSeek")}
                     max={status.media.duration ?? currentTime}
                     value={currentTime}
-                    on:change={ev =>
+                    on:change={ev => {
+                        if (seekHoverPosition) {
+                            ev.preventDefault();
+                            return;
+                        }
                         dispatch("seek", {
                             position: ev.currentTarget.valueAsNumber
-                        })}
+                        });
+                    }}
+                    on:click={() => {
+                        if (seekHoverPosition && status.media?.duration) {
+                            dispatch("seek", {
+                                position:
+                                    status.media.duration *
+                                    (seekHoverPosition / 100)
+                            });
+                        }
+                    }}
+                    use:onSeekMouseMove
                 />
+                {#if seekHoverPosition}
+                    <div
+                        class="media__seek-tooltip"
+                        style:--seek-hover-position="{seekHoverPosition}%"
+                    >
+                        {formatTime(
+                            status.media.duration * (seekHoverPosition / 100)
+                        )}
+                    </div>
+                {/if}
                 <span class="media__remaining-time">
-                    -{formatTime(status.media?.duration - currentTime)}
+                    -{formatTime(status.media.duration - currentTime)}
                 </span>
             </div>
         {/if}
