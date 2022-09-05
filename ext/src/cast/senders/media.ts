@@ -4,9 +4,9 @@ import options from "../../lib/options";
 import type { Message } from "../../messaging";
 
 // Cast types
-import { Capability, ReceiverAvailability } from "../sdk/enums";
-import { Media, PlayerState } from "../sdk/media";
+import type { ReceiverAvailability } from "../sdk/enums";
 import type Session from "../sdk/Session";
+import type Media from "../sdk/media/Media";
 
 import cast, { ensureInit, CastPort } from "../export";
 
@@ -73,9 +73,9 @@ export default class MediaSender {
             throw logger.error("Local media casting not enabled");
         }
 
-        const capabilities = [Capability.AUDIO_OUT];
+        const capabilities = [cast.Capability.AUDIO_OUT];
         if (this.mediaElement instanceof HTMLVideoElement) {
-            capabilities.push(Capability.VIDEO_OUT);
+            capabilities.push(cast.Capability.VIDEO_OUT);
         }
 
         cast.initialize(
@@ -280,17 +280,17 @@ export default class MediaSender {
             }
 
             const mediaElementPlayerState = mediaElement.paused
-                ? PlayerState.PAUSED
-                : PlayerState.PLAYING;
+                ? cast.media.PlayerState.PAUSED
+                : cast.media.PlayerState.PLAYING;
 
             if (mediaElementPlayerState !== this.media.playerState) {
                 switch (this.media.playerState) {
-                    case PlayerState.PLAYING:
+                    case cast.media.PlayerState.PLAYING:
                         mediaElement.play();
                         break;
-                    case PlayerState.PAUSED:
-                    case PlayerState.BUFFERING:
-                    case PlayerState.IDLE:
+                    case cast.media.PlayerState.PAUSED:
+                    case cast.media.PlayerState.BUFFERING:
+                    case cast.media.PlayerState.IDLE:
                         mediaElement.pause();
                         break;
                 }
