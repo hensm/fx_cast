@@ -223,6 +223,7 @@
                     {_("optionsReceiverSelectorCategoryDescription")}
                 </p>
 
+                <!--
                 <div class="option option--inline">
                     <div class="option__control">
                         <input
@@ -243,6 +244,7 @@
                         )}
                     </div>
                 </div>
+                -->
 
                 <div class="option option--inline">
                     <div class="option__control">
