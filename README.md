@@ -25,37 +25,7 @@ The bridge application is currently supported on Windows, macOS and Linux.
 
 ### Daemon Configuration
 
-<details>
-    <summary>Daemon configuration (systemd)</summary>
-
-1. Create a new `fx_cast` user:
-
-```sh
-$ sudo useradd --system fx_cast
-```
-
-2. Create a service file in `/etc/systemd/system/fx_cast.service`:
-
-```
-[Unit]
-Description=fx_cast daemon
-
-[Service]
-User=fx_cast
-ExecStart=/opt/fx_cast/fx_cast_bridge -d
-Restart=always
-
-[Install]
-WantedBy=multi-user.target
-```
-
-3. Enable the service:
-
-```sh
-$ sudo systemctl enable --now fx_cast
-```
-
-</details>
+See documentation on the [daemon wiki page](https://github.com/hensm/fx_cast/wiki/daemon).
 
 ## Usage
 
