@@ -3,49 +3,54 @@
         "fx_cast@matt.tf": {
             "updates": [
                 {
-                    "version": "0.0.1"
-                  , "update_link": "https://github.com/hensm/fx_cast/releases/download/v0.0.1/fx_cast-0.0.1-fx.xpi"
-                  , "update_hash": "sha256:61c112547291d51b29e9d0d23a45a874e765f40e0e74df87f8edcfba944441cf"
-                }
-              , {
-                    "version": "0.0.2"
-                  , "update_link": "https://github.com/hensm/fx_cast/releases/download/v0.0.2/fx_cast-0.0.2-fx.xpi"
-                  , "update_hash": "sha256:aace10ce962977a3a8523edd2195053b31ba500f08453f675a67eed829d3e50e"
-                }
-              , {
-                    "version": "0.0.3"
-                  , "update_link": "https://github.com/hensm/fx_cast/releases/download/v0.0.3/fx_cast-0.0.3-fx.xpi"
-                  , "update_hash": "sha256:cbb1d296446b1b2673738336be84237ff431c2c83d20fe2abc03557c7f920052"
-                }
-              , {
-                    "version": "0.0.4"
-                  , "update_link": "https://github.com/hensm/fx_cast/releases/download/v0.0.4/fx_cast-0.0.4-fx.xpi"
-                  , "update_hash": "sha256:ce4cf8c0c2d392ca94e8cdadcb497ad94465b6180e41e35895cb149ff3f11218"
-                }
-              , {
-                    "version": "0.0.5"
-                  , "update_link": "https://github.com/hensm/fx_cast/releases/download/v0.0.5/fx_cast-0.0.5-fx.xpi"
-                  , "update_hash": "sha256:bc3590e3f602264a95e44706924c4fe0a962129382c45bcd544c1448c6cc9aba"
-                }
-              , {
-                    "version": "0.0.6"
-                  , "update_link": "https://github.com/hensm/fx_cast/releases/download/v0.0.6/fx_cast-0.0.6-fx.xpi"
-                  , "update_hash": "sha256:7b82b3377771b36939714c90503baa8de07c475403fd0533e3efe341e9e3ca24"
-                }
-              , {
-                    "version": "0.0.7"
-                  , "update_link": "https://github.com/hensm/fx_cast/releases/download/v0.0.7/fx_cast-0.0.7-fx.xpi"
-                  , "update_hash": "sha256:8055c786d517f8f0f54d0204fbfd52bf695a0b37789eb28f4091e1583ed94bae"
-                }
-              , {
-                    "version": "0.1.0"
-                  , "update_link": "https://github.com/hensm/fx_cast/releases/download/v0.1.0/fx_cast-0.1.0-fx.xpi"
-                  , "update_hash": "sha256:8e2bb60bf3f6f8f48cb4f1d78e49bc2cc75e9b030676b2d4a70826bf00754157"
-                }
-              , {
-                    "version": "0.1.2"
-                  , "update_link": "https://github.com/hensm/fx_cast/releases/download/v0.1.2/fx_cast-0.1.2-fx.xpi"
-                  , "update_hash": "sha256:2eb45aa59e8bd1f2988ba4c0f5daf0c39787b48c5368b789b9042d63427d71c5"
+                    "version": "0.0.1",
+                    "update_link": "https://github.com/hensm/fx_cast/releases/download/v0.0.1/fx_cast-0.0.1-fx.xpi",
+                    "update_hash": "sha256:61c112547291d51b29e9d0d23a45a874e765f40e0e74df87f8edcfba944441cf"
+                },
+                {
+                    "version": "0.0.2",
+                    "update_link": "https://github.com/hensm/fx_cast/releases/download/v0.0.2/fx_cast-0.0.2-fx.xpi",
+                    "update_hash": "sha256:aace10ce962977a3a8523edd2195053b31ba500f08453f675a67eed829d3e50e"
+                },
+                {
+                    "version": "0.0.3",
+                    "update_link": "https://github.com/hensm/fx_cast/releases/download/v0.0.3/fx_cast-0.0.3-fx.xpi",
+                    "update_hash": "sha256:cbb1d296446b1b2673738336be84237ff431c2c83d20fe2abc03557c7f920052"
+                },
+                {
+                    "version": "0.0.4",
+                    "update_link": "https://github.com/hensm/fx_cast/releases/download/v0.0.4/fx_cast-0.0.4-fx.xpi",
+                    "update_hash": "sha256:ce4cf8c0c2d392ca94e8cdadcb497ad94465b6180e41e35895cb149ff3f11218"
+                },
+                {
+                    "version": "0.0.5",
+                    "update_link": "https://github.com/hensm/fx_cast/releases/download/v0.0.5/fx_cast-0.0.5-fx.xpi",
+                    "update_hash": "sha256:bc3590e3f602264a95e44706924c4fe0a962129382c45bcd544c1448c6cc9aba"
+                },
+                {
+                    "version": "0.0.6",
+                    "update_link": "https://github.com/hensm/fx_cast/releases/download/v0.0.6/fx_cast-0.0.6-fx.xpi",
+                    "update_hash": "sha256:7b82b3377771b36939714c90503baa8de07c475403fd0533e3efe341e9e3ca24"
+                },
+                {
+                    "version": "0.0.7",
+                    "update_link": "https://github.com/hensm/fx_cast/releases/download/v0.0.7/fx_cast-0.0.7-fx.xpi",
+                    "update_hash": "sha256:8055c786d517f8f0f54d0204fbfd52bf695a0b37789eb28f4091e1583ed94bae"
+                },
+                {
+                    "version": "0.1.0",
+                    "update_link": "https://github.com/hensm/fx_cast/releases/download/v0.1.0/fx_cast-0.1.0-fx.xpi",
+                    "update_hash": "sha256:8e2bb60bf3f6f8f48cb4f1d78e49bc2cc75e9b030676b2d4a70826bf00754157"
+                },
+                {
+                    "version": "0.1.2",
+                    "update_link": "https://github.com/hensm/fx_cast/releases/download/v0.1.2/fx_cast-0.1.2-fx.xpi",
+                    "update_hash": "sha256:2eb45aa59e8bd1f2988ba4c0f5daf0c39787b48c5368b789b9042d63427d71c5"
+                },
+                {
+                    "version": "0.3.0",
+                    "update_link": "https://github.com/hensm/fx_cast/releases/download/v0.3.0/fx_cast-0.3.0.xpi",
+                    "update_hash": "sha256:c9b5a9be95913518bee469d7cc4dfadd55db27a289ce4c81b809b8be29184045"
                 }
             ]
         }
