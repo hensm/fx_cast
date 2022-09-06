@@ -185,7 +185,7 @@
                 : ""
         });
 
-        updateMediaMenus();
+        updateMediaMenus(info.menuIds as (string | number)[]);
         browser.menus.refresh();
     }
 
@@ -279,13 +279,23 @@
     }
 
     /** Updates media menu items from media status. */
-    function updateMediaMenus() {
+    function updateMediaMenus(shownMenuIds: (number | string)[]) {
         // Clear caption submenu for re-build
         if (captionSubmenus.size) {
             for (const menuId of captionSubmenus.keys()) {
                 browser.menus.remove(menuId);
             }
             captionSubmenus.clear();
+        } else {
+            // Clear caption submenus from previous instances
+            for (const menuId of shownMenuIds as string[] | number[]) {
+                if (
+                    typeof menuId === "string" &&
+                    menuId.startsWith("subtitle-")
+                ) {
+                    browser.menus.remove(menuId);
+                }
+            }
         }
 
         // Hide all media menu items if no media status
@@ -359,6 +369,7 @@
 
             for (const track of textTracks) {
                 const menuId = browser.menus.create({
+                    id: `subtitle-${track.trackId}`,
                     title: track.name ?? track.trackId.toString(),
                     parentId: menuIds.POPUP_MEDIA_CC,
                     type: "radio",
