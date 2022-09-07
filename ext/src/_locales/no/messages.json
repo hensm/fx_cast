@@ -16,10 +16,6 @@
         "message": "dette medium",
         "description": "Receiver selector media type <option> text for media casting."
     },
-    "popupMediaTypeTab": {
-        "message": "Fane",
-        "description": "Receiver selector media type <option> text for current tab."
-    },
     "popupMediaTypeScreen": {
         "message": "Skjerm",
         "description": "Receiver selector media type <option> text for screen."

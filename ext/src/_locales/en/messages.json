@@ -4,7 +4,7 @@
         "description": "Name of the extension and the native receiver selector window title."
     },
     "extensionDescription": {
-        "message": "Enables Chromecast support for casting web apps (like Netflix or BBC iPlayer), HTML5 video and screen/tab sharing.",
+        "message": "Enables Chromecast support for casting web apps (like Netflix or BBC iPlayer), HTML5 video and screen sharing.",
         "description": "Description of the extension shown in the add-ons manager."
     },
 
@@ -41,10 +41,6 @@
     "popupMediaTypeAppMedia": {
         "message": "this media",
         "description": "Receiver selector media type <option> text for media casting."
-    },
-    "popupMediaTypeTab": {
-        "message": "Tab",
-        "description": "Receiver selector media type <option> text for current tab."
     },
     "popupMediaTypeScreen": {
         "message": "Screen",
@@ -483,7 +479,7 @@
     },
 
     "optionsMirroringCategoryName": {
-        "message": "Screen/tab casting",
+        "message": "Screen mirroring",
         "description": "Options page mirroring category name."
     },
     "optionsMirroringCategoryDescription": {
@@ -491,7 +487,7 @@
         "description": "Options page mirroring category description."
     },
     "optionsMirroringEnabled": {
-        "message": "Enable screen/tab casting (experimental)",
+        "message": "Enable screen mirroring (experimental)",
         "description": "Mirroring enabled checkbox label."
     },
     "optionsMirroringAppId": {

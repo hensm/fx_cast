@@ -95,7 +95,6 @@
                 );
 
             /** Mirroring requires video output capability. */
-            case ReceiverSelectorMediaType.Tab:
             case ReceiverSelectorMediaType.Screen:
                 return !!(
                     device.capabilities & ReceiverDeviceCapabilities.VIDEO_OUT
@@ -126,23 +125,19 @@
              * type is valid.
              */
             if (ev.detail.includes("mirroringEnabled")) {
-                const mirroringMediaTypes =
-                    ReceiverSelectorMediaType.Tab |
-                    ReceiverSelectorMediaType.Screen;
-
                 if (!opts.mirroringEnabled) {
-                    availableMediaTypes &= ~mirroringMediaTypes;
+                    availableMediaTypes &= ~ReceiverSelectorMediaType.Screen;
                 } else {
-                    availableMediaTypes |= mirroringMediaTypes;
+                    availableMediaTypes |= ReceiverSelectorMediaType.Screen;
                 }
 
                 if (!(availableMediaTypes & mediaType)) {
                     if (availableMediaTypes & ReceiverSelectorMediaType.App) {
                         mediaType = ReceiverSelectorMediaType.App;
                     } else if (
-                        availableMediaTypes & ReceiverSelectorMediaType.Tab
+                        availableMediaTypes & ReceiverSelectorMediaType.Screen
                     ) {
-                        mediaType = ReceiverSelectorMediaType.Tab;
+                        mediaType = ReceiverSelectorMediaType.Screen;
                     } else {
                         mediaType = ReceiverSelectorMediaType.App;
                     }
@@ -366,14 +361,6 @@
                 </option>
 
                 {#if opts?.mirroringEnabled}
-                    <option
-                        value={ReceiverSelectorMediaType.Tab}
-                        disabled={!(
-                            availableMediaTypes & ReceiverSelectorMediaType.Tab
-                        )}
-                    >
-                        {_("popupMediaTypeTab")}
-                    </option>
                     <option
                         value={ReceiverSelectorMediaType.Screen}
                         disabled={!(

@@ -11,10 +11,6 @@
         "message": "Deze media",
         "description": "Receiver selector media type <option> text for media casting."
     },
-    "popupMediaTypeTab": {
-        "message": "Tab",
-        "description": "Receiver selector media type <option> text for current tab."
-    },
     "popupMediaTypeScreen": {
         "message": "Scherm",
         "description": "Receiver selector media type <option> text for screen."

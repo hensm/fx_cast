@@ -1,7 +1,7 @@
 import options from "../../lib/options";
 import { Logger } from "../../lib/logger";
 
-import { ReceiverDevice, ReceiverSelectorMediaType } from "../../types";
+import type { ReceiverDevice } from "../../types";
 
 import type { ReceiverAvailability } from "../sdk/enums";
 import type Session from "../sdk/Session";
@@ -18,18 +18,12 @@ type MirroringAppMessage =
     | { subject: "iceCandidate"; data: RTCIceCandidateInit }
     | { subject: "close" };
 
-type MirroringMediaType =
-    | ReceiverSelectorMediaType.Tab
-    | ReceiverSelectorMediaType.Screen;
-
 interface MirroringSenderOpts {
-    mirroringMediaType: MirroringMediaType;
     contextTabId?: number;
     receiverDevice?: ReceiverDevice;
 }
 
 class MirroringSender {
-    private mirroringMediaType: MirroringMediaType;
     private contextTabId?: number;
     private receiverDevice?: ReceiverDevice;
 
@@ -39,7 +33,6 @@ class MirroringSender {
     private peerConnection?: RTCPeerConnection;
 
     constructor(opts: MirroringSenderOpts) {
-        this.mirroringMediaType = opts.mirroringMediaType;
         this.contextTabId = opts.contextTabId;
         this.receiverDevice = opts.receiverDevice;
 
@@ -109,6 +102,19 @@ class MirroringSender {
         });
 
         this.peerConnection = new RTCPeerConnection();
+
+        this.peerConnection.addEventListener("negotiationneeded", async () => {
+            if (!this.peerConnection) return;
+
+            const offer = await this.peerConnection.createOffer();
+            await this.peerConnection.setLocalDescription(offer);
+
+            this.sendMirroringAppMessage({
+                subject: "peerConnectionOffer",
+                data: offer
+            });
+        });
+
         this.peerConnection.addEventListener("icecandidate", ev => {
             if (!ev.candidate) return;
             this.sendMirroringAppMessage({
@@ -117,91 +123,19 @@ class MirroringSender {
             });
         });
 
-        switch (this.mirroringMediaType) {
-            case ReceiverSelectorMediaType.Tab:
-                this.peerConnection.addStream(this.getTabStream());
-                break;
-            case ReceiverSelectorMediaType.Screen:
-                this.peerConnection.addStream(await this.getScreenStream());
-                break;
-        }
-
-        const offer = await this.peerConnection.createOffer();
-        await this.peerConnection.setLocalDescription(offer);
-
-        this.sendMirroringAppMessage({
-            subject: "peerConnectionOffer",
-            data: offer
-        });
-    }
-
-    private getTabStream() {
-        const canvas = document.createElement("canvas");
-        const ctx = canvas.getContext("2d");
-        if (!ctx) {
-            throw logger.error("Failed to get tab canvas context!");
-        }
-
-        // Set initial size
-        canvas.width = window.innerWidth * window.devicePixelRatio;
-        canvas.height = window.innerHeight * window.devicePixelRatio;
-        ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
-
-        // Resize canvas whenever the window resizes
-        window.addEventListener("resize", () => {
-            canvas.width = window.innerWidth * window.devicePixelRatio;
-            canvas.height = window.innerHeight * window.devicePixelRatio;
-            ctx.setTransform(1, 0, 0, 1, 0, 0);
-            ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
-        });
-
-        const drawFlags =
-            ctx.DRAWWINDOW_DRAW_CARET |
-            ctx.DRAWWINDOW_DRAW_VIEW |
-            ctx.DRAWWINDOW_ASYNC_DECODE_IMAGES |
-            ctx.DRAWWINDOW_USE_WIDGET_LAYERS;
-
-        let lastFrame: DOMHighResTimeStamp;
-        window.requestAnimationFrame(function draw(now: DOMHighResTimeStamp) {
-            if (!lastFrame) {
-                lastFrame = now;
-            }
-
-            if (now - lastFrame > 1000 / 30) {
-                ctx.drawWindow(
-                    window, // window
-                    0,
-                    0, // x, y
-                    canvas.width, // w
-                    canvas.height, // h
-                    "white", // bgColor
-                    drawFlags
-                ); // flags
-
-                lastFrame = now;
-            }
-
-            window.requestAnimationFrame(draw);
-        });
-
-        return canvas.captureStream();
-    }
-
-    private getScreenStream() {
-        return new Promise<MediaStream>(resolve => {
-            window.addEventListener(
-                "click",
-                () => {
-                    resolve(
-                        navigator.mediaDevices.getDisplayMedia({
-                            video: { cursor: "motion" },
-                            audio: false
-                        })
-                    );
-                },
-                { once: true }
+        try {
+            // Add screen media stream
+            this.peerConnection.addStream(
+                await navigator.mediaDevices.getDisplayMedia({
+                    video: { cursor: "motion" },
+                    audio: false
+                })
             );
-        });
+        } catch (err) {
+            logger.error("Failed to add display media stream!", err);
+            this.peerConnection.close();
+            this.session?.stop();
+        }
     }
 }
 
@@ -212,7 +146,6 @@ if (window.location.protocol !== "moz-extension:") {
     const window_ = window as any;
 
     new MirroringSender({
-        mirroringMediaType: window_.mirroringMediaType,
         contextTabId: window_.contextTabId,
         receiverDevice: window_.receiverDevice
     });

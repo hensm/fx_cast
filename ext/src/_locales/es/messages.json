@@ -29,10 +29,6 @@
         "message": "este medio",
         "description": "Receiver selector media type <option> text for media casting."
     },
-    "popupMediaTypeTab": {
-        "message": "Pestaña",
-        "description": "Receiver selector media type <option> text for current tab."
-    },
     "popupMediaTypeScreen": {
         "message": "Pantalla",
         "description": "Receiver selector media type <option> text for screen."

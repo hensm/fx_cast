@@ -12,10 +12,6 @@
         "message": "Diese Medien",
         "description": "Receiver selector media type <option> text for media casting."
     },
-    "popupMediaTypeTab": {
-        "message": "Diesen Tab",
-        "description": "Receiver selector media type <option> text for current tab."
-    },
     "popupMediaTypeScreen": {
         "message": "Bildschirm",
         "description": "Receiver selector media type <option> text for screen."

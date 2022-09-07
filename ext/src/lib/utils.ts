@@ -58,11 +58,6 @@ export function getMediaTypesForPageUrl(
         return availableMediaTypes;
     }
 
-    // Only meant to run on normal web pages
-    if (url.protocol === "http:" || url.protocol === "https:") {
-        availableMediaTypes |= ReceiverSelectorMediaType.Tab;
-    }
-
     /**
      * When on an insecure origin, MediaDevices.getDisplayMedia
      * will not exist (and legacy MediaDevices.getUserMedia

@@ -514,11 +514,9 @@ const castManager = new (class {
                 break;
             }
 
-            case ReceiverSelectorMediaType.Tab:
             case ReceiverSelectorMediaType.Screen:
                 await browser.tabs.executeScript(contentContext.tabId, {
                     code: stringify`
-                        window.mirroringMediaType = ${selection.mediaType};
                         window.receiverDevice = ${selection.device};
                         window.contextTabId = ${contentContext.tabId};
                     `,
@@ -561,7 +559,7 @@ async function getReceiverSelection(selectionOpts: {
         selectionOpts.castInstance = undefined;
     }
 
-    let defaultMediaType = ReceiverSelectorMediaType.Tab;
+    let defaultMediaType = ReceiverSelectorMediaType.Screen;
     let availableMediaTypes = ReceiverSelectorMediaType.None;
 
     // Default frame ID
@@ -635,9 +633,7 @@ async function getReceiverSelection(selectionOpts: {
 
     // Disable mirroring media types if mirroring is not enabled
     if (!opts.mirroringEnabled) {
-        availableMediaTypes &= ~(
-            ReceiverSelectorMediaType.Tab | ReceiverSelectorMediaType.Screen
-        );
+        availableMediaTypes &= ~ReceiverSelectorMediaType.Screen;
     }
 
     // Ensure status manager is initialized
