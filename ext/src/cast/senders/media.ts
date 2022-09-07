@@ -74,7 +74,10 @@ export default class MediaSender {
         }
 
         const capabilities = [cast.Capability.AUDIO_OUT];
-        if (this.mediaElement instanceof HTMLVideoElement) {
+        if (
+            this.mediaElement instanceof HTMLVideoElement ||
+            this.mediaElement instanceof HTMLImageElement
+        ) {
             capabilities.push(cast.Capability.VIDEO_OUT);
         }
 
