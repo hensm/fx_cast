@@ -279,7 +279,7 @@
     }
 
     /** Updates media menu items from media status. */
-    function updateMediaMenus(shownMenuIds: (number | string)[]) {
+    function updateMediaMenus(shownMenuIds: (number | string)[] = []) {
         // Clear caption submenu for re-build
         if (captionSubmenus.size) {
             for (const menuId of captionSubmenus.keys()) {
