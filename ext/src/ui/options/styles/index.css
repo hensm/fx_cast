@@ -246,6 +246,10 @@ input:placeholder-shown {
 .category > details:not([open]) > summary ~ * {
     display: none;
 }
+.category > details:not([open]) > summary,
+.category > details[open] > :last-child {
+    margin-bottom: 5px;
+}
 
 .category__name {
     float: left;
@@ -334,12 +338,22 @@ fieldset:disabled .option__description {
 .mirroring-stream > summary {
     color: var(--secondary-color);
 }
-.category.mirroring-stream__options {
+.mirroring-stream__options {
     background-color: var(--overlay-color);
     border-radius: 4px;
+    column-gap: 10px;
+    display: flex;
+    flex-direction: column;
     grid-column: 2;
-    grid-template-columns: max-content 1fr;
-    padding: 10px;
+    padding: 10px 20px;
+    row-gap: 5px;
+}
+.mirroring-stream__options > .option:not(.option--inline) {
+    display: flex;
+    gap: inherit;
+}
+.mirroring-stream__options .option__label {
+    flex-shrink: 0;
 }
 
 .whitelist {

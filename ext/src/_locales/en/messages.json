@@ -498,8 +498,8 @@
         "message": "App ID for a registered Chromecast receiver application. Advanced use only. Must be compatible with the default app (see GitHub repo).",
         "description": "Mirroring app ID option description."
     },
-    "optionsMirroringMediaStreamOptions": {
-        "message": "Media stream encoding options",
+    "optionsMirroringStreamOptions": {
+        "message": "Stream encoding options",
         "description": "Options page mirroring category description."
     },
     "optionsMirroringStreamFrameRate": {
@@ -527,7 +527,7 @@
         "description": "Mirroring stream resolution option label."
     },
     "optionsMirroringStreamMaxResolutionDescription": {
-        "message": "Limits the maximum video stream resolution whilst maintaining the source aspect ratio.",
+        "message": "Limits the maximum video stream resolution while maintaining the source aspect ratio.",
         "description": "Mirroring stream resolution option description."
     },
     "optionsMirroringStreamMaxResolutionWidthPlaceholder": {

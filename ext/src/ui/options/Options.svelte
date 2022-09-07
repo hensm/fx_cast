@@ -195,6 +195,7 @@
                         {_("optionsMirroringEnabled")}
                     </label>
                 </div>
+
                 <div class="option">
                     <label class="option__label" for="mirroringAppId">
                         {_("optionsMirroringAppId")}
@@ -214,10 +215,10 @@
 
                 <details class="mirroring-stream">
                     <summary>
-                        {_("optionsMirroringMediaStreamOptions")}
+                        {_("optionsMirroringStreamOptions")}
                     </summary>
 
-                    <div class="mirroring-stream__options category">
+                    <div class="mirroring-stream__options">
                         <div class="option option--inline scaling-resolution">
                             <div class="option__control">
                                 <input
