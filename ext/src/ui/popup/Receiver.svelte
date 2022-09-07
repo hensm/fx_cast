@@ -171,8 +171,10 @@
             enabled:
                 // Not already connecting to a receiver
                 !isConnecting &&
+                !isAnyConnecting &&
                 // Selected media type available
-                isMediaTypeAvailable
+                isMediaTypeAvailable &&
+                isAnyMediaTypeAvailable
         });
 
         browser.menus.update(menuIds.POPUP_STOP, {
