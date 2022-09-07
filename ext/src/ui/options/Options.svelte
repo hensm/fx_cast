@@ -211,6 +211,121 @@
                         </div>
                     </div>
                 </div>
+
+                <details class="mirroring-stream">
+                    <summary>
+                        {_("optionsMirroringMediaStreamOptions")}
+                    </summary>
+
+                    <div class="mirroring-stream__options category">
+                        <div class="option option--inline scaling-resolution">
+                            <div class="option__control">
+                                <input
+                                    type="checkbox"
+                                    name="scaling"
+                                    id="mirroringStreamUseMaxResolution"
+                                    bind:checked={opts.mirroringStreamUseMaxResolution}
+                                />
+                            </div>
+                            <label
+                                class="option__label"
+                                for="mirroringStreamUseMaxResolution"
+                            >
+                                {_("optionsMirroringStreamMaxResolution")}
+                                <input
+                                    type="number"
+                                    min="1"
+                                    placeholder={_(
+                                        "optionsMirroringStreamMaxResolutionWidthPlaceholder"
+                                    )}
+                                    bind:value={opts
+                                        .mirroringStreamMaxResolution.width}
+                                />
+                                ×
+                                <input
+                                    type="number"
+                                    min="1"
+                                    placeholder={_(
+                                        "optionsMirroringStreamMaxResolutionHeightPlaceholder"
+                                    )}
+                                    bind:value={opts
+                                        .mirroringStreamMaxResolution.height}
+                                />
+                            </label>
+                            <p class="option__description">
+                                {_(
+                                    "optionsMirroringStreamMaxResolutionDescription"
+                                )}
+                            </p>
+                        </div>
+
+                        <div class="option scaling-downscale">
+                            <label
+                                class="option__label"
+                                for="mirroringStreamDownscaleFactor"
+                            >
+                                {_("optionsMirroringStreamDownscaleFactor")}
+                            </label>
+                            <div class="option__control">
+                                <input
+                                    id="mirroringStreamDownscaleFactor"
+                                    type="number"
+                                    required
+                                    min="1"
+                                    step="any"
+                                    bind:value={opts.mirroringStreamDownscaleFactor}
+                                />
+
+                                <p class="option__description">
+                                    {_(
+                                        "optionsMirroringStreamDownscaleFactorDescription"
+                                    )}
+                                </p>
+                            </div>
+                        </div>
+
+                        <div class="option">
+                            <label
+                                class="option__label"
+                                for="mirroringStreamMaxFrameRate"
+                            >
+                                {_("optionsMirroringStreamFrameRate")}
+                            </label>
+                            <div class="option__control">
+                                <input
+                                    id="mirroringStreamMaxFrameRate"
+                                    type="number"
+                                    required
+                                    min="1"
+                                    bind:value={opts.mirroringStreamMaxFrameRate}
+                                />
+                            </div>
+                        </div>
+
+                        <div class="option">
+                            <label
+                                class="option__label"
+                                for="mirroringStreamMaxBitRate"
+                            >
+                                {_("optionsMirroringStreamMaxBitRate")}
+                            </label>
+                            <div class="option__control">
+                                <input
+                                    id="mirroringStreamMaxBitRate"
+                                    type="number"
+                                    required
+                                    min="1"
+                                    bind:value={opts.mirroringStreamMaxBitRate}
+                                />
+                                <p class="option__description">
+                                    {_(
+                                        "optionsMirroringStreamMaxBitRateDescription"
+                                    )}
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </details>
             </fieldset>
         {/if}
 

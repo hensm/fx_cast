@@ -1,5 +1,10 @@
 #root {
-    padding: 20px 10px;
+    --overlay-color: rgba(255, 255, 255, 0.05);
+}
+@media (prefers-color-scheme: dark) {
+    :root {
+        --overlay-color: rgba(0, 0, 0, 0.1);
+    }
 }
 
 body {
@@ -7,6 +12,7 @@ body {
     color: var(--box-color) !important;
     font-size: 13px;
     overflow-y: hidden;
+    padding: 20px 10px;
 }
 
 a {
@@ -230,6 +236,16 @@ input:placeholder-shown {
     grid-column: span 2;
     width: 100%;
 }
+.category > details {
+    display: contents;
+}
+.category > details > summary {
+    grid-column: 2;
+    margin-top: 5px;
+}
+.category > details:not([open]) > summary ~ * {
+    display: none;
+}
 
 .category__name {
     float: left;
@@ -315,6 +331,17 @@ fieldset:disabled .option__description {
     margin-inline-start: initial;
 }
 
+.mirroring-stream > summary {
+    color: var(--secondary-color);
+}
+.category.mirroring-stream__options {
+    background-color: var(--overlay-color);
+    border-radius: 4px;
+    grid-column: 2;
+    grid-template-columns: max-content 1fr;
+    padding: 10px;
+}
+
 .whitelist {
     background-color: var(--box-background);
     border: 1px solid var(--border-color);
@@ -354,7 +381,7 @@ fieldset:disabled .option__description {
 }
 
 .whitelist__item:nth-child(even) {
-    background-color: rgba(0, 0, 0, 0.1);
+    background-color: var(--overlay-color);
 }
 
 .whitelist__item--selected {
@@ -435,8 +462,7 @@ input[id^="customUserAgentString-"] {
     width: -moz-available;
 }
 
-@media (prefers-color-scheme: dark) {
-    .whitelist__item:nth-child(even) {
-        background-color: rgba(255, 255, 255, 0.05);
-    }
+.scaling-resolution input[type="number"],
+.scaling-downscale input[type="number"] {
+    width: 75px;
 }

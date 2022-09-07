@@ -14,6 +14,11 @@ export interface Options {
     localMediaServerPort: number;
     mirroringEnabled: boolean;
     mirroringAppId: string;
+    mirroringStreamMaxFrameRate: number;
+    mirroringStreamMaxBitRate: number;
+    mirroringStreamDownscaleFactor: number;
+    mirroringStreamMaxResolution: { width?: number; height?: number };
+    mirroringStreamUseMaxResolution: boolean;
     receiverSelectorCloseIfFocusLost: boolean;
     receiverSelectorWaitForConnection: boolean;
     receiverSelectorExpandActive: boolean;
@@ -39,6 +44,11 @@ export default {
     localMediaServerPort: 9555,
     mirroringEnabled: false,
     mirroringAppId: MIRRORING_APP_ID,
+    mirroringStreamMaxFrameRate: 15,
+    mirroringStreamMaxBitRate: 1000000,
+    mirroringStreamDownscaleFactor: 1.0,
+    mirroringStreamMaxResolution: { width: 1920, height: 1080 },
+    mirroringStreamUseMaxResolution: true,
     receiverSelectorCloseIfFocusLost: true,
     receiverSelectorWaitForConnection: true,
     receiverSelectorExpandActive: true,

@@ -498,6 +498,46 @@
         "message": "App ID for a registered Chromecast receiver application. Advanced use only. Must be compatible with the default app (see GitHub repo).",
         "description": "Mirroring app ID option description."
     },
+    "optionsMirroringMediaStreamOptions": {
+        "message": "Media stream encoding options",
+        "description": "Options page mirroring category description."
+    },
+    "optionsMirroringStreamFrameRate": {
+        "message": "Max frame rate:",
+        "description": "Mirroring stream max frame rate option label."
+    },
+    "optionsMirroringStreamMaxBitRate": {
+        "message": "Max bitrate:",
+        "description": "Mirroring stream max bit rate option label."
+    },
+    "optionsMirroringStreamMaxBitRateDescription": {
+        "message": "Maximum bitrate in bits per second.",
+        "description": "Mirroring stream max bit rate option description."
+    },
+    "optionsMirroringStreamDownscaleFactor": {
+        "message": "Downscale factor:",
+        "description": "Mirroring stream downscale factor option label."
+    },
+    "optionsMirroringStreamDownscaleFactorDescription": {
+        "message": "Factor by which to scale down the video stream e.g. a factor of 2.0 would result in a video 1/4 the size. ",
+        "description": "Mirroring stream downscale factor option description."
+    },
+    "optionsMirroringStreamMaxResolution": {
+        "message": "Limit resolution to",
+        "description": "Mirroring stream resolution option label."
+    },
+    "optionsMirroringStreamMaxResolutionDescription": {
+        "message": "Limits the maximum video stream resolution whilst maintaining the source aspect ratio.",
+        "description": "Mirroring stream resolution option description."
+    },
+    "optionsMirroringStreamMaxResolutionWidthPlaceholder": {
+        "message": "Width",
+        "description": "Max resolution width input placeholder."
+    },
+    "optionsMirroringStreamMaxResolutionHeightPlaceholder": {
+        "message": "Height",
+        "description": "Max resolution height input placeholder."
+    },
 
     "optionsOptionRecommended": {
         "message": "recommended",
