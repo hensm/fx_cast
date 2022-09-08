@@ -7,10 +7,10 @@ import {
 import logger from "../lib/logger";
 import messaging, { Message, Port } from "../messaging";
 import options from "../lib/options";
-import { getMediaTypesForPageUrl, stringify } from "../lib/utils";
 import type { TypedMessagePort } from "../lib/TypedMessagePort";
 
 import {
+    ReceiverDevice,
     ReceiverSelectorAppInfo,
     ReceiverSelectorMediaType,
     ReceiverSelectorPageInfo
@@ -515,19 +515,7 @@ const castManager = new (class {
             }
 
             case ReceiverSelectorMediaType.Screen:
-                await browser.tabs.executeScript(contentContext.tabId, {
-                    code: stringify`
-                        window.receiverDevice = ${selection.device};
-                        window.contextTabId = ${contentContext.tabId};
-                    `,
-                    frameId: contentContext.frameId
-                });
-
-                await browser.tabs.executeScript(contentContext.tabId, {
-                    file: "cast/senders/mirroring.js",
-                    frameId: contentContext.frameId
-                });
-
+                await createMirroringPopup(selection.device);
                 break;
         }
     }
@@ -560,7 +548,7 @@ async function getReceiverSelection(selectionOpts: {
     }
 
     let defaultMediaType = ReceiverSelectorMediaType.Screen;
-    let availableMediaTypes = ReceiverSelectorMediaType.None;
+    let availableMediaTypes = ReceiverSelectorMediaType.Screen;
 
     // Default frame ID
     if (selectionOpts.frameId === undefined) selectionOpts.frameId = 0;
@@ -616,12 +604,8 @@ async function getReceiverSelection(selectionOpts: {
                     })
                 ).url
             };
-
-            availableMediaTypes = getMediaTypesForPageUrl(pageInfo.url);
-        } catch {
-            logger.error(
-                "Failed to locate frame, falling back to default available media types."
-            );
+        } catch (err) {
+            logger.error("Failed to locate frame!", err);
         }
     }
 
@@ -789,6 +773,40 @@ function createSelector() {
     );
 
     return selector;
+}
+
+async function createMirroringPopup(device: ReceiverDevice) {
+    let popup: browser.windows.Window;
+    try {
+        popup = await browser.windows.create({
+            url: browser.runtime.getURL("ui/mirroring/index.html"),
+            type: "popup",
+            width: 400,
+            height: 150
+        });
+    } catch (err) {
+        logger.error("Failed to create mirroring popup!", err);
+        return;
+    }
+
+    const onMirroringPopupMessage = (port: Port) => {
+        if (
+            port.sender?.tab?.windowId !== popup.id ||
+            port.name !== "mirroring"
+        ) {
+            return;
+        }
+
+        port.postMessage({ subject: "mirroringPopup:init", data: { device } });
+    };
+
+    messaging.onConnect.addListener(onMirroringPopupMessage);
+
+    browser.windows.onRemoved.addListener(function onWindowRemoved(windowId) {
+        if (windowId !== popup.id) return;
+        messaging.onConnect.removeListener(onMirroringPopupMessage);
+        browser.windows.onRemoved.removeListener(onWindowRemoved);
+    });
 }
 
 export default castManager;

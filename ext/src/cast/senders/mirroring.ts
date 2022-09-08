@@ -19,13 +19,17 @@ type MirroringAppMessage =
     | { subject: "close" };
 
 interface MirroringSenderOpts {
-    contextTabId?: number;
-    receiverDevice?: ReceiverDevice;
+    receiverDevice: ReceiverDevice;
+    onSessionCreated: () => void;
+    onMirroringConnected: () => void;
+    onMirroringStopped: () => void;
 }
 
-class MirroringSender {
-    private contextTabId?: number;
-    private receiverDevice?: ReceiverDevice;
+export default class MirroringSender {
+    private receiverDevice: ReceiverDevice;
+    private sessionCreatedCallback: () => void;
+    private mirroringConnectedCallback: () => void;
+    private mirroringStoppedCallback: () => void;
 
     private session?: Session;
     private wasSessionRequested = false;
@@ -40,18 +44,17 @@ class MirroringSender {
     private streamMaxResolution: { width?: number; height?: number } = {};
 
     constructor(opts: MirroringSenderOpts) {
-        this.contextTabId = opts.contextTabId;
         this.receiverDevice = opts.receiverDevice;
+        this.sessionCreatedCallback = opts.onSessionCreated;
+        this.mirroringConnectedCallback = opts.onMirroringConnected;
+        this.mirroringStoppedCallback = opts.onMirroringStopped;
 
         this.init();
     }
 
     private async init() {
         try {
-            await ensureInit({
-                contextTabId: this.contextTabId,
-                receiverDevice: this.receiverDevice
-            });
+            await ensureInit({ receiverDevice: this.receiverDevice });
         } catch (err) {
             logger.error("Failed to initialize cast API", err);
         }
@@ -82,11 +85,6 @@ class MirroringSender {
         cast.initialize(apiConfig);
     }
 
-    stop() {
-        this.peerConnection?.close();
-        this.session?.stop();
-    }
-
     private sessionListener() {
         // Unused
     }
@@ -98,7 +96,7 @@ class MirroringSender {
             cast.requestSession(
                 session => {
                     this.session = session;
-                    this.createMirroringConnection();
+                    this.sessionCreatedCallback();
                 },
                 err => {
                     logger.error("Session request failed", err);
@@ -112,7 +110,14 @@ class MirroringSender {
         this.session.sendMessage(NS_FX_CAST, message);
     }
 
-    private async createMirroringConnection() {
+    stop() {
+        this.peerConnection?.close();
+        this.session?.stop();
+
+        this.mirroringStoppedCallback();
+    }
+
+    async createMirroringConnection(stream: MediaStream) {
         const pc = new RTCPeerConnection();
         this.peerConnection = pc;
 
@@ -152,6 +157,7 @@ class MirroringSender {
                 return;
             }
 
+            this.mirroringConnectedCallback();
             applyParameters();
         });
 
@@ -200,26 +206,9 @@ class MirroringSender {
             await sender.setParameters(params);
         };
 
-        let stream: MediaStream;
-        try {
-            // Add screen media stream
-
-            stream = await navigator.mediaDevices.getDisplayMedia({
-                video: {
-                    cursor: "motion",
-                    frameRate: this.streamMaxFrameRate
-                },
-                audio: false
-            });
-
-            const [track] = stream.getVideoTracks();
-            pc.addTrack(track, stream);
-            track.addEventListener("ended", () => this.stop());
-        } catch (err) {
-            logger.error("Failed to add display media stream!", err);
-            this.stop();
-            return;
-        }
+        const [track] = stream.getVideoTracks();
+        pc.addTrack(track, stream);
+        track.addEventListener("ended", () => this.stop());
 
         /**
          * Use a video element to get stream resize events and update
@@ -230,20 +219,4 @@ class MirroringSender {
         video.addEventListener("resize", () => applyParameters());
         video.play();
     }
-}
-
-/**
- * If loaded as a content script, opts are stored on the window object.
- */
-if (window.location.protocol !== "moz-extension:") {
-    const window_ = window as any;
-
-    const sender = new MirroringSender({
-        contextTabId: window_.contextTabId,
-        receiverDevice: window_.receiverDevice
-    });
-
-    window.addEventListener("beforeunload", () => {
-        sender.stop();
-    });
 }

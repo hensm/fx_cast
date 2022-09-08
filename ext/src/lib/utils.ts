@@ -29,47 +29,6 @@ export function stringify(
     return formattedString;
 }
 
-export function getMediaTypesForPageUrl(
-    pageUrl: string
-): ReceiverSelectorMediaType {
-    const url = new URL(pageUrl);
-    let availableMediaTypes = ReceiverSelectorMediaType.None;
-
-    /**
-     * Content scripts are prohibited from running on some
-     * Mozilla domains.
-     */
-    const blockedHosts = [
-        "accounts-static.cdn.mozilla.net",
-        "accounts.firefox.com",
-        "addons.cdn.mozilla.net",
-        "addons.mozilla.org",
-        "api.accounts.firefox.com",
-        "content.cdn.mozilla.net",
-        "discovery.addons.mozilla.org",
-        "install.mozilla.org",
-        "oauth.accounts.firefox.com",
-        "profile.accounts.firefox.com",
-        "support.mozilla.org",
-        "sync.services.mozilla.com"
-    ];
-
-    if (blockedHosts.includes(url.host)) {
-        return availableMediaTypes;
-    }
-
-    /**
-     * When on an insecure origin, MediaDevices.getDisplayMedia
-     * will not exist (and legacy MediaDevices.getUserMedia
-     * mediaSource constraint will fail).
-     */
-    if (url.protocol === "https:") {
-        availableMediaTypes |= ReceiverSelectorMediaType.Screen;
-    }
-
-    return availableMediaTypes;
-}
-
 export function loadScript(
     scriptUrl: string,
     doc: Document = document

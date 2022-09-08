@@ -75,6 +75,7 @@ const buildOpts = {
         path.join(srcPath, "/cast/senders/mirroring.ts"),
         // UI
         path.join(srcPath, "ui/popup/index.ts"),
+        path.join(srcPath, "ui/mirroring/index.ts"),
         path.join(srcPath, "ui/options/index.ts")
     ],
     define: {

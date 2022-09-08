@@ -559,5 +559,40 @@
     "optionsShowAdvancedOptions": {
         "message": "Show advanced options",
         "description": "Show advanced options checkbox label."
+    },
+
+    "mirroringPopupTitle": {
+        "message": "Mirroring",
+        "description": "Mirroring popup window title."
+    },
+    "mirroringPopupWaitingForConnection": {
+        "message": "Waiting for connection",
+        "description": "Mirroring popup loading text."
+    },
+    "mirroringPopupConnectedTo": {
+        "message": "Connected to $deviceName$",
+        "description": "Mirroring popup label displayed whilst session connected before mirroring.",
+        "placeholders": {
+            "deviceName": {
+                "content": "$1"
+            }
+        }
+    },
+    "mirroringPopupMirroringTo": {
+        "message": "Mirroring to $deviceName$",
+        "description": "Mirroring popup label displayed whilst mirroring.",
+        "placeholders": {
+            "deviceName": {
+                "content": "$1"
+            }
+        }
+    },
+    "mirroringPopupChooseSource": {
+        "message": "Choose Source",
+        "description": "Mirroring popup choose media source button label."
+    },
+    "mirroringPopupStopMirroring": {
+        "message": "Stop Mirroring",
+        "description": "Mirroring popup stop mirroring button label."
     }
 }

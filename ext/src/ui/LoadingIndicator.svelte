@@ -26,4 +26,6 @@
     });
 </script>
 
-<span class="ellipsis">{ellipsis}</span>
+<span class="indicator">
+    <slot />{ellipsis}
+</span>

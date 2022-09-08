@@ -1,0 +1,30 @@
+body,
+html {
+    height: 100%;
+    width: 100%;
+}
+
+body {
+    background: var(--box-background);
+    color: var(--box-color);
+    font: message-box;
+    font-size: 15px;
+    margin: initial;
+}
+
+#root {
+    align-items: center;
+    display: flex;
+    height: 100%;
+    justify-content: center;
+}
+
+.mirroring-status {
+    align-items: center;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+.mirroring-status > p {
+    margin: initial;
+}

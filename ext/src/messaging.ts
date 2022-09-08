@@ -108,6 +108,8 @@ type ExtMessageDefinitions = {
      * to the bridge.
      */
     "main:refreshDeviceManager": void;
+
+    "mirroringPopup:init": { device: ReceiverDevice };
 };
 
 /**

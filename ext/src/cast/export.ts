@@ -3,6 +3,10 @@ import messaging, { Message } from "../messaging";
 import type { ReceiverDevice } from "../types";
 
 import pageMessenging from "./pageMessenging";
+
+// Ensure extension-side is initialized first
+void pageMessenging.extension;
+
 import CastSDK from "./sdk";
 
 export type CastPort = TypedMessagePort<Message>;
@@ -41,7 +45,10 @@ export function ensureInit(opts: EnsureInitOpts): Promise<CastPort> {
          * will be the internal extension URL, whereas in a content
          * script, it will be the content page URL.
          */
-        if (window.location.protocol === "moz-extension:") {
+        if (
+            window.location.protocol === "moz-extension:" &&
+            window.location.pathname === "_generated_background_page.html"
+        ) {
             const { default: castManager } = await import(
                 "../background/castManager"
             );
