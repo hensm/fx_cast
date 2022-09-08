@@ -110,6 +110,13 @@ let receiverSelector: Optional<ReceiverSelector>;
 
 const activeInstances = new Set<CastInstance>();
 
+const allowedContentMessages: Array<Message["subject"]> = [
+    "main:initializeCastSdk",
+    "main:requestSession",
+    "bridge:sendCastReceiverMessage",
+    "bridge:sendCastSessionMessage"
+];
+
 /** Keeps track of cast API instances and provides bridge messaging. */
 const castManager = new (class {
     async init() {
@@ -356,6 +363,16 @@ const castManager = new (class {
         instance: CastInstance,
         message: Message
     ) {
+        // Limit untrusted instances to allowed messages subset
+        if (
+            !allowedContentMessages.includes(message.subject) &&
+            !instance.isTrusted
+        ) {
+            logger.error(`Forbidden message type! (${message.subject})`);
+            disconnectContentPort(instance.contentPort);
+            return;
+        }
+
         const [destination] = message.subject.split(":");
         if (destination === "bridge") {
             instance.bridgePort.postMessage(message);
@@ -383,6 +400,7 @@ const castManager = new (class {
                         logger.error(
                             "Cast instance not trusted to bypass receiver selection!"
                         );
+                        disconnectContentPort(instance.contentPort);
                         break;
                     }
 
