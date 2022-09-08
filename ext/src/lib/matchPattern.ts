@@ -93,7 +93,7 @@ export class RemoteMatchPattern {
         }
 
         // If pattern host is not a wildcard
-        if (!this.matchesDomain(url.host)) {
+        if (!this.matchesDomain(url.hostname)) {
             return false;
         }
 
