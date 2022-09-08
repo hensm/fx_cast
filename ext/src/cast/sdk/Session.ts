@@ -2,7 +2,7 @@ import { v4 as uuid } from "uuid";
 
 import { Logger } from "../../lib/logger";
 
-import eventMessaging from "../pageMessenging";
+import pageMessaging from "../pageMessaging";
 import { convertSupportedMediaCommandsFlags } from "../utils";
 
 import type {
@@ -218,7 +218,7 @@ export default class Session {
         return new Promise<void>((resolve, reject) => {
             const messageId = uuid();
 
-            eventMessaging.page.sendMessage({
+            pageMessaging.page.sendMessage({
                 subject: "bridge:sendCastReceiverMessage",
                 data: {
                     sessionId: this.sessionId,
@@ -291,7 +291,7 @@ export default class Session {
     ) {
         const messageId = uuid();
 
-        eventMessaging.page.sendMessage({
+        pageMessaging.page.sendMessage({
             subject: "bridge:sendCastSessionMessage",
             data: {
                 sessionId: this.sessionId,

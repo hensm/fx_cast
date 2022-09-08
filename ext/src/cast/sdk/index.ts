@@ -1,7 +1,7 @@
 import { Logger } from "../../lib/logger";
 
 import type { Message } from "../../messaging";
-import pageMessenging from "../pageMessenging";
+import pageMessaging from "../pageMessaging";
 
 import {
     AutoJoinPolicy,
@@ -102,7 +102,7 @@ export default class {
     timeout = new Timeout();
 
     constructor() {
-        pageMessenging.page.addListener(this.#onMessage.bind(this));
+        pageMessaging.page.addListener(this.#onMessage.bind(this));
     }
 
     #onMessage(message: Message) {
@@ -300,7 +300,7 @@ export default class {
             this.#initializeSuccessCallback = successCallback;
         }
 
-        pageMessenging.page.sendMessage({
+        pageMessaging.page.sendMessage({
             subject: "main:initializeCastSdk",
             data: { apiConfig: this.#apiConfig }
         });
@@ -343,7 +343,7 @@ export default class {
         this.#requestSessionErrorCallback = errorCallback;
 
         // Open receiver selector UI
-        pageMessenging.page.sendMessage({
+        pageMessaging.page.sendMessage({
             subject: "main:requestSession",
             data: { sessionRequest: this.#sessionRequest }
         });

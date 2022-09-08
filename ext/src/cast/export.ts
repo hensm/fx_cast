@@ -2,10 +2,10 @@ import type { TypedMessagePort } from "../lib/TypedMessagePort";
 import messaging, { Message } from "../messaging";
 import type { ReceiverDevice } from "../types";
 
-import pageMessenging from "./pageMessenging";
+import pageMessaging from "./pageMessaging";
 
 // Ensure extension-side is initialized first
-void pageMessenging.extension;
+void pageMessaging.extension;
 
 import CastSDK from "./sdk";
 
@@ -84,12 +84,12 @@ export function ensureInit(opts: EnsureInitOpts): Promise<CastPort> {
                     }
                 }
 
-                pageMessenging.extension.sendMessage(message);
+                pageMessaging.extension.sendMessage(message);
             });
             managerPort.start();
 
             // Cast instance -> cast manager
-            pageMessenging.extension.addListener(message => {
+            pageMessaging.extension.addListener(message => {
                 // Skip receiver selection
                 if (opts.receiverDevice) {
                     message = rewriteTrustedRequestSession(
@@ -107,17 +107,17 @@ export function ensureInit(opts: EnsureInitOpts): Promise<CastPort> {
             managerPort.onMessage.addListener(message => {
                 if (message.subject === "cast:instanceCreated") {
                     if (message.data.isAvailable) {
-                        resolve(pageMessenging.page.messagePort);
+                        resolve(pageMessaging.page.messagePort);
                     } else {
                         reject();
                     }
                 }
 
-                pageMessenging.extension.sendMessage(message);
+                pageMessaging.extension.sendMessage(message);
             });
 
             // Cast instance -> cast manager
-            pageMessenging.extension.addListener(message => {
+            pageMessaging.extension.addListener(message => {
                 // Skip receiver selection
                 if (opts.receiverDevice) {
                     message = rewriteTrustedRequestSession(
@@ -130,10 +130,10 @@ export function ensureInit(opts: EnsureInitOpts): Promise<CastPort> {
             });
 
             managerPort.onDisconnect.addListener(() => {
-                pageMessenging.extension.close();
+                pageMessaging.extension.close();
             });
 
-            existingPort = pageMessenging.page.messagePort;
+            existingPort = pageMessaging.page.messagePort;
         }
     });
 }

@@ -25,7 +25,7 @@ For some background, see [Cast SDK terminology](https://developers.google.com/ca
 
 ### Communication
 
-SDK instances send messages through a MessageChannel managed by the [`pageMessaging`](./ext/src/cast/pageMessenging.ts) module. One side listens for an initialization message containing a MessagePort, then receives messages from the SDK on that port and calls its message listeners so that they can be forwarded to the Cast Manager. The other side sends that initialization message and handles responses back from the Cast Manager.
+SDK instances send messages through a MessageChannel managed by the [`pageMessaging`](./ext/src/cast/pageMessaging.ts) module. One side listens for an initialization message containing a MessagePort, then receives messages from the SDK on that port and calls its message listeners so that they can be forwarded to the Cast Manager. The other side sends that initialization message and handles responses back from the Cast Manager.
 
 ### Initialization
 

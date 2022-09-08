@@ -6,7 +6,7 @@
 import logger from "../lib/logger";
 import { loadScript } from "../lib/utils";
 
-import pageMessenging from "./pageMessenging";
+import pageMessaging from "./pageMessaging";
 import CastSDK from "./sdk";
 import { CAST_FRAMEWORK_SCRIPT_URL } from "./urls";
 
@@ -30,7 +30,7 @@ if (document.currentScript) {
     }
 }
 
-pageMessenging.page.addListener(async message => {
+pageMessaging.page.addListener(async message => {
     switch (message.subject) {
         case "cast:instanceCreated": {
             // If framework API is loading, wait until completed

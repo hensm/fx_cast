@@ -43,7 +43,7 @@ abstract class Messenger {
 }
 
 /**
- * Page-side of page script messenging.
+ * Page-side of page script messaging.
  *
  * Creates a message channel, then sends an INIT_MESSAGE window message
  * with a port that is handled by an ExtensionScriptMessenger in the
@@ -79,7 +79,7 @@ export class PageScriptMessenger extends Messenger {
 }
 
 /**
- * Extension-side of page script messenging.
+ * Extension-side of page script messaging.
  *
  * Listens for a INIT_MESSAGE window message from a PageScriptMessenger
  * running in a page script and establishes a message channel connection

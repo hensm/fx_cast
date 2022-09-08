@@ -1,19 +1,19 @@
 import messaging, { Message } from "../messaging";
-import pageMessenging from "./pageMessenging";
+import pageMessaging from "./pageMessaging";
 
 // Message port to cast manager in background script
 const managerPort = messaging.connect({ name: "cast" });
 
 const forwardToPage = (message: Message) => {
-    pageMessenging.extension.sendMessage(message);
+    pageMessaging.extension.sendMessage(message);
 };
 const forwardToMain = (message: Message) => {
     managerPort.postMessage(message);
 };
 
 managerPort.onMessage.addListener(forwardToPage);
-pageMessenging.extension.addListener(forwardToMain);
+pageMessaging.extension.addListener(forwardToMain);
 
 managerPort.onDisconnect.addListener(() => {
-    pageMessenging.extension.close();
+    pageMessaging.extension.close();
 });
