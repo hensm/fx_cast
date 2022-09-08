@@ -194,11 +194,13 @@ body {
 .media__seek {
     align-items: center;
     display: grid;
-    gap: 10px;
-    grid-template-columns: auto 1fr auto;
-    grid-template-areas: "current-time seek-bar remaining-time";
+    grid-template-columns: min-content auto 1fr auto;
+    grid-template-areas: "live current-time seek-bar remaining-time";
     min-height: 24px;
     width: 100%;
+}
+.media__seek > :not(:last-child) {
+    margin-inline-end: 10px;
 }
 .media__seek-bar {
     flex: 1;
@@ -255,6 +257,7 @@ body {
     color: var(--box-background);
     font-size: 0.85em;
     font-weight: bold;
+    grid-area: live;
     opacity: 0.75;
     padding: 2px 4px;
     text-transform: uppercase;
