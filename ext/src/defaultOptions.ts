@@ -25,6 +25,8 @@ export interface Options {
     localMediaEnabled: boolean;
     /** HTTP server port for local media. */
     localMediaServerPort: number;
+    /** Media stream mirroring for when flinging not possible. */
+    mediaMirroringEnabled: boolean;
 
     /** Screen mirroring casting. */
     mirroringEnabled: boolean;
@@ -85,6 +87,7 @@ export default {
     mediaStopOnUnload: false,
     localMediaEnabled: true,
     localMediaServerPort: 9555,
+    mediaMirroringEnabled: true,
 
     mirroringEnabled: false,
     mirroringAppId: MIRRORING_APP_ID,

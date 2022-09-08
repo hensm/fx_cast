@@ -355,6 +355,15 @@
         "description": "Media stop on unload checkbox label."
     },
 
+    "optionsMediaMirroringEnabled": {
+        "message": "Enable media mirroring",
+        "description": "Media mirroring enabled checkbox label."
+    },
+    "optionsMediaMirroringEnabledDescription": {
+        "message": "Use a screen mirroring connection as a fallback to cast certain kinds of video content.",
+        "description": "Media mirroring enabled option description."
+    },
+
     "optionsLocalMediaCategoryName": {
         "message": "Local media casting",
         "description": "Options page local media category title."

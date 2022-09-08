@@ -398,6 +398,12 @@ const castManager = new (class {
                 }
 
                 try {
+                    const mirroringAppId = await options.get("mirroringAppId");
+                    const requestedMediaType =
+                        sessionRequest.appId === mirroringAppId
+                            ? ReceiverSelectorMediaType.Screen
+                            : ReceiverSelectorMediaType.App;
+
                     const selection = await getReceiverSelection({
                         castInstance: instance
                     });
@@ -416,7 +422,7 @@ const castManager = new (class {
                      * been changed, we need to cancel the current
                      * sender and switch it out for the right one.
                      */
-                    if (selection.mediaType !== ReceiverSelectorMediaType.App) {
+                    if (selection.mediaType !== requestedMediaType) {
                         instance.contentPort.postMessage({
                             subject: "cast:sessionRequestCancelled"
                         });

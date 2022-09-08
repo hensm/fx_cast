@@ -19,17 +19,17 @@ type MirroringAppMessage =
     | { subject: "close" };
 
 interface MirroringSenderOpts {
-    receiverDevice: ReceiverDevice;
-    onSessionCreated: () => void;
-    onMirroringConnected: () => void;
-    onMirroringStopped: () => void;
+    receiverDevice?: ReceiverDevice;
+    onSessionCreated?: () => void;
+    onMirroringConnected?: () => void;
+    onMirroringStopped?: () => void;
 }
 
 export default class MirroringSender {
-    private receiverDevice: ReceiverDevice;
-    private sessionCreatedCallback: () => void;
-    private mirroringConnectedCallback: () => void;
-    private mirroringStoppedCallback: () => void;
+    private receiverDevice?: ReceiverDevice;
+    private sessionCreatedCallback?: () => void;
+    private mirroringConnectedCallback?: () => void;
+    private mirroringStoppedCallback?: () => void;
 
     private session?: Session;
     private wasSessionRequested = false;
@@ -96,7 +96,7 @@ export default class MirroringSender {
             cast.requestSession(
                 session => {
                     this.session = session;
-                    this.sessionCreatedCallback();
+                    this.sessionCreatedCallback?.();
                 },
                 err => {
                     logger.error("Session request failed", err);
@@ -114,7 +114,7 @@ export default class MirroringSender {
         this.peerConnection?.close();
         this.session?.stop();
 
-        this.mirroringStoppedCallback();
+        this.mirroringStoppedCallback?.();
     }
 
     async createMirroringConnection(stream: MediaStream) {
@@ -157,7 +157,7 @@ export default class MirroringSender {
                 return;
             }
 
-            this.mirroringConnectedCallback();
+            this.mirroringConnectedCallback?.();
             applyParameters();
         });
 

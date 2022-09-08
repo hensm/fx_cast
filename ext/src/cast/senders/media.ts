@@ -9,6 +9,7 @@ import type Session from "../sdk/Session";
 import type Media from "../sdk/media/Media";
 
 import cast, { ensureInit, CastPort } from "../export";
+import MirroringSender from "./mirroring";
 
 const logger = new Logger("fx_cast [media sender]");
 
@@ -359,8 +360,18 @@ if (window.location.protocol !== "moz-extension:") {
         ) as HTMLMediaElement;
     }
 
-    new MediaSender({
-        mediaUrl: window_.mediaUrl,
-        mediaElement
-    });
+    if (window_.mediaUrl) {
+        new MediaSender({
+            mediaUrl: window_.mediaUrl,
+            mediaElement
+        });
+    } else {
+        const mirroringSender = new MirroringSender({
+            onSessionCreated() {
+                mirroringSender.createMirroringConnection(
+                    (mediaElement as any).mozCaptureStream() as MediaStream
+                );
+            }
+        });
+    }
 }

@@ -139,6 +139,22 @@
                 </label>
             </div>
 
+            <div class="option option--inline">
+                <div class="option__control">
+                    <input
+                        id="mediaMirroringEnabled"
+                        type="checkbox"
+                        bind:checked={opts.mediaMirroringEnabled}
+                    />
+                </div>
+                <label class="option__label" for="mediaMirroringEnabled">
+                    {_("optionsMediaMirroringEnabled")}
+                </label>
+                <div class="option__description">
+                    {_("optionsMediaMirroringEnabledDescription")}
+                </div>
+            </div>
+
             <hr />
 
             <div class="option option--inline">

@@ -29,7 +29,7 @@ const whitelistChildMenuPatterns = new Map<MenuId, string>();
 export async function initMenus() {
     logger.info("init (menus)");
 
-    const opts = await options.getAll();
+    let opts = await options.getAll();
 
     // Global "Cast..." menu item
     menuIdCast = browser.menus.create({
@@ -39,15 +39,25 @@ export async function initMenus() {
         icons: { "16": "icons/icon.svg" } // browser_action context
     });
 
+    function createCastMediaMenu() {
+        let targetUrlPatterns: Optional<string[]>;
+        if (!opts.mediaMirroringEnabled) {
+            targetUrlPatterns = opts.localMediaEnabled
+                ? URL_PATTERNS_ALL
+                : URL_PATTERNS_REMOTE;
+        }
+
+        return browser.menus.create({
+            id: "media",
+            contexts: ["audio", "video", "image"],
+            title: _("contextCast"),
+            visible: opts.mediaEnabled,
+            targetUrlPatterns: targetUrlPatterns
+        });
+    }
+
     // <video>/<audio> "Cast..." context menu item
-    menuIdCastMedia = browser.menus.create({
-        contexts: ["audio", "video", "image"],
-        title: _("contextCast"),
-        visible: opts.mediaEnabled,
-        targetUrlPatterns: opts.localMediaEnabled
-            ? URL_PATTERNS_ALL
-            : URL_PATTERNS_REMOTE
-    });
+    menuIdCastMedia = createCastMediaMenu();
 
     menuIdWhitelist = browser.menus.create({
         contexts: ["browser_action"],
@@ -118,20 +128,21 @@ export async function initMenus() {
 
     options.addEventListener("changed", async ev => {
         const alteredOpts = ev.detail;
-        const newOpts = await options.getAll();
+        opts = await options.getAll();
 
         if (menuIdCastMedia && alteredOpts.includes("mediaEnabled")) {
             browser.menus.update(menuIdCastMedia, {
-                visible: newOpts.mediaEnabled
+                visible: opts.mediaEnabled
             });
         }
 
-        if (menuIdCastMedia && alteredOpts.includes("localMediaEnabled")) {
-            browser.menus.update(menuIdCastMedia, {
-                targetUrlPatterns: newOpts.localMediaEnabled
-                    ? URL_PATTERNS_ALL
-                    : URL_PATTERNS_REMOTE
-            });
+        if (
+            menuIdCastMedia &&
+            (alteredOpts.includes("localMediaEnabled") ||
+                alteredOpts.includes("mediaMirroringEnabled"))
+        ) {
+            browser.menus.remove(menuIdCastMedia);
+            menuIdCastMedia = createCastMediaMenu();
         }
     });
 }
@@ -183,20 +194,18 @@ async function onMenuClicked(
         }
 
         case menuIdCastMedia:
-            if (info.srcUrl) {
-                await browser.tabs.executeScript(tab.id, {
-                    code: stringify`
-                            window.mediaUrl = ${info.srcUrl};
-                            window.targetElementId = ${info.targetElementId};
-                        `,
-                    frameId: info.frameId
-                });
+            await browser.tabs.executeScript(tab.id, {
+                code: stringify`
+                    window.mediaUrl = ${info.srcUrl};
+                    window.targetElementId = ${info.targetElementId};
+                `,
+                frameId: info.frameId
+            });
 
-                await browser.tabs.executeScript(tab.id, {
-                    file: "cast/senders/media.js",
-                    frameId: info.frameId
-                });
-            }
+            await browser.tabs.executeScript(tab.id, {
+                file: "cast/senders/media.js",
+                frameId: info.frameId
+            });
             break;
     }
 }
