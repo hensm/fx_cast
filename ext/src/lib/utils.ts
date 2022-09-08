@@ -1,5 +1,3 @@
-import { ReceiverSelectorMediaType } from "../types";
-
 export function getNextEllipsis(ellipsis: string): string {
     if (ellipsis === "") return ".";
     if (ellipsis === ".") return "..";
