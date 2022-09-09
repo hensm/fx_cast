@@ -12,8 +12,8 @@ import type {
     SenderMessage
 } from "./types";
 
-import { SessionStatus } from "./enums";
-import type {
+import { ErrorCode, SessionStatus } from "./enums";
+import {
     Error as CastError,
     Image,
     Receiver,
@@ -268,6 +268,11 @@ export default class Session {
         successCallback?: (media: Media) => void,
         errorCallback?: (err: CastError) => void
     ) {
+        if (!loadRequest) {
+            errorCallback?.(new CastError(ErrorCode.INVALID_PARAMETER));
+            return;
+        }
+
         this.#loadMediaSuccessCallback = successCallback;
         this.#loadMediaErrorCallback = errorCallback;
 

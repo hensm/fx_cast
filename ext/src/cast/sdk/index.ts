@@ -222,7 +222,7 @@ export default class {
             case "cast:sessionStopped": {
                 const { sessionId } = message.data;
                 const session = this.#sessions.get(sessionId);
-                if (session) {
+                if (session?.status === SessionStatus.CONNECTED) {
                     session.status = SessionStatus.STOPPED;
 
                     const updateListeners = SessionUpdateListeners.get(session);
@@ -349,7 +349,7 @@ export default class {
         });
     }
 
-    requestSessionById(_sessionId: string): void {
+    requestSessionById(_sessionId: string) {
         logger.info("STUB :: cast.requestSessionById");
     }
 
@@ -357,15 +357,15 @@ export default class {
         _receivers: Receiver[],
         _successCallback?: () => void,
         _errorCallback?: (err: CastError) => void
-    ): void {
+    ) {
         logger.info("STUB :: cast.setCustomReceivers");
     }
 
-    setPageContext(_win: Window): void {
+    setPageContext(_win: Window) {
         logger.info("STUB :: cast.setPageContext");
     }
 
-    setReceiverDisplayStatus(_sessionId: string): void {
+    setReceiverDisplayStatus(_sessionId: string) {
         logger.info("STUB :: cast.setReceiverDisplayStatus");
     }
 

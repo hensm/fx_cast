@@ -4,7 +4,7 @@ import options from "../../lib/options";
 import type { Message } from "../../messaging";
 
 // Cast types
-import type { ReceiverAvailability } from "../sdk/enums";
+import { AutoJoinPolicy, ReceiverAvailability } from "../sdk/enums";
 import type Session from "../sdk/Session";
 import type Media from "../sdk/media/Media";
 
@@ -88,7 +88,8 @@ export default class MediaSender {
                     capabilities
                 ),
                 this.sessionListener.bind(this),
-                this.receiverListener.bind(this)
+                this.receiverListener.bind(this),
+                AutoJoinPolicy.PAGE_SCOPED
             ),
             undefined,
             err => {

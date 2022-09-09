@@ -3,7 +3,7 @@ import { Logger } from "../../lib/logger";
 
 import type { ReceiverDevice } from "../../types";
 
-import type { ReceiverAvailability } from "../sdk/enums";
+import { AutoJoinPolicy, ReceiverAvailability } from "../sdk/enums";
 import type Session from "../sdk/Session";
 
 import cast, { ensureInit } from "../export";
@@ -79,7 +79,8 @@ export default class MirroringSender {
         const apiConfig = new cast.ApiConfig(
             sessionRequest,
             this.sessionListener,
-            this.receiverListener
+            this.receiverListener,
+            AutoJoinPolicy.PAGE_SCOPED
         );
 
         cast.initialize(apiConfig);

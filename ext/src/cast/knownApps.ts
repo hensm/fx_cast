@@ -16,7 +16,7 @@ export default {
     "CA5E8412": { name: "Netflix", matches: "https://www.netflix.com/*" },
     "233637DE": { name: "YouTube", matches: "https://www.youtube.com/*" },
     "CC32E753": { name: "Spotify", matches: "https://open.spotify.com/*" },
-    "5E81F6DB": {
+    "2BA92214": {
         name: "BBC iPlayer",
         matches: "https://www.bbc.co.uk/iplayer*"
     },
