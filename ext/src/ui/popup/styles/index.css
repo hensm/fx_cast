@@ -193,18 +193,18 @@ body {
 
 .media__seek {
     align-items: center;
-    display: grid;
-    grid-template-columns: min-content auto 1fr auto;
-    grid-template-areas: "live current-time seek-bar remaining-time";
+    display: flex;
+    gap: 10px;
     min-height: 24px;
     width: 100%;
 }
-.media__seek > :not(:last-child) {
-    margin-inline-end: 10px;
+.media__seek-bar-container {
+    display: flex;
+    flex: 1;
+    position: relative;
 }
 .media__seek-bar {
     flex: 1;
-    grid-area: seek-bar;
 }
 .media__seek-tooltip {
     --tooltip-color: var(--button-background);
@@ -213,13 +213,12 @@ body {
     background-color: var(--tooltip-color);
     border-radius: 2px;
     display: flex;
-    grid-area: seek-bar;
-    justify-self: start;
     left: var(--seek-hover-position);
     padding: 2px 5px;
     padding-bottom: 3px;
+    top: 0;
     pointer-events: none;
-    position: relative;
+    position: absolute;
     transform: translate(
         -50%,
         calc(
@@ -238,17 +237,10 @@ body {
     transform: translate(-50%, 100%);
 }
 
-.media__current-time {
-    grid-area: current-time;
-}
-.media__remaining-time {
-    grid-area: remaining-time;
-}
 .media__current-time,
 .media__remaining-time {
     font-variant-numeric: tabular-nums;
     text-align: center;
-    width: 5ch;
 }
 
 .media__live {

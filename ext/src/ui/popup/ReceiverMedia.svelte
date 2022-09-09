@@ -120,7 +120,10 @@
 
         let ret = "";
         if (hours) ret += `${hours}:`;
-        ret += `${date.getUTCMinutes().toString().padStart(2, "0")}:`;
+        ret += `${date
+            .getUTCMinutes()
+            .toString()
+            .padStart(hours ? 2 : 1, "0")}:`;
         ret += date.getUTCSeconds().toString().padStart(2, "0");
         return ret;
     }
@@ -178,44 +181,47 @@
                 <span class="media__current-time">
                     {formatTime(currentTime)}
                 </span>
-                <input
-                    type="range"
-                    class="slider media__seek-bar"
-                    class:slider--indeterminate={status.playerState ===
-                        PlayerState.BUFFERING}
-                    aria-label={_("popupMediaSeek")}
-                    max={status.media.duration ?? currentTime}
-                    value={currentTime}
-                    on:change={ev => {
-                        if (seekHoverPosition) {
-                            ev.preventDefault();
-                            return;
-                        }
-                        dispatch("seek", {
-                            position: ev.currentTarget.valueAsNumber
-                        });
-                    }}
-                    on:click={() => {
-                        if (seekHoverPosition && status.media?.duration) {
+                <div class="media__seek-bar-container">
+                    <input
+                        type="range"
+                        class="slider media__seek-bar"
+                        class:slider--indeterminate={status.playerState ===
+                            PlayerState.BUFFERING}
+                        aria-label={_("popupMediaSeek")}
+                        max={status.media.duration ?? currentTime}
+                        value={currentTime}
+                        on:change={ev => {
+                            if (seekHoverPosition) {
+                                ev.preventDefault();
+                                return;
+                            }
                             dispatch("seek", {
-                                position:
-                                    status.media.duration *
-                                    (seekHoverPosition / 100)
+                                position: ev.currentTarget.valueAsNumber
                             });
-                        }
-                    }}
-                    use:onSeekMouseMove
-                />
-                {#if seekHoverPosition}
-                    <div
-                        class="media__seek-tooltip"
-                        style:--seek-hover-position="{seekHoverPosition}%"
-                    >
-                        {formatTime(
-                            status.media.duration * (seekHoverPosition / 100)
-                        )}
-                    </div>
-                {/if}
+                        }}
+                        on:click={() => {
+                            if (seekHoverPosition && status.media?.duration) {
+                                dispatch("seek", {
+                                    position:
+                                        status.media.duration *
+                                        (seekHoverPosition / 100)
+                                });
+                            }
+                        }}
+                        use:onSeekMouseMove
+                    />
+                    {#if seekHoverPosition}
+                        <div
+                            class="media__seek-tooltip"
+                            style:--seek-hover-position="{seekHoverPosition}%"
+                        >
+                            {formatTime(
+                                status.media.duration *
+                                    (seekHoverPosition / 100)
+                            )}
+                        </div>
+                    {/if}
+                </div>
                 <span class="media__remaining-time">
                     -{formatTime(status.media.duration - currentTime)}
                 </span>
