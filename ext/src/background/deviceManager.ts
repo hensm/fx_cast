@@ -16,14 +16,11 @@ import { PlayerState } from "../cast/sdk/media/enums";
 interface EventMap {
     deviceUp: { deviceInfo: ReceiverDevice };
     deviceDown: { deviceId: string };
-    deviceUpdated: {
-        deviceId: string;
-        status: ReceiverStatus;
-    };
-    deviceMediaUpdated: {
-        deviceId: string;
-        status: MediaStatus;
-    };
+    deviceUpdated: { deviceId: string; status: ReceiverStatus };
+    deviceMediaUpdated: { deviceId: string; status: MediaStatus };
+
+    applicationFound: { deviceId: string; appId: string };
+    applicationClosed: { deviceId: string; appId: string; sessionId: string };
 }
 
 export default new (class extends TypedEventTarget<EventMap> {
@@ -168,10 +165,25 @@ export default new (class extends TypedEventTarget<EventMap> {
                 const device = this.receiverDevices.get(deviceId);
                 if (!device) break;
 
+                const oldApplication = device.status?.applications?.[0];
+
                 // Clear media status when app status changes
                 const application = status.applications?.[0];
                 if (!application || application.isIdleScreen) {
                     delete device.mediaStatus;
+
+                    // Send application closed event
+                    if (oldApplication && !oldApplication.isIdleScreen) {
+                        this.dispatchEvent(
+                            new CustomEvent("applicationClosed", {
+                                detail: {
+                                    deviceId,
+                                    appId: oldApplication.appId,
+                                    sessionId: oldApplication.transportId
+                                }
+                            })
+                        );
+                    }
                 }
 
                 device.status = status;
@@ -184,6 +196,19 @@ export default new (class extends TypedEventTarget<EventMap> {
                         }
                     })
                 );
+
+                // Send new application found event
+                if (
+                    !oldApplication &&
+                    application &&
+                    !application.isIdleScreen
+                ) {
+                    this.dispatchEvent(
+                        new CustomEvent("applicationFound", {
+                            detail: { deviceId, appId: application.appId }
+                        })
+                    );
+                }
 
                 break;
             }

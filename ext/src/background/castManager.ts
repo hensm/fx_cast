@@ -17,11 +17,8 @@ import {
 } from "../types";
 
 import type { ApiConfig } from "../cast/sdk/classes";
-import { ReceiverAction } from "../cast/sdk/enums";
-import { DEFAULT_MEDIA_RECEIVER_APP_ID } from "../cast/sdk/media";
+import { AutoJoinPolicy, ReceiverAction } from "../cast/sdk/enums";
 import { createReceiver } from "../cast/utils";
-
-import deviceManager from "./deviceManager";
 
 import ReceiverSelector, {
     ReceiverSelection,
@@ -29,20 +26,69 @@ import ReceiverSelector, {
     ReceiverSelectorReceiverMessage
 } from "./ReceiverSelector";
 
+import deviceManager from "./deviceManager";
+
 type AnyPort = Port | TypedMessagePort<Message>;
 
 export interface ContentContext {
     tabId: number;
     frameId: number;
+    origin?: string;
+}
+
+/** Checks if two content contexts match. */
+function isSameContext(ctx1?: ContentContext, ctx2?: ContentContext) {
+    if (!ctx1 || !ctx2) return false;
+    return ctx1?.tabId === ctx2?.tabId && ctx1?.frameId === ctx2?.frameId;
 }
 
 interface CastSession {
-    sessionId: string;
+    bridgePort: Port;
     deviceId: string;
+    appId: string;
+    sessionId?: string;
+    initialContentContext?: ContentContext;
+}
+
+/** Creates a cast session object and sets up messaging. */
+async function createCastSession(opts: {
+    deviceId: string;
+    instance: CastInstance;
+    appId?: string;
+}) {
+    // If not explicitly provided, use session request app ID
+    if (!opts.appId) {
+        if (!opts.instance.apiConfig?.sessionRequest) {
+            throw logger.error(
+                "App ID not provided and instance missing valid session request!"
+            );
+        }
+        opts.appId = opts.instance.apiConfig.sessionRequest.appId;
+    }
+
+    const session: CastSession = {
+        bridgePort: await bridge.connect(),
+        deviceId: opts.deviceId,
+        appId: opts.appId,
+        initialContentContext: opts.instance.contentContext
+    };
+
+    opts.instance.session = session;
+    opts.instance.bridgeMessageListener = message => {
+        handleBridgeMessage(opts.instance, message);
+    };
+
+    session.bridgePort.onMessage.addListener(
+        opts.instance.bridgeMessageListener
+    );
+    session.bridgePort.onDisconnect.addListener(() =>
+        destroyCastInstance(opts.instance)
+    );
+
+    return session;
 }
 
 export interface CastInstance {
-    bridgePort: Port;
     contentPort: AnyPort;
     contentContext?: ContentContext;
 
@@ -53,17 +99,18 @@ export interface CastInstance {
     apiConfig?: ApiConfig;
     /** Established session details. */
     session?: CastSession;
+
+    /** Listener for bridge messages. */
+    bridgeMessageListener?: (message: Message) => void;
 }
 
 /** Creates a cast instance object and associated bridge instance. */
-async function createCastInstance(opts: {
-    bridgePort?: Port;
+function createCastInstance(opts: {
     contentPort: AnyPort;
     contentContext?: { tabId: number; frameId?: number };
     isTrusted?: boolean;
 }) {
     const instance: CastInstance = {
-        bridgePort: opts.bridgePort ?? (await bridge.connect()),
         contentPort: opts.contentPort,
         isTrusted: opts.isTrusted ?? false
     };
@@ -81,41 +128,60 @@ async function createCastInstance(opts: {
         !(opts.contentPort instanceof MessagePort) &&
         opts.contentPort.sender?.tab?.id
     ) {
+        // Get origin from content port
+        let origin: Optional<string>;
+        if (opts.contentPort.sender?.tab?.url) {
+            try {
+                ({ origin } = new URL(opts.contentPort.sender.tab.url));
+                // eslint-disable-next-line no-empty
+            } catch {}
+        }
+
         instance.contentContext = {
             tabId: opts.contentPort.sender.tab.id,
-            frameId: opts.contentPort.sender.frameId ?? 0
+            frameId: opts.contentPort.sender.frameId ?? 0,
+            origin
         };
     }
 
     return instance;
 }
 
-/** Disconnects either instance content port type. */
-function disconnectContentPort(port: AnyPort) {
-    if (port instanceof MessagePort) {
-        port.close();
+/** Removes cast instance and disconnects messaging ports. */
+function destroyCastInstance(instance: CastInstance) {
+    if (instance.contentPort instanceof MessagePort) {
+        instance.contentPort.close();
     } else {
-        port.disconnect();
+        instance.contentPort.disconnect();
     }
+
+    if (instance.session && instance.bridgeMessageListener) {
+        instance.session.bridgePort.onMessage.removeListener(
+            instance.bridgeMessageListener
+        );
+    }
+
+    activeInstances.delete(instance);
 }
 
-/** Checks if two content contexts match. */
-function isSameContext(ctx1?: ContentContext, ctx2?: ContentContext) {
-    if (!ctx1 || !ctx2) return false;
-    return ctx1?.tabId === ctx2?.tabId && ctx1?.frameId === ctx2?.frameId;
-}
-
-let baseConfig: BaseConfig;
-let receiverSelector: Optional<ReceiverSelector>;
-
-const activeInstances = new Set<CastInstance>();
-
+/** Whitelist of safe message types from content. */
 const allowedContentMessages: Array<Message["subject"]> = [
     "main:initializeCastSdk",
     "main:requestSession",
     "bridge:sendCastReceiverMessage",
     "bridge:sendCastSessionMessage"
 ];
+
+/** Chromecast base config to check compatibility with audio devices. */
+let baseConfig: BaseConfig;
+/** Shared receiver selector. */
+let receiverSelector: Optional<ReceiverSelector>;
+
+/** Set of active cast instances.  */
+const activeInstances = new Set<CastInstance>();
+
+/** Map of active session IDs to session info objects. */
+const activeSessions = new Map<string, CastSession>();
 
 /** Keeps track of cast API instances and provides bridge messaging. */
 const castManager = new (class {
@@ -130,7 +196,7 @@ const castManager = new (class {
             }
         });
 
-        // Pass receiver availability updates to cast API.
+        // Pass receiver availability updates to cast API
         const updateReceiverAvailability = () => {
             const isAvailable = deviceManager.getDevices().length > 0;
 
@@ -147,6 +213,25 @@ const castManager = new (class {
             "deviceDown",
             updateReceiverAvailability
         );
+
+        deviceManager.addEventListener("applicationClosed", ev => {
+            const session = activeSessions.get(ev.detail.sessionId);
+            if (!session?.sessionId) return;
+
+            // Remove session from instances and notify SDK
+            for (const instance of activeInstances) {
+                if (instance.session === session) {
+                    instance.contentPort.postMessage({
+                        subject: "cast:sessionStopped",
+                        data: { sessionId: session.sessionId }
+                    });
+
+                    delete instance.session;
+                }
+            }
+
+            activeSessions.delete(session.sessionId);
+        });
     }
 
     /**
@@ -200,7 +285,6 @@ const castManager = new (class {
         contentContext?: ContentContext
     ): Promise<CastInstance> {
         const instance = await createCastInstance({
-            bridgePort: await bridge.connect(),
             contentPort,
             contentContext,
             isTrusted: true
@@ -210,26 +294,15 @@ const castManager = new (class {
         if (contentContext) {
             for (const instance of activeInstances) {
                 if (isSameContext(instance.contentContext, contentContext)) {
-                    instance.bridgePort.disconnect();
-                    activeInstances.delete(instance);
+                    destroyCastInstance(instance);
                     break;
                 }
             }
         }
 
-        instance.bridgePort.onDisconnect.addListener(() => {
-            contentPort.close();
-            activeInstances.delete(instance);
-        });
-
-        // bridge -> cast instance
-        instance.bridgePort.onMessage.addListener(message => {
-            this.handleBridgeMessage(instance, message);
-        });
-
         // cast instance -> (any)
         contentPort.addEventListener("message", ev => {
-            this.handleContentMessage(instance, ev.data);
+            handleContentMessage(instance, ev.data);
         });
         contentPort.start();
 
@@ -252,218 +325,19 @@ const castManager = new (class {
             );
         }
 
-        // Ensure only one instance per context
-        for (const instance of activeInstances) {
-            if (
-                isSameContext(
-                    instance.contentContext,
-                    contentPort.sender as ContentContext
-                )
-            ) {
-                instance.bridgePort.disconnect();
-                disconnectContentPort(instance.contentPort);
-                break;
-            }
-        }
-
         const instance = await createCastInstance({ contentPort, isTrusted });
 
         // cast instance -> (any)
         const onContentPortMessage = (message: Message) => {
-            this.handleContentMessage(instance, message);
-        };
-        // bridge -> cast instance
-        const onBridgePortMessage = (message: Message) => {
-            this.handleBridgeMessage(instance, message);
+            handleContentMessage(instance, message);
         };
 
-        const onDisconnect = () => {
-            instance.bridgePort.onMessage.removeListener(onBridgePortMessage);
-            contentPort.onMessage.removeListener(onContentPortMessage);
-
-            instance.bridgePort.disconnect();
-            contentPort.disconnect();
-
-            activeInstances.delete(instance);
-        };
-
-        instance.bridgePort.onDisconnect.addListener(onDisconnect);
-        instance.bridgePort.onMessage.addListener(onBridgePortMessage);
-
-        contentPort.onDisconnect.addListener(onDisconnect);
         contentPort.onMessage.addListener(onContentPortMessage);
+        contentPort.onDisconnect.addListener(() => {
+            destroyCastInstance(instance);
+        });
 
         return instance;
-    }
-
-    private async handleBridgeMessage(
-        instance: CastInstance,
-        message: Message
-    ) {
-        // Intercept messages to store relevant info
-        switch (message.subject) {
-            case "main:castSessionCreated": {
-                // Close after session is created
-                if (
-                    receiverSelector?.isOpen &&
-                    // If selector context is the same as the instance context
-                    isSameContext(
-                        receiverSelector.pageInfo,
-                        instance.contentContext
-                    ) &&
-                    // If selector is supposed to close
-                    (await options.get("receiverSelectorWaitForConnection"))
-                ) {
-                    receiverSelector.close();
-                }
-
-                const { receiverId: deviceId } = message.data;
-
-                instance.session = {
-                    deviceId,
-                    sessionId: message.data.sessionId
-                };
-
-                const device = deviceManager.getDeviceById(deviceId);
-                if (!device) {
-                    logger.error(
-                        "[on main:castSessionCreated]: Could not find device with ID:",
-                        deviceId
-                    );
-                    break;
-                }
-
-                instance.contentPort.postMessage({
-                    subject: "cast:sessionCreated",
-                    data: {
-                        ...message.data,
-                        receiver: createReceiver(device)
-                    }
-                });
-
-                break;
-            }
-
-            case "main:castSessionUpdated":
-                instance.contentPort.postMessage({
-                    subject: "cast:sessionUpdated",
-                    data: message.data
-                });
-        }
-
-        instance.contentPort.postMessage(message);
-    }
-
-    /**
-     * Handle content messages from the cast instance. These will either
-     * be handled here in the background script or forwarded to the
-     * bridge associated with the cast instance.
-     */
-    private async handleContentMessage(
-        instance: CastInstance,
-        message: Message
-    ) {
-        // Limit untrusted instances to allowed messages subset
-        if (
-            !allowedContentMessages.includes(message.subject) &&
-            !instance.isTrusted
-        ) {
-            logger.error(`Forbidden message type! (${message.subject})`);
-            disconnectContentPort(instance.contentPort);
-            return;
-        }
-
-        const [destination] = message.subject.split(":");
-        if (destination === "bridge") {
-            instance.bridgePort.postMessage(message);
-        }
-
-        switch (message.subject) {
-            case "main:initializeCastSdk":
-                instance.apiConfig = message.data.apiConfig;
-                instance.contentPort.postMessage({
-                    subject: "cast:receiverAvailabilityUpdated",
-                    data: {
-                        isAvailable: deviceManager.getDevices().length > 0
-                    }
-                });
-
-                break;
-
-            // User has triggered receiver selection via the cast API
-            case "main:requestSession": {
-                const { sessionRequest, receiverDevice } = message.data;
-
-                // Handle trusted instance receiver selection bypass
-                if (receiverDevice) {
-                    if (!instance.isTrusted) {
-                        logger.error(
-                            "Cast instance not trusted to bypass receiver selection!"
-                        );
-                        disconnectContentPort(instance.contentPort);
-                        break;
-                    }
-
-                    instance.bridgePort.postMessage({
-                        subject: "bridge:createCastSession",
-                        data: {
-                            appId: sessionRequest.appId,
-                            receiverDevice
-                        }
-                    });
-
-                    break;
-                }
-
-                try {
-                    const selection = await getReceiverSelection({
-                        castInstance: instance
-                    });
-
-                    // Handle cancellation
-                    if (!selection) {
-                        instance.contentPort.postMessage({
-                            subject: "cast:sessionRequestCancelled"
-                        });
-
-                        break;
-                    }
-
-                    /**
-                     * If the media type returned from the selector has
-                     * been changed, we need to cancel the current
-                     * sender and switch it out for the right one.
-                     */
-                    if (selection.mediaType !== ReceiverSelectorMediaType.App) {
-                        instance.contentPort.postMessage({
-                            subject: "cast:sessionRequestCancelled"
-                        });
-
-                        if (!instance.contentContext) {
-                            throw logger.error("Missing content context");
-                        }
-                        this.loadSender(selection, instance.contentContext);
-
-                        break;
-                    }
-
-                    instance.bridgePort.postMessage({
-                        subject: "bridge:createCastSession",
-                        data: {
-                            appId: sessionRequest.appId,
-                            receiverDevice: selection.device
-                        }
-                    });
-                } catch (err) {
-                    // TODO: Report errors properly
-                    instance.contentPort.postMessage({
-                        subject: "cast:sessionRequestCancelled"
-                    });
-                }
-
-                break;
-            }
-        }
     }
 
     /**
@@ -481,63 +355,344 @@ const castManager = new (class {
 
         if (!selection) return;
 
-        this.loadSender(selection, { tabId, frameId });
+        loadSender(selection, { tabId, frameId });
     }
+})();
 
-    /**
-     * Loads the appropriate sender for a given receiver selector
-     * response.
-     */
-    private async loadSender(
-        selection: ReceiverSelection,
-        contentContext: ContentContext
-    ) {
-        // Cancelled
-        if (!selection) {
-            return;
+export default castManager;
+
+/** Handles messages to cast instances from bridge. */
+async function handleBridgeMessage(instance: CastInstance, message: Message) {
+    // Intercept messages to store relevant info
+    switch (message.subject) {
+        case "main:castSessionCreated": {
+            // Close after session is created
+            if (
+                receiverSelector?.isOpen &&
+                // If selector context is the same as the instance context
+                isSameContext(
+                    receiverSelector.pageInfo,
+                    instance.contentContext
+                ) &&
+                // If selector is supposed to close
+                (await options.get("receiverSelectorWaitForConnection"))
+            ) {
+                receiverSelector.close();
+            }
+
+            const { receiverId: deviceId } = message.data;
+
+            if (!instance.session) {
+                logger.error("Instance is missing session!");
+                break;
+            }
+
+            instance.session.sessionId = message.data.sessionId;
+            activeSessions.set(message.data.sessionId, instance.session);
+
+            const device = deviceManager.getDeviceById(deviceId);
+            if (!device) {
+                logger.error(
+                    "[on main:castSessionCreated]: Could not find device with ID:",
+                    deviceId
+                );
+                break;
+            }
+
+            instance.contentPort.postMessage({
+                subject: "cast:sessionCreated",
+                data: {
+                    ...message.data,
+                    receiver: createReceiver(device)
+                }
+            });
+
+            break;
         }
 
-        switch (selection.mediaType) {
-            case ReceiverSelectorMediaType.App: {
-                const instance = this.getInstanceAt(
-                    contentContext.tabId,
-                    contentContext.frameId
-                );
-                if (!instance) {
-                    throw logger.error(
-                        `Cast instance not found at tabId ${contentContext.tabId} / frameId ${contentContext.frameId}`
-                    );
+        case "main:castSessionUpdated":
+            instance.contentPort.postMessage({
+                subject: "cast:sessionUpdated",
+                data: message.data
+            });
+    }
+
+    instance.contentPort.postMessage(message);
+}
+
+/**
+ * Handle content messages from the cast instance. These will either
+ * be handled here in the background script or forwarded to the
+ * bridge associated with the cast instance.
+ */
+async function handleContentMessage(instance: CastInstance, message: Message) {
+    // Limit untrusted instances to allowed messages subset
+    if (
+        !allowedContentMessages.includes(message.subject) &&
+        !instance.isTrusted
+    ) {
+        logger.error(`Forbidden message type! (${message.subject})`);
+        destroyCastInstance(instance);
+        return;
+    }
+
+    const [destination] = message.subject.split(":");
+    if (destination === "bridge") {
+        instance.session?.bridgePort.postMessage(message);
+    }
+
+    switch (message.subject) {
+        case "main:initializeCastSdk":
+            instance.apiConfig = message.data.apiConfig;
+            instance.contentPort.postMessage({
+                subject: "cast:receiverAvailabilityUpdated",
+                data: {
+                    isAvailable: deviceManager.getDevices().length > 0
+                }
+            });
+
+            // No need to check for existing sessions if page-scoped
+            if (
+                instance.apiConfig.autoJoinPolicy === AutoJoinPolicy.PAGE_SCOPED
+            ) {
+                break;
+            }
+
+            // Check existing sessions for a valid auto join target
+            sessionLoop: for (const [, session] of activeSessions) {
+                if (
+                    !session.sessionId ||
+                    session.appId !== instance.apiConfig.sessionRequest.appId
+                ) {
+                    continue;
                 }
 
-                if (!instance.apiConfig?.sessionRequest.appId) {
-                    throw logger.error("Invalid session request");
-                }
+                switch (instance.apiConfig.autoJoinPolicy) {
+                    case AutoJoinPolicy.TAB_AND_ORIGIN_SCOPED:
+                        // Ensure matching content tontext
+                        if (
+                            !isSameContext(
+                                instance.contentContext,
+                                session.initialContentContext
+                            )
+                        )
+                            break;
+                    // eslint-disable-next-line no-fallthrough
+                    case AutoJoinPolicy.ORIGIN_SCOPED: {
+                        // Ensure matching origin
+                        if (
+                            instance.contentContext?.origin !==
+                            session.initialContentContext?.origin
+                        )
+                            break;
 
-                instance.contentPort.postMessage({
-                    subject: "cast:receiverAction",
-                    data: {
-                        receiver: createReceiver(selection.device),
-                        action: ReceiverAction.CAST
+                        instance.session = session;
+                        instance.bridgeMessageListener = message =>
+                            handleBridgeMessage(instance, message);
+
+                        session.bridgePort.onMessage.addListener(
+                            instance.bridgeMessageListener
+                        );
+                        session.bridgePort.onDisconnect.addListener(() =>
+                            destroyCastInstance(instance)
+                        );
+
+                        const device = deviceManager.getDeviceById(
+                            session.deviceId
+                        );
+                        if (!device?.status?.applications?.length) {
+                            throw logger.error("Invalid device state");
+                        }
+
+                        /**
+                         * Re-create sessionCreated message. Since the
+                         * sender app hasn't requested a session, this
+                         * will be handled by calling the session
+                         * listener.
+                         */
+                        const application = device?.status?.applications[0];
+                        instance.contentPort.postMessage({
+                            subject: "cast:sessionCreated",
+                            data: {
+                                appId: application.appId,
+                                appImages: [],
+                                displayName: application.displayName,
+                                namespaces: application.namespaces,
+                                receiver: createReceiver(device),
+                                receiverFriendlyName: device.friendlyName,
+                                receiverId: device.id,
+                                senderApps: [],
+                                sessionId: session.sessionId,
+                                statusText: application.statusText,
+                                transportId: session.sessionId,
+                                volume: device.status.volume
+                            }
+                        });
+
+                        break sessionLoop;
                     }
+                }
+            }
+
+            break;
+
+        // User has triggered receiver selection via the cast API
+        case "main:requestSession": {
+            const { sessionRequest, receiverDevice } = message.data;
+
+            // Handle trusted instance receiver selection bypass
+            if (receiverDevice) {
+                if (receiverSelector?.isOpen && instance.contentContext) {
+                    receiverSelector.pageInfo = {
+                        ...instance.contentContext,
+                        url: (
+                            await browser.webNavigation.getFrame({
+                                tabId: instance.contentContext?.tabId,
+                                frameId: instance.contentContext?.frameId
+                            })
+                        ).url
+                    };
+                }
+
+                if (!instance.isTrusted) {
+                    logger.error(
+                        "Cast instance not trusted to bypass receiver selection!"
+                    );
+                    destroyCastInstance(instance);
+                    break;
+                }
+
+                const session = await createCastSession({
+                    instance,
+                    deviceId: receiverDevice.id,
+                    appId: sessionRequest.appId
                 });
 
-                instance.bridgePort.postMessage({
+                session.bridgePort.postMessage({
                     subject: "bridge:createCastSession",
                     data: {
-                        appId: instance.apiConfig?.sessionRequest.appId,
-                        receiverDevice: selection.device
+                        appId: sessionRequest.appId,
+                        receiverDevice
                     }
                 });
 
                 break;
             }
 
-            case ReceiverSelectorMediaType.Screen:
-                await createMirroringPopup(selection.device);
-                break;
+            try {
+                const selection = await getReceiverSelection({
+                    castInstance: instance
+                });
+
+                // Handle cancellation
+                if (!selection) {
+                    instance.contentPort.postMessage({
+                        subject: "cast:sessionRequestCancelled"
+                    });
+
+                    break;
+                }
+
+                /**
+                 * If the media type returned from the selector has
+                 * been changed, we need to cancel the current
+                 * sender and switch it out for the right one.
+                 */
+                if (selection.mediaType !== ReceiverSelectorMediaType.App) {
+                    instance.contentPort.postMessage({
+                        subject: "cast:sessionRequestCancelled"
+                    });
+
+                    if (!instance.contentContext) {
+                        throw logger.error("Missing content context");
+                    }
+                    loadSender(selection, instance.contentContext);
+
+                    break;
+                }
+
+                const session = await createCastSession({
+                    instance,
+                    deviceId: selection.device.id,
+                    appId: sessionRequest.appId
+                });
+
+                session.bridgePort.postMessage({
+                    subject: "bridge:createCastSession",
+                    data: {
+                        appId: sessionRequest.appId,
+                        receiverDevice: selection.device
+                    }
+                });
+            } catch (err) {
+                // TODO: Report errors properly
+                instance.contentPort.postMessage({
+                    subject: "cast:sessionRequestCancelled"
+                });
+            }
+
+            break;
         }
     }
-})();
+}
+
+/**
+ * Loads the appropriate sender for a given receiver selector response.
+ */
+async function loadSender(
+    selection: ReceiverSelection,
+    contentContext: ContentContext
+) {
+    // Cancelled
+    if (!selection) {
+        return;
+    }
+
+    switch (selection.mediaType) {
+        case ReceiverSelectorMediaType.App: {
+            const instance = castManager.getInstanceAt(
+                contentContext.tabId,
+                contentContext.frameId
+            );
+            if (!instance) {
+                throw logger.error(
+                    `Cast instance not found at tabId ${contentContext.tabId} / frameId ${contentContext.frameId}`
+                );
+            }
+
+            if (!instance.apiConfig?.sessionRequest.appId) {
+                throw logger.error("Invalid session request");
+            }
+
+            instance.contentPort.postMessage({
+                subject: "cast:receiverAction",
+                data: {
+                    receiver: createReceiver(selection.device),
+                    action: ReceiverAction.CAST
+                }
+            });
+
+            const session = await createCastSession({
+                instance,
+                deviceId: selection.device.id
+            });
+
+            session.bridgePort.postMessage({
+                subject: "bridge:createCastSession",
+                data: {
+                    appId: session.appId,
+                    receiverDevice: selection.device
+                }
+            });
+
+            break;
+        }
+
+        case ReceiverSelectorMediaType.Screen:
+            await createMirroringPopup(selection.device);
+            break;
+    }
+}
 
 /**
  * Opens a receiver selector with the specified default/available media
@@ -596,15 +751,9 @@ async function getReceiverSelection(selectionOpts: {
             selectionOpts.tabId,
             selectionOpts.frameId
         );
-        /**
-         * If the app in that context is the extension mirroring app or
-         * the default receiver, just ignore it.
-         */
-        const contextAppId = contextInstance?.apiConfig?.sessionRequest.appId;
-        if (
-            contextAppId !== opts.mirroringAppId &&
-            contextAppId !== DEFAULT_MEDIA_RECEIVER_APP_ID
-        ) {
+
+        // Ignore extension senders
+        if (!contextInstance?.isTrusted) {
             selectionOpts.castInstance = contextInstance;
         }
     }
@@ -754,7 +903,7 @@ function createSelector() {
     const onDeviceChange = () => {
         const connectedSessionIds: string[] = [];
         for (const instance of activeInstances) {
-            if (instance.session) {
+            if (instance.session?.sessionId) {
                 connectedSessionIds.push(instance.session.sessionId);
             }
         }
@@ -793,6 +942,7 @@ function createSelector() {
     return selector;
 }
 
+/** Creates and manages mirroring popup window. */
 async function createMirroringPopup(device: ReceiverDevice) {
     let popup: browser.windows.Window;
     try {
@@ -826,5 +976,3 @@ async function createMirroringPopup(device: ReceiverDevice) {
         browser.windows.onRemoved.removeListener(onWindowRemoved);
     });
 }
-
-export default castManager;
