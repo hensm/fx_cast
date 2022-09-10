@@ -92,6 +92,8 @@ type ExtMessageDefinitions = {
     /** Return message to the cast API when a selection is cancelled. */
     "cast:sessionRequestCancelled": undefined;
 
+    "main:requestSessionById": { sessionId: string };
+
     "cast:instanceCreated": { isAvailable: boolean };
     "cast:receiverAvailabilityUpdated": { isAvailable: boolean };
 

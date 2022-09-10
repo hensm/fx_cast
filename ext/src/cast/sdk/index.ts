@@ -349,8 +349,11 @@ export default class {
         });
     }
 
-    requestSessionById(_sessionId: string) {
-        logger.info("STUB :: cast.requestSessionById");
+    requestSessionById(sessionId: string) {
+        pageMessaging.page.sendMessage({
+            subject: "main:requestSessionById",
+            data: { sessionId }
+        });
     }
 
     setCustomReceivers(

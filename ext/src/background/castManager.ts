@@ -48,7 +48,7 @@ interface CastSession {
     deviceId: string;
     appId: string;
     sessionId?: string;
-    initialContentContext?: ContentContext;
+    autoJoinContexts: ContentContext[];
 }
 
 /** Creates a cast session object and sets up messaging. */
@@ -71,8 +71,12 @@ async function createCastSession(opts: {
         bridgePort: await bridge.connect(),
         deviceId: opts.deviceId,
         appId: opts.appId,
-        initialContentContext: opts.instance.contentContext
+        autoJoinContexts: []
     };
+
+    if (opts.instance.contentContext) {
+        session.autoJoinContexts.push(opts.instance.contentContext);
+    }
 
     opts.instance.session = session;
     opts.instance.bridgeMessageListener = message => {
@@ -94,6 +98,56 @@ async function createCastSession(opts: {
     }
 
     return session;
+}
+
+function joinSession(instance: CastInstance, session: CastSession) {
+    if (!session.sessionId) return;
+
+    instance.session = session;
+    instance.bridgeMessageListener = message =>
+        handleBridgeMessage(instance, message);
+
+    session.bridgePort.onMessage.addListener(instance.bridgeMessageListener);
+    session.bridgePort.onDisconnect.addListener(() =>
+        destroyCastInstance(instance)
+    );
+
+    const device = deviceManager.getDeviceById(session.deviceId);
+    if (!device?.status?.applications?.length) {
+        throw logger.error("Invalid device state!");
+    }
+
+    /**
+     * Re-create sessionCreated message. Since the
+     * sender app hasn't requested a session, this
+     * will be handled by calling the session
+     * listener.
+     */
+    const application = device?.status?.applications[0];
+    instance.contentPort.postMessage({
+        subject: "cast:sessionCreated",
+        data: {
+            appId: application.appId,
+            appImages: [],
+            displayName: application.displayName,
+            namespaces: application.namespaces,
+            receiver: createReceiver(device),
+            receiverFriendlyName: device.friendlyName,
+            receiverId: device.id,
+            senderApps: [],
+            sessionId: session.sessionId,
+            statusText: application.statusText,
+            transportId: session.sessionId,
+            volume: device.status.volume
+        }
+    });
+
+    if (instance.contentContext?.tabId) {
+        updateActionState(
+            ActionState.Connected,
+            instance.contentContext?.tabId
+        );
+    }
 }
 
 export interface CastInstance {
@@ -180,6 +234,7 @@ function destroyCastInstance(instance: CastInstance) {
 const allowedContentMessages: Array<Message["subject"]> = [
     "main:initializeCastSdk",
     "main:requestSession",
+    "main:requestSessionById",
     "bridge:sendCastReceiverMessage",
     "bridge:sendCastSessionMessage"
 ];
@@ -493,75 +548,29 @@ async function handleContentMessage(instance: CastInstance, message: Message) {
                     continue;
                 }
 
-                switch (instance.apiConfig.autoJoinPolicy) {
-                    case AutoJoinPolicy.TAB_AND_ORIGIN_SCOPED:
-                        // Ensure matching content tontext
+                // Check for valid auto join sessions
+                const { autoJoinPolicy } = instance.apiConfig;
+                if (
+                    autoJoinPolicy === AutoJoinPolicy.ORIGIN_SCOPED ||
+                    autoJoinPolicy === AutoJoinPolicy.TAB_AND_ORIGIN_SCOPED
+                ) {
+                    for (const context of session.autoJoinContexts) {
+                        // Check same origin
                         if (
-                            !isSameContext(
-                                instance.contentContext,
-                                session.initialContentContext
-                            )
-                        )
-                            break;
-                    // eslint-disable-next-line no-fallthrough
-                    case AutoJoinPolicy.ORIGIN_SCOPED: {
-                        // Ensure matching origin
+                            context.origin !== instance.contentContext?.origin
+                        ) {
+                            continue;
+                        }
+                        // Check same context for tab scoped
                         if (
-                            instance.contentContext?.origin !==
-                            session.initialContentContext?.origin
-                        )
-                            break;
-
-                        instance.session = session;
-                        instance.bridgeMessageListener = message =>
-                            handleBridgeMessage(instance, message);
-
-                        session.bridgePort.onMessage.addListener(
-                            instance.bridgeMessageListener
-                        );
-                        session.bridgePort.onDisconnect.addListener(() =>
-                            destroyCastInstance(instance)
-                        );
-
-                        const device = deviceManager.getDeviceById(
-                            session.deviceId
-                        );
-                        if (!device?.status?.applications?.length) {
-                            throw logger.error("Invalid device state");
+                            autoJoinPolicy ===
+                                AutoJoinPolicy.TAB_AND_ORIGIN_SCOPED &&
+                            !isSameContext(context, instance.contentContext)
+                        ) {
+                            continue;
                         }
 
-                        /**
-                         * Re-create sessionCreated message. Since the
-                         * sender app hasn't requested a session, this
-                         * will be handled by calling the session
-                         * listener.
-                         */
-                        const application = device?.status?.applications[0];
-                        instance.contentPort.postMessage({
-                            subject: "cast:sessionCreated",
-                            data: {
-                                appId: application.appId,
-                                appImages: [],
-                                displayName: application.displayName,
-                                namespaces: application.namespaces,
-                                receiver: createReceiver(device),
-                                receiverFriendlyName: device.friendlyName,
-                                receiverId: device.id,
-                                senderApps: [],
-                                sessionId: session.sessionId,
-                                statusText: application.statusText,
-                                transportId: session.sessionId,
-                                volume: device.status.volume
-                            }
-                        });
-
-                        if (instance.contentContext?.tabId) {
-                            updateActionState(
-                                ActionState.Connected,
-                                instance.contentContext?.tabId
-                            );
-                        }
-
+                        joinSession(instance, session);
                         break sessionLoop;
                     }
                 }
@@ -662,6 +671,27 @@ async function handleContentMessage(instance: CastInstance, message: Message) {
                 instance.contentPort.postMessage({
                     subject: "cast:sessionRequestCancelled"
                 });
+            }
+
+            break;
+        }
+
+        case "main:requestSessionById": {
+            const session = activeSessions.get(message.data.sessionId);
+            if (!session) {
+                logger.log(
+                    `Session not found! (id: ${message.data.sessionId})`
+                );
+                break;
+            }
+
+            if (instance.apiConfig?.sessionRequest.appId === session.appId) {
+                joinSession(instance, session);
+
+                // If requesting by ID, add to the list of auto join contexts
+                if (instance.contentContext) {
+                    session.autoJoinContexts.push(instance.contentContext);
+                }
             }
 
             break;
