@@ -87,11 +87,16 @@
 
     // Keep track of update times for currentTime estimations
     let lastUpdateTime = 0;
+    let lastCurrentTime = 0;
     let currentTime = getEstimatedMediaTime();
 
-    $: if (device.mediaStatus?.currentTime) {
+    $: if (
+        device.mediaStatus?.currentTime &&
+        device.mediaStatus.currentTime !== lastCurrentTime
+    ) {
         lastUpdateTime = Date.now();
         currentTime = device.mediaStatus.currentTime;
+        lastCurrentTime = currentTime;
     }
 
     // Update estimated time every second
