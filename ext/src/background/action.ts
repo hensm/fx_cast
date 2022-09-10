@@ -14,8 +14,7 @@ const isDarkTheme = window.matchMedia("(prefers-color-scheme: dark)").matches;
 export enum ActionState {
     Default,
     Connecting,
-    Connected,
-    Disabled
+    Connected
 }
 
 /** Updates action details depending on given state. */
@@ -29,9 +28,6 @@ export function updateActionState(state: ActionState, tabId?: number) {
         case ActionState.Default:
             title = _("actionTitleDefault");
             break;
-        case ActionState.Disabled:
-            title = _("actionTitleDisabled");
-            break;
         case ActionState.Connecting:
             title = _("actionTitleConnecting");
             path = isDarkTheme
@@ -44,18 +40,14 @@ export function updateActionState(state: ActionState, tabId?: number) {
             break;
     }
 
-    if (state === ActionState.Disabled) {
-        browser.browserAction.disable(tabId);
-    } else {
-        browser.browserAction.enable(tabId);
-    }
-
     browser.browserAction.setTitle({ tabId, title });
     browser.browserAction.setIcon({ tabId, path });
 }
 
 export function initAction() {
     logger.info("init (action)");
+
+    updateActionState(ActionState.Default);
 
     browser.browserAction.onClicked.addListener(async tab => {
         if (tab.id === undefined) {

@@ -9,12 +9,8 @@
     },
 
     "actionTitleDefault": {
-        "message": "fx_cast: Ready to cast",
+        "message": "fx_cast",
         "description": "Title for toolbar button in default state."
-    },
-    "actionTitleDisabled": {
-        "message": "fx_cast: Unable to cast",
-        "description": "Title for toolbar button in disabled state."
     },
     "actionTitleConnecting": {
         "message": "fx_cast: Connecting",

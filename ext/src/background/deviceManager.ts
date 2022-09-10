@@ -47,7 +47,7 @@ export default new (class extends TypedEventTarget<EventMap> {
     async refresh() {
         this.bridgePort?.disconnect();
 
-        updateActionState(ActionState.Disabled);
+        updateActionState(ActionState.Default);
 
         try {
             this.bridgeInfo = await bridge.getInfo();
@@ -66,14 +66,6 @@ export default new (class extends TypedEventTarget<EventMap> {
                     shouldWatchStatus: true
                 }
             });
-        }
-    }
-
-    private updateAction() {
-        if (this.receiverDevices.size > 0) {
-            updateActionState(ActionState.Default);
-        } else {
-            updateActionState(ActionState.Disabled);
         }
     }
 
@@ -154,8 +146,6 @@ export default new (class extends TypedEventTarget<EventMap> {
                     })
                 );
 
-                this.updateAction();
-
                 break;
             }
 
@@ -170,8 +160,6 @@ export default new (class extends TypedEventTarget<EventMap> {
                         detail: { deviceId: deviceId }
                     })
                 );
-
-                this.updateAction();
 
                 break;
             }
