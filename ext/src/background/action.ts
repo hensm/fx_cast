@@ -8,8 +8,6 @@ const ACTION_ICON_DEFAULT_LIGHT = "icons/cast-default-light.svg";
 const ACTION_ICON_CONNECTING_DARK = "icons/cast-connecting-dark.svg";
 const ACTION_ICON_CONNECTING_LIGHT = "icons/cast-connecting-light.svg";
 const ACTION_ICON_CONNECTED = "icons/cast-connected.svg";
-const ACTION_ICON_DISABLED_DARK = "icons/cast-disabled-dark.svg";
-const ACTION_ICON_DISABLED_LIGHT = "icons/cast-disabled-light.svg";
 
 const isDarkTheme = window.matchMedia("(prefers-color-scheme: dark)").matches;
 
@@ -23,13 +21,16 @@ export enum ActionState {
 /** Updates action details depending on given state. */
 export function updateActionState(state: ActionState, tabId?: number) {
     let title: string;
-    let path: string;
+    let path = isDarkTheme
+        ? ACTION_ICON_DEFAULT_LIGHT
+        : ACTION_ICON_DEFAULT_DARK;
+
     switch (state) {
         case ActionState.Default:
             title = _("actionTitleDefault");
-            path = isDarkTheme
-                ? ACTION_ICON_DEFAULT_LIGHT
-                : ACTION_ICON_DEFAULT_DARK;
+            break;
+        case ActionState.Disabled:
+            title = _("actionTitleDisabled");
             break;
         case ActionState.Connecting:
             title = _("actionTitleConnecting");
@@ -40,12 +41,6 @@ export function updateActionState(state: ActionState, tabId?: number) {
         case ActionState.Connected:
             title = _("actionTitleConnected");
             path = ACTION_ICON_CONNECTED;
-            break;
-        case ActionState.Disabled:
-            title = _("actionTitleDisabled");
-            path = isDarkTheme
-                ? ACTION_ICON_DISABLED_LIGHT
-                : ACTION_ICON_DISABLED_DARK;
             break;
     }
 
@@ -61,8 +56,6 @@ export function updateActionState(state: ActionState, tabId?: number) {
 
 export function initAction() {
     logger.info("init (action)");
-
-    updateActionState(ActionState.Default);
 
     browser.browserAction.onClicked.addListener(async tab => {
         if (tab.id === undefined) {
