@@ -173,7 +173,6 @@ body {
 
 .media__image {
     align-self: start;
-    border: 1px solid var(--border-color);
     border-radius: 4px;
     flex-grow: 0;
     max-height: 70px;
