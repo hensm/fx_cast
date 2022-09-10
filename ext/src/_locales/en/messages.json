@@ -8,6 +8,23 @@
         "description": "Description of the extension shown in the add-ons manager."
     },
 
+    "actionTitleDefault": {
+        "message": "fx_cast: Ready to cast",
+        "description": "Title for toolbar button in default state."
+    },
+    "actionTitleDisabled": {
+        "message": "fx_cast: Unable to cast",
+        "description": "Title for toolbar button in disabled state."
+    },
+    "actionTitleConnecting": {
+        "message": "fx_cast: Connecting",
+        "description": "Title for toolbar button whilst connecting."
+    },
+    "actionTitleConnected": {
+        "message": "fx_cast: Connected",
+        "description": "Title for toolbar button whilst connected."
+    },
+
     "popupBridgeErrorBanner": {
         "message": "There is a problem with the bridge!",
         "description": "Bridge error banner message."

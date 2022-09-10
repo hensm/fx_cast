@@ -9,6 +9,7 @@ import messaging from "../messaging";
 import castManager from "./castManager";
 import deviceManager from "./deviceManager";
 
+import { initAction } from "./action";
 import { initMenus } from "./menus";
 import { initWhitelist } from "./whitelist";
 
@@ -129,6 +130,7 @@ async function init() {
     await deviceManager.init();
     await castManager.init();
 
+    await initAction();
     await initMenus();
     await initWhitelist();
 
@@ -138,15 +140,6 @@ async function init() {
                 deviceManager.refresh();
                 break;
         }
-    });
-
-    browser.browserAction.onClicked.addListener(async tab => {
-        if (tab.id === undefined) {
-            logger.error("Tab ID not found in browser action handler.");
-            return;
-        }
-
-        castManager.triggerCast(tab.id);
     });
 }
 

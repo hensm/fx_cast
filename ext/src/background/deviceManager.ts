@@ -13,6 +13,8 @@ import type {
 } from "../cast/sdk/types";
 import { PlayerState } from "../cast/sdk/media/enums";
 
+import { ActionState, updateActionState } from "./action";
+
 interface EventMap {
     deviceUp: { deviceInfo: ReceiverDevice };
     deviceDown: { deviceId: string };
@@ -45,6 +47,8 @@ export default new (class extends TypedEventTarget<EventMap> {
     async refresh() {
         this.bridgePort?.disconnect();
 
+        updateActionState(ActionState.Disabled);
+
         try {
             this.bridgeInfo = await bridge.getInfo();
             // eslint-disable-next-line no-empty
@@ -62,6 +66,14 @@ export default new (class extends TypedEventTarget<EventMap> {
                     shouldWatchStatus: true
                 }
             });
+        }
+    }
+
+    private updateAction() {
+        if (this.receiverDevices.size > 0) {
+            updateActionState(ActionState.Default);
+        } else {
+            updateActionState(ActionState.Disabled);
         }
     }
 
@@ -142,6 +154,8 @@ export default new (class extends TypedEventTarget<EventMap> {
                     })
                 );
 
+                this.updateAction();
+
                 break;
             }
 
@@ -156,6 +170,8 @@ export default new (class extends TypedEventTarget<EventMap> {
                         detail: { deviceId: deviceId }
                     })
                 );
+
+                this.updateAction();
 
                 break;
             }

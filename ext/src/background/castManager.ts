@@ -27,6 +27,7 @@ import ReceiverSelector, {
 } from "./ReceiverSelector";
 
 import deviceManager from "./deviceManager";
+import { ActionState, updateActionState } from "./action";
 
 type AnyPort = Port | TypedMessagePort<Message>;
 
@@ -84,6 +85,13 @@ async function createCastSession(opts: {
     session.bridgePort.onDisconnect.addListener(() =>
         destroyCastInstance(opts.instance)
     );
+
+    if (opts.instance.contentContext?.tabId) {
+        updateActionState(
+            ActionState.Connecting,
+            opts.instance.contentContext?.tabId
+        );
+    }
 
     return session;
 }
@@ -161,6 +169,10 @@ function destroyCastInstance(instance: CastInstance) {
         );
     }
 
+    if (instance.contentContext?.tabId) {
+        updateActionState(ActionState.Default, instance.contentContext?.tabId);
+    }
+
     activeInstances.delete(instance);
 }
 
@@ -227,6 +239,13 @@ const castManager = new (class {
                     });
 
                     delete instance.session;
+
+                    if (instance.contentContext?.tabId) {
+                        updateActionState(
+                            ActionState.Default,
+                            instance.contentContext?.tabId
+                        );
+                    }
                 }
             }
 
@@ -407,6 +426,13 @@ async function handleBridgeMessage(instance: CastInstance, message: Message) {
                 }
             });
 
+            if (instance.contentContext?.tabId) {
+                updateActionState(
+                    ActionState.Connected,
+                    instance.contentContext?.tabId
+                );
+            }
+
             break;
         }
 
@@ -528,6 +554,13 @@ async function handleContentMessage(instance: CastInstance, message: Message) {
                                 volume: device.status.volume
                             }
                         });
+
+                        if (instance.contentContext?.tabId) {
+                            updateActionState(
+                                ActionState.Connected,
+                                instance.contentContext?.tabId
+                            );
+                        }
 
                         break sessionLoop;
                     }
