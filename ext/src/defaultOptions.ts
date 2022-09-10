@@ -58,6 +58,8 @@ export interface Options {
     receiverSelectorWaitForConnection: boolean;
     /** Auto-expand active sessions managed by the extension. */
     receiverSelectorExpandActive: boolean;
+    /** Show media images in receiver selector. */
+    receiverSelectorShowMediaImages: boolean;
 
     /** User agent replacement whitelist enabled. */
     siteWhitelistEnabled: boolean;
@@ -97,6 +99,7 @@ export default {
     receiverSelectorCloseIfFocusLost: true,
     receiverSelectorWaitForConnection: true,
     receiverSelectorExpandActive: true,
+    receiverSelectorShowMediaImages: false,
 
     siteWhitelistEnabled: true,
     siteWhitelist: [{ pattern: "https://www.netflix.com/*", isEnabled: true }],

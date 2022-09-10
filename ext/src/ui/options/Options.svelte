@@ -365,22 +365,6 @@
                 <div class="option option--inline">
                     <div class="option__control">
                         <input
-                            id="receiverSelectorCloseIfFocusLost"
-                            type="checkbox"
-                            bind:checked={opts.receiverSelectorCloseIfFocusLost}
-                        />
-                    </div>
-                    <label
-                        class="option__label"
-                        for="receiverSelectorCloseIfFocusLost"
-                    >
-                        {_("optionsReceiverSelectorCloseIfFocusLost")}
-                    </label>
-                </div>
-
-                <div class="option option--inline">
-                    <div class="option__control">
-                        <input
                             id="receiverSelectorExpandActive"
                             type="checkbox"
                             bind:checked={opts.receiverSelectorExpandActive}
@@ -391,6 +375,41 @@
                         for="receiverSelectorExpandActive"
                     >
                         {_("optionsReceiverSelectorExpandActive")}
+                    </label>
+                </div>
+
+                <div class="option option--inline">
+                    <div class="option__control">
+                        <input
+                            id="receiverSelectorShowMediaImages"
+                            type="checkbox"
+                            bind:checked={opts.receiverSelectorShowMediaImages}
+                        />
+                    </div>
+                    <label
+                        class="option__label"
+                        for="receiverSelectorShowMediaImages"
+                    >
+                        {_("optionsReceiverSelectorShowMediaImages")}
+                    </label>
+                    <div class="option__description">
+                        {_("optionsReceiverSelectorShowMediaImagesDescription")}
+                    </div>
+                </div>
+
+                <div class="option option--inline">
+                    <div class="option__control">
+                        <input
+                            id="receiverSelectorCloseIfFocusLost"
+                            type="checkbox"
+                            bind:checked={opts.receiverSelectorCloseIfFocusLost}
+                        />
+                    </div>
+                    <label
+                        class="option__label"
+                        for="receiverSelectorCloseIfFocusLost"
+                    >
+                        {_("optionsReceiverSelectorCloseIfFocusLost")}
                     </label>
                 </div>
             </fieldset>

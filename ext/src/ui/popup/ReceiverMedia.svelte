@@ -4,7 +4,7 @@
     import type { ReceiverDevice } from "../../types";
 
     import { MediaStatus, _MediaCommand } from "../../cast/sdk/types";
-    import type { Image, Volume } from "../../cast/sdk/classes";
+    import type { Volume } from "../../cast/sdk/classes";
     import {
         MetadataType,
         PlayerState,
@@ -27,6 +27,7 @@
     export let status: MediaStatus;
     export let device: ReceiverDevice;
     export let textTracks: Track[] = [];
+    export let showImage = false;
 
     $: isPlayingOrPaused =
         status.playerState === PlayerState.PLAYING ||
@@ -38,14 +39,13 @@
 
     let mediaTitle: Optional<string>;
     let mediaSubtitle: Optional<string>;
-    let mediaImage: Optional<Image>;
+    let mediaImageSet: Optional<string>;
 
     // Choose subset of metadata depending on metadata type
     $: {
         const metadata = status?.media?.metadata;
 
         mediaTitle = metadata?.title;
-        mediaImage = metadata?.images?.[0];
         mediaSubtitle = undefined;
 
         if (metadata) {
@@ -70,6 +70,18 @@
                 case MetadataType.GENERIC:
                     mediaSubtitle = metadata.subtitle;
             }
+        }
+
+        if (showImage && metadata?.images?.length) {
+            let imageSet: string[] = [];
+            for (const image of metadata.images) {
+                let sizeString = image.url;
+                if (image.width) sizeString += ` ${image.width}w`;
+                imageSet.push(sizeString);
+            }
+            mediaImageSet = imageSet.join(",");
+        } else {
+            mediaImageSet = undefined;
         }
     }
 
@@ -155,17 +167,22 @@
     }
 </script>
 
-<div class="media" style:--media-image="url({mediaImage?.url})">
+<div class="media">
     {#if mediaTitle}
         <div class="media__metadata">
-            <div class="media__title" title={mediaTitle}>
-                {mediaTitle}
-            </div>
-            {#if mediaSubtitle}
-                <div class="media__subtitle">
-                    {mediaSubtitle}
-                </div>
+            {#if mediaImageSet}
+                <img class="media__image" srcset={mediaImageSet} alt="" />
             {/if}
+            <div class="media__metadata-text">
+                <div class="media__title" title={mediaTitle}>
+                    {mediaTitle}
+                </div>
+                {#if mediaSubtitle}
+                    <div class="media__subtitle">
+                        {mediaSubtitle}
+                    </div>
+                {/if}
+            </div>
         </div>
     {/if}
 

@@ -396,6 +396,14 @@
         "message": "Auto-expand media controls for connected devices",
         "description": "Receiver selector expand active checkbox label."
     },
+    "optionsReceiverSelectorShowMediaImages": {
+        "message": "Show media images",
+        "description": "Receiver selector show media images checkbox label."
+    },
+    "optionsReceiverSelectorShowMediaImagesDescription": {
+        "message": "Loads media thumbnail/branding images from remote servers.",
+        "description": "Receiver selector show media images option description."
+    },
 
     "optionsSiteWhitelistCategoryName": {
         "message": "Site whitelist",

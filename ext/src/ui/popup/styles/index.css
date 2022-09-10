@@ -163,10 +163,24 @@ body {
 
 .media__metadata,
 .media__controls {
-    padding: 5px 10px;
+    padding: 5px;
 }
 
 .media__metadata {
+    display: flex;
+    gap: 10px;
+}
+
+.media__image {
+    align-self: start;
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    flex-grow: 0;
+    max-height: 70px;
+    max-width: 120px;
+}
+
+.media__metadata-text {
     display: flex;
     flex-direction: column;
 }
@@ -177,7 +191,6 @@ body {
 .media__subtitle {
     color: var(--secondary-color);
 }
-.media__title,
 .media__subtitle {
     overflow: hidden;
     text-overflow: ellipsis;

@@ -467,6 +467,7 @@
         <div class="receiver__expanded">
             <ReceiverMedia
                 status={mediaStatus}
+                showImage={opts?.receiverSelectorShowMediaImages}
                 {device}
                 {textTracks}
                 on:togglePlayback={() => handleMediaPlayPause()}
