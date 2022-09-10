@@ -317,16 +317,16 @@
             data: { deviceId: device.id }
         });
     }
+
+    function openOptionsPage() {
+        browser.runtime.openOptionsPage();
+    }
 </script>
 
 {#if !isBridgeCompatible}
     <div class="banner banner--warn">
         {_("popupBridgeErrorBanner")}
-        <button
-            on:click={() => {
-                browser.runtime.openOptionsPage();
-            }}
-        >
+        <button on:click={openOptionsPage}>
             {_("popupBridgeErrorBannerOptions")}
         </button>
     </div>
