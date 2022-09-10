@@ -262,7 +262,7 @@
                 <button
                     class="media__backward-button ghost"
                     title={_("popupMediaSeekBackward")}
-                    disabled={!isPlayingOrPaused}
+                    disabled={status.playerState === PlayerState.IDLE}
                     on:click={() =>
                         dispatch("seek", { position: currentTime - 5 })}
                 />
@@ -280,7 +280,6 @@
                     status.playerState === PlayerState.PLAYING
                         ? _("popupMediaPause")
                         : _("popupMediaPlay")}
-                    disabled={!isPlayingOrPaused}
                     on:click={() => dispatch("togglePlayback")}
                 />
             {/if}
@@ -288,7 +287,7 @@
             {#if status.supportedMediaCommands & _MediaCommand.SEEK}
                 <button
                     class="media__forward-button ghost"
-                    disabled={!isPlayingOrPaused}
+                    disabled={status.playerState === PlayerState.IDLE}
                     title={_("popupMediaSeekForward")}
                     on:click={() =>
                         dispatch("seek", { position: currentTime + 5 })}
