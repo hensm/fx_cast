@@ -54,15 +54,20 @@ export function convertSupportedMediaCommandsFlags(flags: _MediaCommand) {
     const supportedMediaCommands: string[] = [];
     if (flags & _MediaCommand.PAUSE) {
         supportedMediaCommands.push(MediaCommand.PAUSE);
-    } else if (flags & _MediaCommand.SEEK) {
+    }
+    if (flags & _MediaCommand.SEEK) {
         supportedMediaCommands.push(MediaCommand.SEEK);
-    } else if (flags & _MediaCommand.STREAM_VOLUME) {
+    }
+    if (flags & _MediaCommand.STREAM_VOLUME) {
         supportedMediaCommands.push(MediaCommand.STREAM_VOLUME);
-    } else if (flags & _MediaCommand.STREAM_MUTE) {
+    }
+    if (flags & _MediaCommand.STREAM_MUTE) {
         supportedMediaCommands.push(MediaCommand.STREAM_MUTE);
-    } else if (flags & _MediaCommand.QUEUE_NEXT) {
+    }
+    if (flags & _MediaCommand.QUEUE_NEXT) {
         supportedMediaCommands.push("queue_next");
-    } else if (flags & _MediaCommand.QUEUE_PREV) {
+    }
+    if (flags & _MediaCommand.QUEUE_PREV) {
         supportedMediaCommands.push("queue_prev");
     }
 
