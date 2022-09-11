@@ -77,11 +77,13 @@ export function convertSupportedMediaCommandsFlags(flags: _MediaCommand) {
 interface GetEstimatedTimeOpts {
     currentTime: number;
     lastUpdateTime: number;
+    playbackRate?: number;
     duration?: Nullable<number>;
 }
 export function getEstimatedTime(opts: GetEstimatedTimeOpts) {
     let estimatedTime =
-        opts.currentTime + (Date.now() - opts.lastUpdateTime) / 1000;
+        opts.currentTime +
+        (opts.playbackRate ?? 1) * ((Date.now() - opts.lastUpdateTime) / 1000);
 
     // Enforce valid range
     if (estimatedTime < 0) {

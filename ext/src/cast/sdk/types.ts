@@ -4,7 +4,12 @@
  */
 
 import type { SenderApplication, Volume, Image } from "./classes";
-import type { MediaInfo, QueueItem } from "./media/classes";
+import type {
+    BreakStatus,
+    LiveSeekableRange,
+    MediaInfo,
+    QueueItem
+} from "./media/classes";
 import type {
     IdleReason,
     PlayerState,
@@ -14,18 +19,20 @@ import type {
 
 export interface MediaStatus {
     activeTrackIds?: number[];
+    breakStatus?: BreakStatus;
     currentItemId?: number;
-    mediaSessionId: number;
-    media?: MediaInfo;
-    playbackRate: number;
-    playerState: PlayerState;
+    currentTime: Nullable<number>;
+    customData: unknown;
     idleReason?: IdleReason;
     items?: QueueItem[];
-    currentTime: Nullable<number>;
-    supportedMediaCommands: number;
+    liveSeekableRange?: LiveSeekableRange;
+    media?: MediaInfo;
+    mediaSessionId: number;
+    playbackRate: number;
+    playerState: PlayerState;
     repeatMode?: RepeatMode;
+    supportedMediaCommands: number;
     volume: Volume;
-    customData: unknown;
 }
 
 export interface ReceiverApplication {

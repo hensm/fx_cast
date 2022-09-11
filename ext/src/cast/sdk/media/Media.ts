@@ -38,9 +38,9 @@ type MediaMessageCallback = (
     message: DistributiveOmit<SenderMediaMessage, "requestId">
 ) => Promise<void>;
 
-const MediaMessageCallbacks = new WeakMap<Media, MediaMessageCallback>();
-export const MediaUpdateListeners = new WeakMap<Media, Set<UpdateListener>>();
-export const MediaLastUpdateTimes = new WeakMap<Media, number>();
+const mediaMessageCallbacks = new WeakMap<Media, MediaMessageCallback>();
+export const mediaUpdateListeners = new WeakMap<Media, Set<UpdateListener>>();
+export const mediaLastUpdateTimes = new WeakMap<Media, number>();
 
 /** Creates a Media object and initializes private data. */
 export function createMedia(
@@ -48,9 +48,9 @@ export function createMedia(
     mediaMessageCallback: MediaMessageCallback
 ) {
     const media = new Media(...mediaArgs);
-    MediaMessageCallbacks.set(media, mediaMessageCallback);
-    MediaUpdateListeners.set(media, new Set());
-    MediaLastUpdateTimes.set(media, 0);
+    mediaMessageCallbacks.set(media, mediaMessageCallback);
+    mediaUpdateListeners.set(media, new Set());
+    mediaLastUpdateTimes.set(media, 0);
 
     return media;
 }
@@ -61,18 +61,18 @@ export default class Media {
     #id = uuid();
 
     get #updateListeners() {
-        const updateListeners = MediaUpdateListeners.get(this);
+        const updateListeners = mediaUpdateListeners.get(this);
         if (!updateListeners)
             throw logger.error("Missing media update listeners!");
         return updateListeners;
     }
     get #mediaMessageCallback() {
-        const callback = MediaMessageCallbacks.get(this);
+        const callback = mediaMessageCallbacks.get(this);
         if (!callback) throw logger.error("Missing media message callback!");
         return callback;
     }
     get #lastUpdateTime() {
-        const lastUpdateTime = MediaLastUpdateTimes.get(this);
+        const lastUpdateTime = mediaLastUpdateTimes.get(this);
         if (lastUpdateTime === undefined)
             throw logger.error("Missing last update time!");
         return lastUpdateTime;
@@ -127,18 +127,15 @@ export default class Media {
      * information reported by the receiver.
      */
     getEstimatedBreakClipTime() {
-        if (!this.breakStatus?.currentBreakClipTime) return;
+        if (this.breakStatus?.currentBreakClipTime === undefined) return;
+        if (this.playerState === PlayerState.PLAYING) {
+            return getEstimatedTime({
+                currentTime: this.breakStatus.currentBreakClipTime,
+                lastUpdateTime: this.#lastUpdateTime
+            });
+        }
 
-        const currentBreakClip = this.media?.breakClips?.find(
-            breakClip => breakClip.id === this.breakStatus?.breakClipId
-        );
-        if (!currentBreakClip) return;
-
-        return getEstimatedTime({
-            currentTime: this.breakStatus.currentBreakClipTime,
-            lastUpdateTime: this.#lastUpdateTime,
-            duration: currentBreakClip.duration
-        });
+        return this.breakStatus.currentBreakClipTime;
     }
 
     /**
@@ -146,18 +143,15 @@ export default class Media {
      * information reported by the receiver.
      */
     getEstimatedBreakTime() {
-        if (!this.breakStatus?.currentBreakTime) return;
+        if (this.breakStatus?.currentBreakTime === undefined) return;
+        if (this.playerState === PlayerState.PLAYING) {
+            return getEstimatedTime({
+                currentTime: this.breakStatus.currentBreakTime,
+                lastUpdateTime: this.#lastUpdateTime
+            });
+        }
 
-        const currentBreak = this.media?.breaks?.find(
-            break_ => break_.id === this.breakStatus?.breakId
-        );
-        if (!currentBreak) return;
-
-        return getEstimatedTime({
-            currentTime: this.breakStatus.currentBreakTime,
-            lastUpdateTime: this.#lastUpdateTime,
-            duration: currentBreak.duration
-        });
+        return this.breakStatus.currentBreakTime;
     }
 
     getEstimatedLiveSeekableRange() {
@@ -173,6 +167,7 @@ export default class Media {
             return getEstimatedTime({
                 currentTime: this.currentTime,
                 lastUpdateTime: this.#lastUpdateTime,
+                playbackRate: this.playbackRate,
                 duration: this.media?.duration
             });
         }

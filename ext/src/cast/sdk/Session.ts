@@ -23,8 +23,8 @@ import {
 import type { LoadRequest, QueueLoadRequest, QueueItem } from "./media/classes";
 import Media, {
     createMedia,
-    MediaLastUpdateTimes,
-    MediaUpdateListeners,
+    mediaLastUpdateTimes,
+    mediaUpdateListeners,
     NS_MEDIA
 } from "./media/Media";
 
@@ -36,10 +36,11 @@ const logger = new Logger("fx_cast [sdk :: cast.Session]");
  */
 export function updateMedia(media: Media, status: MediaStatus) {
     if (status.currentTime) {
-        MediaLastUpdateTimes.set(media, Date.now());
+        mediaLastUpdateTimes.set(media, Date.now());
     }
 
     // Copy basic props
+    if (status.breakStatus) media.breakStatus = status.breakStatus;
     if (status.currentTime) media.currentTime = status.currentTime;
     if (status.customData) media.customData = status.customData;
     if (status.idleReason) media.idleReason = status.idleReason;
@@ -87,20 +88,20 @@ export function updateMedia(media: Media, status: MediaStatus) {
     }
 }
 
-export const SessionMessageListeners = new WeakMap<
+export const sessionMessageListeners = new WeakMap<
     Session,
     Map<string, Set<MessageListener>>
 >();
-export const SessionUpdateListeners = new WeakMap<
+export const sessionUpdateListeners = new WeakMap<
     Session,
     Set<UpdateListener>
 >();
-export const SessionSendMessageCallbacks = new WeakMap<
+export const sessionSendMessageCallbacks = new WeakMap<
     Session,
     Map<string, SendMessageCallback>
 >();
 
-export const SessionLeaveSuccessCallback = new WeakMap<
+export const sessionLeaveSuccessCallback = new WeakMap<
     Session,
     Optional<() => void>
 >();
@@ -108,24 +109,58 @@ export const SessionLeaveSuccessCallback = new WeakMap<
 type SendMediaMessage = (
     message: DistributiveOmit<SenderMediaMessage, "requestId">
 ) => Promise<void>;
-export const SessionSendMediaMessage = new WeakMap<Session, SendMediaMessage>();
+export const sessionSendMediaMessage = new WeakMap<Session, SendMediaMessage>();
+
+interface MediaRequest {
+    successCallback: () => void;
+    errorCallback: (error: CastError) => void;
+    message: SenderMediaMessage;
+    requestId: number;
+}
+
+const sessionMediaRequests = new WeakMap<Session, Map<number, MediaRequest>>();
 
 /** Creates a Session object and initializes private data. */
 export function createSession(
     sessionArgs: ConstructorParameters<typeof Session>
 ) {
     const session = new Session(...sessionArgs);
-    SessionUpdateListeners.set(session, new Set());
-    SessionSendMessageCallbacks.set(session, new Map());
+    sessionUpdateListeners.set(session, new Set());
+    sessionSendMessageCallbacks.set(session, new Map());
 
-    SessionSendMediaMessage.set(session, message => {
+    // Record of pending media requests
+    // FIXME: Handle request timeouts
+    const mediaRequests = new Map<number, MediaRequest>();
+    sessionMediaRequests.set(session, mediaRequests);
+
+    // Current media request ID
+    let mediaRequestId = 1;
+
+    /**
+     * Stores callbacks for request response, then adds current request
+     * ID to the message and sends it.
+     */
+    sessionSendMediaMessage.set(session, message => {
         return new Promise<void>((resolve, reject) => {
-            session.sendMessage(
-                NS_MEDIA,
-                { ...message, requestId: 0 },
-                resolve,
-                reject
-            );
+            const requestId = mediaRequestId++;
+            const request: MediaRequest = {
+                successCallback: () => {
+                    mediaRequests.delete(requestId);
+                    resolve();
+                },
+                errorCallback: () => {
+                    mediaRequests.delete(requestId);
+                    reject();
+                },
+                message: { ...message, requestId },
+                requestId
+            };
+
+            mediaRequests.set(request.requestId, request);
+            session.sendMessage(NS_MEDIA, request.message, undefined, () => {
+                mediaRequests.delete(requestId);
+                reject();
+            });
         });
     });
 
@@ -142,36 +177,43 @@ export default class Session {
     #loadMediaErrorCallback?: (err: CastError) => void;
 
     get #messageListeners() {
-        const messageListeners = SessionMessageListeners.get(this);
+        const messageListeners = sessionMessageListeners.get(this);
         if (!messageListeners)
             throw logger.error("Missing session message listeners!");
         return messageListeners;
     }
     get #updateListeners() {
-        const updateListeners = SessionUpdateListeners.get(this);
+        const updateListeners = sessionUpdateListeners.get(this);
         if (!updateListeners)
             throw logger.error("Missing session update listeners!");
         return updateListeners;
     }
     get #sendMessageCallbacks() {
-        const sendMessageCallback = SessionSendMessageCallbacks.get(this);
+        const sendMessageCallback = sessionSendMessageCallbacks.get(this);
         if (!sendMessageCallback)
             throw logger.error("Missing session sendMessage callback!");
         return sendMessageCallback;
     }
 
     get #sendMediaMessage() {
-        const sendMediaMessage = SessionSendMediaMessage.get(this);
+        const sendMediaMessage = sessionSendMediaMessage.get(this);
         if (!sendMediaMessage)
             throw logger.error("Missing send media message function!");
         return sendMediaMessage;
     }
 
+    get #mediaRequests() {
+        const mediaRequests = sessionMediaRequests.get(this);
+        if (!mediaRequests)
+            throw logger.error("Missing session media requests!");
+        return mediaRequests;
+    }
+
     get #leaveSuccessCallback() {
-        return SessionLeaveSuccessCallback.get(this);
+        return sessionLeaveSuccessCallback.get(this);
     }
     set #leaveSuccessCallback(successCallback: Optional<() => void>) {
-        SessionLeaveSuccessCallback.set(this, successCallback);
+        sessionLeaveSuccessCallback.set(this, successCallback);
     }
 
     media: Media[] = [];
@@ -190,42 +232,48 @@ export default class Session {
     ) {
         this.transportId = sessionId || "";
 
-        SessionMessageListeners.set(this, new Map());
+        sessionMessageListeners.set(this, new Map());
         this.addMessageListener(NS_MEDIA, this.#mediaMessageListener);
     }
 
     #mediaMessageListener = (namespace: string, messageString: string) => {
         if (namespace !== NS_MEDIA) return;
-
         const message: ReceiverMediaMessage = JSON.parse(messageString);
-        switch (message.type) {
-            case "MEDIA_STATUS": {
-                // Update media
-                for (const mediaStatus of message.status) {
-                    let media = this.media.find(
-                        media =>
-                            media.mediaSessionId === mediaStatus.mediaSessionId
-                    );
+        if (message.type !== "MEDIA_STATUS") return;
 
-                    // Handle Media creation
-                    if (!media) {
-                        media = createMedia(
-                            [this.sessionId, mediaStatus.mediaSessionId],
-                            this.#sendMediaMessage
-                        );
+        for (const status of message.status) {
+            let media = this.media.find(
+                media => media.mediaSessionId === status.mediaSessionId
+            );
 
-                        this.media.push(media);
-                        updateMedia(media, mediaStatus);
-                        this.#loadMediaSuccessCallback?.(media);
-                    } else {
-                        updateMedia(media, mediaStatus);
-                        const updateListeners = MediaUpdateListeners.get(media);
-                        if (updateListeners) {
-                            for (const listener of updateListeners) {
-                                listener(true);
-                            }
-                        }
-                    }
+            if (!media) {
+                media = createMedia(
+                    [this.sessionId, status.mediaSessionId],
+                    this.#sendMediaMessage
+                );
+                updateMedia(media, status);
+                this.media.push(media);
+            } else {
+                updateMedia(media, status);
+            }
+        }
+
+        // Handle media request responses
+        const mediaRequest = this.#mediaRequests.get(message.requestId);
+        if (mediaRequest) {
+            mediaRequest.successCallback();
+        }
+
+        for (const status of message.status) {
+            const media = this.media.find(
+                media => media.mediaSessionId === status.mediaSessionId
+            );
+            if (!media) continue;
+
+            const updateListeners = mediaUpdateListeners.get(media);
+            if (updateListeners) {
+                for (const listener of updateListeners) {
+                    listener(true);
                 }
             }
         }
@@ -307,7 +355,11 @@ export default class Session {
         this.#loadMediaErrorCallback = errorCallback;
 
         loadRequest.sessionId = this.sessionId;
-        this.#sendMediaMessage(loadRequest).catch(errorCallback);
+        this.#sendMediaMessage(loadRequest)
+            .then(() => {
+                successCallback?.(this.media[this.media.length - 1]);
+            })
+            .catch(errorCallback);
     }
 
     queueLoad(

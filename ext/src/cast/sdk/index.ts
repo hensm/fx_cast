@@ -33,11 +33,11 @@ import {
 
 import Session, {
     createSession,
-    SessionLeaveSuccessCallback,
-    SessionMessageListeners,
-    SessionSendMediaMessage,
-    SessionSendMessageCallbacks,
-    SessionUpdateListeners,
+    sessionLeaveSuccessCallback,
+    sessionMessageListeners,
+    sessionSendMediaMessage,
+    sessionSendMessageCallbacks,
+    sessionUpdateListeners,
     updateMedia
 } from "./Session";
 
@@ -186,7 +186,7 @@ export default class {
                     const media = createMedia(
                         [status.sessionId, status.media.mediaSessionId],
                         // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-                        SessionSendMediaMessage.get(session)!
+                        sessionSendMediaMessage.get(session)!
                     );
                     updateMedia(media, status.media);
                     session.media = [media];
@@ -223,7 +223,7 @@ export default class {
                 session.namespaces = status.namespaces;
                 session.receiver.volume = status.volume;
 
-                const updateListeners = SessionUpdateListeners.get(session);
+                const updateListeners = sessionUpdateListeners.get(session);
                 if (updateListeners) {
                     for (const listener of updateListeners) {
                         listener(session.status !== SessionStatus.STOPPED);
@@ -238,7 +238,7 @@ export default class {
                 if (session?.status === SessionStatus.CONNECTED) {
                     session.status = SessionStatus.STOPPED;
 
-                    const updateListeners = SessionUpdateListeners.get(session);
+                    const updateListeners = sessionUpdateListeners.get(session);
                     if (updateListeners) {
                         for (const listener of updateListeners) {
                             listener(false);
@@ -254,9 +254,9 @@ export default class {
                 if (session?.status === SessionStatus.CONNECTED) {
                     session.status = SessionStatus.DISCONNECTED;
 
-                    SessionLeaveSuccessCallback.get(session)?.();
+                    sessionLeaveSuccessCallback.get(session)?.();
 
-                    const updateListeners = SessionUpdateListeners.get(session);
+                    const updateListeners = sessionUpdateListeners.get(session);
                     if (updateListeners) {
                         for (const listener of updateListeners) {
                             listener(true);
@@ -271,8 +271,9 @@ export default class {
                 const { sessionId, namespace, messageData } = message.data;
                 const session = this.#sessions.get(sessionId);
                 if (session) {
-                    const listeners =
-                        SessionMessageListeners.get(session)?.get(namespace);
+                    const listeners = sessionMessageListeners
+                        .get(session)
+                        ?.get(namespace);
                     if (listeners) {
                         for (const listener of listeners) {
                             listener(namespace, messageData);
@@ -291,8 +292,9 @@ export default class {
                     break;
                 }
 
-                const sendMessageCallback =
-                    SessionSendMessageCallbacks.get(session)?.get(messageId);
+                const sendMessageCallback = sessionSendMessageCallbacks
+                    .get(session)
+                    ?.get(messageId);
                 if (sendMessageCallback) {
                     const [successCallback, errorCallback] =
                         sendMessageCallback;
