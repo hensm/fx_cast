@@ -35,11 +35,14 @@ import Session, {
     createSession,
     SessionLeaveSuccessCallback,
     SessionMessageListeners,
+    SessionSendMediaMessage,
     SessionSendMessageCallbacks,
-    SessionUpdateListeners
+    SessionUpdateListeners,
+    updateMedia
 } from "./Session";
 
 import * as media from "./media";
+import { createMedia } from "./media/Media";
 
 const logger = new Logger("fx_cast [sdk]");
 
@@ -178,6 +181,16 @@ export default class {
                 session.senderApps = status.senderApps;
                 session.statusText = status.statusText;
                 session.transportId = status.transportId;
+
+                if (status.media) {
+                    const media = createMedia(
+                        [status.sessionId, status.media.mediaSessionId],
+                        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+                        SessionSendMediaMessage.get(session)!
+                    );
+                    updateMedia(media, status.media);
+                    session.media = [media];
+                }
 
                 this.#sessions.set(session.sessionId, session);
 

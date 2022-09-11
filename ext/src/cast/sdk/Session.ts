@@ -34,7 +34,7 @@ const logger = new Logger("fx_cast [sdk :: cast.Session]");
  * Takes a media object and a media status object and merges the status
  * with the existing media object, updating it with new properties.
  */
-function updateMedia(media: Media, status: MediaStatus) {
+export function updateMedia(media: Media, status: MediaStatus) {
     if (status.currentTime) {
         MediaLastUpdateTimes.set(media, Date.now());
     }
@@ -105,6 +105,11 @@ export const SessionLeaveSuccessCallback = new WeakMap<
     Optional<() => void>
 >();
 
+type SendMediaMessage = (
+    message: DistributiveOmit<SenderMediaMessage, "requestId">
+) => Promise<void>;
+export const SessionSendMediaMessage = new WeakMap<Session, SendMediaMessage>();
+
 /** Creates a Session object and initializes private data. */
 export function createSession(
     sessionArgs: ConstructorParameters<typeof Session>
@@ -112,6 +117,17 @@ export function createSession(
     const session = new Session(...sessionArgs);
     SessionUpdateListeners.set(session, new Set());
     SessionSendMessageCallbacks.set(session, new Map());
+
+    SessionSendMediaMessage.set(session, message => {
+        return new Promise<void>((resolve, reject) => {
+            session.sendMessage(
+                NS_MEDIA,
+                { ...message, requestId: 0 },
+                resolve,
+                reject
+            );
+        });
+    });
 
     return session;
 }
@@ -142,6 +158,13 @@ export default class Session {
         if (!sendMessageCallback)
             throw logger.error("Missing session sendMessage callback!");
         return sendMessageCallback;
+    }
+
+    get #sendMediaMessage() {
+        const sendMediaMessage = SessionSendMediaMessage.get(this);
+        if (!sendMediaMessage)
+            throw logger.error("Missing send media message function!");
+        return sendMediaMessage;
     }
 
     get #leaveSuccessCallback() {
@@ -206,22 +229,6 @@ export default class Session {
                 }
             }
         }
-    };
-
-    /**
-     * Sends a media message to the app receiver.
-     */
-    #sendMediaMessage = (
-        message: DistributiveOmit<SenderMediaMessage, "requestId">
-    ) => {
-        return new Promise<void>((resolve, reject) => {
-            this.sendMessage(
-                NS_MEDIA,
-                { ...message, requestId: 0 },
-                resolve,
-                reject
-            );
-        });
     };
 
     #sendReceiverMessage = (

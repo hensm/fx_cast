@@ -131,14 +131,16 @@ function joinSession(instance: CastInstance, session: CastSession) {
             appImages: [],
             displayName: application.displayName,
             namespaces: application.namespaces,
-            receiver: createReceiver(device),
             receiverFriendlyName: device.friendlyName,
             receiverId: device.id,
             senderApps: [],
             sessionId: session.sessionId,
             statusText: application.statusText,
             transportId: session.sessionId,
-            volume: device.status.volume
+            volume: device.status.volume,
+
+            receiver: createReceiver(device),
+            media: device.mediaStatus
         }
     });
 
@@ -252,14 +254,16 @@ function isValidAutoJoinContext(
     instance: CastInstance,
     context: ContentContext
 ) {
-    if (!instance.apiConfig?.autoJoinPolicy) return;
+    if (!instance.apiConfig?.autoJoinPolicy) return false;
 
     const { autoJoinPolicy } = instance.apiConfig;
     if (
         autoJoinPolicy === AutoJoinPolicy.ORIGIN_SCOPED ||
         autoJoinPolicy === AutoJoinPolicy.TAB_AND_ORIGIN_SCOPED
     ) {
+        // Check origin
         if (context.origin !== instance.contentContext?.origin) return false;
+        // If tab-scoped, check context
         if (
             autoJoinPolicy === AutoJoinPolicy.TAB_AND_ORIGIN_SCOPED &&
             !isSameContext(context, instance.contentContext)

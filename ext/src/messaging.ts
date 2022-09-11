@@ -98,7 +98,10 @@ type ExtMessageDefinitions = {
     "cast:instanceCreated": { isAvailable: boolean };
     "cast:receiverAvailabilityUpdated": { isAvailable: boolean };
 
-    "cast:sessionCreated": CastSessionCreatedDetails & { receiver: Receiver };
+    "cast:sessionCreated": CastSessionCreatedDetails & {
+        receiver: Receiver;
+        media?: MediaStatus;
+    };
     "cast:sessionUpdated": CastSessionUpdatedDetails;
     "cast:sessionDisconnected": { sessionId: string };
 
