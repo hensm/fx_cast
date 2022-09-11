@@ -93,12 +93,14 @@ type ExtMessageDefinitions = {
     "cast:sessionRequestCancelled": undefined;
 
     "main:requestSessionById": { sessionId: string };
+    "main:leaveSession": void;
 
     "cast:instanceCreated": { isAvailable: boolean };
     "cast:receiverAvailabilityUpdated": { isAvailable: boolean };
 
     "cast:sessionCreated": CastSessionCreatedDetails & { receiver: Receiver };
     "cast:sessionUpdated": CastSessionUpdatedDetails;
+    "cast:sessionDisconnected": { sessionId: string };
 
     /** Allows the selector popup to send cast NS_RECEIVER messages. */
     "main:sendReceiverMessage": ReceiverSelectorReceiverMessage;

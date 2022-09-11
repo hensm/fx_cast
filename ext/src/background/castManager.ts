@@ -48,7 +48,7 @@ interface CastSession {
     deviceId: string;
     appId: string;
     sessionId?: string;
-    autoJoinContexts: ContentContext[];
+    autoJoinContexts: Set<ContentContext>;
 }
 
 /** Creates a cast session object and sets up messaging. */
@@ -71,11 +71,11 @@ async function createCastSession(opts: {
         bridgePort: await bridge.connect(),
         deviceId: opts.deviceId,
         appId: opts.appId,
-        autoJoinContexts: []
+        autoJoinContexts: new Set()
     };
 
     if (opts.instance.contentContext) {
-        session.autoJoinContexts.push(opts.instance.contentContext);
+        session.autoJoinContexts.add(opts.instance.contentContext);
     }
 
     opts.instance.session = session;
@@ -147,6 +147,20 @@ function joinSession(instance: CastInstance, session: CastSession) {
             ActionState.Connected,
             instance.contentContext?.tabId
         );
+    }
+}
+
+function leaveSession(instance: CastInstance) {
+    if (!instance.session?.sessionId) return;
+
+    instance.contentPort.postMessage({
+        subject: "cast:sessionDisconnected",
+        data: { sessionId: instance.session.sessionId }
+    });
+
+    delete instance.session;
+    if (instance.contentContext?.tabId) {
+        updateActionState(ActionState.Default, instance.contentContext.tabId);
     }
 }
 
@@ -230,11 +244,60 @@ function destroyCastInstance(instance: CastInstance) {
     activeInstances.delete(instance);
 }
 
+/**
+ * Check instance's auto join policy against a content context to
+ * determine if it's a valid auto join target.
+ */
+function isValidAutoJoinContext(
+    instance: CastInstance,
+    context: ContentContext
+) {
+    if (!instance.apiConfig?.autoJoinPolicy) return;
+
+    const { autoJoinPolicy } = instance.apiConfig;
+    if (
+        autoJoinPolicy === AutoJoinPolicy.ORIGIN_SCOPED ||
+        autoJoinPolicy === AutoJoinPolicy.TAB_AND_ORIGIN_SCOPED
+    ) {
+        if (context.origin !== instance.contentContext?.origin) return false;
+        if (
+            autoJoinPolicy === AutoJoinPolicy.TAB_AND_ORIGIN_SCOPED &&
+            !isSameContext(context, instance.contentContext)
+        )
+            return false;
+
+        return true;
+    }
+
+    return false;
+}
+
+interface AutoJoinTarget {
+    session: CastSession;
+    autoJoinContext: ContentContext;
+}
+function findAutoJoinTarget(instance: CastInstance) {
+    for (const [, session] of activeSessions) {
+        if (
+            !session.sessionId ||
+            session.appId !== instance.apiConfig?.sessionRequest.appId
+        )
+            continue;
+
+        for (const context of session.autoJoinContexts) {
+            if (isValidAutoJoinContext(instance, context)) {
+                return { session, autoJoinContext: context } as AutoJoinTarget;
+            }
+        }
+    }
+}
+
 /** Whitelist of safe message types from content. */
 const allowedContentMessages: Array<Message["subject"]> = [
     "main:initializeCastSdk",
     "main:requestSession",
     "main:requestSessionById",
+    "main:leaveSession",
     "bridge:sendCastReceiverMessage",
     "bridge:sendCastSessionMessage"
 ];
@@ -298,7 +361,7 @@ const castManager = new (class {
                     if (instance.contentContext?.tabId) {
                         updateActionState(
                             ActionState.Default,
-                            instance.contentContext?.tabId
+                            instance.contentContext.tabId
                         );
                     }
                 }
@@ -523,7 +586,7 @@ async function handleContentMessage(instance: CastInstance, message: Message) {
     }
 
     switch (message.subject) {
-        case "main:initializeCastSdk":
+        case "main:initializeCastSdk": {
             instance.apiConfig = message.data.apiConfig;
             instance.contentPort.postMessage({
                 subject: "cast:receiverAvailabilityUpdated",
@@ -540,43 +603,11 @@ async function handleContentMessage(instance: CastInstance, message: Message) {
             }
 
             // Check existing sessions for a valid auto join target
-            sessionLoop: for (const [, session] of activeSessions) {
-                if (
-                    !session.sessionId ||
-                    session.appId !== instance.apiConfig.sessionRequest.appId
-                ) {
-                    continue;
-                }
-
-                // Check for valid auto join sessions
-                const { autoJoinPolicy } = instance.apiConfig;
-                if (
-                    autoJoinPolicy === AutoJoinPolicy.ORIGIN_SCOPED ||
-                    autoJoinPolicy === AutoJoinPolicy.TAB_AND_ORIGIN_SCOPED
-                ) {
-                    for (const context of session.autoJoinContexts) {
-                        // Check same origin
-                        if (
-                            context.origin !== instance.contentContext?.origin
-                        ) {
-                            continue;
-                        }
-                        // Check same context for tab scoped
-                        if (
-                            autoJoinPolicy ===
-                                AutoJoinPolicy.TAB_AND_ORIGIN_SCOPED &&
-                            !isSameContext(context, instance.contentContext)
-                        ) {
-                            continue;
-                        }
-
-                        joinSession(instance, session);
-                        break sessionLoop;
-                    }
-                }
-            }
+            const target = findAutoJoinTarget(instance);
+            if (target) joinSession(instance, target.session);
 
             break;
+        }
 
         // User has triggered receiver selection via the cast API
         case "main:requestSession": {
@@ -690,11 +721,53 @@ async function handleContentMessage(instance: CastInstance, message: Message) {
 
                 // If requesting by ID, add to the list of auto join contexts
                 if (instance.contentContext) {
-                    session.autoJoinContexts.push(instance.contentContext);
+                    session.autoJoinContexts.add(instance.contentContext);
                 }
             }
 
             break;
+        }
+
+        case "main:leaveSession": {
+            if (!instance.contentContext || !instance.session?.sessionId) {
+                logger.error("Cannot leave session, instance invalid!");
+                break;
+            }
+
+            // Find auto join target for this instance
+            const target = findAutoJoinTarget(instance);
+            if (target) {
+                // Remove auto join context for future instances
+                instance.session.autoJoinContexts.delete(
+                    target.autoJoinContext
+                );
+
+                const sessionAppId = instance.session.appId;
+                leaveSession(instance);
+
+                /**
+                 * Disconnect other instances within the scope of this
+                 * instances's auto join policy.
+                 */
+                for (const activeInstance of activeInstances) {
+                    if (
+                        (activeInstance === instance ||
+                            activeInstance.session?.appId) !== sessionAppId
+                    )
+                        continue;
+
+                    if (
+                        isValidAutoJoinContext(
+                            activeInstance,
+                            target.autoJoinContext
+                        )
+                    ) {
+                        leaveSession(activeInstance);
+                    }
+                }
+            } else {
+                leaveSession(instance);
+            }
         }
     }
 }

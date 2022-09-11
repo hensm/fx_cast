@@ -33,6 +33,7 @@ import {
 
 import Session, {
     createSession,
+    SessionLeaveSuccessCallback,
     SessionMessageListeners,
     SessionSendMessageCallbacks,
     SessionUpdateListeners
@@ -220,8 +221,7 @@ export default class {
             }
 
             case "cast:sessionStopped": {
-                const { sessionId } = message.data;
-                const session = this.#sessions.get(sessionId);
+                const session = this.#sessions.get(message.data.sessionId);
                 if (session?.status === SessionStatus.CONNECTED) {
                     session.status = SessionStatus.STOPPED;
 
@@ -229,6 +229,24 @@ export default class {
                     if (updateListeners) {
                         for (const listener of updateListeners) {
                             listener(false);
+                        }
+                    }
+                }
+
+                break;
+            }
+
+            case "cast:sessionDisconnected": {
+                const session = this.#sessions.get(message.data.sessionId);
+                if (session?.status === SessionStatus.CONNECTED) {
+                    session.status = SessionStatus.DISCONNECTED;
+
+                    SessionLeaveSuccessCallback.get(session)?.();
+
+                    const updateListeners = SessionUpdateListeners.get(session);
+                    if (updateListeners) {
+                        for (const listener of updateListeners) {
+                            listener(true);
                         }
                     }
                 }

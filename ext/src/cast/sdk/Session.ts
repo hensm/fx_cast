@@ -100,6 +100,11 @@ export const SessionSendMessageCallbacks = new WeakMap<
     Map<string, SendMessageCallback>
 >();
 
+export const SessionLeaveSuccessCallback = new WeakMap<
+    Session,
+    Optional<() => void>
+>();
+
 /** Creates a Session object and initializes private data. */
 export function createSession(
     sessionArgs: ConstructorParameters<typeof Session>
@@ -137,6 +142,13 @@ export default class Session {
         if (!sendMessageCallback)
             throw logger.error("Missing session sendMessage callback!");
         return sendMessageCallback;
+    }
+
+    get #leaveSuccessCallback() {
+        return SessionLeaveSuccessCallback.get(this);
+    }
+    set #leaveSuccessCallback(successCallback: Optional<() => void>) {
+        SessionLeaveSuccessCallback.set(this, successCallback);
     }
 
     media: Media[] = [];
@@ -257,10 +269,21 @@ export default class Session {
     }
 
     leave(
-        _successCallback?: () => void,
-        _errorCallback?: (err: CastError) => void
+        successCallback?: () => void,
+        errorCallback?: (err: CastError) => void
     ) {
-        logger.info("STUB :: Session#leave");
+        if (!this.sessionId) {
+            errorCallback?.(
+                new CastError(ErrorCode.INVALID_PARAMETER, "Session not active")
+            );
+            return;
+        }
+
+        this.#leaveSuccessCallback = successCallback;
+
+        pageMessaging.page.sendMessage({
+            subject: "main:leaveSession"
+        });
     }
 
     loadMedia(
