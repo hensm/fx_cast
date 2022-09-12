@@ -47,8 +47,6 @@ export default new (class extends TypedEventTarget<EventMap> {
     async refresh() {
         this.bridgePort?.disconnect();
 
-        updateActionState(ActionState.Default);
-
         try {
             this.bridgeInfo = await bridge.getInfo();
             // eslint-disable-next-line no-empty
