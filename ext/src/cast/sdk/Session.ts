@@ -20,6 +20,7 @@ import {
     SenderApplication
 } from "./classes";
 
+import { PlayerState } from "./media/enums";
 import type { LoadRequest, QueueLoadRequest, QueueItem } from "./media/classes";
 import Media, {
     createMedia,
@@ -35,28 +36,53 @@ const logger = new Logger("fx_cast [sdk :: cast.Session]");
  * with the existing media object, updating it with new properties.
  */
 export function updateMedia(media: Media, status: MediaStatus) {
-    if (status.currentTime) {
+    media.currentItemId = null;
+    media.loadingItemId = null;
+    media.preloadedItemId = null;
+
+    // Copy status properties to media
+    for (const prop in status) {
+        if (prop === "items") continue;
+
+        switch (prop) {
+            case "volume":
+                media.volume.level = status.volume.level;
+                media.volume.muted = status.volume.muted;
+                break;
+            case "supportedMediaCommands":
+                media.supportedMediaCommands =
+                    convertSupportedMediaCommandsFlags(
+                        status.supportedMediaCommands
+                    );
+                break;
+
+            default:
+                (media as any)[prop] = (status as any)[prop];
+        }
+    }
+
+    if (!("idleReason" in status)) {
+        media.idleReason = null;
+    }
+    if (!("extendedStatus" in status)) {
+        // FIXME: Add extendedStatus types
+        (media as any).extendedStatus = null;
+    }
+
+    // Set last update time on currentTime change
+    if ("currentTime" in status) {
         mediaLastUpdateTimes.set(media, Date.now());
     }
 
-    // Copy basic props
-    if (status.breakStatus) media.breakStatus = status.breakStatus;
-    if (status.currentTime) media.currentTime = status.currentTime;
-    if (status.customData) media.customData = status.customData;
-    if (status.idleReason) media.idleReason = status.idleReason;
-    if (status.media) media.media = status.media;
-    if (status.mediaSessionId) media.mediaSessionId = status.mediaSessionId;
-    if (status.playbackRate) media.playbackRate = status.playbackRate;
-    if (status.playerState) media.playerState = status.playerState;
-    if (status.repeatMode) media.repeatMode = status.repeatMode;
-    if (status.volume) media.volume = status.volume;
-
-    media.supportedMediaCommands = convertSupportedMediaCommandsFlags(
-        status.supportedMediaCommands
-    );
-
-    // Update queue state
-    if (status.items) {
+    if (
+        media.playerState === PlayerState.IDLE &&
+        media.loadingItemId === null
+    ) {
+        media.currentItemId = null;
+        media.loadingItemId = null;
+        media.preloadedItemId = null;
+        media.items = null;
+    } else if (status.items) {
         const newItems: QueueItem[] = [];
 
         for (const newItem of status.items) {
@@ -251,8 +277,8 @@ export default class Session {
                     [this.sessionId, status.mediaSessionId],
                     this.#sendMediaMessage
                 );
-                updateMedia(media, status);
                 this.media.push(media);
+                updateMedia(media, status);
             } else {
                 updateMedia(media, status);
             }
