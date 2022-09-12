@@ -688,6 +688,14 @@ async function handleContentMessage(instance: CastInstance, message: Message) {
                     break;
                 }
 
+                instance.contentPort.postMessage({
+                    subject: "cast:receiverAction",
+                    data: {
+                        receiver: createReceiver(selection.device),
+                        action: ReceiverAction.CAST
+                    }
+                });
+
                 const session = await createCastSession({
                     instance,
                     deviceId: selection.device.id,
