@@ -924,8 +924,25 @@ async function getReceiverSelection(selectionOpts: {
         }
     }
 
-    // Enable app media type if sender application is present
-    if (selectionOpts.castInstance) {
+    let appInfo: Optional<ReceiverSelectorAppInfo>;
+    if (selectionOpts.castInstance?.apiConfig) {
+        if (!baseConfig) {
+            try {
+                ({ baseConfig } = await baseConfigStorage.get("baseConfig"));
+            } catch (err) {
+                throw logger.error("Failed to get Chromecast base config!");
+            }
+        }
+
+        appInfo = {
+            sessionRequest: selectionOpts.castInstance.apiConfig.sessionRequest,
+            isRequestAppAudioCompatible: getAppTag(
+                baseConfig,
+                selectionOpts.castInstance.apiConfig?.sessionRequest.appId
+            )?.supports_audio_only
+        };
+
+        // Enable app media type if sender application is present
         defaultMediaType = ReceiverSelectorMediaType.App;
         availableMediaTypes |= ReceiverSelectorMediaType.App;
     }
@@ -937,27 +954,6 @@ async function getReceiverSelection(selectionOpts: {
 
     // Ensure status manager is initialized
     await deviceManager.init();
-
-    let appInfo: Optional<ReceiverSelectorAppInfo>;
-    if (selectionOpts.castInstance?.apiConfig) {
-        if (!baseConfig) {
-            try {
-                baseConfig = (await baseConfigStorage.get("baseConfig"))
-                    .baseConfig;
-            } catch (err) {
-                throw logger.error("Failed to get Chromecast base config!");
-            }
-        }
-
-        appInfo = {
-            sessionRequest:
-                selectionOpts.castInstance.apiConfig?.sessionRequest,
-            isRequestAppAudioCompatible: getAppTag(
-                baseConfig,
-                selectionOpts.castInstance.apiConfig?.sessionRequest.appId
-            )?.supports_audio_only
-        };
-    }
 
     return new Promise(async (resolve, reject) => {
         // Close an existing open selector
