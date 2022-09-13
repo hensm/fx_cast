@@ -51,6 +51,11 @@
                     "version": "0.3.0",
                     "update_link": "https://github.com/hensm/fx_cast/releases/download/v0.3.0/fx_cast-0.3.0.xpi",
                     "update_hash": "sha256:c9b5a9be95913518bee469d7cc4dfadd55db27a289ce4c81b809b8be29184045"
+                },
+                {
+                    "version": "0.3.1",
+                    "update_link": "https://github.com/hensm/fx_cast/releases/download/v0.3.1/fx_cast-0.3.1.xpi",
+                    "update_hash": "sha256:cda627509a4991100f482a4cdd2db43e3312e1a781b501a15c1db081d9459124"
                 }
             ]
         }
