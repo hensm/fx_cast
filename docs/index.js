@@ -120,7 +120,7 @@ function populateDownloads(releaseList) {
         for (const asset of release.assets) {
             const fileExtension = asset.name.match(PATTERN_FILE_EXT).pop();
             if (fileExtension === "xpi") {
-                if (extensionUrl) break;
+                if (extensionUrl) continue;
 
                 extensionUrl = asset.browser_download_url;
                 extensionVersion = release.tag_name;
