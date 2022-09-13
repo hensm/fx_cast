@@ -27,6 +27,7 @@ export default {
     },
     "C3DE6BC2": { name: "Disney+", matches: "https://www.disneyplus.com/*" },
     "B143C57E": { name: "SoundCloud", matches: "https://soundcloud.com/*" },
+    "10AAD887": { name: "All 4", matches: "https://www.channel4.com/*" },
 
     // Misc
     "9AC194DC": { name: "Plex" },
