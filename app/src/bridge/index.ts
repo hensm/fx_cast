@@ -10,9 +10,13 @@ import { applicationVersion } from "../../config.json";
 
 process.on("SIGTERM", async () => {
     discovery?.stop();
-    await stopMediaServer();
-
-    process.exit(1);
+    try {
+        await stopMediaServer();
+    } catch (err) {
+        console.error("Error stopping media server!", err);
+    } finally {
+        process.exit(1);
+    }
 });
 
 let discovery: Discovery | null = null;
