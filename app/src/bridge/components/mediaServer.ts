@@ -179,16 +179,19 @@ export async function startMediaServer(filePath: string, port: number) {
 
 export function stopMediaServer() {
     return new Promise<void>((resolve, reject) => {
-        if (mediaServer?.listening) {
-            mediaServer.close(err => {
-                if (err) {
-                    reject();
-                } else {
-                    resolve();
-                }
-            });
-
-            mediaServer = undefined;
+        if (!mediaServer?.listening) {
+            resolve();
+            return;
         }
+
+        mediaServer.close(err => {
+            if (err) {
+                reject();
+            } else {
+                resolve();
+            }
+        });
+
+        mediaServer = undefined;
     });
 }
