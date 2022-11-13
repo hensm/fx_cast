@@ -1,5 +1,6 @@
 <script lang="ts">
     import { afterUpdate, onDestroy, onMount, tick } from "svelte";
+    import fuzzysort from "fuzzysort";
 
     import messaging, { Message, Port } from "../../messaging";
     import options, { Options } from "../../lib/options";
@@ -321,7 +322,46 @@
     function openOptionsPage() {
         browser.runtime.openOptionsPage();
     }
+
+    /** Search input element. */
+    let searchInput: HTMLInputElement | undefined;
+    /** Current search term. */
+    let searchTerm: string | undefined;
+    let isSearching = false;
+    /** Results of current search term. */
+    let searchResults: Fuzzysort.KeyResults<ReceiverDevice> | undefined;
+
+    async function handleKeyDown(ev: KeyboardEvent) {
+        if (ev.key === "Escape") {
+            handleSearchClear();
+            return;
+        }
+        if (!isSearching && ev.key.length === 1) {
+            isSearching = true;
+        }
+
+        await tick();
+        searchInput?.focus();
+    }
+    function handleSearchInput() {
+        // Clear search on empty string
+        if (!searchTerm) {
+            handleSearchClear();
+            return;
+        }
+
+        searchResults = fuzzysort.go(searchTerm, devices, {
+            key: "friendlyName"
+        });
+    }
+
+    function handleSearchClear() {
+        isSearching = false;
+        searchTerm = undefined;
+    }
 </script>
+
+<svelte:window on:keydown={handleKeyDown} />
 
 {#if !isBridgeCompatible}
     <div class="banner banner--warn">
@@ -379,8 +419,56 @@
     </div>
 {/if}
 
+{#if isSearching}
+    <div class="search">
+        <input
+            type="text"
+            class="search-input"
+            bind:this={searchInput}
+            bind:value={searchTerm}
+            on:input={handleSearchInput}
+            title={_("popupSearch")}
+        />
+        <button
+            class="search-clear ghost"
+            title={_("popupSearchClear")}
+            on:click={handleSearchClear}
+        />
+    </div>
+{/if}
+
 <ul class="receiver-list">
-    {#if !devices.length}
+    {#if searchTerm && searchResults}
+        {#if !searchResults.length}
+            <div class="receiver-list__not-found">
+                No devices found for "{searchTerm}"
+            </div>
+        {/if}
+
+        {#each searchResults as result}
+            {@const device = devices.find(
+                device => device.id === result.obj.id
+            )}
+
+            {#if device}
+                <Receiver
+                    {opts}
+                    {port}
+                    {device}
+                    {result}
+                    {connectedSessionIds}
+                    {isMediaTypeAvailable}
+                    isAnyMediaTypeAvailable={availableMediaTypes !==
+                        ReceiverSelectorMediaType.None &&
+                        isDeviceCompatible(mediaType, device)}
+                    isAnyConnecting={isConnecting}
+                    bind:lastMenuShownDeviceId
+                    on:cast={ev => onReceiverCast(ev.detail.device)}
+                    on:stop={ev => onReceiverStop(ev.detail.device)}
+                />
+            {/if}
+        {/each}
+    {:else if !devices.length}
         <div class="receiver-list__not-found">
             {_("popupNoReceiversFound")}
         </div>

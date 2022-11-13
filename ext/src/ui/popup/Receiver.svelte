@@ -1,5 +1,6 @@
 <script lang="ts">
     import { createEventDispatcher, onMount } from "svelte";
+    import fuzzysort from "fuzzysort";
 
     import type { Options } from "../../lib/options";
 
@@ -38,6 +39,9 @@
     /** Device to display. */
     export let device: ReceiverDevice;
     export let connectedSessionIds: string[];
+
+    /** Result object if this receiver is displayed in a search results list. */
+    export let result: Nullable<Fuzzysort.KeyResult<ReceiverDevice>> = null;
 
     export let opts: Nullable<Options>;
 
@@ -402,7 +406,12 @@
     });
 </script>
 
-<li class="receiver" bind:this={receiverElement} on:contextmenu={onContextMenu}>
+<li
+    class="receiver"
+    class:receiver--result={!!result}
+    bind:this={receiverElement}
+    on:contextmenu={onContextMenu}
+>
     <img
         class="receiver__icon"
         src="icons/{device.capabilities & ReceiverDeviceCapabilities.VIDEO_OUT
@@ -414,7 +423,11 @@
     />
     <div class="receiver__details">
         <div class="receiver__name">
-            {device.friendlyName}
+            {#if result}
+                {@html fuzzysort.highlight(result)}
+            {:else}
+                {device.friendlyName}
+            {/if}
         </div>
         {#if application && !application.isIdleScreen}
             <div class="receiver__status">
