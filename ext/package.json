@@ -16,7 +16,7 @@
         "fs-extra": "^10.1.0",
         "fuzzysort": "^2.0.3",
         "semver": "^7.3.7",
-        "svelte": "^3.48.0",
+        "svelte": "^3.49.0",
         "svelte-preprocess": "^4.10.6",
         "ts-loader": "^9.2.8",
         "typescript": "^4.6.3",
