@@ -1,0 +1,689 @@
+{
+    "extensionDescription": {
+        "message": "Mengaktifkan dukungan Chromecast untuk mentransmisikan aplikasi web (seperti Netflix atau BBC iPlayer), video HTML5 dan berbagi layar.",
+        "description": "Description of the extension shown in the add-ons manager.",
+        "hash": "28e706bff5afebcbea0771d2fefce33c"
+    },
+    "actionTitleConnecting": {
+        "message": "fx_cast: Menghubungkan",
+        "description": "Title for toolbar button whilst connecting.",
+        "hash": "c09ff6e51063941fd2f028f7d6eb1d95"
+    },
+    "actionTitleConnected": {
+        "message": "fx_cast: Terhubung",
+        "description": "Title for toolbar button whilst connected.",
+        "hash": "5945eeeaf7bb83f9fba000df92446d12"
+    },
+    "popupBridgeErrorBanner": {
+        "message": "Ada masalah dengan bridge!",
+        "description": "Bridge error banner message.",
+        "hash": "a2fa863ad2a93b3380fc0db038e019dc"
+    },
+    "popupBridgeErrorBannerOptions": {
+        "message": "Informasi lebih lanjut",
+        "description": "Bridge error banner button label.",
+        "hash": "c16dea13f2e801809f1db437153dee02"
+    },
+    "popupWhitelistNotWhitelisted": {
+        "message": "$appName$ tidak ada di daftar putih",
+        "description": "Receiver selector whitelist suggestion banner label.",
+        "placeholders": {
+            "appName": { "content": "$1", "example": "Netflix" }
+        },
+        "hash": "7699bc5bc233b6cffd70552dca888941"
+    },
+    "popupWhitelistAddToWhitelist": {
+        "message": "Tambahkan ke daftar putih",
+        "description": "Receiver selector whitelist suggestion banner button label.",
+        "hash": "f62a2993e590b730340f5f377408b2f9"
+    },
+    "popupMediaTypeApp": {
+        "message": "situs ini",
+        "description": "Receiver selector media type <option> text for current site's sender application.",
+        "hash": "447054ca93cd9c437b3ff558d7fed68b"
+    },
+    "popupMediaTypeAppNotFound": {
+        "message": "situs ini (tidak ditemukan)",
+        "description": "Receiver selector media type <option> text for current site's sender application if none found.",
+        "hash": "c5b67276069722dbfb56c6a2b3ceb370"
+    },
+    "popupMediaTypeAppMedia": {
+        "message": "media ini",
+        "description": "Receiver selector media type <option> text for media casting.",
+        "hash": "a153436182910fbadae78621faa67395"
+    },
+    "popupMediaTypeScreen": {
+        "message": "Layar",
+        "description": "Receiver selector media type <option> text for screen.",
+        "hash": "ac9859bb6d9cb5098a9e455667f57c5c"
+    },
+    "popupMediaTypeFile": {
+        "message": "Telusuri...",
+        "description": "Receiver selector media type <option> text for opening a file selector dialog.",
+        "hash": "070e2a9fa21ab2abab971be668738e1e"
+    },
+    "popupMediaSelectCastLabel": {
+        "message": "Transmisikan",
+        "description": "(Cast) <select> to:",
+        "hash": "2697d6a1da20b8baa9c3c866983b195c"
+    },
+    "popupMediaSelectToLabel": {
+        "message": "ke:",
+        "description": "Cast <select> (to:)",
+        "hash": "16b67fe728a86deffba17241c6bd5eaf"
+    },
+    "popupNoReceiversFound": {
+        "message": "Tidak ada perangkat penerima yang ditemukan",
+        "description": "Message displayed in the receiver selector if there are no available receivers.",
+        "hash": "3ce2f57b41fe59bf2709b1d7ad6ec0e6"
+    },
+    "popupCastButtonTitle": {
+        "message": "Transmisikan",
+        "description": "Button text for each receiver entry in the receiver selector.",
+        "hash": "2697d6a1da20b8baa9c3c866983b195c"
+    },
+    "popupCastingButtonTitle": {
+        "message": "Mentransmisikan$ellipsis$",
+        "description": "Button text while establishing a session in the receiver selector. Ellipsis cycles (. → .. → ...) as loading indicator.",
+        "placeholders": {
+            "ellipsis": { "content": "$1", "example": "..." }
+        },
+        "hash": "3a13ea12ce352174fc7628f6ce954a53"
+    },
+    "popupStopButtonTitle": {
+        "message": "Berhenti",
+        "description": "Alternate action button text displayed instead of popupCastButtonTitle.",
+        "hash": "2c9e6b261d6a925c3acc4fa478be4f02"
+    },
+    "popupCastMenuTitle": {
+        "message": "Transmisikan ke $deviceName$",
+        "description": "Menu text for cast item in context menu for receivers in receiver selector.",
+        "placeholders": {
+            "deviceName": { "content": "$1", "example": "Living Room TV" }
+        },
+        "hash": "da6800a599084a9f971214faa56d3806"
+    },
+    "popupStopMenuTitle": {
+        "message": "Hentikan \"$appName$\" di $deviceName$",
+        "description": "Menu text for stop item in context menu for receivers in receiver selector.",
+        "placeholders": {
+            "appName": { "content": "$1", "example": "Netflix" },
+            "deviceName": { "content": "$2", "example": "Living Room TV" }
+        },
+        "hash": "34f1812668ef443ca94b8fdd59f277ad"
+    },
+    "popupShowDetailsTitle": {
+        "message": "Tampilkan detail",
+        "description": "Receiver device expand button title.",
+        "hash": "bca0de3c08c9efbfde9b210731d8e300"
+    },
+    "popupMediaPlay": {
+        "message": "Putar",
+        "description": "Media controls play button title.",
+        "hash": "e8836bb3401b7918d1f663d902728df4"
+    },
+    "popupMediaPause": {
+        "message": "Jeda",
+        "description": "Media controls pause button title.",
+        "hash": "7a53c125ad76bfc91d19f685b9feae50"
+    },
+    "popupMediaSkipPrevious": {
+        "message": "Skip sebelumnya",
+        "description": "Media controls skip previous button title.",
+        "hash": "60b2f75cad3736292b53452594f5798f"
+    },
+    "popupMediaSkipNext": {
+        "message": "Skip setelahnya",
+        "description": "Media controls skip next button title.",
+        "hash": "f11a30ae2d31facfbc43716c63edee0f"
+    },
+    "popupMediaSeek": {
+        "message": "Atur posisi",
+        "description": "Media controls seek bar accessibility label.",
+        "hash": "bc03f4d070364cec72647b465c3d3818"
+    },
+    "popupMediaSeekBackward": {
+        "message": "Mundurkan",
+        "description": "Media controls seek backward button title.",
+        "hash": "1b7ba493964cf798c81dc9e213636b5c"
+    },
+    "popupMediaSeekForward": {
+        "message": "Majukan",
+        "description": "Media controls seek forward button title.",
+        "hash": "4ea30d709af336bf20d8dcbfae6e9353"
+    },
+    "popupMediaSubtitlesCaptions": {
+        "message": "Subtitel/teks tertutup",
+        "description": "Media controls subtitles/cc button title.",
+        "hash": "2a7e8cc0225f48bf497518baddc235d6"
+    },
+    "popupMediaSubtitlesCaptionsOff": {
+        "message": "Nonaktif",
+        "description": "Media controls subtitles/cc button title.",
+        "hash": "68031547056d63979c1bacf256ac7fd5"
+    },
+    "popupMediaMute": {
+        "message": "Bisukan",
+        "description": "Media controls mute button title.",
+        "hash": "213eb933ad370f5dfa8098020f110bff"
+    },
+    "popupMediaUnmute": {
+        "message": "Bunyikan",
+        "description": "Media controls unmute button title.",
+        "hash": "7361ce0749dfbfb7d06ef2e0ca0aa1eb"
+    },
+    "popupMediaVolume": {
+        "message": "Bunyikan",
+        "description": "Media controls volume slider accessibility label.",
+        "hash": "7361ce0749dfbfb7d06ef2e0ca0aa1eb"
+    },
+    "popupMediaLive": {
+        "message": "Siaran Langsung",
+        "description": "Media controls label displayed for live streams.",
+        "hash": "3ee73aedcd12602aeb3f8746e95070aa"
+    },
+    "contextCast": {
+        "message": "Transmisikan...",
+        "description": "Main context menu item title. Ellipsis indicates additional information required as it triggers opening of receiver selector.",
+        "hash": "148ea8aea16251530ad77bc1d24253cb"
+    },
+    "contextAddToWhitelist": {
+        "message": "Tambahkan ke Daftar putih",
+        "description": "Top-level whitelist context menu item title.",
+        "hash": "f62a2993e590b730340f5f377408b2f9"
+    },
+    "contextAddToWhitelistRecommended": {
+        "message": "Tambahkan $matchPattern$ (disarankan)",
+        "description": "Context menu item title for recomended match pattern.",
+        "placeholders": {
+            "matchPattern": { "content": "$1", "example": "https://example.com/*" }
+        },
+        "hash": "395caf736ead76c1a7340850424e2c5b"
+    },
+    "contextAddToWhitelistAdvancedAdd": {
+        "message": "Tambahkan $matchPattern$",
+        "description": "Context menu item title for all other match patterns.",
+        "placeholders": {
+            "matchPattern": { "content": "$1", "example": "*://*.example.com/*" }
+        },
+        "hash": "a79d67f700965693261f2f38f97fd870"
+    },
+    "optionsBridgeLoading": {
+        "message": "Memuat info bridge...",
+        "description": "Loading placeholder text for bridge section on options page.",
+        "hash": "da533bfa70f4359693c6194f601faeeb"
+    },
+    "optionsBridgeFoundStatusTitle": {
+        "message": "Bridge ditemukan",
+        "description": "Bridge OK status title text.",
+        "hash": "e8ea7c0de859a99248eab9b0a8c56e0e"
+    },
+    "optionsBridgeIssueStatusTitle": {
+        "message": "Masalah bridge",
+        "description": "Bridge error status title text.",
+        "hash": "91ca475ef1fd61142c50e14159241986"
+    },
+    "optionsBridgeIssueStatusTextTimedOut": {
+        "message": "Waktu koneksi berakhir.",
+        "description": "Bridge timed out issue additional description text.",
+        "hash": "522040158e825389dd4afe9bee3de5ef"
+    },
+    "optionsBridgeIssueStatusTextAuthentication": {
+        "message": "Gagal mengautentikasi koneksi.",
+        "description": "Bridge authentication issue additional description text.",
+        "hash": "48874ba669a8985a0a09e2d702b66c86"
+    },
+    "optionsBridgeNotFoundStatusTitle": {
+        "message": "Bridge tidak ditemukan",
+        "description": "Bridge missing status title text.",
+        "hash": "ac23e6d80564cb2e6b4358421e498f5d"
+    },
+    "optionsBridgeNotFoundStatusText": {
+        "message": "Coba unduh dan instal versi terbaru.",
+        "description": "Bridge not found additional description text",
+        "hash": "a6cae425dc794e2798c50c914f060af1"
+    },
+    "optionsBridgeStatsName": {
+        "message": "Nama:",
+        "description": "Bridge stats name row title.",
+        "hash": "bcc9f177b0a20c395aac47bd88204419"
+    },
+    "optionsBridgeStatsVersion": {
+        "message": "Versi:",
+        "hash": "eb089a4ff5e2c6afc41bd4a81a4dade6"
+    },
+    "optionsBridgeStatsExpectedVersion": {
+        "message": "Versi yang diharapkan:",
+        "description": "Bridge stats expected version row title.",
+        "hash": "e8d73707f7a8e5c340b1ab52abf6793a"
+    },
+    "optionsBridgeStatsCompatibility": {
+        "message": "Kompatibilitas:",
+        "description": "Bridge stats compatibility row title.",
+        "hash": "834a9ddcab7c18521a58522adabffb1f"
+    },
+    "optionsBridgeStatsRecommendedAction": {
+        "message": "Tindakan yang direkomendasikan:",
+        "description": "Bridge stats recommended action row title.",
+        "hash": "967cea6c06bb9309f3cac58e0accdab1"
+    },
+    "optionsBridgeCompatible": {
+        "message": "Kompatibel",
+        "description": "Compatibility status is definitely compatible.",
+        "hash": "7976aeb05daa7e3ab6ff5ebc8d74b0f9"
+    },
+    "optionsBridgeLikelyCompatible": {
+        "message": "Mungkin kompatibel",
+        "description": "Compatibility status is probably compatible.",
+        "hash": "a08be1061026eeb504cdf08f4b7c864e"
+    },
+    "optionsBridgeIncompatible": {
+        "message": "Tidak kompatibel",
+        "description": "Compatibility status is definitely incompatible.",
+        "hash": "28453c055bb3d322bb9a6ff2ba430ea2"
+    },
+    "optionsBridgeOlderAction": {
+        "message": "Versi bridge lebih tua dari yang diharapkan, coba perbarui bridge ke versi terbaru.",
+        "description": "Recommended action for when the installed bridge version is older than the installed extension version.",
+        "hash": "401dc978f73e5452ae3ac0622a65fd05"
+    },
+    "optionsBridgeNewerAction": {
+        "message": "Versi bridge lebih baru dari yang diharapkan, coba perbarui ekstensi ke versi terbaru.",
+        "description": "Recommended action for when the installed bridge version is newer than the installed extension version.",
+        "hash": "1579f4717e682022f947d9f169ccad55"
+    },
+    "optionsBridgeNoAction": {
+        "message": "Tidak perlu tindakan.",
+        "description": "Recommended action for when both bridge and extension versions are compatible or likely compatible.",
+        "hash": "c5ba416a736b041c1f96cee49830e4a4"
+    },
+    "optionsBridgeRefresh": {
+        "message": "Perbarui status bridge",
+        "description": "Bridge status refresh button title.",
+        "hash": "8f1b5aa483d9cb3cc652e28fa6c8310b"
+    },
+    "optionsBridgeUpdateCheck": {
+        "message": "Periksa Pembaruan",
+        "description": "Update check button title.",
+        "hash": "f712c081e2e0ff4d83ab9b8c2cb226fa"
+    },
+    "optionsBridgeUpdateChecking": {
+        "message": "Periksa Pembaruan$ellipsis$",
+        "description": "Update check button title while in progress. Ellipsis cycles (. → .. → ...) as loading indicator.",
+        "placeholders": {
+            "ellipsis": { "content": "$1", "example": ".." }
+        },
+        "hash": "282dc18c1fe1de587133edd5d050b624"
+    },
+    "optionsBridgeUpdateStatusNoUpdates": {
+        "message": "Tidak ada pembaruan yang tersedia",
+        "description": "Update status if no updates are found.",
+        "hash": "93c0b86f72daf273a6066d9525aad1c1"
+    },
+    "optionsBridgeUpdateStatusError": {
+        "message": "Kesalahan memeriksa pembaruan",
+        "description": "Update status if an error was encountered checking for updates.",
+        "hash": "a885c6a90ca732276ab09e972d9c3232"
+    },
+    "optionsBridgeUpdateAvailable": {
+        "message": "Pembaruan tersedia:",
+        "description": "Update status if an update was found.",
+        "hash": "62f83435cf64c57e719fa05fb4cd39aa"
+    },
+    "optionsBridgeUpdate": {
+        "message": "Perbarui sekarang...",
+        "description": "Update now button title. Ellipsis indicates additional information as it triggers an update window popup.",
+        "hash": "19da82f32535564dc116b89e9b9839e8"
+    },
+    "optionsBridgeBackupEnabled": {
+        "message": "Aktifkan koneksi daemon cadangan di $hostPort$",
+        "description": "Backup daemon checkbox label. Host/port inputs are inserted inline at the hostPort substitution.",
+        "placeholders": {
+            "hostPort": { "content": "$1" }
+        },
+        "hash": "923eff866d306017aa4f5223e07cfcd5"
+    },
+    "optionsBridgeBackupEnabledDescription": {
+        "message": "Sambungkan ke bridge yang berjalan dalam mode daemon, jika koneksi bridge biasa gagal",
+        "description": "Backup daemon checkbox description.",
+        "hash": "0ce9582305f68542d131499559616155"
+    },
+    "optionsBridgeBackupSecure": {
+        "message": "Gunakan koneksi yang aman",
+        "description": "Daemon secure option checkbox label.",
+        "hash": "21678e1e5fde5b36c1f6be28e266ec1f"
+    },
+    "optionsBridgeBackupSecureDescription": {
+        "message": "Sambungkan ke daemon melalui HTTPS dari pada HTTP. Membutuhkan konfigurasi tambahan.",
+        "description": "Daemon secure option description.",
+        "hash": "3236dda1229cc1bf89b6dccf4344d9bc"
+    },
+    "optionsBridgeBackupPassword": {
+        "message": "Sandi:",
+        "description": "Daemon password option label.",
+        "hash": "783de8262aef12ba1de87a8277a68ddf"
+    },
+    "optionsBridgeBackupPasswordDescription": {
+        "message": "Kata sandi opsional yang dikonfigurasi untuk koneksi daemon.",
+        "description": "Daemon password option description.",
+        "hash": "851571617af8552047283f89f2e880ac"
+    },
+    "optionsMediaCategoryName": {
+        "message": "Transmisi media",
+        "description": "Options page media casting category title.",
+        "hash": "b68324d8f3c48698008bf4ea67a9843c"
+    },
+    "optionsMediaCategoryDescription": {
+        "message": "Transmisi media video/audio HTML5.",
+        "description": "Options page media casting category description.",
+        "hash": "6b1a30506d1324ab3dfb340bdca684d7"
+    },
+    "optionsMediaEnabled": {
+        "message": "Aktifkan transmisi media",
+        "description": "Media casting enabled checkbox label.",
+        "hash": "c9071e46ce057bdc8ac472b061ed62e9"
+    },
+    "optionsMediaSyncElement": {
+        "message": "Sinkronkan status penerima dengan elemen media",
+        "description": "Media casting sync checkbox label.",
+        "hash": "2b61bd9c36dc09cc4d67b62e63e8439b"
+    },
+    "optionsMediaSyncElementDescription": {
+        "message": "Sinkronkan status (pemutaran, volume, keterangan, dll...) antara elemen media dan perangkat penerima.",
+        "description": "Media casting sync option description.",
+        "hash": "156ea206867c07cf80bbcd8b8f955d89"
+    },
+    "optionsMediaStopOnUnload": {
+        "message": "Hentikan pemutaran penerima saat tidak memuat halaman",
+        "description": "Media stop on unload checkbox label.",
+        "hash": "a60732963c6bf8ba5273a977cfc53e20"
+    },
+    "optionsLocalMediaCategoryName": {
+        "message": "Transmisi media lokal",
+        "description": "Options page local media category title.",
+        "hash": "555b3dda3d57b31268b2fd4e2148f0a1"
+    },
+    "optionsLocalMediaCategoryDescription": {
+        "message": "Server HTTP dimulai oleh aplikasi bridge untuk streaming file media lokal ke penerima transmisi.",
+        "description": "Options page local media category description.",
+        "hash": "e00f4b7c8c6455740bb5aa5ca48f94ce"
+    },
+    "optionsLocalMediaEnabled": {
+        "message": "Aktifkan transmisi media lokal",
+        "description": "Local media enabled checkbox label.",
+        "hash": "dddd9796b68b17067a304f4560223cdc"
+    },
+    "optionsLocalMediaServerPort": {
+        "message": "Port server HTTP:",
+        "description": "HTTP server port input label.",
+        "hash": "adba96abd8f0ed467bb7146315dd8b90"
+    },
+    "optionsReceiverSelectorCategoryName": {
+        "message": "Pemilih perangkat penerima",
+        "description": "Options page receiver selector category title.",
+        "hash": "5f4dc0204ad9cf9bf062b9ddbbd48f71"
+    },
+    "optionsReceiverSelectorCategoryDescription": {
+        "message": "UI pemilihan perangkat penerima.",
+        "description": "Options page receiver selector category description.",
+        "hash": "b990cd04c332de84ad96f13ada59539f"
+    },
+    "optionsReceiverSelectorWaitForConnection": {
+        "message": "Menunggu koneksi",
+        "description": "Receiver selector wait for connection option checkbox label.",
+        "hash": "2d7e179330799e7187908f0adb832798"
+    },
+    "optionsReceiverSelectorWaitForConnectionDescription": {
+        "message": "Tetap buka pemilih perangkat penerima hingga sesi dibuat atau koneksi gagal.",
+        "description": "Receiver selector wait for connection option description.",
+        "hash": "a093f20a6ac41312a874b14fdba7a3f0"
+    },
+    "optionsReceiverSelectorCloseIfFocusLost": {
+        "message": "Tutup setelah kehilangan fokus",
+        "description": "Receiver selector close if focus lost option checkbox label.",
+        "hash": "670ee2676ef52e4b399937991458ebef"
+    },
+    "optionsReceiverSelectorExpandActive": {
+        "message": "Perluas kontrol media secara otomatis untuk perangkat yang terhubung",
+        "description": "Receiver selector expand active checkbox label.",
+        "hash": "6010e2f6cc8dd276cf5678ee70ae8523"
+    },
+    "optionsReceiverSelectorShowMediaImages": {
+        "message": "Tampilkan gambar media",
+        "description": "Receiver selector show media images checkbox label.",
+        "hash": "5451dabe85152fef98feda4591737871"
+    },
+    "optionsReceiverSelectorShowMediaImagesDescription": {
+        "message": "Memuat media thumbnail/gambar merk dari server jarak jauh.",
+        "description": "Receiver selector show media images option description.",
+        "hash": "9ea74badb4387d204c42be2111925344"
+    },
+    "optionsSiteWhitelistCategoryName": {
+        "message": "Situs daftar putih",
+        "description": "Options page whitelist category title.",
+        "hash": "b4c29508b1076fc8d70c0d0a3b9bcfc7"
+    },
+    "optionsSiteWhitelistCategoryDescription": {
+        "message": "Situs dimana fungsi transmisi akan diaktifkan dan string User Agent akan diganti dengan versi Chrome untuk kompatibilitas.",
+        "description": "Options page whitelist category description.",
+        "hash": "50289390d9ba15f54b7fd1538adc5067"
+    },
+    "optionsSiteWhitelistEnabled": {
+        "message": "Aktifkan situs daftar putih",
+        "description": "Whitelist enabled checkbox label.",
+        "hash": "e2a983568c921d33169acb2285112e3a"
+    },
+    "optionsSiteWhitelistEnabledDescription": {
+        "message": "Menonaktifkan opsi ini akan mengaktifkan fungsionalitas transmisi di situs mana pun, tetapi string User Agent tidak akan diganti.",
+        "description": "Whitelist restricted mode enabled description.",
+        "hash": "0793ff98663df82bb12a5b59c9744740"
+    },
+    "optionsSiteWhitelistContent": {
+        "message": "Pola pencocokan situs:",
+        "description": "Match patterns editor widget label.",
+        "hash": "649cd2a5977b6f2760aa4a0b7e8094c5"
+    },
+    "optionsSiteWhitelistAddItem": {
+        "message": "Tambahkan Situs",
+        "description": "Add new whitelist item button title.",
+        "hash": "7f3dd0607a364c07977651e77888485a"
+    },
+    "optionsSiteWhitelistEditItem": {
+        "message": "Ubah",
+        "description": "Tooltip text for whitelist item's edit button.",
+        "hash": "07fa34db2b1ae6134e7ea08b4c43b447"
+    },
+    "optionsSiteWhitelistRemoveItem": {
+        "message": "Hapus",
+        "description": "Tooltip text for whitelist item's remove button.",
+        "hash": "3908a268c854fe64242e38845dbb7c81"
+    },
+    "optionsSiteWhitelistItemShowOptions": {
+        "message": "Tampilkan opsi",
+        "description": "Tooltip text for whitelist item's show options button.",
+        "hash": "54b0919c482e66be5dd0af67ace666c7"
+    },
+    "optionsSiteWhitelistItemHideOptions": {
+        "message": "Sembunyikan opsi",
+        "description": "Tooltip text for whitelist item's hide options button.",
+        "hash": "893b6ef0fe464c26e743028c1e1ab998"
+    },
+    "optionsSiteWhitelistInvalidDuplicatePattern": {
+        "message": "Pola pencocokan situs sudah ada!",
+        "description": "Error displayed by input indicating a duplicate match pattern.",
+        "hash": "2df401191e509fcc99fd6340347ad0f4"
+    },
+    "optionsSiteWhitelistKnownAppsCustomApp": {
+        "message": "Kustom",
+        "description": "Default <option> for knownApps <select>.",
+        "hash": "1685452bc68395b620b0ce1fb9b76da5"
+    },
+    "optionsSiteWhitelistCustomUserAgentDescription": {
+        "message": "Jika ditentukan, string User Agent khusus yang akan digunakan untuk situs yang masuk daftar putih.",
+        "description": "Custom user agent option description.",
+        "hash": "75a715d0fdb4cee2273d3c13bf9a4bab"
+    },
+    "optionsSiteWhitelistUserAgentDisabled": {
+        "message": "Nonaktifkan User Agent",
+        "description": "Whitelist item user agent disabled checkbox label.",
+        "hash": "43140519e27bbe3665b09ce574dfecb7"
+    },
+    "optionsSiteWhitelistUserAgentDisabledDescription": {
+        "message": "Nonaktifkan sepenuhnya penggantian User Agent untuk situs yang cocok dengan pola ini.",
+        "description": "Whitelist item user agent disabled checkbox description.",
+        "hash": "acb6f7918125ad114de9cbec08a942d9"
+    },
+    "optionsSiteWhitelistSiteSpecificUserAgentDescription": {
+        "message": "Jika ditentukan, string User Agent khusus yang akan digunakan untuk situs yang masuk daftar putih.",
+        "description": "Whitelist item user agent option label.",
+        "hash": "253942e6e08a6e2f0e03de2380c0fcea"
+    },
+    "optionsSiteWhitelistItemEnabled": {
+        "message": "Aktifkan item daftar putih",
+        "description": "Whitelist item enabled checkbox title.",
+        "hash": "41d0a73fac7f0fb38e7201a3140deae1"
+    },
+    "optionsSiteWhitelistItemPattern": {
+        "message": "Pola pencocokan situs",
+        "description": "Whitelist item pattern edit input title.",
+        "hash": "a46b7d8eb955f4e50d345eb66b8267d8"
+    },
+    "optionsMirroringCategoryName": {
+        "message": "Mentransmisikan layar",
+        "description": "Options page mirroring category name.",
+        "hash": "c97bb91cfa508a7400db67093429405c"
+    },
+    "optionsMirroringCategoryDescription": {
+        "message": "Mentransmisikan layar ke aplikasi penerima Chromecast.",
+        "description": "Options page mirroring category description.",
+        "hash": "e6c1ef9e8b168f0d9049aacc984c22fd"
+    },
+    "optionsMirroringEnabled": {
+        "message": "Aktifkan transmisi layar (eksperimental)",
+        "description": "Mirroring enabled checkbox label.",
+        "hash": "69d00f1674ec817c6b3b5a0e9c4e8061"
+    },
+    "optionsMirroringAppId": {
+        "message": "ID aplikasi transmisi layar:",
+        "description": "Mirroring app ID input label.",
+        "hash": "3416cc2f16a3a9dd2f6dc43f3e609cb6"
+    },
+    "optionsMirroringAppIdDescription": {
+        "message": "ID Aplikasi untuk aplikasi penerima Chromecast yang terdaftar. Hanya penggunaan tingkat lanjut. Harus kompatibel dengan aplikasi default (lihat repo di GitHub).",
+        "description": "Mirroring app ID option description.",
+        "hash": "90e7943c57f0bcaa04ce8e55795d9d0c"
+    },
+    "optionsMirroringStreamOptions": {
+        "message": "Opsi enkode stream",
+        "description": "Options page mirroring category description.",
+        "hash": "150cf1291af3a86ca42168befe2a4751"
+    },
+    "optionsMirroringStreamFrameRate": {
+        "message": "Maks kecepatan frame:",
+        "description": "Mirroring stream max frame rate option label.",
+        "hash": "080d81431268f644afe7d241bc88ebbc"
+    },
+    "optionsMirroringStreamMaxBitRate": {
+        "message": "Maks kecepatan bit",
+        "description": "Mirroring stream max bit rate option label.",
+        "hash": "3259b72367ab1f152a5a5c6cf4143ea3"
+    },
+    "optionsMirroringStreamMaxBitRateDescription": {
+        "message": "Maksimum kecepatan bit dalam bit per detik.",
+        "description": "Mirroring stream max bit rate option description.",
+        "hash": "59df8cacd361cee2ba4c9d37a89786ce"
+    },
+    "optionsMirroringStreamDownscaleFactor": {
+        "message": "Faktor penurunan:",
+        "description": "Mirroring stream downscale factor option label.",
+        "hash": "8c950afc5a3249832c757a804f3c0e41"
+    },
+    "optionsMirroringStreamDownscaleFactorDescription": {
+        "message": "Faktor yang digunakan untuk memperkecil stream video, co. faktor 2.0 akan menghasilkan video berukuran 1/4.",
+        "description": "Mirroring stream downscale factor option description.",
+        "hash": "9135a6b22ce55ee7ecf30e7c74c836d3"
+    },
+    "optionsMirroringStreamMaxResolution": {
+        "message": "Batasi resolusi hingga",
+        "description": "Mirroring stream resolution option label.",
+        "hash": "574f9b6e388ec0311b18502d16ea22f7"
+    },
+    "optionsMirroringStreamMaxResolutionDescription": {
+        "message": "Membatasi resolusi streaming video maksimum sambil mempertahankan aspek rasio sumber.",
+        "description": "Mirroring stream resolution option description.",
+        "hash": "d9e946e544eb7c6b02bd30f3d2c618c6"
+    },
+    "optionsMirroringStreamMaxResolutionWidthPlaceholder": {
+        "message": "Lebar",
+        "description": "Max resolution width input placeholder.",
+        "hash": "f6322e65aa252c2bfebeef3642eda579"
+    },
+    "optionsMirroringStreamMaxResolutionHeightPlaceholder": {
+        "message": "Tinggi",
+        "description": "Max resolution height input placeholder.",
+        "hash": "8413a498a0ddfc0947e8ad46a2ff186f"
+    },
+    "optionsOptionRecommended": {
+        "message": "disarankan",
+        "description": "Badge next to option label indicating boolean option is recommended enabled.",
+        "hash": "cb7a5f6614a279d34d8bb57dae48bdbd"
+    },
+    "optionsReset": {
+        "message": "Kembalikan Default",
+        "description": "Restore default options button label.",
+        "hash": "368002c153ff9aeda930d97821631f0c"
+    },
+    "optionsSave": {
+        "message": "Simpan",
+        "description": "Save options button label.",
+        "hash": "aa14043bd4e6f79db542868539be9220"
+    },
+    "optionsSaved": {
+        "message": "Tersimpan!",
+        "description": "Status text displayed by save button once options have been successfully saved.",
+        "hash": "d2f31b10edbccfb9147336aa30b5bb08"
+    },
+    "optionsShowAdvancedOptions": {
+        "message": "Tampilkan opsi lanjutan",
+        "description": "Show advanced options checkbox label.",
+        "hash": "47f7601f490ff7de924c9167538a25b6"
+    },
+    "mirroringPopupTitle": {
+        "message": "Mentransmisikan Layar",
+        "description": "Mirroring popup window title.",
+        "hash": "092bd4419cff5b6b4e365f36fc4f9c50"
+    },
+    "mirroringPopupWaitingForConnection": {
+        "message": "Menunggu koneksi",
+        "description": "Mirroring popup loading text.",
+        "hash": "79e6d3d1169bbc652acecf34dce6b82e"
+    },
+    "mirroringPopupConnectedTo": {
+        "message": "Terhubung ke $deviceName$",
+        "description": "Mirroring popup label displayed whilst session connected before mirroring.",
+        "placeholders": {
+            "deviceName": { "content": "$1" }
+        },
+        "hash": "bd3d58015008ac8b9dcded600e05a744"
+    },
+    "mirroringPopupMirroringTo": {
+        "message": "Mentransmisikan Layar ke $deviceName$",
+        "description": "Mirroring popup label displayed whilst mirroring.",
+        "placeholders": {
+            "deviceName": { "content": "$1" }
+        },
+        "hash": "13dd028ed9d37902f92977622241d0f9"
+    },
+    "mirroringPopupChooseSource": {
+        "message": "Pilih Sumber",
+        "description": "Mirroring popup choose media source button label.",
+        "hash": "040e46e866e781425c429261eef824d3"
+    },
+    "mirroringPopupStopMirroring": {
+        "message": "Hentikan transmisi layar",
+        "description": "Mirroring popup stop mirroring button label.",
+        "hash": "fade5f575be1a34437a60036bcd96bb3"
+    },
+
+    "__WET_LOCALE__": { "message": "id" }
+}
