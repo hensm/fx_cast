@@ -175,6 +175,25 @@
         "description": "Media controls label displayed for live streams."
     },
 
+    "popupSearch": {
+        "message": "Search devices",
+        "description": "Media devices search title."
+    },
+    "popupSearchClear": {
+        "message": "Clear Search",
+        "description": "Media devices search clear button title."
+    },
+    "popupSearchNoDevicesFound": {
+        "message": "No devices found for \"$searchTerm$\".",
+        "description": "Message displayed when no receiver devices are found for a given search term.",
+        "placeholders": {
+            "searchTerm": {
+                "content": "$1",
+                "example": "Living Room"
+            }
+        }
+    },
+
     "contextCast": {
         "message": "Cast...",
         "description": "Main context menu item title. Ellipsis indicates additional information required as it triggers opening of receiver selector."
