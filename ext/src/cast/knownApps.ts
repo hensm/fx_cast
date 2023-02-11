@@ -15,6 +15,10 @@ export default {
     // Web-supported
     "CA5E8412": { name: "Netflix", matches: "https://www.netflix.com/*" },
     "233637DE": { name: "YouTube", matches: "https://www.youtube.com/*" },
+    "2DB7CC49": {
+        name: "YouTube Music",
+        matches: "https://music.youtube.com/*"
+    },
     "CC32E753": { name: "Spotify", matches: "https://open.spotify.com/*" },
     "2BA92214": {
         name: "BBC iPlayer",
