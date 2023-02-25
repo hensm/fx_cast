@@ -17,10 +17,12 @@ The bridge application is currently supported on Windows, macOS and Linux.
 
 ### Installing via package managers
 
-**Note**: These packages are maintained by third parties and support likely will not be provided for any issues specific to these packages.
+**Note**: These packages are maintained by third parties and any issues specfic to these packages should be directed to the respective package maintainers.
 
+-   **macOS (Homebrew cask)**
+    -   `fx-cast-bridge` — https://formulae.brew.sh/cask/fx-cast-bridge  
+        Install by running `brew install --cask fx-cast-bridge`.
 -   **Arch Linux (AUR)**
-    -   `fx_cast` — https://aur.archlinux.org/packages/fx_cast
     -   `fx_cast-bin` — https://aur.archlinux.org/packages/fx_cast-bin
 
 ### Daemon Configuration
