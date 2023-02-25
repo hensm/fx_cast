@@ -307,6 +307,9 @@ h3.download__bridge-header {
 .faq__content code {
     background-color: var(--grey-10-a10);
     border-radius: 3px;
+    display: inline-block;
+    margin: 1px 0;
+    padding: 0.25em 0.5em;
     white-space: nowrap;
 }
 
