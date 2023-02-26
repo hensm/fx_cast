@@ -41,6 +41,7 @@
         "page": "ui/options/index.html"
     },
     "permissions": [
+        "downloads",
         "history",
         "menus",
         "menus.overrideContext",

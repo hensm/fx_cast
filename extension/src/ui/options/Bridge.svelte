@@ -83,83 +83,126 @@
     });
 
     // Updates
-    let updateData: Nullable<GitHubRelease> = null;
+    let updateData: Nullable<UpdateManifestUpdate> = null;
     let updateStatus: Nullable<string> = null;
     let updateStatusTimeout: number;
 
     let isCheckingUpdate = false;
     let isUpdateAvailable = false;
 
-    interface GitHubRelease {
-        url: string;
-        tag_name: string;
-        html_url: string;
-        assets: Array<{
-            content_type: string;
-            html_url: string;
-        }>;
+    type UpdateManifestPlatform = "mac" | "win" | "linux-deb" | "linux-rpm";
+    type UpdateManifestArch = "x86" | "x64" | "arm64";
+
+    interface UpdateManifestUpdateInfo {
+        update_link: string;
+        update_hash: string;
+    }
+    interface UpdateManifestUpdate {
+        version: string;
+        platforms: Record<
+            UpdateManifestPlatform,
+            Partial<Record<UpdateManifestArch, UpdateManifestUpdateInfo>>
+        >;
+    }
+    interface UpdateManifest {
+        fx_cast_bridge: {
+            updates: UpdateManifestUpdate[];
+        };
+    }
+
+    async function fetchLatestUpdateInfo() {
+        let updateManifest: UpdateManifest;
+        try {
+            updateManifest = await fetch(
+                "https://hensm.github.io/fx_cast/updates.json"
+            ).then(res => res.json());
+        } catch (err) {
+            throw new Error(
+                "Failed to check for updates due to a network error!"
+            );
+        }
+
+        const latestUpdate = updateManifest?.fx_cast_bridge?.updates?.reduce(
+            (latest, next) =>
+                semver.gt(next.version, latest.version) ? next : latest
+        );
+        if (!latestUpdate) {
+            throw new Error(
+                "Failed to check for updates due to invalid update manifest!"
+            );
+        }
+
+        return latestUpdate;
     }
 
     async function checkUpdate() {
         isCheckingUpdate = true;
 
-        let releases: GitHubRelease[];
         try {
-            releases = await fetch(
-                "https://api.github.com/repos/hensm/fx_cast/releases"
-            ).then(res => res.json());
+            const latestUpdate = await fetchLatestUpdateInfo();
+            /**
+             * Update available if no bridge found or bridge version lower
+             * than fetched release version.
+             */
+            isUpdateAvailable =
+                !bridgeInfo ||
+                semver.lt(bridgeInfo.version, latestUpdate.version);
+
+            if (isUpdateAvailable) {
+                updateData = latestUpdate;
+            } else {
+                updateStatus = _("optionsBridgeUpdateStatusNoUpdates");
+            }
         } catch (err) {
-            isCheckingUpdate = false;
+            if (err instanceof Error) logger.error(err.message);
             updateStatus = _("optionsBridgeUpdateStatusError");
             return;
+        } finally {
+            isCheckingUpdate = false;
+            if (updateStatusTimeout) window.clearTimeout(updateStatusTimeout);
+            updateStatusTimeout = window.setTimeout(() => {
+                updateStatus = null;
+            }, 1500);
         }
-
-        // Ensure valid response
-        if (!Array.isArray(releases)) {
-            throw logger.error("Check update response is not array.", releases);
-        }
-
-        // First non-extension-only release
-        const latestBridgeRelease = releases.find(release =>
-            release.assets.find(
-                asset => asset.content_type !== "application/x-xpinstall"
-            )
-        );
-
-        if (!latestBridgeRelease) {
-            throw logger.error(
-                "Check update response does not contain release info."
-            );
-        }
-
-        /**
-         * Update available if no bridge found or bridge version lower
-         * than fetched release version.
-         */
-        isUpdateAvailable =
-            !bridgeInfo ||
-            semver.lt(bridgeInfo.version, latestBridgeRelease.tag_name);
-
-        if (isUpdateAvailable) {
-            updateData = latestBridgeRelease;
-        } else {
-            updateStatus = _("optionsBridgeUpdateStatusNoUpdates");
-        }
-
-        isCheckingUpdate = false;
-
-        if (updateStatusTimeout) {
-            window.clearTimeout(updateStatusTimeout);
-        }
-        updateStatusTimeout = window.setTimeout(() => {
-            updateStatus = null;
-        }, 1500);
     }
 
-    function getUpdate() {
-        // Open downloads page
-        if (updateData?.html_url) {
-            browser.tabs.create({ url: updateData.html_url });
+    const getReleasePageUrl = (version: string) =>
+        `https://github.com/hensm/fx_cast/releases/tag/${version}`;
+
+    async function getUpdate() {
+        if (!updateData) return;
+
+        const platformArchMap: {
+            [k in browser.runtime.PlatformArch]?: UpdateManifestArch;
+        } = {
+            "aarch64": "arm64",
+            "x86-32": "x86",
+            "x86-64": "x64"
+        };
+
+        let downloadUrl: Optional<string>;
+
+        const platform = await browser.runtime.getPlatformInfo();
+        const releasePlatformArch = platformArchMap[platform.arch];
+        if (
+            // We can't assume which Linux binary is required
+            (platform.os === "mac" || platform.os === "win") &&
+            releasePlatformArch &&
+            platform.os in updateData.platforms
+        ) {
+            const releasePlatform = updateData.platforms[platform.os];
+            const releaseInfo = releasePlatform[releasePlatformArch];
+            downloadUrl = releaseInfo?.update_link;
+        }
+
+        if (downloadUrl) {
+            // If there's a valid download URL, download that.
+            browser.downloads.download({ url: downloadUrl });
+        } else {
+            // ...otherwise open a new tab for the update page.
+            browser.tabs.create({
+                url: getReleasePageUrl(updateData.version)
+            });
         }
     }
 
@@ -341,6 +384,11 @@
                         >
                             {_("optionsBridgeUpdate")}
                         </button>
+                        {#if updateData}
+                            <a href={getReleasePageUrl(updateData.version)}>
+                                {_("optionsBridgeUpdateViewChangelog")}
+                            </a>
+                        {/if}
                     </div>
                 </div>
             {:else}

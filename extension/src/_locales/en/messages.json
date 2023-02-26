@@ -331,6 +331,10 @@
         "message": "Update Now...",
         "description": "Update now button title. Ellipsis indicates additional information as it triggers an update window popup."
     },
+    "optionsBridgeUpdateViewChangelog": {
+        "message": "View Changelog",
+        "description": "Link text for changelog link next to bridge update button."
+    },
 
     "optionsBridgeBackupEnabled": {
         "message": "Enable backup daemon connection on $hostPort$",

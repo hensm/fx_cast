@@ -184,8 +184,9 @@ input:placeholder-shown {
 }
 
 .bridge__update-options {
+    align-items: center;
     display: inline-flex;
-    flex-direction: column;
+    gap: 10px;
     margin-left: 10px;
 }
 
