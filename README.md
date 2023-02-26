@@ -97,19 +97,19 @@ This will build the extension and bridge, outputting to `dist/`:
 
 -   `dist/bridge/`  
      ... contains the built bridge with launcher script and manifest (with the path pointing that script). The `install-manifest` npm script copies this manifest to the proper location (or adds its current location to the registry on Windows).
--   `dist/ext/`  
+-   `dist/extension/`  
      ... contains the unpacked extension.
 
-Watching ext changes:
+Watching extension changes:
 
 ```sh
-$ npm run watch:ext
+$ npm run watch:extension
 ```
 
 Launch Firefox with built extension (run in separate terminal):
 
 ```sh
-$ npm run start:ext
+$ npm run start:extension
 ```
 
 #### 32-bit on Windows
@@ -128,7 +128,7 @@ $ npm run package:bridge -- -- --arch=x86
 
 ### Build scripts
 
-Extension build script (`build:ext`) arguments:
+Extension build script (`build:extension`) arguments:
 
 -   `--watch`  
      Rebuild on changes. Incompatible with `--package`.
@@ -164,13 +164,13 @@ $ npm run package
 
 -   `dist/bridge/`  
      ... contains the installer package: `fx_cast_bridge-<version>-<arch>.(pkg|deb|rpm|exe)`
--   `dist/ext/`  
+-   `dist/extension/`  
      ... contains the built extension archive: `fx_cast-<version>.xpi`.
 
 Packaging examples:
 
 ```sh
-$ npm run package:ext # Packaging extension
+$ npm run package:extension # Packaging extension
 $ npm run package:bridge # Packaging bridge application
 
 # Linux platforms
@@ -182,14 +182,14 @@ $ npm run package:bridge -- -- --package-type=rpm
 
 Testing requires geckodriver (or chromedriver for Chrome parity testing). See [selenium-webdriver](https://www.npmjs.com/package/selenium-webdriver#installation) installation instructions (ignore `npm install`).
 
-The test script expects a compatible installed bridge version and a packaged extension archive at `dist/ext/`.
+The test script expects a compatible installed bridge version and a packaged extension archive at `dist/extension/`.
 
 Test results will be displayed in the terminal and within the opened browser tab. Chrome may take some time to initialize the media router component before the cast API is available for testing.
 
 ```sh
 $ npm run build:bridge
 $ npm run install-manifest
-$ npm run package:ext
+$ npm run package:extension
 $ npm test
 
 # Or if testing in Chrome
@@ -207,9 +207,9 @@ These are somewhat outdated now, but show the basic function of the extension:
 
 -   [electron-chromecast](https://github.com/GPMDP/electron-chromecast)[^electron]
 -   Icons by [icons8](https://icons8.com/):
-    -   `ext/src/ui/options/assets/icons8-cancel-120.png`
-    -   `ext/src/ui/options/assets/icons8-ok-120.png`
-    -   `ext/src/ui/options/assets/icons8-warn-120.png`
+    -   `extension/src/ui/options/assets/icons8-cancel-120.png`
+    -   `extension/src/ui/options/assets/icons8-ok-120.png`
+    -   `extension/src/ui/options/assets/icons8-warn-120.png`
 
 ## Donations
 

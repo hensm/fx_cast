@@ -4,7 +4,7 @@
         "build": "node bin/build.js",
         "package": "node bin/build.js --package",
         "watch": "node bin/build.js --watch",
-        "start": "web-ext run -s ../dist/ext/",
+        "start": "web-ext run -s ../dist/extension/",
         "lint": "eslint src --ext .ts,.tsx"
     },
     "devDependencies": {

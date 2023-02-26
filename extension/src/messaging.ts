@@ -41,7 +41,7 @@ import type { ReceiverAction } from "./cast/sdk/enums";
  * Messages exclusively used internally between extension
  * components.
  */
-type ExtMessageDefinitions = {
+type ExtensionMessageDefinitions = {
     /** Initial data to send to selector popup. */
     "popup:init": {
         appInfo?: ReceiverSelectorAppInfo;
@@ -125,7 +125,7 @@ type ExtMessageDefinitions = {
  * in-sync with the bridge's version at:
  *   app/src/bridge/messaging.ts > MessageDefinitions
  */
-type AppMessageDefinitions = {
+type BridgeMessageDefinitions = {
     /**
      * First message sent by the extension to the bridge.
      * Includes extension version string. Responds directly with version
@@ -297,7 +297,8 @@ type AppMessageDefinitions = {
     "mediaCast:mediaServerError": string;
 };
 
-type MessageDefinitions = ExtMessageDefinitions & AppMessageDefinitions;
+type MessageDefinitions = ExtensionMessageDefinitions &
+    BridgeMessageDefinitions;
 
 interface MessageBase<K extends keyof MessageDefinitions> {
     subject: K;

@@ -47,7 +47,7 @@ const __dirname = path.dirname(url.fileURLToPath(import.meta.url));
 const rootPath = path.join(__dirname, "../");
 const srcPath = path.join(rootPath, "src");
 
-const distPath = path.join(rootPath, "../dist/ext/");
+const distPath = path.join(rootPath, "../dist/extension/");
 const unpackedPath = path.join(distPath, "unpacked");
 
 const outPath = argv.package ? unpackedPath : distPath;

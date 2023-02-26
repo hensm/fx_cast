@@ -27,14 +27,14 @@
             }
         },
         {
-            "files": ["ext/**/*.svelte"],
+            "files": ["extension/**/*.svelte"],
             "processor": "svelte3/svelte3",
             "rules": {
                 "no-undef": "off"
             }
         },
         {
-            "files": ["**/*.ts", "ext/**/*.svelte"],
+            "files": ["**/*.ts", "extension/**/*.svelte"],
             "extends": "plugin:@typescript-eslint/recommended",
             "rules": {
                 "@typescript-eslint/no-empty-interface": "error",

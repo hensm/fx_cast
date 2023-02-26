@@ -19,7 +19,7 @@ import type {
  * IMPORTANT:
  * Messages that cross the native messaging channel. MUST keep
  * in-sync with the extension's version at:
- *   ext/src/messaging.ts > AppMessageDefinitions
+ *   extension/src/messaging.ts > AppMessageDefinitions
  */
 type MessageDefinitions = {
     /**

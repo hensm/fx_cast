@@ -16,7 +16,7 @@ const chrome = require("selenium-webdriver/chrome");
 const { By, until } = webdriver;
 
 const extensionArchivePath = glob.sync("*.xpi", {
-    cwd: path.join(__dirname, "../dist/ext"),
+    cwd: path.join(__dirname, "../dist/extension"),
     absolute: true
 })[0];
 
