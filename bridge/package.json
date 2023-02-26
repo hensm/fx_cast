@@ -10,6 +10,7 @@
         "bplist-creator": "^0.1.0",
         "bplist-parser": "^0.3.1",
         "castv2": "^0.1.10",
+        "chalk": "^4.1.2",
         "fast-srp-hap": "^2.0.4",
         "mdns": "^2.7.2",
         "mime-types": "^2.1.35",

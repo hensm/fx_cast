@@ -3,6 +3,7 @@ import https from "https";
 import { ChildProcess, spawn } from "child_process";
 import { Readable } from "stream";
 
+import chalk from "chalk";
 import WebSocket from "ws";
 
 import { DecodeTransform, EncodeTransform } from "./transforms.js";
@@ -130,6 +131,18 @@ export function init(opts: DaemonOpts) {
         res.writeHead(authenticate(req) ? 200 : 401);
         res.end();
     });
+
+    if (
+        opts.host !== "localhost" &&
+        opts.host !== "127.0.0.1" &&
+        !opts.secure
+    ) {
+        process.stdout.write(
+            chalk.red(
+                "WARNING: A non-local host is set, but secure connections are not enabled!\n"
+            )
+        );
+    }
 
     process.stdout.write(
         `Starting WebSocket server at ${opts.secure ? "wss" : "ws"}://${
