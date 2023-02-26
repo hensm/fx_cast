@@ -8,7 +8,7 @@ import config from "./config.js";
 const __dirname = path.dirname(url.fileURLToPath(import.meta.url));
 const rootPath = path.join(__dirname, "../../../");
 
-export const DIST_PATH = path.join(rootPath, "dist/app");
+export const DIST_PATH = path.join(rootPath, "dist/bridge");
 export const LICENSE_PATH = path.join(rootPath, "LICENSE");
 
 export const REGISTRY_KEY = config.applicationName;

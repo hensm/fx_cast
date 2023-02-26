@@ -93,9 +93,9 @@ $ npm run install-manifest
 $ npm run remove-manifest
 ```
 
-This will build the ext and app, outputting to `dist/`:
+This will build the extension and bridge, outputting to `dist/`:
 
--   `dist/app/`  
+-   `dist/bridge/`  
      ... contains the built bridge with launcher script and manifest (with the path pointing that script). The `install-manifest` npm script copies this manifest to the proper location (or adds its current location to the registry on Windows).
 -   `dist/ext/`  
      ... contains the unpacked extension.
@@ -117,13 +117,13 @@ $ npm run start:ext
 Building a 32-bit version is only supported for Windows. If you're building from a 64-bit system, you'll also need to rebuild any native dependencies as 32-bit.
 
 ```sh
-$ npm clean-install --prefix ./app --arch=ia32  # If on a 64-bit system
+$ npm clean-install --prefix ./bridge --arch=ia32  # If on a 64-bit system
 
 # If building without packaging
-$ npm run build:app -- -- --arch=x86 --use-pkg
+$ npm run build:bridge -- -- --arch=x86 --use-pkg
 
 # If packaging
-$ npm run package:app -- -- --arch=x86
+$ npm run package:bridge -- -- --arch=x86
 ```
 
 ### Build scripts
@@ -137,7 +137,7 @@ Extension build script (`build:ext`) arguments:
 -   `--mode` `"development"`, `"production"`  
      Sets build mode. Defaults to `development` unless packaging.
 
-Bridge build script (`build:app`) arguments:
+Bridge build script (`build:bridge`) arguments:
 
 -   `--package`  
     Builds and creates installer packages for distribution.
@@ -162,7 +162,7 @@ Build and package extension and bridge application for current platform:
 $ npm run package
 ```
 
--   `dist/app/`  
+-   `dist/bridge/`  
      ... contains the installer package: `fx_cast_bridge-<version>-<arch>.(pkg|deb|rpm|exe)`
 -   `dist/ext/`  
      ... contains the built extension archive: `fx_cast-<version>.xpi`.
@@ -171,11 +171,11 @@ Packaging examples:
 
 ```sh
 $ npm run package:ext # Packaging extension
-$ npm run package:app # Packaging bridge application
+$ npm run package:bridge # Packaging bridge application
 
 # Linux platforms
-$ npm run package:app -- -- --package-type=deb
-$ npm run package:app -- -- --package-type=rpm
+$ npm run package:bridge -- -- --package-type=deb
+$ npm run package:bridge -- -- --package-type=rpm
 ```
 
 ### Testing
@@ -187,7 +187,7 @@ The test script expects a compatible installed bridge version and a packaged ext
 Test results will be displayed in the terminal and within the opened browser tab. Chrome may take some time to initialize the media router component before the cast API is available for testing.
 
 ```sh
-$ npm run build:app
+$ npm run build:bridge
 $ npm run install-manifest
 $ npm run package:ext
 $ npm test
