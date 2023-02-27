@@ -59,5 +59,42 @@
                 }
             ]
         }
+    },
+    "fx_cast_bridge": {
+        "updates": [
+            {
+                "version": "v0.3.0",
+                "platforms": {
+                    "mac": {
+                        "arm64": {
+                            "update_link": "https://github.com/hensm/fx_cast/releases/download/v0.3.0/fx_cast_bridge-0.3.0-arm64.pkg",
+                            "update_hash": "sha256:2e8dd783be80c21b5b25615284046df7ea7322dba80e96f09c93a329f3f6b6fb"
+                        },
+                        "x64": {
+                            "update_link": "https://github.com/hensm/fx_cast/releases/download/v0.3.0/fx_cast_bridge-0.3.0-x64.pkg",
+                            "update_hash": "sha256:f24e347fd240d5e74b488c83aee8c939b5abf7498dd047b4d3cdb5912a71e8aa"
+                        }
+                    },
+                    "win": {
+                        "x64": {
+                            "update_link": "https://github.com/hensm/fx_cast/releases/download/v0.3.0/fx_cast_bridge-0.3.0-x64.exe",
+                            "update_hash": "sha256:775f4b278c1d8b551d9dcae70468cafd0fb3ab4afdaaab505efffb062a93c520"
+                        }
+                    },
+                    "linux-deb": {
+                        "x64": {
+                            "update_link": "https://github.com/hensm/fx_cast/releases/download/v0.3.0/fx_cast_bridge-0.3.0-x64.deb",
+                            "update_hash": "sha256:0abb90d5cf4d1452b5aaed3f61fc456ec4722ca97f3dca834175fc6b236d1e19"
+                        }
+                    },
+                    "linux-rpm": {
+                        "x64": {
+                            "update_link": "https://github.com/hensm/fx_cast/releases/download/v0.3.0/fx_cast_bridge-0.3.0-x64.rpm",
+                            "update_hash": "sha256:98df8f1d1b727bc1ff87276fd13b5ff6b05538ac412f6a5e1044a914011f3ddc"
+                        }
+                    }
+                }
+            }
+        ]
     }
 }
