@@ -25,7 +25,7 @@ For some background, see [Cast SDK terminology](https://developers.google.com/ca
 
 ### Communication
 
-SDK instances send messages through a MessageChannel managed by the [`pageMessaging`](./extension/src/cast/pageMessaging.ts) module. One side listens for an initialization message containing a MessagePort, then receives messages from the SDK on that port and calls its message listeners so that they can be forwarded to the Cast Manager. The other side sends that initialization message and handles responses back from the Cast Manager.
+SDK instances send messages through a MessageChannel managed by the [`pageMessaging`](./extension/src/cast/pageMessaging.ts) module. One side listens for an initialization message containing a MessagePort, then receives messages from the SDK on that port and calls its message listeners so that they can be forwarded to the cast manager. The other side sends that initialization message and handles responses back from the cast manager.
 
 ### Initialization
 
@@ -42,9 +42,9 @@ For an instance created for a page script SDK:
 
 1. The [`contentInitial.ts`](./extension/src/cast/contentInitial.ts) content script is run at document start and handles some compatibility issues that can't be addressed via extension APIs (like SDK scripts directly loaded from `chrome-extension://` URLs).
 2. The page loads the SDK via the usual Google-hosted `cast_sender.js` loader script.
-3. The extension intercepts this script load, injects the [`contentBridge.ts`](./extension/src/cast/contentBridge.ts) script that creates a messaging connection to the Cast Manager (via extension messaging) that registers an instance for that context, and waits for a page messaging connection to forward messages through (as described [here](#communication)). The initial request is then transparently redirected to the extension-hosted SDK page script at [`extension/src/cast/content.ts`](./extension/src/cast/content.ts).
+3. The extension intercepts this script load, injects the [`contentBridge.ts`](./extension/src/cast/contentBridge.ts) script that creates a messaging connection to the cast manager (via extension messaging) that registers an instance for that context, and waits for a page messaging connection to forward messages through (as described [here](#communication)). The initial request is then transparently redirected to the extension-hosted SDK page script at [`extension/src/cast/content.ts`](./extension/src/cast/content.ts).
 4. The SDK page script then creates the SDK objects ([`window.chrome.cast`](https://developers.google.com/cast/docs/reference/web_sender/chrome.cast)), handles loading the Framework API (if requested) and adds a page messaging listener for `cast:instanceCreated` events.
-5. The Cast Manager sends a `cast:instanceCreated` message to the SDK, which then calls the sender app's entry handler ([`window.__onGCastApiAvailable`](https://developers.google.com/cast/docs/web_sender/integrate#initialization)).
+5. The cast manager sends a `cast:instanceCreated` message to the SDK, which then calls the sender app's entry handler ([`window.__onGCastApiAvailable`](https://developers.google.com/cast/docs/web_sender/integrate#initialization)).
 
 #### Extension script
 
@@ -53,29 +53,29 @@ For an instance created for an extension script:
 1. The extension script imports the [`extension/src/cast/export.ts`](./extension/src/cast/export.ts) module which creates an SDK instance. Page messaging is still used to communicate with the SDK, despite the lack of a script context boundary to avoid complicating the SDK implementation.
 2. The extension script calls the exported `ensureInit` async function.
    Depending on the extension script context:
-    - If **background**: The Cast Manager is called directly, registering a new cast instance, providing it with a port for a newly-created message channel (since extension messaging is only supported between contexts). Page messaging is hooked up such that messages from the SDK are sent to the Cast Manager through this channel and vice versa.
-    - If **content/extension page**: Much like with `contentBridge.ts`, a messaging channel is created to the Cast Manager and page messaging is hooked up (as described for page script instances).
-3. Listeners are added for the `cast:instanceCreated` message, so that the `ensureInit` function can resolve its promise and provide a Cast Manager port after initialization.
+    - If **background**: The cast manager is called directly, registering a new cast instance, providing it with a port for a newly-created message channel (since extension messaging is only supported between contexts). Page messaging is hooked up such that messages from the SDK are sent to the cast manager through this channel and vice versa.
+    - If **content/extension page**: Much like with `contentBridge.ts`, a messaging channel is created to the cast manager and page messaging is hooked up (as described for page script instances).
+3. Listeners are added for the `cast:instanceCreated` message, so that the `ensureInit` function can resolve its promise and provide a cast manager port after initialization.
 
-Extension sender apps are considered to be trusted by the Cast Manager and are granted additional privileges. They can bypass the receiver selection step when requesting a session by providing a receiver device when initialising the SDK via `ensureInit`.
+Extension sender apps are considered to be trusted by the cast manager and are granted additional privileges. They can bypass the receiver selection step when requesting a session by providing a receiver device when initialising the SDK via `ensureInit`.
 
 #### All contexts
 
 The process now continues identically for all contexts:
 
-1. The page's now-active sender app calls the [`chrome.cast.initialize`](https://developers.google.com/cast/docs/reference/web_sender/chrome.cast#.initialize) API function, sending a `main:initializeCastSdk` message to the Cast Manager, providing it with the [`chrome.cast.ApiConfig`](https://developers.google.com/cast/docs/reference/web_sender/chrome.cast.ApiConfig) data and prompting a receiver availability update.
+1. The page's now-active sender app calls the [`chrome.cast.initialize`](https://developers.google.com/cast/docs/reference/web_sender/chrome.cast#.initialize) API function, sending a `main:initializeCastSdk` message to the cast manager, providing it with the [`chrome.cast.ApiConfig`](https://developers.google.com/cast/docs/reference/web_sender/chrome.cast.ApiConfig) data and prompting a receiver availability update.
 2. The SDK handles the first `cast:receiverAvailabilityUpdated` message as an response to the `main:initializeCastSdk` message and calls the appropriate app callbacks.
 3. The page is now free to request a session if receivers are available.
 
 ### Sessions
 
-A sender app can request a session by calling the SDK's [`chrome.cast.requestSession`](https://developers.google.com/cast/docs/reference/web_sender/chrome.cast#.requestSession) method. This sends a `main:requestSession` message to the Cast Manager with a [`chrome.cast.SessionRequest`](https://developers.google.com/cast/docs/reference/web_sender/chrome.cast.SessionRequest?hl=en) object. This will trigger a receiver selection where the Cast Manager opens the popup UI and waits for the user to select a receiver device.
+A sender app can request a session by calling the SDK's [`chrome.cast.requestSession`](https://developers.google.com/cast/docs/reference/web_sender/chrome.cast#.requestSession) method. This sends a `main:requestSession` message to the cast manager with a [`chrome.cast.SessionRequest`](https://developers.google.com/cast/docs/reference/web_sender/chrome.cast.SessionRequest?hl=en) object. This will trigger a receiver selection where the cast manager opens the popup UI and waits for the user to select a receiver device.
 
 If the selection is cancelled, a `cast:sessionRequestCancelled` message is sent to the SDK instance allowing.
 
-Otherwise, if a device is selected, the Cast Manager sends a `bridge:/createCastSession` message to the bridge instance which causes the bridge to launch the requested receiver app on the selected device. Once the app has launched and the cast session has been created, the bridge sends a `main:castSessionCreated` message and further `main:castSessionUpdated` messages back to the Cast Manager.
+Otherwise, if a device is selected, the cast manager sends a `bridge:/createCastSession` message to the bridge instance which causes the bridge to launch the requested receiver app on the selected device. Once the app has launched and the cast session has been created, the bridge sends a `main:castSessionCreated` message and further `main:castSessionUpdated` messages back to the cast manager.
 
-Upon receiving the session created/updated messages, the Cast Manager forwards the message to the SDK instance which creates/updates the [`chrome.cast.Session`](https://developers.google.com/cast/docs/reference/web_sender/chrome.cast.Session) object and calls the relevant app listener functions.
+Upon receiving the session created/updated messages, the cast manager forwards the message to the SDK instance which creates/updates the [`chrome.cast.Session`](https://developers.google.com/cast/docs/reference/web_sender/chrome.cast.Session) object and calls the relevant app listener functions.
 
 ## Bridge
 
