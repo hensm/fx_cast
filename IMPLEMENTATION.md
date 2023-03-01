@@ -17,7 +17,7 @@ The message payloads are all fully-typed and defined in [`extension/src/messagin
 
 ## Cast Instances
 
-A cast instance is an initialized Web Sender SDK instance with the extension components that handle communication with receiver devices and other required functionality (like receiver selection) and is managed by the [Cast Manager](./extension/src/background/castManager.ts) background script module.
+A cast instance is an initialized Web Sender SDK instance with the extension components that handle communication with receiver devices and other required functionality (like receiver selection) and is managed by the [`castManager`](./extension/src/background/castManager.ts) background script module.
 
 Only the [Base API](https://web.archive.org/web/20150318065431/https://developers.google.com/cast/docs/chrome_sender) (`chrome.cast`) is implemented, since the Framework API (`chrome.cast.framework`) is a wrapper around the Base API and doesn't require any extra functionality on the extension-side.
 
@@ -42,7 +42,7 @@ For an instance created for a page script SDK:
 
 1. The [`contentInitial.ts`](./extension/src/cast/contentInitial.ts) content script is run at document start and handles some compatibility issues that can't be addressed via extension APIs (like SDK scripts directly loaded from `chrome-extension://` URLs).
 2. The page loads the SDK via the usual Google-hosted `cast_sender.js` loader script.
-3. The extension intercepts this script load, injects the [`contentBridge.ts`](./extension/src/cast/contentBridge.ts) script that creates a messaging connection to the Cast Manager (via extension messaging) that registers an instance for that context, and waits for a page messaging connection to forward messages through (as described [here](#communication)). The initial request is then transparently redirected to the extension-hosted SDK page script at [`src/cast/content.ts`](./src/cast/content.ts).
+3. The extension intercepts this script load, injects the [`contentBridge.ts`](./extension/src/cast/contentBridge.ts) script that creates a messaging connection to the Cast Manager (via extension messaging) that registers an instance for that context, and waits for a page messaging connection to forward messages through (as described [here](#communication)). The initial request is then transparently redirected to the extension-hosted SDK page script at [`extension/src/cast/content.ts`](./extension/src/cast/content.ts).
 4. The SDK page script then creates the SDK objects ([`window.chrome.cast`](https://developers.google.com/cast/docs/reference/web_sender/chrome.cast)), handles loading the Framework API (if requested) and adds a page messaging listener for `cast:instanceCreated` events.
 5. The Cast Manager sends a `cast:instanceCreated` message to the SDK, which then calls the sender app's entry handler ([`window.__onGCastApiAvailable`](https://developers.google.com/cast/docs/web_sender/integrate#initialization)).
 
@@ -50,7 +50,7 @@ For an instance created for a page script SDK:
 
 For an instance created for an extension script:
 
-1. The extension script imports the [`cast/export.ts`](./extension/src/cast/export.ts) module which creates an SDK instance. Page messaging is still used to communicate with the SDK, despite the lack of a script context boundary to avoid complicating the SDK implementation.
+1. The extension script imports the [`extension/src/cast/export.ts`](./extension/src/cast/export.ts) module which creates an SDK instance. Page messaging is still used to communicate with the SDK, despite the lack of a script context boundary to avoid complicating the SDK implementation.
 2. The extension script calls the exported `ensureInit` async function.
    Depending on the extension script context:
     - If **background**: The Cast Manager is called directly, registering a new cast instance, providing it with a port for a newly-created message channel (since extension messaging is only supported between contexts). Page messaging is hooked up such that messages from the SDK are sent to the Cast Manager through this channel and vice versa.
