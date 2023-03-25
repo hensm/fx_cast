@@ -116,7 +116,12 @@ export default class ReceiverSelector extends TypedEventTarget<ReceiverSelectorE
          * left/top positions for the popup.
          */
         const refWin = await browser.windows.getCurrent();
-        if (refWin.width && refWin.height && refWin.left && refWin.top) {
+        if (
+            refWin.width !== undefined &&
+            refWin.height !== undefined &&
+            refWin.left !== undefined &&
+            refWin.top !== undefined
+        ) {
             const centerX = refWin.left + refWin.width / 2;
             const centerY = refWin.top + refWin.height / 3;
 
