@@ -13,6 +13,7 @@ interface CastClientConnectOptions {
     port?: number;
     onReceiverMessage?: (message: ReceiverMessage) => void;
     onHeartbeat?: () => void;
+    onClose?: () => void;
 }
 
 export default class CastClient {
@@ -55,6 +56,8 @@ export default class CastClient {
     sendReceiverMessage(message: DistributiveOmit<SenderMessage, "requestId">) {
         if (!this.receiverChannel) return;
 
+        console.error("[CastClient] Sending receiver message", message);
+
         const requestId = this.receiverRequestId++;
         this.receiverChannel.send({ ...message, requestId });
         return requestId;
@@ -66,12 +69,25 @@ export default class CastClient {
      */
     connect(host: string, options?: CastClientConnectOptions) {
         return new Promise<void>((resolve, reject) => {
+            let isPromiseResolved = false;
+
             // Handle errors
-            this.client.on("error", reject);
+            this.client.on("error", err => {
+                if (!isPromiseResolved) {
+                    isPromiseResolved = true;
+                    reject();
+                }
+
+                console.error(`[CastClient] Client at ${host} gave error:`, {
+                    err
+                });
+            });
             this.client.on("close", () => {
+                console.error(`[CastClient] Client at ${host} closed!`);
                 if (this.heartbeatChannel && this.heartbeatIntervalId) {
                     clearInterval(this.heartbeatIntervalId);
                 }
+                options?.onClose?.();
             });
 
             this.client.connect(
@@ -98,6 +114,7 @@ export default class CastClient {
                         options?.onHeartbeat?.();
                     }, HEARTBEAT_INTERVAL_MS);
 
+                    isPromiseResolved = true;
                     resolve();
                 }
             );

@@ -51,6 +51,9 @@ messaging.on("message", (message: Message) => {
                     });
 
                     if (shouldWatchStatus) {
+                        console.error(
+                            `Device found (id: ${device.id}, name: ${device.friendlyName}, host: ${device.host}), removing remote!`
+                        );
                         remotes.set(
                             device.id,
                             new Remote(device.host, {
@@ -90,6 +93,9 @@ messaging.on("message", (message: Message) => {
 
                     if (shouldWatchStatus) {
                         if (remotes.has(deviceId)) {
+                            console.error(
+                                `Device lost (id: ${deviceId}), removing remote!`
+                            );
                             remotes.get(deviceId)?.disconnect();
                             remotes.delete(deviceId);
                         }

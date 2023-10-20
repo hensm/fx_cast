@@ -71,17 +71,36 @@ export default class Remote extends CastClient {
 
         // Handle app creation/discovery
         if (application && !this.transportClient) {
+            console.error(
+                `[Remote]: Creating transport at ${this.host} for: `,
+                { application }
+            );
+
             this.transportClient = new RemoteTransport(
                 application.transportId,
                 message => this.onMediaMessage(message)
             );
 
-            this.transportClient.connect(this.host).then(() => {
-                this.transportClient?.sendMediaMessage({
-                    type: "GET_STATUS",
-                    requestId: 0
+            this.transportClient
+                .connect(this.host, {
+                    onClose: () => {
+                        console.error(
+                            `[Remote] Transport at ${this.host} client closed!`
+                        );
+                        this.transportClient = undefined;
+                    }
+                })
+                .then(() => {
+                    this.transportClient?.sendMediaMessage({
+                        type: "GET_STATUS",
+                        requestId: 0
+                    });
+                })
+                .catch(() => {
+                    console.error(
+                        `[Remote] Failed to create transport at ${this.host}`
+                    );
                 });
-            });
 
             this.options?.onApplicationFound?.();
         }
@@ -116,6 +135,15 @@ class RemoteTransport extends CastClient {
     }
 
     sendMediaMessage(message: SenderMediaMessage) {
-        this.mediaChannel.send(message);
+        console.error("[Remote] Sending receiver message", message);
+
+        try {
+            this.mediaChannel.send(message);
+        } catch (err) {
+            console.error("[Remote] Failed to send media message!", {
+                message,
+                err
+            });
+        }
     }
 }
