@@ -1,324 +1,731 @@
 {
+    "extensionName": {
+        "message": "fx_cast",
+        "description": "Name of the extension and the native receiver selector window title.",
+        "hash": "1815c8a66588365bd16519dfc1cb3ea2"
+    },
     "extensionDescription": {
-        "message": "",
-        "description": "Description of the extension shown in the add-ons manager."
+        "message": "Bied Chromecast ondersteuning voor het casten van web-apps (zoals Netflix of BBC iPlayer), HTML5-video en scherm delen.",
+        "description": "Description of the extension shown in the add-ons manager.",
+        "hash": "28e706bff5afebcbea0771d2fefce33c"
+    },
+    "actionTitleDefault": {
+        "message": "fx_cast",
+        "description": "Title for toolbar button in default state.",
+        "hash": "1815c8a66588365bd16519dfc1cb3ea2"
+    },
+    "actionTitleConnecting": {
+        "message": "fx_cast: Aan het verbinden",
+        "description": "Title for toolbar button whilst connecting.",
+        "hash": "c09ff6e51063941fd2f028f7d6eb1d95"
+    },
+    "actionTitleConnected": {
+        "message": "fx_cast: Verbonden",
+        "description": "Title for toolbar button whilst connected.",
+        "hash": "5945eeeaf7bb83f9fba000df92446d12"
+    },
+    "popupBridgeErrorBanner": {
+        "message": "Er is een probleem met de bridge",
+        "description": "Bridge error banner message.",
+        "hash": "a2fa863ad2a93b3380fc0db038e019dc"
+    },
+    "popupBridgeErrorBannerOptions": {
+        "message": "Meer informatie",
+        "description": "Bridge error banner button label.",
+        "hash": "c16dea13f2e801809f1db437153dee02"
+    },
+    "popupWhitelistNotWhitelisted": {
+        "message": "$appName$ is niet gewhitelist",
+        "description": "Receiver selector whitelist suggestion banner label.",
+        "placeholders": {
+            "appName": { "content": "$1", "example": "Netflix" }
+        },
+        "hash": "7699bc5bc233b6cffd70552dca888941"
+    },
+    "popupWhitelistAddToWhitelist": {
+        "message": "Toevoegen aan whitelist",
+        "description": "Receiver selector whitelist suggestion banner button label.",
+        "hash": "f62a2993e590b730340f5f377408b2f9"
     },
     "popupMediaTypeApp": {
-        "message": "Deze site zijn app",
-        "description": "Receiver selector media type <option> text for current site's sender application."
+        "message": "Deze site's app",
+        "description": "Receiver selector media type <option> text for current site's sender application.",
+        "hash": "447054ca93cd9c437b3ff558d7fed68b"
+    },
+    "popupMediaTypeAppNotFound": {
+        "message": "Deze site's app (niet gevonden)",
+        "description": "Receiver selector media type <option> text for current site's sender application if none found.",
+        "hash": "c5b67276069722dbfb56c6a2b3ceb370"
     },
     "popupMediaTypeAppMedia": {
         "message": "Deze media",
-        "description": "Receiver selector media type <option> text for media casting."
+        "description": "Receiver selector media type <option> text for media casting.",
+        "hash": "a153436182910fbadae78621faa67395"
     },
     "popupMediaTypeScreen": {
         "message": "Scherm",
-        "description": "Receiver selector media type <option> text for screen."
+        "description": "Receiver selector media type <option> text for screen.",
+        "hash": "ac9859bb6d9cb5098a9e455667f57c5c"
     },
     "popupMediaTypeFile": {
         "message": "Bladeren...",
-        "description": "Receiver selector media type <option> text for opening a file selector dialog."
+        "description": "Receiver selector media type <option> text for opening a file selector dialog.",
+        "hash": "070e2a9fa21ab2abab971be668738e1e"
     },
     "popupMediaSelectCastLabel": {
         "message": "Cast",
-        "description": "(Cast) <select> to:"
+        "description": "(Cast) <select> to:",
+        "hash": "2697d6a1da20b8baa9c3c866983b195c"
     },
     "popupMediaSelectToLabel": {
-        "message": "to:",
-        "description": "Cast <select> (to:)"
+        "message": "naar:",
+        "description": "Cast <select> (to:)",
+        "hash": "16b67fe728a86deffba17241c6bd5eaf"
     },
     "popupNoReceiversFound": {
         "message": "Geen ontvangende apparaten gevonden",
-        "description": "Message displayed in the receiver selector if there are no available receivers."
+        "description": "Message displayed in the receiver selector if there are no available receivers.",
+        "hash": "3ce2f57b41fe59bf2709b1d7ad6ec0e6"
     },
     "popupCastButtonTitle": {
         "message": "Casten",
-        "description": "Button text for each receiver entry in the receiver selector."
+        "description": "Button text for each receiver entry in the receiver selector.",
+        "hash": "2697d6a1da20b8baa9c3c866983b195c"
     },
     "popupCastingButtonTitle": {
         "message": "Aan het casten$ellipsis$",
         "description": "Button text while establishing a session in the receiver selector. Ellipsis cycles (. → .. → ...) as loading indicator.",
         "placeholders": {
-            "ellipsis": {
-                "content": "$1",
-                "example": "..."
-            }
-        }
+            "ellipsis": { "content": "$1", "example": "..." }
+        },
+        "hash": "3a13ea12ce352174fc7628f6ce954a53"
     },
     "popupStopButtonTitle": {
         "message": "Stop",
-        "description": "Alternate action button text displayed instead of popupCastButtonTitle."
+        "description": "Alternate action button text displayed instead of popupCastButtonTitle.",
+        "hash": "2c9e6b261d6a925c3acc4fa478be4f02"
+    },
+    "popupCastMenuTitle": {
+        "message": "Cast naar $deviceName$",
+        "description": "Menu text for cast item in context menu for receivers in receiver selector.",
+        "placeholders": {
+            "deviceName": { "content": "$1", "example": "Living Room TV" }
+        },
+        "hash": "da6800a599084a9f971214faa56d3806"
+    },
+    "popupStopMenuTitle": {
+        "message": "Stop $appName$ op $deviceName$",
+        "description": "Menu text for stop item in context menu for receivers in receiver selector.",
+        "placeholders": {
+            "appName": { "content": "$1", "example": "Netflix" },
+            "deviceName": { "content": "$2", "example": "Living Room TV" }
+        },
+        "hash": "34f1812668ef443ca94b8fdd59f277ad"
+    },
+    "popupShowDetailsTitle": {
+        "message": "Toon details",
+        "description": "Receiver device expand button title.",
+        "hash": "bca0de3c08c9efbfde9b210731d8e300"
+    },
+    "popupMediaPlay": {
+        "message": "Afspelen",
+        "description": "Media controls play button title.",
+        "hash": "e8836bb3401b7918d1f663d902728df4"
+    },
+    "popupMediaPause": {
+        "message": "Pauze",
+        "description": "Media controls pause button title.",
+        "hash": "7a53c125ad76bfc91d19f685b9feae50"
+    },
+    "popupMediaSkipPrevious": {
+        "message": "Vorige overslaan",
+        "description": "Media controls skip previous button title.",
+        "hash": "60b2f75cad3736292b53452594f5798f"
+    },
+    "popupMediaSkipNext": {
+        "message": "Volgende overslaan",
+        "description": "Media controls skip next button title.",
+        "hash": "f11a30ae2d31facfbc43716c63edee0f"
+    },
+    "popupMediaSeek": {
+        "message": "Zoek positie",
+        "description": "Media controls seek bar accessibility label.",
+        "hash": "bc03f4d070364cec72647b465c3d3818"
+    },
+    "popupMediaSeekBackward": {
+        "message": "Zoek achteruit",
+        "description": "Media controls seek backward button title.",
+        "hash": "1b7ba493964cf798c81dc9e213636b5c"
+    },
+    "popupMediaSeekForward": {
+        "message": "Zoek vooruit",
+        "description": "Media controls seek forward button title.",
+        "hash": "4ea30d709af336bf20d8dcbfae6e9353"
+    },
+    "popupMediaSubtitlesCaptions": {
+        "message": "Ondertiteling",
+        "description": "Media controls subtitles/cc button title.",
+        "hash": "2a7e8cc0225f48bf497518baddc235d6"
+    },
+    "popupMediaSubtitlesCaptionsOff": {
+        "message": "Uit",
+        "description": "Media controls subtitles/cc button title.",
+        "hash": "68031547056d63979c1bacf256ac7fd5"
+    },
+    "popupMediaMute": {
+        "message": "Dempen",
+        "description": "Media controls mute button title.",
+        "hash": "213eb933ad370f5dfa8098020f110bff"
+    },
+    "popupMediaUnmute": {
+        "message": "Dempen opheffen",
+        "description": "Media controls unmute button title.",
+        "hash": "7361ce0749dfbfb7d06ef2e0ca0aa1eb"
+    },
+    "popupMediaVolume": {
+        "message": "Dempen opheffen",
+        "description": "Media controls volume slider accessibility label.",
+        "hash": "7361ce0749dfbfb7d06ef2e0ca0aa1eb"
+    },
+    "popupMediaLive": {
+        "message": "Live",
+        "description": "Media controls label displayed for live streams.",
+        "hash": "3ee73aedcd12602aeb3f8746e95070aa"
+    },
+    "popupSearch": {
+        "message": "Zoek apparaten",
+        "description": "Media devices search title.",
+        "hash": "7a149543333497aa16d6c223d614e87f"
+    },
+    "popupSearchClear": {
+        "message": "Wis zoekopdracht",
+        "description": "Media devices search clear button title.",
+        "hash": "3e6f7446e68cf0949146c3d488385d27"
+    },
+    "popupSearchNoDevicesFound": {
+        "message": "Geen apparaten gevonden voor \"$searchTerms$\".",
+        "description": "Message displayed when no receiver devices are found for a given search term.",
+        "placeholders": {
+            "searchTerm": { "content": "$1", "example": "Living Room" }
+        },
+        "hash": "4c53dd5c9ed94ee2ed53969930e0fbfb"
     },
     "contextCast": {
-        "message": "Bezig met casten...",
-        "description": "Main context menu item title. Ellipsis indicates additional information required as it triggers opening of receiver selector."
+        "message": "Casten...",
+        "description": "Main context menu item title. Ellipsis indicates additional information required as it triggers opening of receiver selector.",
+        "hash": "148ea8aea16251530ad77bc1d24253cb"
     },
     "contextAddToWhitelist": {
         "message": "Voeg aan whitelist toe",
-        "description": "Top-level whitelist context menu item title."
+        "description": "Top-level whitelist context menu item title.",
+        "hash": "f62a2993e590b730340f5f377408b2f9"
     },
     "contextAddToWhitelistRecommended": {
-        "message": "Voeg $matchPattern$ toe (Aangeraden)",
+        "message": "Voeg $matchPattern$ toe (Aanbevolen)",
         "description": "Context menu item title for recomended match pattern.",
         "placeholders": {
-            "matchPattern": {
-                "content": "$1",
-                "example": "https://example.com/*"
-            }
-        }
+            "matchPattern": { "content": "$1", "example": "https://example.com/*" }
+        },
+        "hash": "395caf736ead76c1a7340850424e2c5b"
     },
     "contextAddToWhitelistAdvancedAdd": {
         "message": "Voeg $matchPattern$ toe",
         "description": "Context menu item title for all other match patterns.",
         "placeholders": {
-            "matchPattern": {
-                "content": "$1",
-                "example": "*://*.example.com/*"
-            }
-        }
+            "matchPattern": { "content": "$1", "example": "*://*.example.com/*" }
+        },
+        "hash": "a79d67f700965693261f2f38f97fd870"
     },
     "optionsBridgeLoading": {
-        "message": "Bezig met laden van bridge-informatie...",
-        "description": "Loading placeholder text for bridge section on options page."
+        "message": "Bezig met laden van bridge informatie...",
+        "description": "Loading placeholder text for bridge section on options page.",
+        "hash": "da533bfa70f4359693c6194f601faeeb"
     },
     "optionsBridgeFoundStatusTitle": {
         "message": "Bridge aangetroffen",
-        "description": "Bridge OK status title text."
+        "description": "Bridge OK status title text.",
+        "hash": "e8ea7c0de859a99248eab9b0a8c56e0e"
     },
     "optionsBridgeIssueStatusTitle": {
         "message": "Probleem met bridge",
-        "description": "Bridge error status title text."
+        "description": "Bridge error status title text.",
+        "hash": "91ca475ef1fd61142c50e14159241986"
+    },
+    "optionsBridgeIssueStatusTextTimedOut": {
+        "message": "Verbinding time out",
+        "description": "Bridge timed out issue additional description text.",
+        "hash": "522040158e825389dd4afe9bee3de5ef"
+    },
+    "optionsBridgeIssueStatusTextAuthentication": {
+        "message": "Kan de verbinding niet verifiëren",
+        "description": "Bridge authentication issue additional description text.",
+        "hash": "48874ba669a8985a0a09e2d702b66c86"
     },
     "optionsBridgeNotFoundStatusTitle": {
         "message": "Geen bridge aangetroffen",
-        "description": "Bridge missing status title text."
+        "description": "Bridge missing status title text.",
+        "hash": "ac23e6d80564cb2e6b4358421e498f5d"
     },
     "optionsBridgeNotFoundStatusText": {
         "message": "Probeer de nieuwste versie te installeren.",
-        "description": "Bridge not found additional description text"
+        "description": "Bridge not found additional description text",
+        "hash": "a6cae425dc794e2798c50c914f060af1"
     },
     "optionsBridgeStatsName": {
         "message": "Naam:",
-        "description": "Bridge stats name row title."
+        "description": "Bridge stats name row title.",
+        "hash": "bcc9f177b0a20c395aac47bd88204419"
     },
     "optionsBridgeStatsVersion": {
         "message": "Versie:",
-        "description": "Bridge stats version row title."
+        "description": "Bridge stats version row title.",
+        "hash": "eb089a4ff5e2c6afc41bd4a81a4dade6"
     },
     "optionsBridgeStatsExpectedVersion": {
         "message": "Verwachte versie:",
-        "description": "Bridge stats expected version row title."
+        "description": "Bridge stats expected version row title.",
+        "hash": "e8d73707f7a8e5c340b1ab52abf6793a"
     },
     "optionsBridgeStatsCompatibility": {
         "message": "Compatibiliteit:",
-        "description": "Bridge stats compatibility row title."
+        "description": "Bridge stats compatibility row title.",
+        "hash": "834a9ddcab7c18521a58522adabffb1f"
     },
     "optionsBridgeStatsRecommendedAction": {
         "message": "Aanbevolen actie:",
-        "description": "Bridge stats recommended action row title."
+        "description": "Bridge stats recommended action row title.",
+        "hash": "967cea6c06bb9309f3cac58e0accdab1"
     },
     "optionsBridgeCompatible": {
-        "message": "COMPATIBEL",
-        "description": "Compatibility status is definitely compatible."
+        "message": "Compatibel",
+        "description": "Compatibility status is definitely compatible.",
+        "hash": "7976aeb05daa7e3ab6ff5ebc8d74b0f9"
     },
     "optionsBridgeLikelyCompatible": {
-        "message": "WAARSCHIJNLIJK COMPATIBEL",
-        "description": "Compatibility status is probably compatible."
+        "message": "Waarschijnlijk compatibel",
+        "description": "Compatibility status is probably compatible.",
+        "hash": "a08be1061026eeb504cdf08f4b7c864e"
     },
     "optionsBridgeIncompatible": {
-        "message": "INCOMPATIBEL",
-        "description": "Compatibility status is definitely incompatible."
+        "message": "Niet compatibel",
+        "description": "Compatibility status is definitely incompatible.",
+        "hash": "28453c055bb3d322bb9a6ff2ba430ea2"
     },
     "optionsBridgeOlderAction": {
         "message": "De bridge-versie is ouder dan verwacht. Installeer de nieuwste bridge-versie.",
-        "description": "Recommended action for when the installed bridge version is older than the installed extension version."
+        "description": "Recommended action for when the installed bridge version is older than the installed extension version.",
+        "hash": "401dc978f73e5452ae3ac0622a65fd05"
     },
     "optionsBridgeNewerAction": {
         "message": "De bridge-versie is nieuwer dan verwacht. Installeer de nieuwste versie van de extensie.",
-        "description": "Recommended action for when the installed bridge version is newer than the installed extension version."
+        "description": "Recommended action for when the installed bridge version is newer than the installed extension version.",
+        "hash": "1579f4717e682022f947d9f169ccad55"
     },
     "optionsBridgeNoAction": {
         "message": "Geen actie benodigd.",
-        "description": "Recommended action for when both bridge and extension versions are compatible or likely compatible."
+        "description": "Recommended action for when both bridge and extension versions are compatible or likely compatible.",
+        "hash": "c5ba416a736b041c1f96cee49830e4a4"
+    },
+    "optionsBridgeRefresh": {
+        "message": "Ververs bridge status",
+        "description": "Bridge status refresh button title.",
+        "hash": "8f1b5aa483d9cb3cc652e28fa6c8310b"
     },
     "optionsBridgeUpdateCheck": {
-        "message": "Controleer op updates",
-        "description": "Update check button title."
+        "message": "Controleer voor updates",
+        "description": "Update check button title.",
+        "hash": "f712c081e2e0ff4d83ab9b8c2cb226fa"
     },
     "optionsBridgeUpdateChecking": {
         "message": "Bezig met controleren op updates$ellipsis$",
         "description": "Update check button title while in progress. Ellipsis cycles (. → .. → ...) as loading indicator.",
         "placeholders": {
-            "ellipsis": {
-                "content": "$1",
-                "example": ".."
-            }
-        }
+            "ellipsis": { "content": "$1", "example": ".." }
+        },
+        "hash": "282dc18c1fe1de587133edd5d050b624"
     },
     "optionsBridgeUpdateStatusNoUpdates": {
         "message": "Geen updates beschikbaar",
-        "description": "Update status if no updates are found."
+        "description": "Update status if no updates are found.",
+        "hash": "93c0b86f72daf273a6066d9525aad1c1"
     },
     "optionsBridgeUpdateStatusError": {
-        "message": "Er is een fout opgetreden tijdens het controleren op updates",
-        "description": "Update status if an error was encountered checking for updates."
+        "message": "Er is een fout opgetreden tijdens het controleren naar updates",
+        "description": "Update status if an error was encountered checking for updates.",
+        "hash": "a885c6a90ca732276ab09e972d9c3232"
     },
     "optionsBridgeUpdateAvailable": {
         "message": "Er is een update beschikbaar:",
-        "description": "Update status if an update was found."
+        "description": "Update status if an update was found.",
+        "hash": "62f83435cf64c57e719fa05fb4cd39aa"
     },
     "optionsBridgeUpdate": {
-        "message": "Nu bijwerken...",
-        "description": "Update now button title. Ellipsis indicates additional information as it triggers an update window popup."
+        "message": "Bijwerken...",
+        "description": "Update now button title. Ellipsis indicates additional information as it triggers an update window popup.",
+        "hash": "19da82f32535564dc116b89e9b9839e8"
+    },
+    "optionsBridgeUpdateViewChangelog": {
+        "message": "Bekijk changelog",
+        "hash": "58b6011ca566f6a2874073b4838814a4"
     },
     "optionsBridgeBackupEnabled": {
-        "message": "Inschakelen van backup daemon verbinding",
-        "description": "Backup daemon checkbox label."
+        "message": "Back-up daemonverbinding inschakelen op $hostPort$",
+        "description": "Backup daemon checkbox label. Host/port inputs are inserted inline at the hostPort substitution.",
+        "placeholders": {
+            "hostPort": { "content": "$1" }
+        },
+        "hash": "923eff866d306017aa4f5223e07cfcd5"
     },
     "optionsBridgeBackupEnabledDescription": {
         "message": "Als de brigde verbinding regelmatig verbreekt, probeer dan de bridge in daemon mode te starten.",
-        "description": "Backup daemon checkbox description."
+        "description": "Backup daemon checkbox description.",
+        "hash": "0ce9582305f68542d131499559616155"
+    },
+    "optionsBridgeBackupSecure": {
+        "message": "Gebruik een beveiligde verbinding",
+        "description": "Daemon secure option checkbox label.",
+        "hash": "21678e1e5fde5b36c1f6be28e266ec1f"
+    },
+    "optionsBridgeBackupSecureDescription": {
+        "message": "Verbind met de deamon via HTTPS in plaats van HTTP. Vereist aanvullende configuratie.",
+        "description": "Daemon secure option description.",
+        "hash": "3236dda1229cc1bf89b6dccf4344d9bc"
+    },
+    "optionsBridgeBackupPassword": {
+        "message": "Wachtwoord:",
+        "description": "Daemon password option label.",
+        "hash": "783de8262aef12ba1de87a8277a68ddf"
+    },
+    "optionsBridgeBackupPasswordDescription": {
+        "message": "Het optionele wachtwoord ingesteld voor de deamon verbindingen.",
+        "description": "Daemon password option description.",
+        "hash": "851571617af8552047283f89f2e880ac"
     },
     "optionsMediaCategoryName": {
-        "message": "Mediacasten",
-        "description": "Options page media casting category title."
+        "message": "Media casten",
+        "description": "Options page media casting category title.",
+        "hash": "b68324d8f3c48698008bf4ea67a9843c"
     },
     "optionsMediaCategoryDescription": {
         "message": "HTML5 video/audio media casten.",
-        "description": "Options page media casting category description."
+        "description": "Options page media casting category description.",
+        "hash": "6b1a30506d1324ab3dfb340bdca684d7"
     },
     "optionsMediaEnabled": {
-        "message": "Mediacasten ingeschakeld",
-        "description": "Media casting enabled checkbox label."
+        "message": "Media casten inschakelen",
+        "description": "Media casting enabled checkbox label.",
+        "hash": "c9071e46ce057bdc8ac472b061ed62e9"
     },
     "optionsMediaSyncElement": {
-        "message": "Ontvangerstatus synchroniseren met media-element",
-        "description": "Media casting sync checkbox label."
+        "message": "Synchroniseer ontvanger met media element",
+        "description": "Media casting sync checkbox label.",
+        "hash": "2b61bd9c36dc09cc4d67b62e63e8439b"
     },
     "optionsMediaSyncElementDescription": {
-        "message": "Synchroniseer status (afspelen, volume, ondertiteling, etc...) tussen het media element en de ontvanger.",
-        "description": "Media casting sync option description."
+        "message": "Synchroniseer status (afspelen, volume, ondertiteling, etc.) tussen het media element en de ontvanger.",
+        "description": "Media casting sync option description.",
+        "hash": "156ea206867c07cf80bbcd8b8f955d89"
     },
     "optionsMediaStopOnUnload": {
         "message": "Afspelen stoppen na sluiten van pagina",
-        "description": "Media stop on unload checkbox label."
+        "description": "Media stop on unload checkbox label.",
+        "hash": "a60732963c6bf8ba5273a977cfc53e20"
     },
     "optionsLocalMediaCategoryName": {
         "message": "Lokale media casten",
-        "description": "Options page local media category title."
+        "description": "Options page local media category title.",
+        "hash": "555b3dda3d57b31268b2fd4e2148f0a1"
     },
     "optionsLocalMediaCategoryDescription": {
-        "message": "HTTP-server gestart door de bridge-app om lokale mediabestanden te streamen naar de ontvanger.",
-        "description": "Options page local media category description."
+        "message": "HTTP server gestart door de bridge app om lokale mediabestanden te streamen naar de ontvanger.",
+        "description": "Options page local media category description.",
+        "hash": "e00f4b7c8c6455740bb5aa5ca48f94ce"
     },
     "optionsLocalMediaEnabled": {
-        "message": "Lokaal mediacasten ingeschakeld",
-        "description": "Local media enabled checkbox label."
+        "message": "Lokaal media casten inschakelen",
+        "description": "Local media enabled checkbox label.",
+        "hash": "dddd9796b68b17067a304f4560223cdc"
     },
     "optionsLocalMediaServerPort": {
-        "message": "HTTP-serverpoort:",
-        "description": "HTTP server port input label."
+        "message": "HTTP serverpoort:",
+        "description": "HTTP server port input label.",
+        "hash": "adba96abd8f0ed467bb7146315dd8b90"
     },
     "optionsReceiverSelectorCategoryName": {
         "message": "Ontvanger selectie",
-        "description": "Options page receiver selector category title."
+        "description": "Options page receiver selector category title.",
+        "hash": "5f4dc0204ad9cf9bf062b9ddbbd48f71"
     },
     "optionsReceiverSelectorCategoryDescription": {
         "message": "Ontvangstapparaat selectie interface",
-        "description": "Options page receiver selector category description."
+        "description": "Options page receiver selector category description.",
+        "hash": "b990cd04c332de84ad96f13ada59539f"
     },
     "optionsReceiverSelectorWaitForConnection": {
         "message": "Wachten op verbinding",
-        "description": "Receiver selector wait for connection option checkbox label."
+        "description": "Receiver selector wait for connection option checkbox label.",
+        "hash": "2d7e179330799e7187908f0adb832798"
     },
     "optionsReceiverSelectorWaitForConnectionDescription": {
         "message": "Hou de ontvanger selectie open totdat er verbinding is gemaakt of het maken van de verbinding mislukt.",
-        "description": "Receiver selector wait for connection option description."
+        "description": "Receiver selector wait for connection option description.",
+        "hash": "a093f20a6ac41312a874b14fdba7a3f0"
     },
     "optionsReceiverSelectorCloseIfFocusLost": {
-        "message": "Sluit na het verliezen van de focus",
-        "description": "Receiver selector close if focus lost option checkbox label."
+        "message": "Sluit na het verliezen van focus",
+        "description": "Receiver selector close if focus lost option checkbox label.",
+        "hash": "670ee2676ef52e4b399937991458ebef"
+    },
+    "optionsReceiverSelectorExpandActive": {
+        "message": "Media bediening automatisch uitvouwen",
+        "description": "Receiver selector expand active checkbox label.",
+        "hash": "6010e2f6cc8dd276cf5678ee70ae8523"
+    },
+    "optionsReceiverSelectorShowMediaImages": {
+        "message": "Laat media afbeeldingen zien",
+        "description": "Receiver selector show media images checkbox label.",
+        "hash": "5451dabe85152fef98feda4591737871"
+    },
+    "optionsReceiverSelectorShowMediaImagesDescription": {
+        "message": "Media voorbeeld laden van externe servers.",
+        "description": "Receiver selector show media images option description.",
+        "hash": "9ea74badb4387d204c42be2111925344"
     },
     "optionsSiteWhitelistCategoryName": {
-        "message": "Gebruikersagent - Whitelist",
-        "description": "Options page whitelist category title."
+        "message": "Whitelist website",
+        "description": "Options page whitelist category title.",
+        "hash": "b4c29508b1076fc8d70c0d0a3b9bcfc7"
     },
     "optionsSiteWhitelistCategoryDescription": {
         "message": "Websites waarvan de gebruikersagent omwille van compatibiliteit moet worden ingesteld op Chrome. De patronen moeten geldig zijn.",
-        "description": "Options page whitelist category description."
+        "description": "Options page whitelist category description.",
+        "hash": "50289390d9ba15f54b7fd1538adc5067"
     },
     "optionsSiteWhitelistEnabled": {
-        "message": "Whitelist ingeschakeld",
-        "description": "Whitelist enabled checkbox label."
+        "message": "Whitelist inschakelen",
+        "description": "Whitelist enabled checkbox label.",
+        "hash": "e2a983568c921d33169acb2285112e3a"
+    },
+    "optionsSiteWhitelistEnabledDescription": {
+        "message": "Als u deze optie uitschakelt, wordt de cast functionaliteit op elke site ingeschakeld, maar de user agent string wordt niet vervangen.",
+        "description": "Whitelist restricted mode enabled description.",
+        "hash": "0793ff98663df82bb12a5b59c9744740"
     },
     "optionsSiteWhitelistContent": {
         "message": "Patronen:",
-        "description": "Match patterns editor widget label."
-    },
-    "optionsSiteWhitelistBasicView": {
-        "message": "Basisweergave",
-        "description": "Switch to basic view button title."
-    },
-    "optionsSiteWhitelistRawView": {
-        "message": "Ruwe weergave",
-        "description": "Switch to raw view button title."
-    },
-    "optionsSiteWhitelistSaveRaw": {
-        "message": "Ruwe weergave opslaan",
-        "description": "Save raw view edits button title."
+        "description": "Match patterns editor widget label.",
+        "hash": "649cd2a5977b6f2760aa4a0b7e8094c5"
     },
     "optionsSiteWhitelistAddItem": {
         "message": "Voeg toe",
-        "description": "Add new whitelist item button title."
+        "description": "Add new whitelist item button title.",
+        "hash": "7f3dd0607a364c07977651e77888485a"
     },
     "optionsSiteWhitelistEditItem": {
         "message": "Bewerken",
-        "description": "Edit whitelist item button title. Displayed on each item."
+        "description": "Tooltip text for whitelist item's edit button.",
+        "hash": "07fa34db2b1ae6134e7ea08b4c43b447"
     },
     "optionsSiteWhitelistRemoveItem": {
         "message": "Verwijderen",
-        "description": "Remove whitelist item button title. Displayed on each item."
+        "description": "Tooltip text for whitelist item's remove button.",
+        "hash": "3908a268c854fe64242e38845dbb7c81"
     },
-    "optionsSiteWhitelistInvalidMatchPattern": {
-        "message": "Ongeldig patroon $matchPattern$",
-        "description": "Error displayed by input indicating an invalid match pattern.",
-        "placeholders": {
-            "matchPattern": {
-                "content": "$1",
-                "example": "http://example"
-            }
-        }
+    "optionsSiteWhitelistItemShowOptions": {
+        "message": "Toon opties",
+        "description": "Tooltip text for whitelist item's show options button.",
+        "hash": "54b0919c482e66be5dd0af67ace666c7"
+    },
+    "optionsSiteWhitelistItemHideOptions": {
+        "message": "Verberg opties",
+        "description": "Tooltip text for whitelist item's hide options button.",
+        "hash": "893b6ef0fe464c26e743028c1e1ab998"
+    },
+    "optionsSiteWhitelistInvalidDuplicatePattern": {
+        "message": "Patroon bestaat al!",
+        "description": "Error displayed by input indicating a duplicate match pattern.",
+        "hash": "2df401191e509fcc99fd6340347ad0f4"
+    },
+    "optionsSiteWhitelistKnownAppsCustomApp": {
+        "message": "Aangepast",
+        "description": "Default <option> for knownApps <select>.",
+        "hash": "1685452bc68395b620b0ce1fb9b76da5"
+    },
+    "optionsSiteWhitelistCustomUserAgent": {
+        "message": "User agent:",
+        "description": "Custom user agent option label.",
+        "hash": "72fb625cd7e6b630cec8a4dae396b939"
+    },
+    "optionsSiteWhitelistCustomUserAgentDescription": {
+        "message": "Indien opgegeven, een aangepaste user agent gebruiken voor sites op de witte lijst.",
+        "description": "Custom user agent option description.",
+        "hash": "75a715d0fdb4cee2273d3c13bf9a4bab"
+    },
+    "optionsSiteWhitelistUserAgentDisabled": {
+        "message": "User agent uitschakelen",
+        "description": "Whitelist item user agent disabled checkbox label.",
+        "hash": "43140519e27bbe3665b09ce574dfecb7"
+    },
+    "optionsSiteWhitelistUserAgentDisabledDescription": {
+        "message": "Volledig uitschakelen van user agent vervanging met dit patroon",
+        "description": "Whitelist item user agent disabled checkbox description.",
+        "hash": "acb6f7918125ad114de9cbec08a942d9"
+    },
+    "optionsSiteWhitelistSiteSpecificUserAgent": {
+        "message": "User agent:",
+        "description": "Whitelist item user agent option label.",
+        "hash": "72fb625cd7e6b630cec8a4dae396b939"
+    },
+    "optionsSiteWhitelistSiteSpecificUserAgentDescription": {
+        "message": "Indien opgegeven, een aangepaste user agent gebruiken voor websites met dit patroon.",
+        "description": "Whitelist item user agent option label.",
+        "hash": "253942e6e08a6e2f0e03de2380c0fcea"
+    },
+    "optionsSiteWhitelistItemEnabled": {
+        "message": "Whitelist item toepassen",
+        "description": "Whitelist item enabled checkbox title.",
+        "hash": "41d0a73fac7f0fb38e7201a3140deae1"
+    },
+    "optionsSiteWhitelistItemPattern": {
+        "message": "Patroon toepassen",
+        "description": "Whitelist item pattern edit input title.",
+        "hash": "a46b7d8eb955f4e50d345eb66b8267d8"
     },
     "optionsMirroringCategoryName": {
         "message": "Beeldschermspiegeling",
-        "description": "Options page mirroring category name."
+        "description": "Options page mirroring category name.",
+        "hash": "c97bb91cfa508a7400db67093429405c"
     },
     "optionsMirroringCategoryDescription": {
         "message": "Beeldscherm-/tabbladspiegeling naar een Chromecast-ontvanger.",
-        "description": "Options page mirroring category description."
+        "description": "Options page mirroring category description.",
+        "hash": "e6c1ef9e8b168f0d9049aacc984c22fd"
     },
     "optionsMirroringEnabled": {
-        "message": "Beeldschermspiegeling ingeschakeld",
-        "description": "Mirroring enabled checkbox label."
+        "message": "Beeldschermspiegeling inschakelen (experimenteel)",
+        "description": "Mirroring enabled checkbox label.",
+        "hash": "69d00f1674ec817c6b3b5a0e9c4e8061"
     },
     "optionsMirroringAppId": {
         "message": "App ID van ontvanger:",
-        "description": "Mirroring app ID input label."
+        "description": "Mirroring app ID input label.",
+        "hash": "3416cc2f16a3a9dd2f6dc43f3e609cb6"
     },
     "optionsMirroringAppIdDescription": {
         "message": "App ID for a registered Chromecast receiver application. Advanced use only. Must be compatible with the default app (see GitHub repo).",
-        "description": "Mirroring app ID option description."
+        "description": "Mirroring app ID option description.",
+        "hash": "90e7943c57f0bcaa04ce8e55795d9d0c"
+    },
+    "optionsMirroringStreamOptions": {
+        "message": "Stream encoding opties",
+        "description": "Options page mirroring category description.",
+        "hash": "150cf1291af3a86ca42168befe2a4751"
+    },
+    "optionsMirroringStreamFrameRate": {
+        "message": "Maximale framerate:",
+        "description": "Mirroring stream max frame rate option label.",
+        "hash": "080d81431268f644afe7d241bc88ebbc"
+    },
+    "optionsMirroringStreamMaxBitRate": {
+        "message": "Maximale bitrate",
+        "description": "Mirroring stream max bit rate option label.",
+        "hash": "3259b72367ab1f152a5a5c6cf4143ea3"
+    },
+    "optionsMirroringStreamMaxBitRateDescription": {
+        "message": "Maximum bitrate in bits per seconde.",
+        "description": "Mirroring stream max bit rate option description.",
+        "hash": "59df8cacd361cee2ba4c9d37a89786ce"
+    },
+    "optionsMirroringStreamDownscaleFactor": {
+        "message": "Downschale factor:",
+        "description": "Mirroring stream downscale factor option label.",
+        "hash": "8c950afc5a3249832c757a804f3c0e41"
+    },
+    "optionsMirroringStreamDownscaleFactorDescription": {
+        "message": "Factor waarmee de videostream gedownscaled wordt.",
+        "description": "Mirroring stream downscale factor option description.",
+        "hash": "9135a6b22ce55ee7ecf30e7c74c836d3"
+    },
+    "optionsMirroringStreamMaxResolution": {
+        "message": "Limiteer de resolutie tot",
+        "hash": "574f9b6e388ec0311b18502d16ea22f7"
+    },
+    "optionsMirroringStreamMaxResolutionDescription": {
+        "message": "Limiteert de maximum video stream resolutie met behoud van de aspect ratio.",
+        "description": "Mirroring stream resolution option description.",
+        "hash": "d9e946e544eb7c6b02bd30f3d2c618c6"
+    },
+    "optionsMirroringStreamMaxResolutionWidthPlaceholder": {
+        "message": "Breedte",
+        "description": "Max resolution width input placeholder.",
+        "hash": "f6322e65aa252c2bfebeef3642eda579"
+    },
+    "optionsMirroringStreamMaxResolutionHeightPlaceholder": {
+        "message": "Hoogte",
+        "description": "Max resolution height input placeholder.",
+        "hash": "8413a498a0ddfc0947e8ad46a2ff186f"
+    },
+    "optionsOptionRecommended": {
+        "message": "aanbevolen",
+        "description": "Badge next to option label indicating boolean option is recommended enabled.",
+        "hash": "cb7a5f6614a279d34d8bb57dae48bdbd"
     },
     "optionsReset": {
         "message": "Standaardwaarden herstellen",
-        "description": "Restore default options button label."
+        "description": "Restore default options button label.",
+        "hash": "368002c153ff9aeda930d97821631f0c"
     },
     "optionsSave": {
         "message": "Opslaan",
-        "description": "Save options button label."
+        "description": "Save options button label.",
+        "hash": "aa14043bd4e6f79db542868539be9220"
     },
     "optionsSaved": {
         "message": "Opgeslagen!",
-        "description": "Status text displayed by save button once options have been successfully saved."
-    }
+        "description": "Status text displayed by save button once options have been successfully saved.",
+        "hash": "d2f31b10edbccfb9147336aa30b5bb08"
+    },
+    "optionsShowAdvancedOptions": {
+        "message": "Geavanceerde opties weergeven",
+        "description": "Show advanced options checkbox label.",
+        "hash": "47f7601f490ff7de924c9167538a25b6"
+    },
+    "mirroringPopupTitle": {
+        "message": "Spiegelen",
+        "description": "Mirroring popup window title.",
+        "hash": "092bd4419cff5b6b4e365f36fc4f9c50"
+    },
+    "mirroringPopupWaitingForConnection": {
+        "message": "Wachten op verbinding",
+        "description": "Mirroring popup loading text.",
+        "hash": "79e6d3d1169bbc652acecf34dce6b82e"
+    },
+    "mirroringPopupConnectedTo": {
+        "message": "Verbonden met $deviceName$",
+        "description": "Mirroring popup label displayed whilst session connected before mirroring.",
+        "placeholders": {
+            "deviceName": { "content": "$1" }
+        },
+        "hash": "bd3d58015008ac8b9dcded600e05a744"
+    },
+    "mirroringPopupMirroringTo": {
+        "message": "Spiegelen naar $deviceName$",
+        "description": "Mirroring popup label displayed whilst mirroring.",
+        "placeholders": {
+            "deviceName": { "content": "$1" }
+        },
+        "hash": "13dd028ed9d37902f92977622241d0f9"
+    },
+    "mirroringPopupChooseSource": {
+        "message": "Selecteer bron",
+        "description": "Mirroring popup choose media source button label.",
+        "hash": "040e46e866e781425c429261eef824d3"
+    },
+    "mirroringPopupStopMirroring": {
+        "message": "Stop met spiegelen",
+        "description": "Mirroring popup stop mirroring button label.",
+        "hash": "fade5f575be1a34437a60036bcd96bb3"
+    },
+
+    "__WET_LOCALE__": { "message": "nl" }
 }
