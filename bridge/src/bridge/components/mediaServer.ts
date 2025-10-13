@@ -6,12 +6,16 @@ import stream from "stream";
 
 import mime from "mime-types";
 
-import messaging from "../messaging";
+import type { Messenger } from "../messaging";
 import { convertSrtToVtt } from "../lib/subtitles";
 
 export let mediaServer: http.Server | undefined;
 
-export async function startMediaServer(filePath: string, port: number) {
+export async function startMediaServer(
+    messaging: Messenger,
+    filePath: string,
+    port: number
+) {
     if (mediaServer?.listening) {
         await stopMediaServer();
     }

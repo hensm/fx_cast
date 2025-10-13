@@ -15,6 +15,7 @@ interface CastRemoteOptions {
     onApplicationClose?: () => void;
     onReceiverStatusUpdate?: (status: ReceiverStatus) => void;
     onMediaStatusUpdate?: (status?: MediaStatus) => void;
+    port?: number;
 }
 
 /**
@@ -27,6 +28,7 @@ export default class Remote extends CastClient {
         super();
         super
             .connect(host, {
+                port: options?.port,
                 onReceiverMessage: message => {
                     this.onReceiverMessage(message);
                 }
@@ -76,12 +78,14 @@ export default class Remote extends CastClient {
                 message => this.onMediaMessage(message)
             );
 
-            this.transportClient.connect(this.host).then(() => {
-                this.transportClient?.sendMediaMessage({
-                    type: "GET_STATUS",
-                    requestId: 0
+            this.transportClient
+                .connect(this.host, { port: this.options?.port })
+                .then(() => {
+                    this.transportClient?.sendMediaMessage({
+                        type: "GET_STATUS",
+                        requestId: 0
+                    });
                 });
-            });
 
             this.options?.onApplicationFound?.();
         }

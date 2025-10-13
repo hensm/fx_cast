@@ -1,20 +1,17 @@
 import http from "http";
 import https from "https";
 import { ChildProcess, spawn } from "child_process";
-import { Readable } from "stream";
+import { Readable, Writable } from "stream";
+import * as bridge from "./bridge";
 
 import chalk from "chalk";
 import WebSocket from "ws";
 
 import { DecodeTransform, EncodeTransform } from "./transforms.js";
-
-const bridgeInstances = new Set<ChildProcess>();
+import { WebsocketMessenger } from "./bridge/messaging";
 
 // Ensure child processes are killed on exit
 process.on("SIGTERM", async () => {
-    for (const bridge of bridgeInstances) {
-        bridge.kill();
-    }
     process.exit(1);
 });
 
@@ -38,45 +35,7 @@ export function init(opts: DaemonOpts) {
     const wss = new WebSocket.Server({ noServer: true });
 
     wss.on("connection", socket => {
-        // Stream for incoming WebSocket messages
-        const messageStream = new Readable({ objectMode: true });
-        // eslint-disable-next-line @typescript-eslint/no-empty-function
-        messageStream._read = () => {};
-
-        socket.on("message", (message: string) => {
-            try {
-                messageStream.push(JSON.parse(message));
-            } catch (err) {
-                // Catch parse errors and close socket
-                socket.close();
-            }
-        });
-
-        /**
-         * Daemon and bridge are the same binary, so spawn a new
-         * version of self in bridge mode.
-         */
-        const bridge = spawn(process.execPath, [process.argv[1]]);
-        bridgeInstances.add(bridge);
-
-        // socket -> bridge.stdin
-        messageStream.pipe(new EncodeTransform()).pipe(bridge.stdin);
-
-        // bridge.stdout -> socket
-        bridge.stdout.pipe(new DecodeTransform()).on("data", data => {
-            if (socket.readyState !== WebSocket.OPEN) {
-                return;
-            }
-
-            socket.send(JSON.stringify(data));
-        });
-
-        // Handle termination
-        socket.on("close", () => bridge.kill());
-        bridge.on("exit", () => {
-            socket.close();
-            bridgeInstances.delete(bridge);
-        });
+        bridge.run(new WebsocketMessenger(socket));
     });
 
     /**

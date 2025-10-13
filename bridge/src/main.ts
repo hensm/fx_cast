@@ -6,6 +6,7 @@ import yargs from "yargs";
 import type { DaemonOpts } from "./daemon";
 
 import { applicationName, applicationVersion } from "../config.json";
+import { Messenger, StdioMessenger } from "./bridge/messaging";
 
 const argv = yargs()
     .scriptName(applicationName)
@@ -103,8 +104,9 @@ function parseConfig(configPath: string) {
     return config;
 }
 
-if (argv.daemon) {
-    import("./daemon").then(daemon => {
+async function main() {
+    if (argv.daemon) {
+        const daemon = await import("./daemon");
         const daemonOpts: DaemonOpts = {
             host: argv.host,
             port: argv.port,
@@ -117,7 +119,10 @@ if (argv.daemon) {
         }
 
         daemon.init(daemonOpts);
-    });
-} else {
-    import("./bridge");
+    } else {
+        const bridge = await import("./bridge");
+        bridge.run(new StdioMessenger());
+    }
 }
+
+main();

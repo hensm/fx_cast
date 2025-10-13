@@ -1,4 +1,4 @@
-import messaging, { Message } from "./messaging";
+import type { Messenger, Message } from "./messaging";
 
 import { handleCastMessage } from "./components/cast";
 import Discovery from "./components/cast/discovery";
@@ -29,103 +29,106 @@ const remotes = new Map<string, Remote>();
  * Initializes the counterpart objects and is responsible
  * for managing existing ones.
  */
-messaging.on("message", (message: Message) => {
-    switch (message.subject) {
-        case "bridge:getInfo":
-        case "bridge:/getInfo": {
-            messaging.send(applicationVersion);
-            break;
-        }
+export function run(messaging: Messenger) {
+    messaging.on("message", (message: Message) => {
+        switch (message.subject) {
+            case "bridge:getInfo":
+            case "bridge:/getInfo": {
+                messaging.send(applicationVersion);
+                break;
+            }
 
-        case "bridge:startDiscovery": {
-            const { shouldWatchStatus } = message.data;
+            case "bridge:startDiscovery": {
+                const { shouldWatchStatus } = message.data;
 
-            discovery = new Discovery({
-                onDeviceFound(device) {
-                    messaging.sendMessage({
-                        subject: "main:deviceUp",
-                        data: {
-                            deviceId: device.id,
-                            deviceInfo: device
+                discovery = new Discovery({
+                    onDeviceFound(device) {
+                        messaging.sendMessage({
+                            subject: "main:deviceUp",
+                            data: {
+                                deviceId: device.id,
+                                deviceInfo: device
+                            }
+                        });
+
+                        if (shouldWatchStatus) {
+                            remotes.set(
+                                device.id,
+                                new Remote(device.host, {
+                                    port: device.port,
+                                    // RECEIVER_STATUS
+                                    onReceiverStatusUpdate(status) {
+                                        messaging.sendMessage({
+                                            subject:
+                                                "main:receiverDeviceStatusUpdated",
+                                            data: {
+                                                deviceId: device.id,
+                                                status
+                                            }
+                                        });
+                                    },
+                                    // MEDIA_STATUS
+                                    onMediaStatusUpdate(status) {
+                                        if (!status) return;
+
+                                        messaging.sendMessage({
+                                            subject:
+                                                "main:receiverDeviceMediaStatusUpdated",
+                                            data: {
+                                                deviceId: device.id,
+                                                status
+                                            }
+                                        });
+                                    }
+                                })
+                            );
                         }
-                    });
+                    },
+                    onDeviceDown(deviceId) {
+                        messaging.sendMessage({
+                            subject: "main:deviceDown",
+                            data: { deviceId }
+                        });
 
-                    if (shouldWatchStatus) {
-                        remotes.set(
-                            device.id,
-                            new Remote(device.host, {
-                                // RECEIVER_STATUS
-                                onReceiverStatusUpdate(status) {
-                                    messaging.sendMessage({
-                                        subject:
-                                            "main:receiverDeviceStatusUpdated",
-                                        data: {
-                                            deviceId: device.id,
-                                            status
-                                        }
-                                    });
-                                },
-                                // MEDIA_STATUS
-                                onMediaStatusUpdate(status) {
-                                    if (!status) return;
-
-                                    messaging.sendMessage({
-                                        subject:
-                                            "main:receiverDeviceMediaStatusUpdated",
-                                        data: {
-                                            deviceId: device.id,
-                                            status
-                                        }
-                                    });
-                                }
-                            })
-                        );
-                    }
-                },
-                onDeviceDown(deviceId) {
-                    messaging.sendMessage({
-                        subject: "main:deviceDown",
-                        data: { deviceId }
-                    });
-
-                    if (shouldWatchStatus) {
-                        if (remotes.has(deviceId)) {
-                            remotes.get(deviceId)?.disconnect();
-                            remotes.delete(deviceId);
+                        if (shouldWatchStatus) {
+                            if (remotes.has(deviceId)) {
+                                remotes.get(deviceId)?.disconnect();
+                                remotes.delete(deviceId);
+                            }
                         }
                     }
-                }
-            });
+                });
 
-            discovery.start();
+                discovery.start();
 
-            break;
-        }
+                break;
+            }
 
-        case "bridge:sendReceiverMessage": {
-            const { deviceId, message: receiverMessage } = message.data;
-            remotes.get(deviceId)?.sendReceiverMessage(receiverMessage);
-            break;
-        }
-        case "bridge:sendMediaMessage": {
-            const { deviceId, message: mediaMessage } = message.data;
-            remotes.get(deviceId)?.sendMediaMessage(mediaMessage);
-            break;
-        }
+            case "bridge:sendReceiverMessage": {
+                const { deviceId, message: receiverMessage } = message.data;
+                remotes.get(deviceId)?.sendReceiverMessage(receiverMessage);
+                break;
+            }
+            case "bridge:sendMediaMessage": {
+                const { deviceId, message: mediaMessage } = message.data;
+                remotes.get(deviceId)?.sendMediaMessage(mediaMessage);
+                break;
+            }
 
-        // Media server
-        case "bridge:startMediaServer": {
-            const { filePath, port } = message.data;
-            startMediaServer(filePath, port);
-            break;
-        }
-        case "bridge:stopMediaServer": {
-            stopMediaServer();
-            break;
-        }
+            // Media server
+            case "bridge:startMediaServer": {
+                const { filePath, port } = message.data;
+                startMediaServer(messaging, filePath, port);
+                break;
+            }
+            case "bridge:stopMediaServer": {
+                stopMediaServer();
+                break;
+            }
 
-        default: {
-            handleCastMessage(message);
+            default: {
+                handleCastMessage(messaging, message);
+            }
         }
-    }
-});
+    });
+}

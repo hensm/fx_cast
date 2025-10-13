@@ -77,6 +77,9 @@ export default class CastClient {
             this.client.connect(
                 {
                     host,
+                    // !! This was the reason it wasn't working for me (aka it was always tried to connect
+                    // to the default port, disregarding what is broadcast in mDNS)
+                    // - @pato05
                     port: options?.port ?? DEFAULT_PORT
                 },
                 // On connection callback

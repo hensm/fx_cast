@@ -14,6 +14,7 @@ import type {
     CastSessionCreatedDetails,
     CastSessionUpdatedDetails
 } from "./messagingTypes";
+import type { WebSocket } from "ws";
 
 /**
  * IMPORTANT:
@@ -218,7 +219,15 @@ interface MessengerEvents {
     message: (message: Message) => void;
 }
 
-class Messenger extends TypedEmitter<MessengerEvents> {
+export abstract class Messenger extends TypedEmitter<MessengerEvents> {
+    abstract sendMessage(message: Message): void;
+    abstract send(data: unknown): void;
+}
+
+export class StdioMessenger
+    extends TypedEmitter<MessengerEvents>
+    implements Messenger
+{
     // Native messaging transforms
     private decodeTransform = new DecodeTransform();
     private encodeTransform = new EncodeTransform();
@@ -244,7 +253,7 @@ class Messenger extends TypedEmitter<MessengerEvents> {
 
     /** Sends a message to the extension. */
     sendMessage(message: Message) {
-        this.encodeTransform.write(message);
+        this.send(message);
     }
 
     send(data: unknown) {
@@ -252,4 +261,33 @@ class Messenger extends TypedEmitter<MessengerEvents> {
     }
 }
 
-export default new Messenger();
+export class WebsocketMessenger
+    extends TypedEmitter<MessengerEvents>
+    implements Messenger
+{
+    private socket: WebSocket;
+
+    constructor(socket: WebSocket) {
+        super();
+
+        this.socket = socket;
+        socket.on("message", (message: string) => {
+            try {
+                const parsed = JSON.parse(message) as Message;
+                this.emit("message", parsed);
+            } catch (err) {
+                // Catch parse errors and close socket
+                socket.close();
+            }
+        });
+    }
+
+    /** Sends a message to the extension. */
+    sendMessage(message: Message) {
+        this.send(message);
+    }
+
+    send(data: unknown) {
+        this.socket.send(JSON.stringify(data));
+    }
+}
