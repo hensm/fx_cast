@@ -1,19 +1,24 @@
-import messaging, { Message } from "../../messaging";
+import type { Messenger, Message } from "../../messaging";
 
 import Session from "./Session";
 import CastClient from "./client";
 
 const sessions = new Map<string, Session>();
 
-export function handleCastMessage(message: Message) {
+export function handleCastMessage(messaging: Messenger, message: Message) {
     switch (message.subject) {
         case "bridge:createCastSession": {
             const { appId, receiverDevice } = message.data;
 
             // Connect and store with returned ID
-            const session = new Session(appId, receiverDevice, sessionId => {
-                sessions.set(sessionId, session);
-            });
+            const session = new Session(
+                appId,
+                receiverDevice,
+                messaging,
+                sessionId => {
+                    sessions.set(sessionId, session);
+                }
+            );
 
             break;
         }
@@ -110,9 +115,11 @@ export function handleCastMessage(message: Message) {
             const { receiverDevice } = message.data;
 
             const client = new CastClient();
-            client.connect(receiverDevice.host).then(() => {
-                (client.sendReceiverMessage as any)({ type: "STOP" });
-            });
+            client
+                .connect(receiverDevice.host, { port: receiverDevice.port })
+                .then(() => {
+                    (client.sendReceiverMessage as any)({ type: "STOP" });
+                });
 
             break;
         }

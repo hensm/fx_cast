@@ -1,6 +1,6 @@
 import type { Channel } from "castv2";
 
-import messaging from "../../messaging";
+import type { Messenger } from "../../messaging";
 
 import type { ReceiverDevice } from "../../messagingTypes";
 import type { ReceiverMessage } from "./types";
@@ -70,7 +70,7 @@ export default class Session extends CastClient {
                         this.establishAppConnection(this.transportId);
                         this.onSessionCreated?.(this.sessionId);
 
-                        messaging.sendMessage({
+                        this.messaging.sendMessage({
                             subject: "main:castSessionCreated",
                             data: {
                                 sessionId: this.sessionId,
@@ -100,7 +100,7 @@ export default class Session extends CastClient {
                     break;
                 }
 
-                messaging.sendMessage({
+                this.messaging.sendMessage({
                     subject: "main:castSessionUpdated",
                     data: {
                         sessionId: this.sessionId,
@@ -137,7 +137,7 @@ export default class Session extends CastClient {
 
                 messageData = JSON.stringify(messageData);
 
-                messaging.sendMessage({
+                this.messaging.sendMessage({
                     subject: "cast:sessionMessageReceived",
                     data: {
                         sessionId: this.sessionId,
@@ -156,12 +156,14 @@ export default class Session extends CastClient {
     constructor(
         private appId: string,
         private receiverDevice: ReceiverDevice,
+        private messaging: Messenger,
         private onSessionCreated?: OnSessionCreatedCallback
     ) {
         super();
 
         super
             .connect(receiverDevice.host, {
+                port: receiverDevice.port,
                 onHeartbeat: () => {
                     // Include transport heartbeat with platform heartbeat
                     if (this.transportHeartbeat) {
