@@ -13,11 +13,16 @@ Install the Firefox extension (from within Firefox) and bridge application via t
 
 The bridge application is currently supported on Windows, macOS and Linux.
 
-**Important**: On Linux platforms such as Arch, it may be necessary to [configure local hostname resolution](https://wiki.archlinux.org/index.php/avahi#Hostname_resolution)[^arch].
+> [!WARNING]
+> Windows 11 is not supported! It may work, but [crashes have been reported](https://github.com/hensm/fx_cast/issues/319), so no guarantees about stability whatsoever.
+
+> [!IMPORTANT]
+> On Linux platforms such as Arch, it may be necessary to [configure local hostname resolution](https://wiki.archlinux.org/index.php/avahi#Hostname_resolution)[^arch].
 
 ### Installing via package managers
 
-**Note**: These packages are maintained by third parties and any issues specfic to these packages should be directed to the respective package maintainers.
+> [!NOTE]
+> These packages are maintained by third parties and any issues specfic to these packages should be directed to the respective package maintainers.
 
 -   **macOS (Homebrew cask)**
     -   `fx-cast-bridge` — https://formulae.brew.sh/cask/fx-cast-bridge  
