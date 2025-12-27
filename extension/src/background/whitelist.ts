@@ -1,7 +1,7 @@
 import logger from "../lib/logger";
 import options from "../lib/options";
 
-import { getChromeUserAgent } from "../lib/userAgents";
+import { cacheUaInfo, getChromeUserAgentString } from "../lib/userAgents";
 import { RemoteMatchPattern } from "../lib/matchPattern";
 
 import {
@@ -41,11 +41,17 @@ let customUserAgent: string | undefined;
 export async function initWhitelist() {
     logger.info("init (whitelist)");
 
+    await cacheUaInfo();
+
     if (!platform) {
+        const browserInfo = await browser.runtime.getBrowserInfo();
+
         // TODO: Allow hybrid UA to be configurable
         platform = (await browser.runtime.getPlatformInfo()).os;
-        chromeUserAgent = getChromeUserAgent(platform);
-        chromeUserAgentHybrid = getChromeUserAgent(platform, true);
+        chromeUserAgent = await getChromeUserAgentString(platform);
+        chromeUserAgentHybrid = await getChromeUserAgentString(platform, {
+            hybridFirefoxVersion: browserInfo.version
+        });
         if (!chromeUserAgent) {
             throw logger.error("Failed to get Chrome UA string");
         }

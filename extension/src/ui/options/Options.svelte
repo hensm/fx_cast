@@ -10,7 +10,7 @@
     import options, { Options } from "../../lib/options";
     import defaultOptions from "../../defaultOptions";
 
-    import { getChromeUserAgent } from "../../lib/userAgents";
+    import { getChromeUserAgentString } from "../../lib/userAgents";
 
     const _ = browser.i18n.getMessage;
 
@@ -23,7 +23,7 @@
     let opts: Options | undefined;
     onMount(async () => {
         const platform = (await browser.runtime.getPlatformInfo()).os;
-        defaultUserAgent = getChromeUserAgent(platform);
+        defaultUserAgent = await getChromeUserAgentString(platform);
 
         opts = await options.getAll();
         options.addEventListener("changed", async () => {

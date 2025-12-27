@@ -1,0 +1,22 @@
+{
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "$defs": {
+        "ua_string": { "type": "string", "minLength": 1 }
+    },
+    "properties": {
+        "$schema": { "type": "string" },
+        "version": { "type": "integer", "const": 1 },
+        "platforms": {
+            "type": "object",
+            "properties": {
+                "win": { "$ref": "#/$defs/ua_string" },
+                "mac": { "$ref": "#/$defs/ua_string" },
+                "linux": { "$ref": "#/$defs/ua_string" }
+            },
+            "required": ["win", "mac", "linux"],
+            "additionalProperties": false
+        }
+    },
+    "required": ["version", "platforms"],
+    "additionalProperties": false
+}

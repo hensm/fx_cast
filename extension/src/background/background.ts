@@ -12,6 +12,7 @@ import deviceManager from "./deviceManager";
 import { initAction } from "./action";
 import { initMenus } from "./menus";
 import { initWhitelist } from "./whitelist";
+import { cacheUaInfo, getChromeUserAgentString } from "../lib/userAgents";
 
 const _ = browser.i18n.getMessage;
 
@@ -143,5 +144,6 @@ async function init() {
     });
 }
 
+cacheUaInfo();
 cacheBaseConfig();
 init();
