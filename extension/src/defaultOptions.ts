@@ -106,4 +106,4 @@ export default {
     siteWhitelistCustomUserAgent: "",
 
     showAdvancedOptions: false
-} satisfies Options as Options;
+} as Options;

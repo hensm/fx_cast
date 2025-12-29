@@ -11,6 +11,8 @@
     import defaultOptions from "../../defaultOptions";
 
     import { getChromeUserAgentString } from "../../lib/userAgents";
+    import Option from "./Option.svelte";
+    import OptionsCategory from "./OptionsCategory.svelte";
 
     const _ = browser.i18n.getMessage;
 
@@ -87,383 +89,230 @@
     >
         <Bridge bind:opts />
 
-        <fieldset class="category">
-            <legend class="category__name">
-                <h2>{_("optionsMediaCategoryName")}</h2>
-            </legend>
-            <p class="category__description">
-                {_("optionsMediaCategoryDescription")}
-            </p>
-
-            <div class="option option--inline">
-                <div class="option__control">
-                    <input
-                        id="mediaEnabled"
-                        type="checkbox"
-                        bind:checked={opts.mediaEnabled}
-                    />
-                </div>
-                <label class="option__label" for="mediaEnabled">
-                    {_("optionsMediaEnabled")}
-                </label>
-            </div>
+        <OptionsCategory
+            name={_("optionsMediaCategoryName")}
+            description={_("optionsMediaCategoryDescription")}
+        >
+            <Option
+                id="mediaEnabled"
+                label={_("optionsMediaEnabled")}
+                type="checkbox"
+                bind:checked={opts.mediaEnabled}
+                inline
+            />
 
             {#if opts.showAdvancedOptions}
-                <div class="option option--inline">
-                    <div class="option__control">
-                        <input
-                            id="mediaSyncElement"
-                            type="checkbox"
-                            bind:checked={opts.mediaSyncElement}
-                        />
-                    </div>
-                    <label class="option__label" for="mediaSyncElement">
-                        {_("optionsMediaSyncElement")}
-                    </label>
-                    <div class="option__description">
-                        {_("optionsMediaSyncElementDescription")}
-                    </div>
-                </div>
+                <Option
+                    id="mediaSyncElement"
+                    label={_("optionsMediaSyncElement")}
+                    description={_("optionsMediaSyncElementDescription")}
+                    type="checkbox"
+                    bind:checked={opts.mediaSyncElement}
+                    inline
+                />
             {/if}
 
-            <div class="option option--inline">
-                <div class="option__control">
-                    <input
-                        id="mediaStopOnUnload"
-                        type="checkbox"
-                        bind:checked={opts.mediaStopOnUnload}
-                    />
-                </div>
-                <label class="option__label" for="mediaStopOnUnload">
-                    {_("optionsMediaStopOnUnload")}
-                </label>
-            </div>
+            <Option
+                id="mediaStopOnUnload"
+                label={_("optionsMediaStopOnUnload")}
+                type="checkbox"
+                bind:checked={opts.mediaStopOnUnload}
+                inline
+            />
 
             <hr />
 
-            <div class="option option--inline">
-                <div class="option__control">
-                    <input
-                        id="localMediaEnabled"
-                        type="checkbox"
-                        bind:checked={opts.localMediaEnabled}
-                    />
-                </div>
-                <label class="option__label" for="localMediaEnabled">
-                    {_("optionsLocalMediaEnabled")}
-                </label>
-                <div class="option__description">
-                    {_("optionsLocalMediaCategoryDescription")}
-                </div>
-            </div>
+            <Option
+                id="localMediaEnabled"
+                label={_("optionsLocalMediaEnabled")}
+                description={_("optionsLocalMediaCategoryDescription")}
+                type="checkbox"
+                bind:checked={opts.localMediaEnabled}
+                inline
+            />
 
-            <div class="option">
-                <label class="option__label" for="localMediaServerPort">
-                    {_("optionsLocalMediaServerPort")}
-                </label>
-                <div class="option__control">
-                    <input
-                        id="localMediaServerPort"
-                        type="number"
-                        required
-                        min="1025"
-                        max="65535"
-                        bind:value={opts.localMediaServerPort}
-                    />
-                </div>
-            </div>
-        </fieldset>
+            <Option
+                id="localMediaServerPort"
+                label={_("optionsLocalMediaServerPort")}
+                type="number"
+                required
+                min="1025"
+                max="65535"
+                bind:value={opts.localMediaServerPort}
+            />
+        </OptionsCategory>
 
         {#if opts.showAdvancedOptions}
-            <fieldset class="category">
-                <legend class="category__name">
-                    <h2>{_("optionsMirroringCategoryName")}</h2>
-                </legend>
-                <p class="category__description">
-                    {_("optionsMirroringCategoryDescription")}
-                </p>
+            <OptionsCategory
+                name={_("optionsMirroringCategoryName")}
+                description={_("optionsMirroringCategoryDescription")}
+            >
+                <Option
+                    id="mirroringEnabled"
+                    label={_("optionsMirroringEnabled")}
+                    type="checkbox"
+                    bind:checked={opts.mirroringEnabled}
+                    inline
+                />
 
-                <div class="option option--inline">
-                    <div class="option__control">
-                        <input
-                            id="mirroringEnabled"
-                            type="checkbox"
-                            bind:checked={opts.mirroringEnabled}
-                        />
-                    </div>
-                    <label class="option__label" for="mirroringEnabled">
-                        {_("optionsMirroringEnabled")}
-                    </label>
-                </div>
+                <Option
+                    id="mirroringAppId"
+                    label={_("optionsMirroringAppId")}
+                    description={_("optionsMirroringAppIdDescription")}
+                    required
+                    bind:value={opts.mirroringAppId}
+                />
 
-                <div class="option">
-                    <label class="option__label" for="mirroringAppId">
-                        {_("optionsMirroringAppId")}
-                    </label>
-                    <div class="option__control">
-                        <input
-                            id="mirroringAppId"
-                            type="text"
-                            required
-                            bind:value={opts.mirroringAppId}
-                        />
-                        <div class="option__description">
-                            {_("optionsMirroringAppIdDescription")}
-                        </div>
-                    </div>
-                </div>
+                <div class="mirroring-stream">
+                    <details>
+                        <summary>
+                            {_("optionsMirroringStreamOptions")}
+                        </summary>
 
-                <details class="mirroring-stream">
-                    <summary>
-                        {_("optionsMirroringStreamOptions")}
-                    </summary>
-
-                    <div class="mirroring-stream__options">
-                        <div class="option option--inline scaling-resolution">
-                            <div class="option__control">
-                                <input
-                                    type="checkbox"
-                                    name="scaling"
-                                    id="mirroringStreamUseMaxResolution"
-                                    bind:checked={opts.mirroringStreamUseMaxResolution}
-                                />
-                            </div>
-                            <label
-                                class="option__label"
-                                for="mirroringStreamUseMaxResolution"
-                            >
-                                {_("optionsMirroringStreamMaxResolution")}
-                                <input
-                                    type="number"
-                                    min="1"
-                                    placeholder={_(
-                                        "optionsMirroringStreamMaxResolutionWidthPlaceholder"
-                                    )}
-                                    bind:value={opts
-                                        .mirroringStreamMaxResolution.width}
-                                />
-                                ×
-                                <input
-                                    type="number"
-                                    min="1"
-                                    placeholder={_(
-                                        "optionsMirroringStreamMaxResolutionHeightPlaceholder"
-                                    )}
-                                    bind:value={opts
-                                        .mirroringStreamMaxResolution.height}
-                                />
-                            </label>
-                            <p class="option__description">
-                                {_(
-                                    "optionsMirroringStreamMaxResolutionDescription"
+                        <div class="mirroring-stream__options">
+                            <Option
+                                id="mirroringStreamUseMaxResolution"
+                                label={_(
+                                    "optionsMirroringStreamUseMaxResolution"
                                 )}
-                            </p>
-                        </div>
-
-                        <div class="option scaling-downscale">
-                            <label
-                                class="option__label"
-                                for="mirroringStreamDownscaleFactor"
+                                description={_(
+                                    "optionsMirroringStreamUseMaxResolutionDescription"
+                                )}
+                                class="scaling-resolution"
+                                type="checkbox"
+                                bind:checked={opts.mirroringStreamUseMaxResolution}
+                                inline
                             >
-                                {_("optionsMirroringStreamDownscaleFactor")}
-                            </label>
-                            <div class="option__control">
-                                <input
-                                    id="mirroringStreamDownscaleFactor"
-                                    type="number"
-                                    required
-                                    min="1"
-                                    step="any"
-                                    bind:value={opts.mirroringStreamDownscaleFactor}
-                                />
+                                <svelte:fragment slot="label">
+                                    <input
+                                        type="number"
+                                        min="1"
+                                        placeholder={_(
+                                            "optionsMirroringStreamMaxResolutionWidthPlaceholder"
+                                        )}
+                                        bind:value={opts
+                                            .mirroringStreamMaxResolution.width}
+                                    />
+                                    ×
+                                    <input
+                                        type="number"
+                                        min="1"
+                                        placeholder={_(
+                                            "optionsMirroringStreamMaxResolutionHeightPlaceholder"
+                                        )}
+                                        bind:value={opts
+                                            .mirroringStreamMaxResolution
+                                            .height}
+                                    />
+                                </svelte:fragment>
+                            </Option>
 
-                                <p class="option__description">
-                                    {_(
-                                        "optionsMirroringStreamDownscaleFactorDescription"
-                                    )}
-                                </p>
-                            </div>
-                        </div>
+                            <Option
+                                id="mirroringStreamDownscaleFactor"
+                                label={_(
+                                    "optionsMirroringStreamDownscaleFactor"
+                                )}
+                                description={_(
+                                    "optionsMirroringStreamDownscaleFactorDescription"
+                                )}
+                                type="number"
+                                required
+                                min="1"
+                                step="any"
+                                bind:value={opts.mirroringStreamDownscaleFactor}
+                                class="scaling-downscale"
+                            />
 
-                        <div class="option">
-                            <label
-                                class="option__label"
-                                for="mirroringStreamMaxFrameRate"
-                            >
-                                {_("optionsMirroringStreamFrameRate")}
-                            </label>
-                            <div class="option__control">
-                                <input
-                                    id="mirroringStreamMaxFrameRate"
-                                    type="number"
-                                    required
-                                    min="1"
-                                    bind:value={opts.mirroringStreamMaxFrameRate}
-                                />
-                            </div>
-                        </div>
+                            <Option
+                                id="mirroringStreamMaxFrameRate"
+                                label={_("optionsMirroringStreamFrameRate")}
+                                type="number"
+                                required
+                                min="1"
+                                bind:value={opts.mirroringStreamMaxFrameRate}
+                            />
 
-                        <div class="option">
-                            <label
-                                class="option__label"
-                                for="mirroringStreamMaxBitRate"
-                            >
-                                {_("optionsMirroringStreamMaxBitRate")}
-                            </label>
-                            <div class="option__control">
-                                <input
-                                    id="mirroringStreamMaxBitRate"
-                                    type="number"
-                                    required
-                                    min="1"
-                                    bind:value={opts.mirroringStreamMaxBitRate}
-                                />
-                                <p class="option__description">
-                                    {_(
-                                        "optionsMirroringStreamMaxBitRateDescription"
-                                    )}
-                                </p>
-                            </div>
+                            <Option
+                                id="mirroringStreamMaxBitRate"
+                                label={_("optionsMirroringStreamMaxBitRate")}
+                                description={_(
+                                    "optionsMirroringStreamMaxBitRateDescription"
+                                )}
+                                type="number"
+                                required
+                                min="1"
+                                bind:value={opts.mirroringStreamMaxBitRate}
+                            />
                         </div>
-                    </div>
-                </details>
-            </fieldset>
+                    </details>
+                </div>
+            </OptionsCategory>
         {/if}
 
         {#if opts.showAdvancedOptions}
-            <fieldset class="category">
-                <legend class="category__name">
-                    <h2>{_("optionsReceiverSelectorCategoryName")}</h2>
-                </legend>
-                <p class="category__description">
-                    {_("optionsReceiverSelectorCategoryDescription")}
-                </p>
+            <OptionsCategory
+                name={_("optionsReceiverSelectorCategoryName")}
+                description={_("optionsReceiverSelectorCategoryDescription")}
+            >
+                <!-- <Option
+                    id="receiverSelectorWaitForConnection"
+                    label={_("optionsreceiverSelectorWaitForConnection")}
+                    description={_("optionsReceiverSelectorWaitForConnectionDescription")}
+                    type="checkbox"
+                    bind:checked={opts.receiverSelectorWaitForConnection}
+                /> -->
 
-                <!--
-                <div class="option option--inline">
-                    <div class="option__control">
-                        <input
-                            id="receiverSelectorWaitForConnection"
-                            type="checkbox"
-                            bind:checked={opts.receiverSelectorWaitForConnection}
-                        />
-                    </div>
-                    <label
-                        class="option__label"
-                        for="receiverSelectorWaitForConnection"
-                    >
-                        {_("optionsReceiverSelectorWaitForConnection")}
-                    </label>
-                    <div class="option__description">
-                        {_(
-                            "optionsReceiverSelectorWaitForConnectionDescription"
-                        )}
-                    </div>
-                </div>
-                -->
-
-                <div class="option option--inline">
-                    <div class="option__control">
-                        <input
-                            id="receiverSelectorExpandActive"
-                            type="checkbox"
-                            bind:checked={opts.receiverSelectorExpandActive}
-                        />
-                    </div>
-                    <label
-                        class="option__label"
-                        for="receiverSelectorExpandActive"
-                    >
-                        {_("optionsReceiverSelectorExpandActive")}
-                    </label>
-                </div>
-
-                <div class="option option--inline">
-                    <div class="option__control">
-                        <input
-                            id="receiverSelectorShowMediaImages"
-                            type="checkbox"
-                            bind:checked={opts.receiverSelectorShowMediaImages}
-                        />
-                    </div>
-                    <label
-                        class="option__label"
-                        for="receiverSelectorShowMediaImages"
-                    >
-                        {_("optionsReceiverSelectorShowMediaImages")}
-                    </label>
-                    <div class="option__description">
-                        {_("optionsReceiverSelectorShowMediaImagesDescription")}
-                    </div>
-                </div>
-
-                <div class="option option--inline">
-                    <div class="option__control">
-                        <input
-                            id="receiverSelectorCloseIfFocusLost"
-                            type="checkbox"
-                            bind:checked={opts.receiverSelectorCloseIfFocusLost}
-                        />
-                    </div>
-                    <label
-                        class="option__label"
-                        for="receiverSelectorCloseIfFocusLost"
-                    >
-                        {_("optionsReceiverSelectorCloseIfFocusLost")}
-                    </label>
-                </div>
-            </fieldset>
+                <Option
+                    id="receiverSelectorExpandActive"
+                    label={_("optionsReceiverSelectorExpandActive")}
+                    type="checkbox"
+                    bind:checked={opts.receiverSelectorExpandActive}
+                    inline
+                />
+                <Option
+                    id="receiverSelectorShowMediaImages"
+                    label={_("optionsreceiverSelectorShowMediaImages")}
+                    description={_(
+                        "optionsreceiverSelectorShowMediaImagesDescription"
+                    )}
+                    type="checkbox"
+                    bind:checked={opts.receiverSelectorShowMediaImages}
+                    inline
+                />
+                <Option
+                    id="receiverSelectorCloseIfFocusLost"
+                    label={_("optionsReceiverSelectorCloseIfFocusLost")}
+                    type="checkbox"
+                    bind:checked={opts.receiverSelectorCloseIfFocusLost}
+                    inline
+                />
+            </OptionsCategory>
         {/if}
 
-        <fieldset class="category">
-            <legend class="category__name">
-                <h2>{_("optionsSiteWhitelistCategoryName")}</h2>
-            </legend>
-            <p class="category__description">
-                {_("optionsSiteWhitelistCategoryDescription")}
-            </p>
-
+        <OptionsCategory
+            name={_("optionsSiteWhitelistCategoryName")}
+            description={_("optionsSiteWhitelistCategoryDescription")}
+        >
             {#if opts.showAdvancedOptions}
-                <div class="option option--inline">
-                    <div class="option__control">
-                        <input
-                            id="siteWhitelistEnabled"
-                            type="checkbox"
-                            bind:checked={opts.siteWhitelistEnabled}
-                        />
-                    </div>
-                    <label class="option__label" for="siteWhitelistEnabled">
-                        {_("optionsSiteWhitelistEnabled")}
-                        <span class="option__recommended">
-                            {_("optionsOptionRecommended")}
-                        </span>
-                    </label>
-                    <div class="option__description">
-                        {_("optionsSiteWhitelistEnabledDescription")}
-                    </div>
-                </div>
+                <Option
+                    id="siteWhitelistEnabled"
+                    label={_("optionsSiteWhitelistEnabled")}
+                    description={_("optionsSiteWhitelistEnabledDescription")}
+                    type="checkbox"
+                    bind:checked={opts.siteWhitelistEnabled}
+                    recommended
+                    inline
+                />
 
-                <div class="option">
-                    <label
-                        class="option__label"
-                        for="siteWhitelistCustomUserAgent"
-                    >
-                        {_("optionsSiteWhitelistCustomUserAgent")}
-                    </label>
-                    <div class="option__control">
-                        <input
-                            id="siteWhitelistCustomUserAgent"
-                            type="text"
-                            bind:value={opts.siteWhitelistCustomUserAgent}
-                            placeholder={defaultUserAgent}
-                        />
-                        <div class="option__description">
-                            {_(
-                                "optionsSiteWhitelistCustomUserAgentDescription"
-                            )}
-                        </div>
-                    </div>
-                </div>
+                <Option
+                    id="siteWhitelistCustomUserAgent"
+                    label={_("optionsSiteWhitelistCustomUserAgent")}
+                    description={_(
+                        "optionsSiteWhitelistCustomUserAgentDescription"
+                    )}
+                    bind:value={opts.siteWhitelistCustomUserAgent}
+                    placeholder={defaultUserAgent}
+                />
             {/if}
 
             <div class="option">
@@ -478,21 +327,16 @@
                     />
                 </div>
             </div>
-        </fieldset>
+        </OptionsCategory>
 
         <div class="form__footer">
-            <div class="option option--inline">
-                <div class="option__control">
-                    <input
-                        id="showAdvancedOptions"
-                        type="checkbox"
-                        bind:checked={opts.showAdvancedOptions}
-                    />
-                </div>
-                <label class="option__label" for="showAdvancedOptions">
-                    {_("optionsShowAdvancedOptions")}
-                </label>
-            </div>
+            <Option
+                id="showAdvancedOptions"
+                label={_("optionsShowAdvancedOptions")}
+                type="checkbox"
+                bind:checked={opts.showAdvancedOptions}
+                inline
+            />
 
             <div class="form__buttons">
                 {#if isSavedIndicatorVisible}

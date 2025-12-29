@@ -7,6 +7,7 @@
     import type { Options } from "../../lib/options";
 
     import knownApps, { KnownApp } from "../../cast/knownApps";
+    import Option from "./Option.svelte";
 
     const _ = browser.i18n.getMessage;
 
@@ -217,51 +218,31 @@
 
                     {#if isItemExpanded}
                         <div class="whitelist__expanded">
-                            <div class="option option--inline">
-                                <div class="option__control">
-                                    <input
-                                        id="isUserAgentDisabled-{i}"
-                                        type="checkbox"
-                                        bind:checked={item.isUserAgentDisabled}
-                                    />
-                                </div>
-                                <label
-                                    class="option__label"
-                                    for="isUserAgentDisabled-{i}"
-                                >
-                                    {_("optionsSiteWhitelistUserAgentDisabled")}
-                                </label>
-                                <div class="option__description">
-                                    {_(
-                                        "optionsSiteWhitelistUserAgentDisabledDescription"
-                                    )}
-                                </div>
-                            </div>
+                            <Option
+                                id="isUserAgentDisabled-{i}"
+                                label={_(
+                                    "optionsSiteWhitelistUserAgentDisabled"
+                                )}
+                                description={_(
+                                    "optionsSiteWhitelistUserAgentDisabledDescription"
+                                )}
+                                type="checkbox"
+                                bind:checked={item.isUserAgentDisabled}
+                                inline
+                            />
 
-                            <div class="option">
-                                <label
-                                    class="option__label"
-                                    for="customUserAgentString-{i}"
-                                >
-                                    {_(
-                                        "optionsSiteWhitelistSiteSpecificUserAgent"
-                                    )}
-                                </label>
-                                <div class="option__control">
-                                    <input
-                                        id="customUserAgentString-{i}"
-                                        type="text"
-                                        bind:value={item.customUserAgent}
-                                        placeholder={opts.siteWhitelistCustomUserAgent ||
-                                            defaultUserAgent}
-                                    />
-                                    <div class="option__description">
-                                        {_(
-                                            "optionsSiteWhitelistSiteSpecificUserAgentDescription"
-                                        )}
-                                    </div>
-                                </div>
-                            </div>
+                            <Option
+                                id="customUserAgentString-{i}"
+                                label={_(
+                                    "optionsSiteWhitelistSiteSpecificUserAgent"
+                                )}
+                                description={_(
+                                    "optionsSiteWhitelistSiteSpecificUserAgentDescription"
+                                )}
+                                bind:value={item.customUserAgent}
+                                placeholder={opts.siteWhitelistCustomUserAgent ||
+                                    defaultUserAgent}
+                            />
                         </div>
                     {/if}
                 {/if}

@@ -237,20 +237,6 @@ input:placeholder-shown {
     grid-column: span 2;
     width: 100%;
 }
-.category > details {
-    display: contents;
-}
-.category > details > summary {
-    grid-column: 2;
-    margin-top: 5px;
-}
-.category > details:not([open]) > summary ~ * {
-    display: none;
-}
-.category > details:not([open]) > summary,
-.category > details[open] > :last-child {
-    margin-bottom: 5px;
-}
 
 .category__name {
     float: left;
@@ -336,9 +322,14 @@ fieldset:disabled .option__description {
     margin-inline-start: initial;
 }
 
-.mirroring-stream > summary {
-    color: var(--secondary-color);
+.mirroring-stream {
+    grid-column: 2;
 }
+.mirroring-stream > details > summary {
+    color: var(--secondary-color);
+    margin: 5px 0;
+}
+
 .mirroring-stream__options {
     background-color: var(--overlay-color);
     border-radius: 4px;

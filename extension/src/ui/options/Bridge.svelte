@@ -13,6 +13,7 @@
     import type { Options } from "../../lib/options";
 
     import messaging from "../../messaging";
+    import Option from "./Option.svelte";
 
     const _ = browser.i18n.getMessage;
 
@@ -294,16 +295,15 @@
     {/if}
 
     <div class="bridge__options">
-        <div class="option option--inline">
-            <div class="option__control">
-                <input
-                    name="bridgeBackupEnabled"
-                    id="bridgeBackupEnabled"
-                    type="checkbox"
-                    bind:checked={opts.bridgeBackupEnabled}
-                />
-            </div>
-            <label class="option__label" for="bridgeBackupEnabled">
+        <Option
+            id="bridgeBackupEnabled"
+            label={_("optionsBridgeEnabled")}
+            description={_("optionsBridgeBackupEnabledDescription")}
+            type="checkbox"
+            bind:checked={opts.bridgeBackupEnabled}
+            inline
+        >
+            <svelte:fragment slot="label">
                 {backupMessageStart}
                 <input
                     class="bridge__backup-host"
@@ -323,48 +323,30 @@
                     bind:value={opts.bridgeBackupPort}
                 />
                 {backupMessageEnd}
-            </label>
-            <div class="option__description">
-                {_("optionsBridgeBackupEnabledDescription")}
-            </div>
-        </div>
+            </svelte:fragment>
+        </Option>
+
 
         {#if opts.showAdvancedOptions}
             <fieldset
                 class="bridge__daemon-options"
                 disabled={!opts.bridgeBackupEnabled}
             >
-                <div class="option option--inline">
-                    <div class="option__control">
-                        <input
-                            id="bridgeBackupSecure"
-                            type="checkbox"
-                            bind:checked={opts.bridgeBackupSecure}
-                        />
-                    </div>
-                    <label class="option__label" for="bridgeBackupSecure">
-                        {_("optionsBridgeBackupSecure")}
-                    </label>
-                    <div class="option__description">
-                        {_("optionsBridgeBackupSecureDescription")}
-                    </div>
-                </div>
-                <div class="option">
-                    <label class="option__label" for="bridgeBackupPassword">
-                        {_("optionsBridgeBackupPassword")}
-                    </label>
-                    <div class="option__control">
-                        <input
-                            id="bridgeBackupPassword"
-                            placeholder="Password"
-                            type="password"
-                            bind:value={opts.bridgeBackupPassword}
-                        />
-                        <div class="option__description">
-                            {_("optionsBridgeBackupPasswordDescription")}
-                        </div>
-                    </div>
-                </div>
+                <Option
+                    id="bridgeBackupSecure"
+                    label={_("optionsBridgeBackupSecure")}
+                    description={_("optionsBridgeBackupSecureDescription")}
+                    type="checkbox"
+                    bind:checked={opts.bridgeBackupSecure}
+                    inline
+                />
+                <Option
+                    id="bridgeBackupPassword"
+                    label={_("optionsBridgeBackupPassword")}
+                    description={_("optionsBridgeBackupPasswordDescription")}
+                    type="password"
+                    bind:value={opts.bridgeBackupPassword}
+                />
             </fieldset>
         {/if}
     </div>
