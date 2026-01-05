@@ -13,7 +13,7 @@ import webExt from "web-ext";
 import copyFilesPlugin from "./lib/copyFilesPlugin.js";
 
 const BRIDGE_NAME = "fx_cast_bridge";
-const BRIDGE_VERSION = "0.3.0";
+const BRIDGE_VERSION = "0.4.0";
 
 const MIRRORING_APP_ID = "19A6F4AE";
 
