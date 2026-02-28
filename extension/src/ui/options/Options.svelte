@@ -7,7 +7,7 @@
 
     import logger from "../../lib/logger";
 
-    import options, { Options } from "../../lib/options";
+    import options, { type Options } from "../../lib/options";
     import defaultOptions from "../../defaultOptions";
 
     import { getChromeUserAgentString } from "../../lib/userAgents";

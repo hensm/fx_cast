@@ -95,7 +95,36 @@ const buildOpts = {
             src: srcPath,
             dest: outPath,
             excludePattern: /^(manifest\.json|.*\.(ts|js|svelte))$/
-        })
+        }),
+
+        // Write manifest after each build
+        {
+            name: "write-manifest",
+            setup(build) {
+                build.onEnd(result => {
+                    if (result.errors.length) {
+                        console.error("Build error!");
+                        return;
+                    }
+
+                    const manifest = JSON.parse(
+                        fs.readFileSync(`${srcPath}/manifest.json`, {
+                            encoding: "utf-8"
+                        })
+                    );
+
+                    manifest.content_security_policy =
+                        argv.mode === "production"
+                            ? "script-src 'self'; object-src 'self'"
+                            : "script-src 'self' 'unsafe-eval'; object-src 'self'";
+
+                    fs.writeFileSync(
+                        `${outPath}/manifest.json`,
+                        JSON.stringify(manifest)
+                    );
+                });
+            }
+        }
     ]
 };
 
@@ -105,47 +134,15 @@ if (argv.mode === "production") {
     buildOpts.sourcemap = false;
 }
 
-/**
- * Handle build results.
- *
- * @param {esbuild.BuildResult | null} result
- */
-function onBuildResult(result) {
-    if (result?.errors.length) {
-        console.error("Build error!");
-        return;
-    }
-
-    const manifest = JSON.parse(
-        fs.readFileSync(`${srcPath}/manifest.json`, { encoding: "utf-8" })
-    );
-
-    manifest.content_security_policy =
-        argv.mode === "production"
-            ? "script-src 'self'; object-src 'self'"
-            : "script-src 'self' 'unsafe-eval'; object-src 'self'";
-
-    fs.writeFileSync(`${outPath}/manifest.json`, JSON.stringify(manifest));
-}
-
 // Clean
 fs.removeSync(distPath);
 
 if (argv.watch) {
-    esbuild
-        .build({
-            ...buildOpts,
-            watch: {
-                onRebuild(_err, result) {
-                    return onBuildResult(result);
-                }
-            }
-        })
-        .then(onBuildResult);
+    const ctx = await esbuild.context(buildOpts);
+    await ctx.watch();
+    console.info("Watching for changes...");
 } else {
-    esbuild.build(buildOpts).then(result => {
-        onBuildResult(result);
-
+    esbuild.build(buildOpts).then(() => {
         if (argv.package) {
             webExt.cmd
                 .build(

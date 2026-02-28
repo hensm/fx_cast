@@ -3,8 +3,8 @@
     import MirroringSender from "../../cast/senders/mirroring";
     import logger from "../../lib/logger";
 
-    import options, { Options } from "../../lib/options";
-    import messaging, { Port } from "../../messaging";
+    import options, { type Options } from "../../lib/options";
+    import messaging, { type Port } from "../../messaging";
 
     import type { ReceiverDevice } from "../../types";
     import LoadingIndicator from "../LoadingIndicator.svelte";

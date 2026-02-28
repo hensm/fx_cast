@@ -5,7 +5,7 @@
     import LoadingIndicator from "../LoadingIndicator.svelte";
 
     import bridge, {
-        BridgeInfo,
+        type BridgeInfo,
         BridgeTimedOutError,
         BridgeAuthenticationError
     } from "../../lib/bridge";

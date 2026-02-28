@@ -1,4 +1,4 @@
-import messaging, { Message } from "../messaging";
+import messaging, { type Message } from "../messaging";
 import pageMessaging from "./pageMessaging";
 
 // Message port to cast manager in background script

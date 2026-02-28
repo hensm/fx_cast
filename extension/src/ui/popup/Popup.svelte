@@ -2,21 +2,21 @@
     import { afterUpdate, onDestroy, onMount, tick } from "svelte";
     import fuzzysort from "fuzzysort";
 
-    import messaging, { Message, Port } from "../../messaging";
-    import options, { Options } from "../../lib/options";
+    import messaging, { type Message, type Port } from "../../messaging";
+    import options, { type Options } from "../../lib/options";
     import { RemoteMatchPattern } from "../../lib/matchPattern";
 
     import { receiverMenuIds } from "../../menuIds";
 
     import {
-        ReceiverDevice,
+        type ReceiverDevice,
         ReceiverDeviceCapabilities,
-        ReceiverSelectorAppInfo,
+        type ReceiverSelectorAppInfo,
         ReceiverSelectorMediaType,
-        ReceiverSelectorPageInfo
+        type ReceiverSelectorPageInfo
     } from "../../types";
 
-    import knownApps, { KnownApp } from "../../cast/knownApps";
+    import knownApps, { type KnownApp } from "../../cast/knownApps";
     import { hasRequiredCapabilities } from "../../cast/utils";
 
     import Receiver from "./Receiver.svelte";

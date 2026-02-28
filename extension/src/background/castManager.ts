@@ -1,19 +1,19 @@
 import bridge from "../lib/bridge";
 import {
-    BaseConfig,
+    type BaseConfig,
     baseConfigStorage,
     getAppTag
 } from "../lib/chromecastConfigApi";
 import logger from "../lib/logger";
-import messaging, { Message, Port } from "../messaging";
+import messaging, { type Message, type Port } from "../messaging";
 import options from "../lib/options";
 import type { TypedMessagePort } from "../lib/TypedMessagePort";
 
 import {
-    ReceiverDevice,
-    ReceiverSelectorAppInfo,
+    type ReceiverDevice,
+    type ReceiverSelectorAppInfo,
     ReceiverSelectorMediaType,
-    ReceiverSelectorPageInfo
+    type ReceiverSelectorPageInfo
 } from "../types";
 
 import type { ApiConfig } from "../cast/sdk/classes";
@@ -21,10 +21,10 @@ import { AutoJoinPolicy, ReceiverAction } from "../cast/sdk/enums";
 import { createReceiver } from "../cast/utils";
 
 import ReceiverSelector, {
-    ReceiverSelection,
-    ReceiverSelectorMediaMessage,
-    ReceiverSelectorReceiverMessage
-} from "./ReceiverSelector";
+    type ReceiverSelection,
+    type ReceiverSelectorMediaMessage,
+    type ReceiverSelectorReceiverMessage
+} from "./receiverSelector";
 
 import deviceManager from "./deviceManager";
 import { ActionState, updateActionState } from "./action";

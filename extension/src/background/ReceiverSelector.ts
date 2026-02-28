@@ -1,5 +1,5 @@
 import logger from "../lib/logger";
-import messaging, { Port, Message } from "../messaging";
+import messaging, { type Port, type Message } from "../messaging";
 import options from "../lib/options";
 import { TypedEventTarget } from "../lib/TypedEventTarget";
 

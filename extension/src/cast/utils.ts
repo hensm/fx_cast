@@ -1,4 +1,4 @@
-import { ReceiverDevice, ReceiverDeviceCapabilities } from "../types";
+import { type ReceiverDevice, ReceiverDeviceCapabilities } from "../types";
 import { Receiver } from "./sdk/classes";
 import { Capability, ReceiverType } from "./sdk/enums";
 import { MediaCommand } from "./sdk/media/enums";

@@ -8,7 +8,7 @@ import { AutoJoinPolicy, ReceiverAvailability } from "../sdk/enums";
 import type Session from "../sdk/Session";
 import type Media from "../sdk/media/Media";
 
-import cast, { ensureInit, CastPort } from "../export";
+import cast, { ensureInit, type CastPort } from "../export";
 
 const logger = new Logger("fx_cast [media sender]");
 

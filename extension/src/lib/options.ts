@@ -1,5 +1,5 @@
-import defaultOptions, { Options } from "../defaultOptions";
-export { Options };
+import defaultOptions, { type Options } from "../defaultOptions";
+export type { Options };
 
 import logger from "./logger";
 

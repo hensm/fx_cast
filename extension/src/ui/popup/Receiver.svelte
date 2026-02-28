@@ -4,18 +4,18 @@
 
     import type { Options } from "../../lib/options";
 
-    import { ReceiverDevice, ReceiverDeviceCapabilities } from "../../types";
+    import { type ReceiverDevice, ReceiverDeviceCapabilities } from "../../types";
     import type { Port } from "../../messaging";
 
     import * as menuIds from "../../menuIds";
 
     import type { Volume } from "../../cast/sdk/classes";
     import { PlayerState, TrackType } from "../../cast/sdk/media/enums";
-    import {
+    import type {
         SenderMediaMessage,
-        SenderMessage,
-        _MediaCommand
+        SenderMessage
     } from "../../cast/sdk/types";
+    import { _MediaCommand } from "../../cast/sdk/types";
 
     import LoadingIndicator from "../LoadingIndicator.svelte";
     import ReceiverMedia from "./ReceiverMedia.svelte";

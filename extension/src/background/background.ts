@@ -1,6 +1,6 @@
 import logger from "../lib/logger";
 import options from "../lib/options";
-import bridge, { BridgeInfo } from "../lib/bridge";
+import bridge, { type BridgeInfo } from "../lib/bridge";
 import { baseConfigStorage, fetchBaseConfig } from "../lib/chromecastConfigApi";
 
 import defaultOptions from "../defaultOptions";

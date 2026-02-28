@@ -1,4 +1,4 @@
-import bridge, { BridgeInfo } from "../lib/bridge";
+import bridge, { type BridgeInfo } from "../lib/bridge";
 import logger from "../lib/logger";
 import { TypedEventTarget } from "../lib/TypedEventTarget";
 

@@ -1,5 +1,5 @@
 import type { TypedMessagePort } from "../lib/TypedMessagePort";
-import messaging, { Message } from "../messaging";
+import messaging, { type Message } from "../messaging";
 import type { ReceiverDevice } from "../types";
 
 import pageMessaging from "./pageMessaging";

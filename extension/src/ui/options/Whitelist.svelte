@@ -6,7 +6,7 @@
     import { REMOTE_MATCH_PATTERN_REGEX } from "../../lib/matchPattern";
     import type { Options } from "../../lib/options";
 
-    import knownApps, { KnownApp } from "../../cast/knownApps";
+    import knownApps, { type KnownApp } from "../../cast/knownApps";
     import Option from "./Option.svelte";
 
     const _ = browser.i18n.getMessage;

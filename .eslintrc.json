@@ -1,7 +1,7 @@
 {
     "root": true,
     "parser": "@typescript-eslint/parser",
-    "plugins": ["svelte3", "@typescript-eslint"],
+    "plugins": ["@typescript-eslint"],
     "extends": ["eslint:recommended", "prettier"],
     "rules": {
         "no-useless-escape": "off",
@@ -17,7 +17,7 @@
         ]
     },
     "parserOptions": {
-        "extraFileExtensions": ".svelte"
+        "extraFileExtensions": [".svelte"]
     },
     "overrides": [
         {
@@ -28,7 +28,10 @@
         },
         {
             "files": ["extension/**/*.svelte"],
-            "processor": "svelte3/svelte3",
+            "parser": "svelte-eslint-parser",
+            "parserOptions": {
+                "parser": "@typescript-eslint/parser"
+            },
             "rules": {
                 "no-undef": "off"
             }
@@ -53,8 +56,5 @@
                 ]
             }
         }
-    ],
-    "settings": {
-        "svelte3/typescript": true
-    }
+    ]
 }

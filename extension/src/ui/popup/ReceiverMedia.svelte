@@ -3,7 +3,8 @@
 
     import type { ReceiverDevice } from "../../types";
 
-    import { MediaStatus, _MediaCommand } from "../../cast/sdk/types";
+    import type { MediaStatus } from "../../cast/sdk/types";
+    import { _MediaCommand } from "../../cast/sdk/types";
     import type { Volume } from "../../cast/sdk/classes";
     import {
         MetadataType,
