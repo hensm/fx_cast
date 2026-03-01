@@ -6,9 +6,7 @@
 #include <mutex>
 #include <string>
 
-/**
- * Represents a resolved DNS-SD service.
- */
+/** Represents a resolved DNS-SD service. */
 struct DnsSdService {
     std::string name;
     std::string host;
@@ -18,9 +16,7 @@ struct DnsSdService {
     std::map<std::string, std::string> txt_record;
 };
 
-/**
- * Delegate interface for receiving DNS-SD browser events.
- */
+/** Delegate interface for receiving DNS-SD browser events. */
 class DnsSdPlatformBrowserDelegate {
 public:
     virtual ~DnsSdPlatformBrowserDelegate() = default;
@@ -30,8 +26,8 @@ public:
 
 /**
  * Platform-specific DNS-SD browser.
- * Implemented in dns_sd_platform_browser_unix.cc (macOS/Linux) and
- * dns_sd_platform_browser_win.cc (Windows).
+ * Implemented in dns_sd_platform_browser_unix.cc (macOS/Linux) and dns_sd_platform_browser_win.cc
+ * (Windows).
  */
 class DnsSdPlatformBrowser {
 public:
