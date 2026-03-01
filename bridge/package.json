@@ -2,25 +2,26 @@
     "type": "module",
     "scripts": {
         "build": "node bin/build.js",
+        "install": "node-gyp rebuild",
         "package": "node bin/build.js --package",
         "install-manifest": "node bin/install-manifest.js",
         "remove-manifest": "node bin/install-manifest.js --remove"
     },
     "dependencies": {
+        "bindings": "^1.5.0",
         "bplist-creator": "^0.1.0",
         "bplist-parser": "^0.3.1",
         "castv2": "^0.1.10",
         "chalk": "^4.1.2",
         "fast-srp-hap": "^2.0.4",
-        "mdns": "^2.7.2",
         "mime-types": "^2.1.35",
+        "node-addon-api": "^8.0.0",
         "node-fetch": "^3.2.10",
         "tweetnacl": "^1.0.3",
         "ws": "^8.5.0",
         "yargs": "^17.5.1"
     },
     "devDependencies": {
-        "@types/mdns": "^0.0.34",
         "@types/mime-types": "^2.1.1",
         "@types/minimist": "^1.2.2",
         "@types/node": "^22.0.0",

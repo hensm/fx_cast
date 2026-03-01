@@ -1,7 +1,7 @@
 import type { Messenger, Message } from "./messaging";
 
 import { handleCastMessage } from "./components/cast";
-import Discovery from "./components/cast/discovery";
+import CastDeviceBrowser from "./components/cast/deviceBrowser";
 import Remote from "./components/cast/remote";
 
 import { startMediaServer, stopMediaServer } from "./components/mediaServer";
@@ -9,7 +9,7 @@ import { startMediaServer, stopMediaServer } from "./components/mediaServer";
 import { applicationVersion } from "../../config.json";
 
 process.on("SIGTERM", async () => {
-    discovery?.stop();
+    deviceBrowser?.stop();
     try {
         await stopMediaServer();
     } catch (err) {
@@ -19,15 +19,15 @@ process.on("SIGTERM", async () => {
     }
 });
 
-let discovery: Discovery | null = null;
+let deviceBrowser: CastDeviceBrowser | null = null;
 const remotes = new Map<string, Remote>();
 
 /**
- * Handle incoming messages from the extension and forward
- * them to the appropriate handlers.
+ * Handle incoming messages from the extension and forward them to the
+ * appropriate handlers.
  *
- * Initializes the counterpart objects and is responsible
- * for managing existing ones.
+ * Initializes the counterpart objects and is responsible for managing existing
+ * ones.
  */
 export function run(messaging: Messenger) {
     messaging.on("message", (message: Message) => {
@@ -41,66 +41,66 @@ export function run(messaging: Messenger) {
             case "bridge:startDiscovery": {
                 const { shouldWatchStatus } = message.data;
 
-                discovery = new Discovery({
-                    onDeviceFound(device) {
-                        messaging.sendMessage({
-                            subject: "main:deviceUp",
-                            data: {
-                                deviceId: device.id,
-                                deviceInfo: device
-                            }
-                        });
+                deviceBrowser = new CastDeviceBrowser();
 
-                        if (shouldWatchStatus) {
-                            remotes.set(
-                                device.id,
-                                new Remote(device.host, {
-                                    port: device.port,
-                                    // RECEIVER_STATUS
-                                    onReceiverStatusUpdate(status) {
-                                        messaging.sendMessage({
-                                            subject:
-                                                "main:receiverDeviceStatusUpdated",
-                                            data: {
-                                                deviceId: device.id,
-                                                status
-                                            }
-                                        });
-                                    },
-                                    // MEDIA_STATUS
-                                    onMediaStatusUpdate(status) {
-                                        if (!status) return;
-
-                                        messaging.sendMessage({
-                                            subject:
-                                                "main:receiverDeviceMediaStatusUpdated",
-                                            data: {
-                                                deviceId: device.id,
-                                                status
-                                            }
-                                        });
-                                    }
-                                })
-                            );
+                deviceBrowser.on("deviceUp", device => {
+                    messaging.sendMessage({
+                        subject: "main:deviceUp",
+                        data: {
+                            deviceId: device.id,
+                            deviceInfo: device
                         }
-                    },
-                    onDeviceDown(deviceId) {
-                        messaging.sendMessage({
-                            subject: "main:deviceDown",
-                            data: { deviceId }
-                        });
+                    });
 
-                        if (shouldWatchStatus) {
-                            if (remotes.has(deviceId)) {
-                                remotes.get(deviceId)?.disconnect();
-                                remotes.delete(deviceId);
-                            }
+                    if (shouldWatchStatus) {
+                        remotes.set(
+                            device.id,
+                            new Remote(device.host, {
+                                port: device.port,
+                                // RECEIVER_STATUS
+                                onReceiverStatusUpdate(status) {
+                                    messaging.sendMessage({
+                                        subject:
+                                            "main:receiverDeviceStatusUpdated",
+                                        data: {
+                                            deviceId: device.id,
+                                            status
+                                        }
+                                    });
+                                },
+                                // MEDIA_STATUS
+                                onMediaStatusUpdate(status) {
+                                    if (!status) return;
+
+                                    messaging.sendMessage({
+                                        subject:
+                                            "main:receiverDeviceMediaStatusUpdated",
+                                        data: {
+                                            deviceId: device.id,
+                                            status
+                                        }
+                                    });
+                                }
+                            })
+                        );
+                    }
+                });
+
+                deviceBrowser.on("deviceDown", deviceId => {
+                    messaging.sendMessage({
+                        subject: "main:deviceDown",
+                        data: { deviceId }
+                    });
+
+                    if (shouldWatchStatus) {
+                        if (remotes.has(deviceId)) {
+                            remotes.get(deviceId)?.disconnect();
+                            remotes.delete(deviceId);
                         }
                     }
                 });
 
-                discovery.start();
-
+                deviceBrowser.start();
                 break;
             }
 

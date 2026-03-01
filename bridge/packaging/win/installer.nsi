@@ -35,16 +35,12 @@ SetCompressor /SOLID LZMA
 !insertmacro MUI_LANGUAGE "German"
 
 # lang:en
-LangString MSG__INSTALL_BONJOUR ${LANG_ENGLISH} \
-        "Install Bonjour dependency?"
 LangString MSG__FIREFOX_OPEN ${LANG_ENGLISH} \
         "Firefox must be closed during uninstallation if the extension is \
         installed. Close Firefox and click $\"Retry$\", click $\"Ignore$\" \
         to force close or $\"Abort$\" to cancel uninstallation."
 
 # lang:es
-LangString MSG__INSTALL_BONJOUR ${LANG_SPANISH} \
-        "¿Instalar dependencia Bonjour?"
 LangString MSG__FIREFOX_OPEN ${LANG_SPANISH} \
         "Firefox debe estar cerrado durante la desinstalación si la extensión \
         está instalada. Cierra Firefox y aprieta $\"Reintentar$\", aprieta \
@@ -52,8 +48,6 @@ LangString MSG__FIREFOX_OPEN ${LANG_SPANISH} \
         desinstalación."
 
 # lang:de
-LangString MSG__INSTALL_BONJOUR ${LANG_GERMAN} \
-        "Bonjour installieren?"
 LangString MSG__FIREFOX_OPEN ${LANG_GERMAN} \
         "Firefox muss während der Deinstallation geschlossen werden, wenn die \
         Erweiterung installiert ist. Schließen Sie Firefox und klicken Sie auf \
@@ -85,23 +79,6 @@ Section
     File "{{executableName}}"
     File "{{bindingName}}"
     File "{{manifestName}}"
-
-    # Install Bonjour
-    IfFileExists "$SYSDIR\dnssd.dll" skipInstallBonjour
-        MessageBox MB_YESNO \
-                $(MSG__INSTALL_BONJOUR) \
-                IDNO skipInstallBonjour
-
-            ${If} ${ARCH} == "x86"
-                File /oname=Bonjour.msi "C:\Program Files\Bonjour SDK\Installer\Bonjour.msi"
-            ${ElseIf} ${ARCH} == "x64"
-                File /oname=Bonjour.msi "C:\Program Files\Bonjour SDK\Installer\Bonjour64.msi"
-            ${EndIf}
-
-            ExecWait "msiexec /i $\"$INSTDIR\Bonjour.msi$\""
-
-    skipInstallBonjour:
-    Delete "$INSTDIR\Bonjour.msi"
 
     # Native manifest key
     WriteRegStr HKLM "${KEY_MANIFEST}" "" "$INSTDIR\{{manifestName}}"

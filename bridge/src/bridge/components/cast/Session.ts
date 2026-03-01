@@ -180,7 +180,8 @@ export default class Session extends CastClient {
                     type: "LAUNCH",
                     appId: this.appId
                 });
-            });
+            })
+            .catch(() => {});
 
         // Handle client connection closed
         this.client.on("close", () => {

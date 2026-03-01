@@ -1,7 +1,7 @@
 node_modules/
 dist/
 bridge/node_modules/
-bridge/build
+bridge/build/
 extension/node_modules/
 test/ChromeProfile/
 .idea/

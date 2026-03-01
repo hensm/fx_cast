@@ -58,7 +58,7 @@ if (!supportedTargets[process.platform]?.includes(argv.arch)) {
 const __dirname = path.dirname(url.fileURLToPath(import.meta.url));
 
 const ROOT_PATH = path.join(__dirname, "..");
-const BUILD_PATH = path.join(ROOT_PATH, "build");
+const BUILD_PATH = path.join(ROOT_PATH, "dist/app");
 
 const spawnOptions = {
     shell: true,
@@ -70,15 +70,14 @@ const spawnOptions = {
  * build directories, just in case.
  */
 fs.rmSync(BUILD_PATH, { force: true, recursive: true });
-fs.rmSync(paths.DIST_PATH, { force: true, recursive: true });
 fs.mkdirSync(BUILD_PATH, { recursive: true });
-fs.mkdirSync(paths.DIST_PATH, { recursive: true });
+if (argv.package) {
+    fs.rmSync(paths.DIST_PATH, { force: true, recursive: true });
+    fs.mkdirSync(paths.DIST_PATH, { recursive: true });
+}
 
-const MDNS_BINDING_PATH = path.join(
-    __dirname,
-    "../node_modules/mdns/build/Release/"
-);
-const MDNS_BINDING_NAME = "dns_sd_bindings.node";
+const NATIVE_BINDING_PATH = path.join(ROOT_PATH, "build/Release");
+const NATIVE_BINDING_NAME = "dns_sd.node";
 
 async function build() {
     // Run tsc
@@ -140,8 +139,8 @@ async function build() {
         ]);
 
         fs.copySync(
-            path.join(MDNS_BINDING_PATH, MDNS_BINDING_NAME),
-            path.join(BUILD_PATH, MDNS_BINDING_NAME)
+            path.join(NATIVE_BINDING_PATH, NATIVE_BINDING_NAME),
+            path.join(BUILD_PATH, NATIVE_BINDING_NAME)
         );
 
         fs.rmSync(path.join(BUILD_PATH, "src"), {
@@ -190,7 +189,19 @@ NODE_PATH="${modulesDir}" node $(dirname $0)/src/main.js --__name $(basename $0)
         }
 
         manifest.path = path.join(paths.DIST_PATH, path.basename(launcherPath));
+
+        // Copy native binding into build/Release so bindings() finds it
+        fs.copySync(
+            path.join(NATIVE_BINDING_PATH, NATIVE_BINDING_NAME),
+            path.join(BUILD_PATH, "build", "Release", NATIVE_BINDING_NAME)
+        );
     }
+
+    // Write a package.json so the bindings module resolves from this directory
+    fs.writeFileSync(
+        path.join(BUILD_PATH, "package.json"),
+        "{}"
+    );
 
     // Write app manifest
     fs.writeFileSync(
@@ -318,8 +329,8 @@ function packageDarwin(
         path.join(rootExecutableDirectory, platformExecutableName)
     );
     fs.moveSync(
-        path.join(BUILD_PATH, MDNS_BINDING_NAME),
-        path.join(rootExecutableDirectory, MDNS_BINDING_NAME)
+        path.join(BUILD_PATH, NATIVE_BINDING_NAME),
+        path.join(rootExecutableDirectory, NATIVE_BINDING_NAME)
     );
     fs.moveSync(
         path.join(BUILD_PATH, paths.MANIFEST_NAME),
@@ -416,8 +427,8 @@ function packageLinuxDeb(
         path.join(rootExecutableDirectory, platformExecutableName)
     );
     fs.moveSync(
-        path.join(BUILD_PATH, MDNS_BINDING_NAME),
-        path.join(rootExecutableDirectory, MDNS_BINDING_NAME)
+        path.join(BUILD_PATH, NATIVE_BINDING_NAME),
+        path.join(rootExecutableDirectory, NATIVE_BINDING_NAME)
     );
     fs.moveSync(
         path.join(BUILD_PATH, paths.MANIFEST_NAME),
@@ -490,7 +501,7 @@ function packageLinuxRpm(
         manifestPath: platformManifestDirectory,
         executableName: platformExecutableName,
         manifestName: paths.MANIFEST_NAME,
-        bindingName: MDNS_BINDING_NAME
+        bindingName: NATIVE_BINDING_NAME
     };
 
     fs.writeFileSync(
@@ -539,7 +550,7 @@ function packageWin32(
         executableName: platformExecutableName,
         executablePath: platformExecutableDirectory,
         manifestName: paths.MANIFEST_NAME,
-        bindingName: MDNS_BINDING_NAME,
+        bindingName: NATIVE_BINDING_NAME,
         winRegistryKey: paths.REGISTRY_KEY,
         outputName,
         licensePath: paths.LICENSE_PATH,

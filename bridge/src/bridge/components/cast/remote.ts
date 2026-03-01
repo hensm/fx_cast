@@ -35,7 +35,8 @@ export default class Remote extends CastClient {
             })
             .then(() => {
                 this.sendReceiverMessage({ type: "GET_STATUS" });
-            });
+            })
+            .catch(() => {});
     }
 
     disconnect() {
@@ -85,7 +86,8 @@ export default class Remote extends CastClient {
                         type: "GET_STATUS",
                         requestId: 0
                     });
-                });
+                })
+                .catch(() => {});
 
             this.options?.onApplicationFound?.();
         }

@@ -1,3 +1,10 @@
 {
-    "eslint.validate": ["javascript", "svelte"]
+    "eslint.validate": ["javascript", "svelte"],
+    "search.exclude": {
+        "**/node_modules": true,
+        "**/bower_components": true,
+        "**/*.code-search": true,
+        "**/dist": true,
+        "**/build": true
+    },
 }

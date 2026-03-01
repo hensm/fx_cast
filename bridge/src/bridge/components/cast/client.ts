@@ -66,8 +66,19 @@ export default class CastClient {
      */
     connect(host: string, options?: CastClientConnectOptions) {
         return new Promise<void>((resolve, reject) => {
+            let connected = false;
+
             // Handle errors
-            this.client.on("error", reject);
+            this.client.on("error", err => {
+                if (!connected) {
+                    reject(err);
+                } else {
+                    try {
+                        this.client.close();
+                    } catch {}
+                }
+            });
+
             this.client.on("close", () => {
                 if (this.heartbeatChannel && this.heartbeatIntervalId) {
                     clearInterval(this.heartbeatIntervalId);
@@ -84,6 +95,7 @@ export default class CastClient {
                 },
                 // On connection callback
                 () => {
+                    connected = true;
                     this.connectionChannel = this.createChannel(NS_CONNECTION);
                     this.heartbeatChannel = this.createChannel(NS_HEARTBEAT);
 
