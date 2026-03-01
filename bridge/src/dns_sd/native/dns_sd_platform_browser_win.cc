@@ -339,7 +339,9 @@ void WINAPI DnsSdPlatformBrowser::Impl::resolve_callback(
             }
         }
 
-        // Resolve v4/v6 addresses via getaddrinfo
+        // The v4Address/v6Address fields of DNS_SERVICE_INSTANCE don't seem to be populated
+        // reliably, but getaddrinfo seems to work consistently in my testing, so we'll just use
+        // that approach across all platforms.
         resolve_addresses(service.host, service.address4, service.address6);
 
         if (impl->is_started) {
