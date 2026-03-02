@@ -1,8 +1,8 @@
 /**
  * DNS-SD browser implementation for Windows.
  *
- * Uses the DNS-SD functions of the Windows DNS API (Windns.h) available on Windows 10+ without any
- * third-party dependencies like Bonjour.
+ * Uses the DnsService* functions of the Windows DNS API (windns.h) available on Windows 10+ without
+ * any third-party dependencies like Bonjour.
  */
 
 #include "dns_sd_platform_browser.h"
@@ -17,7 +17,6 @@
 #include <chrono>
 #include <condition_variable>
 #include <map>
-#include <set>
 #include <thread>
 
 namespace {
@@ -76,7 +75,6 @@ struct DnsSdPlatformBrowser::Impl {
     /** Represents a resolve operation triggered by the current browse operation. */
     struct ResolveContext {
         Impl* impl;
-        bool cancelled;
         DWORD ttl;
         std::string service_name;
         std::wstring query_name;
@@ -85,20 +83,20 @@ struct DnsSdPlatformBrowser::Impl {
 
         ResolveContext()
             : impl(nullptr)
-            , cancelled(false)
             , ttl(0)
             , resolve_request {}
             , resolve_cancel {}
         {
         }
     };
-    // Stored contexts for ongoing resolve operations
-    std::set<ResolveContext*> active_resolves;
+    // Stored contexts for ongoing resolve operations (keyed by service name)
+    std::map<std::string, ResolveContext*> active_resolves;
     std::mutex active_resolves_mutex;
 
-    // WinDNS doesn't have a builtin mechanism to notify us when a service disappears, so we
-    // keep a record of found services and expire them (emitting a `service_down` event) based on
-    // their TTL unless they're refreshed by a subsequent browse callback.
+    // The Windows DNS API doesn't have a builtin mechanism to notify us when a service disappears,
+    // so we keep a record of found services (keyed by service name) and expire them (emitting a
+    // `service_down` event) based on their TTL unless they're refreshed by a subsequent browse
+    // callback.
     std::map<std::string, std::chrono::steady_clock::time_point> expiring_services;
     std::mutex expiring_services_mutex;
     std::thread expiry_thread;
@@ -175,16 +173,15 @@ void DnsSdPlatformBrowser::Impl::stop()
     // Cancel browse operation
     DnsServiceBrowseCancel(&browse.cancel);
 
-    // Cancel and cleanup active resolves
+    // Cancel active resolve operation(s). We make a copy of the map here to avoid a deadlock when
+    // DnsServiceResolveCancel invokes the resolve callback with an ERROR_CANCELLED status.
+    std::map<std::string, ResolveContext*> resolves_to_cancel;
     {
         std::scoped_lock lock(active_resolves_mutex);
-        for (auto* ctx : active_resolves) {
-            if (!ctx->cancelled) {
-                ctx->cancelled = true;
-                DnsServiceResolveCancel(&ctx->resolve_cancel);
-            }
-        }
-        active_resolves.clear();
+        resolves_to_cancel = active_resolves;
+    }
+    for (auto& [name, ctx] : resolves_to_cancel) {
+        DnsServiceResolveCancel(&ctx->resolve_cancel);
     }
 
     // Wake and join expiry thread
@@ -261,18 +258,43 @@ void WINAPI DnsSdPlatformBrowser::Impl::browse_callback(
         if (record->wType != DNS_TYPE_PTR)
             continue;
 
+        std::string instance_name = wide_to_utf8(record->Data.PTR.pNameHost);
+
+        // Strip everything after (and including) the first dot to get the service name
+        size_t first_dot_index = instance_name.find('.');
+        std::string service_name = (first_dot_index != std::string::npos)
+            ? instance_name.substr(0, first_dot_index)
+            : instance_name;
+
+        // If we've already resolved this service, just refresh its TTL expiry without starting
+        // another resolve operation.
+        {
+            std::scoped_lock lock(impl->expiring_services_mutex);
+            if (impl->expiring_services.count(service_name) > 0) {
+                impl->expiring_services[service_name]
+                    = std::chrono::steady_clock::now() + std::chrono::seconds(record->dwTtl);
+                DEBUG_LOG("refreshed TTL for %s (ttl=%lu)", service_name.c_str(), record->dwTtl);
+                impl->expiry_cv.notify_one();
+                continue;
+            }
+        }
+
+        // Ensure we don't have an active resolve operation for this service already
+        {
+            std::scoped_lock lock(impl->active_resolves_mutex);
+            if (impl->active_resolves.count(service_name) > 0) {
+                DEBUG_LOG("resolve already in progress for %s, skipping", service_name.c_str());
+                continue;
+            }
+        }
+
+        DEBUG_LOG("browse found: %s (ttl=%lu)", instance_name.c_str(), record->dwTtl);
+
+        // Create a new resolve context for this service
         auto* resolve_ctx = new ResolveContext();
         resolve_ctx->impl = impl;
         resolve_ctx->ttl = record->dwTtl;
-
-        std::string instance_name = wide_to_utf8(record->Data.PTR.pNameHost);
-        DEBUG_LOG("browse found: %s (ttl=%lu)", instance_name.c_str(), record->dwTtl);
-
-        // Strip everything after (and including) the first dot to get the service name
-        size_t dot = instance_name.find('.');
-        resolve_ctx->service_name
-            = (dot != std::string::npos) ? instance_name.substr(0, dot) : instance_name;
-
+        resolve_ctx->service_name = std::move(service_name);
         resolve_ctx->query_name = utf8_to_wide(instance_name);
 
         // Populate resolve request
@@ -290,7 +312,7 @@ void WINAPI DnsSdPlatformBrowser::Impl::browse_callback(
             switch (resolve_status) {
             case ERROR_SUCCESS:
             case DNS_REQUEST_PENDING:
-                impl->active_resolves.insert(resolve_ctx);
+                impl->active_resolves[resolve_ctx->service_name] = resolve_ctx;
                 break;
             default:
                 delete resolve_ctx;
@@ -311,15 +333,13 @@ void WINAPI DnsSdPlatformBrowser::Impl::resolve_callback(
             DnsServiceFreeInstance(service_instance);
         {
             std::scoped_lock lock(impl->active_resolves_mutex);
-            impl->active_resolves.erase(resolve_ctx);
+            impl->active_resolves.erase(resolve_ctx->service_name);
         }
         delete resolve_ctx;
     } };
 
-    // If the browse operation is still active, the resolve operation was not cancelled, and we got
-    // a valid result, emit a service_up event
-    if (impl->is_started && !resolve_ctx->cancelled && status == ERROR_SUCCESS
-        && service_instance) {
+    // If the browse operation is still active and we got a valid result, emit a service_up event
+    if (impl->is_started && status == ERROR_SUCCESS && service_instance) {
         DnsSdService service;
         service.name = resolve_ctx->service_name;
         service.host = wide_to_utf8(service_instance->pszHostName);

@@ -158,7 +158,6 @@ void DnsSdPlatformBrowser::Impl::event_loop()
             .tv_sec = 0, .tv_usec = 250000
         }; // 250ms
         int result = select(max_fd + 1, &read_fds, nullptr, nullptr, &tv);
-
         if (result <= 0 || !is_started)
             continue;
 
@@ -230,10 +229,10 @@ void DNSSD_API DnsSdPlatformBrowser::Impl::resolve_callback(DNSServiceRef, DNSSe
         return;
     }
 
-    DnsSdService info;
-    info.name = ctx->service_name;
-    info.host = hosttarget;
-    info.port = ntohs(port);
+    DnsSdService service;
+    service.name = ctx->service_name;
+    service.host = hosttarget;
+    service.port = ntohs(port);
 
     // Parse TXT record into key-value map
     {
@@ -245,7 +244,7 @@ void DNSSD_API DnsSdPlatformBrowser::Impl::resolve_callback(DNSServiceRef, DNSSe
             auto err = TXTRecordGetItemAtIndex(
                 txt_len, txt_record, i, sizeof(key), key, &value_len, &value);
             if (err == kDNSServiceErr_NoError) {
-                info.txt_record[key] = (value && value_len > 0)
+                service.txt_record[key] = (value && value_len > 0)
                     ? std::string(static_cast<const char*>(value), value_len)
                     : "";
             }
@@ -253,10 +252,10 @@ void DNSSD_API DnsSdPlatformBrowser::Impl::resolve_callback(DNSServiceRef, DNSSe
     }
 
     // Resolve v4/v6 addresses via getaddrinfo
-    resolve_addresses(hosttarget, info.address4, info.address6);
+    resolve_addresses(hosttarget, service.address4, service.address6);
 
-    DEBUG_LOG("resolved: %s -> %s:%d (%s / %s)", info.name.c_str(), info.host.c_str(), info.port,
-        info.address4.c_str(), info.address6.c_str());
-    ctx->impl->delegate.on_service_up(info);
+    DEBUG_LOG("resolved: %s -> %s:%d (%s / %s)", service.name.c_str(), service.host.c_str(),
+        service.port, service.address4.c_str(), service.address6.c_str());
+    ctx->impl->delegate.on_service_up(service);
     ctx->destroyed = true;
 }
