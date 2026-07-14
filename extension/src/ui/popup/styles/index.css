@@ -452,3 +452,39 @@ progress.slider {
     );
     background-size: 200% 100%;
 }
+
+/* --- CUSTOM MODERN THEME INJECTION --- */
+body {
+    background-color: #1a1a24;
+}
+
+.receiver {
+    background-color: #242430;
+    border-radius: 10px;
+    margin: 6px 8px;
+    border: 1px solid #333344;
+    transition: all 0.2s ease-in-out;
+}
+
+.receiver:hover {
+    background-color: #2a2a38;
+    transform: translateX(4px);
+    border-color: #555577;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+}
+
+.receiver__cast-button {
+    background-color: #4a4a8f;
+    border-radius: 15px;
+    font-weight: bold;
+    transition: background-color 0.2s;
+}
+
+.receiver__cast-button:hover {
+    background-color: #6262b5;
+}
+
+.receiver__name {
+    font-weight: 600;
+    letter-spacing: 0.3px;
+}

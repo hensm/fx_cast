@@ -213,7 +213,7 @@ function populateDownloads(releaseList) {
     try {
         populateDownloads(
             await fetch(
-                "https://api.github.com/repos/hensm/fx_cast/releases"
+                "https://api.github.com/repos/gitxpresso/fx_cast/releases"
             ).then(res => res.json())
         );
     } catch (err) {

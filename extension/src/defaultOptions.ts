@@ -88,7 +88,7 @@ export default {
     localMediaEnabled: true,
     localMediaServerPort: 9555,
 
-    mirroringEnabled: false,
+    mirroringEnabled: true,
     mirroringAppId: MIRRORING_APP_ID,
     mirroringStreamMaxFrameRate: 15,
     mirroringStreamMaxBitRate: 1000000,

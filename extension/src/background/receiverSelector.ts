@@ -115,7 +115,7 @@ export default class ReceiverSelector extends TypedEventTarget<ReceiverSelectorE
          * Get current browser window and calculate relative centered
          * left/top positions for the popup.
          */
-        const refWin = await browser.windows.getCurrent();
+        const refWin = await browser.windows.getLastFocused({ windowTypes: ["normal"] });
         if (
             refWin.width !== undefined &&
             refWin.height !== undefined &&

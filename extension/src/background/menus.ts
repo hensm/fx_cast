@@ -39,7 +39,7 @@ export async function initMenus() {
     // <video>/<audio> "Cast..." context menu item
     browser.menus.create({
         id: MenuId.CastMedia,
-        contexts: ["audio", "video", "image"],
+        contexts: ["audio", "video", "image", "link"],
         title: _("contextCast"),
         visible: opts.mediaEnabled,
         targetUrlPatterns: opts.localMediaEnabled
@@ -186,7 +186,8 @@ async function onMenuClicked(
             }
 
             case MenuId.CastMedia: {
-                if (info.srcUrl) {
+                const targetUrl = info.srcUrl || info.linkUrl;
+                if (targetUrl) {
                     const frameIds = info.frameId ? [info.frameId] : undefined;
                     await browser.scripting.executeScript({
                         target: { tabId: tab.id, frameIds },
@@ -197,7 +198,7 @@ async function onMenuClicked(
                             (window as any).mediaUrl = mediaUrl;
                             (window as any).targetElementId = targetElementId;
                         },
-                        args: [info.srcUrl, info.targetElementId]
+                        args: [targetUrl, info.targetElementId]
                     });
                     await browser.scripting.executeScript({
                         target: { tabId: tab.id, frameIds },

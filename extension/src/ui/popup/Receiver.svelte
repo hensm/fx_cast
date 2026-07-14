@@ -478,35 +478,52 @@
     <button
         type="button"
         class="receiver__expand-button ghost"
-        class:receiver__expand-button--expanded={isExpanded && mediaStatus}
-        title={_("popupShowDetailsTitle")}
-        disabled={!mediaStatus}
+        class:receiver__expand-button--expanded={isExpanded}
+        title="Show Details & Volume"
         on:click={() => {
             isExpanded = !isExpanded;
             isExpandedUserModified = true;
         }}
     />
 
-    {#if isExpanded && mediaStatus}
+    {#if isExpanded}
         <div class="receiver__expanded">
-            <ReceiverMedia
-                status={mediaStatus}
-                showImage={opts?.receiverSelectorShowMediaImages}
-                {device}
-                {textTracks}
-                on:togglePlayback={() => handleMediaPlayPause()}
-                on:previous={() => handleMediaSkipPrevious()}
-                on:next={() => handleMediaSkipNext()}
-                on:seek={ev => {
-                    sendMediaMessage({
-                        type: "SEEK",
-                        currentTime: ev.detail.position
-                    });
-                }}
-                on:trackChanged={ev =>
-                    handleMediaTrackChange(ev.detail.activeTrackIds)}
-                on:volumeChanged={ev => handleVolumeChange(ev.detail)}
-            />
+            {#if mediaStatus}
+                <ReceiverMedia
+                    status={mediaStatus}
+                    showImage={opts?.receiverSelectorShowMediaImages}
+                    {device}
+                    {textTracks}
+                    on:togglePlayback={() => handleMediaPlayPause()}
+                    on:previous={() => handleMediaSkipPrevious()}
+                    on:next={() => handleMediaSkipNext()}
+                    on:seek={ev => {
+                        sendMediaMessage({
+                            type: "SEEK",
+                            currentTime: ev.detail.position
+                        });
+                    }}
+                    on:trackChanged={ev =>
+                        handleMediaTrackChange(ev.detail.activeTrackIds)}
+                    on:volumeChanged={ev => handleVolumeChange(ev.detail)}
+                />
+            {:else if device.status?.volume}
+                <div style="padding: 15px; display: flex; align-items: center; gap: 10px;">
+                    <span style="color: #ccc; font-size: 12px; font-weight: bold;">TV Volume:</span>
+                    <input
+                        type="range"
+                        class="slider media__volume-slider"
+                        step="0.05"
+                        max="1"
+                        value={device.status.volume.muted ? 0 : device.status.volume.level}
+                        on:change={ev => {
+                            handleVolumeChange({ level: ev.currentTarget.valueAsNumber });
+                        }}
+                    />
+                </div>
+            {:else}
+                <div style="padding: 10px; color: #888; font-size: 12px; text-align: center;">Device is offline</div>
+            {/if}
         </div>
     {/if}
 </li>

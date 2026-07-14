@@ -1,17 +1,25 @@
 {
     "name": "__MSG_extensionName__",
-    "description": "__MSG_extensionDescription__",
-    "version": "0.4.2",
+    "description": "Enables Chromecast support for casting web apps (like Netflix or BBC iPlayer), HTML5 video and screen sharing.",
+    "version": "0.4.0",
     "developer": {
-        "name": "Matt Hensman",
-        "url": "https://matt.tf/"
+        "name": "William Gwin (unoffical contributor)",
+        "url": "https://github.com/gitxpresso/"
     },
 
     "browser_specific_settings": {
         "gecko": {
-            "id": "fx_cast@matt.tf",
+            "data_collection_permissions": {
+                "required": [ 
+                    "locationInfo"
+                ],
+                "optional": [
+                    "technicalAndInteraction"
+                ]
+            },
+            "id": "fx_cast-nightly@gitxpresso",
             "strict_min_version": "109.0",
-            "update_url": "https://hensm.github.io/fx_cast/updates.json"
+            "update_url": "https://gitxpresso.github.io/fx_cast/updates.json"
         }
     },
     "action": {
@@ -36,7 +44,9 @@
     },
 
     "manifest_version": 3,
-
+    "content_security_policy": {
+        "extension_pages": "script-src 'self'; object-src 'self';"
+    },
     "options_ui": {
         "page": "ui/options/index.html"
     },

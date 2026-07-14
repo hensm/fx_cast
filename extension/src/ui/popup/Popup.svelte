@@ -207,7 +207,7 @@
                 document.body.clientHeight +
                     (window.outerHeight - window.innerHeight)
             )
-        });
+        }).catch(() => {});
     }
 
     function updateKnownApp() {

@@ -149,6 +149,9 @@ function joinSession(instance: CastInstance, session: CastSession) {
             ActionState.Connected,
             instance.contentContext?.tabId
         );
+        // --- FEATURE A: AUTO-MUTE ---
+        // Silently mute the tab now that it's connected to the TV
+        browser.tabs.update(instance.contentContext.tabId, { muted: true }).catch(() => {});
     }
 }
 
@@ -163,6 +166,10 @@ function leaveSession(instance: CastInstance) {
     delete instance.session;
     if (instance.contentContext?.tabId) {
         updateActionState(ActionState.Default, instance.contentContext.tabId);
+        
+        // --- FEATURE A: AUTO-UNMUTE ---
+        // Restore tab audio since the cast session is over
+        browser.tabs.update(instance.contentContext.tabId, { muted: false }).catch(() => {});
     }
 }
 
@@ -241,6 +248,10 @@ function destroyCastInstance(instance: CastInstance) {
 
     if (instance.contentContext?.tabId) {
         updateActionState(ActionState.Default, instance.contentContext?.tabId);
+        
+        // --- FEATURE A: AUTO-UNMUTE ---
+        // Failsafe unmute if the instance is suddenly destroyed
+        browser.tabs.update(instance.contentContext.tabId, { muted: false }).catch(() => {});
     }
 
     activeInstances.delete(instance);
@@ -367,6 +378,10 @@ const castManager = new (class {
                             ActionState.Default,
                             instance.contentContext.tabId
                         );
+                        
+                        // --- FEATURE A: AUTO-UNMUTE ---
+                        // Unmute if the casting app was closed from the TV side
+                        browser.tabs.update(instance.contentContext.tabId, { muted: false }).catch(() => {});
                     }
                 }
             }
@@ -553,6 +568,10 @@ async function handleBridgeMessage(instance: CastInstance, message: Message) {
                     ActionState.Connected,
                     instance.contentContext?.tabId
                 );
+                
+                // --- FEATURE A: AUTO-MUTE ---
+                // Silently mute the tab as soon as the bridge confirms the connection
+                browser.tabs.update(instance.contentContext.tabId, { muted: true }).catch(() => {});
             }
 
             break;
