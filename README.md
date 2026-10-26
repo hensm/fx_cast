@@ -157,7 +157,7 @@ Bridge build script (`build:bridge`) arguments:
     | --------- | ----------------------- |
     | `Windows` | `x86`, `x64`            |
     | `macOS`   | `x64`, `arm64`          |
-    | `Linux`   | `x64`                   |
+    | `Linux`   | `x64`, `arm64`          |
 
 ### Packaging
 
