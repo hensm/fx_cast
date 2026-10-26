@@ -43,7 +43,7 @@ const argv = await yargs()
 const supportedTargets = {
     win32: ["x86", "x64"],
     darwin: ["x64", "arm64"],
-    linux: ["x64"]
+    linux: ["x64", "arm64"]
 };
 if (!supportedTargets[process.platform]?.includes(argv.arch)) {
     console.error(
@@ -447,6 +447,7 @@ function packageLinuxDeb(
         packageName: config.applicationName.replace(/_/g, "-"),
         applicationName: config.applicationName,
         applicationVersion: config.applicationVersion,
+        architecture: { x64: "amd64", arm64: "arm64" },
         author: config.author
     };
 
@@ -509,7 +510,7 @@ function packageLinuxRpm(
         mustache.render(fs.readFileSync(specPath).toString(), view)
     );
 
-    const rpmArchMap = { x86: "i386", x64: "x86_64" };
+    const rpmArchMap = { x64: "x86_64", arm64: "aarch64" };
 
     spawnSync(
         `rpmbuild -bb ${specOutputPath} \
