@@ -1,4 +1,5 @@
 import mdns from "mdns";
+import { isIPv4 } from "net";
 
 import type { ReceiverDevice } from "../../messagingTypes";
 
@@ -59,7 +60,11 @@ export default class Discovery {
                 friendlyName: record.fn,
                 modelName: record.md,
                 capabilities: parseInt(record.ca),
-                host: service.addresses[0],
+                // Prefer IPv4: IPv6 link-local addresses come back
+                // without a zone ID and are unreachable (EHOSTUNREACH).
+                host:
+                    service.addresses.find(address => isIPv4(address)) ??
+                    service.addresses[0],
                 port: service.port
             };
 

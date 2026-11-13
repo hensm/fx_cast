@@ -33,6 +33,10 @@ export default class Remote extends CastClient {
             })
             .then(() => {
                 this.sendReceiverMessage({ type: "GET_STATUS" });
+            })
+            .catch(err => {
+                // An unreachable receiver must not crash the bridge
+                console.error(`Failed to connect to receiver (${host}):`, err);
             });
     }
 
@@ -81,6 +85,9 @@ export default class Remote extends CastClient {
                     type: "GET_STATUS",
                     requestId: 0
                 });
+            })
+            .catch(err => {
+                console.error(`Failed to connect to transport (${this.host}):`, err);
             });
 
             this.options?.onApplicationFound?.();
